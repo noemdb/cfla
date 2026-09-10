@@ -135,6 +135,7 @@ class TimetableEditor extends Component
             'profesor_id' => $lesson->pevaluacion->profesor_id,
             'seccion_id' => $lesson->pevaluacion->seccion_id,
             'grupo_estable_id' => $lesson->pevaluacion->grupo_estable_id ? (int) $lesson->pevaluacion->grupo_estable_id : null,
+            'is_half_group' => (bool) $lesson->is_half_group,
             'room_id' => null,
             'is_manual_override' => true,
             'locked' => false,

@@ -14,9 +14,14 @@ class TimetableTeacherAvailability extends Model
 
     protected $table = 'timetable_teacher_availability';
 
-    protected $fillable = ['calendar_id', 'profesor_id', 'period_id', 'is_available'];
+    protected $fillable = [
+        'calendar_id', 'profesor_id', 'shift_id', 'day_of_week',
+        'order_in_day', 'start_time', 'end_time', 'is_available',
+    ];
 
     protected $casts = [
+        'day_of_week' => 'integer',
+        'order_in_day' => 'integer',
         'is_available' => 'boolean',
     ];
 
@@ -30,8 +35,14 @@ class TimetableTeacherAvailability extends Model
         return $this->belongsTo(Profesor::class, 'profesor_id');
     }
 
-    public function period()
+    public function shift()
     {
-        return $this->belongsTo(TimetablePeriod::class, 'period_id');
+        return $this->belongsTo(TimetableShift::class, 'shift_id');
+    }
+
+    /** Clave unívoca (turno-día-bloque) para el solver: "shift-day-order". */
+    public function getBlockKeyAttribute(): string
+    {
+        return $this->shift_id.'-'.$this->day_of_week.'-'.$this->order_in_day;
     }
 }

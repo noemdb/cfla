@@ -12,11 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Módulo horario: turnos M/T como catálogo (idempotente, sin datos de prueba).
+        $this->call(\Database\Seeders\TimetableShiftsSeeder::class);
     }
 }

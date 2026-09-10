@@ -6,11 +6,12 @@ use App\Events\Timetable\TimetableGenerated;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
-use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Services\Timetable\Solver\LessonToSchedule;
+use App\Services\Timetable\Solver\SlotCandidate;
 use App\Services\Timetable\Solver\SolverResult;
 use App\Services\Timetable\Solver\TimetableSolver;
+use App\Services\Timetable\TimetableRoomEligibilityService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -38,6 +39,7 @@ class GenerateTimetableJob implements ShouldQueue
     public function __construct(
         public int $calendarId,
         public bool $dryRun = false,
+        public ?array $previewPayload = null,
     ) {}
 
     public function handle(): void
@@ -59,6 +61,7 @@ class GenerateTimetableJob implements ShouldQueue
             'correlation_id' => $this->correlationId(),
             'calendar_id' => $this->calendarId,
             'dry_run' => $this->dryRun,
+            'strategy' => $calendar->strategy ?: TimetableCalendar::STRATEGY_OPTIMIZED,
         ]);
 
         $calendar->update(['status' => 'generating']);
@@ -87,6 +90,29 @@ class GenerateTimetableJob implements ShouldQueue
 
     private function runSolver(TimetableCalendar $calendar): SolverResult
     {
+        if (! $this->dryRun && $this->previewPayload !== null) {
+            return new SolverResult(
+                assignment: collect($this->previewPayload['assignment'] ?? [])
+                    ->mapWithKeys(fn (array $slots, $lessonId) => [
+                        (int) $lessonId => collect($slots)->map(fn (array $slot) => new SlotCandidate(
+                            periodId: (int) ($slot['period_id'] ?? 0),
+                            roomId: ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
+                            isPractical: (bool) ($slot['is_practical'] ?? false),
+                        ))->filter(fn (SlotCandidate $slot) => $slot->periodId > 0)->values()->all(),
+                    ])
+                    ->all(),
+                unassigned: array_map('intval', $this->previewPayload['unassigned'] ?? []),
+            );
+        }
+
+        if (($calendar->strategy ?? TimetableCalendar::STRATEGY_OPTIMIZED) === TimetableCalendar::STRATEGY_LEGACY) {
+            $legacyResult = $this->legacyAssignment($calendar);
+
+            if ($legacyResult !== null) {
+                return $legacyResult;
+            }
+        }
+
         $lessons = TimetableLesson::query()
             ->with('pevaluacion', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion', 'pevaluacion.profesor')
             ->where('calendar_id', $calendar->id)
@@ -102,7 +128,14 @@ class GenerateTimetableJob implements ShouldQueue
             }
 
             // Lecciones locked: sus períodos ya fijados (slots locked).
-            $lockedPeriods = $lesson->locked
+            // Las lecciones legacy marcadas como medio grupo deben poder
+            // reubicarse para formar parejas en una misma celda.
+            $isLocked = (bool) $lesson->locked
+                && (
+                    ($calendar->strategy ?? TimetableCalendar::STRATEGY_OPTIMIZED) === TimetableCalendar::STRATEGY_LEGACY
+                    || ! (bool) $lesson->is_half_group
+                );
+            $lockedPeriods = $isLocked
                 ? $lesson->slots()->where('locked', true)->pluck('period_id')->map(fn ($v) => (int) $v)->all()
                 : [];
 
@@ -114,8 +147,9 @@ class GenerateTimetableJob implements ShouldQueue
                 blocksT: (int) $lesson->weekly_blocks_t,
                 blocksP: (int) $lesson->weekly_blocks_p,
                 roomTypeRequired: $lesson->room_type_required,
+                isHalfGroup: (bool) $lesson->is_half_group,
                 priority: (int) $lesson->priority,
-                locked: (bool) $lesson->locked,
+                locked: $isLocked,
                 lockedPeriodIds: $lockedPeriods,
                 grupoEstableId: $pev->grupo_estable_id ? (int) $pev->grupo_estable_id : null,
             );
@@ -125,8 +159,76 @@ class GenerateTimetableJob implements ShouldQueue
         $roomsByType = $this->buildRoomsByType($calendar);
         $periodMeta = $this->buildPeriodMeta($calendar);
 
-        return (new TimetableSolver($dto, $availableByTeacher, $roomsByType, $periodMeta))
+        return (new TimetableSolver(
+            $dto,
+            $availableByTeacher,
+            $roomsByType,
+            $periodMeta,
+            30,
+            max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
+        ))
             ->solve();
+    }
+
+    /**
+     * Legacy es una reproducción de las posiciones importadas, no una nueva
+     * distribución heurística. Si el calendario aún no tiene slots importados,
+     * se devuelve null para permitir el fallback del solver.
+     */
+    private function legacyAssignment(TimetableCalendar $calendar): ?SolverResult
+    {
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->with('slots')
+            ->get();
+
+        if ($lessons->isEmpty() || ! $lessons->contains(fn (TimetableLesson $lesson) => $lesson->slots->isNotEmpty())) {
+            return null;
+        }
+
+        $assignment = [];
+        $unassigned = [];
+        $periodLoad = [];
+        $maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
+
+        foreach ($lessons as $lesson) {
+            $lessonSlots = $lesson->slots->values();
+            $lessonLoad = $lessonSlots
+                ->groupBy(fn (TimetableSlot $slot) => $slot->period_id.':'.$slot->seccion_id)
+                ->map->count();
+            $exceedsCapacity = $lessonLoad->contains(
+                fn (int $count, string $key): bool => ($periodLoad[$key] ?? 0) + $count > $maxSubjectsPerPeriod,
+            );
+
+            if ($exceedsCapacity) {
+                $unassigned[] = (int) $lesson->id;
+
+                continue;
+            }
+
+            foreach ($lessonLoad as $key => $count) {
+                $periodLoad[$key] = ($periodLoad[$key] ?? 0) + $count;
+            }
+
+            $slots = $lessonSlots
+                ->map(fn (TimetableSlot $slot) => new SlotCandidate(
+                    periodId: (int) $slot->period_id,
+                    roomId: $slot->room_id ? (int) $slot->room_id : null,
+                    isPractical: false,
+                ))
+                ->all();
+
+            if ($slots === []) {
+                $unassigned[] = (int) $lesson->id;
+            } else {
+                $assignment[(int) $lesson->id] = $slots;
+            }
+        }
+
+        return new SolverResult(
+            assignment: $assignment,
+            unassigned: $unassigned,
+        );
     }
 
     /**
@@ -140,31 +242,32 @@ class GenerateTimetableJob implements ShouldQueue
     {
         $periods = $calendar->periods()
             ->where('is_break', false)
-            ->get(['id', 'shift_id'])
-            ->groupBy('shift_id')
-            ->map(fn ($group) => $group->pluck('id')->values()->all());
+            ->get(['id', 'shift_id', 'day_of_week', 'order_in_day']);
+        $byShift = $periods->groupBy('shift_id')->map(fn ($g) => $g->values()->all())->all();
 
-        // fallback: si la tabla de períodos no distingue turno, usar todos.
-        $byShift = $periods->toArray();
-
-        $availability = $calendar->availabilities()->get()->groupBy('profesor_id');
+        // Disponibilidad por (turno-día-bloque): claves con is_available=false.
+        $unavailableByTeacher = [];
+        foreach ($calendar->availabilities()->get() as $row) {
+            if (! $row->is_available) {
+                $unavailableByTeacher[$row->profesor_id][$row->block_key] = true;
+            }
+        }
 
         $result = [];
         foreach ($lessons as $lesson) {
             $profesorId = $lesson->profesorId;
             $shiftId = $lesson->shiftId;
 
-            $periodsForShift = $byShift[$shiftId] ?? ($periods->flatten()->all() ?: []);
+            $periodsForShift = $byShift[$shiftId] ?? ($periods->values()->all() ?: []);
+            $unavailable = $unavailableByTeacher[$profesorId] ?? [];
 
-            $avail = $availability->get($profesorId, collect());
-            $availByPeriod = $avail->keyBy('period_id');
-
-            $available = array_values(array_filter(
-                $periodsForShift,
-                fn (int $pId) => ! isset($availByPeriod[$pId]) || $availByPeriod[$pId]->is_available,
+            $result[$profesorId] = array_values(array_map(
+                fn ($p) => $p->id,
+                array_filter(
+                    $periodsForShift,
+                    fn ($p) => ! isset($unavailable["{$p->shift_id}-{$p->day_of_week}-{$p->order_in_day}"]),
+                ),
             ));
-
-            $result[$profesorId] = $available;
         }
 
         return $result;
@@ -177,16 +280,7 @@ class GenerateTimetableJob implements ShouldQueue
      */
     private function buildRoomsByType(TimetableCalendar $calendar): array
     {
-        $rooms = TimetableRoom::query()
-            ->where('status_active', true)
-            ->get();
-
-        $byType = [];
-        foreach ($rooms as $room) {
-            $byType[$room->type][] = (int) $room->id;
-        }
-
-        return $byType;
+        return app(TimetableRoomEligibilityService::class)->idsByType($calendar);
     }
 
     /**
@@ -208,6 +302,10 @@ class GenerateTimetableJob implements ShouldQueue
             'preview_payload' => [
                 'generated_at' => now()->toIso8601String(),
                 'dry_run' => true,
+                'strategy' => $calendar->strategy ?: TimetableCalendar::STRATEGY_OPTIMIZED,
+                'assignment_source' => $calendar->strategy === TimetableCalendar::STRATEGY_LEGACY
+                    && $this->hasLegacySlots($calendar) ? 'legacy_slots' : 'solver',
+                'max_subjects_per_period' => max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
                 'timed_out' => $result->timedOut,
                 'elapsed_seconds' => round($result->elapsedSeconds, 2),
                 'assignment' => $this->serializeAssignment($result),
@@ -215,6 +313,11 @@ class GenerateTimetableJob implements ShouldQueue
             ],
             'status' => 'draft',
         ]);
+    }
+
+    private function hasLegacySlots(TimetableCalendar $calendar): bool
+    {
+        return $calendar->slots()->exists();
     }
 
     /**
@@ -284,6 +387,7 @@ class GenerateTimetableJob implements ShouldQueue
                             'profesor_id' => $lesson->pevaluacion->profesor_id,
                             'seccion_id' => $lesson->pevaluacion->seccion_id,
                             'grupo_estable_id' => $lesson->pevaluacion->grupo_estable_id ? (int) $lesson->pevaluacion->grupo_estable_id : null,
+                            'is_half_group' => (bool) $lesson->is_half_group,
                             'room_id' => $slot->roomId,
                             'locked' => $lesson->locked,
                             'is_manual_override' => false,

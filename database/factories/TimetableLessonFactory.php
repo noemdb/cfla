@@ -21,6 +21,7 @@ class TimetableLessonFactory extends Factory
             'weekly_blocks_t' => 3,
             'weekly_blocks_p' => 0,
             'room_type_required' => null,
+            'is_half_group' => false,
             'priority' => 0,
             'locked' => false,
         ];

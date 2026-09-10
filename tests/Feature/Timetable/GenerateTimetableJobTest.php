@@ -57,6 +57,88 @@ class GenerateTimetableJobTest extends TestCase
         $this->assertCount(2, $payload['assignment']);
     }
 
+    public function test_legacy_strategy_reuses_imported_slots_without_reoptimizing(): void
+    {
+        $fixture = $this->smallFeasibleFixture();
+        $calendar = $fixture['calendar'];
+        $calendar->update(['strategy' => TimetableCalendar::STRATEGY_LEGACY]);
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->orderBy('id')
+            ->get();
+        $periods = TimetablePeriod::query()
+            ->where('calendar_id', $calendar->id)
+            ->orderBy('id')
+            ->get();
+
+        TimetableSlot::create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lessons[0]->id,
+            'period_id' => $periods[1]->id,
+            'profesor_id' => $lessons[0]->pevaluacion->profesor_id,
+            'seccion_id' => $lessons[0]->pevaluacion->seccion_id,
+            'locked' => true,
+        ]);
+        TimetableSlot::create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lessons[1]->id,
+            'period_id' => $periods[0]->id,
+            'profesor_id' => $lessons[1]->pevaluacion->profesor_id,
+            'seccion_id' => $lessons[1]->pevaluacion->seccion_id,
+            'locked' => true,
+        ]);
+
+        GenerateTimetableJob::dispatchSync($calendar->id, dryRun: true);
+
+        $payload = $calendar->fresh()->preview_payload;
+        $this->assertSame('legacy_slots', $payload['assignment_source']);
+        $this->assertSame($periods[1]->id, $payload['assignment'][(string) $lessons[0]->id][0]['period_id']);
+        $this->assertSame($periods[0]->id, $payload['assignment'][(string) $lessons[1]->id][0]['period_id']);
+    }
+
+    public function test_legacy_strategy_does_not_exceed_subjects_per_period(): void
+    {
+        $fixture = $this->smallFeasibleFixture();
+        $calendar = $fixture['calendar'];
+        $calendar->update([
+            'strategy' => TimetableCalendar::STRATEGY_LEGACY,
+            'max_subjects_per_period' => 1,
+        ]);
+
+        $grupoA = GrupoEstable::factory()->create(['name' => 'Legacy grupo A']);
+        $grupoB = GrupoEstable::factory()->create(['name' => 'Legacy grupo B']);
+
+        foreach ([
+            [$fixture['lessonA'], $grupoA->id],
+            [$fixture['lessonB'], $grupoB->id],
+        ] as [$lesson, $grupoId]) {
+            TimetableSlot::create([
+                'calendar_id' => $calendar->id,
+                'lesson_id' => $lesson->id,
+                'period_id' => $fixture['periods'][0]->id,
+                'profesor_id' => $lesson->pevaluacion->profesor_id,
+                'seccion_id' => $lesson->pevaluacion->seccion_id,
+                'grupo_estable_id' => $grupoId,
+                'locked' => true,
+            ]);
+        }
+
+        // Simula dos asignaturas de la misma sección en la misma celda.
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->update([
+                'seccion_id' => $fixture['lessonA']->pevaluacion->seccion_id,
+            ]);
+
+        GenerateTimetableJob::dispatchSync($calendar->id, dryRun: true);
+
+        $payload = $calendar->fresh()->preview_payload;
+        $this->assertCount(1, $payload['assignment']);
+        $this->assertCount(1, $payload['unassigned']);
+        $this->assertSame(1, $payload['max_subjects_per_period']);
+    }
+
     public function test_confirm_persists_slots_and_sets_status_active(): void
     {
         $fixture = $this->smallFeasibleFixture();
@@ -126,6 +208,101 @@ class GenerateTimetableJobTest extends TestCase
         // Ambos sub-grupos de la MISMA sección caen en el MISMO período (paralelo).
         $this->assertSame($fixture['period']->id, $slots[0]->period_id);
         $this->assertSame($fixture['period']->id, $slots[1]->period_id);
+    }
+
+    public function test_job_schedules_two_half_group_lessons_in_same_period(): void
+    {
+        $fixture = $this->parallelSubgroupFixture();
+        TimetableLesson::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->update(['is_half_group' => true]);
+
+        GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: false);
+
+        $slots = TimetableSlot::query()->where('calendar_id', $fixture['calendar']->id)->get();
+
+        $this->assertCount(2, $slots);
+        $this->assertSame($fixture['period']->id, $slots[0]->period_id);
+        $this->assertSame($fixture['period']->id, $slots[1]->period_id);
+        $this->assertTrue($slots->every(fn ($slot) => $slot->is_half_group));
+    }
+
+    public function test_half_group_reoptimizes_legacy_locked_lessons(): void
+    {
+        $fixture = $this->parallelSubgroupFixture();
+        TimetableLesson::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->update([
+                'is_half_group' => true,
+                'locked' => true,
+            ]);
+
+        GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: true);
+
+        $payload = $fixture['calendar']->fresh()->preview_payload;
+
+        $this->assertSame([], $payload['unassigned']);
+        $this->assertCount(2, $payload['assignment']);
+        $this->assertSame(
+            [$fixture['period']->id],
+            collect($payload['assignment'])
+                ->flatten(1)
+                ->pluck('period_id')
+                ->unique()
+                ->values()
+                ->all(),
+        );
+    }
+
+    public function test_job_pairs_four_half_group_lessons_into_two_periods(): void
+    {
+        $fixture = $this->parallelSubgroupFixture();
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->get();
+
+        $secondPeriod = TimetablePeriod::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'shift_id' => $fixture['period']->shift_id,
+            'day_of_week' => 1,
+            'order_in_day' => 2,
+            'is_break' => false,
+        ]);
+
+        $baseLesson = $lessons->first();
+        for ($i = 1; $i <= 2; $i++) {
+            $pev = $baseLesson->pevaluacion;
+            $copy = $pev->replicate();
+            $copy->profesor_id = $i === 1
+                ? $baseLesson->pevaluacion->profesor_id
+                : $lessons->last()->pevaluacion->profesor_id;
+            $copy->save();
+
+            TimetableLesson::factory()->create([
+                'calendar_id' => $fixture['calendar']->id,
+                'pevaluacion_id' => $copy->id,
+                'shift_id' => $fixture['period']->shift_id,
+                'weekly_blocks_t' => 1,
+                'weekly_blocks_p' => 0,
+                'is_half_group' => true,
+            ]);
+        }
+
+        TimetableLesson::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->update(['is_half_group' => true]);
+
+        GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: false);
+
+        $counts = TimetableSlot::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->selectRaw('period_id, COUNT(*) as total')
+            ->groupBy('period_id')
+            ->pluck('total', 'period_id');
+
+        $this->assertCount(2, $counts);
+        $this->assertSame([2, 2], $counts->sort()->values()->map(fn ($v) => (int) $v)->all());
+        $this->assertSame($secondPeriod->id, $counts->keys()->last());
     }
 
     public function test_job_is_queued_not_run_inline(): void

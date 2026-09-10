@@ -15,12 +15,14 @@ class TimetableCalendar extends Model
     protected $table = 'timetable_calendars';
 
     protected $fillable = [
-        'lapso_id', 'pescolar_id', 'name', 'status', 'period_minutes',
-        'version', 'quality_score', 'preview_payload', 'active_job_id',
+        'lapso_id', 'pescolar_id', 'pestudio_id', 'name', 'status', 'period_minutes',
+        'max_subjects_per_period', 'strategy', 'version', 'quality_score', 'preview_payload', 'active_job_id',
     ];
 
     protected $casts = [
+        'pestudio_id' => 'integer',
         'period_minutes' => 'integer',
+        'max_subjects_per_period' => 'integer',
         'version' => 'integer',
         'quality_score' => 'decimal:2',
         'preview_payload' => 'array',
@@ -28,6 +30,10 @@ class TimetableCalendar extends Model
 
     protected $hidden = [
         'active_lapso_key',
+    ];
+
+    protected $attributes = [
+        'strategy' => self::STRATEGY_OPTIMIZED,
     ];
 
     const STATUS_DRAFT = 'draft';
@@ -38,6 +44,15 @@ class TimetableCalendar extends Model
 
     const STATUS_ARCHIVED = 'archived';
 
+    public const STRATEGY_OPTIMIZED = 'optimized';
+
+    public const STRATEGY_LEGACY = 'legacy';
+
+    public const STRATEGIES = [
+        self::STRATEGY_OPTIMIZED,
+        self::STRATEGY_LEGACY,
+    ];
+
     public function lapso()
     {
         return $this->belongsTo(Lapso::class, 'lapso_id');
@@ -46,6 +61,11 @@ class TimetableCalendar extends Model
     public function pescolar()
     {
         return $this->belongsTo(Pescolar::class, 'pescolar_id');
+    }
+
+    public function pestudio()
+    {
+        return $this->belongsTo(\App\Models\app\Academy\Pestudio::class, 'pestudio_id');
     }
 
     public function periods()

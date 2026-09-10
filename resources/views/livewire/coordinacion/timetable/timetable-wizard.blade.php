@@ -1,4 +1,25 @@
 <div class="fade-in">
+    {{-- Overlay de carga (patrón LessonWizard): paso 4 (disponibilidad) y paso 5 (generar) --}}
+    <div wire:loading.flex
+         wire:target="setAllAvailable,saveAvailability,runDryRun,confirmAndPublish"
+         class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-gray-900/90 backdrop-blur-md">
+        <div class="flex flex-col items-center gap-4">
+            <div class="relative w-14 h-14">
+                <svg class="absolute inset-0 w-full h-full animate-spin text-emerald-500/40" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="3" stroke-dasharray="44 132" stroke-linecap="round" class="opacity-80"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-sm font-bold text-gray-700 dark:text-gray-200">
+                {{ ($currentStep ?? 1) === 5 ? 'Generando horario…' : 'Procesando disponibilidad…' }}
+            </p>
+        </div>
+    </div>
+
     {{-- Header --}}
     <div class="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
@@ -9,38 +30,18 @@
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-white/5 text-sm font-bold">
                 Paso {{ $currentStep }} de 5
             </span>
+            <button wire:click="refreshWizard"
+                type="button"
+                title="Refrescar y seleccionar otro calendario"
+                aria-label="Refrescar y seleccionar otro calendario"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 border border-white/5 text-sm font-bold transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 9A7 7 0 0117 5.5L20 8M18.5 15A7 7 0 017 18.5L4 16"/>
+                </svg>
+                <span>Refrescar</span>
+            </button>
         </div>
     </div>
-
-    {{-- Stepper --}}
-    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-4 mb-6">
-        <div class="flex flex-wrap items-center gap-2">
-            @foreach ([1 => 'Calendario', 2 => 'Aulas', 3 => 'Lecciones', 4 => 'Disponibilidad', 5 => 'Generar'] as $step => $label)
-                <button wire:click="goToStep({{ $step }})"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $currentStep === $step ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400 hover:text-gray-200' }}">
-                    {{ $step }}. {{ $label }}
-                </button>
-            @endforeach
-        </div>
-    </div>
-
-    {{-- Flash --}}
-    @if (session()->has('message'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-medium">{{ session('message') }}</div>
-    @endif
-    @if (session()->has('error'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-medium">{{ session('error') }}</div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-medium">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     {{-- Switcher global: alternativas (calendarios) del lapso en edición --}}
     {{-- Sin backdrop-blur-md: backdrop-filter en un ancestro descoloca el
@@ -48,14 +49,19 @@
     @if (count($calendars))
         <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-4 mb-6">
             <div class="flex flex-wrap items-center gap-3">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Alternativas del lapso</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Horario</span>
                 <select wire:model.live="calendarId" class="flex-1 min-w-[200px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                    <option value="">Seleccionar</option>
                     @foreach ($calendars as $c)
                         <option value="{{ $c['id'] }}">{{ $c['name'] }} ({{ $c['status'] }})</option>
                     @endforeach
                 </select>
-                <a href="{{ request()->url() }}"
-                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</a>
+                <button wire:click="$set('showCreateCalendarForm', true)"
+                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</button>
+                {{-- <button wire:click="openEditCalendarForm"
+                    {{ filled($calendarId) ? '' : 'disabled' }}
+                    class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ filled($calendarId) ? 'bg-white/5 hover:bg-white/10 text-gray-300 border border-gray-200 dark:border-white/10' : 'bg-white/5 text-gray-500 border border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50' }}">
+                    Editar calendario.</button> --}}
             </div>
             @if ($calendarId)
                 <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">
@@ -71,69 +77,198 @@
         </div>
     @endif
 
+    {{-- Tabs · cada paso del wizard es una pestaña (currentStep vía goToStep) --}}
+    {{-- Sin backdrop-blur-md: backdrop-filter en ancestro descoloca el dropdown
+         nativo del <select> en Chromium (mismo bug documentado en el switcher). --}}
+    <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-1.5 mb-6">
+        <div class="flex gap-1 overflow-x-auto" role="tablist" aria-label="Pasos del asistente de horarios">
+            @php
+                $calendarSelected = filled($calendarId);
+            @endphp
+            @foreach ([1 => 'Calendario', 2 => 'Aulas', 3 => 'Clases', 4 => 'Disponibilidad', 5 => 'Generar'] as $step => $label)
+                @php
+                    $stepLocked = $step >= 2 && ! $calendarSelected;
+                @endphp
+                <button type="button"
+                    id="tt-tab-{{ $step }}"
+                    role="tab"
+                    aria-selected="{{ $currentStep === $step ? 'true' : 'false' }}"
+                    aria-controls="tt-step-{{ $step }}"
+                    @if ($stepLocked) disabled @endif
+                    @if ($stepLocked) aria-disabled="true" tabindex="-1" @endif
+                    @if (! $stepLocked) wire:click="goToStep({{ $step }})" @endif
+                    class="flex-1 min-w-[110px] px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap {{ $stepLocked ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500' : ($currentStep === $step ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5') }}">
+                    {{ $step }}. {{ $label }}
+                </button>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- Flash --}}
+    @if (session()->has('message'))
+        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-medium">{{ session('message') }}</div>
+    @endif
+    @if (session()->has('error'))
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-medium">{{ session('error') }}</div>
+    @endif
+    @if (session()->has('warning'))
+        <div class="mb-4 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-sm font-medium" role="status">{{ session('warning') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-medium">
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- ═══════════ Paso 1 · Calendario ═══════════ --}}
     @if ($currentStep === 1)
-        <div class="space-y-6">
-            <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-5">
-                <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">1 · Calendario</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Lapso</label>
-                        <select wire:model.live="lapsoId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                            <option value="">Selecciona un lapso</option>
-                            @foreach ($lapsos as $lapso)
-                                <option value="{{ $lapso->id }}">{{ $lapso->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre del calendario</label>
-                        <input type="text" wire:model.live="calendarName" placeholder="Horario 2025-2026 · Lapso I"
-                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Duración del bloque (min)</label>
-                        <input type="number" wire:model="periodMinutes" min="30" max="120"
-                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    </div>
-                </div>
-                <button wire:click="createCalendar"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all">
-                    Crear borrador
-                </button>
-            </div>
+        <div class="space-y-6" role="tabpanel" id="tt-step-1" aria-labelledby="tt-tab-1">
+            {{-- <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-5"> --}}
+                {{-- <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">1 · Calendario</h2> --}}
+                {{-- <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Pulsa «+ Nuevo borrador» para crear un calendario para un plan de estudio.</p> --}}
 
-            {{-- PLAN-TIMETABLE-002 §4.5: alternativas (calendarios) del lapso --}}
-            @if (count($calendars))
+            {{-- </div> --}}
+
+            {{-- Detalle del calendario seleccionado (antes: lista de todos los
+                 calendarios del lapso; el switcher global ya cubre la elección). --}}
+            @if ($selectedCalendarDetail)
                 <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">Calendarios del lapso</h2>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ count($calendars) }} alternativa(s) · máximo 1 activo</span>
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">{{ $selectedCalendarDetail['name'] }}</h2>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase {{ $selectedCalendarDetail['status'] === 'active' ? 'bg-emerald-500/15 text-emerald-600' : ($selectedCalendarDetail['status'] === 'archived' ? 'bg-gray-500/10 text-gray-500' : 'bg-amber-500/15 text-amber-600') }}">
+                                {{ $selectedCalendarDetail['status'] }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button wire:click="openEditCalendarForm"
+                                class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Editar</button>
+                            @if ($selectedCalendarDetail['status'] === 'draft')
+                                <button wire:click="activateCalendar({{ $selectedCalendarDetail['id'] }})"
+                                    class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-200 text-xs font-bold border border-gray-200 dark:border-white/10">Activar</button>
+                                <button wire:click="duplicateCalendar({{ $selectedCalendarDetail['id'] }})"
+                                    class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10">Duplicar</button>
+                                <button wire:click="deleteCalendar({{ $selectedCalendarDetail['id'] }})"
+                                    class="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
+                            @endif
+                        </div>
                     </div>
-                    <div class="space-y-2">
-                        @foreach ($calendars as $c)
-                            <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border {{ $calendarId === $c['id'] ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-gray-200 dark:border-white/10 bg-white/5' }}">
-                                <div class="flex items-center gap-3">
-                                    <div>
-                                        <div class="text-sm font-extrabold text-gray-900 dark:text-white">{{ $c['name'] }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">v{{ $c['version'] }} · calidad {{ $c['quality_score'] ?? '—' }}</div>
-                                    </div>
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase {{ $c['status'] === 'active' ? 'bg-emerald-500/15 text-emerald-600' : ($c['status'] === 'archived' ? 'bg-gray-500/10 text-gray-500' : 'bg-amber-500/15 text-amber-600') }}">
-                                        {{ $c['status'] }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button wire:click="selectCalendar({{ $c['id'] }})" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">Continuar</button>
-                                    @if ($c['status'] === 'draft')
-                                        <button wire:click="activateCalendar({{ $c['id'] }})" class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-200 text-xs font-bold border border-gray-200 dark:border-white/10">Activar</button>
-                                        <button wire:click="deleteCalendar({{ $c['id'] }})" class="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
-                                    @endif
-                                </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        @php
+                            $detailItems = [
+                                'Lapso' => $selectedCalendarDetail['lapso_name'] ?? '—',
+                                'Plan de estudio' => $selectedCalendarDetail['pestudio_name'] ?? '—',
+                                'Bloque (min)' => (string) $selectedCalendarDetail['period_minutes'],
+                                'Asignaturas por período' => (string) ($selectedCalendarDetail['max_subjects_per_period'] ?? 2),
+                                'Estrategia' => ($selectedCalendarDetail['strategy'] ?? 'optimized') === 'legacy' ? 'Legacy' : 'Optimizado',
+                                'Versión' => 'v'.$selectedCalendarDetail['version'],
+                                'Calidad' => $selectedCalendarDetail['quality_score'] !== null ? $selectedCalendarDetail['quality_score'].'%' : '—',
+                                'Turnos' => (string) $selectedCalendarDetail['shifts_count'],
+                                'Períodos' => $selectedCalendarDetail['periods_count'].' ('.$selectedCalendarDetail['class_periods_count'].' clase · '.$selectedCalendarDetail['break_periods_count'].' recreo)',
+                                'Clases' => (string) $selectedCalendarDetail['lessons_count'],
+                                'Slots asignados' => (string) $selectedCalendarDetail['slots_count'],
+                                'Conflictos' => (string) $selectedCalendarDetail['conflicts_count'],
+                                'Creado' => $selectedCalendarDetail['created_at'] ?? '—',
+                                'Actualizado' => $selectedCalendarDetail['updated_at'] ?? '—',
+                            ];
+                        @endphp
+                        @foreach ($detailItems as $label => $value)
+                            <div class="rounded-lg bg-white/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-3">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1">{{ $label }}</div>
+                                <div class="text-sm font-bold text-gray-900 dark:text-white break-words">{{ $value }}</div>
                             </div>
                         @endforeach
                     </div>
+
+                    @if (count($selectedCalendarDetail['schedule_blocks'] ?? []))
+                        <div class="mt-5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
+                            <div class="px-4 py-3 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div>
+                                        <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                                            Bloques de horario del plan de estudio
+                                        </h3>
+                                        <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                            {{ $selectedCalendarDetail['pestudio_name'] ?? 'Plan de estudio seleccionado' }}
+                                            · detalle por día, turno y bloque
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                                        {{ $selectedCalendarDetail['periods_count'] }} bloques registrados
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="px-4 py-2">
+                                <nav class="flex w-full overflow-x-auto border-b border-gray-200 dark:border-white/10" aria-label="Días del horario">
+                                    @foreach ($selectedCalendarDetail['schedule_blocks'] as $i => $day)
+                                        <button type="button" wire:click="setSelectedScheduleDay({{ $i }})" class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 {{ $selectedScheduleDayIndex === $i ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-emerald-600 dark:hover:text-emerald-400' }}">
+                                            {{ $day['day'] }}
+                                            <span class="ml-1 text-[10px] font-normal normal-case tracking-normal opacity-70">({{ count($day['blocks']) }})</span>
+                                        </button>
+                                    @endforeach
+                                </nav>
+
+                                @php
+                                    $selectedDay = $selectedCalendarDetail['schedule_blocks'][$selectedScheduleDayIndex] ?? ($selectedCalendarDetail['schedule_blocks'][0] ?? null);
+                                @endphp
+
+                                @if ($selectedDay)
+                                    <div class="mt-2 space-y-3">
+                                        @foreach ($selectedDay['shift_groups'] ?? [] as $shiftGroup)
+                                            <section class="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
+                                                <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                                    <span class="text-[11px] font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                                                        {{ $shiftGroup['name'] }}
+                                                    </span>
+                                                    <span class="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                                        {{ $shiftGroup['code'] }}
+                                                    </span>
+                                                </div>
+                                                <div class="min-w-[620px] divide-y divide-gray-100 text-xs dark:divide-white/5">
+                                                    @foreach ($shiftGroup['blocks'] as $block)
+                                                        @php $isBreak = $block['type'] === 'Recreo'; @endphp
+                                                        <div class="grid grid-cols-[3rem_1fr_8rem_5rem] items-center gap-3 px-3 py-2 {{ $isBreak ? 'bg-amber-500/5' : 'bg-white/5' }}">
+                                                            <span class="font-bold text-gray-500 dark:text-gray-400">#{{ $block['order'] }}</span>
+                                                            <span class="font-mono font-bold text-gray-800 dark:text-gray-100">
+                                                                {{ $block['start'] }}–{{ $block['end'] }}
+                                                            </span>
+                                                            <span class="text-gray-500 dark:text-gray-400">{{ $block['shift'] }}</span>
+                                                            <span class="justify-self-start rounded px-1.5 py-0.5 text-[9px] font-bold {{ $isBreak ? 'bg-amber-500/15 text-amber-600 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300' }}">
+                                                                {{ $block['type'] }}
+                                                            </span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </section>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="mt-3 text-xs text-gray-500">No hay bloques para el día seleccionado.</div>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="mt-5 rounded-lg border border-dashed border-gray-300 dark:border-white/10 px-4 py-5 text-center text-xs text-gray-500 dark:text-gray-400">
+                            Este plan de estudio todavía no tiene bloques de horario registrados.
+                        </div>
+                    @endif
+
+                    @if ($selectedCalendarDetail['conflicts_count'] > 0)
+                        <div class="mt-3 px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-medium">
+                            ⚠ Este calendario tiene {{ $selectedCalendarDetail['conflicts_count'] }} conflicto(s) registrado(s) — revísalos en el editor manual.
+                        </div>
+                    @endif
+                </div>
+            @elseif (count($calendars))
+                <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5 text-sm text-gray-500 dark:text-gray-400">
+                    Selecciona un calendario en el switcher superior para ver su detalle.
                 </div>
             @endif
 
@@ -170,21 +305,110 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <select wire:model="shiftId" class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <select wire:model.live="shiftId" class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm">
                             <option value="0">Elige un turno</option>
                             @foreach ($shifts as $shift)
                                 <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                             @endforeach
                         </select>
-                        <button wire:click="generatePeriods" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10">Vista previa de períodos</button>
-                        <button wire:click="savePeriods" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar períodos (Lun–Vie)</button>
+                        <button wire:click="generatePeriods"
+                            @disabled((int) $shiftId <= 0)
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="generatePeriods"
+                            class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/5">
+                            <span wire:loading.remove wire:target="generatePeriods">Vista previa de períodos</span>
+                            <span wire:loading wire:target="generatePeriods" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Generando…
+                            </span>
+                        </button>
+                        <button wire:click="savePeriods"
+                            @disabled((int) $shiftId <= 0)
+                            class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed">
+                            Guardar períodos (Lun–Vie)
+                        </button>
+                        <button wire:click="regeneratePeriods"
+                            @disabled((int) $shiftId <= 0)
+                            wire:loading.attr="disabled"
+                            wire:target="regeneratePeriods"
+                            class="px-4 py-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-bold border border-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Regenerar
+                        </button>
                     </div>
 
                     @if ($periods)
-                        <div class="mt-4 grid grid-cols-5 gap-2">
-                            @foreach ($periods as $p)
-                                <div class="text-center px-2 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-gray-300">{{ $p['label'] }}</div>
-                            @endforeach
+                        @php
+                            $previewClassPeriods = collect($periods)->where('is_break', false);
+                            $previewBreakPeriods = collect($periods)->where('is_break', true);
+                            $selectedShift = $shifts->firstWhere('id', (int) $shiftId);
+                        @endphp
+                        <div class="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Detalle de períodos</h3>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $selectedShift?->name ?? 'Turno seleccionado' }}
+                                        @if ($selectedShift)
+                                            · {{ $selectedShift->code }} · {{ $selectedShift->start_time }}–{{ $selectedShift->end_time }}
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap gap-2 text-[10px] font-bold">
+                                    <span class="px-2 py-1 rounded-md bg-white/10 text-gray-500 dark:text-gray-300">{{ count($periods) }} total</span>
+                                    <span class="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">{{ $previewClassPeriods->count() }} clase</span>
+                                    <span class="px-2 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">{{ $previewBreakPeriods->count() }} recreo</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
+                                <table class="w-full min-w-[760px] text-xs">
+                                    <thead class="bg-gray-50 dark:bg-white/5 text-left text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                        <tr>
+                                            <th class="px-3 py-2">#</th>
+                                            <th class="px-3 py-2">Pestudio</th>
+                                            <th class="px-3 py-2">ID</th>
+                                            <th class="px-3 py-2">Tipo</th>
+                                            <th class="px-3 py-2">Inicio</th>
+                                            <th class="px-3 py-2">Fin</th>
+                                            <th class="px-3 py-2">Duración</th>
+                                            <th class="px-3 py-2">Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($periods as $p)
+                                            @php
+                                                $duration = max(0, $p['end'] - $p['start']);
+                                                $hours = intdiv($duration, 60);
+                                                $minutes = $duration % 60;
+                                                $durationLabel = $hours > 0 ? $hours.' h' : '';
+                                                $durationLabel .= $minutes > 0 ? ($durationLabel ? ' ' : '').$minutes.' min' : '';
+                                            @endphp
+                                            <tr class="border-t border-gray-100 dark:border-white/5 {{ $p['is_break'] ? 'bg-amber-500/5' : '' }}">
+                                                <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">{{ $p['order'] }}</td>
+                                                <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ $p['pestudio'] }}</td>
+                                                <td class="px-3 py-2 font-mono text-gray-500 dark:text-gray-400">{{ $p['pestudio_id'] }}</td>
+                                                <td class="px-3 py-2">
+                                                    <span class="px-1.5 py-0.5 rounded {{ $p['is_break'] ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }}">
+                                                        {{ $p['is_break'] ? 'Recreo' : 'Clase' }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-3 py-2 font-mono text-gray-600 dark:text-gray-300">{{ sprintf('%02d:%02d', intdiv($p['start'], 60), $p['start'] % 60) }}</td>
+                                                <td class="px-3 py-2 font-mono text-gray-600 dark:text-gray-300">{{ sprintf('%02d:%02d', intdiv($p['end'], 60), $p['end'] % 60) }}</td>
+                                                <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ $durationLabel }}</td>
+                                                <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $p['label'] }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p class="mt-3 text-[11px] text-gray-500 dark:text-gray-400">
+                                Esta es una vista previa por día del turno. Los períodos de clase y recreo se repetirán de lunes a viernes al guardar.
+                            </p>
                         </div>
                     @endif
 
@@ -198,70 +422,16 @@
 
     {{-- ═══════════ Paso 2 · Aulas ═══════════ --}}
     @if ($currentStep === 2)
-        <div class="space-y-6">
-            <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-5">
-                <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">2 · Aulas</h2>
-                {{-- Datos principales (requeridos) --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Código *</label>
-                        <input type="text" wire:model="roomCode" placeholder="A-101"
-                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                        @error('roomCode') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre *</label>
-                        <input type="text" wire:model="roomName" placeholder="Aula 101"
-                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                        @error('roomName') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Capacidad *</label>
-                        <input type="number" wire:model="roomCapacity" min="1" placeholder="30"
-                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                        @error('roomCapacity') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Tipo *</label>
-                        <select wire:model="roomType" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                            @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
-                                <option value="{{ $type }}">{{ ucfirst($type) }}</option>
-                            @endforeach
-                        </select>
-                        @error('roomType') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
-                    </div>
-                </div>
-                {{-- Vínculo a sección (opcional) --}}
-                @if ($roomSectionLinkLabel)
-                    <div class="mb-4 flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
-                        <div class="flex items-center gap-2 text-sm text-gray-300">
-                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-14a2 2 0 01-2-2v-6a2 2 0 012-2h2m4 0a2 2 0 110-4 2 2 0 010 4zm8 0a2 2 0 110-4 2 2 0 010 4z"/></svg>
-                            <span class="text-xs"><span class="font-bold text-emerald-400">Sección vinculada:</span> {{ $roomSectionLinkLabel }}</span>
-                        </div>
-                        <button wire:click="clearRoomSection" class="text-xs text-red-400 hover:text-red-300 font-bold">Quitar</button>
-                    </div>
-                @endif
-                <div class="flex flex-wrap items-center gap-2">
-                    <button wire:click="saveRoom" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Registrar aula</button>
-                    <button wire:click="openRoomSectionModal"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span>Vincular a Grado/Sección</span>
-                    </button>
-                </div>
-                <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Registra automáticamente un aula/salón/ambiente por cada <strong>grado/sección</strong> de los pestudios activos (nombre asociado al grado y la sección).</p>
-                    <button wire:click="confirmBulkCreateRooms"
-                        class="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10">
-                        Registrar aulas por grado/sección
-                    </button>
-                </div>
-            </div>
-
+        <div class="space-y-6" role="tabpanel" id="tt-step-2" aria-labelledby="tt-tab-2">
             <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
                 <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
                     <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">Aulas registradas</h2>
                     <div class="flex items-center gap-2">
+                        <button wire:click="openRoomCreateModal"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8h-16"/></svg>
+                            <span>Nueva aula</span>
+                        </button>
                         @if (count($pendingRooms))
                             <button wire:click="saveAllRooms"
                                 class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
@@ -313,6 +483,71 @@
                     <div class="text-sm text-gray-500 dark:text-gray-400">Sin aulas registradas.</div>
                 @endforelse
             </div>
+
+            {{-- Modal: crear aula --}}
+            @if ($showRoomCreateModal)
+                <x-modal-card title="Registrar aula" blur="lg" wire:model="showRoomCreateModal" max-width="lg" persistent>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Código *</label>
+                                <input type="text" wire:model="roomCode" placeholder="A-101"
+                                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                @error('roomCode') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre *</label>
+                                <input type="text" wire:model="roomName" placeholder="Aula 101"
+                                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                @error('roomName') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Capacidad *</label>
+                                <input type="number" wire:model="roomCapacity" min="1" placeholder="30"
+                                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                @error('roomCapacity') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Tipo *</label>
+                                <select wire:model="roomType" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                    @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
+                                        <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                                    @endforeach
+                                </select>
+                                @error('roomType') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        @if ($roomSectionLinkLabel)
+                            <div class="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
+                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-14a2 2 0 01-2-2v-6a2 2 0 012-2h2m4 0a2 2 0 110-4 2 2 0 010 4zm8 0a2 2 0 110-4 2 2 0 010 4z"/></svg>
+                                    <span class="text-xs"><span class="font-bold text-emerald-400">Sección vinculada:</span> {{ $roomSectionLinkLabel }}</span>
+                                </div>
+                                <button wire:click="clearRoomSection" class="text-xs text-red-400 hover:text-red-300 font-bold">Quitar</button>
+                            </div>
+                        @endif
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button wire:click="saveRoom" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Registrar aula</button>
+                            <button wire:click="openRoomSectionModal"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <span>Vincular a Grado/Sección</span>
+                            </button>
+                            <button wire:click="confirmBulkCreateRooms" class="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10">
+                                Registrar aulas por grado/sección
+                            </button>
+                        </div>
+                    </div>
+
+                    <x-slot name="footer">
+                        <div class="flex items-center justify-end gap-2">
+                            <button wire:click="closeRoomCreateModal" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">Cancelar</button>
+                        </div>
+                    </x-slot>
+                </x-modal-card>
+            @endif
 
             {{-- Dialog: editar aula --}}
             <x-modal-card title="Editar aula" blur="lg" wire:model="roomEditOpen" max-width="md" persistent>
@@ -426,21 +661,21 @@
         </div>
     @endif
 
-    {{-- ═══════════ Paso 3 · Lecciones ═══════════ --}}
+    {{-- ═══════════ Paso 3 · Clases ═══════════ --}}
     @if ($currentStep === 3)
-        <div class="space-y-6">
+        <div class="space-y-6" role="tabpanel" id="tt-step-3" aria-labelledby="tt-tab-3">
             <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-5">
                 <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                     <div class="flex items-center gap-2">
-                        <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">3 · Lecciones</h2>
+                        <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">3 · Clases</h2>
                         <span class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{{ $step3SelectedCount }} seleccionadas</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    {{-- <div class="flex items-center gap-1">
                         <button wire:click="setStep3ViewMode('tabs')"
                             class="px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all duration-200 {{ $step3ViewMode === 'tabs' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white/5 text-gray-400 border-white/10 hover:text-gray-300' }}">Pestañas</button>
                         <button wire:click="setStep3ViewMode('flat')"
                             class="px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all duration-200 {{ $step3ViewMode === 'flat' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white/5 text-gray-400 border-white/10 hover:text-gray-300' }}">Lista</button>
-                    </div>
+                    </div> --}}
                 </div>
 
                 {{-- Toolbar: búsqueda, orden, asignación masiva --}}
@@ -469,8 +704,24 @@
                         @endforeach
                     </select>
                     <div class="col-span-1 sm:col-span-2 lg:col-span-5 flex items-center gap-2">
-                        <button wire:click="bulkAssignShift" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10">Aplicar turno</button>
-                        <button wire:click="bulkAssignRoomType" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10">Aplicar aula</button>
+                        <button wire:click="bulkAssignShift" wire:loading.attr="disabled" wire:target="bulkAssignShift"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10">
+                            <span wire:loading.remove wire:target="bulkAssignShift">Aplicar turno</span>
+                            <span wire:loading wire:target="bulkAssignShift" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                Aplicando…
+                            </span>
+                        </button>
+                        <button wire:click="bulkAssignRoomType" wire:loading.attr="disabled" wire:target="bulkAssignRoomType"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10">
+                            <span wire:loading.remove wire:target="bulkAssignRoomType">Aplicar aula</span>
+                            <span wire:loading wire:target="bulkAssignRoomType" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                Aplicando…
+                            </span>
+                        </button>
                         @if (isset($step3Warnings) && count($step3Warnings))
                             <span class="text-[11px] text-amber-500">⚠ {{ count($step3Warnings) }} lección(es) con advertencia</span>
                         @endif
@@ -526,22 +777,73 @@
                     $rows = $step3ViewMode === 'flat' ? $pevaluaciones : $tabActivePevaluaciones;
                     $sumT = 0;
                     $sumP = 0;
+                    $selectedT = 0;
+                    $selectedP = 0;
+                    $selectedHalfBlocks = 0;
                     foreach ($rows as $pev) {
                         $sumT += (int) ceil(((int) ($pev->pensum?->asignatura?->hour_t_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
                         $sumP += (int) ceil(((int) ($pev->pensum?->asignatura?->hour_p_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
+                        if (isset($lessons[$pev->id])) {
+                            $selectedT += (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0);
+                            $selectedP += (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
+                            if (! empty($lessons[$pev->id]['is_half_group'])) {
+                                $selectedHalfBlocks += (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0)
+                                    + (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
+                            }
+                        }
                     }
                 @endphp
 
-                {{-- Resumen de la selección (bloques teóricos/prácticos) --}}
+                {{-- Resumen de la selección (bloques teóricos/prácticos + capacidad) --}}
                 @if ($rows->isNotEmpty())
-                    <div class="mb-3 px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400">
-                        {{ $rows->count() }} área(s) de formación · {{ $sumT }} bloques teóricos · {{ $sumP }} bloques prácticos · {{ $sumT + $sumP }} bloques totales
+                    @php
+                        // Capacidad en la MISMA unidad que lo requerido (semanal):
+                        // bloques de clase por día del turno × 5 días (Lun–Vie).
+                        $capacidadPorDia = collect($shiftCapacityPerDay ?? [])->max() ?: 0;
+                        $capacidadSemanal = $capacidadPorDia * 5;
+                        $maxSubjectsPerPeriod = max(1, (int) ($maxSubjectsPerPeriod ?? 2));
+                        $fullGroupBlocks = $selectedT + $selectedP - $selectedHalfBlocks;
+                        $required = $fullGroupBlocks + (int) ceil($selectedHalfBlocks / $maxSubjectsPerPeriod);
+                        $overCapacity = $capacidadSemanal > 0 && $required > $capacidadSemanal;
+                        $usage = $capacidadSemanal > 0 ? min(100, (int) round($required * 100 / $capacidadSemanal)) : 0;
+                    @endphp
+                    <div class="mb-3 px-3 py-2 rounded-lg {{ $overCapacity ? 'bg-amber-500/5 border border-amber-500/30 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/5 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' }} text-xs flex flex-wrap items-center gap-2">
+                        <span>{{ $rows->count() }} asignatura(s) · {{ $selectedT }} bloques teóricos · {{ $selectedP }} bloques prácticos · {{ $required }} celdas/semana</span>
+                        @if ($capacidadSemanal > 0)
+                            <span class="font-bold {{ $overCapacity ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400' }}">
+                                · Capacidad del turno: {{ $capacidadSemanal }} celdas/semana ({{ $capacidadPorDia }}/día × 5 días)
+                                · Máximo {{ $maxSubjectsPerPeriod }} asignatura(s)/período
+                                · Uso {{ $usage }}%
+                                {{ $overCapacity ? '⚠ excede ('.($required - $capacidadSemanal).' de más)' : '✓' }}
+                            </span>
+                        @endif
                     </div>
                 @endif
 
                 <div class="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>{{ $rows->count() }} asignatura(s) · {{ $step3SelectedCount }} seleccionada(s)</span>
-                    <span>Los bloques se derivan de <code>hour_t_week/hour_p_week</code> · <code>Guardar</code> persiste el borrador</span>
+                    <span class="flex items-center gap-2">
+                        @if ($lessonsDirty)
+                            <span class="text-amber-600 dark:text-amber-400 font-bold">● Cambios sin guardar</span>
+                        @elseif ($lessonsSavedAt)
+                            <span class="text-emerald-600 dark:text-emerald-400">Guardado {{ $lessonsSavedAt }}</span>
+                        @endif
+                        <span>Los bloques se derivan de <code>hour_t_week/hour_p_week</code></span>
+                        <button wire:click="syncAcademicLoad"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="syncAcademicLoad"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-gray-500 dark:text-gray-300 font-bold">
+                            <span wire:loading.remove wire:target="syncAcademicLoad">Sincronizar carga académica</span>
+                            <span wire:loading wire:target="syncAcademicLoad" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Sincronizando…
+                            </span>
+                        </button>
+                    </span>
                 </div>
 
                 <div class="rounded-lg border border-gray-200 dark:border-white/10">
@@ -559,13 +861,15 @@
                                 <th class="px-3 py-2">Prio</th>
                                 <th class="px-3 py-2">Turno</th>
                                 <th class="px-3 py-2">Aula req.</th>
+                                <th class="px-3 py-2 text-nowrap">Medio grupo</th>
                                 <th class="px-3 py-2">Estado</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($rows as $pev)
                                 @php
-                                    $selected = array_key_exists($pev->id, $lessons);
+                                    $selected = (array_key_exists($pev->id, $selectedPevs) && (bool) $selectedPevs[$pev->id])
+                                        || in_array($pev->id, array_map('intval', array_values($selectedPevs)), true);
                                     $derivedT = (int) ceil(((int) ($pev->pensum?->asignatura?->hour_t_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
                                     $derivedP = (int) ceil(((int) ($pev->pensum?->asignatura?->hour_p_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
                                 @endphp
@@ -575,55 +879,65 @@
                                             class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
                                     </td>
                                     <td class="px-3 py-2 text-gray-900 dark:text-gray-200 font-medium">{{ $pev->pensum?->asignatura?->name }}{{ $pev->grupoEstable?->name ? ' · '.$pev->grupoEstable->name : '' }}</td>
-                                    <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $pev->profesor?->lastname }}, {{ $pev->profesor?->name }}</td>
+                                    <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $pev->profesor?->lastname }}, {{ $pev->profesor?->name }}                                    </td>
                                     <td class="px-3 py-2">
-                                        @if ($selected)
-                                            <input type="number" wire:model="lessons.{{ $pev->id }}.weekly_blocks_t" wire:change="autosaveLessons" min="0"
-                                                class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs">
-                                        @else
-                                            <span class="text-gray-500 dark:text-gray-400">{{ $derivedT }}</span>
-                                        @endif
+                                        <input type="number"
+                                            wire:key="lesson-blocks-t-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
+                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.weekly_blocks_t" wire:change="autosaveLessons" @endif
+                                            value="{{ $selected ? ($lessons[$pev->id]['weekly_blocks_t'] ?? $derivedT) : $derivedT }}"
+                                            min="0" @disabled(! $selected)
+                                            class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2">
-                                        @if ($selected)
-                                            <input type="number" wire:model="lessons.{{ $pev->id }}.weekly_blocks_p" wire:change="autosaveLessons" min="0"
-                                                class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs">
-                                        @else
-                                            <span class="text-gray-500 dark:text-gray-400">{{ $derivedP }}</span>
-                                        @endif
+                                        <input type="number"
+                                            wire:key="lesson-blocks-p-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
+                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.weekly_blocks_p" wire:change="autosaveLessons" @endif
+                                            value="{{ $selected ? ($lessons[$pev->id]['weekly_blocks_p'] ?? $derivedP) : $derivedP }}"
+                                            min="0" @disabled(! $selected)
+                                            class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2">
-                                        @if ($selected)
-                                            <input type="number" wire:model="lessons.{{ $pev->id }}.priority" wire:change="autosaveLessons" min="0"
-                                                class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs">
-                                        @else
-                                            <span class="text-gray-400">—</span>
-                                        @endif
+                                        <input type="number"
+                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.priority" wire:change="autosaveLessons" @endif
+                                            value="{{ $selected ? ($lessons[$pev->id]['priority'] ?? 0) : 0 }}"
+                                            min="0" @disabled(! $selected)
+                                            class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2">
-                                        @if ($selected)
-                                            <select wire:model="lessons.{{ $pev->id }}.shift_id" wire:change="autosaveLessons" class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1">
-                                                @foreach ($shifts as $shift)
-                                                    <option value="{{ $shift->id }}">{{ $shift->code }}</option>
-                                                @endforeach
-                                            </select>
-                                        @else
-                                            <span class="text-xs text-gray-400">—</span>
-                                        @endif
+                                        <select
+                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.shift_id" wire:change="autosaveLessons" @endif
+                                            @disabled(! $selected)
+                                            class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
+                                            @if (! $selected)
+                                                <option value="">Selecciona</option>
+                                            @endif
+                                            @foreach ($shifts as $shift)
+                                                <option value="{{ $shift->id }}">{{ $shift->code }}</option>
+                                            @endforeach
+                                        </select>
                                     </td>
                                     <td class="px-3 py-2">
-                                        @if ($selected)
-                                            <select wire:model="lessons.{{ $pev->id }}.room_type_required" wire:change="autosaveLessons" class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1">
-                                                <option value="">—</option>
-                                                @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
-                                                    <option value="{{ $type }}">{{ ucfirst($type) }}</option>
-                                                @endforeach
-                                            </select>
-                                        @else
-                                            <span class="text-xs text-gray-400">—</span>
-                                        @endif
+                                        <select
+                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.room_type_required" wire:change="autosaveLessons" @endif
+                                            @disabled(! $selected)
+                                            class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
+                                            <option value="">{{ $selected ? '—' : 'Selecciona' }}</option>
+                                            @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
+                                                <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                                            @endforeach
+                                        </select>
                                     </td>
-                                    <td class="px-3 py-2 text-[10px]">
+                                    <td class="px-3 py-2 text-center">
+                                        <input type="checkbox"
+                                            @if ($selected)
+                                                wire:model.live="lessons.{{ $pev->id }}.is_half_group"
+                                                wire:change="autosaveLessons"
+                                            @endif
+                                            @disabled(! $selected)
+                                            title="Comparte la celda con otra asignatura de medio grupo"
+                                            class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed">
+                                    </td>
+                                    <td class="px-3 py-2 text-[10px] flex items-center gap-1.5">
                                         @if (isset($savedPevIds[$pev->id]))
                                             <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">Guardado</span>
                                         @endif
@@ -634,14 +948,14 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-3 py-8 text-center text-sm text-gray-400">No hay lecciones (pevaluaciones) para la selección.</td>
+                                    <td colspan="10" class="px-3 py-8 text-center text-sm text-gray-400">No hay lecciones (pevaluaciones) para la selección.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <div class="mt-5 rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-4">
+                {{-- <div class="mt-5 rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-4">
                     <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">Importación masiva (CSV / Excel)</div>
                     <div class="flex flex-wrap items-center gap-3">
                         <input type="file" wire:model="importFile"
@@ -656,7 +970,7 @@
                             Descargar plantilla
                         </button>
                     </div>
-                    <p class="mt-2 text-[11px] text-gray-400 dark:text-gray-500">Columnas: <code>pevaluacion_id</code> (obligatorio), <code>turno</code> (M/T), <code>bloques_t</code>, <code>bloques_p</code>, <code>aula</code>, <code>prioridad</code>.</p>
+                    <p class="mt-2 text-[11px] text-gray-400 dark:text-gray-500">Columnas: <code>pevaluacion_id</code> <em>o</em> (<code>seccion_id</code> + <code>asignatura</code>), <code>turno</code> (M/T), <code>bloques_t</code>, <code>bloques_p</code>, <code>aula</code>, <code>prioridad</code>.</p>
                     @if ($importMessage)
                         <div class="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">{{ $importMessage }}</div>
                     @endif
@@ -667,13 +981,54 @@
                             @endforeach
                         </ul>
                     @endif
-                </div>
+                </div> --}}
 
                 <div class="mt-4 flex items-center justify-between">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Los bloques se derivan de <code>hour_t_week/hour_p_week</code> y la duración del bloque.</span>
                     <div class="flex items-center gap-2">
-                        <button wire:click="autosaveLessons" class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">Guardar borrador</button>
-                        <button wire:click="saveLessons" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar lecciones y continuar</button>
+                        <button wire:click="autosaveLessons"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="autosaveLessons"
+                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                            <span wire:loading.remove wire:target="autosaveLessons">Guardar borrador</span>
+                            <span wire:loading wire:target="autosaveLessons" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Guardando…
+                            </span>
+                        </button>
+                        <button wire:click="recalculateLessonBlocks"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="recalculateLessonBlocks"
+                            title="Recalcular bloques desde las horas actuales de las asignaturas"
+                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                            <span wire:loading.remove wire:target="recalculateLessonBlocks">Recalcular bloques</span>
+                            <span wire:loading wire:target="recalculateLessonBlocks" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Recalculando…
+                            </span>
+                        </button>
+                        <button wire:click="saveLessons"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="saveLessons"
+                            class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
+                            <span wire:loading.remove wire:target="saveLessons">Guardar clases y continuar</span>
+                            <span wire:loading wire:target="saveLessons" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Guardando…
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -682,44 +1037,106 @@
 
     {{-- ═══════════ Paso 4 · Disponibilidad ═══════════ --}}
     @if ($currentStep === 4)
-        <div class="space-y-6">
+        <div class="space-y-6" role="tabpanel" id="tt-step-4" aria-labelledby="tt-tab-4">
             <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
                     <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">4 · Disponibilidad docente</h2>
-                    <button wire:click="setAllAvailable" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10">Marcar todo disponible</button>
+                    <button wire:click="setAllAvailable" wire:loading.attr="disabled" wire:target="setAllAvailable"
+                        class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10">
+                        Marcar 100% disponible (todos los profesores activos)
+                    </button>
                 </div>
 
-                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Grilla día × período por docente. Ajusta la disponibilidad si es necesario.</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">Elige un profesor para ajustar su disponibilidad puntualmente (día × período).</div>
 
-                @foreach ($profesores as $profesor)
-                    <div class="mb-6 rounded-lg border border-gray-200 dark:border-white/10 p-4">
-                        <div class="text-sm font-extrabold text-gray-900 dark:text-white mb-3">{{ $profesor->lastname }}, {{ $profesor->name }}</div>
-                        @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
-                            @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
+                {{-- Búsqueda + selector de profesor --}}
+                <div class="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-3 mb-5">
+                    <div>
+                        <input type="text" wire:model.live="searchProfesor" placeholder="Buscar profesor…"
+                            class="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-transparent px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <select wire:model.live="selectedProfesorId"
+                            class="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-transparent px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500">
+                            <option value="">Seleccionar profesor…</option>
+                            @foreach ($profesoresFiltrados as $p)
+                                <option value="{{ $p->id }}">{{ $p->lastname }}, {{ $p->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 self-center">
+                        {{ $profesoresFiltrados->count() }} profesor(es)
+                    </div>
+                </div>
+
+                @if ($selectedProfesor)
+                    @php
+                        $profAvail = $this->availability[$selectedProfesor->id] ?? [];
+                        $totalPeriodos = 0;
+                        $disponibles = 0;
+                        foreach ($availabilityGrid as $shiftId => $g) {
+                            foreach (range(1, 5) as $day) {
+                                foreach ($g['blocks'] as $order => $block) {
+                                    $totalPeriodos++;
+                                    if (! empty($profAvail[$shiftId][$day][$order])) {
+                                        $disponibles++;
+                                    }
+                                }
+                            }
+                        }
+                    @endphp
+                    <div class="rounded-lg border border-gray-200 dark:border-white/10 p-4">
+                        <div class="flex items-center justify-between mb-3 gap-3 flex-wrap">
+                            <div class="text-sm font-extrabold text-gray-900 dark:text-white">
+                                {{ $selectedProfesor->lastname }}, {{ $selectedProfesor->name }}
+                                <span class="ml-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Disponibilidad</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
+                                    {{ $disponibles }}/{{ $totalPeriodos }} bloques disponibles
+                                </span>
+                                <button wire:click="markAllAvailable"
+                                    class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+                                    Marcar todo disponible
+                                </button>
+                                <button wire:click="fillAvailabilityFromLessons"
+                                    class="px-3 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-600 dark:text-sky-400 text-xs font-bold">
+                                    Prellenar desde sus clases
+                                </button>
+                                <button wire:click="uncheckAllAvailability"
+                                    class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold">
+                                    Desmarcar todo
+                                </button>
+                                <select wire:change="copyAvailabilityFrom($event.target.value)"
+                                    class="px-2 py-1.5 rounded-lg bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 text-xs font-bold">
+                                    <option value="">Copiar de…</option>
+                                    @foreach ($profesoresFiltrados->where('id', '!=', $selectedProfesor->id) as $p)
+                                        <option value="{{ $p->id }}">{{ $p->lastname }}, {{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        @foreach ($availabilityGrid as $shiftId => $g)
                             <div class="mb-4 last:mb-0">
                                 <div class="text-[10px] font-bold text-gray-400 mb-1">
-                                    {{ $shift?->name ?? ('Turno '.$shiftId) }}
-                                    {{ $shift?->start_time ? '· '.substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5) : '' }}
+                                    {{ $g['name'] ?? ('Turno '.$shiftId) }}
+                                    · {{ substr((string) $g['start'], 0, 5) }}–{{ substr((string) $g['end'], 0, 5) }}
                                 </div>
-                                <div class="grid grid-cols-6 gap-1">
-                                    <div class="text-[10px] font-bold text-gray-400">Período</div>
-                                    @foreach (['Lun', 'Mar', 'Mié', 'Jue', 'Vie'] as $dayLabel)
+                                <div class="grid grid-cols-6 gap-1" x-data>
+                                    <div class="text-[10px] font-bold text-gray-400">Hora</div>
+                                    @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as $dayLabel)
                                         <div class="text-[10px] font-bold text-gray-400 text-center">{{ $dayLabel }}</div>
                                     @endforeach
 
-                                    @foreach ($shiftPeriods->groupBy('order_in_day') as $order => $group)
+                                    @foreach ($g['blocks'] as $order => $block)
                                         <div class="contents">
-                                            <div class="text-[10px] font-bold text-gray-400 flex items-center">{{ $order }}º</div>
+                                            <div class="text-[10px] font-bold text-gray-400 flex items-center">{{ $block['start_time'] }}–{{ $block['end_time'] }}</div>
                                             @for ($day = 1; $day <= 5; $day++)
-                                                @php $period = $group->firstWhere('day_of_week', $day); @endphp
                                                 <div class="flex justify-center">
-                                                    @if ($period)
-                                                        <input type="checkbox"
-                                                            wire:model.live="availability.{{ $profesor->id }}.{{ $period->id }}"
-                                                            class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                                                    @else
-                                                        <span class="text-[10px] text-gray-300">–</span>
-                                                    @endif
+                                                    <input type="checkbox"
+                                                        wire:model.live="availability.{{ $selectedProfesor->id }}.{{ $shiftId }}.{{ $day }}.{{ $order }}"
+                                                        class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
                                                 </div>
                                             @endfor
                                         </div>
@@ -728,16 +1145,23 @@
                             </div>
                         @endforeach
                     </div>
-                @endforeach
+                @else
+                    <div class="rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-400">
+                        Selecciona un profesor para ver y ajustar su disponibilidad.
+                    </div>
+                @endif
 
-                <button wire:click="saveAvailability" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar disponibilidad</button>
+                <div class="mt-5 flex items-center gap-3">
+                    <button wire:click="saveAvailability" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar disponibilidad</button>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Se guarda la disponibilidad del profesor seleccionado.</span>
+                </div>
             </div>
         </div>
     @endif
 
     {{-- ═══════════ Paso 5 · Generar ═══════════ --}}
     @if ($currentStep === 5)
-        <div class="space-y-6">
+        <div class="space-y-6" role="tabpanel" id="tt-step-5" aria-labelledby="tt-tab-5">
             <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
                 <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">5 · Generar horario</h2>
 
@@ -749,6 +1173,11 @@
                     </button>
 
                     @if ($generationState === 'preview_ready' && $preview)
+                        <button wire:click="updateDraftPreview" wire:loading.attr="disabled" wire:target="updateDraftPreview"
+                            class="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                            <span wire:loading.remove wire:target="updateDraftPreview">Actualizar borrador</span>
+                            <span wire:loading wire:target="updateDraftPreview">Actualizando…</span>
+                        </button>
                         <button wire:click="confirmAndPublish" wire:loading.attr="disabled" wire:target="confirmAndPublish"
                             class="px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold">
                             Confirmar y publicar
@@ -782,10 +1211,399 @@
                             <div class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $preview['elapsed_seconds'] ?? 0 }}s</div>
                         </div>
                     </div>
+
+                    @if ($generationConflictGroups)
+                        <div class="mt-4 p-4 rounded-lg bg-red-500/5 border border-red-500/30">
+                            <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                                <div>
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-red-500">Conflictos accionables</div>
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                        Revisa la causa probable y aplica la recomendación antes de volver a previsualizar.
+                                    </p>
+                                </div>
+                                <span class="px-2 py-1 rounded-md bg-red-500/10 text-[10px] font-bold text-red-500">
+                                    {{ count($preview['unassigned'] ?? []) }} pendiente(s)
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                @foreach ($generationConflictGroups as $teacher => $group)
+                                    <details class="rounded-lg border border-red-500/20 bg-white/5 px-3 py-2" @if ($loop->first) open @endif>
+                                        <summary class="cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-200">
+                                            {{ $teacher }} · {{ $group['count'] }} sin asignar
+                                        </summary>
+                                        <div class="mt-3 space-y-3">
+                                            @foreach ($group['items'] as $item)
+                                                <div class="rounded-lg border border-white/10 bg-black/5 dark:bg-white/[0.03] p-3">
+                                                    <div class="flex flex-wrap items-start justify-between gap-2">
+                                                        <div>
+                                                            <div class="text-xs font-bold text-gray-800 dark:text-gray-100">{{ $item['subject'] }}</div>
+                                                            <div class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                                                Sección {{ $item['section'] }} · Turno {{ $item['shift'] }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex flex-wrap gap-1">
+                                                            <span class="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-gray-500 dark:text-gray-300">T {{ $item['blocks_t'] }}</span>
+                                                            <span class="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-gray-500 dark:text-gray-300">P {{ $item['blocks_p'] }}</span>
+                                                            <span class="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-gray-500 dark:text-gray-300">Aula {{ $item['room_type'] }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2 rounded-md bg-red-500/10 px-2.5 py-2 text-[11px] text-red-600 dark:text-red-300">
+                                                        <strong>Causa probable:</strong> {{ $item['reason'] }}
+                                                    </div>
+                                                    <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                                        Candidatos: <strong>{{ $item['available_periods'] }}</strong>
+                                                        · Libres: <strong class="{{ $item['free_periods'] < $item['required_periods'] ? 'text-red-500' : '' }}">{{ $item['free_periods'] }}</strong>
+                                                        · Necesarios: <strong>{{ $item['required_periods'] }}</strong>
+                                                    </div>
+                                                    @if (($item['section_blocked_periods'] ?? 0) || ($item['teacher_occupied_periods'] ?? 0) || ($item['room_unavailable_periods'] ?? 0))
+                                                        <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                                                            @if (($item['section_blocked_periods'] ?? 0) > 0)
+                                                                Sección ocupada: {{ $item['section_blocked_periods'] }}
+                                                            @endif
+                                                            @if (($item['teacher_occupied_periods'] ?? 0) > 0)
+                                                                @if (($item['section_blocked_periods'] ?? 0) > 0) · @endif
+                                                                Docente ocupado: {{ $item['teacher_occupied_periods'] }}
+                                                            @endif
+                                                            @if (($item['room_unavailable_periods'] ?? 0) > 0)
+                                                                @if (($item['section_blocked_periods'] ?? 0) || ($item['teacher_occupied_periods'] ?? 0)) · @endif
+                                                                Aula no disponible: {{ $item['room_unavailable_periods'] }}
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                    </div>
+                                                    <ul class="mt-2 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                                        @foreach ($item['actions'] as $action)
+                                                            <li class="flex gap-1.5"><span class="text-emerald-500">→</span><span>{{ $action }}</span></li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </details>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Checklist pre-publicación: revisar antes de «Confirmar y publicar» --}}
+                    @php $checklist = $this->publishChecklist(); @endphp
+                    @if ($checklist !== [] && ($checklist['sin_asignar'] > 0 || $checklist['asignadas'] === 0))
+                        <div class="mt-4 p-4 rounded-lg {{ $checklist['sin_asignar'] > 0 ? 'bg-amber-500/5 border border-amber-500/30' : 'bg-red-500/5 border border-red-500/30' }}">
+                            <div class="text-[10px] font-bold uppercase tracking-widest {{ $checklist['sin_asignar'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500' }} mb-2">
+                                ⚠ Revisa antes de publicar
+                            </div>
+                            <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                                @if ($checklist['sin_asignar'] > 0)
+                                    <li>• <strong>{{ $checklist['sin_asignar'] }}</strong> lección(es) sin asignar quedarán como conflictos <code>unassigned</code>.</li>
+                                    @if ($checklist['docentes_afectados'] > 0)
+                                        <li>• Docentes afectados ({{ $checklist['docentes_afectados'] }}): {{ $checklist['docentes'] }}{{ $checklist['docentes_afectados'] > 5 ? '…' : '' }}</li>
+                                    @endif
+                                @endif
+                                @if ($checklist['asignadas'] === 0)
+                                    <li>• <strong>Ninguna</strong> lección quedó asignada: revisa períodos, turnos y disponibilidad antes de publicar.</li>
+                                @endif
+                                <li>• Calidad del horario: <strong>{{ $checklist['calidad'] }}%</strong> asignado · {{ $checklist['secciones_con_horario'] }} sección(es) con horario.</li>
+                            </ul>
+                        </div>
+                    @elseif ($checklist !== [])
+                        <div class="mt-4 px-4 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/30 text-xs text-emerald-600 dark:text-emerald-400">
+                            ✓ Checklist OK: {{ $checklist['asignadas'] }} clases asignadas · {{ $checklist['secciones_con_horario'] }} sección(es) · calidad {{ $checklist['calidad'] }}%
+                        </div>
+                    @endif
+
+                    {{-- Vista previa por sección: pestañas pestudio → grado → sección --}}
+                    <div class="mt-6 space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Horario previsualizado</h3>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Elige pestudio · grado · sección</span>
+                        </div>
+
+                        {{-- Pestañas · Pestudio --}}
+                        @if ($tabPestudioOptions)
+                            <div class="border-b border-gray-200 dark:border-white/10">
+                                <nav class="flex w-full overflow-x-auto">
+                                    @foreach ($tabPestudioOptions as $opt)
+                                        <button wire:click="$set('activePestudioId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                            class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
+                                            {{ (string) $activePestudioId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                            {{ $opt['name'] }}
+                                        </button>
+                                    @endforeach
+                                </nav>
+                            </div>
+                        @endif
+
+                        {{-- Pestañas · Grado --}}
+                        @if ($tabGradoOptions)
+                            <div class="border-b border-gray-200 dark:border-white/10">
+                                <nav class="flex w-full overflow-x-auto">
+                                    @foreach ($tabGradoOptions as $opt)
+                                        <button wire:click="$set('activeGradoId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                            class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
+                                            {{ (string) $activeGradoId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                            {{ $opt['name'] }}
+                                        </button>
+                                    @endforeach
+                                </nav>
+                            </div>
+                        @endif
+
+                        {{-- Pestañas · Sección --}}
+                        @if ($tabSeccionOptions)
+                            <div class="border-b border-gray-200 dark:border-white/10">
+                                <nav class="flex w-full overflow-x-auto">
+                                    @foreach ($tabSeccionOptions as $opt)
+                                        <button wire:click="$set('activeSeccionId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                            class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
+                                            {{ (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                            Sección {{ $opt['name'] }}
+                                        </button>
+                                    @endforeach
+                                </nav>
+                            </div>
+                        @endif
+
+                        @php $secGrid = $sectionPreviewGrid ?? []; @endphp
+                        @if ($secGrid !== [])
+                            <div class="flex items-center justify-end">
+                                <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId]) }}"
+                                    target="_blank" rel="noopener"
+                                    class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10 inline-flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Exportar PDF
+                                </a>
+                            </div>
+                            @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
+                                @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
+                                <div class="rounded-lg border border-gray-200 dark:border-white/10 p-3">
+                                    <div class="text-[10px] font-bold text-gray-400 mb-2">
+                                        {{ $shift?->name ?? ('Turno '.$shiftId) }}
+                                        {{ $shift?->start_time ? '· '.substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5) : '' }}
+                                    </div>
+                                    <div class="grid grid-cols-6 gap-1">
+                                        <div class="text-[10px] font-bold text-gray-400">Hora</div>
+                                        @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as $dayLabel)
+                                            <div class="text-[10px] font-bold text-gray-400 text-center">{{ $dayLabel }}</div>
+                                        @endforeach
+
+                                        @foreach ($shiftPeriods->groupBy('order_in_day') as $order => $group)
+                                            @php $rowPeriod = $group->first(); @endphp
+                                            <div class="contents">
+                                                <div class="text-[10px] font-bold text-gray-400 flex items-center">{{ substr((string) $rowPeriod?->start_time, 0, 5) }}–{{ substr((string) $rowPeriod?->end_time, 0, 5) }}</div>
+                                                @for ($day = 1; $day <= 5; $day++)
+                                                    @php
+                                                        $cellAssignments = $secGrid[$shiftId][$order][$day] ?? [];
+                                                        $targetPeriod = $group->firstWhere('day_of_week', $day);
+                                                    @endphp
+                                                    @php $isBreak = (bool) ($group->firstWhere('day_of_week', $day)?->is_break ?? $rowPeriod?->is_break); @endphp
+                                                    <div
+                                                        @if (! $isBreak && $targetPeriod)
+                                                            x-on:dragover.prevent
+                                                            x-on:drop.prevent="$wire.movePreviewLesson(parseInt(event.dataTransfer.getData('lesson-id')), parseInt(event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod->id }})"
+                                                        @endif
+                                                        class="relative flex flex-col items-stretch justify-center gap-1 rounded p-1 min-h-[44px] {{ $cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : '' }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
+                                                        @if ($cellAssignments)
+                                                            @foreach ($cellAssignments as $cell)
+                                                                <div
+                                                                    draggable="true"
+                                                                    x-on:dragstart="event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
+                                                                    class="cursor-grab active:cursor-grabbing text-center leading-tight rounded {{ count($cellAssignments) > 1 ? 'bg-white/5 px-1 py-0.5' : '' }}">
+                                                                    <div class="text-[10px] font-bold text-gray-900 dark:text-white">{{ $cell['asignatura'] }}</div>
+                                                                    @if ($cell['profesor'])
+                                                                        <div class="text-[9px] text-gray-500 dark:text-gray-400">{{ $cell['profesor'] }}</div>
+                                                                    @endif
+                                                                    @if ($cell['grupo'])
+                                                                        <div class="text-[9px] text-emerald-600 dark:text-emerald-400">{{ $cell['grupo'] }}</div>
+                                                                    @endif
+                                                                </div>
+                                                            @endforeach
+                                                        @elseif (! $isBreak)
+                                                            <button type="button"
+                                                                wire:click="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
+                                                                title="Agregar una lección a este período"
+                                                                class="absolute right-1 top-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                                                <span aria-hidden="true" class="text-sm leading-none">+</span>
+                                                                <span class="sr-only">Agregar lección</span>
+                                                            </button>
+                                                            <span class="flex min-h-[44px] items-center justify-center text-xs text-gray-400 dark:text-gray-500">Vacío</span>
+                                                        @endif
+                                                    </div>
+                                                @endfor
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-400">
+                                Selecciona una sección con clases asignadas en la vista previa (o ejecuta el dry-run).
+                            </div>
+                        @endif
+
+                        @if ($showAddPreviewLessonModal)
+                            <x-modal-card title="Agregar lección al período" blur="lg" wire:model="showAddPreviewLessonModal" align="center" max-width="md" persistent>
+                                <div class="space-y-4">
+                                    <div class="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                                        <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            Selecciona una lección para este período
+                                        </p>
+                                        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                            Solo se muestran las lecciones que aún no tienen una asignación.
+                                        </p>
+                                    </div>
+
+                                    <div class="max-h-[min(58vh,28rem)] space-y-2 overflow-y-auto pr-1">
+                                    @forelse ($this->availablePreviewLessons() as $availableLesson)
+                                        <button type="button"
+                                            wire:click="addPreviewLesson({{ $availableLesson->id }})"
+                                            class="group flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-emerald-500/60 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-emerald-500/10">
+                                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                                                +
+                                            </span>
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block truncate text-sm font-bold text-gray-900 dark:text-gray-200">
+                                                    {{ $availableLesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre' }}
+                                                </span>
+                                                <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                                                    Sección {{ $availableLesson->pevaluacion?->seccion?->name ?? '—' }}
+                                                </span>
+                                            </span>
+                                            <span class="shrink-0 text-right text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                                                <span class="block">T {{ $availableLesson->weekly_blocks_t }}</span>
+                                                <span class="block">P {{ $availableLesson->weekly_blocks_p }}</span>
+                                            </span>
+                                        </button>
+                                    @empty
+                                        <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+                                            No hay lecciones sin asignar disponibles para agregar.
+                                        </div>
+                                    @endforelse
+                                    </div>
+                                </div>
+                                <x-slot name="footer">
+                                    <div class="flex items-center gap-3 justify-end">
+                                        <button type="button" wire:click="closeAddPreviewLessonModal"
+                                            class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </x-slot>
+                            </x-modal-card>
+                        @endif
+                    </div>
                 @endif
             </div>
         </div>
     @endif
+
+    {{-- Modal · Nuevo borrador (vive a nivel raíz: el botón "+ Nuevo borrador"
+         del switcher global es visible en TODOS los pasos, no solo en el 1;
+         dentro de @if($currentStep===1) el modal no existía en el DOM cuando
+         se abría desde pasos 2-5). --}}
+    <x-modal-card title="Nuevo borrador de calendario" blur="lg" wire:model="showCreateCalendarForm" max-width="md" persistent>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Lapso</label>
+                <select wire:model.live="lapsoId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Selecciona un lapso</option>
+                    @foreach ($lapsos as $lapso)
+                        <option value="{{ $lapso->id }}">{{ $lapso->name }}</option>
+                    @endforeach
+                </select>
+                @error('lapsoId') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Plan de estudio (pestudio)</label>
+                <select wire:model="pestudioId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Selecciona el plan</option>
+                    @foreach ($pestudios as $pes)
+                        <option value="{{ $pes->id }}">{{ $pes->name }}</option>
+                    @endforeach
+                </select>
+                @error('pestudioId') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre del calendario</label>
+                <input type="text" wire:model.live="calendarName" placeholder="Horario 2025-2026 · Lapso I"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('calendarName') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Duración del bloque (min)</label>
+                <input type="number" wire:model="periodMinutes" min="30" max="120"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Asignaturas por período</label>
+                <input type="number" wire:model="maxSubjectsPerPeriod" min="1" max="10"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('maxSubjectsPerPeriod') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Por defecto: 2. Aplica a las asignaturas marcadas como medio grupo.</p>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Estrategia de generación</label>
+                <select wire:model="strategy" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="optimized">Optimizado</option>
+                    <option value="legacy">Legacy</option>
+                </select>
+                @error('strategy') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Optimizado permite reacomodar medio grupo; Legacy conserva las asignaciones legacy bloqueadas.</p>
+            </div>
+        </div>
+        <x-slot name="footer">
+            <div class="flex items-center gap-3 justify-end">
+                <button wire:click="$set('showCreateCalendarForm', false)"
+                    class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">Cancelar</button>
+                <button wire:click="createCalendar"
+                    class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Crear borrador</button>
+            </div>
+        </x-slot>
+    </x-modal-card>
+
+    {{-- Modal · Editar calendario seleccionado (nombre + duración del bloque;
+         lapso/pestudio son identidad y no se editan, SPEC §10.1). --}}
+    <x-modal-card title="Editar calendario" blur="lg" wire:model="showEditCalendarForm" max-width="md" persistent>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre del calendario</label>
+                <input type="text" wire:model.live="calendarName" placeholder="Horario 2025-2026 · Lapso I"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('calendarName') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Duración del bloque (min)</label>
+                <input type="number" wire:model="periodMinutes" min="30" max="120"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('periodMinutes') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Asignaturas por período</label>
+                <input type="number" wire:model="maxSubjectsPerPeriod" min="1" max="10"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('maxSubjectsPerPeriod') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Por defecto: 2. Aplica a las asignaturas marcadas como medio grupo.</p>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Estrategia de generación</label>
+                <select wire:model="strategy" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="optimized">Optimizado</option>
+                    <option value="legacy">Legacy</option>
+                </select>
+                @error('strategy') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Optimizado permite reacomodar medio grupo; Legacy conserva las asignaciones legacy bloqueadas.</p>
+            </div>
+        </div>
+        <x-slot name="footer">
+            <div class="flex items-center gap-3 justify-end">
+                <button wire:click="$set('showEditCalendarForm', false)"
+                    class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">Cancelar</button>
+                <button wire:click="updateCalendar"
+                    class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar cambios</button>
+            </div>
+        </x-slot>
+    </x-modal-card>
 
     @include('coordinacion.help-timetable-wizard')
 </div>

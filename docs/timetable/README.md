@@ -126,11 +126,26 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
 
 ### Paso 5 · Generar
 
-1. **Previsualizar (dry-run)**: corre el solver sin escribir `timetable_slots`;
-   el resultado se serializa en `timetable_calendars.preview_payload`.
-2. **Confirmar y publicar**: persiste slots, demueve al activo anterior del lapso
+1. **Estrategia de generación**:
+   - **Optimizado** (predeterminado): ejecuta el solver y puede reacomodar
+     lecciones de medio grupo para encontrar una combinación viable.
+   - **Legacy**: reproduce directamente los `timetable_slots` importados,
+     conservando día, franja, grupo y aula. Si el calendario no tiene slots
+     importados, usa el solver como fallback y marca `assignment_source=solver`
+     en el preview.
+2. **Previsualizar (dry-run)**: ejecuta la estrategia seleccionada sin escribir
+   `timetable_slots`; el resultado se serializa en
+   `timetable_calendars.preview_payload`. En Legacy, el origen queda indicado
+   como `assignment_source=legacy_slots`. La importación legacy crea también
+   las lecciones de todas las `Pevaluacion` del pestudio aunque no tengan un
+   slot legacy mapeado; esas lecciones quedan en `unassigned` para poder
+   agregarlas manualmente desde una celda vacía.
+3. **Confirmar y publicar**: persiste slots, demueve al activo anterior del lapso
    a `archived` y activa este (invariante DB `uq_active_lapso`).
-3. Con lecciones sin asignar queda en `draft` con conflictos `type='unassigned'`
+4. En la grilla del preview, cada lección asignada se puede arrastrar a otro
+   período de clase del mismo turno. El movimiento valida docente y sección,
+   excluye recreos y conserva el cambio al confirmar la publicación.
+5. Con lecciones sin asignar queda en `draft` con conflictos `type='unassigned'`
    para resolver a mano en el editor.
 
 ---
@@ -226,14 +241,19 @@ active ──(cierre de lapso / otra alternativa)──▶ archived (terminal, s
 ## 10. Modelo de datos
 
 ```
-timetable_shifts            catálogo global M/T (code único)
-timetable_calendars         N por lapso; status; version; quality_score; preview_payload;
+timetable_shifts            catálogo global M/T (code único); se garantiza con
+                            TimetableShiftsSeeder (M 07:00–12:30 · T 13:00–15:00)
+timetable_calendars         N por lapso · UNO POR PESTUDIO (pestudio_id, FK);
+                            status; version; quality_score; preview_payload;
                             active_lapso_key (generada) + uq_active_lapso
-timetable_periods           por calendario+turno+día (L–V × orden, is_break)
+timetable_periods           por calendario+turno+día (L–V × orden, is_break);
+                            heredan el pestudio del calendario (sin columna)
 timetable_rooms             catálogo global; code único; seccion_id opcional (aula por sección)
 timetable_lessons           1:1 con pevaluacion por calendario; bloques_t/p; room_type_required;
                             priority; locked; shift_id
-timetable_teacher_availability  grilla profesor × período por calendario
+timetable_teacher_availability  por (calendario, profesor, turno, día, bloque)
+                            con start_time/end_time del bloque — rejilla de 60 min
+                            desde el seeder (M 6 bloques 07:00–13:00, T 2 13:00–15:00)
 timetable_slots             resultado: lesson+period (+profesor/seccion/grupo_estable desnormalizados,
                             room_id nullable); únicos (calendar, period, {teacher|section_key|room});
                             is_manual_override; locked
@@ -246,6 +266,26 @@ timetable_substitute_assignments  suplente por slot; pending|confirmed|declined
 
 Reglas de integridad (ADR-TT-002): validación en aplicación (`ConflictValidator`)
 + índices únicos en BD. Los `room_id` NULL no colisionan en MySQL/MariaDB.
+
+### 10.1 Cambios 2026-09-08 (ajustes de arquitectura)
+
+| Cambio | Migración |
+|---|---|
+| `pestudio_id` en `timetable_calendars` (un calendario = un plan) | `2026_09_08_000004` |
+| Disponibilidad por turno·día·bloque (reemplaza period_id) | `2026_09_08_000003` |
+| Índices de soporte (idx_period_cal, idx_avail_cal) | incluidos arriba |
+
+**Comandos de producción** (`docs` en cada comando):
+```bash
+php8.2 artisan migrate --force                              # tablas del módulo
+php8.2 artisan db:seed --class=TimetableShiftsSeeder --force  # turnos M/T (idempotente)
+php8.2 artisan timetable:backfill-horas [--dry-run|--force]   # horas de asignaturas por plan
+php8.2 artisan timetable:import-legacy --lapso=1              # base legacy (un calendario por pestudio)
+php8.2 artisan timetable:create-section-rooms --dry-run     # audita un aula por sección
+php8.2 artisan timetable:create-section-rooms               # crea aulas activas por sección
+```
+La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
+`blueprint/school-timetable/legacy/csv`).
 
 ---
 
@@ -266,9 +306,14 @@ Reglas de integridad (ADR-TT-002): validación en aplicación (`ConflictValidato
 | Job de generación | `app/Jobs/Timetable/GenerateTimetableJob.php` |
 | Jobs de notificación | `app/Jobs/Timetable/{NotifyTimetableChangesJob,NotifySubstituteJob}.php` |
 | Modelos | `app/Models/app/Timetable/Timetable*.php` |
-| Migraciones | `database/migrations/2026_09_07_00000{1,2}_*.php` (ajustes); base en `database/migrations/bck/timetable/` |
+| Migraciones | `database/migrations/2026_09_07_*` y `2026_09_08_*` (ajustes); base en `database/migrations/bck/timetable/` |
 | Import CSV | `app/Imports/TimetableLessonsImport.php` |
+| Comando backfill de horas | `app/Console/Commands/TimetableBackfillHoras.php` |
+| Comando import legacy | `app/Console/Commands/TimetableImportLegacy.php` |
+| Seeder de turnos | `database/seeders/TimetableShiftsSeeder.php` |
+| Config del módulo | `config/timetable.php` (`legacy_csv_dir` vía `TIMETABLE_LEGACY_CSV_DIR`) |
 | PDFs | `app/Http/Controllers/Timetable/TimetablePdfController.php`, vistas `resources/views/pdfs/timetable/` |
+| PDF del preview | `TimetablePdfController::previewSection()` · ruta `timetable.pdf.preview` |
 | Vistas públicas | `app/Http/Controllers/Timetable/TimetablePublicController.php`, `resources/views/timetable/public.blade.php` |
 | Rutas | `routes/web.php` (`timetable.public.*` firmadas; grupos coordinacion/planning/profesors/student/leadership/director) |
 | Menú navbar | `config/menus.php` (grupo *Herramientas* → *Herramientas* de Planning) |
@@ -294,23 +339,35 @@ php8.2 artisan db:seed --class=TimetableTestSeeder
 
 # Log del canal timetable (correlation_id = calendar_id-timestamp)
 tail -f storage/logs/laravel.log | grep timetable
+
+# Importación legacy (opción 3): un CALENDARIO POR PESTUDIO
+php8.2 artisan timetable:import-legacy --lapso=1 --dry-run
+php8.2 artisan timetable:import-legacy --lapso=1
 ```
 
 Cobertura: solver (factible/infactible/locked/timeout/sub-grupos/pool adaptativo),
 ConflictValidator por regla, wizard end-to-end, editor con bloqueo optimista,
 multi-calendario (democión, índice DB, dry-run), publicación (enlace firmado,
-vistas por rol), notificaciones (diff vacío no notifica), suplencias.
+vistas por rol), notificaciones (diff vacío no notifica), suplencias,
+disponibilidad por turno·día·bloque (prefill desde lecciones) y duplicación
+de borradores.
 
 ## 13. FAQ operativa
 
 - **El select "Turno y períodos" está vacío** — el catálogo `timetable_shifts`
-  está vacío: crear los turnos M/T con el formulario "Nuevo turno" del paso 1.
-- **"Los períodos de este turno ya están generados"** — cada turno solo puede
-  generar períodos una vez por calendario; para rehacerlos, elimina el borrador
-  y crea uno nuevo.
+  está vacío: corre `php8.2 artisan db:seed --class=TimetableShiftsSeeder --force`.
+- **"Los períodos de este turno ya están generados"** — usa el botón
+  **Regenerar** del paso 1 (recrea los períodos del turno desde la estructura
+  del pestudio).
 - **"El borrador no tiene horario generado"** — *Activar* exige slots: corre el
   dry-run y confirma la publicación primero.
 - **Lecciones sin asignar** — quedan como conflictos `unassigned` visibles en el
   editor; resuélvelas a mano (drag) o ajusta disponibilidad/aulas y regenera.
 - **"Otro usuario modificó este horario"** — bloqueo optimista (§15): recarga la
   página para tomar la `version` vigente.
+- **T=0/P=0 en lecciones** — la asignatura no tiene `hour_t_week/hour_p_week`;
+  corre `php8.2 artisan timetable:backfill-horas` (mapa normalizado por plan).
+- **El Paso 3 solo muestra un plan** — es el comportamiento correcto: cada
+  calendario es de UN pestudio y el paso filtra las pevaluaciones a ese plan.
+- **Exportar el preview** — en el paso 5, con la vista previa lista, botón
+  «Exportar PDF» sobre la pestaña de la sección activa (ruta `timetable.pdf.preview`).

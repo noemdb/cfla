@@ -10,6 +10,11 @@ namespace App\Services\Timetable\Solver;
  */
 final class SchedulingContext
 {
+    public function __construct(private int $maxSubjectsPerPeriod = 2)
+    {
+        $this->maxSubjectsPerPeriod = max(1, $maxSubjectsPerPeriod);
+    }
+
     /** @var array<string, true> "periodId:profesorId" */
     private array $teacherBusy = [];
 
@@ -22,6 +27,14 @@ final class SchedulingContext
     /** @var array<string, int> "periodId:seccionId" — nº de sub-grupos ocupando el período */
     private array $sectionGroupCount = [];
 
+    /** @var array<string, int> Nº de lecciones de medio grupo en el período */
+    private array $sectionHalfGroupCount = [];
+
+    public function halfGroupLoad(int $periodId, int $seccionId): int
+    {
+        return $this->sectionHalfGroupCount["$periodId:$seccionId"] ?? 0;
+    }
+
     /** @var array<string, true> "periodId:seccionId:grupoId" — sub-grupo ocupado */
     private array $sectionGroupBusy = [];
 
@@ -29,7 +42,7 @@ final class SchedulingContext
      * @param  int|null  $grupoEstableId  null = lección de sección completa.
      *                                    Un valor = sub-grupo (componente de formación).
      */
-    public function isFree(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null): bool
+    public function isFree(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null, bool $isHalfGroup = false): bool
     {
         if (isset($this->teacherBusy["$periodId:$profesorId"])) {
             return false;
@@ -44,9 +57,15 @@ final class SchedulingContext
             return false;
         }
 
+        if ($isHalfGroup) {
+            return ($this->sectionHalfGroupCount["$periodId:$seccionId"] ?? 0) < $this->maxSubjectsPerPeriod;
+        }
+
         if ($grupoEstableId === null) {
-            // Lección de sección completa: requiere que NO haya actividad de la sección.
-            return ($this->sectionGroupCount["$periodId:$seccionId"] ?? 0) === 0;
+            // Lección de sección completa: requiere que NO haya actividad de
+            // la sección, incluidos medios grupos que ya ocupen la celda.
+            return ($this->sectionGroupCount["$periodId:$seccionId"] ?? 0) === 0
+                && ($this->sectionHalfGroupCount["$periodId:$seccionId"] ?? 0) === 0;
         }
 
         // Lección de sub-grupo: solo choca con su propio sub-grupo.
@@ -56,7 +75,7 @@ final class SchedulingContext
     /**
      * @param  int|null  $grupoEstableId  null = lección de sección completa.
      */
-    public function occupy(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null): void
+    public function occupy(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null, bool $isHalfGroup = false): void
     {
         $this->teacherBusy["$periodId:$profesorId"] = true;
 
@@ -64,7 +83,9 @@ final class SchedulingContext
             $this->roomBusy["$periodId:$roomId"] = true;
         }
 
-        if ($grupoEstableId === null) {
+        if ($isHalfGroup) {
+            $this->sectionHalfGroupCount["$periodId:$seccionId"] = ($this->sectionHalfGroupCount["$periodId:$seccionId"] ?? 0) + 1;
+        } elseif ($grupoEstableId === null) {
             $this->sectionWholeBusy["$periodId:$seccionId"] = true;
         } else {
             $this->sectionGroupBusy["$periodId:$seccionId:$grupoEstableId"] = true;
@@ -75,7 +96,7 @@ final class SchedulingContext
     /**
      * @param  int|null  $grupoEstableId  null = lección de sección completa.
      */
-    public function release(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null): void
+    public function release(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null, bool $isHalfGroup = false): void
     {
         unset($this->teacherBusy["$periodId:$profesorId"]);
 
@@ -83,7 +104,12 @@ final class SchedulingContext
             unset($this->roomBusy["$periodId:$roomId"]);
         }
 
-        if ($grupoEstableId === null) {
+        if ($isHalfGroup) {
+            $this->sectionHalfGroupCount["$periodId:$seccionId"] = ($this->sectionHalfGroupCount["$periodId:$seccionId"] ?? 1) - 1;
+            if (($this->sectionHalfGroupCount["$periodId:$seccionId"] ?? 0) <= 0) {
+                unset($this->sectionHalfGroupCount["$periodId:$seccionId"]);
+            }
+        } elseif ($grupoEstableId === null) {
             unset($this->sectionWholeBusy["$periodId:$seccionId"]);
         } else {
             unset($this->sectionGroupBusy["$periodId:$seccionId:$grupoEstableId"]);

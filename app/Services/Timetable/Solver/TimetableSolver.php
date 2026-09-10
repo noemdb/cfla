@@ -45,6 +45,7 @@ final class TimetableSolver
         private array $roomsByType,
         private array $periodMeta = [],
         private int $timeLimitSeconds = 30,
+        private int $maxSubjectsPerPeriod = 2,
     ) {}
 
     public function solve(): SolverResult
@@ -52,7 +53,7 @@ final class TimetableSolver
         $started = microtime(true);
         $deadline = $started + $this->timeLimitSeconds;
 
-        $ctx = new SchedulingContext;
+        $ctx = new SchedulingContext($this->maxSubjectsPerPeriod);
         $assignment = [];
         $unassigned = [];
 
@@ -65,11 +66,11 @@ final class TimetableSolver
             $combo = [];
             $conflict = false;
             foreach ($lesson->lockedPeriodIds as $pId) {
-                if (! $ctx->isFree($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId)) {
+                if (! $ctx->isFree($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
                     $conflict = true;
                     break;
                 }
-                $ctx->occupy($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId);
+                $ctx->occupy($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup);
                 $combo[] = new SlotCandidate($pId, null, false);
             }
 
@@ -132,7 +133,7 @@ final class TimetableSolver
 
         foreach ($this->combinationsOfSize($domain, $lesson) as $combo) {
             foreach ($combo as $slot) {
-                $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId);
+                $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup);
             }
             $assignment[$lesson->lessonId] = $combo;
 
@@ -141,7 +142,7 @@ final class TimetableSolver
             }
 
             foreach ($combo as $slot) {
-                $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId);
+                $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup);
             }
             unset($assignment[$lesson->lessonId]);
         }
@@ -164,18 +165,30 @@ final class TimetableSolver
         $domain = ['t' => [], 'p' => []];
 
         foreach ($base as $periodId) {
-            if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId)) {
+            if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
                 $domain['t'][] = new SlotCandidate($periodId, null, false);
             }
 
             if ($lesson->roomTypeRequired !== null) {
                 foreach ($this->roomsByType[$lesson->roomTypeRequired] ?? [] as $roomId) {
-                    if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, $roomId, $lesson->grupoEstableId)) {
+                    if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, $roomId, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
                         $domain['p'][] = new SlotCandidate($periodId, $roomId, true);
                     }
                 }
-            } elseif ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId)) {
+            } elseif ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
                 $domain['p'][] = new SlotCandidate($periodId, null, true);
+            }
+        }
+
+        if ($lesson->isHalfGroup) {
+            foreach (['t', 'p'] as $blockType) {
+                usort(
+                    $domain[$blockType],
+                    fn (SlotCandidate $a, SlotCandidate $b): int => $ctx->halfGroupLoad(
+                        $b->periodId,
+                        $lesson->seccionId,
+                    ) <=> $ctx->halfGroupLoad($a->periodId, $lesson->seccionId),
+                );
             }
         }
 

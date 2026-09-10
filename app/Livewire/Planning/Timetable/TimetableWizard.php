@@ -14,4 +14,9 @@ class TimetableWizard extends BaseTimetableWizard
     {
         return 'planning.layouts.app';
     }
+
+    public function moduleRoutePrefix(): string
+    {
+        return 'app.planning';
+    }
 }

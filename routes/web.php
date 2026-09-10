@@ -297,6 +297,10 @@ Route::prefix('app')->name('app.')->group(function () {
         Route::get('/timetable/pdf/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'room'])
             ->name('timetable.pdf.room');
 
+        // Vista previa (Paso 5): PDF del preview_payload sin publicar el calendario.
+        Route::get('/timetable/pdf/preview/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewSection'])
+            ->name('timetable.pdf.preview');
+
         // Diagramas de flujo: hub e infografías (documentos estáticos).
         // Cada archivo `docs/infografia/flujo{Studly}.html` se publica como
         // /app/planning/diagram/flow/{slug}. Protegido por el middleware del
@@ -360,6 +364,8 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('timetable.pdf.teacher');
             Route::get('/timetable/pdf/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'room'])
                 ->name('timetable.pdf.room');
+            Route::get('/timetable/pdf/preview/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewSection'])
+                ->name('timetable.pdf.preview');
         });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────

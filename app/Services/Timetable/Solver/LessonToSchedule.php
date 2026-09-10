@@ -25,6 +25,7 @@ final class LessonToSchedule
         public readonly array $lockedPeriodIds = [],
         /** Sub-grupo (componente de formación). null = lección de sección completa. */
         public readonly ?int $grupoEstableId = null,
+        public readonly bool $isHalfGroup = false,
     ) {}
 
     public function blocksNeeded(): int

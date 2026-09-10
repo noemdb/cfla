@@ -97,12 +97,24 @@ Estadísticas                                     app/Services/EducationStatsSer
 
 ## 7. Estado en cfla (verificado 2026-09-08)
 
-- **BD principal (s2627):** las **19 tablas `ei*` ya existen clonadas con DDL idéntico** al legacy (verificado con `SHOW TABLES`/`SHOW CREATE TABLE`) — pero están **vacías (0 filas)**. El clon se hizo por SQL directo, no por migraciones: en `s2627.migrations` no hay ninguna migración `ei*`. La migración de **datos** reales (en `s2526` viva: 274 planificaciones semanales, 1,630 estrategias, 19 proyectos, 24 evaluaciones, 98 posiciones…) debe hacerse con dumps/INSERT…SELECT desde la conexión `s2526` definida en `config/database.php` de cfla.
-- **Código cfla:** no existe nada del módulo (ni modelos `Ei*`, ni rutas, ni middleware `is_inicial`) — todo el código es nuevo, aunque **no así el schema**.
-- **Ecosistema dependiente:** cfla ya tiene `Academy\{Pestudio,Grado,Seccion,Lapso,Profesor,Pensum,Pevaluacion,AreaConocimiento}`, `Entity\{Institucion,Autoridad}` y `Learner\Estudiant` — y el **`pestudio` id 6 = "EDUCACION INICIAL" coincide con el legacy** (mismo id en ambas BDs).
+- **BD principal (s2627):** las **19 tablas `ei*` ya existen clonadas con DDL idéntico** al legacy (verificado con `SHOW TABLES`/`SHOW CREATE TABLE`) — pero están **vacías (0 filas)**. El clon se hizo por SQL directo, no por migraciones: en `s2627.migrations` no hay ninguna migración `ei*`. La migración de **datos** reales debe hacerse con INSERT…SELECT desde la conexión `s2526` definida en `config/database.php` de cfla.
+- **Datos vivos en s2526 (contados 2026-09-08):** 319 planes semanales + 1,696 estrategias (9 profesores, 3 secciones), 6 quincenales + 49 estrategias + 16 resúmenes, 19 proyectos (+322 estrategias, 47 resúmenes, 8 revisiones), 3 especiales (+8 actividades), 24 evaluaciones + 98 posiciones. **`eifinalks`, `eifinalk_expectation`, `eilearningareas` y `eilearningexpectations` están VACÍAS en producción** — el `EILearningSeeder` del legacy (162 inserts, grado_ids 22–24) nunca se ejecutó y el subsistema de informes finales nunca operó (en cfla es greenfield). **Verificación FK:** los ids de profesores/secciones/lapsos usados por los datos existen tal cual en s2627 → INSERT…SELECT directo, sin remapping.
+- **Código cfla:** no existe nada del módulo (ni modelos `Ei*`, ni rutas, ni middleware `is_inicial`) — todo el código es nuevo, aunque **no así el schema**. Plan completo en [`08-adaptacion-cfla.md`](08-adaptacion-cfla.md) (decisiones D1–D7, fases F0–F7, script de migración de datos).
+- **Ecosistema dependiente:** cfla ya tiene `Academy\{Pestudio,Grado,Seccion,Lapso,Profesor,Pensum,Pevaluacion,Peducativo,AreaConocimiento}`, `Entity\{Institucion,Autoridad}` y `Learner\Estudiant` — y el **`pestudio` id 6 = "EDUCACION INICIAL" coincide con el legacy** (grados 22/23/24 = 1ER/2DO/3ER GRUPO en ambas BDs).
 - Mapeo de namespaces legacy→cfla: `App\Models\app\Pescolar\*` → `App\Models\app\Academy\*` · `App\Models\app\Institucion\*` → `App\Models\app\Entity\*` · `App\Models\app\Estudiant` → `App\Models\app\Learner\Estudiant`.
 
 Ver detalle en [`08-adaptacion-cfla.md`](08-adaptacion-cfla.md).
+
+## 8. Hallazgos estructurales globales (resumen ejecutivo)
+
+1. **Dos generaciones de UI:** la 1ª (tablas + overlays + forms compartidos, `livewire/inicial/{table,overlay,forms}/`) está **completamente huérfana** con wiring roto (`close()` inexistente) — verificada por grep en vistas y `app/`. La 2ª (tarjetas + modal único `$modalType`) es la viva.
+2. **Quirk de persistencia del grid de estrategias:** el texto SIEMPRE se guarda en la columna `lunes` (día real en `day_of_week`, momento en `momento_rutina_diaria`) — compensado por accessors en lectura. Preservar hasta refactor.
+3. **El subsistema de informes finales nunca operó** (catálogo de expectativas sin sembrar, tabs de expectativas comentadas en la UI del docente).
+4. **La perspectiva Evaluación NO es solo lectura:** escribe `observacion` (planes) y `recomendacion` (evaluaciones) — la revisión del Coordinador, con regla `min:5`.
+5. **Roles por tabla `rols`** (area/rol/vigencia) con superposición excesiva (cualquier `SISTEMA/ADMINISTRADOR` pasa los 4 checks) — en cfla se sustituye por flags booleanos.
+6. **Typos sistemáticos:** `inicilas` (directorios de vistas de perspectiva), `eiplanningwbks` (ruta wb≠bw), "Actividaes", "Plan de Quincenal", `messeges`, `buttomtext`, `goal_ammount` — normalizar en cfla.
+7. **Bugs de wiring:** `deleteStrategy(id)` vs firma `(day,momento)` (no-op), `edit-strategy` bwk → `loadStrategy()` inexistente, mount desalineado grado→sección en Evaluación, `$pevaluacion` indefinida (l.111) en el modal de eifinalk.
+8. **Escapado:** `as_replace()` con `{!! !!}` (XSS potencial) en formatos y modales — sustituir por `nl2br(e())` (la familia de boletines B ya lo hace bien).
 
 ---
 

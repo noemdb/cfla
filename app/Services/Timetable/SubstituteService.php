@@ -136,14 +136,19 @@ class SubstituteService
     private function candidateConflict(TimetableSlot $slot, Profesor $candidate): string
     {
         // Disponibilidad explícita no disponible → aviso (no bloquea).
-        $availability = \App\Models\app\Timetable\TimetableTeacherAvailability::query()
-            ->where('calendar_id', $slot->calendar_id)
-            ->where('profesor_id', $candidate->id)
-            ->where('period_id', $slot->period_id)
-            ->first();
+        $period = TimetablePeriod::query()->find($slot->period_id);
+        if ($period) {
+            $availability = \App\Models\app\Timetable\TimetableTeacherAvailability::query()
+                ->where('calendar_id', $slot->calendar_id)
+                ->where('profesor_id', $candidate->id)
+                ->where('shift_id', $period->shift_id)
+                ->where('day_of_week', $period->day_of_week)
+                ->where('order_in_day', $period->order_in_day)
+                ->first();
 
-        if ($availability && ! $availability->is_available) {
-            return 'Sin disponibilidad declarada en ese período.';
+            if ($availability && ! $availability->is_available) {
+                return 'Sin disponibilidad declarada en ese bloque.';
+            }
         }
 
         return '';

@@ -17,6 +17,7 @@ class TimetableCalendarFactory extends Factory
             'name' => 'Horario ' . fake()->year(),
             'status' => TimetableCalendar::STATUS_DRAFT,
             'period_minutes' => 45,
+            'strategy' => TimetableCalendar::STRATEGY_OPTIMIZED,
             'version' => 0,
         ];
     }

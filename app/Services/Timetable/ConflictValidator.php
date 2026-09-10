@@ -68,18 +68,23 @@ class ConflictValidator
             $reasons[] = 'El docente ya tiene clase en ese período.';
         }
 
-        // Sección doble: una lección de sección completa choca con CUALQUIER
-        // actividad de la sección; una lección de sub-grupo solo choca con una
-        // lección de sección completa o con su mismo sub-grupo (paralelo OK).
+        // Una pareja de medio grupo puede compartir la celda; la sección
+        // completa y los subgrupos conservan sus restricciones originales.
         $sectionQuery = $conflictQuery($calendarId, $periodId, $ignoreSlotId)
             ->where('seccion_id', $seccionId);
 
-        $sectionConflict = $grupoEstableId === null
-            ? $sectionQuery->exists()
-            : $sectionQuery->where(function ($q) use ($grupoEstableId) {
-                $q->whereNull('grupo_estable_id')
-                    ->orWhere('grupo_estable_id', $grupoEstableId);
-            })->exists();
+        if ($lesson->is_half_group) {
+            $maxSubjectsPerPeriod = max(1, (int) ($lesson->calendar?->max_subjects_per_period ?? 2));
+            $sectionConflict = $sectionQuery->where('is_half_group', false)->exists()
+                || $sectionQuery->where('is_half_group', true)->count() >= $maxSubjectsPerPeriod;
+        } else {
+            $sectionConflict = $grupoEstableId === null
+                ? $sectionQuery->exists()
+                : $sectionQuery->where(function ($q) use ($grupoEstableId) {
+                    $q->whereNull('grupo_estable_id')
+                        ->orWhere('grupo_estable_id', $grupoEstableId);
+                })->exists();
+        }
 
         if ($sectionConflict) {
             $reasons[] = 'La sección ya tiene clase en ese período.';
@@ -92,15 +97,21 @@ class ConflictValidator
             $reasons[] = 'El aula ya está ocupada en ese período.';
         }
 
-        // Disponibilidad del docente en ese período (si hay fila explícita).
-        $availability = \App\Models\app\Timetable\TimetableTeacherAvailability::query()
-            ->where('calendar_id', $calendarId)
-            ->where('profesor_id', $profesorId)
-            ->where('period_id', $periodId)
-            ->first();
+        // Disponibilidad del docente en ese bloque (turno · día · bloque).
+        $period = TimetablePeriod::query()->find($periodId);
+        $availability = null;
+        if ($period) {
+            $availability = \App\Models\app\Timetable\TimetableTeacherAvailability::query()
+                ->where('calendar_id', $calendarId)
+                ->where('profesor_id', $profesorId)
+                ->where('shift_id', $period->shift_id)
+                ->where('day_of_week', $period->day_of_week)
+                ->where('order_in_day', $period->order_in_day)
+                ->first();
+        }
 
         if ($availability && ! $availability->is_available) {
-            $reasons[] = 'El docente no está disponible en ese período.';
+            $reasons[] = 'El docente no está disponible en ese bloque.';
         }
 
         return [

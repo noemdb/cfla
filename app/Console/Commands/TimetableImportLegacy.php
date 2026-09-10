@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
  *
  * Fuentes (blueprint/school-timetable/legacy/csv/):
  *   legacy_horario_secciones.csv  slots por sección (575)
- *   legacy_estructura_horaria.csv franjas/bloques (17, referencia)
+ *   legacy_estructura_horaria.csv franjas/bloques canónicas por nivel/turno
  *   legacy_area_docente.csv       firma área→docente (132) para desambiguar
  *
  * Estrategia de mapeo (ver --dry-run para el audit):
@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\DB;
  * de 40min por día L-V, shift M (07:xx) y T (13:xx) existentes.
  *
  * Uso:
- *   php8.2 artisan timetable:import-legacy --lapso=1 --dry-run
+ *   php8.2 artisan timetable:import-legacy --lapso=1 --dry-run --force
  *   php8.2 artisan timetable:import-legacy --lapso=1
  */
 class TimetableImportLegacy extends Command
@@ -44,7 +44,8 @@ class TimetableImportLegacy extends Command
         {--calendar-name= : Nombre del calendario borrador (default: "Horario 2025-2026 (legacy)")}
         {--csv-dir= : Directorio con los CSVs (default: blueprint/school-timetable/legacy/csv)}
         {--dry-run : Solo audit report, no persiste}
-        {--force : Permite ejecutar sin --dry-run aunque haya errores de mapeo}';
+        {--force : Permite ejecutar sin --dry-run aunque haya errores de mapeo}
+        {--replace : Elimina los borradores legacy previos del lapso (mismo nombre base) antes de importar}';
 
     protected $description = 'Importa el horario legacy 2025-2026 (CSVs del ETL) como calendario borrador con slots locked (opción 3)';
 
@@ -116,7 +117,7 @@ class TimetableImportLegacy extends Command
     {
         $lapsoId = (int) $this->option('lapso');
         $dryRun = (bool) $this->option('dry-run');
-        $csvDir = $this->option('csv-dir') ?: base_path('blueprint/school-timetable/legacy/csv');
+        $csvDir = $this->option('csv-dir') ?: (string) config('timetable.legacy_csv_dir');
 
         $slotsFile = "$csvDir/legacy_horario_secciones.csv";
         if (! is_file($slotsFile)) {
@@ -125,9 +126,29 @@ class TimetableImportLegacy extends Command
             return self::FAILURE;
         }
 
+        $estructura = $this->loadEstructura();
+        $overlaps = $this->findStructureOverlaps($estructura);
+        if ($overlaps !== []) {
+            $this->error('La estructura horaria contiene franjas solapadas por nivel y turno.');
+            $this->table(
+                ['Nivel', 'Turno', 'Franja anterior', 'Franja solapada'],
+                $overlaps,
+            );
+
+            return self::FAILURE;
+        }
+
         $slots = $this->readCsv($slotsFile);
         $areaDocente = $this->readCsv("$csvDir/legacy_area_docente.csv");
         $this->info('CSVs: '.count($slots).' slots · '.count($areaDocente).' firmas área→docente');
+
+        // Los turnos M/T son catálogo compartido: en producción se garantizan con
+        // el seeder. Persistir sin turnos terminaría descartando slots.
+        if (! $dryRun && ! TimetableShift::where('code', 'M')->exists()) {
+            $this->error('Falta el turno M (catálogo). Ejecuta: php8.2 artisan db:seed --class=TimetableShiftsSeeder --force');
+
+            return self::FAILURE;
+        }
 
         $pevs = $this->loadPevs($lapsoId);
         $this->allPevs = $pevs;
@@ -152,10 +173,31 @@ class TimetableImportLegacy extends Command
             return self::FAILURE;
         }
 
-        $calendar = $this->persistCalendar($lapsoId, $audit);
-        $this->info('Calendario creado: id '.$calendar->id.' · '.$calendar->name);
-        $this->info('Lecciones: '.TimetableLesson::where('calendar_id', $calendar->id)->count());
-        $this->info('Slots: '.TimetableSlot::where('calendar_id', $calendar->id)->count());
+        // --replace: elimina los borradores legacy previos del lapso antes de
+        // importar (idempotencia: re-ejecutar no acumula duplicados).
+        if ($this->option('replace')) {
+            $baseName = $this->option('calendar-name') ?: 'Horario 2025-2026 (legacy)';
+            $previos = TimetableCalendar::query()
+                ->forLapso($lapsoId)
+                ->draft()
+                ->where('name', 'like', $baseName.'%')
+                ->get();
+
+            foreach ($previos as $previo) {
+                $previo->deleteDraft();
+                $this->warn('Borrador previo eliminado (--replace): id '.$previo->id.' · '.$previo->name);
+            }
+
+            if ($previos->isNotEmpty()) {
+                $this->info('Borradores legacy previos eliminados: '.$previos->count());
+            }
+        }
+
+        $calendars = $this->persistCalendar($lapsoId, $audit);
+        foreach ($calendars as $calendar) {
+            $this->info('Calendario creado: id '.$calendar->id.' · '.$calendar->name);
+            $this->info('  Lecciones: '.TimetableLesson::where('calendar_id', $calendar->id)->count().' · slots: '.TimetableSlot::where('calendar_id', $calendar->id)->count());
+        }
 
         return self::SUCCESS;
     }
@@ -184,7 +226,7 @@ class TimetableImportLegacy extends Command
     {
         $rows = DB::select(
             "SELECT pe.id, pe.seccion_id, pe.profesor_id, pe.grupo_estable_id,
-                    s.name sec_nombre, g.code_sm grado, p2.name pestudio,
+                    s.name sec_nombre, g.code_sm grado, p2.name pestudio, p2.id pestudio_id,
                     a.name asig, ge.name grupo_estable,
                     a.hour_t_week hour_t_week, a.hour_p_week hour_p_week,
                     CONCAT(pr.name,' ',pr.lastname) docente
@@ -578,31 +620,67 @@ class TimetableImportLegacy extends Command
     // Persistencia
     // ─────────────────────────────────────────────────────────────
 
-    private function persistCalendar(int $lapsoId, array $audit): TimetableCalendar
+    /**
+     * Crea UN calendario POR PESTUDIO (el pestudio se asocia al calendario, no al
+     * período). Cada calendario genera los períodos de la estructura de su nivel.
+     *
+     * @return array<int, TimetableCalendar>
+     */
+    private function persistCalendar(int $lapsoId, array $audit): array
     {
-        $name = $this->option('calendar-name') ?: 'Horario 2025-2026 (legacy)';
+        $baseName = $this->option('calendar-name') ?: 'Horario 2025-2026 (legacy)';
+        $shiftM = TimetableShift::where('code', 'M')->first();
+        $shiftT = TimetableShift::where('code', 'T')->first();
 
-        return DB::transaction(function () use ($lapsoId, $name, $audit) {
-            $calendar = TimetableCalendar::create([
-                'lapso_id' => $lapsoId,
-                'name' => $name,
-                'period_minutes' => 40,
-                'status' => TimetableCalendar::STATUS_DRAFT,
-                'version' => 0,
-            ]);
+        return DB::transaction(function () use ($lapsoId, $baseName, $audit, $shiftM, $shiftT) {
+            $calendars = [];
 
-            $shiftM = TimetableShift::where('code', 'M')->first();
-            $shiftT = TimetableShift::where('code', 'T')->first();
-            $periods = $this->buildPeriods($calendar, $shiftM, $shiftT, $audit);
-
-            $lessonByPev = [];
-            $skipped = 0;
-            $conflicts = [];
-            $periodMinutes = max(1, (int) $calendar->period_minutes);
+            $byPestudio = [];
             foreach ($audit['ok'] as $m) {
-                $pev = $m['pev'];
-                $turno = $m['periodo']['turno'];
-                if (! isset($lessonByPev[$pev->id])) {
+                $pid = (int) $m['pev']->pestudio_id;
+                $byPestudio[$pid]['name'] = (string) $m['pev']->pestudio;
+                $byPestudio[$pid]['items'][] = $m;
+            }
+            foreach ($this->allPevs as $pev) {
+                $pid = (int) $pev->pestudio_id;
+                if (! isset($byPestudio[$pid])) {
+                    $byPestudio[$pid] = [
+                        'name' => (string) $pev->pestudio,
+                        'items' => [],
+                    ];
+                }
+            }
+
+            foreach ($byPestudio as $pid => $group) {
+                $calendar = TimetableCalendar::create([
+                    'lapso_id' => $lapsoId,
+                    'pestudio_id' => $pid,
+                    'name' => $baseName.' · '.$group['name'],
+                    'period_minutes' => 60,
+                    'strategy' => TimetableCalendar::STRATEGY_LEGACY,
+                    'status' => TimetableCalendar::STATUS_DRAFT,
+                    'version' => 0,
+                ]);
+
+                $nivel = $this->levelForPestudio($group['name']);
+                $periods = $this->buildPeriods($calendar, $shiftM, $shiftT, $nivel);
+
+                $lessonByPev = [];
+                $skipped = 0;
+                $conflicts = [];
+
+                // También se crean las evaluaciones sin slot legacy. Quedan
+                // disponibles como "no asignadas" para completarlas en el
+                // preview o el editor manual.
+                $turnoPorPev = [];
+                foreach ($group['items'] as $m) {
+                    $turnoPorPev[(int) $m['pev']->id] = $m['periodo']['turno'];
+                }
+                foreach ($this->allPevs as $pev) {
+                    if ((int) $pev->pestudio_id !== (int) $pid) {
+                        continue;
+                    }
+                    $turno = $turnoPorPev[(int) $pev->id] ?? 'M';
                     $shift = $turno === 'T' ? $shiftT : $shiftM;
                     if (! $shift) {
                         $skipped++;
@@ -613,114 +691,212 @@ class TimetableImportLegacy extends Command
                         'calendar_id' => $calendar->id,
                         'pevaluacion_id' => $pev->id,
                         'shift_id' => $shift->id,
-                        // Bloques derivados de Asignatura.hour_t_week/hour_p_week
-                        // (§4: ceil(horas × 60 / period_minutes)) para que la base
-                        // sea coherente con la carga del pensum y pueda regenerarse.
-                        'weekly_blocks_t' => (int) ceil(((int) ($pev->hour_t_week ?? 0)) * 60 / $periodMinutes),
-                        'weekly_blocks_p' => (int) ceil(((int) ($pev->hour_p_week ?? 0)) * 60 / $periodMinutes),
+                        'weekly_blocks_t' => (int) ceil(((int) ($pev->hour_t_week ?? 0)) * 60 / 60),
+                        'weekly_blocks_p' => (int) ceil(((int) ($pev->hour_p_week ?? 0)) * 60 / 60),
                         'room_type_required' => null,
                         'priority' => 0,
-                        'locked' => true,
+                        'locked' => isset($turnoPorPev[(int) $pev->id]),
                     ]);
                 }
-                $periodKey = $turno.'|'.$m['periodo']['inicio'].'-'.$m['periodo']['fin'];
-                // Los bloques legacy con 2 asignaturas (compound) ocupan sub-períodos
-                // distintos del bloque; el resto usa el período por defecto de la franja.
-                $dia = $m['periodo']['dia'];
-                $periodId = ! empty($m['compound'])
-                    ? ($periods[$periodKey]['subPeriods'][$m['sub_index']][$dia] ?? null)
-                    : ($periods[$periodKey]['ids'][$dia] ?? null);
-                if (! $periodId) {
-                    $this->warn('slot sin período: '.$m['slot']['seccion'].' '.$m['slot']['materia'].' '.$m['periodo']['inicio']);
-                    $skipped++;
 
-                    continue;
+                foreach ($group['items'] as $m) {
+                    $pev = $m['pev'];
+                    $turno = $m['periodo']['turno'];
+                    $dia = $m['periodo']['dia'];
+                    $subStartMin = $this->toMin($m['periodo']['inicio'])
+                        + (! empty($m['compound']) ? (($m['sub_index'] ?? 0) * 40) : 0);
+                    $periodId = $this->periodIdFor($periods, $turno, $dia, $subStartMin);
+                    if (! $periodId) {
+                        $this->warn('slot sin período: '.$m['slot']['seccion'].' '.$m['slot']['materia'].' '.$m['periodo']['inicio']);
+                        $skipped++;
+
+                        continue;
+                    }
+                    try {
+                        TimetableSlot::create([
+                            'calendar_id' => $calendar->id,
+                            'lesson_id' => $lessonByPev[$pev->id]->id,
+                            'period_id' => $periodId,
+                            'profesor_id' => $pev->profesor_id,
+                            'seccion_id' => $pev->seccion_id,
+                            'grupo_estable_id' => $pev->grupo_estable_id,
+                            'room_id' => null,
+                            'locked' => true,
+                            'is_manual_override' => true,
+                        ]);
+                    } catch (\Illuminate\Database\QueryException $e) {
+                        $skipped++;
+                        $conflictKey = str_contains((string) $e->getMessage(), 'uq_slot_teacher')
+                            ? 'docente doble'
+                            : (str_contains((string) $e->getMessage(), 'uq_slot_room')
+                                ? 'aula doble'
+                                : (str_contains((string) $e->getMessage(), 'uq_slot_section') ? 'sección doble' : 'conflicto'));
+                        $conflicts[$conflictKey] = ($conflicts[$conflictKey] ?? 0) + 1;
+                        $this->warn("slot omitido ($conflictKey): {$m['slot']['seccion']} {$m['slot']['materia']} {$m['periodo']['inicio']}");
+                    }
                 }
-                try {
-                    TimetableSlot::create([
-                        'calendar_id' => $calendar->id,
-                        'lesson_id' => $lessonByPev[$pev->id]->id,
-                        'period_id' => $periodId,
-                        'profesor_id' => $pev->profesor_id,
-                        'seccion_id' => $pev->seccion_id,
-                        'grupo_estable_id' => $pev->grupo_estable_id,
-                        // El legacy no define aulas: se importa sin aula dedicada
-                        // (room_id=NULL no colisiona en uq_slot_room y no bloquea
-                        // la gestión de aulas). La coordinación asigna aula en el editor.
-                        'room_id' => null,
-                        'locked' => true,
-                        'is_manual_override' => true,
-                    ]);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    // Regla dura a nivel BD (docente/aula/sección doble): el slot
-                    // legacy entra en conflicto -> se omite y se reporta para
-                    // resolverlo a mano en el editor (opción 3 = base editable).
-                    $skipped++;
-                    $conflictKey = str_contains((string) $e->getMessage(), 'uq_slot_teacher')
-                        ? 'docente doble'
-                        : (str_contains((string) $e->getMessage(), 'uq_slot_room')
-                            ? 'aula doble'
-                            : (str_contains((string) $e->getMessage(), 'uq_slot_section') ? 'sección doble' : 'conflicto'));
-                    $conflicts[$conflictKey] = ($conflicts[$conflictKey] ?? 0) + 1;
-                    $this->warn("slot omitido ($conflictKey): {$m['slot']['seccion']} {$m['slot']['materia']} {$m['periodo']['inicio']}");
+                if ($skipped) {
+                    $detalle = array_map(fn ($k, $v) => "{$k}×{$v}", array_keys($conflicts), $conflicts);
+                    $this->warn("{$skipped} slots omitidos en {$group['name']} (".(implode(', ', $detalle) ?: 'sin shift/período').'). Revisa en el editor.');
                 }
-            }
-            if ($skipped) {
-                $detalle = array_map(fn ($k, $v) => "{$k}×{$v}", array_keys($conflicts), $conflicts);
-                $this->warn("{$skipped} slots omitidos (".(implode(', ', $detalle) ?: 'sin shift/período').'). Revisa en el editor.');
+
+                $calendars[] = $calendar;
             }
 
-            return $calendar;
+            return $calendars;
         });
     }
 
     /**
-     * Franjas legacy únicas por turno, descompuestas en períodos de 40min
-     * por día L-V. Un bloque legacy de 80min produce DOS períodos y el slot
-     * se asigna al PRIMERO (la lección cubre el bloque completo).
+     * Períodos del calendario (que es DE UN pestudio): los bloques del nivel de
+     * ese pestudio (del legacy legacy_estructura_horaria.csv), con tiempos
+     * EXACTOS y recreos is_break=true.
+     *
+     * @return array<string, list<array{start:int, end:int, is_break:bool, ids:array<int,int>}>> turno => frames
      */
-    private function buildPeriods(TimetableCalendar $calendar, ?TimetableShift $shiftM, ?TimetableShift $shiftT, array $audit): array
+    private function buildPeriods(TimetableCalendar $calendar, ?TimetableShift $shiftM, ?TimetableShift $shiftT, string $nivel): array
     {
-        $franjas = [];
-        foreach ($audit['ok'] as $m) {
-            $p = $m['periodo'];
-            $franjas[$p['turno']][$p['inicio'].'-'.$p['fin']] = true;
-        }
+        $estructura = $this->loadEstructura();
         $periods = [];
+
         foreach (['M' => $shiftM, 'T' => $shiftT] as $turno => $shift) {
             if (! $shift) {
                 continue;
             }
-            $list = array_keys($franjas[$turno] ?? []);
-            usort($list, fn ($a, $b) => strcmp(explode('-', $a)[0], explode('-', $b)[0]));
-            $ordenGlobal = 1;
-            foreach ($list as $rango) {
-                [$h1, $h2] = explode('-', $rango);
-                $min1 = $this->toMin($h1);
-                $min2 = $this->toMin($h2);
-                for ($start = $min1, $orden = $ordenGlobal; $start < $min2; $start += 40, $orden++) {
-                    $end = min($start + 40, $min2);
-                    $ids = [];
-                    foreach (range(1, 5) as $dia) {
-                        $ids[$dia] = TimetablePeriod::create([
-                            'calendar_id' => $calendar->id,
-                            'shift_id' => $shift->id,
-                            'day_of_week' => $dia,
-                            'order_in_day' => $orden,
-                            'start_time' => $this->fmt($start),
-                            'end_time' => $this->fmt($end),
-                            'is_break' => false,
-                        ])->id;
-                    }
-                    $periods[$turno.'|'.$h1.'-'.$h2]['ids'] = $ids;
-                    $periods[$turno.'|'.$h1.'-'.$h2]['sub'][$orden] = $ids; // sub-períodos de la franja
-                    $periods[$turno.'|'.$h1.'-'.$h2]['subPeriods'][] = $ids; // en orden (0..n-1)
+            $franjas = $estructura[$nivel][$turno] ?? [];
+            if ($franjas === []) {
+                continue;
+            }
+            $order = 1;
+            foreach ($franjas as [$start, $end, $isBreak]) {
+                $ids = [];
+                foreach (range(1, 5) as $dia) {
+                    $ids[$dia] = TimetablePeriod::create([
+                        'calendar_id' => $calendar->id,
+                        'shift_id' => $shift->id,
+                        'day_of_week' => $dia,
+                        'order_in_day' => $order,
+                        'start_time' => $this->fmt($start),
+                        'end_time' => $this->fmt($end),
+                        'is_break' => $isBreak,
+                    ])->id;
                 }
-                $ordenGlobal = $orden; // continúa el orden entre franjas contiguas
+                $periods[$turno][] = ['start' => $start, 'end' => $end, 'is_break' => $isBreak, 'ids' => $ids];
+                $order++;
             }
         }
 
         return $periods;
+    }
+
+    /** Id del período NO-recreo (turno + día) cuyo bloque contiene el minuto dado. */
+    private function periodIdFor(array $periods, string $turno, int $dia, int $minute): ?int
+    {
+        foreach ($periods[$turno] ?? [] as $frame) {
+            if ($frame['is_break']) {
+                continue;
+            }
+            if ($minute >= $frame['start'] && $minute < $frame['end']) {
+                return $frame['ids'][$dia] ?? null;
+            }
+        }
+
+        return null;
+    }
+
+    /** Nivel del legacy (estructura) para un pestudio. */
+    private function levelForPestudio(string $pestudioName): string
+    {
+        $n = $this->norm($pestudioName);
+        if (str_contains($n, 'PRIMARIA') || str_contains($n, 'INICIAL')) {
+            return 'PRIMARIA';
+        }
+
+        return 'MEDIA GENERAL';
+    }
+
+    /**
+     * Estructura horaria del legacy por nivel+turno: lista de franjas ordenadas
+     * [startMin, endMin, esReceso]. De legacy_estructura_horaria.csv.
+     *
+     * @return array<string, array<string, list<array{0:int,1:int,2:bool}>>>
+     */
+    private function loadEstructura(): array
+    {
+        $path = rtrim((string) ($this->option('csv-dir') ?: config('timetable.legacy_csv_dir')), '/').'/legacy_estructura_horaria.csv';
+        if (! is_file($path)) {
+            return [];
+        }
+
+        $rows = [];
+        $h = fopen($path, 'r');
+        $header = fgetcsv($h);
+        while (($r = fgetcsv($h)) !== false) {
+            if (count($r) !== count($header)) {
+                continue;
+            }
+            $rows[] = array_combine($header, $r);
+        }
+        fclose($h);
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[$r['nivel']][$r['turno']][] = [
+                $this->toMin($r['hora_inicio']),
+                $this->toMin($r['hora_fin']),
+                $r['es_receso'] === 'true',
+            ];
+        }
+        foreach ($out as $nivel => $turnos) {
+            foreach ($turnos as $turno => $franjas) {
+                usort($franjas, fn ($a, $b) => $a[0] <=> $b[0]);
+                $out[$nivel][$turno] = $franjas;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Detecta franjas que se cruzan dentro de un mismo nivel y turno.
+     *
+     * @param  array<string, array<string, list<array{0:int,1:int,2:bool}>>>  $estructura
+     * @return list<array{0:string,1:string,2:string,3:string}>
+     */
+    private function findStructureOverlaps(array $estructura): array
+    {
+        $overlaps = [];
+
+        foreach ($estructura as $nivel => $turnos) {
+            foreach ($turnos as $turno => $franjas) {
+                $previous = null;
+
+                foreach ($franjas as $franja) {
+                    [$start, $end] = $franja;
+
+                    if ($previous !== null && $start < $previous[1]) {
+                        $overlaps[] = [
+                            $nivel,
+                            $turno,
+                            $this->formatFrame($previous),
+                            $this->formatFrame($franja),
+                        ];
+                    }
+
+                    if ($previous === null || $end > $previous[1]) {
+                        $previous = $franja;
+                    }
+                }
+            }
+        }
+
+        return $overlaps;
+    }
+
+    /** @param array{0:int,1:int,2:bool} $franja */
+    private function formatFrame(array $franja): string
+    {
+        return $this->fmt($franja[0]).'–'.$this->fmt($franja[1]).($franja[2] ? ' (recreo)' : ' (clase)');
     }
 
     private function toMin(string $h): int
