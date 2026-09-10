@@ -2309,10 +2309,13 @@ class TimetableWizard extends Component
 
         $grid = [];
         foreach ($lessons as $lesson) {
-            $slots = $assignment[(string) $lesson->id] ?? [];
+            $slots = $assignment[(string) $lesson->id]
+                ?? $assignment[(int) $lesson->id]
+                ?? [];
 
             foreach ($slots as $slot) {
-                $period = $periodMap->get($slot['period_id']);
+                $periodId = is_array($slot) ? ($slot['period_id'] ?? null) : null;
+                $period = $periodMap->get((int) $periodId);
                 if (! $period) {
                     continue;
                 }
@@ -2710,7 +2713,7 @@ class TimetableWizard extends Component
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
             ->whereIn('id', $ids)
-            ->with('shift', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion', 'pevaluacion.profesor')
+            ->with('shift', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor')
             ->get();
 
         $periods = TimetablePeriod::query()
@@ -2780,6 +2783,8 @@ class TimetableWizard extends Component
                 $pev = $lesson->pevaluacion;
                 $subject = $pev?->pensum?->asignatura?->name ?? 'Sin asignatura';
                 $section = $pev?->seccion?->name ?? 'Sin sección';
+                $sectionId = (int) ($pev?->seccion_id ?? 0);
+                $grade = $pev?->seccion?->grado?->name ?? 'Sin grado';
                 $teacher = trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')) ?: 'Sin docente';
                 $blocks = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;
                 $shiftPeriods = $periodsByShift->get($lesson->shift_id, collect());
@@ -2792,7 +2797,6 @@ class TimetableWizard extends Component
                 $candidatePeriods = $shiftPeriods->filter(fn ($period) => ! $blockedKeys->has(
                     "{$period->shift_id}-{$period->day_of_week}-{$period->order_in_day}"
                 ));
-                $sectionId = (int) ($pev?->seccion_id ?? 0);
                 $groupId = $pev?->grupo_estable_id ? (int) $pev->grupo_estable_id : null;
                 $sectionBlocked = 0;
                 $teacherOccupied = 0;
@@ -2890,6 +2894,8 @@ class TimetableWizard extends Component
                 return [
                     'subject' => $subject,
                     'section' => $section,
+                    'section_id' => $sectionId,
+                    'grade' => $grade,
                     'teacher' => $teacher,
                     'shift' => $lesson->shift?->code ?? '—',
                     'blocks_t' => (int) $lesson->weekly_blocks_t,
@@ -2905,12 +2911,16 @@ class TimetableWizard extends Component
                     'actions' => $actions,
                 ];
             })
-            ->groupBy(fn (array $item) => $item['teacher'])
+            ->groupBy(fn (array $item) => $item['section_id'])
             ->map(fn ($group) => [
+                'section_id' => (int) $group->first()['section_id'],
+                'grade' => $group->first()['grade'],
+                'section' => $group->first()['section'],
                 'count' => $group->count(),
                 'items' => $group->values()->all(),
             ])
-            ->sortByDesc('count')
+            ->sortBy(fn ($group) => $group['grade'].' '.$group['section'])
+            ->keyBy('section_id')
             ->all();
     }
 

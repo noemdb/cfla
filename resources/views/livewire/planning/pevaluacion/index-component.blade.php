@@ -245,6 +245,11 @@
                                 <span class="block text-[10px] text-gray-500 mt-0.5">
                                     {{ $pevaluacion->seccion?->grado?->name ?? '?' }} - Secc. {{ $pevaluacion->seccion?->name ?? '?' }}
                                 </span>
+                                @if($pevaluacion->grupo_estable_id)
+                                    <span class="block text-[10px] text-amber-400/90 mt-0.5">
+                                        Grupo: {{ $pevaluacion->grupoEstable?->name ?? '—' }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-4 py-2 hidden lg:table-cell">
                                 <span class="text-sm text-gray-300">{{ $pevaluacion->lapso?->name ?? '—' }}</span>
@@ -444,6 +449,11 @@
                                     {{ $pevaluacion->pensum?->pestudio?->code ?? '—' }}
                                 </span>
                                 <span class="text-[10px] text-gray-400">{{ $pevaluacion->lapso?->name ?? '—' }}</span>
+                                @if($pevaluacion->grupo_estable_id)
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded-md border border-amber-500/20">
+                                        {{ $pevaluacion->grupoEstable?->name ?? 'Grupo' }}
+                                    </span>
+                                @endif
                                 @if($lapsoClosed)
                                     <span class="text-[10px] text-red-400 font-medium">Cerrado</span>
                                 @endif

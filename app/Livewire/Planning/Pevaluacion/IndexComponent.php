@@ -101,7 +101,7 @@ class IndexComponent extends Component
     {
         $query = Pevaluacion::with([
                 'profesor', 'lapso', 'seccion', 'pensum.asignatura', 'pensum.pestudio',
-                'pensum.grado',
+                'pensum.grado', 'grupoEstable',
             ])
             ->withCount('activities')
             ->withPlanningModule();

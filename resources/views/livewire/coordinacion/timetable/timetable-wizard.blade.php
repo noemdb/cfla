@@ -1212,27 +1212,38 @@
                         </div>
                     </div>
 
-                    @if ($generationConflictGroups)
-                        <div class="mt-4 p-4 rounded-lg bg-red-500/5 border border-red-500/30">
+                    @php
+                        $activeConflictGroup = $generationConflictGroups[(int) ($activeSeccionId ?? 0)]
+                            ?? collect($generationConflictGroups)->first();
+                    @endphp
+                    {{-- @if ($activeConflictGroup)
                             <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
                                 <div>
-                                    <div class="text-[10px] font-bold uppercase tracking-widest text-red-500">Conflictos accionables</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-red-500">
+                                        Conflictos accionables · {{ $activeConflictGroup['grade'] }} · Sección {{ $activeConflictGroup['section'] }} · #{{ $activeConflictGroup['section_id'] }}
+                                    </div>
                                     <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
                                         Revisa la causa probable y aplica la recomendación antes de volver a previsualizar.
                                     </p>
                                 </div>
-                                <span class="px-2 py-1 rounded-md bg-red-500/10 text-[10px] font-bold text-red-500">
-                                    {{ count($preview['unassigned'] ?? []) }} pendiente(s)
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <a href="#timetable-preview-grid"
+                                        class="px-2 py-1 rounded-md bg-emerald-500/10 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                        Ver horario
+                                    </a>
+                                    <span class="px-2 py-1 rounded-md bg-red-500/10 text-[10px] font-bold text-red-500">
+                                        {{ $activeConflictGroup['count'] }} pendiente(s)
+                                    </span>
+                                </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                @foreach ($generationConflictGroups as $teacher => $group)
-                                    <details class="rounded-lg border border-red-500/20 bg-white/5 px-3 py-2" @if ($loop->first) open @endif>
+                                @foreach (collect($activeConflictGroup['items'])->groupBy('teacher') as $teacher => $items)
+                                    <details class="rounded-lg border border-red-500/20 bg-white/5 px-3 py-2">
                                         <summary class="cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-200">
-                                            {{ $teacher }} · {{ $group['count'] }} sin asignar
+                                            {{ $teacher }} · {{ $items->count() }} sin asignar
                                         </summary>
                                         <div class="mt-3 space-y-3">
-                                            @foreach ($group['items'] as $item)
+                                            @foreach ($items as $item)
                                                 <div class="rounded-lg border border-white/10 bg-black/5 dark:bg-white/[0.03] p-3">
                                                     <div class="flex flex-wrap items-start justify-between gap-2">
                                                         <div>
@@ -1268,9 +1279,8 @@
                                                                 @if (($item['section_blocked_periods'] ?? 0) || ($item['teacher_occupied_periods'] ?? 0)) · @endif
                                                                 Aula no disponible: {{ $item['room_unavailable_periods'] }}
                                                             @endif
-                                                        </div>
+                                                        @endif
                                                     @endif
-                                                    </div>
                                                     <ul class="mt-2 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
                                                         @foreach ($item['actions'] as $action)
                                                             <li class="flex gap-1.5"><span class="text-emerald-500">→</span><span>{{ $action }}</span></li>
@@ -1283,7 +1293,7 @@
                                 @endforeach
                             </div>
                         </div>
-                    @endif
+                    @endif --}}
 
                     {{-- Checklist pre-publicación: revisar antes de «Confirmar y publicar» --}}
                     @php $checklist = $this->publishChecklist(); @endphp
@@ -1356,7 +1366,7 @@
                                         <button wire:click="$set('activeSeccionId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                             class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                             {{ (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
-                                            Sección {{ $opt['name'] }}
+                                            {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
                                         </button>
                                     @endforeach
                                 </nav>
@@ -1364,7 +1374,11 @@
                         @endif
 
                         @php $secGrid = $sectionPreviewGrid ?? []; @endphp
+                        @if ($activeConflictGroup)
+                            @include('livewire.coordinacion.timetable.partials.preview-conflicts', ['activeConflictGroup' => $activeConflictGroup])
+                        @endif
                         @if ($preview && $periodsList->isNotEmpty())
+                            <div id="timetable-preview-grid">
                             <div class="flex items-center justify-end">
                                 <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId]) }}"
                                     target="_blank" rel="noopener"
@@ -1436,6 +1450,7 @@
                                     </div>
                                 </div>
                             @endforeach
+                            </div>
                         @else
                             <div class="rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-6 text-center text-sm text-gray-400">
                                 Selecciona una sección con clases asignadas en la vista previa (o ejecuta el dry-run).
