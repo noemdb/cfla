@@ -31,6 +31,14 @@
         }
       }"
      x-init="init()">
+    @php
+        // Fallback defensivo: evita un 500 si el componente desplegado todavía
+        // no expone las propiedades nuevas (deploy parcial / caché obsoleta).
+        $filter_grados = $filter_grados ?? [];
+        $filter_secciones = $filter_secciones ?? [];
+        $filter_asignaturas = $filter_asignaturas ?? [];
+        $filter_asignatura = $filter_asignatura ?? '';
+    @endphp
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
