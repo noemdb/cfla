@@ -4,7 +4,7 @@
     <title>Horario de Docente</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:Helvetica,sans-serif;font-size:7pt;color:#1a1a2e;padding:6px 10px;line-height:1.25;}
+        body{font-family:Helvetica,sans-serif;font-size:7pt;color:#1a1a2e;margin:1cm;line-height:1.25;text-transform:uppercase;}
         h1{font-size:10pt;font-weight:800;color:#0d9488;text-align:center;letter-spacing:0.5px;}
         h2{font-size:7.5pt;font-weight:700;color:#374151;text-align:center;}
         .subhead{text-align:center;font-size:6.5pt;color:#6b7280;margin-bottom:4px;}

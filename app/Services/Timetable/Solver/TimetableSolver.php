@@ -57,8 +57,44 @@ final class TimetableSolver
         $assignment = [];
         $unassigned = [];
 
+        // Las asignaciones parciales válidas se conservan y se completan.
+        foreach ($this->lessons as $lesson) {
+            if ($lesson->preassignedSlots === []) {
+                continue;
+            }
+
+            foreach ($lesson->preassignedSlots as $slot) {
+                if (! $ctx->isFree(
+                    $slot->periodId,
+                    $lesson->profesorId,
+                    $lesson->seccionId,
+                    $slot->roomId,
+                    $lesson->grupoEstableId,
+                    $lesson->isHalfGroup,
+                )) {
+                    $unassigned[] = $lesson->lessonId;
+                    continue 2;
+                }
+            }
+
+            foreach ($lesson->preassignedSlots as $slot) {
+                $ctx->occupy(
+                    $slot->periodId,
+                    $lesson->profesorId,
+                    $lesson->seccionId,
+                    $slot->roomId,
+                    $lesson->grupoEstableId,
+                    $lesson->isHalfGroup,
+                );
+            }
+            $assignment[$lesson->lessonId] = $lesson->preassignedSlots;
+        }
+
         // ADR-TT-007: reservar primero las locked.
         foreach ($this->lessons as $lesson) {
+            if ($lesson->preassignedSlots !== []) {
+                continue;
+            }
             $lockedPeriods = array_values(array_unique(array_map('intval', $lesson->lockedPeriodIds)));
             $hasCompleteLock = $lesson->locked
                 && $lesson->blocksNeeded() > 0
@@ -159,7 +195,8 @@ final class TimetableSolver
             foreach ($combo as $slot) {
                 $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup);
             }
-            $assignment[$lesson->lessonId] = $combo;
+            $existingSlots = $assignment[$lesson->lessonId] ?? [];
+            $assignment[$lesson->lessonId] = array_merge($existingSlots, $combo);
 
             if ($this->backtrack(
                 $lessons,
@@ -178,7 +215,11 @@ final class TimetableSolver
             foreach ($combo as $slot) {
                 $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup);
             }
-            unset($assignment[$lesson->lessonId]);
+            if ($existingSlots === []) {
+                unset($assignment[$lesson->lessonId]);
+            } else {
+                $assignment[$lesson->lessonId] = $existingSlots;
+            }
         }
 
         // Se permite omitir esta lección, pero solo después de explorar las
@@ -291,8 +332,8 @@ final class TimetableSolver
      */
     private function combinationsOfSize(array $domain, LessonToSchedule $lesson): iterable
     {
-        $tCombos = $this->pickCombinations($domain['t'], $lesson->blocksT);
-        $pCombos = $this->pickCombinations($domain['p'], $lesson->blocksP);
+        $tCombos = $this->pickCombinations($domain['t'], $lesson->remainingBlocksT());
+        $pCombos = $this->pickCombinations($domain['p'], $lesson->remainingBlocksP());
 
         $results = [];
         foreach ($tCombos as $tCombo) {

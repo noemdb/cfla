@@ -121,6 +121,27 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
   (`plantilla-lecciones.csv`, columnas: `pevaluacion_id,turno,bloques_t,bloques_p,aula,prioridad`).
   El turno acepta id numérico o código `M`/`T`; filas duplicadas/inválidas fallan
   limpio sin persistir nada. Requiere `maatwebsite/excel` (instalado).
+- **Respaldo y restauración JSON**: *Backup JSON* descarga la configuración vigente
+  de las lessons junto con la identidad del calendario, lapso, pestudio, grado,
+  sección, Pevaluación, asignatura y profesor. *Elegir restore* + *Restore* valida
+  el formato, limita el archivo a 5 MB, exige coincidencia de lapso/pestudio y
+  resuelve Pevaluaciones por ID o por identidad académica compuesta antes de
+  persistir turno, bloques T/P, aula requerida, medio grupo, prioridad y bloqueo.
+- **Auditoría del dry-run**: junto a *Exportar PDF* se puede descargar *Auditoría
+  JSON*. El informe conserva el resultado bruto del solver y añade contexto del
+  calendario, métricas de cobertura/calidad, cobertura de la sección activa,
+  asignaciones detalladas por período, lecciones sin asignar, conflictos
+  bloqueantes y una resolución accionable por tipo de conflicto. También incluye
+  un snapshot diagnóstico de las tablas `timetable_*` del calendario: períodos,
+  turnos, aulas, lessons con sus relaciones académicas, slots, disponibilidad
+  docente, conflictos, versiones, changelogs, ausencias y suplencias. El bloque
+  `table_counts` permite comprobar rápidamente si el contexto exportado está
+  completo antes de analizar el JSON. La versión 2 añade, para cada lesson
+  incompleta, el dominio de períodos candidato, ocupación de cada período y
+  razones de descarte (`teacher_busy`, `section_whole_busy`,
+  `half_group_capacity_reached`, `availability_blocked`, `room_busy`,
+  `stable_group_conflict` y `shift_mismatch`), además de la comparación entre
+  asignación del preview y slots históricos.
 
 ### Paso 4 · Disponibilidad
 

@@ -14,12 +14,13 @@ class TimetablePeriod extends Model
     protected $table = 'timetable_periods';
 
     protected $fillable = [
-        'calendar_id', 'shift_id', 'day_of_week', 'order_in_day',
+        'calendar_id', 'shift_id', 'pestudio_id', 'day_of_week', 'order_in_day',
         'start_time', 'end_time', 'is_break',
     ];
 
     protected $casts = [
         'day_of_week' => 'integer',
+        'pestudio_id' => 'integer',
         'order_in_day' => 'integer',
         'is_break' => 'boolean',
     ];

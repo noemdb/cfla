@@ -4,7 +4,7 @@
     <title>Vista previa — Horario de Sección</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:Helvetica,sans-serif;font-size:7pt;color:#1a1a2e;padding:6px 10px;line-height:1.25;}
+        body{font-family:Helvetica,sans-serif;font-size:7pt;color:#1a1a2e;margin:1cm;line-height:1.25;text-transform:uppercase;}
         h1{font-size:10pt;font-weight:800;color:#0d9488;text-align:center;letter-spacing:0.5px;}
         h2{font-size:7.5pt;font-weight:700;color:#374151;text-align:center;}
         .badge{ text-align:center;font-size:6pt;color:#b45309;font-weight:700;letter-spacing:1px; }
@@ -22,12 +22,18 @@
         .subject{font-weight:700;font-size:6.5pt;}
         .teacher{font-size:5.5pt;color:#4b5563;}
         .group{font-size:5.5pt;color:#0d9488;}
-    </style>
+            .summary{margin:6px 0 7px;border:1px solid #cbd5e1;border-radius:4px;padding:4px 6px;}
+            .summary-title{color:#374151;font-size:7pt;font-weight:800;margin-bottom:3px;}
+            .summary table{width:100%;}
+            .summary td,.summary th{font-size:6pt;padding:2px 4px;}
+            .summary th{background:#475569;text-align:left;}
+            .summary td:last-child,.summary th:last-child{text-align:center;width:70px;}
+        </style>
 </head>
 <body>
 
     <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-    <h2>VISTA PREVIA — Horario de Clases — Sección {{ $seccion->name }}</h2>
+    <h2>{{ ($isPublishedSchedule ?? false) ? 'Horario de Clases' : 'VISTA PREVIA — Horario de Clases' }} — Sección {{ $seccion->name }}</h2>
     <div class="subhead">{{ $seccion->grado?->name ?? '' }} · {{ $calendar->name }} · {{ $fecha }}</div>
     <div class="badge">{{ ($isPublishedSchedule ?? false) ? 'HORARIO PUBLICADO' : 'BORRADOR — NO PUBLICADO' }}</div>
 
@@ -77,6 +83,28 @@
             </table>
         </div>
     @endforeach
+
+    @if (!empty($teacherSummary))
+        <div class="summary">
+            <div class="summary-title">Profesores asociados al horario ({{ count($teacherSummary) }})</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Profesor</th>
+                        <th>Bloques asignados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($teacherSummary as $teacher)
+                        <tr>
+                            <td>{{ $teacher['name'] ?: 'Sin nombre' }}</td>
+                            <td>{{ $teacher['blocks'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
 
     <div class="footer">Vista previa generada el {{ $fecha }} · {{ $institucion?->name ?? '' }}</div>
 </body>

@@ -1,7 +1,7 @@
 <div class="fade-in">
     {{-- Overlay de carga (patrón LessonWizard): paso 4 (disponibilidad) y paso 5 (generar) --}}
     <div wire:loading.flex
-         wire:target="setAllAvailable,saveAvailability,runDryRun,confirmAndPublish"
+         wire:target="setAllAvailable,saveAvailability,runDryRun,confirmAndPublish,analyzeDryRunWithAi"
          class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-gray-900/90 backdrop-blur-md">
         <div class="flex flex-col items-center gap-4">
             <div class="relative w-14 h-14">
@@ -15,7 +15,11 @@
                 </div>
             </div>
             <p class="text-sm font-bold text-gray-700 dark:text-gray-200">
-                {{ ($currentStep ?? 1) === 5 ? 'Generando horario…' : 'Procesando disponibilidad…' }}
+                @if ($aiDryRunAnalysisBusy)
+                    Analizando horario publicado con IA…
+                @else
+                    {{ ($currentStep ?? 1) === 5 ? 'Generando horario…' : 'Procesando disponibilidad…' }}
+                @endif
             </p>
         </div>
     </div>
@@ -350,6 +354,13 @@
                                 Generando…
                             </span>
                         </button>
+                        <button wire:click="loadEditablePeriods"
+                            @disabled((int) $shiftId <= 0)
+                            wire:loading.attr="disabled"
+                            wire:target="loadEditablePeriods"
+                            class="px-4 py-2 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 text-sm font-bold border border-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Editar bloques
+                        </button>
                         <button wire:click="savePeriods"
                             @disabled((int) $shiftId <= 0)
                             class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed">
@@ -400,6 +411,7 @@
                                             <th class="px-3 py-2">Fin</th>
                                             <th class="px-3 py-2">Duración</th>
                                             <th class="px-3 py-2">Descripción</th>
+                                            <th class="px-3 py-2">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -419,11 +431,33 @@
                                                     <span class="px-1.5 py-0.5 rounded {{ $p['is_break'] ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }}">
                                                         {{ $p['is_break'] ? 'Recreo' : 'Clase' }}
                                                     </span>
+                                                    <label class="ml-2 inline-flex items-center gap-1 text-[10px] text-gray-500">
+                                                        <input type="checkbox" wire:model="periods.{{ $loop->index }}.is_break">
+                                                        Recreo
+                                                    </label>
                                                 </td>
-                                                <td class="px-3 py-2 font-mono text-gray-600 dark:text-gray-300">{{ sprintf('%02d:%02d', intdiv($p['start'], 60), $p['start'] % 60) }}</td>
-                                                <td class="px-3 py-2 font-mono text-gray-600 dark:text-gray-300">{{ sprintf('%02d:%02d', intdiv($p['end'], 60), $p['end'] % 60) }}</td>
+                                                <td class="px-3 py-2">
+                                                    <input type="time" step="60" value="{{ sprintf('%02d:%02d', intdiv($p['start'], 60), $p['start'] % 60) }}"
+                                                        wire:change="updatePeriodTime({{ $loop->index }}, 'start', $event.target.value)"
+                                                        class="rounded border border-gray-200 bg-white/70 px-2 py-1 font-mono text-[11px] dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="time" step="60" value="{{ sprintf('%02d:%02d', intdiv($p['end'], 60), $p['end'] % 60) }}"
+                                                        wire:change="updatePeriodTime({{ $loop->index }}, 'end', $event.target.value)"
+                                                        class="rounded border border-gray-200 bg-white/70 px-2 py-1 font-mono text-[11px] dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                                                </td>
                                                 <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ $durationLabel }}</td>
-                                                <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $p['label'] }}</td>
+                                                <td class="px-3 py-2 text-gray-500 dark:text-gray-400">
+                                                    <input type="text" wire:model="periods.{{ $loop->index }}.label"
+                                                        placeholder="Clase o recreo"
+                                                        class="w-full rounded border border-gray-200 bg-white/70 px-2 py-1 text-[11px] dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <button type="button" wire:click="removePeriodBlock({{ $loop->index }})"
+                                                        class="rounded px-2 py-1 text-[10px] font-bold text-red-600 hover:bg-red-500/10 dark:text-red-300">
+                                                        Eliminar
+                                                    </button>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -433,6 +467,15 @@
                             <p class="mt-3 text-[11px] text-gray-500 dark:text-gray-400">
                                 Esta es una vista previa por día del turno. Los períodos de clase y recreo se repetirán de lunes a viernes al guardar.
                             </p>
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <button type="button" wire:click="addPeriodBlock"
+                                    class="rounded-lg bg-sky-500/10 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-500/20 dark:text-sky-300">
+                                    + Agregar bloque
+                                </button>
+                                <span class="text-[11px] text-gray-500 dark:text-gray-400">
+                                    Edita el detalle y elimina bloques antes de guardar.
+                                </span>
+                            </div>
                         </div>
                     @endif
 
@@ -794,7 +837,7 @@
                     <div class="mb-3 border-b border-gray-200 dark:border-white/10">
                         <nav class="flex w-full overflow-x-auto">
                             @foreach ($tabPestudioOptions as $opt)
-                                <button wire:click="$set('activePestudioId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                <button type="button" wire:click="selectStep5Pestudio({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                     class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                     {{ (string) $activePestudioId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                     {{ $opt['name'] }}
@@ -809,7 +852,7 @@
                     <div class="mb-3 border-b border-gray-200 dark:border-white/10">
                         <nav class="flex w-full overflow-x-auto">
                             @foreach ($tabGradoOptions as $opt)
-                                <button wire:click="$set('activeGradoId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                <button type="button" wire:click="selectStep5Grade({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                     class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                     {{ (string) $activeGradoId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                     {{ $opt['name'] }}
@@ -824,7 +867,7 @@
                     <div class="mb-3 border-b border-gray-200 dark:border-white/10">
                         <nav class="flex w-full overflow-x-auto">
                             @foreach ($tabSeccionOptions as $opt)
-                                <button wire:click="$set('activeSeccionId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                <button type="button" wire:click="selectStep5Section({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                     class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                     {{ (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                     {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
@@ -874,9 +917,63 @@
                         $capacidadSemanal = $capacidadPorDia * 5;
                         $maxSubjectsPerPeriod = max(1, (int) ($maxSubjectsPerPeriod ?? 2));
                         $fullGroupBlocks = $selectedT + $selectedP - $selectedHalfBlocks;
-                        $required = $fullGroupBlocks + (int) ceil($selectedHalfBlocks / $maxSubjectsPerPeriod);
+                        $totalBlocks = $selectedT + $selectedP;
+                        $minimumCells = $fullGroupBlocks + (int) ceil($selectedHalfBlocks / $maxSubjectsPerPeriod);
+                        $required = $minimumCells;
                         $overCapacity = $capacidadSemanal > 0 && $required > $capacidadSemanal;
                         $usage = $capacidadSemanal > 0 ? min(100, (int) round($required * 100 / $capacidadSemanal)) : 0;
+                        $capacityGap = $capacidadSemanal - $required;
+                        $maximumCells = $fullGroupBlocks + $selectedHalfBlocks;
+                        $hasDryRunResult = in_array($generationState, ['preview_ready', 'published'], true)
+                            && is_array($preview ?? null)
+                            && array_key_exists('assignment', $preview);
+                        $actualAssignment = collect($preview['assignment'] ?? []);
+                        $actualPeriodIds = collect();
+                        $actualAssignedBlocks = 0;
+                        $actualIncompleteLessons = 0;
+                        foreach ($rows as $pev) {
+                            if (! isset($selectedPevIdsForView[(int) $pev->id])) {
+                                continue;
+                            }
+
+                            $lessonId = (int) ($lessons[$pev->id]['id'] ?? 0);
+                            $slots = collect($actualAssignment->get((string) $lessonId, $actualAssignment->get($lessonId, [])));
+                            $assigned = $slots->pluck('period_id')->filter()->unique();
+                            $requiredForLesson = (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0)
+                                + (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
+                            $actualAssignedBlocks += $assigned->count();
+                            $actualPeriodIds = $actualPeriodIds->merge($assigned);
+                            if ($requiredForLesson > $assigned->count()) {
+                                $actualIncompleteLessons++;
+                            }
+                        }
+                        $actualCells = $actualPeriodIds->unique()->count();
+                        $actualCapacityGap = $capacidadSemanal - $actualCells;
+                        $actualUsage = $capacidadSemanal > 0
+                            ? min(100, (int) round($actualCells * 100 / $capacidadSemanal))
+                            : 0;
+                        $actualPairedBlocks = max(0, $actualAssignedBlocks - $actualCells);
+                        if ($hasDryRunResult) {
+                            if ($actualIncompleteLessons > 0) {
+                                $feasibilityLabel = 'Preview incompleto';
+                                $feasibilityClasses = 'border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200';
+                            } elseif ($actualCapacityGap < 0) {
+                                $feasibilityLabel = 'Sin capacidad';
+                                $feasibilityClasses = 'border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-200';
+                            } elseif ($actualCells > $minimumCells) {
+                                $feasibilityLabel = 'Ajustado';
+                                $feasibilityClasses = 'border-sky-500/30 bg-sky-500/10 text-sky-800 dark:text-sky-200';
+                            } else {
+                                $feasibilityLabel = 'Factible';
+                                $feasibilityClasses = 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200';
+                            }
+                        } elseif ($overCapacity) {
+                            $feasibilityLabel = 'Sin capacidad teórica';
+                            $feasibilityClasses = 'border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-200';
+                        } else {
+                            $feasibilityLabel = 'Factible en teoría';
+                            $feasibilityClasses = 'border-gray-300/80 bg-white/60 text-gray-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-200';
+                        }
                         $shiftCapacityStatus = collect($shifts)->map(function ($shift) use (
                             $rows,
                             $selectedPevIdsForView,
@@ -938,17 +1035,6 @@
                             ];
                         })->values();
                     @endphp
-                    <div class="mb-3 px-3 py-2 rounded-lg {{ $overCapacity ? 'bg-amber-500/5 border border-amber-500/30 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/5 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' }} text-xs flex flex-wrap items-center gap-2">
-                        <span>{{ $rows->count() }} asignatura(s) · {{ $selectedT }} bloques teóricos · {{ $selectedP }} bloques prácticos · {{ $required }} celdas/semana</span>
-                        @if ($capacidadSemanal > 0)
-                            <span class="font-bold {{ $overCapacity ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400' }}">
-                                · Capacidad de los turnos: {{ $capacidadSemanal }} celdas/semana ({{ $capacidadPorDia }}/día × 5 días)
-                                · Máximo {{ $maxSubjectsPerPeriod }} asignatura(s)/período
-                                · Uso {{ $usage }}%
-                                {{ $overCapacity ? '⚠ excede ('.($required - $capacidadSemanal).' de más)' : '✓' }}
-                            </span>
-                        @endif
-                    </div>
                     @if ($shiftCapacityStatus->isNotEmpty())
                         <div class="mb-4 rounded-lg border border-gray-200/80 bg-gray-50/70 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
                             <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -959,7 +1045,7 @@
                                     La carga se compara con los slots del turno seleccionado
                                 </span>
                             </div>
-                            <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                 @foreach ($shiftCapacityStatus as $shiftStatus)
                                     @php
                                         $statusStyles = match ($shiftStatus['status']) {
@@ -989,7 +1075,7 @@
                                             ],
                                         };
                                     @endphp
-                                    <div class="rounded-md border px-2.5 py-2 {{ $statusStyles['container'] }}">
+                                    <div class="w-full rounded-md border px-2.5 py-2 {{ $statusStyles['container'] }}">
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="flex min-w-0 items-center gap-1.5">
                                                 <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $statusStyles['dot'] }}" aria-hidden="true"></span>
@@ -1003,7 +1089,7 @@
                                             </span>
                                         </div>
                                         <div class="mt-1 text-[10px] {{ $statusStyles['detail'] }}">
-                                            {{ $shiftStatus['required'] }} / {{ $shiftStatus['capacity'] }} celdas
+                                            {{ $shiftStatus['required'] }} / {{ $shiftStatus['capacity'] }} celdas mínimas estimadas
                                             @if ($shiftStatus['status'] === 'available')
                                                 · {{ $shiftStatus['remaining'] }} libres
                                             @elseif ($shiftStatus['status'] === 'overflow')
@@ -1017,54 +1103,57 @@
                     @endif
                 @endif
 
-                <div class="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>{{ $rows->count() }} asignatura(s) · {{ $step3SelectedCount }} seleccionada(s)</span>
-                    <span class="flex items-center gap-2">
-                        @if ($lessonsDirty)
-                            <span class="text-amber-600 dark:text-amber-400 font-bold">● Cambios sin guardar</span>
-                        @elseif ($lessonsSavedAt)
-                            <span class="text-emerald-600 dark:text-emerald-400">Guardado {{ $lessonsSavedAt }}</span>
-                        @endif
-                        <span>Los bloques se derivan de <code>hour_t_week/hour_p_week</code></span>
-                        <button wire:click="syncAcademicLoad"
-                            wire:loading.attr="disabled"
-                            wire:loading.class="opacity-50 cursor-not-allowed"
-                            wire:target="syncAcademicLoad"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-gray-500 dark:text-gray-300 font-bold">
-                            <span wire:loading.remove wire:target="syncAcademicLoad">Sincronizar carga académica</span>
-                            <span wire:loading wire:target="syncAcademicLoad" class="inline-flex items-center gap-1.5">
-                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                                Sincronizando…
+                @if ($rows->isNotEmpty())
+                    <div class="mb-3 rounded-lg {{ $overCapacity ? 'bg-amber-500/5 border border-amber-500/30 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/5 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300' }} px-3 py-2.5 text-xs">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span class="font-bold">{{ $rows->count() }} asignaturas seleccionadas</span>
+                            <span>{{ $totalBlocks }} bloques requeridos ({{ $selectedT }} T · {{ $selectedP }} P)</span>
+                            @if ($selectedHalfBlocks > 0)
+                                <span>{{ $selectedHalfBlocks }} bloques de medio grupo</span>
+                            @endif
+                            <span class="font-bold">Estimación: {{ $minimumCells }}–{{ $maximumCells }} celdas</span>
+                            <span class="rounded-full border px-2 py-0.5 text-[10px] font-extrabold {{ $feasibilityClasses }}">
+                                {{ $feasibilityLabel }}
                             </span>
-                        </button>
-                        @if ($step3ViewMode === 'tabs' && is_numeric($activeSeccionId))
-                            <div class="inline-flex items-center gap-1.5">
-                                <select wire:model="replicateToSeccionId"
-                                    title="Sección destino para replicar las lecciones"
-                                    class="max-w-[16rem] rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-500 dark:text-gray-300">
-                                    <option value="">Replicar a sección…</option>
-                                    @foreach ($tabSeccionOptions as $sectionOption)
-                                        @if ((int) $sectionOption['id'] !== (int) $activeSeccionId)
-                                            <option value="{{ $sectionOption['id'] }}">{{ $sectionOption['label'] }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                <button wire:click="replicateLessonsToSection"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:target="replicateLessonsToSection"
-                                    title="Copiar las lecciones configuradas a la sección seleccionada"
-                                    class="inline-flex items-center gap-1.5 rounded-md bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-700 transition-colors hover:bg-indigo-500/20 dark:text-indigo-300">
-                                    <span wire:loading.remove wire:target="replicateLessonsToSection">Replicar</span>
-                                    <span wire:loading wire:target="replicateLessonsToSection">Replicando…</span>
-                                </button>
+                        </div>
+                        @if ($capacidadSemanal > 0)
+                            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                                <span>Capacidad: {{ $capacidadSemanal }} celdas ({{ $capacidadPorDia }}/día × 5)</span>
+                                <span>Máximo: {{ $maxSubjectsPerPeriod }} asignaturas por período</span>
+                                <span>Uso teórico: {{ $usage }}%</span>
+                                <span class="font-bold">
+                                    @if ($overCapacity)
+                                        ⚠ el mejor caso excede por {{ abs($capacityGap) }} celdas
+                                    @else
+                                        ✓ margen teórico: {{ $capacityGap }} celdas
+                                    @endif
+                                </span>
                             </div>
+                            @if ($hasDryRunResult)
+                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-current/10 pt-2 text-[11px]">
+                                    <span class="font-bold">Dry-run: {{ $actualCells }} celdas usadas · {{ $actualUsage }}% de uso</span>
+                                    <span>{{ $actualAssignedBlocks }}/{{ $totalBlocks }} bloques asignados</span>
+                                    <span>{{ $actualPairedBlocks }} bloques compartidos</span>
+                                    @if ($actualIncompleteLessons > 0)
+                                        <span class="font-bold text-amber-700 dark:text-amber-300">
+                                            ⚠ {{ $actualIncompleteLessons }} lesson(s) incompleta(s)
+                                        </span>
+                                    @elseif ($actualCapacityGap > 0)
+                                        <span class="font-bold">✓ margen real: {{ $actualCapacityGap }} celdas</span>
+                                    @else
+                                        <span class="font-bold">⚠ sin margen real</span>
+                                    @endif
+                                </div>
+                            @endif
+                            @if ($selectedHalfBlocks > 0)
+                                <p class="mt-1 text-[10px] opacity-80">
+                                    La estimación va de ningún emparejamiento al máximo teórico de medios grupos.
+                                    El dry-run incorpora profesor, aula, disponibilidad, turno y sección.
+                                </p>
+                            @endif
                         @endif
-                    </span>
-                </div>
+                    </div>
+                @endif
 
                 <div class="rounded-lg border border-gray-200 dark:border-white/10">
                     <table class="w-full text-sm">
@@ -1089,7 +1178,22 @@
                                 </th>
                                 <th class="px-3 py-2">Profesor</th>
                                 <th class="px-3 py-2">T</th>
-                                <th class="px-3 py-2">P</th>
+                                <th class="px-3 py-2">
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <span>P</span>
+                                        <button type="button"
+                                            wire:click="resetPracticalBlocks"
+                                            wire:loading.attr="disabled"
+                                            wire:loading.class="opacity-50 cursor-not-allowed"
+                                            wire:target="resetPracticalBlocks"
+                                            title="Poner en cero todos los bloques prácticos"
+                                            aria-label="Poner en cero todos los bloques prácticos"
+                                            class="inline-flex items-center rounded-full border border-amber-500/25 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-300">
+                                            <span wire:loading.remove wire:target="resetPracticalBlocks">0</span>
+                                            <span wire:loading wire:target="resetPracticalBlocks">…</span>
+                                        </button>
+                                    </span>
+                                </th>
                                 <th class="px-3 py-2">Prio</th>
                                 <th class="px-3 py-2">Turno</th>
                                 <th class="px-3 py-2">Aula req.</th>
@@ -1187,6 +1291,82 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <div class="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>{{ $rows->count() }} asignatura(s) · {{ $step3SelectedCount }} seleccionada(s)</span>
+                    <span class="flex items-center gap-2">
+                        @if ($lessonsDirty)
+                            <span class="text-amber-600 dark:text-amber-400 font-bold">● Cambios sin guardar</span>
+                        @elseif ($lessonsSavedAt)
+                            <span class="text-emerald-600 dark:text-emerald-400">Guardado {{ $lessonsSavedAt }}</span>
+                        @endif
+                        <span>Los bloques se derivan de <code>hour_t_week/hour_p_week</code></span>
+                        <button wire:click="syncAcademicLoad"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="syncAcademicLoad"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-gray-500 dark:text-gray-300 font-bold">
+                            <span wire:loading.remove wire:target="syncAcademicLoad">Sincronizar carga académica</span>
+                            <span wire:loading wire:target="syncAcademicLoad" class="inline-flex items-center gap-1.5">
+                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Sincronizando…
+                            </span>
+                        </button>
+                        @if ($step3ViewMode === 'tabs' && is_numeric($activeSeccionId))
+                            <div class="inline-flex items-center gap-1.5">
+                                <select wire:model="replicateToSeccionId"
+                                    title="Sección destino para replicar las lecciones"
+                                    class="max-w-[16rem] rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-500 dark:text-gray-300">
+                                    <option value="">Replicar a sección…</option>
+                                    @foreach ($tabSeccionOptions as $sectionOption)
+                                        @if ((int) $sectionOption['id'] !== (int) $activeSeccionId)
+                                            <option value="{{ $sectionOption['id'] }}">{{ $sectionOption['label'] }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <button wire:click="replicateLessonsToSection"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="replicateLessonsToSection"
+                                    title="Copiar las lecciones configuradas a la sección seleccionada"
+                                    class="inline-flex items-center gap-1.5 rounded-md bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-700 transition-colors hover:bg-indigo-500/20 dark:text-indigo-300">
+                                    <span wire:loading.remove wire:target="replicateLessonsToSection">Replicar</span>
+                                    <span wire:loading wire:target="replicateLessonsToSection">Replicando…</span>
+                                </button>
+                            </div>
+                        @endif
+                        @if (is_numeric($activeSeccionId))
+                            <button type="button"
+                                wire:click="downloadLessonsBackup({{ (int) $activeSeccionId }})"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-50 cursor-not-allowed"
+                                wire:target="downloadLessonsBackup"
+                                title="Descargar respaldo JSON de las lessons de la sección activa"
+                                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                                <span wire:loading.remove wire:target="downloadLessonsBackup">Backup JSON</span>
+                                <span wire:loading wire:target="downloadLessonsBackup">Preparando…</span>
+                            </button>
+                        @endif
+                        <label title="Seleccionar respaldo JSON de lessons por grado y sección"
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
+                            <span>Elegir restore</span>
+                            <input type="file" wire:model="lessonsBackupFile" accept="application/json,.json" class="sr-only">
+                        </label>
+                        <button type="button"
+                            wire:click="restoreLessonsBackup"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            wire:target="restoreLessonsBackup,lessonsBackupFile"
+                            title="Restaurar la configuración del grado y sección desde el JSON seleccionado"
+                            class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                            <span wire:loading.remove wire:target="restoreLessonsBackup">Restore</span>
+                            <span wire:loading wire:target="restoreLessonsBackup">Restaurando…</span>
+                        </button>
+                    </span>
                 </div>
 
                 {{-- <div class="mt-5 rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-4">
@@ -1407,6 +1587,21 @@
                         <span wire:loading.remove wire:target="runDryRun">Previsualizar (dry-run)</span>
                         <span wire:loading wire:target="runDryRun">Generando…</span>
                     </button>
+                    @if (($selectedCalendarDetail['status'] ?? null) === 'active')
+                    <button type="button"
+                        wire:click="openAiDryRunDialog"
+                        wire:loading.attr="disabled"
+                        wire:target="openAiDryRunDialog,analyzeDryRunWithAi"
+                        title="Analizar el horario publicado con IA"
+                        class="inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.75h4.5l.75 3.25 2.75 1.25 2.5-1.5 2.25 3.9-2.5 1.75v3.1l2.5 1.75-2.25 3.9-2.5-1.5-2.75 1.25-.75 3.25h-4.5L9 19.9l-2.75-1.25-2.5 1.5-2.25-3.9L4 14.5v-3.1L1.5 9.65l2.25-3.9 2.5 1.5L9 6.0l.75-2.25Z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10.25v3.5m0 2.5h.01"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="openAiDryRunDialog,analyzeDryRunWithAi">Analizar con IA</span>
+                        <span wire:loading wire:target="openAiDryRunDialog,analyzeDryRunWithAi">Analizando…</span>
+                    </button>
+                    @endif
 
                     @if ($generationState === 'preview_ready' && $preview)
                         {{-- <button wire:click="updateDraftPreview" wire:loading.attr="disabled" wire:target="updateDraftPreview"
@@ -1416,7 +1611,7 @@
                         </button> --}}
                         <button wire:click="confirmAndPublish" wire:loading.attr="disabled" wire:target="confirmAndPublish"
                             class="px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold">
-                            Confirmar y publicar
+                            Confirmar y publicar secciones válidas
                         </button>
                         <button wire:click="undoLastPreviewChange" wire:loading.attr="disabled"
                             class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
@@ -1432,7 +1627,6 @@
                         <span class="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-bold">Horario publicado.</span>
                     @endif
                 </div>
-
                 @if ($generationState === 'preview_ready' && $preview)
                     @php $publicationReadiness = $this->publicationReadiness(); @endphp
                     @php $displayHardConflicts = $publicationReadiness['display_hard_conflicts'] ?? []; @endphp
@@ -1459,7 +1653,7 @@
                         </div>
                     </div>
                     @if (!empty($displayHardConflicts))
-                        <details class="mt-4 rounded-lg border border-red-500/30 bg-red-500/5" open>
+                        <details class="mt-4 rounded-lg border border-red-500/30 bg-red-500/5">
                             <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500">
                                 <span>Detalle de conflictos bloqueantes</span>
                                 <span class="rounded-md bg-red-500/10 px-2 py-1">{{ count($displayHardConflicts) }}</span>
@@ -1730,7 +1924,7 @@
                             <div class="border-b border-gray-200 dark:border-white/10">
                                 <nav class="flex w-full overflow-x-auto">
                                     @foreach ($tabPestudioOptions as $opt)
-                                        <button wire:click="$set('activePestudioId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                        <button type="button" wire:click="selectStep5Pestudio({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                             class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                             {{ (string) $activePestudioId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                             {{ $opt['name'] }}
@@ -1745,12 +1939,19 @@
                             <div class="border-b border-gray-200 dark:border-white/10">
                                 <nav class="flex w-full overflow-x-auto">
                                     @foreach ($tabGradoOptions as $opt)
-                                        <button wire:click="$set('activeGradoId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                        <button type="button" wire:click="selectStep5Grade({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                             class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
-                                            {{ (string) $activeGradoId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                            {{ $step5GradeTab !== 'pestudio' && (string) $activeGradoId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                             {{ $opt['name'] }}
                                         </button>
                                     @endforeach
+                                    <button type="button" wire:click="showPestudioFormats"
+                                        title="Formatos PDF"
+                                        aria-label="Formatos PDF"
+                                        class="flex-none w-12 text-center px-2 py-2 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
+                                        {{ $step5GradeTab === 'pestudio' && $step5PestudioTab === 'formats' ? 'text-violet-600 dark:text-violet-400 border-violet-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                        PDF
+                                    </button>
                                 </nav>
                             </div>
                         @endif
@@ -1760,18 +1961,111 @@
                             <div class="border-b border-gray-200 dark:border-white/10">
                                 <nav class="flex w-full overflow-x-auto">
                                     @foreach ($tabSeccionOptions as $opt)
-                                        <button wire:click="$set('activeSeccionId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
+                                        <button type="button" wire:click="selectStep5Section({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                             class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
-                                            {{ (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                            {{ $step5SectionTab !== 'formats' && (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                             {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
                                         </button>
                                     @endforeach
+                                    <button type="button" wire:click="showSectionFormats"
+                                        title="Formatos PDF"
+                                        aria-label="Formatos PDF"
+                                        class="flex-none w-12 text-center px-2 py-2 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
+                                        {{ $step5SectionTab === 'formats' ? 'text-violet-600 dark:text-violet-400 border-violet-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                        PDF
+                                    </button>
                                 </nav>
                             </div>
                         @endif
 
+                        @if ($step5GradeTab === 'pestudio' && $step5PestudioTab === 'formats')
+                            <div class="rounded-lg border border-violet-500/25 bg-violet-500/5 p-4">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <div class="text-[10px] font-bold uppercase tracking-widest text-violet-700 dark:text-violet-300">Formatos del pestudio</div>
+                                        <h3 class="mt-1 text-base font-extrabold text-gray-900 dark:text-white">
+                                            {{ $tabPestudioOptions ? (collect($tabPestudioOptions)->firstWhere('id', $activePestudioId)['name'] ?? 'Pestudio activo') : 'Pestudio activo' }}
+                                        </h3>
+                                        <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                            Genera el PDF consolidado de cada grado asociado a este pestudio.
+                                        </p>
+                                    </div>
+                                    <span class="rounded-md bg-violet-500/10 px-2 py-1 text-[10px] font-bold text-violet-700 dark:text-violet-300">
+                                        {{ count($tabGradoOptions) }} grado(s)
+                                    </span>
+                                </div>
+                                @if (is_numeric($activePestudioId))
+                                    <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.pestudio-preview', ['calendar' => $calendarId, 'pestudio' => (int) $activePestudioId]) }}"
+                                        target="_blank"
+                                        class="mt-4 inline-flex items-center gap-2 rounded-md bg-violet-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-violet-700">
+                                        Generar PDF del pestudio completo
+                                    </a>
+                                @endif
+                                <div class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                    @foreach ($tabGradoOptions as $gradeOption)
+                                        <div class="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                                            <div class="min-w-0">
+                                                <div class="truncate text-xs font-bold text-gray-800 dark:text-gray-100">
+                                                    {{ $gradeOption['name'] }}
+                                                </div>
+                                                <div class="text-[10px] text-gray-500 dark:text-gray-400">Horario consolidado del grado</div>
+                                            </div>
+                                            @if (is_numeric($gradeOption['id']))
+                                                <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.grade-preview', ['calendar' => $calendarId, 'grado' => (int) $gradeOption['id']]) }}"
+                                                    target="_blank"
+                                                    class="shrink-0 rounded-md bg-violet-500/10 px-2.5 py-1.5 text-[10px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                                                    PDF
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @elseif ($step5SectionTab === 'formats')
+                            <div class="rounded-lg border border-violet-500/25 bg-violet-500/5 p-4">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <div class="text-[10px] font-bold uppercase tracking-widest text-violet-700 dark:text-violet-300">Formatos del grado</div>
+                                        <h3 class="mt-1 text-base font-extrabold text-gray-900 dark:text-white">
+                                            {{ $tabGradoOptions ? (collect($tabGradoOptions)->firstWhere('id', $activeGradoId)['name'] ?? 'Grado activo') : 'Grado activo' }}
+                                        </h3>
+                                        <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                            Genera el PDF del horario para cada sección asociada al grado seleccionado.
+                                        </p>
+                                    </div>
+                                    <span class="rounded-md bg-violet-500/10 px-2 py-1 text-[10px] font-bold text-violet-700 dark:text-violet-300">
+                                        {{ count($tabSeccionOptions) }} sección(es)
+                                    </span>
+                                </div>
+                                @if (is_numeric($activeGradoId))
+                                    <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.grade-preview', ['calendar' => $calendarId, 'grado' => (int) $activeGradoId]) }}"
+                                        target="_blank"
+                                        class="mt-4 inline-flex items-center gap-2 rounded-md bg-violet-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-violet-700">
+                                        Generar PDF del grado
+                                    </a>
+                                @endif
+                                <div class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                    @foreach ($tabSeccionOptions as $sectionOption)
+                                        <div class="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                                            <div class="min-w-0">
+                                                <div class="truncate text-xs font-bold text-gray-800 dark:text-gray-100">
+                                                    Sección {{ $sectionOption['name'] }}
+                                                </div>
+                                                <div class="text-[10px] text-gray-500 dark:text-gray-400">{{ $sectionOption['label'] }}</div>
+                                            </div>
+                                            <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $sectionOption['id']]) }}"
+                                                target="_blank"
+                                                class="shrink-0 rounded-md bg-violet-500/10 px-2.5 py-1.5 text-[10px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                                                PDF
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         @php $secGrid = $sectionPreviewGrid ?? []; @endphp
-                        @if ($sectionSlotParity && count($sectionSlotParity['sections']) > 1)
+                        @if ($step5GradeTab !== 'pestudio' && $step5SectionTab !== 'formats' && $sectionSlotParity && count($sectionSlotParity['sections']) > 1)
                             <details class="mb-4 rounded-lg border {{ $sectionSlotParity['balanced'] ? 'border-emerald-500/20 bg-emerald-500/[0.03]' : 'border-amber-500/25 bg-amber-500/[0.04]' }}">
                                 <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest {{ $sectionSlotParity['balanced'] ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' }}">
                                     <span>Equidad de slots · {{ $sectionSlotParity['grade'] }}</span>
@@ -1874,10 +2168,10 @@
                                 </div>
                             </details>
                         @endif
-                        @if ($activeConflictGroup)
+                        @if ($step5GradeTab !== 'pestudio' && $step5SectionTab !== 'formats' && $activeConflictGroup)
                             @include('livewire.coordinacion.timetable.partials.preview-conflicts', ['activeConflictGroup' => $activeConflictGroup])
                         @endif
-                        @if ($preview && $periodsList->isNotEmpty())
+                        @if ($step5GradeTab !== 'pestudio' && $step5SectionTab !== 'formats' && $preview && $periodsList->isNotEmpty())
                             @php $sectionGapSummary = $this->previewSectionGapSummary($activeSeccionId); @endphp
                             @if (($sectionGapSummary['empty_cells'] ?? 0) > 0 || !empty($sectionGapSummary['incomplete_lessons']))
                                 <div class="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4" role="status">
@@ -1920,15 +2214,68 @@
                                 </div>
                             @endif
                             <div id="timetable-preview-grid">
-                            <div class="flex items-center justify-end">
+                            <div class="flex items-center justify-end pb-2">
+                                <div class="inline-flex overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-white/10" role="group" aria-label="Exportar y auditar dry-run">
                                 <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId]) }}"
                                     target="_blank" rel="noopener"
-                                    class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10 inline-flex items-center gap-1.5">
+                                    class="inline-flex items-center gap-1.5 border-r border-gray-200 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 dark:border-white/10">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                     Exportar PDF
                                 </a>
+                                <button type="button"
+                                    wire:click="downloadDryRunResult({{ (int) $activeSeccionId }})"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="downloadDryRunResult"
+                                    title="Descargar informe JSON auditable del dry-run"
+                                    class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"></path>
+                                    </svg>
+                                    <span wire:loading.remove wire:target="downloadDryRunResult">Auditoría JSON</span>
+                                    <span wire:loading wire:target="downloadDryRunResult">Preparando…</span>
+                                </button>
+                                <button type="button"
+                                    wire:click="persistCurrentSectionSlots"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="persistCurrentSectionSlots"
+                                    title="Guardar en la base de datos los slots de la sección activa"
+                                    class="inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-300">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l4 4L19 6"/>
+                                    </svg>
+                                    <span wire:loading.remove wire:target="persistCurrentSectionSlots">Guardar sección</span>
+                                    <span wire:loading wire:target="persistCurrentSectionSlots">Guardando…</span>
+                                </button>
+                                <button type="button"
+                                    wire:click="downloadCurrentSectionSlotsBackup({{ (int) $activeSeccionId }})"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="downloadCurrentSectionSlotsBackup"
+                                    title="Descargar respaldo JSON de los slots de la sección activa"
+                                    class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                                    <span wire:loading.remove wire:target="downloadCurrentSectionSlotsBackup">Backup slots</span>
+                                    <span wire:loading wire:target="downloadCurrentSectionSlotsBackup">Preparando…</span>
+                                </button>
+                                <label title="Seleccionar respaldo JSON de slots de la sección activa"
+                                    class="inline-flex cursor-pointer items-center gap-1.5 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
+                                    <span>Elegir restore</span>
+                                    <input type="file" wire:model="slotsBackupFile" accept="application/json,.json" class="sr-only">
+                                </label>
+                                <button type="button"
+                                    wire:click="restoreCurrentSectionSlotsBackup"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="restoreCurrentSectionSlotsBackup,slotsBackupFile"
+                                    title="Restaurar los slots de la sección activa desde un respaldo JSON"
+                                    class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                                    <span wire:loading.remove wire:target="restoreCurrentSectionSlotsBackup">Restore slots</span>
+                                    <span wire:loading wire:target="restoreCurrentSectionSlotsBackup">Restaurando…</span>
+                                </button>
+                                </div>
                             </div>
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
                                 @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
@@ -2032,6 +2379,43 @@
             </div>
         </div>
     @endif
+
+    <x-modal-card
+        title="Diagnóstico del horario publicado"
+        blur="lg"
+        wire:model="showAiAnalysisModal"
+        max-width="7xl"
+        persistent
+    >
+        @if ($aiDryRunAnalysis)
+            <div class="max-h-[70vh] overflow-y-auto rounded-lg border border-violet-500/20 bg-violet-500/[0.03] px-4 py-4 dark:bg-violet-500/[0.06]">
+                <div class="prose prose-sm max-w-none text-gray-700 dark:prose-invert dark:text-gray-200
+                    prose-headings:mb-3 prose-headings:mt-5 prose-headings:font-extrabold prose-headings:text-gray-900
+                    prose-p:my-2 prose-li:my-1 prose-table:my-4 prose-th:bg-violet-500/10 prose-th:px-3 prose-th:py-2
+                    prose-td:border-gray-200 prose-td:px-3 prose-td:py-2 dark:prose-headings:text-white dark:prose-td:border-white/10">
+                    {!! \Illuminate\Support\Str::markdown($aiDryRunAnalysis) !!}
+                </div>
+            </div>
+            @if ($aiDryRunAnalysisModel)
+                <p class="mt-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                    Modelo: {{ $aiDryRunAnalysisModel }}
+                </p>
+            @endif
+        @else
+            <div class="rounded-lg border border-dashed border-gray-300 px-4 py-8 text-center text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
+                No hay un diagnóstico disponible.
+            </div>
+        @endif
+        <x-slot name="footer">
+            <button
+                type="button"
+                wire:click="$set('showAiAnalysisModal', false)"
+                class="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+            >
+                Cerrar diagnóstico
+            </button>
+        </x-slot>
+    </x-modal-card>
 
     {{-- Modal · Nuevo borrador (vive a nivel raíz: el botón "+ Nuevo borrador"
          del switcher global es visible en TODOS los pasos, no solo en el 1;

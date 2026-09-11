@@ -26,11 +26,31 @@ final class LessonToSchedule
         /** Sub-grupo (componente de formación). null = lección de sección completa. */
         public readonly ?int $grupoEstableId = null,
         public readonly bool $isHalfGroup = false,
+        /** @var list<SlotCandidate> Slots válidos ya asignados que deben conservarse. */
+        public readonly array $preassignedSlots = [],
     ) {}
 
     public function blocksNeeded(): int
     {
         return $this->blocksT + $this->blocksP;
+    }
+
+    public function remainingBlocksT(): int
+    {
+        return max(0, $this->blocksT - $this->assignedBlocks(false));
+    }
+
+    public function remainingBlocksP(): int
+    {
+        return max(0, $this->blocksP - $this->assignedBlocks(true));
+    }
+
+    private function assignedBlocks(bool $practical): int
+    {
+        return count(array_filter(
+            $this->preassignedSlots,
+            fn (SlotCandidate $slot): bool => $slot->isPractical === $practical,
+        ));
     }
 
     /**

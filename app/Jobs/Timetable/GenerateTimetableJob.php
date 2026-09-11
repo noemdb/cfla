@@ -42,6 +42,7 @@ class GenerateTimetableJob implements ShouldQueue
         public bool $dryRun = false,
         public ?array $previewPayload = null,
         public ?array $pevaluacionIds = null,
+        public ?array $lessonIds = null,
     ) {}
 
     public function handle(): void
@@ -95,12 +96,18 @@ class GenerateTimetableJob implements ShouldQueue
         if (! $this->dryRun && $this->previewPayload !== null) {
             return new SolverResult(
                 assignment: collect($this->previewPayload['assignment'] ?? [])
+                    ->filter(fn (array $slots, $lessonId): bool => $this->lessonIds === null
+                        || in_array((int) $lessonId, $this->lessonIds, true))
                     ->mapWithKeys(fn (array $slots, $lessonId) => [
                         (int) $lessonId => collect($slots)->map(fn (array $slot) => new SlotCandidate(
                             periodId: (int) ($slot['period_id'] ?? 0),
                             roomId: ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                             isPractical: (bool) ($slot['is_practical'] ?? false),
-                        ))->filter(fn (SlotCandidate $slot) => $slot->periodId > 0)->values()->all(),
+                        ))
+                            ->filter(fn (SlotCandidate $slot) => $slot->periodId > 0)
+                            ->unique(fn (SlotCandidate $slot): int => $slot->periodId)
+                            ->values()
+                            ->all(),
                     ])
                     ->all(),
                 unassigned: array_map('intval', $this->previewPayload['unassigned'] ?? []),
@@ -133,6 +140,7 @@ class GenerateTimetableJob implements ShouldQueue
 
             $isInScope = $scopedLessonIds === null || in_array((int) $lesson->id, $scopedLessonIds, true);
             $preservedPeriodIds = [];
+            $preassignedSlots = [];
 
             if (! $isInScope) {
                 $preservedPeriodIds = collect($previousAssignment[(string) $lesson->id] ?? $previousAssignment[$lesson->id] ?? [])
@@ -149,6 +157,29 @@ class GenerateTimetableJob implements ShouldQueue
                 if ($preservedPeriodIds === []) {
                     continue;
                 }
+            }
+
+            $existingAssignment = $previousAssignment[(string) $lesson->id]
+                ?? $previousAssignment[$lesson->id]
+                ?? null;
+            $existingSlots = is_array($existingAssignment) && $existingAssignment !== []
+                ? collect($existingAssignment)
+                : $lesson->slots;
+            $requiredBlocks = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;
+            $existingPeriodCount = $existingSlots instanceof \Illuminate\Support\Collection
+                ? $existingSlots->pluck('period_id')->filter()->unique()->count()
+                : collect($existingSlots)->pluck('period_id')->filter()->unique()->count();
+            if ($existingPeriodCount > 0 && $existingPeriodCount < $requiredBlocks) {
+                $preassignedSlots = collect($existingSlots)
+                    ->map(fn ($slot): SlotCandidate => new SlotCandidate(
+                        periodId: (int) data_get($slot, 'period_id'),
+                        roomId: data_get($slot, 'room_id') ? (int) data_get($slot, 'room_id') : null,
+                        isPractical: (bool) data_get($slot, 'is_practical', false),
+                    ))
+                    ->filter(fn (SlotCandidate $slot): bool => $slot->periodId > 0)
+                    ->unique(fn (SlotCandidate $slot): int => $slot->periodId)
+                    ->values()
+                    ->all();
             }
 
             // Lecciones locked: sus períodos ya fijados (slots locked).
@@ -195,6 +226,7 @@ class GenerateTimetableJob implements ShouldQueue
                 locked: $isLocked,
                 lockedPeriodIds: $lockedPeriods,
                 grupoEstableId: $pev->grupo_estable_id ? (int) $pev->grupo_estable_id : null,
+                preassignedSlots: $preassignedSlots,
             );
         }
 
@@ -508,8 +540,14 @@ class GenerateTimetableJob implements ShouldQueue
                     'preview_payload' => null,
                 ]);
 
-                TimetableSlot::query()->where('calendar_id', $calendar->id)->delete();
-                TimetableConflict::query()->where('calendar_id', $calendar->id)->delete();
+                $slotQuery = TimetableSlot::query()->where('calendar_id', $calendar->id);
+                $conflictQuery = TimetableConflict::query()->where('calendar_id', $calendar->id);
+                if ($this->lessonIds !== null) {
+                    $slotQuery->whereIn('lesson_id', $this->lessonIds);
+                    $conflictQuery->whereIn('lesson_id', $this->lessonIds);
+                }
+                $slotQuery->delete();
+                $conflictQuery->delete();
 
                 $slotRows = [];
                 $now = now();
@@ -519,6 +557,10 @@ class GenerateTimetableJob implements ShouldQueue
                     ->get()
                     ->keyBy('id');
                 foreach ($result->assignment as $lessonId => $slots) {
+                    if ($this->lessonIds !== null && ! in_array((int) $lessonId, $this->lessonIds, true)) {
+                        continue;
+                    }
+
                     $lesson = $lessonsById->get($lessonId);
 
                     if (! $lesson || ! $lesson->pevaluacion) {
@@ -547,6 +589,10 @@ class GenerateTimetableJob implements ShouldQueue
                 }
 
                 foreach ($result->unassigned as $lessonId) {
+                    if ($this->lessonIds !== null && ! in_array((int) $lessonId, $this->lessonIds, true)) {
+                        continue;
+                    }
+
                     TimetableConflict::create([
                         'calendar_id' => $calendar->id,
                         'lesson_id' => $lessonId,
@@ -569,6 +615,8 @@ class GenerateTimetableJob implements ShouldQueue
                 'calendar_id' => $this->calendarId,
                 'error' => $e->getMessage(),
             ]);
+
+            throw $e;
         }
     }
 

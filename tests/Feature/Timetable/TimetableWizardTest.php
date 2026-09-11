@@ -1895,7 +1895,9 @@ class TimetableWizardTest extends TestCase
             ->set('generationState', 'preview_ready')
             ->set('preview', ['assignment' => [], 'unassigned' => [$lessonT->id, $lessonM->id]])
             ->call('openAddPreviewLessonModal', $periodM->id)
-            ->assertSet('addPreviewLessonSearch', '');
+            ->assertSet('addPreviewLessonSearch', '')
+            ->assertSet('addPreviewLessonSource', 'grade')
+            ->set('addPreviewLessonSource', 'missing');
 
         // Prioriza el mismo turno del período destino (M).
         $ordered = $c->instance()->availablePreviewLessons()->pluck('id')->all();
@@ -2199,6 +2201,71 @@ class TimetableWizardTest extends TestCase
             ->flatten()
             ->contains(2));
         $this->assertNotContains($inactiveSection->id, array_keys($parity['subjects'][0]['sections']));
+    }
+
+    public function test_step5_does_not_replace_section_slots_when_preserved_teacher_collides(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shift = $this->shift();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id,
+            'shift_id' => $shift->id,
+            'day_of_week' => 1,
+            'order_in_day' => 1,
+            'is_break' => false,
+        ]);
+        $preserved = $this->pevaluacionFixture($lapso->id);
+        $candidate = $this->pevaluacionFixture($lapso->id);
+        $candidate['pev']->update(['profesor_id' => $preserved['profesor']->id]);
+        $preservedLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $preserved['pev']->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+        $candidateLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $candidate['pev']->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+        TimetableSlot::create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $preservedLesson->id,
+            'period_id' => $period->id,
+            'profesor_id' => $preserved['profesor']->id,
+            'seccion_id' => $preserved['pev']->seccion_id,
+            'is_half_group' => false,
+            'locked' => true,
+            'is_manual_override' => true,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('activeSeccionId', $candidate['pev']->seccion_id)
+            ->set('preview', [
+                'assignment' => [
+                    (string) $candidateLesson->id => [
+                        ['period_id' => $period->id],
+                    ],
+                ],
+            ])
+            ->call('persistCurrentSectionSlots');
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $preservedLesson->id,
+            'period_id' => $period->id,
+        ]);
+        $this->assertDatabaseMissing('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $candidateLesson->id,
+        ]);
     }
 
     public function test_step5_allows_swap_when_both_lessons_have_same_teacher(): void

@@ -322,6 +322,49 @@ class TimetableSolverTest extends TestCase
         $this->assertSame(1, $result->assignment[2][0]->periodId);
     }
 
+    public function test_partial_half_group_lesson_completes_against_existing_half_group(): void
+    {
+        $existingHalfGroup = new LessonToSchedule(
+            lessonId: 1,
+            seccionId: 500,
+            profesorId: 101,
+            shiftId: 10,
+            blocksT: 1,
+            blocksP: 0,
+            isHalfGroup: true,
+            preassignedSlots: [new SlotCandidate(2, null, false)],
+        );
+        $partialHalfGroup = new LessonToSchedule(
+            lessonId: 2,
+            seccionId: 500,
+            profesorId: 102,
+            shiftId: 10,
+            blocksT: 2,
+            blocksP: 0,
+            isHalfGroup: true,
+            preassignedSlots: [new SlotCandidate(3, null, false)],
+        );
+
+        $result = (new TimetableSolver(
+            [$existingHalfGroup, $partialHalfGroup],
+            [101 => [2], 102 => [1, 3]],
+            [],
+            $this->periodMeta,
+            30,
+            2,
+        ))->solve();
+
+        $this->assertTrue($result->isComplete());
+        $this->assertSame([2], array_map(
+            fn (SlotCandidate $slot): int => $slot->periodId,
+            $result->assignment[1],
+        ));
+        $this->assertSame([3, 1], array_map(
+            fn (SlotCandidate $slot): int => $slot->periodId,
+            $result->assignment[2],
+        ));
+    }
+
     public function test_same_subgroup_of_same_section_cannot_share_period(): void
     {
         // Misma sección y MISMO sub-grupo en un único período → infactible.

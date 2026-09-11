@@ -177,6 +177,7 @@ class IndexComponent extends Component
             'seccion.grado',
             'profesor',
             'lapso',
+            'grupoEstable',
         ])
         ->with('activities.lmsPublication')
         ->with('activities.lmsSections')

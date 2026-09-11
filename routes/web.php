@@ -300,6 +300,10 @@ Route::prefix('app')->name('app.')->group(function () {
         // Vista previa (Paso 5): PDF del preview_payload sin publicar el calendario.
         Route::get('/timetable/pdf/preview/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewSection'])
             ->name('timetable.pdf.preview');
+        Route::get('/timetable/pdf/grade-preview/{calendar}/{grado}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewGrade'])
+            ->name('timetable.pdf.grade-preview');
+        Route::get('/timetable/pdf/pestudio-preview/{calendar}/{pestudio}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewPestudio'])
+            ->name('timetable.pdf.pestudio-preview');
 
         // Diagramas de flujo: hub e infografías (documentos estáticos).
         // Cada archivo `docs/infografia/flujo{Studly}.html` se publica como
@@ -366,6 +370,10 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('timetable.pdf.room');
             Route::get('/timetable/pdf/preview/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewSection'])
                 ->name('timetable.pdf.preview');
+            Route::get('/timetable/pdf/grade-preview/{calendar}/{grado}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewGrade'])
+                ->name('timetable.pdf.grade-preview');
+            Route::get('/timetable/pdf/pestudio-preview/{calendar}/{pestudio}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewPestudio'])
+                ->name('timetable.pdf.pestudio-preview');
         });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────

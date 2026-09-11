@@ -3,6 +3,7 @@
 namespace App\Services\Timetable;
 
 use App\Models\app\Timetable\TimetableLesson;
+use App\Models\app\Academy\Pevaluacion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -16,41 +17,70 @@ final class TimetableLessonPersistenceService
      */
     public function persist(int $calendarId, array $lessons): void
     {
+        // Livewire puede rehidratar el payload indexado por pevaluacion_id.
+        // Normalizarlo aquí evita confundir la clave de la fila con una
+        // referencia académica ausente.
+        $lessons = collect($lessons)
+            ->map(function ($lesson, $key): array {
+                $lesson = is_array($lesson) ? $lesson : [];
+                $lesson['pev_id'] = (int) ($lesson['pev_id'] ?? $key);
+
+                return $lesson;
+            })
+            ->all();
+
         $invalidPevaluacionRows = collect($lessons)
             ->map(fn ($lesson, $key) => [
                 'key' => $key,
-                'id' => (int) ($lesson['pev_id'] ?? 0),
+                'id' => (int) $lesson['pev_id'],
             ])
             ->filter(fn ($row) => $row['id'] <= 0);
         $pevaluacionIds = collect($lessons)
-            ->map(fn ($lesson) => (int) ($lesson['pev_id'] ?? 0))
+            ->map(fn ($lesson) => (int) $lesson['pev_id'])
             ->filter()
             ->unique()
             ->values();
-        $existingPevaluacionIds = \App\Models\app\Academy\Pevaluacion::query()
+        $pevaluaciones = Pevaluacion::query()
             ->whereIn('id', $pevaluacionIds)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id);
+            ->get(['id', 'seccion_id'])
+            ->keyBy('id');
+        $existingPevaluacionIds = $pevaluaciones->keys()->map(fn ($id) => (int) $id);
         $missingPevaluacionIds = $pevaluacionIds->diff($existingPevaluacionIds)->values();
+        $sectionMismatches = collect($lessons)
+            ->map(function (array $lesson, $key) use ($pevaluaciones): ?string {
+                $pevaluacion = $pevaluaciones->get((int) $lesson['pev_id']);
+                $lessonSectionId = (int) ($lesson['seccion_id'] ?? 0);
 
-        if ($invalidPevaluacionRows->isNotEmpty() || $missingPevaluacionIds->isNotEmpty()) {
+                if (! $pevaluacion || $lessonSectionId <= 0 || $lessonSectionId === (int) $pevaluacion->seccion_id) {
+                    return null;
+                }
+
+                return "fila {$key}: sección {$lessonSectionId}, Pevaluacion #{$lesson['pev_id']} pertenece a la sección {$pevaluacion->seccion_id}";
+            })
+            ->filter()
+            ->values();
+
+        if ($invalidPevaluacionRows->isNotEmpty() || $missingPevaluacionIds->isNotEmpty() || $sectionMismatches->isNotEmpty()) {
             $invalidIds = $invalidPevaluacionRows
                 ->map(fn ($row) => (string) $row['key'])
                 ->values();
             $references = $missingPevaluacionIds
                 ->map(fn ($id) => '#'.$id)
                 ->merge($invalidIds->map(fn ($key) => "fila {$key} sin ID"))
+                ->merge($sectionMismatches)
                 ->implode(', ');
 
             throw ValidationException::withMessages([
-                'lessons' => 'No se pueden registrar lessons con Pevaluacion inexistente: '
+                'lessons' => ($sectionMismatches->isNotEmpty() && $missingPevaluacionIds->isEmpty() && $invalidPevaluacionRows->isEmpty()
+                    ? 'No se pueden registrar lessons con una sección distinta a su Pevaluacion: '
+                    : 'No se pueden registrar lessons con Pevaluacion inexistente: ')
                     .$references.'.',
             ]);
         }
 
         DB::transaction(function () use ($calendarId, $lessons): void {
             foreach ($lessons as $lesson) {
-                $pevaluacionId = (int) ($lesson['pev_id'] ?? 0);
+                $pevaluacionId = (int) $lesson['pev_id'];
                 if ($pevaluacionId <= 0) {
                     continue;
                 }

@@ -309,6 +309,25 @@ class GenerateTimetableJobTest extends TestCase
         $this->assertSame(4, TimetableSlot::query()->where('calendar_id', $calendar->id)->count());
     }
 
+    public function test_confirm_ignores_duplicate_slots_for_the_same_lesson(): void
+    {
+        $fixture = $this->smallFeasibleFixture();
+
+        GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: true);
+        $payload = $fixture['calendar']->fresh()->preview_payload;
+        $lessonId = (string) $fixture['lessonA']->id;
+        $payload['assignment'][$lessonId][] = $payload['assignment'][$lessonId][0];
+
+        GenerateTimetableJob::dispatchSync(
+            $fixture['calendar']->id,
+            dryRun: false,
+            previewPayload: $payload,
+        );
+
+        $this->assertSame('active', $fixture['calendar']->fresh()->status);
+        $this->assertSame(4, TimetableSlot::query()->where('calendar_id', $fixture['calendar']->id)->count());
+    }
+
     public function test_persisted_slots_have_no_double_booking_per_teacher(): void
     {
         $fixture = $this->smallFeasibleFixture();
