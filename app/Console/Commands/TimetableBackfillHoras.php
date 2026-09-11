@@ -67,6 +67,8 @@ class TimetableBackfillHoras extends Command
 
     public function handle(): int
     {
+        $this->warn('Este comando está deprecado; usa timetable:normalize-legacy-hours como fuente normativa única.');
+
         $lapsoId = (int) $this->option('lapso');
         $force = (bool) $this->option('force');
         $dryRun = (bool) $this->option('dry-run');

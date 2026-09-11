@@ -5,6 +5,7 @@ namespace App\Services\Timetable;
 use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableSlot;
+use App\Services\Timetable\TimetableAvailabilityService;
 
 /**
  * SPEC-TIMETABLE-001 §6 — Validación síncrona de las reglas duras.
@@ -99,18 +100,7 @@ class ConflictValidator
 
         // Disponibilidad del docente en ese bloque (turno · día · bloque).
         $period = TimetablePeriod::query()->find($periodId);
-        $availability = null;
-        if ($period) {
-            $availability = \App\Models\app\Timetable\TimetableTeacherAvailability::query()
-                ->where('calendar_id', $calendarId)
-                ->where('profesor_id', $profesorId)
-                ->where('shift_id', $period->shift_id)
-                ->where('day_of_week', $period->day_of_week)
-                ->where('order_in_day', $period->order_in_day)
-                ->first();
-        }
-
-        if ($availability && ! $availability->is_available) {
+        if ($period && ! app(TimetableAvailabilityService::class)->isAvailable($calendarId, $profesorId, $period)) {
             $reasons[] = 'El docente no está disponible en ese bloque.';
         }
 

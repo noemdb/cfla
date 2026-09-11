@@ -31,14 +31,16 @@
                 Paso {{ $currentStep }} de 5
             </span>
             <button wire:click="refreshWizard"
+                wire:loading.attr="disabled"
+                wire:target="refreshWizard"
                 type="button"
-                title="Refrescar y seleccionar otro calendario"
-                aria-label="Refrescar y seleccionar otro calendario"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 border border-white/5 text-sm font-bold transition-all">
+                title="Reiniciar selección y elegir otro calendario"
+                aria-label="Reiniciar selección y elegir otro calendario"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-sm font-bold transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 9A7 7 0 0117 5.5L20 8M18.5 15A7 7 0 017 18.5L4 16"/>
                 </svg>
-                <span>Refrescar</span>
+                <span>Reiniciar</span>
             </button>
         </div>
     </div>
@@ -148,11 +150,15 @@
                         <div class="flex items-center gap-2">
                             <button wire:click="openEditCalendarForm"
                                 class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Editar</button>
+                            <button wire:click="duplicateCalendar({{ $selectedCalendarDetail['id'] }})"
+                                wire:loading.attr="disabled" wire:target="duplicateCalendar"
+                                class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10">
+                                <span wire:loading.remove wire:target="duplicateCalendar">Duplicar</span>
+                                <span wire:loading wire:target="duplicateCalendar">Duplicando…</span>
+                            </button>
                             @if ($selectedCalendarDetail['status'] === 'draft')
                                 <button wire:click="activateCalendar({{ $selectedCalendarDetail['id'] }})"
                                     class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-200 text-xs font-bold border border-gray-200 dark:border-white/10">Activar</button>
-                                <button wire:click="duplicateCalendar({{ $selectedCalendarDetail['id'] }})"
-                                    class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10">Duplicar</button>
                                 <button wire:click="deleteCalendar({{ $selectedCalendarDetail['id'] }})"
                                     class="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
                             @endif
@@ -205,53 +211,71 @@
                                 </div>
                             </div>
 
-                            <div class="px-4 py-2">
-                                <nav class="flex w-full overflow-x-auto border-b border-gray-200 dark:border-white/10" aria-label="Días del horario">
-                                    @foreach ($selectedCalendarDetail['schedule_blocks'] as $i => $day)
-                                        <button type="button" wire:click="setSelectedScheduleDay({{ $i }})" class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 {{ $selectedScheduleDayIndex === $i ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-emerald-600 dark:hover:text-emerald-400' }}">
-                                            {{ $day['day'] }}
-                                            <span class="ml-1 text-[10px] font-normal normal-case tracking-normal opacity-70">({{ count($day['blocks']) }})</span>
-                                        </button>
-                                    @endforeach
-                                </nav>
+                            @php
+                                $scheduleDays = $selectedCalendarDetail['schedule_blocks'];
+                                $scheduleRows = [];
+                                $scheduleCells = [];
 
-                                @php
-                                    $selectedDay = $selectedCalendarDetail['schedule_blocks'][$selectedScheduleDayIndex] ?? ($selectedCalendarDetail['schedule_blocks'][0] ?? null);
-                                @endphp
+                                foreach ($scheduleDays as $dayIndex => $day) {
+                                    foreach ($day['shift_groups'] ?? [] as $shiftGroup) {
+                                        foreach ($shiftGroup['blocks'] as $block) {
+                                                    $rowKey = $shiftGroup['code'].'-'.$block['order'];
+                                                    $scheduleRows[$rowKey] ??= [
+                                                        'code' => $shiftGroup['code'],
+                                                        'name' => $shiftGroup['name'],
+                                                        'order' => $block['order'],
+                                                    ];
+                                                    $scheduleCells[$rowKey][$dayIndex] = $block;
+                                        }
+                                    }
+                                }
+                            @endphp
 
-                                @if ($selectedDay)
-                                    <div class="mt-2 space-y-3">
-                                        @foreach ($selectedDay['shift_groups'] ?? [] as $shiftGroup)
-                                            <section class="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
-                                                <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                                                    <span class="text-[11px] font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
-                                                        {{ $shiftGroup['name'] }}
-                                                    </span>
-                                                    <span class="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                                                        {{ $shiftGroup['code'] }}
-                                                    </span>
-                                                </div>
-                                                <div class="min-w-[620px] divide-y divide-gray-100 text-xs dark:divide-white/5">
-                                                    @foreach ($shiftGroup['blocks'] as $block)
-                                                        @php $isBreak = $block['type'] === 'Recreo'; @endphp
-                                                        <div class="grid grid-cols-[3rem_1fr_8rem_5rem] items-center gap-3 px-3 py-2 {{ $isBreak ? 'bg-amber-500/5' : 'bg-white/5' }}">
-                                                            <span class="font-bold text-gray-500 dark:text-gray-400">#{{ $block['order'] }}</span>
-                                                            <span class="font-mono font-bold text-gray-800 dark:text-gray-100">
-                                                                {{ $block['start'] }}–{{ $block['end'] }}
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-[860px] table-fixed text-left text-xs">
+                                    <caption class="sr-only">Bloques de horario comparados por día</caption>
+                                    <thead class="border-b border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5">
+                                        <tr class="text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                                    <th scope="col" class="w-36 px-4 py-2.5">Turno · bloque</th>
+                                                    @foreach ($scheduleDays as $day)
+                                                        <th scope="col" class="px-4 py-2.5 text-center">
+                                                            {{ $day['day'] }}
+                                                            <span class="mt-0.5 block text-[9px] font-normal normal-case tracking-normal opacity-70">
+                                                                {{ count($day['blocks']) }} bloques
                                                             </span>
-                                                            <span class="text-gray-500 dark:text-gray-400">{{ $block['shift'] }}</span>
-                                                            <span class="justify-self-start rounded px-1.5 py-0.5 text-[9px] font-bold {{ $isBreak ? 'bg-amber-500/15 text-amber-600 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300' }}">
-                                                                {{ $block['type'] }}
-                                                            </span>
-                                                        </div>
+                                                        </th>
                                                     @endforeach
-                                                </div>
-                                            </section>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                                        @foreach ($scheduleRows as $rowKey => $row)
+                                                    <tr class="bg-white/5">
+                                                        <th scope="row" class="px-4 py-2.5 font-bold text-gray-700 dark:text-gray-200">
+                                                            <span class="block">{{ $row['name'] }}</span>
+                                                            <span class="mt-0.5 block text-[9px] font-normal uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                                                {{ $row['code'] }} · #{{ $row['order'] }}
+                                                            </span>
+                                                        </th>
+                                                        @foreach ($scheduleDays as $dayIndex => $day)
+                                                            @php $block = $scheduleCells[$rowKey][$dayIndex] ?? null; @endphp
+                                                            @if ($block)
+                                                                @php $isBreak = $block['type'] === 'Recreo'; @endphp
+                                                                <td class="px-3 py-2.5 text-center {{ $isBreak ? 'bg-amber-500/5' : '' }}">
+                                                                    <span class="block font-mono font-bold text-gray-800 dark:text-gray-100">
+                                                                        {{ $block['start'] }}–{{ $block['end'] }}
+                                                                    </span>
+                                                                    <span class="mt-1 inline-flex rounded px-1.5 py-0.5 text-[9px] font-bold {{ $isBreak ? 'bg-amber-500/15 text-amber-600 dark:text-amber-300' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300' }}">
+                                                                        {{ $block['type'] }}
+                                                                    </span>
+                                                                </td>
+                                                            @else
+                                                                <td class="px-3 py-2.5 text-center text-gray-300 dark:text-gray-600">—</td>
+                                                            @endif
+                                                        @endforeach
+                                                    </tr>
                                         @endforeach
-                                    </div>
-                                @else
-                                    <div class="mt-3 text-xs text-gray-500">No hay bloques para el día seleccionado.</div>
-                                @endif
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     @else
@@ -722,11 +746,48 @@
                                 Aplicando…
                             </span>
                         </button>
+                        <button type="button" wire:click="resetLessonCheckboxes"
+                            wire:loading.attr="disabled" wire:target="resetLessonCheckboxes"
+                            wire:loading.class="opacity-50 cursor-not-allowed"
+                            class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/20">
+                            <span wire:loading.remove wire:target="resetLessonCheckboxes">Desmarcar todo</span>
+                            <span wire:loading wire:target="resetLessonCheckboxes">Reiniciando…</span>
+                        </button>
                         @if (isset($step3Warnings) && count($step3Warnings))
                             <span class="text-[11px] text-amber-500">⚠ {{ count($step3Warnings) }} lección(es) con advertencia</span>
                         @endif
                     </div>
                 </div>
+
+                @php $orphanLessons = $this->timetableOrphanLessons(); @endphp
+                @if ($orphanLessons !== [])
+                    <div class="mb-4 rounded-lg border border-red-500/40 bg-red-500/5 px-4 py-3" role="alert">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                                <div class="text-xs font-bold uppercase tracking-widest text-red-500">
+                                    Lessons con referencia académica huérfana
+                                </div>
+                                <p class="mt-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                    Estas lessons ya están registradas, pero su Pevaluación no existe. No se pueden editar ni publicar hasta restaurar la Pevaluación o retirar la lesson.
+                                </p>
+                            </div>
+                            <span class="rounded-md bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-500">{{ count($orphanLessons) }}</span>
+                        </div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach ($orphanLessons as $orphanLesson)
+                                <span class="rounded border border-red-500/30 bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-600 dark:text-red-300">
+                                    Lesson #{{ $orphanLesson['id'] }} · Pevaluacion #{{ $orphanLesson['pevaluacion_id'] }} · {{ $orphanLesson['blocks'] }} bloque(s)
+                                </span>
+                            @endforeach
+                        </div>
+                        <button type="button" wire:click="confirmRemoveOrphanLessons"
+                            wire:loading.attr="disabled" wire:target="confirmRemoveOrphanLessons"
+                            class="mt-3 inline-flex items-center rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-[11px] font-bold text-red-600 transition hover:bg-red-500/20 dark:text-red-300">
+                            <span wire:loading.remove wire:target="confirmRemoveOrphanLessons">Retirar lessons huérfanas</span>
+                            <span wire:loading wire:target="confirmRemoveOrphanLessons">Preparando…</span>
+                        </button>
+                    </div>
+                @endif
 
                 {{-- Pestañas · Pestudio --}}
                 @if ($step3ViewMode === 'tabs' && $tabPestudioOptions)
@@ -792,32 +853,168 @@
                             }
                         }
                     }
+                    $bulkSectionId = is_numeric($activeSeccionId) ? (int) $activeSeccionId : null;
+                    $selectedPevIdsForView = collect($selectedPevs)->contains(fn ($value) => is_bool($value))
+                        ? array_flip(array_map('intval', array_keys(array_filter($selectedPevs))))
+                        : array_flip(array_map('intval', array_filter($selectedPevs, fn ($value) => is_numeric($value) && $value > 0)));
+                    $bulkSectionSelected = $bulkSectionId !== null
+                        && $rows->isNotEmpty()
+                        && $rows->every(fn ($pev) => isset($selectedPevIdsForView[(int) $pev->id]));
                 @endphp
 
                 {{-- Resumen de la selección (bloques teóricos/prácticos + capacidad) --}}
                 @if ($rows->isNotEmpty())
                     @php
-                        // Capacidad en la MISMA unidad que lo requerido (semanal):
-                        // bloques de clase por día del turno × 5 días (Lun–Vie).
-                        $capacidadPorDia = collect($shiftCapacityPerDay ?? [])->max() ?: 0;
+                        // La capacidad pertenece al calendario completo: cada turno
+                        // aporta sus propias celdas semanales y no debe descartarse
+                        // al elegir solo el máximo entre turnos.
+                        $capacidadesPorTurno = collect($shiftCapacityPerDay ?? [])
+                            ->filter(fn ($capacity) => (int) $capacity > 0);
+                        $capacidadPorDia = $capacidadesPorTurno->sum();
                         $capacidadSemanal = $capacidadPorDia * 5;
                         $maxSubjectsPerPeriod = max(1, (int) ($maxSubjectsPerPeriod ?? 2));
                         $fullGroupBlocks = $selectedT + $selectedP - $selectedHalfBlocks;
                         $required = $fullGroupBlocks + (int) ceil($selectedHalfBlocks / $maxSubjectsPerPeriod);
                         $overCapacity = $capacidadSemanal > 0 && $required > $capacidadSemanal;
                         $usage = $capacidadSemanal > 0 ? min(100, (int) round($required * 100 / $capacidadSemanal)) : 0;
+                        $shiftCapacityStatus = collect($shifts)->map(function ($shift) use (
+                            $rows,
+                            $selectedPevIdsForView,
+                            $lessons,
+                            $shiftCapacityPerDay,
+                            $maxSubjectsPerPeriod
+                        ) {
+                            $shiftId = (int) $shift->id;
+                            $capacityPerDay = (int) ($shiftCapacityPerDay[$shiftId] ?? 0);
+                            $capacity = $capacityPerDay * 5;
+                            $blocks = 0;
+                            $halfBlocks = 0;
+
+                            foreach ($rows as $pev) {
+                                if (! isset($selectedPevIdsForView[(int) $pev->id])) {
+                                    continue;
+                                }
+
+                                $lesson = $lessons[$pev->id] ?? null;
+                                if (! $lesson || (int) ($lesson['shift_id'] ?? 0) !== $shiftId) {
+                                    continue;
+                                }
+
+                                $lessonBlocks = (int) ($lesson['weekly_blocks_t'] ?? 0)
+                                    + (int) ($lesson['weekly_blocks_p'] ?? 0);
+                                $blocks += $lessonBlocks;
+                                if (! empty($lesson['is_half_group'])) {
+                                    $halfBlocks += $lessonBlocks;
+                                }
+                            }
+
+                            $required = $blocks - $halfBlocks
+                                + (int) ceil($halfBlocks / max(1, $maxSubjectsPerPeriod));
+                            $remaining = $capacity - $required;
+
+                            if ($capacity <= 0) {
+                                $status = 'empty';
+                                $label = 'Sin slots';
+                            } elseif ($remaining < 0) {
+                                $status = 'overflow';
+                                $label = 'Desbordado';
+                            } elseif ($remaining === 0) {
+                                $status = 'full';
+                                $label = 'Completo';
+                            } else {
+                                $status = 'available';
+                                $label = 'Disponible';
+                            }
+
+                            return [
+                                'id' => $shiftId,
+                                'name' => $shift->name,
+                                'code' => $shift->code,
+                                'capacity' => $capacity,
+                                'required' => $required,
+                                'remaining' => $remaining,
+                                'status' => $status,
+                                'label' => $label,
+                            ];
+                        })->values();
                     @endphp
                     <div class="mb-3 px-3 py-2 rounded-lg {{ $overCapacity ? 'bg-amber-500/5 border border-amber-500/30 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/5 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' }} text-xs flex flex-wrap items-center gap-2">
                         <span>{{ $rows->count() }} asignatura(s) · {{ $selectedT }} bloques teóricos · {{ $selectedP }} bloques prácticos · {{ $required }} celdas/semana</span>
                         @if ($capacidadSemanal > 0)
                             <span class="font-bold {{ $overCapacity ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400' }}">
-                                · Capacidad del turno: {{ $capacidadSemanal }} celdas/semana ({{ $capacidadPorDia }}/día × 5 días)
+                                · Capacidad de los turnos: {{ $capacidadSemanal }} celdas/semana ({{ $capacidadPorDia }}/día × 5 días)
                                 · Máximo {{ $maxSubjectsPerPeriod }} asignatura(s)/período
                                 · Uso {{ $usage }}%
                                 {{ $overCapacity ? '⚠ excede ('.($required - $capacidadSemanal).' de más)' : '✓' }}
                             </span>
                         @endif
                     </div>
+                    @if ($shiftCapacityStatus->isNotEmpty())
+                        <div class="mb-4 rounded-lg border border-gray-200/80 bg-gray-50/70 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                    Capacidad por turno
+                                </span>
+                                <span class="text-[10px] text-gray-400 dark:text-gray-500">
+                                    La carga se compara con los slots del turno seleccionado
+                                </span>
+                            </div>
+                            <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                @foreach ($shiftCapacityStatus as $shiftStatus)
+                                    @php
+                                        $statusStyles = match ($shiftStatus['status']) {
+                                            'available' => [
+                                                'container' => 'border-emerald-500/20 bg-emerald-500/[0.04]',
+                                                'dot' => 'bg-emerald-500',
+                                                'label' => 'text-emerald-700 dark:text-emerald-300',
+                                                'detail' => 'text-emerald-700/80 dark:text-emerald-300/80',
+                                            ],
+                                            'full' => [
+                                                'container' => 'border-sky-500/20 bg-sky-500/[0.04]',
+                                                'dot' => 'bg-sky-500',
+                                                'label' => 'text-sky-700 dark:text-sky-300',
+                                                'detail' => 'text-sky-700/80 dark:text-sky-300/80',
+                                            ],
+                                            'overflow' => [
+                                                'container' => 'border-amber-500/30 bg-amber-500/[0.06]',
+                                                'dot' => 'bg-amber-500',
+                                                'label' => 'text-amber-700 dark:text-amber-300',
+                                                'detail' => 'text-amber-700/80 dark:text-amber-300/80',
+                                            ],
+                                            default => [
+                                                'container' => 'border-gray-300/80 bg-gray-500/[0.04]',
+                                                'dot' => 'bg-gray-400',
+                                                'label' => 'text-gray-600 dark:text-gray-300',
+                                                'detail' => 'text-gray-500 dark:text-gray-400',
+                                            ],
+                                        };
+                                    @endphp
+                                    <div class="rounded-md border px-2.5 py-2 {{ $statusStyles['container'] }}">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex min-w-0 items-center gap-1.5">
+                                                <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $statusStyles['dot'] }}" aria-hidden="true"></span>
+                                                <span class="truncate text-[11px] font-bold text-gray-700 dark:text-gray-200">
+                                                    {{ $shiftStatus['name'] }}
+                                                    <span class="font-normal text-gray-400 dark:text-gray-500">({{ $shiftStatus['code'] }})</span>
+                                                </span>
+                                            </div>
+                                            <span class="shrink-0 text-[10px] font-extrabold {{ $statusStyles['label'] }}">
+                                                {{ $shiftStatus['label'] }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-1 text-[10px] {{ $statusStyles['detail'] }}">
+                                            {{ $shiftStatus['required'] }} / {{ $shiftStatus['capacity'] }} celdas
+                                            @if ($shiftStatus['status'] === 'available')
+                                                · {{ $shiftStatus['remaining'] }} libres
+                                            @elseif ($shiftStatus['status'] === 'overflow')
+                                                · {{ abs($shiftStatus['remaining']) }} de más
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 @endif
 
                 <div class="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
@@ -843,6 +1040,29 @@
                                 Sincronizando…
                             </span>
                         </button>
+                        @if ($step3ViewMode === 'tabs' && is_numeric($activeSeccionId))
+                            <div class="inline-flex items-center gap-1.5">
+                                <select wire:model="replicateToSeccionId"
+                                    title="Sección destino para replicar las lecciones"
+                                    class="max-w-[16rem] rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-500 dark:text-gray-300">
+                                    <option value="">Replicar a sección…</option>
+                                    @foreach ($tabSeccionOptions as $sectionOption)
+                                        @if ((int) $sectionOption['id'] !== (int) $activeSeccionId)
+                                            <option value="{{ $sectionOption['id'] }}">{{ $sectionOption['label'] }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <button wire:click="replicateLessonsToSection"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="replicateLessonsToSection"
+                                    title="Copiar las lecciones configuradas a la sección seleccionada"
+                                    class="inline-flex items-center gap-1.5 rounded-md bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-700 transition-colors hover:bg-indigo-500/20 dark:text-indigo-300">
+                                    <span wire:loading.remove wire:target="replicateLessonsToSection">Replicar</span>
+                                    <span wire:loading wire:target="replicateLessonsToSection">Replicando…</span>
+                                </button>
+                            </div>
+                        @endif
                     </span>
                 </div>
 
@@ -850,11 +1070,23 @@
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800/80">
                             <tr class="text-left text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                                <th class="px-3 py-2">
-                                    <input type="checkbox" wire:click="toggleSelectAll" title="Seleccionar todo"
-                                        class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                <th colspan="2" class="px-3 py-2">
+                                    <span class="inline-flex items-center gap-2">
+                                        @if ($step3ViewMode === 'tabs' && $bulkSectionId !== null)
+                                            @php
+                                                $bulkSectionLabel = collect($tabSeccionOptions)
+                                                    ->firstWhere('id', $bulkSectionId)['label'] ?? 'la sección activa';
+                                            @endphp
+                                            <input type="checkbox"
+                                                wire:key="bulk-select-section-{{ $bulkSectionId }}-{{ $selectionResetToken }}"
+                                                wire:click="toggleSelectAllForSection({{ $bulkSectionId }})"
+                                                title="Seleccionar todas las asignaturas de {{ $bulkSectionLabel }}"
+                                                @checked($bulkSectionSelected)
+                                                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                        @endif
+                                        <span>Asignatura · Sección</span>
+                                    </span>
                                 </th>
-                                <th class="px-3 py-2">Asignatura · Sección</th>
                                 <th class="px-3 py-2">Profesor</th>
                                 <th class="px-3 py-2">T</th>
                                 <th class="px-3 py-2">P</th>
@@ -875,7 +1107,9 @@
                                 @endphp
                                 <tr class="border-t border-gray-100 dark:border-white/5 {{ $selected ? 'bg-emerald-500/5' : '' }}">
                                     <td class="px-3 py-2">
-                                        <input type="checkbox" wire:model.live="selectedPevs.{{ $pev->id }}"
+                                        <input type="checkbox"
+                                            wire:key="select-pev-{{ $pev->id }}-{{ $selectionResetToken }}"
+                                            wire:model.live="selectedPevs.{{ $pev->id }}"
                                             class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
                                     </td>
                                     <td class="px-3 py-2 text-gray-900 dark:text-gray-200 font-medium">{{ $pev->pensum?->asignatura?->name }}{{ $pev->grupoEstable?->name ? ' · '.$pev->grupoEstable->name : '' }}</td>
@@ -987,6 +1221,7 @@
                     <span class="text-xs text-gray-500 dark:text-gray-400">Los bloques se derivan de <code>hour_t_week/hour_p_week</code> y la duración del bloque.</span>
                     <div class="flex items-center gap-2">
                         <button wire:click="autosaveLessons"
+                            @disabled($step3SelectedCount === 0)
                             wire:loading.attr="disabled"
                             wire:loading.class="opacity-50 cursor-not-allowed"
                             wire:target="autosaveLessons"
@@ -1016,6 +1251,7 @@
                             </span>
                         </button>
                         <button wire:click="saveLessons"
+                            @disabled($step3SelectedCount === 0)
                             wire:loading.attr="disabled"
                             wire:loading.class="opacity-50 cursor-not-allowed"
                             wire:target="saveLessons"
@@ -1041,9 +1277,9 @@
             <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
                 <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
                     <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">4 · Disponibilidad docente</h2>
-                    <button wire:click="setAllAvailable" wire:loading.attr="disabled" wire:target="setAllAvailable"
+                    <button wire:click="setAllAvailable" @disabled($step3SelectedCount === 0) wire:loading.attr="disabled" wire:target="setAllAvailable"
                         class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-200 text-sm font-bold border border-white/10">
-                        Marcar 100% disponible (todos los profesores activos)
+                        Marcar 100% disponible (profesores de asignaturas seleccionadas)
                     </button>
                 </div>
 
@@ -1152,8 +1388,8 @@
                 @endif
 
                 <div class="mt-5 flex items-center gap-3">
-                    <button wire:click="saveAvailability" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar disponibilidad</button>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Se guarda la disponibilidad del profesor seleccionado.</span>
+                    <button wire:click="saveAvailability" @disabled($step3SelectedCount === 0) class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar disponibilidad</button>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Solo se guarda la disponibilidad vinculada a las asignaturas seleccionadas en el paso 3.</span>
                 </div>
             </div>
         </div>
@@ -1166,21 +1402,29 @@
                 <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">5 · Generar horario</h2>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <button wire:click="runDryRun" wire:loading.attr="disabled" wire:target="runDryRun"
+                    <button wire:click="runDryRun" @disabled($step3SelectedCount === 0) wire:loading.attr="disabled" wire:target="runDryRun"
                         class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
                         <span wire:loading.remove wire:target="runDryRun">Previsualizar (dry-run)</span>
                         <span wire:loading wire:target="runDryRun">Generando…</span>
                     </button>
 
                     @if ($generationState === 'preview_ready' && $preview)
-                        <button wire:click="updateDraftPreview" wire:loading.attr="disabled" wire:target="updateDraftPreview"
+                        {{-- <button wire:click="updateDraftPreview" wire:loading.attr="disabled" wire:target="updateDraftPreview"
                             class="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
                             <span wire:loading.remove wire:target="updateDraftPreview">Actualizar borrador</span>
                             <span wire:loading wire:target="updateDraftPreview">Actualizando…</span>
-                        </button>
+                        </button> --}}
                         <button wire:click="confirmAndPublish" wire:loading.attr="disabled" wire:target="confirmAndPublish"
                             class="px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold">
                             Confirmar y publicar
+                        </button>
+                        <button wire:click="undoLastPreviewChange" wire:loading.attr="disabled"
+                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                            Deshacer último cambio
+                        </button>
+                        <button wire:click="restoreGeneratedPreview" wire:loading.attr="disabled"
+                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                            Restaurar dry-run
                         </button>
                     @endif
 
@@ -1189,6 +1433,77 @@
                     @endif
                 </div>
 
+                @if ($generationState === 'preview_ready' && $preview)
+                    @php $publicationReadiness = $this->publicationReadiness(); @endphp
+                    @php $displayHardConflicts = $publicationReadiness['display_hard_conflicts'] ?? []; @endphp
+                    <div class="mt-4 grid grid-cols-2 gap-2 md:grid-cols-5" aria-label="Resumen de publicación">
+                        <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                            <div class="text-[10px] uppercase tracking-wide text-gray-500">Cobertura</div>
+                            <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">{{ $publicationReadiness['quality']['coverage'] ?? 0 }}%</div>
+                        </div>
+                        <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                            <div class="text-[10px] uppercase tracking-wide text-gray-500">Asignadas</div>
+                            <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">{{ $publicationReadiness['assigned'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                            <div class="text-[10px] uppercase tracking-wide text-gray-500">Sin asignar</div>
+                            <div class="mt-1 text-sm font-bold text-amber-600">{{ $publicationReadiness['unassigned'] ?? 0 }}</div>
+                        </div>
+                        <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                            <div class="text-[10px] uppercase tracking-wide text-gray-500">Bloqueantes</div>
+                            <div class="mt-1 text-sm font-bold {{ !empty($publicationReadiness['hard_conflicts']) ? 'text-red-500' : 'text-emerald-600' }}">{{ count($publicationReadiness['hard_conflicts'] ?? []) }}</div>
+                        </div>
+                        <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                            <div class="text-[10px] uppercase tracking-wide text-gray-500">Calidad</div>
+                            <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">{{ $publicationReadiness['quality']['score'] ?? 0 }}/100</div>
+                        </div>
+                    </div>
+                    @if (!empty($displayHardConflicts))
+                        <details class="mt-4 rounded-lg border border-red-500/30 bg-red-500/5" open>
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-500">
+                                <span>Detalle de conflictos bloqueantes</span>
+                                <span class="rounded-md bg-red-500/10 px-2 py-1">{{ count($displayHardConflicts) }}</span>
+                            </summary>
+                            <div class="space-y-2 border-t border-red-500/20 px-4 pb-4 pt-3">
+                                @foreach ($displayHardConflicts as $conflict)
+                                    <div class="rounded-md border border-red-500/20 bg-white/5 p-3">
+                                        <div class="flex flex-wrap items-start justify-between gap-2">
+                                            <div>
+                                                <div class="text-xs font-bold text-gray-800 dark:text-gray-100">{{ $conflict['title'] ?? 'Conflicto bloqueante' }}</div>
+                                                <div class="mt-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                                    {{ $conflict['subject'] ?? 'Asignatura sin nombre' }}
+                                                    · Sección {{ $conflict['section'] ?? '—' }}
+                                                    · {{ $conflict['teacher'] ?? 'Sin docente' }}
+                                                </div>
+                                            </div>
+                                            <span class="rounded bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-500">
+                                                Lesson #{{ $conflict['lesson_id'] ?? '—' }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-2 text-[11px] text-red-600 dark:text-red-300">
+                                            <strong>Período:</strong> {{ $conflict['period'] ?? 'Sin período válido' }}
+                                        </div>
+                                        @if (($conflict['type'] ?? '') === 'missing_pevaluacion')
+                                            <div class="mt-2 rounded-md bg-red-500/10 px-2.5 py-2 text-[11px] text-red-600 dark:text-red-300">
+                                                La lesson referencia la Pevaluación #{{ $conflict['pevaluacion_id'] ?? '—' }},
+                                                pero ese registro académico no existe.
+                                                {{ $conflict['resolution'] ?? 'Restaura la Pevaluacion o retira la lesson del calendario.' }}
+                                            </div>
+                                        @endif
+                                        @if (($conflict['type'] ?? '') === 'incomplete_assignment')
+                                            <div class="mt-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                                Asignados: <strong>{{ $conflict['assigned_blocks'] }}</strong>
+                                                · Requeridos: <strong>{{ $conflict['required_blocks'] }}</strong>
+                                                · Faltan: <strong class="text-red-500">{{ $conflict['missing_blocks'] }}</strong>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </details>
+                    @endif
+                @endif
+
                 @if ($generationState === 'generating')
                     <div class="mt-4 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -1196,7 +1511,7 @@
                     </div>
                 @endif
 
-                @if ($generationState === 'preview_ready' && $preview)
+                @if (in_array($generationState, ['preview_ready', 'published'], true) && $preview)
                     <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="p-4 rounded-lg bg-white/5 border border-white/10">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Asignadas</div>
@@ -1213,8 +1528,9 @@
                     </div>
 
                     @php
-                        $activeConflictGroup = $generationConflictGroups[(int) ($activeSeccionId ?? 0)]
-                            ?? collect($generationConflictGroups)->first();
+                        $activeConflictGroup = is_numeric($activeSeccionId)
+                            ? ($generationConflictGroups[(int) $activeSeccionId] ?? null)
+                            : null;
                     @endphp
                     {{-- @if ($activeConflictGroup)
                             <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
@@ -1298,10 +1614,13 @@
                     {{-- Checklist pre-publicación: revisar antes de «Confirmar y publicar» --}}
                     @php $checklist = $this->publishChecklist(); @endphp
                     @if ($checklist !== [] && ($checklist['sin_asignar'] > 0 || $checklist['asignadas'] === 0))
-                        <div class="mt-4 p-4 rounded-lg {{ $checklist['sin_asignar'] > 0 ? 'bg-amber-500/5 border border-amber-500/30' : 'bg-red-500/5 border border-red-500/30' }}">
-                            <div class="text-[10px] font-bold uppercase tracking-widest {{ $checklist['sin_asignar'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500' }} mb-2">
-                                ⚠ Revisa antes de publicar
-                            </div>
+                        @php $actionableConflictGroups = $generationConflictGroups ?? []; @endphp
+                        <details class="mt-4 rounded-lg {{ $checklist['sin_asignar'] > 0 ? 'bg-amber-500/5 border border-amber-500/30' : 'bg-red-500/5 border border-red-500/30' }}">
+                            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-[10px] font-bold uppercase tracking-widest {{ $checklist['sin_asignar'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500' }}">
+                                <span>⚠ Revisa antes de publicar</span>
+                                <span class="text-base leading-none transition-transform details-open:rotate-180" aria-hidden="true">⌄</span>
+                            </summary>
+                            <div class="border-t {{ $checklist['sin_asignar'] > 0 ? 'border-amber-500/20' : 'border-red-500/20' }} px-4 pb-4 pt-3">
                             <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
                                 @if ($checklist['sin_asignar'] > 0)
                                     <li>• <strong>{{ $checklist['sin_asignar'] }}</strong> lección(es) sin asignar quedarán como conflictos <code>unassigned</code>.</li>
@@ -1314,7 +1633,85 @@
                                 @endif
                                 <li>• Calidad del horario: <strong>{{ $checklist['calidad'] }}%</strong> asignado · {{ $checklist['secciones_con_horario'] }} sección(es) con horario.</li>
                             </ul>
-                        </div>
+
+                            @if ($actionableConflictGroups !== [])
+                                <div class="mt-4 space-y-3 border-t border-amber-500/20 pt-3">
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                        Incidencias que requieren revisión
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        @foreach ($actionableConflictGroups as $conflictGroup)
+                                            @foreach ($conflictGroup['items'] as $conflictItem)
+                                                <div class="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-[11px] text-gray-700 dark:text-gray-200">
+                                                    <span class="font-bold">{{ $conflictGroup['grade'] }}</span>
+                                                    <span class="text-gray-400 dark:text-gray-500">·</span>
+                                                    <span>Sección {{ $conflictGroup['section'] }}</span>
+                                                    <span class="text-gray-400 dark:text-gray-500">·</span>
+                                                    <span class="font-semibold">{{ $conflictItem['subject'] }}</span>
+                                                </div>
+                                            @endforeach
+                                        @endforeach
+                                    </div>
+                                    <div class="pt-1 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                        Detalle para resolver
+                                    </div>
+                                    @foreach ($actionableConflictGroups as $conflictGroup)
+                                        <details class="rounded-lg border border-amber-500/20 bg-white/5 px-3 py-2" @if ($loop->first) open @endif>
+                                            <summary class="cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-200">
+                                                {{ $conflictGroup['grade'] }} · Sección {{ $conflictGroup['section'] }} · #{{ $conflictGroup['section_id'] }}
+                                                <span class="ml-1 font-normal text-red-500">({{ $conflictGroup['count'] }} sin asignar)</span>
+                                            </summary>
+                                            <div class="mt-3 space-y-3">
+                                                @foreach ($conflictGroup['items'] as $conflictItem)
+                                                    <div class="rounded-lg border border-white/10 bg-black/5 dark:bg-white/[0.03] p-3 text-[11px]">
+                                                        <div class="flex flex-wrap items-start justify-between gap-2">
+                                                            <div>
+                                                                <div class="font-bold text-gray-800 dark:text-gray-100">{{ $conflictItem['subject'] }}</div>
+                                                                <div class="mt-0.5 text-gray-500 dark:text-gray-400">
+                                                                    Docente: {{ $conflictItem['teacher'] ?: 'No asignado' }}
+                                                                    · Turno: {{ $conflictItem['shift'] }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex gap-1">
+                                                                <span class="rounded bg-white/10 px-1.5 py-0.5 text-gray-500 dark:text-gray-300">T {{ $conflictItem['blocks_t'] }}</span>
+                                                                <span class="rounded bg-white/10 px-1.5 py-0.5 text-gray-500 dark:text-gray-300">P {{ $conflictItem['blocks_p'] }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2 rounded-md bg-red-500/10 px-2.5 py-2 text-red-600 dark:text-red-300">
+                                                            <strong>Causa:</strong> {{ $conflictItem['reason'] }}
+                                                        </div>
+                                                        <div class="mt-2 text-gray-500 dark:text-gray-400">
+                                                            Candidatos: <strong>{{ $conflictItem['available_periods'] }}</strong>
+                                                            · Libres: <strong class="{{ $conflictItem['free_periods'] < $conflictItem['required_periods'] ? 'text-red-500' : '' }}">{{ $conflictItem['free_periods'] }}</strong>
+                                                            · Necesarios: <strong>{{ $conflictItem['required_periods'] }}</strong>
+                                                        </div>
+                                                        @if (! empty($conflictItem['assigned_blocks']))
+                                                            <div class="mt-2 rounded-md bg-white/5 px-2.5 py-2 text-gray-600 dark:text-gray-300">
+                                                                <strong>Bloque asociado:</strong>
+                                                                {{ implode(' · ', $conflictItem['assigned_blocks']) }}
+                                                            </div>
+                                                        @endif
+                                                        @if (($conflictItem['section_blocked_periods'] ?? 0) || ($conflictItem['teacher_occupied_periods'] ?? 0) || ($conflictItem['room_unavailable_periods'] ?? 0))
+                                                            <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                                                                @if (($conflictItem['section_blocked_periods'] ?? 0) > 0) Sección ocupada: {{ $conflictItem['section_blocked_periods'] }} @endif
+                                                                @if (($conflictItem['teacher_occupied_periods'] ?? 0) > 0) · Docente ocupado: {{ $conflictItem['teacher_occupied_periods'] }} @endif
+                                                                @if (($conflictItem['room_unavailable_periods'] ?? 0) > 0) · Aula no disponible: {{ $conflictItem['room_unavailable_periods'] }} @endif
+                                                            </div>
+                                                        @endif
+                                                        <ul class="mt-2 space-y-1 text-gray-600 dark:text-gray-300">
+                                                            @foreach ($conflictItem['actions'] as $action)
+                                                                <li class="flex gap-1.5"><span class="text-emerald-500">→</span><span>{{ $action }}</span></li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </details>
+                                    @endforeach
+                                </div>
+                            @endif
+                            </div>
+                        </details>
                     @elseif ($checklist !== [])
                         <div class="mt-4 px-4 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/30 text-xs text-emerald-600 dark:text-emerald-400">
                             ✓ Checklist OK: {{ $checklist['asignadas'] }} clases asignadas · {{ $checklist['secciones_con_horario'] }} sección(es) · calidad {{ $checklist['calidad'] }}%
@@ -1325,7 +1722,7 @@
                     <div class="mt-6 space-y-4">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                             <h3 class="text-sm font-bold text-gray-900 dark:text-white">Horario previsualizado</h3>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Elige pestudio · grado · sección</span>
+                            {{-- <span class="text-xs text-gray-500 dark:text-gray-400">Elige pestudio · grado · sección</span> --}}
                         </div>
 
                         {{-- Pestañas · Pestudio --}}
@@ -1374,10 +1771,154 @@
                         @endif
 
                         @php $secGrid = $sectionPreviewGrid ?? []; @endphp
+                        @if ($sectionSlotParity && count($sectionSlotParity['sections']) > 1)
+                            <details class="mb-4 rounded-lg border {{ $sectionSlotParity['balanced'] ? 'border-emerald-500/20 bg-emerald-500/[0.03]' : 'border-amber-500/25 bg-amber-500/[0.04]' }}">
+                                <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[10px] font-bold uppercase tracking-widest {{ $sectionSlotParity['balanced'] ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' }}">
+                                    <span>Equidad de slots · {{ $sectionSlotParity['grade'] }}</span>
+                                    <span class="flex items-center gap-2 normal-case tracking-normal">
+                                        <span>{{ $sectionSlotParity['balanced'] ? '✓ Todas iguales' : '⚠ Diferencia de '.$sectionSlotParity['delta'].' slot(s)' }}</span>
+                                        <span class="text-base leading-none transition-transform details-open:rotate-180" aria-hidden="true">⌄</span>
+                                    </span>
+                                </summary>
+                                <div x-data="{ parityTab: 'sections' }" class="border-t {{ $sectionSlotParity['balanced'] ? 'border-emerald-500/15' : 'border-amber-500/20' }} px-4 pb-3 pt-3">
+                                    <p class="mb-3 text-xs text-gray-600 dark:text-gray-300">
+                                        Por regla general, las secciones de un mismo grado deben mantener la misma cantidad de slots llenos.
+                                        @if ($sectionSlotParity['balanced'])
+                                            La distribución actual está equilibrada.
+                                        @else
+                                            La sección con más carga tiene {{ $sectionSlotParity['delta'] }} slot(s) más que la sección con menos carga.
+                                        @endif
+                                    </p>
+                                    <div class="mb-3 flex gap-1 border-b border-gray-200 dark:border-white/10">
+                                        <button type="button" x-on:click="parityTab = 'sections'"
+                                            class="border-b-2 px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest transition-colors"
+                                            :class="parityTab === 'sections' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-300' : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'">
+                                            Por sección
+                                        </button>
+                                        <button type="button" x-on:click="parityTab = 'subjects'"
+                                            class="border-b-2 px-3 py-2 text-[10px] font-extrabold uppercase tracking-widest transition-colors"
+                                            :class="parityTab === 'subjects' ? 'border-emerald-500 text-emerald-700 dark:text-emerald-300' : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'">
+                                            Por asignatura
+                                        </button>
+                                    </div>
+
+                                    <div x-show="parityTab === 'sections'" x-cloak>
+                                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                            @foreach ($sectionSlotParity['sections'] as $paritySection)
+                                                <div class="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                                                    <div class="flex items-center justify-between gap-2">
+                                                        <span class="truncate text-xs font-bold text-gray-800 dark:text-gray-100">
+                                                            Sección {{ $paritySection['name'] }}
+                                                        </span>
+                                                        <span class="shrink-0 text-sm font-extrabold {{ $paritySection['filled_slots'] === $sectionSlotParity['max'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-200' }}">
+                                                            {{ $paritySection['filled_slots'] }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                                        slot(s) llenos · {{ $paritySection['assigned_lessons'] }} asignatura(s) con horario
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <div x-show="parityTab === 'subjects'" x-cloak>
+                                        <p class="mb-3 text-[11px] text-gray-500 dark:text-gray-400">
+                                            Comparativa de bloques/slots asignados por asignatura entre las secciones asociadas a {{ $sectionSlotParity['grade'] }}.
+                                        </p>
+                                        <div class="overflow-x-auto rounded-md border border-white/10">
+                                            <table class="min-w-full text-left">
+                                                <thead class="bg-black/5 dark:bg-white/[0.03]">
+                                                    <tr class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                                        <th class="min-w-[15rem] px-3 py-2">Asignatura</th>
+                                                        @foreach ($sectionSlotParity['sections'] as $paritySection)
+                                                            <th class="min-w-[7rem] px-3 py-2 text-center">Sección {{ $paritySection['name'] }}</th>
+                                                        @endforeach
+                                                        <th class="min-w-[7rem] px-3 py-2 text-center">Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-gray-200/80 dark:divide-white/10">
+                                                    @forelse ($sectionSlotParity['subjects'] as $paritySubject)
+                                                        <tr class="text-[11px] text-gray-700 dark:text-gray-200">
+                                                            <td class="px-3 py-2.5">
+                                                                <div class="font-bold">{{ $paritySubject['name'] }}</div>
+                                                                <div class="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">
+                                                                    Total del grupo: {{ array_sum($paritySubject['sections']) }} slot(s)
+                                                                </div>
+                                                            </td>
+                                                            @foreach ($sectionSlotParity['sections'] as $paritySection)
+                                                                @php $subjectSlots = (int) ($paritySubject['sections'][$paritySection['id']] ?? 0); @endphp
+                                                                <td class="px-3 py-2.5 text-center">
+                                                                    <span class="inline-flex min-w-[2rem] items-center justify-center rounded-md px-2 py-1 font-extrabold {{ $subjectSlots === $paritySubject['max'] ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : ($subjectSlots < $paritySubject['min'] ? 'bg-red-500/10 text-red-600 dark:text-red-300' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300') }}">
+                                                                        {{ $subjectSlots }}
+                                                                    </span>
+                                                                </td>
+                                                            @endforeach
+                                                            <td class="px-3 py-2.5 text-center">
+                                                                <span class="text-[10px] font-bold {{ $paritySubject['balanced'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-300' }}">
+                                                                    {{ $paritySubject['balanced'] ? 'Equilibrada' : 'Diferencia '.$paritySubject['delta'] }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="{{ count($sectionSlotParity['sections']) + 2 }}" class="px-3 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                                                                No hay asignaturas configuradas para comparar.
+                                                            </td>
+                                                        </tr>
+                                                    @endforelse
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        @endif
                         @if ($activeConflictGroup)
                             @include('livewire.coordinacion.timetable.partials.preview-conflicts', ['activeConflictGroup' => $activeConflictGroup])
                         @endif
                         @if ($preview && $periodsList->isNotEmpty())
+                            @php $sectionGapSummary = $this->previewSectionGapSummary($activeSeccionId); @endphp
+                            @if (($sectionGapSummary['empty_cells'] ?? 0) > 0 || !empty($sectionGapSummary['incomplete_lessons']))
+                                <div class="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4" role="status">
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                            <div class="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                                Cobertura de la sección
+                                            </div>
+                                            <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                                La generación por sección puede dejar períodos disponibles sin una lesson asignada.
+                                            </p>
+                                        </div>
+                                        <span class="rounded-md bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                                            {{ $sectionGapSummary['empty_cells'] ?? 0 }} celda(s) vacía(s)
+                                        </span>
+                                    </div>
+                                    @if (!empty($sectionGapSummary['empty_periods']))
+                                        <div class="mt-3 flex flex-wrap gap-1.5">
+                                            @foreach ($sectionGapSummary['empty_periods'] as $emptyPeriod)
+                                                <span class="rounded-md border border-amber-500/20 bg-white/5 px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">
+                                                    {{ $emptyPeriod['day'] }} · {{ $emptyPeriod['time'] }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if (!empty($sectionGapSummary['incomplete_lessons']))
+                                        <div class="mt-3 border-t border-amber-500/20 pt-3">
+                                            <div class="text-[10px] font-bold uppercase tracking-widest text-red-500">Lessons incompletas</div>
+                                            <div class="mt-1 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                                @foreach ($sectionGapSummary['incomplete_lessons'] as $incompleteLesson)
+                                                    <div>
+                                                        <strong>{{ $incompleteLesson['subject'] }}</strong>:
+                                                        {{ $incompleteLesson['assigned'] }}/{{ $incompleteLesson['required'] }} bloques,
+                                                        faltan {{ $incompleteLesson['missing'] }}.
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
                             <div id="timetable-preview-grid">
                             <div class="flex items-center justify-end">
                                 <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId]) }}"
@@ -1392,9 +1933,23 @@
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
                                 @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
                                 <div class="rounded-lg border border-gray-200 dark:border-white/10 p-3">
-                                    <div class="text-[10px] font-bold text-gray-400 mb-2">
-                                        {{ $shift?->name ?? ('Turno '.$shiftId) }}
-                                        {{ $shift?->start_time ? '· '.substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5) : '' }}
+                                    <div class="-mx-3 -mt-3 mb-3 flex items-center justify-between gap-3 rounded-t-lg border-b border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5 dark:border-emerald-400/10 dark:bg-emerald-400/5">
+                                        <div class="flex min-w-0 items-center gap-2">
+                                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300" aria-hidden="true">
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/>
+                                                    <circle cx="12" cy="12" r="9"/>
+                                                </svg>
+                                            </span>
+                                            <span class="truncate text-[11px] font-extrabold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+                                                {{ $shift?->name ?? ('Turno '.$shiftId) }}
+                                            </span>
+                                        </div>
+                                        @if ($shift?->start_time)
+                                            <span class="shrink-0 rounded-md bg-white/70 px-2 py-1 font-mono text-[10px] font-bold text-emerald-700 dark:bg-black/10 dark:text-emerald-300">
+                                                {{ substr((string) $shift->start_time, 0, 5) }}–{{ substr((string) $shift->end_time, 0, 5) }}
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="grid grid-cols-6 gap-1">
                                         <div class="text-[10px] font-bold text-gray-400">Hora</div>
@@ -1405,7 +1960,10 @@
                                         @foreach ($shiftPeriods->groupBy('order_in_day') as $order => $group)
                                             @php $rowPeriod = $group->first(); @endphp
                                             <div class="contents">
-                                                <div class="text-[10px] font-bold text-gray-400 flex items-center">{{ substr((string) $rowPeriod?->start_time, 0, 5) }}–{{ substr((string) $rowPeriod?->end_time, 0, 5) }}</div>
+                                                @php $isBreakRow = (bool) $rowPeriod?->is_break; @endphp
+                                                <div class="flex items-center rounded px-1 text-[10px] font-bold {{ $isBreakRow ? 'bg-amber-500/5 text-amber-700/80 dark:bg-amber-400/5 dark:text-amber-300/80' : 'text-gray-400' }}">
+                                                    {{ substr((string) $rowPeriod?->start_time, 0, 5) }}–{{ substr((string) $rowPeriod?->end_time, 0, 5) }}
+                                                </div>
                                                 @for ($day = 1; $day <= 5; $day++)
                                                     @php
                                                         $cellAssignments = $secGrid[$shiftId][$order][$day] ?? [];
@@ -1417,23 +1975,35 @@
                                                             x-on:dragover.prevent
                                                             x-on:drop.prevent="$wire.movePreviewLesson(parseInt(event.dataTransfer.getData('lesson-id')), parseInt(event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod->id }})"
                                                         @endif
-                                                        class="relative flex flex-col items-stretch justify-center gap-1 rounded p-1 min-h-[44px] {{ $cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : '' }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
+                                                        class="relative flex min-h-[44px] flex-col items-stretch justify-center gap-1 rounded p-1 {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:bg-amber-400/5 dark:text-amber-300/70' : ($cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : 'border border-transparent') }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
                                                         @if ($cellAssignments)
                                                             @foreach ($cellAssignments as $cell)
                                                                 <div
                                                                     draggable="true"
                                                                     x-on:dragstart="event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
-                                                                    class="cursor-grab active:cursor-grabbing text-center leading-tight rounded {{ count($cellAssignments) > 1 ? 'bg-white/5 px-1 py-0.5' : '' }}">
-                                                                    <div class="text-[10px] font-bold text-gray-900 dark:text-white">{{ $cell['asignatura'] }}</div>
+                                                                    title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
+                                                                    class="relative cursor-grab active:cursor-grabbing text-center leading-tight rounded {{ count($cellAssignments) > 1 ? 'bg-white/5 px-1 py-0.5' : '' }} {{ !empty($cell['is_half_group']) ? 'border border-solid border-violet-500/[0.02] bg-violet-500/[0.02]' : '' }}">
+                                                                    <button type="button"
+                                                                        wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }})"
+                                                                        title="Retirar esta lección del preview"
+                                                                        aria-label="Retirar {{ $cell['asignatura'] }} del preview"
+                                                                        class="absolute right-0 top-0 z-10 inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-300/70 bg-white/80 text-gray-400 transition-colors hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 dark:border-white/15 dark:bg-gray-900/50">
+                                                                        <span aria-hidden="true" class="text-xs leading-none">×</span>
+                                                                    </button>
+                                                                    <div class="flex items-center justify-center gap-1 pr-4 text-[10px] font-bold text-gray-900 dark:text-white">
+                                                                        <span>{{ $cell['asignatura'] }}</span>
+                                                                    </div>
                                                                     @if ($cell['profesor'])
-                                                                        <div class="text-[9px] text-gray-500 dark:text-gray-400">{{ $cell['profesor'] }}</div>
+                                                                        <div class="pr-3 text-[9px] text-gray-500 dark:text-gray-400">{{ $cell['profesor'] }}</div>
                                                                     @endif
                                                                     @if ($cell['grupo'])
-                                                                        <div class="text-[9px] text-emerald-600 dark:text-emerald-400">{{ $cell['grupo'] }}</div>
+                                                                        <div class="pr-3 text-[9px] text-emerald-600 dark:text-emerald-400">{{ $cell['grupo'] }}</div>
                                                                     @endif
                                                                 </div>
                                                             @endforeach
-                                                        @elseif (! $isBreak)
+                                                        @elseif ($isBreak)
+                                                            <div class="w-full text-center text-[9px] font-semibold uppercase tracking-wide opacity-75">Receso</div>
+                                                        @else
                                                             <button type="button"
                                                                 wire:click="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
                                                                 title="Agregar una lección a este período"
@@ -1457,56 +2027,6 @@
                             </div>
                         @endif
 
-                        @if ($showAddPreviewLessonModal)
-                            <x-modal-card title="Agregar lección al período" blur="lg" wire:model="showAddPreviewLessonModal" align="center" max-width="md" persistent>
-                                <div class="space-y-4">
-                                    <div class="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
-                                        <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            Selecciona una lección para este período
-                                        </p>
-                                        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                                            Solo se muestran las lecciones que aún no tienen una asignación.
-                                        </p>
-                                    </div>
-
-                                    <div class="max-h-[min(58vh,28rem)] space-y-2 overflow-y-auto pr-1">
-                                    @forelse ($this->availablePreviewLessons() as $availableLesson)
-                                        <button type="button"
-                                            wire:click="addPreviewLesson({{ $availableLesson->id }})"
-                                            class="group flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-emerald-500/60 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-emerald-500/10">
-                                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                                +
-                                            </span>
-                                            <span class="min-w-0 flex-1">
-                                                <span class="block truncate text-sm font-bold text-gray-900 dark:text-gray-200">
-                                                    {{ $availableLesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre' }}
-                                                </span>
-                                                <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
-                                                    Sección {{ $availableLesson->pevaluacion?->seccion?->name ?? '—' }}
-                                                </span>
-                                            </span>
-                                            <span class="shrink-0 text-right text-[10px] font-semibold text-gray-500 dark:text-gray-400">
-                                                <span class="block">T {{ $availableLesson->weekly_blocks_t }}</span>
-                                                <span class="block">P {{ $availableLesson->weekly_blocks_p }}</span>
-                                            </span>
-                                        </button>
-                                    @empty
-                                        <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
-                                            No hay lecciones sin asignar disponibles para agregar.
-                                        </div>
-                                    @endforelse
-                                    </div>
-                                </div>
-                                <x-slot name="footer">
-                                    <div class="flex items-center gap-3 justify-end">
-                                        <button type="button" wire:click="closeAddPreviewLessonModal"
-                                            class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </x-slot>
-                            </x-modal-card>
-                        @endif
                     </div>
                 @endif
             </div>
@@ -1619,6 +2139,123 @@
             </div>
         </x-slot>
     </x-modal-card>
+
+@if ($showAddPreviewLessonModal)
+    @php
+        $targetPeriod = $this->addPreviewPeriod();
+        $lessonsToAdd = $this->availablePreviewLessons();
+    @endphp
+    <x-modal-card title="Agregar lección al período" blur="lg" wire:model="showAddPreviewLessonModal" align="center" max-width="md" persistent>
+        <div class="space-y-3">
+            {{-- Contexto del período destino --}}
+            <div class="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                            @if ($targetPeriod)
+                                {{ $targetPeriod->shift?->name ?? 'Turno' }} · {{ $targetPeriod->day_label ?? ('Día '.$targetPeriod->day_of_week) }}
+                                · {{ substr((string) $targetPeriod->start_time, 0, 5) }}–{{ substr((string) $targetPeriod->end_time, 0, 5) }}
+                            @else
+                                Selecciona una lección para este período
+                            @endif
+                        </p>
+                        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                            Se muestran {{ $lessonsToAdd->count() }} opción(es)
+                            @if ($addPreviewLessonSource === 'missing') faltantes @elseif ($addPreviewLessonSource === 'grade') de la sección actual @else del listado actual @endif
+                            · primero las del mismo turno.
+                        </p>
+                    </div>
+                    @if ($targetPeriod)
+                        <span class="shrink-0 rounded-md bg-emerald-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                            {{ $targetPeriod->shift?->code ?? '—' }}
+                        </span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Búsqueda --}}
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <select wire:model.live="addPreviewLessonSource"
+                    class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500/50 outline-none dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                    <option value="missing">Asignaturas faltantes</option>
+                    <option value="current">Listado actual</option>
+                    <option value="grade">Todas las asignaturas de la sección actual</option>
+                </select>
+                @if (!is_numeric($activeSeccionId))
+                    <span class="self-center text-[10px] text-amber-600 dark:text-amber-300">Selecciona una sección para consultar el grado.</span>
+                @endif
+            </div>
+            <div class="relative">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
+                </svg>
+                <input type="text" wire:model.live.debounce.250ms="addPreviewLessonSearch"
+                    placeholder="Buscar asignatura, docente o sección…"
+                    class="w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500/50 outline-none dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+            </div>
+
+            <div class="max-h-[min(52vh,26rem)] space-y-2 overflow-y-auto pr-1">
+            @forelse ($lessonsToAdd as $availableLesson)
+                @php
+                    $shiftMismatch = $targetPeriod && (int) $availableLesson->shift_id !== (int) $targetPeriod->shift_id;
+                    $teacherName = trim(($availableLesson->pevaluacion?->profesor?->lastname ?? '').' '.($availableLesson->pevaluacion?->profesor?->name ?? ''));
+                    $isGradeCandidate = !empty($availableLesson->is_grade_candidate);
+                @endphp
+                <button type="button"
+                    wire:click="{{ $isGradeCandidate ? 'addPreviewPevaluacion('.(int) $availableLesson->pevaluacion_id.')' : 'addPreviewLesson('.(int) $availableLesson->id.')' }}"
+                    wire:loading.attr="disabled" wire:target="addPreviewLesson,addPreviewPevaluacion"
+                    class="group flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50
+                        {{ $shiftMismatch
+                            ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-500/60 hover:bg-amber-500/10'
+                            : 'border-gray-200 bg-white hover:border-emerald-500/60 hover:bg-emerald-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-emerald-500/10' }}">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm font-bold
+                        {{ $shiftMismatch ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' }}">
+                        +
+                    </span>
+                    <span class="min-w-0 flex-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="block truncate text-sm font-bold text-gray-900 dark:text-gray-200">
+                                {{ $availableLesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre' }}
+                            </span>
+                            @if ($shiftMismatch)
+                                <span class="shrink-0 rounded bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300" title="La lección es de otro turno">
+                                    otro turno
+                                </span>
+                            @endif
+                        </span>
+                        <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                            {{ $availableLesson->pevaluacion?->seccion?->grado?->name ? $availableLesson->pevaluacion->seccion->grado->name.' · ' : '' }}Sección {{ $availableLesson->pevaluacion?->seccion?->name ?? '—' }}
+                            @if ($teacherName) · {{ $teacherName }} @endif
+                            @if ($isGradeCandidate) · Nueva en este calendario @endif
+                        </span>
+                    </span>
+                    <span class="shrink-0 text-right text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                        <span class="block">T {{ $availableLesson->weekly_blocks_t }}</span>
+                        <span class="block">P {{ $availableLesson->weekly_blocks_p }}</span>
+                    </span>
+                </button>
+            @empty
+                <div class="rounded-lg border border-dashed border-gray-300 px-3 py-6 text-center text-xs text-gray-400 dark:border-white/10">
+                    @if ($addPreviewLessonSearch !== '')
+                        Sin resultados para «{{ $addPreviewLessonSearch }}».
+                    @else
+                        No hay lecciones sin asignar disponibles para agregar.
+                    @endif
+                </div>
+            @endforelse
+            </div>
+        </div>
+        <x-slot name="footer">
+            <div class="flex items-center justify-between gap-3">
+                <span class="text-[10px] text-gray-400 dark:text-gray-500">Las de «otro turno» se agregan con advertencia.</span>
+                <button type="button" wire:click="closeAddPreviewLessonModal"
+                    class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">
+                    Cancelar
+                </button>
+            </div>
+        </x-slot>
+    </x-modal-card>
+@endif
 
     @include('coordinacion.help-timetable-wizard')
 </div>

@@ -7,6 +7,8 @@ use App\Jobs\Timetable\GenerateTimetableJob;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Timetable\TimetableCalendar;
+use App\Models\app\Timetable\TimetableCalendarVersion;
+use App\Models\app\Timetable\TimetableChangeLog;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetableLessonDraftTrait;
 use App\Models\app\Timetable\TimetablePeriod;
@@ -14,6 +16,7 @@ use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\app\Timetable\TimetableTeacherAvailability;
+use App\Services\Timetable\TimetablePublicationReadinessService;
 use App\Services\Timetable\TimetableRoomEligibilityService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
@@ -70,7 +73,7 @@ class TimetableWizard extends Component
 
     public int $maxSubjectsPerPeriod = 2;
 
-    public string $strategy = TimetableCalendar::STRATEGY_OPTIMIZED;
+    public string $strategy = TimetableCalendar::DEFAULT_STRATEGY;
 
     public int $shiftId = 0;
 
@@ -132,6 +135,9 @@ class TimetableWizard extends Component
     // ─── Paso 3 · Lecciones ────────────────────────────────────
     public array $selectedPevs = [];
 
+    /** Fuerza la recreación de los checkboxes al reiniciar el wizard. */
+    public int $selectionResetToken = 0;
+
     public array $lessons = [];
 
     public bool $lessonsDirty = false;
@@ -142,12 +148,20 @@ class TimetableWizard extends Component
 
     public ?int $addPreviewLessonPeriodId = null;
 
+    /** Búsqueda por asignatura/docente/sección en el modal de agregar lección. */
+    public string $addPreviewLessonSearch = '';
+
+    public string $addPreviewLessonSource = 'missing';
+
     // Pestañas pestudio → grado → sección (PLAN-ACTIVITIES-001)
     public $activePestudioId = null;
 
     public $activeGradoId = null;
 
     public $activeSeccionId = null;
+
+    /** Sección del grado actual que recibirá una copia de las lecciones. */
+    public $replicateToSeccionId = null;
 
     // Mejoras del paso 3 (PLAN-ACTIVITIES-001)
     public string $step3ViewMode = 'tabs'; // 'tabs' | 'flat'
@@ -202,6 +216,13 @@ class TimetableWizard extends Component
             $selectedCalendar = TimetableCalendar::find((int) $this->calendarId);
             if ($selectedCalendar) {
                 $this->loadCalendar($selectedCalendar);
+                $this->loadLessons();
+                $this->loadPublishedPreview($selectedCalendar);
+
+                // Horario ACTIVO/publicado: mostrar su grilla por defecto (Paso 5).
+                if ($this->generationState === 'published') {
+                    $this->currentStep = 5;
+                }
             }
         }
 
@@ -210,32 +231,67 @@ class TimetableWizard extends Component
 
     public function refreshWizard(): void
     {
-        $this->calendarId = null;
+        $selectedCalendarId = $this->calendarId ? (int) $this->calendarId : null;
         $this->currentStep = 1;
         $this->calendarName = '';
         $this->pestudioId = null;
+        $this->lapsoId = null;
+        $this->pescolarId = null;
         $this->periodMinutes = 60;
         $this->maxSubjectsPerPeriod = 2;
-        $this->strategy = TimetableCalendar::STRATEGY_OPTIMIZED;
+        $this->strategy = TimetableCalendar::DEFAULT_STRATEGY;
         $this->shiftId = 0;
         $this->periods = [];
         $this->lessons = [];
         $this->selectedPevs = [];
+        $this->selectionResetToken++;
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = null;
         $this->availability = [];
+        $this->searchProfesor = '';
+        $this->step3Search = '';
+        $this->bulkShiftId = null;
+        $this->bulkRoomType = '';
         $this->generationState = null;
         $this->preview = null;
+        $this->busy = false;
         $this->activePestudioId = null;
         $this->activeGradoId = null;
         $this->activeSeccionId = null;
+        $this->replicateToSeccionId = null;
         $this->selectedProfesorId = null;
         $this->showCreateCalendarForm = false;
         $this->showEditCalendarForm = false;
 
-        // Rehidrata las colecciones y aulas como en el montaje inicial. La
-        // asignación anterior de calendarId se sincroniza con #[Url].
-        $this->mount();
+        // Conserva el calendario contextual (incluido el `calendarId` de la
+        // URL) y reconstruye el estado persistido como una recarga del
+        // componente, sin solicitar otra página al navegador.
+        $this->calendarId = $selectedCalendarId;
+        $this->loadCalendars();
+
+        $selectedCalendar = $selectedCalendarId
+            ? TimetableCalendar::find($selectedCalendarId)
+            : null;
+        if (! $selectedCalendar) {
+            $this->calendarId = null;
+            $this->reloadRooms();
+
+            return;
+        }
+
+        $this->loadCalendar($selectedCalendar);
+        $this->loadLessons(true);
+        $this->loadAvailability();
+        $this->loadPublishedPreview($selectedCalendar);
+
+        if ($this->generationState === 'published') {
+            $this->currentStep = 5;
+        }
+        $this->selectedScheduleDayIndex = (int) session()->get(
+            'timetable.selected_schedule_day_'.$selectedCalendar->id,
+            0,
+        );
+        $this->reloadRooms();
     }
 
     public function updatedLapsoId($value): void
@@ -384,7 +440,7 @@ class TimetableWizard extends Component
      * PLAN-TIMETABLE-002 §4.5 — Cambia el calendario en edición (alternativa
      * del lapso) recargando todo el contexto del wizard.
      */
-    public function selectCalendar($calendarId): void
+    public function selectCalendar($calendarId, bool $hydrateSavedSelection = true): void
     {
         $calendar = TimetableCalendar::find((int) $calendarId);
         if (! $calendar) {
@@ -406,8 +462,9 @@ class TimetableWizard extends Component
         $sessionKey = 'timetable.selected_schedule_day_'.($this->calendarId ?? '');
         $this->selectedScheduleDayIndex = (int) session()->get($sessionKey, 0);
 
-        $this->loadLessons();
+        $this->loadLessons($hydrateSavedSelection);
         $this->loadAvailability();
+        $this->loadPublishedPreview($calendar);
     }
 
     /**
@@ -437,36 +494,59 @@ class TimetableWizard extends Component
     }
 
     /**
-     * PLAN-TIMETABLE-002 §9 — Duplica un borrador (estructura + lecciones + slots).
+     * PLAN-TIMETABLE-002 §9 — Duplica un calendario como nuevo borrador
+     * independiente, conservando la trazabilidad del calendario origen.
      */
     public function duplicateCalendar($calendarId): void
     {
         $source = TimetableCalendar::find((int) $calendarId);
-        if (! $source || $source->status !== TimetableCalendar::STATUS_DRAFT) {
-            session()->flash('error', 'Solo se pueden duplicar calendarios en estado borrador.');
+        if (! $source || ! in_array($source->status, [
+            TimetableCalendar::STATUS_DRAFT,
+            TimetableCalendar::STATUS_ACTIVE,
+            TimetableCalendar::STATUS_ARCHIVED,
+        ], true)) {
+            session()->flash('error', 'El calendario seleccionado no se puede duplicar.');
 
             return;
         }
 
         $copy = DB::transaction(function () use ($source) {
+            $copyNumber = TimetableCalendar::query()
+                ->where('lapso_id', $source->lapso_id)
+                ->where('name', 'like', $source->name.' (copia%')
+                ->count() + 1;
+            $copyName = $source->name.' (copia v'.((int) $source->version).' · '.$copyNumber.')';
+
             $copy = TimetableCalendar::create([
                 'lapso_id' => $source->lapso_id,
                 'pescolar_id' => $source->pescolar_id,
                 'pestudio_id' => $source->pestudio_id,
-                'name' => $source->name.' (copia)',
+                'name' => $copyName,
                 'period_minutes' => $source->period_minutes,
                 'max_subjects_per_period' => $source->max_subjects_per_period,
-                'strategy' => $source->strategy ?: TimetableCalendar::STRATEGY_OPTIMIZED,
+                'strategy' => $source->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
                 'status' => TimetableCalendar::STATUS_DRAFT,
                 'version' => 0,
+                'quality_score' => $source->quality_score,
+                'preview_payload' => [
+                    'duplicated_from' => [
+                        'calendar_id' => (int) $source->id,
+                        'name' => $source->name,
+                        'status' => $source->status,
+                        'version' => (int) $source->version,
+                        'duplicated_at' => now()->toIso8601String(),
+                    ],
+                ],
             ]);
 
+            $periodMap = [];
             foreach ($source->periods()->get() as $period) {
-                TimetablePeriod::create([
+                $newPeriod = TimetablePeriod::create([
                     'calendar_id' => $copy->id, 'shift_id' => $period->shift_id,
                     'day_of_week' => $period->day_of_week, 'order_in_day' => $period->order_in_day,
                     'start_time' => $period->start_time, 'end_time' => $period->end_time, 'is_break' => $period->is_break,
                 ]);
+                $periodMap[$period->id] = $newPeriod->id;
             }
 
             foreach ($source->lessons()->with('slots')->get() as $lesson) {
@@ -477,21 +557,41 @@ class TimetableWizard extends Component
                     'priority' => $lesson->priority, 'locked' => $lesson->locked,
                 ]);
                 foreach ($lesson->slots as $slot) {
+                    $newPeriodId = $periodMap[$slot->period_id] ?? null;
+                    if (! $newPeriodId) {
+                        continue;
+                    }
+
                     TimetableSlot::create([
-                        'calendar_id' => $copy->id, 'lesson_id' => $newLesson->id, 'period_id' => $slot->period_id,
+                        'calendar_id' => $copy->id, 'lesson_id' => $newLesson->id, 'period_id' => $newPeriodId,
                         'profesor_id' => $slot->profesor_id, 'seccion_id' => $slot->seccion_id,
                         'grupo_estable_id' => $slot->grupo_estable_id, 'room_id' => $slot->room_id,
                         'is_half_group' => $slot->is_half_group,
                         'locked' => $slot->locked, 'is_manual_override' => $slot->is_manual_override,
                     ]);
                 }
+
+            }
+
+            foreach ($source->availabilities()->get() as $availability) {
+                TimetableTeacherAvailability::create([
+                    'calendar_id' => $copy->id,
+                    'profesor_id' => $availability->profesor_id,
+                    'shift_id' => $availability->shift_id,
+                    'day_of_week' => $availability->day_of_week,
+                    'order_in_day' => $availability->order_in_day,
+                    'start_time' => $availability->start_time,
+                    'end_time' => $availability->end_time,
+                    'is_available' => $availability->is_available,
+                ]);
             }
 
             return $copy;
         });
 
         $this->loadCalendars();
-        session()->flash('message', 'Calendario duplicado: «'.$copy->name.'».');
+        $this->selectCalendar($copy->id);
+        session()->flash('message', 'Calendario duplicado como borrador: «'.$copy->name.'». Origen: «'.$source->name.'» v'.$source->version.'.');
     }
 
     /**
@@ -1329,7 +1429,7 @@ class TimetableWizard extends Component
     public function updatedSelectedPevs(): void
     {
         $this->lessonsDirty = true;
-        $this->loadLessons();
+        $this->loadLessons(false);
     }
 
     public function updatedLessons(): void
@@ -1368,15 +1468,155 @@ class TimetableWizard extends Component
         );
     }
 
+    /**
+     * Replica las lecciones configuradas de la sección activa a otra sección
+     * del mismo grado. Las nuevas lecciones empiezan sin slots asignados.
+     */
+    public function replicateLessonsToSection(): void
+    {
+        $sourceSectionId = is_numeric($this->activeSeccionId) ? (int) $this->activeSeccionId : 0;
+        $targetSectionId = is_numeric($this->replicateToSeccionId) ? (int) $this->replicateToSeccionId : 0;
+
+        if (! $this->calendarId || $sourceSectionId <= 0 || $targetSectionId <= 0 || $sourceSectionId === $targetSectionId) {
+            $this->notification()->warning(
+                'Sección destino requerida',
+                'Selecciona una sección destino distinta de la sección activa.',
+            );
+
+            return;
+        }
+
+        $sourceSection = \App\Models\app\Academy\Seccion::query()
+            ->with('grado')
+            ->find($sourceSectionId);
+        $targetSection = \App\Models\app\Academy\Seccion::query()
+            ->with('grado')
+            ->find($targetSectionId);
+
+        if (! $sourceSection || ! $targetSection || (int) $sourceSection->grado_id !== (int) $targetSection->grado_id) {
+            $this->notification()->warning(
+                'Sección no compatible',
+                'La sección destino debe pertenecer al mismo grado que la sección activa.',
+            );
+
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+        $pevaluaciones = Pevaluacion::query()
+            ->with(['pensum.asignatura', 'seccion', 'profesor', 'grupoEstable'])
+            ->where('lapso_id', $calendar?->lapso_id)
+            ->whereIn('seccion_id', [$sourceSectionId, $targetSectionId])
+            ->when($calendar?->pestudio_id, fn ($query, $pestudioId) => $query->whereHas(
+                'seccion.grado',
+                fn ($gradoQuery) => $gradoQuery->where('pestudio_id', $pestudioId)
+            ))
+            ->get()
+            ->groupBy('seccion_id');
+        $sourcePevaluaciones = $pevaluaciones->get($sourceSectionId, collect());
+        $targetPevaluaciones = $pevaluaciones->get($targetSectionId, collect())
+            ->keyBy(fn ($pev) => (int) $pev->pensum_id.'|'.(int) ($pev->grupo_estable_id ?? 0));
+
+        $sourcePevIds = collect($this->selectedPevIds())
+            ->map(fn ($id) => (int) $id)
+            ->intersect($sourcePevaluaciones->pluck('id')->map(fn ($id) => (int) $id))
+            ->values();
+        $persistedLessons = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereIn('pevaluacion_id', $sourcePevIds)
+            ->get()
+            ->keyBy('pevaluacion_id');
+        $sourceLessons = $sourcePevIds->mapWithKeys(function (int $pevId) use ($persistedLessons) {
+            $lesson = $this->lessons[$pevId] ?? $persistedLessons->get($pevId);
+
+            return $lesson ? [$pevId => $lesson] : [];
+        });
+
+        if ($sourceLessons->isEmpty()) {
+            $this->notification()->warning(
+                'Sin lecciones para replicar',
+                'Selecciona las asignaturas de la sección activa antes de replicar.',
+            );
+
+            return;
+        }
+
+        $created = 0;
+        $updated = 0;
+        $missing = [];
+
+        DB::transaction(function () use (
+            $sourceLessons,
+            $sourcePevaluaciones,
+            $targetPevaluaciones,
+            &$created,
+            &$updated,
+            &$missing
+        ): void {
+            foreach ($sourceLessons as $sourcePevId => $sourceLesson) {
+                $sourcePev = $sourcePevaluaciones->firstWhere('id', (int) $sourcePevId);
+                $targetPev = $targetPevaluaciones->get(
+                    (int) ($sourcePev?->pensum_id).'|'.(int) ($sourcePev?->grupo_estable_id ?? 0)
+                );
+
+                if (! $targetPev) {
+                    $missing[] = $sourcePev?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
+
+                    continue;
+                }
+
+                $targetLesson = TimetableLesson::query()->firstOrNew([
+                    'calendar_id' => $this->calendarId,
+                    'pevaluacion_id' => $targetPev->id,
+                ]);
+                $wasExisting = $targetLesson->exists;
+                $targetLesson->fill([
+                    'shift_id' => data_get($sourceLesson, 'shift_id'),
+                    'weekly_blocks_t' => (int) data_get($sourceLesson, 'weekly_blocks_t', 0),
+                    'weekly_blocks_p' => (int) data_get($sourceLesson, 'weekly_blocks_p', 0),
+                    'room_type_required' => filled(data_get($sourceLesson, 'room_type_required'))
+                        ? (string) data_get($sourceLesson, 'room_type_required')
+                        : null,
+                    'is_half_group' => filter_var(data_get($sourceLesson, 'is_half_group', false), FILTER_VALIDATE_BOOLEAN),
+                    'priority' => (int) data_get($sourceLesson, 'priority', 0),
+                    'locked' => (bool) data_get($sourceLesson, 'locked', false),
+                ])->save();
+
+                $wasExisting ? $updated++ : $created++;
+            }
+        });
+
+        $targetIds = $targetPevaluaciones
+            ->values()
+            ->filter(fn ($pev) => TimetableLesson::query()
+                ->where('calendar_id', $this->calendarId)
+                ->where('pevaluacion_id', $pev->id)
+                ->exists())
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $this->selectedPevs = array_replace($this->selectedPevs, array_fill_keys($targetIds, true));
+        $this->loadLessons(false);
+        $this->replicateToSeccionId = null;
+
+        $message = "{$created} lección(es) creada(s), {$updated} actualizada(s).";
+        if ($missing !== []) {
+            $message .= ' Sin equivalente: '.implode(', ', array_unique($missing)).'.';
+        }
+        $this->notification()->success('Lecciones replicadas', $message);
+    }
+
     public function updatedActivePestudioId($value): void
     {
         $this->activeGradoId = null;
         $this->activeSeccionId = null;
+        $this->replicateToSeccionId = null;
     }
 
     public function updatedActiveGradoId($value): void
     {
         $this->activeSeccionId = null;
+        $this->replicateToSeccionId = null;
     }
 
     public function setStep3ViewMode($mode): void
@@ -1416,6 +1656,40 @@ class TimetableWizard extends Component
             }
         }
 
+        $this->loadLessons();
+    }
+
+    /**
+     * Marca o desmarca únicamente las lecciones de una sección concreta.
+     */
+    public function toggleSelectAllForSection(int $seccionId): void
+    {
+        if ($seccionId <= 0) {
+            return;
+        }
+
+        $sectionLessons = $this->allPevaluaciones()
+            ->where('seccion_id', $seccionId)
+            ->values();
+
+        if ($sectionLessons->isEmpty()) {
+            return;
+        }
+
+        $selectedIds = array_flip($this->selectedPevIds());
+        $allSelected = $sectionLessons->every(
+            fn ($pev) => isset($selectedIds[(int) $pev->id])
+        );
+
+        foreach ($sectionLessons as $pev) {
+            if ($allSelected) {
+                unset($this->selectedPevs[$pev->id]);
+            } else {
+                $this->selectedPevs[$pev->id] = true;
+            }
+        }
+
+        $this->lessonsDirty = true;
         $this->loadLessons();
     }
 
@@ -1476,15 +1750,46 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Desmarca todas las lecciones del Paso 3 sin eliminar las lessons
+     * persistidas del calendario.
+     */
+    public function resetLessonCheckboxes(): void
+    {
+        $this->selectedPevs = [];
+        $this->lessons = [];
+        $this->selectionResetToken++;
+        $this->lessonsDirty = false;
+        $this->lessonsSavedAt = null;
+        $this->notification()->success(
+            'Selección reiniciada',
+            'Se desmarcaron todas las lecciones del Paso 3. Las lessons guardadas no fueron eliminadas.',
+        );
+    }
+
+    /**
      * Autoguardado (borrador): persiste las lecciones sin navegar de paso.
      */
     public function autosaveLessons(): void
     {
-        if (! $this->calendarId) {
+        if (! $this->calendarId || $this->lessonScopePevIds() === []) {
+            $this->notification()->warning(
+                'Sin asignaturas seleccionadas',
+                'Selecciona al menos una asignatura en el paso 3.',
+            );
+
             return;
         }
 
-        $this->persistTimetableLessonDraft((int) $this->calendarId, $this->lessons);
+        try {
+            $this->persistTimetableLessonDraft((int) $this->calendarId, $this->lessons);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->notification()->error(
+                'Referencia académica inválida',
+                $exception->validator->errors()->first('lessons'),
+            );
+
+            return;
+        }
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = now()->format('H:i:s');
         session()->flash('message', 'Borrador de lecciones guardado.');
@@ -1592,7 +1897,7 @@ class TimetableWizard extends Component
         return $data['tabActivePevaluaciones'];
     }
 
-    public function loadLessons(): void
+    public function loadLessons(bool $hydrateSavedSelection = false): void
     {
         if (! $this->calendarId) {
             $this->lessons = [];
@@ -1622,6 +1927,12 @@ class TimetableWizard extends Component
                 'locked',
             ])
             ->keyBy(fn ($lesson) => (int) $lesson->pevaluacion_id);
+        if ($hydrateSavedSelection) {
+            $this->selectedPevs = $savedLessons
+                ->keys()
+                ->mapWithKeys(fn ($pevId) => [(int) $pevId => true])
+                ->all();
+        }
         $periodMinutes = max(1, (int) $calendar->period_minutes);
         $ids = $this->selectedPevIds();
         $pevs = $ids === []
@@ -1693,6 +2004,27 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Current lesson payload is the scope for legacy callers that set lesson
+     * values directly; the checkbox selection remains the normal source.
+     *
+     * @return array<int, int>
+     */
+    private function lessonScopePevIds(): array
+    {
+        $selected = $this->selectedPevIds();
+        if ($selected !== []) {
+            return $selected;
+        }
+
+        return collect($this->lessons)
+            ->map(fn ($lesson, $key) => (int) ($lesson['pev_id'] ?? $key))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Construye la entrada de lección para una Pevaluacion.
      *
      * @return array<string, mixed>
@@ -1740,13 +2072,24 @@ class TimetableWizard extends Component
     private function validateLessons(): bool
     {
         foreach ($this->lessons as $lessonKey => $lesson) {
+            $pevId = (int) ($lesson['pev_id'] ?? $lessonKey);
+            $pev = $pevId > 0
+                ? Pevaluacion::query()
+                    ->with(['pensum.asignatura', 'seccion'])
+                    ->find($pevId)
+                : null;
+
+            if (! $pev) {
+                $this->notification()->error(
+                    'Referencia académica inválida',
+                    "La lesson intenta registrar la Pevaluacion #{$pevId}, pero ese registro no existe. "
+                    .'Corrige la selección antes de guardar.',
+                );
+
+                return false;
+            }
+
             if (($lesson['weekly_blocks_t'] ?? 0) <= 0 && ($lesson['weekly_blocks_p'] ?? 0) <= 0) {
-                $pevId = (int) ($lesson['pev_id'] ?? $lessonKey);
-                $pev = $pevId > 0
-                    ? Pevaluacion::query()
-                        ->with(['pensum.asignatura', 'seccion'])
-                        ->find($pevId)
-                    : null;
                 $subject = trim((string) ($pev?->pensum?->asignatura?->name ?? ''));
                 $section = trim((string) ($pev?->seccion?->name ?? ''));
                 $label = trim((string) ($lesson['name'] ?? ''));
@@ -1773,6 +2116,100 @@ class TimetableWizard extends Component
         }
 
         return true;
+    }
+
+    /**
+     * Lessons persistidas cuya Pevaluacion fue eliminada o nunca existió.
+     *
+     * @return list<array{id:int, pevaluacion_id:int, blocks:int}>
+     */
+    public function timetableOrphanLessons(): array
+    {
+        if (! $this->calendarId) {
+            return [];
+        }
+
+        return TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereDoesntHave('pevaluacion')
+            ->orderBy('id')
+            ->get(['id', 'pevaluacion_id', 'weekly_blocks_t', 'weekly_blocks_p'])
+            ->map(fn (TimetableLesson $lesson) => [
+                'id' => (int) $lesson->id,
+                'pevaluacion_id' => (int) $lesson->pevaluacion_id,
+                'blocks' => (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p,
+            ])
+            ->values()
+            ->all();
+    }
+
+    public function confirmRemoveOrphanLessons(): void
+    {
+        $orphans = $this->timetableOrphanLessons();
+
+        if ($orphans === []) {
+            $this->notification()->warning(
+                'Sin lessons huérfanas',
+                'No se encontraron referencias académicas huérfanas en este calendario.',
+            );
+
+            return;
+        }
+
+        $ids = collect($orphans)->pluck('id')->map(fn ($id) => '#'.$id)->implode(', ');
+        $this->dialog()->confirm([
+            'title' => '¿Retirar lessons huérfanas?',
+            'description' => "Se eliminarán del calendario las lessons {$ids} y sus slots asociados. Esta acción no afecta las Pevaluaciones existentes.",
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Sí, retirar lessons',
+                'method' => 'removeOrphanLessons',
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'color' => 'secondary',
+            ],
+        ]);
+    }
+
+    public function removeOrphanLessons(): void
+    {
+        if (! $this->calendarId) {
+            return;
+        }
+
+        $orphans = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereDoesntHave('pevaluacion')
+            ->pluck('id');
+
+        if ($orphans->isEmpty()) {
+            $this->notification()->warning(
+                'Sin cambios',
+                'Las lessons huérfanas ya fueron retiradas o corregidas.',
+            );
+
+            return;
+        }
+
+        DB::transaction(function () use ($orphans): void {
+            TimetableSlot::query()
+                ->whereIn('lesson_id', $orphans)
+                ->delete();
+
+            TimetableLesson::query()
+                ->whereIn('id', $orphans)
+                ->delete();
+        });
+
+        $this->preview = null;
+        $this->generationState = null;
+        $this->loadLessons(true);
+        $this->notification()->success(
+            'Lessons huérfanas retiradas',
+            $orphans->count().' lesson(s) inválida(s) fueron retiradas del calendario.',
+        );
     }
 
     private function persistLessons(): void
@@ -1992,11 +2429,21 @@ class TimetableWizard extends Component
         }
 
         $grid = $this->availabilityGrid();
+        $selectedPevIds = $this->selectedPevIds();
+        if ($selectedPevIds === []) {
+            $this->notification()->warning(
+                'Sin asignaturas seleccionadas',
+                'Selecciona al menos una asignatura en el paso 3.',
+            );
+
+            return;
+        }
 
         $profesorIds = \App\Models\app\Academy\Profesor::query()
             ->whereIn('id', TimetableLesson::query()
                 ->where('calendar_id', $this->calendarId)
-                ->with('pevaluacion')
+                ->whereIn('pevaluacion_id', $selectedPevIds)
+                ->with('pevaluacion:id,profesor_id')
                 ->get()
                 ->pluck('pevaluacion.profesor_id')
                 ->unique()
@@ -2121,7 +2568,20 @@ class TimetableWizard extends Component
         }
 
         $grid = $this->availabilityGrid();
+        $selectedProfessorIds = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereIn('pevaluacion_id', $this->selectedPevIds())
+            ->with('pevaluacion:id,profesor_id')
+            ->get()
+            ->pluck('pevaluacion.profesor_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->all();
         foreach ($this->availability as $profesorId => $shifts) {
+            if (! in_array((int) $profesorId, $selectedProfessorIds, true)) {
+                continue;
+            }
             foreach ($shifts as $shiftId => $days) {
                 foreach ($days as $day => $orders) {
                     foreach ($orders as $order => $isAvailable) {
@@ -2151,16 +2611,19 @@ class TimetableWizard extends Component
 
     public function updatedCalendarId($value): void
     {
+        // Un cambio explícito del selector siempre inicia el Paso 3 sin
+        // checkboxes heredados del calendario anterior.
+        $this->selectedPevs = [];
+        $this->lessons = [];
+        $this->lessonsDirty = false;
+        $this->lessonsSavedAt = null;
+
         if (! $this->calendarId) {
             $this->currentStep = 1;
-            $this->lessons = [];
-            $this->selectedPevs = [];
             $this->availability = [];
             $this->periods = [];
             $this->generationState = null;
             $this->preview = null;
-            $this->lessonsDirty = false;
-            $this->lessonsSavedAt = null;
             $this->activePestudioId = null;
             $this->activeGradoId = null;
             $this->activeSeccionId = null;
@@ -2175,7 +2638,7 @@ class TimetableWizard extends Component
         }
 
         // Switcher global: al cambiar el calendario se recarga todo el contexto.
-        $this->selectCalendar($this->calendarId);
+        $this->selectCalendar($this->calendarId, false);
     }
 
     public function loadAvailability(): void
@@ -2330,12 +2793,205 @@ class TimetableWizard extends Component
                     'asignatura' => $pev?->pensum?->asignatura?->name ?? '—',
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                     'grupo' => $pev?->grupoEstable?->name,
+                    'is_half_group' => (bool) $lesson->is_half_group,
                 ];
                 $cellLoad[$cellKey] = ($cellLoad[$cellKey] ?? 0) + 1;
             }
         }
 
         return $grid;
+    }
+
+    /**
+     * Resume los huecos reales de la sección activa y las lessons que no
+     * alcanzaron la cantidad de bloques configurada.
+     *
+     * @return array{empty_cells:int, empty_periods:list<array{shift_id:int, day:string, time:string}>, incomplete_lessons:list<array{id:int, subject:string, required:int, assigned:int, missing:int}>}
+     */
+    public function previewSectionGapSummary(?int $seccionId): array
+    {
+        if (! $this->preview || ! $seccionId || ! $this->calendarId) {
+            return [
+                'empty_cells' => 0,
+                'empty_periods' => [],
+                'incomplete_lessons' => [],
+            ];
+        }
+
+        $assignment = $this->preview['assignment'] ?? [];
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion', fn ($query) => $query->where('seccion_id', $seccionId))
+            ->with('pevaluacion.pensum.asignatura')
+            ->get();
+        $sectionShiftIds = $lessons->pluck('shift_id')->filter()->unique()->map(fn ($id) => (int) $id);
+        $assignedPeriods = [];
+        $incompleteLessons = [];
+
+        foreach ($lessons as $lesson) {
+            $slots = $assignment[(string) $lesson->id]
+                ?? $assignment[(int) $lesson->id]
+                ?? [];
+            $periodIds = collect($slots)->pluck('period_id')->filter()->map(fn ($id) => (int) $id)->unique()->values();
+            foreach ($periodIds as $periodId) {
+                $assignedPeriods[$periodId] = true;
+            }
+
+            $required = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;
+            $assigned = $periodIds->count();
+            if ($required > 0 && $assigned < $required) {
+                $incompleteLessons[] = [
+                    'id' => (int) $lesson->id,
+                    'subject' => $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
+                    'required' => $required,
+                    'assigned' => $assigned,
+                    'missing' => $required - $assigned,
+                ];
+            }
+        }
+
+        $periods = TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereIn('shift_id', $sectionShiftIds->all())
+            ->where('is_break', false)
+            ->orderBy('shift_id')
+            ->orderBy('day_of_week')
+            ->orderBy('order_in_day')
+            ->get();
+        $dayNames = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes'];
+        $emptyPeriods = $periods
+            ->filter(fn (TimetablePeriod $period): bool => ! isset($assignedPeriods[(int) $period->id]))
+            ->map(fn (TimetablePeriod $period): array => [
+                'shift_id' => (int) $period->shift_id,
+                'day' => $dayNames[(int) $period->day_of_week] ?? 'Día '.$period->day_of_week,
+                'time' => substr((string) $period->start_time, 0, 5).'–'.substr((string) $period->end_time, 0, 5),
+            ])
+            ->values()
+            ->all();
+
+        return [
+            'empty_cells' => count($emptyPeriods),
+            'empty_periods' => $emptyPeriods,
+            'incomplete_lessons' => $incompleteLessons,
+        ];
+    }
+
+    /**
+     * Compara los slots llenos de las secciones que pertenecen al grado activo.
+     *
+     * @return array{grade:string, sections:list<array{id:int,name:string,filled_slots:int,assigned_lessons:int}>, subjects:list<array{key:string,name:string,sections:array<int,int>,min:int,max:int,delta:int,balanced:bool}>, min:int, max:int, delta:int, balanced:bool}|null
+     */
+    public function sectionSlotParity(): ?array
+    {
+        if (! $this->preview || ! is_numeric($this->activeSeccionId)) {
+            return null;
+        }
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->with('pevaluacion.seccion.grado', 'pevaluacion.pensum.asignatura')
+            ->get();
+
+        $activeLesson = $lessons->first(
+            fn (TimetableLesson $lesson): bool => (int) ($lesson->pevaluacion?->seccion_id ?? 0) === (int) $this->activeSeccionId
+        );
+        $gradeId = $activeLesson?->pevaluacion?->seccion?->grado_id;
+
+        if (! $gradeId) {
+            return null;
+        }
+
+        $gradeSections = \App\Models\app\Academy\Seccion::query()
+            ->where('grado_id', $gradeId)
+            ->where('status_active', 'true')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        $gradeLessons = $lessons->filter(
+            fn (TimetableLesson $lesson): bool => (int) ($lesson->pevaluacion?->seccion?->grado_id ?? 0) === (int) $gradeId
+        );
+        $assignment = $this->preview['assignment'] ?? [];
+
+        $sections = $gradeSections
+            ->map(function ($section) use ($gradeLessons, $assignment): array {
+                $sectionLessons = $gradeLessons->filter(
+                    fn (TimetableLesson $lesson): bool => (int) ($lesson->pevaluacion?->seccion_id ?? 0) === (int) $section->id
+                );
+                $filledSlots = 0;
+                $assignedLessons = 0;
+
+                foreach ($sectionLessons as $lesson) {
+                    $slots = $assignment[(string) $lesson->id]
+                        ?? $assignment[(int) $lesson->id]
+                        ?? [];
+                    $slotCount = count($slots);
+                    $filledSlots += $slotCount;
+                    $assignedLessons += $slotCount > 0 ? 1 : 0;
+                }
+
+                return [
+                    'id' => (int) $section->id,
+                    'name' => $section->name ?? 'Sección '.$section->id,
+                    'filled_slots' => $filledSlots,
+                    'assigned_lessons' => $assignedLessons,
+                ];
+            })
+            ->values();
+
+        if ($sections->isEmpty()) {
+            return null;
+        }
+
+        $subjectGroups = $gradeLessons->groupBy(
+            fn (TimetableLesson $lesson): string => (string) (
+                $lesson->pevaluacion?->pensum_id
+                ?? 'subject-'.strtolower(trim((string) ($lesson->pevaluacion?->pensum?->asignatura?->name ?? 'sin-asignatura')))
+            )
+        );
+        $subjects = $subjectGroups->map(function ($subjectLessons, string $subjectKey) use ($sections, $assignment): array {
+            $sectionSlots = $sections->mapWithKeys(function (array $section) use ($subjectLessons, $assignment): array {
+                $slots = 0;
+                foreach ($subjectLessons as $lesson) {
+                    if ((int) ($lesson->pevaluacion?->seccion_id ?? 0) !== $section['id']) {
+                        continue;
+                    }
+
+                    $slots += count(
+                        $assignment[(string) $lesson->id]
+                            ?? $assignment[(int) $lesson->id]
+                            ?? []
+                    );
+                }
+
+                return [$section['id'] => $slots];
+            })->all();
+            $counts = collect($sectionSlots);
+            $min = (int) $counts->min();
+            $max = (int) $counts->max();
+
+            return [
+                'key' => $subjectKey,
+                'name' => $subjectLessons->first()?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
+                'sections' => $sectionSlots,
+                'min' => $min,
+                'max' => $max,
+                'delta' => $max - $min,
+                'balanced' => $max === $min,
+            ];
+        })->sortBy('name')->values()->all();
+
+        $counts = $sections->pluck('filled_slots');
+        $min = (int) $counts->min();
+        $max = (int) $counts->max();
+
+        return [
+            'grade' => $activeLesson->pevaluacion?->seccion?->grado?->name ?? 'Grado activo',
+            'sections' => $sections->all(),
+            'subjects' => $subjects,
+            'min' => $min,
+            'max' => $max,
+            'delta' => $max - $min,
+            'balanced' => $max === $min,
+        ];
     }
 
     public function movePreviewLesson(int $lessonId, int $fromPeriodId, int $newPeriodId): void
@@ -2365,6 +3021,7 @@ class TimetableWizard extends Component
         $assignment = $this->preview['assignment'] ?? [];
         $lessonKey = (string) $lessonId;
         $slots = $assignment[$lessonKey] ?? $assignment[$lessonId] ?? [];
+        $originalSlots = $slots;
         $slotIndex = collect($slots)->search(
             fn (array $slot): bool => (int) ($slot['period_id'] ?? 0) === $fromPeriodId,
         );
@@ -2387,15 +3044,16 @@ class TimetableWizard extends Component
         }
 
         $sourcePeriod = TimetablePeriod::query()->find($fromPeriodId);
-        if (! $sourcePeriod || $sourcePeriod->shift_id !== $targetPeriod->shift_id
-            || $lesson->shift_id !== $targetPeriod->shift_id) {
+        if (! $sourcePeriod) {
             $this->notification()->error(
-                'Turno incompatible',
-                'El período destino debe pertenecer al mismo turno de la lección.',
+                'Movimiento no válido',
+                'El período de origen no existe.',
             );
 
             return;
         }
+        $hasShiftMismatch = $sourcePeriod->shift_id !== $targetPeriod->shift_id
+            || $lesson->shift_id !== $targetPeriod->shift_id;
 
         $swapLessonId = null;
         $swapSlotIndex = null;
@@ -2450,10 +3108,22 @@ class TimetableWizard extends Component
             $this->preview['assignment'] = $assignment;
             $this->preview['manual_override'] = true;
             $this->preview['assignment_source'] = 'manual_preview';
-            $this->notification()->success(
-                'Lecciones intercambiadas',
-                'La lección arrastrada y la lección de la sección intercambiaron sus períodos.',
-            );
+            $this->recordPreviewChange('swap_preview_lessons', $lessonId, $originalSlots, [
+                'lesson' => $slots,
+                'swap_lesson_id' => $swapLessonId,
+                'swap_slots' => $swapSlots,
+            ]);
+            if ($hasShiftMismatch) {
+                $this->notification()->warning(
+                    'Lecciones intercambiadas con advertencia',
+                    'El intercambio se realizó, pero una o ambas lecciones quedaron en un turno distinto al configurado.',
+                );
+            } else {
+                $this->notification()->success(
+                    'Lecciones intercambiadas',
+                    'La lección arrastrada y la lección de la sección intercambiaron sus períodos.',
+                );
+            }
 
             return;
         }
@@ -2463,10 +3133,113 @@ class TimetableWizard extends Component
         $this->preview['assignment'] = $assignment;
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
+        $this->recordPreviewChange('move_preview_lesson', $lessonId, $originalSlots, $slots);
+        if ($hasShiftMismatch) {
+            $this->notification()->warning(
+                'Lección reubicada con advertencia',
+                'La lección se movió a un período de otro turno distinto al configurado.',
+            );
+        } else {
+            $this->notification()->success(
+                'Lección reubicada',
+                'La lección se movió correctamente en el preview.',
+            );
+        }
+    }
+
+    /**
+     * Quita una lección completa del preview sin eliminar su configuración
+     * persistida. Sus celdas quedan disponibles para agregar otra lección.
+     */
+    public function removePreviewLesson(int $lessonId): void
+    {
+        if (! $this->preview || $lessonId <= 0) {
+            return;
+        }
+
+        $lesson = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->with('pevaluacion.pensum.asignatura')
+            ->find($lessonId);
+
+        if (! $lesson) {
+            $this->notification()->error(
+                'Lección no encontrada',
+                'La lección ya no está disponible en este calendario.',
+            );
+
+            return;
+        }
+
+        $assignment = $this->preview['assignment'] ?? [];
+        $lessonKey = (string) $lessonId;
+        $lessonSlots = $assignment[$lessonKey] ?? $assignment[$lessonId] ?? [];
+        $hadAssignment = array_key_exists($lessonKey, $assignment)
+            || array_key_exists($lessonId, $assignment);
+
+        unset($assignment[$lessonKey], $assignment[$lessonId]);
+
+        if (! $hadAssignment) {
+            $this->notification()->warning(
+                'Lección ya retirada',
+                'La lección no tenía asignaciones en el preview.',
+            );
+
+            return;
+        }
+
+        $unassigned = collect($this->preview['unassigned'] ?? [])
+            ->push($lessonId)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->preview['assignment'] = $assignment;
+        $this->preview['unassigned'] = $unassigned;
+        $this->preview['manual_override'] = true;
+        $this->preview['assignment_source'] = 'manual_preview';
+
+        $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
         $this->notification()->success(
-            'Lección reubicada',
-            'La lección se movió correctamente en el preview.',
+            'Lección retirada',
+            $subject.' quedó sin asignar en el preview.',
         );
+    }
+
+    public function confirmRemovePreviewLesson(int $lessonId): void
+    {
+        $lesson = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->with('pevaluacion.pensum.asignatura')
+            ->find($lessonId);
+
+        if (! $lesson) {
+            $this->notification()->error(
+                'Lección no encontrada',
+                'La lección ya no está disponible en este calendario.',
+            );
+
+            return;
+        }
+
+        $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'esta lección';
+        $this->dialog()->confirm([
+            'title' => '¿Retirar lección del preview?',
+            'description' => '«'.$subject.'» quedará sin asignar y sus celdas volverán a mostrar el botón +. La configuración guardada no se eliminará.',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Sí, retirar',
+                'method' => 'removePreviewLesson',
+                'params' => $lessonId,
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'color' => 'secondary',
+            ],
+        ]);
     }
 
     public function openAddPreviewLessonModal(int $periodId): void
@@ -2483,6 +3256,8 @@ class TimetableWizard extends Component
         }
 
         $this->addPreviewLessonPeriodId = $periodId;
+        $this->addPreviewLessonSearch = '';
+        $this->addPreviewLessonSource = 'missing';
         $this->showAddPreviewLessonModal = true;
     }
 
@@ -2490,20 +3265,128 @@ class TimetableWizard extends Component
     {
         $this->showAddPreviewLessonModal = false;
         $this->addPreviewLessonPeriodId = null;
+        $this->addPreviewLessonSearch = '';
+        $this->addPreviewLessonSource = 'missing';
     }
 
+    /** Período destino del modal de «agregar lección» (para mostrar su contexto). */
+    public function addPreviewPeriod(): ?TimetablePeriod
+    {
+        if (! $this->addPreviewLessonPeriodId || ! $this->calendarId) {
+            return null;
+        }
+
+        return TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->with('shift')
+            ->find($this->addPreviewLessonPeriodId);
+    }
+
+    /**
+     * Lecciones sin asignar del preview, filtradas por búsqueda y ordenadas de
+     * modo que primero aparezcan las del MISMO turno del período destino.
+     */
     public function availablePreviewLessons()
     {
-        $ids = collect($this->preview['unassigned'] ?? [])
+        $period = $this->addPreviewPeriod();
+        $search = mb_strtolower(trim($this->addPreviewLessonSearch));
+
+        $assignment = collect($this->preview['assignment'] ?? []);
+        $unassignedIds = collect($this->preview['unassigned'] ?? [])
             ->map(fn ($id) => (int) $id)
             ->filter()
             ->values();
-
-        return TimetableLesson::query()
+        $query = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
-            ->whereIn('id', $ids)
-            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion')
-            ->get();
+            ->with([
+                'pevaluacion.pensum.asignatura',
+                'pevaluacion.seccion.grado',
+                'pevaluacion.profesor',
+            ]);
+
+        if ($this->addPreviewLessonSource === 'current') {
+            $lessons = $query->get();
+        } elseif ($this->addPreviewLessonSource === 'grade' && is_numeric($this->activeSeccionId)) {
+            $sectionId = (int) $this->activeSeccionId;
+            $registeredPevIds = $query->get()->pluck('pevaluacion_id');
+            $lessons = $query
+                ->whereHas('pevaluacion', fn ($pevaluacion) => $pevaluacion->where('seccion_id', $sectionId))
+                ->get();
+            $lessons = $lessons->concat(
+                Pevaluacion::query()
+                    ->where('lapso_id', TimetableCalendar::find($this->calendarId)?->lapso_id)
+                    ->where('seccion_id', $sectionId)
+                    ->whereNotIn('id', $registeredPevIds)
+                    ->with('pensum.asignatura', 'seccion.grado', 'profesor')
+                    ->get()
+                    ->map(fn ($pev) => (object) [
+                        'id' => null,
+                        'pevaluacion_id' => $pev->id,
+                        'is_grade_candidate' => true,
+                        'pevaluacion' => $pev,
+                        'shift_id' => $period?->shift_id,
+                    ]),
+            );
+        } else {
+            $lessons = $query->whereIn('id', $unassignedIds)->get();
+        }
+
+        return $lessons
+            ->when($search !== '', fn ($c) => $c->filter(function ($l) use ($search) {
+                $haystack = mb_strtolower(implode(' ', [
+                    $l->pevaluacion?->pensum?->asignatura?->name ?? '',
+                    $l->pevaluacion?->profesor?->lastname ?? '',
+                    $l->pevaluacion?->profesor?->name ?? '',
+                    $l->pevaluacion?->seccion?->grado?->name ?? '',
+                    $l->pevaluacion?->seccion?->name ?? '',
+                ]));
+
+                return str_contains($haystack, $search);
+            }))
+            ->sortBy(fn ($l) => sprintf(
+                '%d|%s|%s',
+                ($period && (int) $l->shift_id === (int) $period->shift_id) ? 0 : 1,
+                $l->pevaluacion?->seccion?->grado?->name ?? '',
+                $l->pevaluacion?->pensum?->asignatura?->name ?? '',
+            ))
+            ->values();
+    }
+
+    public function addPreviewPevaluacion(int $pevaluacionId): void
+    {
+        if (! $this->calendarId || ! $this->addPreviewLessonPeriodId) {
+            return;
+        }
+
+        $calendar = TimetableCalendar::find($this->calendarId);
+        $period = $this->addPreviewPeriod();
+        $pev = Pevaluacion::query()
+            ->with('pensum.asignatura')
+            ->where('lapso_id', $calendar?->lapso_id)
+            ->find($pevaluacionId);
+
+        if (! $calendar || ! $period || ! $pev) {
+            $this->notification()->error('Asignatura no agregada', 'La Pevaluacion seleccionada no pertenece al calendario actual.');
+
+            return;
+        }
+
+        $minutes = max(1, (int) $calendar->period_minutes);
+        $asignatura = $pev->pensum?->asignatura;
+        $lesson = TimetableLesson::firstOrCreate(
+            ['calendar_id' => $calendar->id, 'pevaluacion_id' => $pev->id],
+            [
+                'shift_id' => $period->shift_id,
+                'weekly_blocks_t' => (int) ceil(((int) ($asignatura?->hour_t_week ?? 0)) * 60 / $minutes),
+                'weekly_blocks_p' => (int) ceil(((int) ($asignatura?->hour_p_week ?? 0)) * 60 / $minutes),
+                'room_type_required' => null,
+                'is_half_group' => false,
+                'priority' => 0,
+                'locked' => false,
+            ],
+        );
+
+        $this->addPreviewLesson((int) $lesson->id);
     }
 
     public function addPreviewLesson(int $lessonId): void
@@ -2523,11 +3406,7 @@ class TimetableWizard extends Component
             return;
         }
 
-        if ($lesson->shift_id !== $period->shift_id) {
-            $this->notification()->error('Turno incompatible', 'La lección no pertenece al turno del período seleccionado.');
-
-            return;
-        }
+        $hasShiftMismatch = (int) $lesson->shift_id !== (int) $period->shift_id;
 
         $assignment = $this->preview['assignment'] ?? [];
         $targetLessonIds = collect($assignment)
@@ -2583,8 +3462,16 @@ class TimetableWizard extends Component
         ));
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
+        $this->recordPreviewChange('add_preview_lesson', $lesson->id, [], $lessonSlots);
         $this->closeAddPreviewLessonModal();
-        $this->notification()->success('Lección agregada', 'La lección se agregó al período seleccionado.');
+        if ($hasShiftMismatch) {
+            $this->notification()->warning(
+                'Lección agregada con advertencia',
+                'La lección se agregó a un período de otro turno distinto al configurado.',
+            );
+        } else {
+            $this->notification()->success('Lección agregada', 'La lección se agregó al período seleccionado.');
+        }
     }
 
     public function runDryRun(): void
@@ -2599,13 +3486,94 @@ class TimetableWizard extends Component
         $this->generationState = 'generating';
 
         try {
-            GenerateTimetableJob::dispatchSync($this->calendarId, dryRun: true);
+            $selectedPevIds = $this->selectedPevIds();
+            GenerateTimetableJob::dispatchSync(
+                $this->calendarId,
+                dryRun: true,
+                pevaluacionIds: $selectedPevIds ?: null,
+            );
             $calendar = TimetableCalendar::find($this->calendarId);
             $this->preview = $calendar?->preview_payload;
+            if ($this->preview) {
+                $this->preview['generated_assignment'] = $this->preview['assignment'] ?? [];
+                $this->preview['generated_unassigned'] = $this->preview['unassigned'] ?? [];
+                $this->preview['preview_history'] = [];
+            }
             $this->generationState = 'preview_ready';
         } finally {
             $this->busy = false;
         }
+    }
+
+    /**
+     * Rehidrata la vista del Paso 5 desde los slots persistidos de un
+     * calendario publicado, sin ejecutar nuevamente el solver.
+     */
+    private function loadPublishedPreview(TimetableCalendar $calendar): void
+    {
+        if ($calendar->status !== TimetableCalendar::STATUS_ACTIVE || ! $calendar->slots()->exists()) {
+            return;
+        }
+
+        $assignment = [];
+        $assignedLessonIds = [];
+
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->orderBy('lesson_id')
+            ->orderBy('period_id')
+            ->get()
+            ->each(function (TimetableSlot $slot) use (&$assignment, &$assignedLessonIds): void {
+                $lessonId = (int) $slot->lesson_id;
+                $assignedLessonIds[$lessonId] = true;
+                $assignment[$lessonId][] = [
+                    'period_id' => (int) $slot->period_id,
+                    'room_id' => $slot->room_id ? (int) $slot->room_id : null,
+                    'is_practical' => (bool) ($slot->is_practical ?? false),
+                ];
+            });
+
+        $unassigned = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereNotIn('id', array_keys($assignedLessonIds))
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->values()
+            ->all();
+        $diagnostics = [];
+        $lessons = $calendar->lessons()
+            ->get(['id', 'weekly_blocks_t', 'weekly_blocks_p'])
+            ->keyBy('id');
+        foreach ($assignment as $lessonId => $slots) {
+            $lesson = $lessons->get((int) $lessonId);
+            if (! $lesson) {
+                continue;
+            }
+
+            $required = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;
+            $assigned = collect($slots)->pluck('period_id')->filter()->unique()->count();
+            if ($required > 0 && $assigned !== $required) {
+                $unassigned[] = (int) $lessonId;
+                $diagnostics[] = [
+                    'lesson_id' => (int) $lessonId,
+                    'required_blocks' => $required,
+                    'assigned_blocks' => $assigned,
+                    'missing_blocks' => max(0, $required - $assigned),
+                ];
+            }
+        }
+
+        $this->preview = [
+            'dry_run' => false,
+            'assignment' => $assignment,
+            'unassigned' => array_values(array_unique($unassigned)),
+            'assignment_source' => 'published_slots',
+            'strategy' => $calendar->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
+            'timed_out' => false,
+            'elapsed_seconds' => 0,
+            'assignment_diagnostics' => $diagnostics,
+        ];
+        $this->generationState = 'published';
     }
 
     /**
@@ -2634,6 +3602,10 @@ class TimetableWizard extends Component
             'preview_payload' => $this->preview,
             'status' => TimetableCalendar::STATUS_DRAFT,
         ]);
+        $this->recordPreviewChange('update_draft_preview', null, [], [
+            'assignment_count' => count($this->preview['assignment'] ?? []),
+            'unassigned_count' => count($this->preview['unassigned'] ?? []),
+        ]);
         $this->generationState = 'preview_ready';
         $this->notification()->success(
             'Borrador actualizado',
@@ -2654,6 +3626,12 @@ class TimetableWizard extends Component
             return [];
         }
 
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+        if (! $calendar) {
+            return [];
+        }
+
+        $readiness = app(TimetablePublicationReadinessService::class)->evaluate($calendar, $this->preview);
         $unassigned = collect($this->preview['unassigned'] ?? []);
         $assignment = collect($this->preview['assignment'] ?? []);
 
@@ -2664,7 +3642,11 @@ class TimetableWizard extends Component
             ->where('calendar_id', $this->calendarId)
             ->with('pevaluacion.profesor')
             ->get()
-            ->pluck('pevaluacion.profesor.lastname')
+            ->map(fn ($lesson) => trim(
+                ($lesson->pevaluacion?->profesor?->lastname ?? '').' '.
+                ($lesson->pevaluacion?->profesor?->name ?? '')
+            ))
+            ->filter()
             ->unique()
             ->values();
 
@@ -2684,10 +3666,42 @@ class TimetableWizard extends Component
             'docentes_afectados' => $teachersAffected->count(),
             'docentes' => $teachersAffected->take(5)->implode(', '),
             'secciones_con_horario' => $seccionesConHorario,
-            'calidad' => $assignment->count() + $unassigned->count() > 0
-                ? (int) round($assignment->count() * 100 / ($assignment->count() + $unassigned->count()))
-                : 100,
+            'calidad' => (int) round($readiness['quality']['score']),
+            'cobertura' => $readiness['quality']['coverage'],
+            'conflictos_bloqueantes' => count($readiness['hard_conflicts']),
+            'warnings' => count($readiness['warnings']),
+            'ready' => $readiness['ready'],
         ];
+    }
+
+    public function publicationReadiness(): array
+    {
+        if (! $this->calendarId || ! $this->preview) {
+            return [];
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            return [];
+        }
+
+        $readiness = app(TimetablePublicationReadinessService::class)->evaluate($calendar, $this->preview);
+        $selectedPevIds = $this->selectedPevIds();
+        $selectedLessonIds = $selectedPevIds === []
+            ? collect()
+            : TimetableLesson::query()
+                ->where('calendar_id', $calendar->id)
+                ->whereIn('pevaluacion_id', $selectedPevIds)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id);
+
+        $readiness['display_hard_conflicts'] = collect($readiness['hard_conflicts'] ?? [])
+            ->filter(fn (array $conflict): bool => $selectedLessonIds->contains((int) ($conflict['lesson_id'] ?? 0)))
+            ->values()
+            ->all();
+
+        return $readiness;
     }
 
     /**
@@ -2713,8 +3727,11 @@ class TimetableWizard extends Component
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
             ->whereIn('id', $ids)
-            ->with('shift', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor')
+            ->with('shift', 'slots.period', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor')
             ->get();
+        $calendarStrategy = TimetableCalendar::query()
+            ->whereKey($this->calendarId)
+            ->value('strategy');
 
         $periods = TimetablePeriod::query()
             ->where('calendar_id', $this->calendarId)
@@ -2778,7 +3795,8 @@ class TimetableWizard extends Component
                 $teacherBusy,
                 $sectionBusy,
                 $sectionGroupBusy,
-                $roomBusy
+                $roomBusy,
+                $calendarStrategy
             ): array {
                 $pev = $lesson->pevaluacion;
                 $subject = $pev?->pensum?->asignatura?->name ?? 'Sin asignatura';
@@ -2787,6 +3805,14 @@ class TimetableWizard extends Component
                 $grade = $pev?->seccion?->grado?->name ?? 'Sin grado';
                 $teacher = trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')) ?: 'Sin docente';
                 $blocks = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;
+                $assignedBlocks = $lesson->slots
+                    ->map(fn ($slot) => $slot->period
+                        ? $slot->period->period_label
+                        .' · '.substr((string) $slot->period->end_time, 0, 5)
+                        : null)
+                    ->filter()
+                    ->values()
+                    ->all();
                 $shiftPeriods = $periodsByShift->get($lesson->shift_id, collect());
                 $teacherBlocks = $blockedAvailability->get($pev?->profesor_id, collect())
                     ->where('shift_id', $lesson->shift_id);
@@ -2843,7 +3869,13 @@ class TimetableWizard extends Component
                     'Prueba ejecutar nuevamente después de liberar o redistribuir períodos.',
                 ];
 
-                if (! $lesson->shift_id) {
+                if ($calendarStrategy === TimetableCalendar::STRATEGY_LEGACY && $lesson->slots->isEmpty()) {
+                    $reason = 'La estrategia legacy conserva las posiciones importadas y esta lección no tiene bloques legacy.';
+                    $actions = [
+                        'Cambia la estrategia del calendario a optimizada para que el solver la ubique.',
+                        'O importa/asigna sus bloques legacy antes de volver a previsualizar.',
+                    ];
+                } elseif (! $lesson->shift_id) {
                     $reason = 'La lección no tiene un turno válido.';
                     $actions = ['Selecciona un turno con períodos guardados en el paso 3.'];
                 } elseif ($shiftPeriods->isEmpty()) {
@@ -2900,6 +3932,7 @@ class TimetableWizard extends Component
                     'shift' => $lesson->shift?->code ?? '—',
                     'blocks_t' => (int) $lesson->weekly_blocks_t,
                     'blocks_p' => (int) $lesson->weekly_blocks_p,
+                    'assigned_blocks' => $assignedBlocks,
                     'room_type' => $lesson->room_type_required ?: 'No requerido',
                     'available_periods' => $availablePeriods,
                     'free_periods' => $freePeriods,
@@ -2932,19 +3965,129 @@ class TimetableWizard extends Component
             return;
         }
 
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+        $readiness = $calendar
+            ? app(TimetablePublicationReadinessService::class)->evaluate($calendar, $this->preview)
+            : [];
+
+        if (! $calendar || ($readiness['hard_conflicts'] ?? []) !== []) {
+            $conflictCount = count($readiness['hard_conflicts'] ?? []);
+            $this->notification()->error(
+                'Publicación bloqueada',
+                "Se detectaron {$conflictCount} conflicto(s) bloqueante(s). Revisa el detalle mostrado en el resumen antes de publicar.",
+            );
+
+            return;
+        }
+
         $this->busy = true;
         try {
+            $version = $calendar->version + 1;
             GenerateTimetableJob::dispatchSync(
                 $this->calendarId,
                 dryRun: false,
                 previewPayload: $this->preview,
             );
+            $publishedCalendar = TimetableCalendar::query()->find($this->calendarId);
+            $calendarVersion = TimetableCalendarVersion::create([
+                'calendar_id' => $this->calendarId,
+                'version' => $version,
+                'status' => TimetableCalendar::STATUS_ACTIVE,
+                'published_by' => auth()->id(),
+                'published_at' => now(),
+                'quality_score' => $readiness['quality']['score'] ?? null,
+                'summary_json' => $readiness,
+            ]);
+            TimetableChangeLog::create([
+                'calendar_id' => $this->calendarId,
+                'version_id' => $calendarVersion->id,
+                'user_id' => auth()->id(),
+                'action' => 'publish',
+                'metadata_json' => [
+                    'previous_version' => $calendar->version,
+                    'published_version' => $publishedCalendar?->version ?? $version,
+                    'correlation_id' => (string) str()->uuid(),
+                ],
+            ]);
             $this->generationState = 'published';
             $this->preview = null;
             session()->flash('message', 'Horario publicado.');
         } finally {
             $this->busy = false;
         }
+    }
+
+    private function recordPreviewChange(string $action, ?int $lessonId = null, array $before = [], array $after = []): void
+    {
+        if (! $this->calendarId) {
+            return;
+        }
+
+        TimetableChangeLog::create([
+            'calendar_id' => $this->calendarId,
+            'user_id' => auth()->id(),
+            'action' => $action,
+            'lesson_id' => $lessonId,
+            'before_json' => $before ?: null,
+            'after_json' => $after ?: null,
+            'metadata_json' => ['preview' => true],
+        ]);
+    }
+
+    public function undoLastPreviewChange(): void
+    {
+        if (! $this->preview || ! $this->calendarId) {
+            return;
+        }
+
+        $change = TimetableChangeLog::query()
+            ->where('calendar_id', $this->calendarId)
+            ->where('user_id', auth()->id())
+            ->where('metadata_json->preview', true)
+            ->whereNotIn('action', ['undo_move_preview_lesson', 'undo_remove_preview_lesson', 'undo_add_preview_lesson'])
+            ->latest('id')
+            ->first();
+
+        if (! $change || ! $change->lesson_id) {
+            $this->notification()->warning('Sin cambios para deshacer', 'No hay un cambio manual reciente disponible.');
+
+            return;
+        }
+
+        $assignment = $this->preview['assignment'] ?? [];
+        $lessonKey = (string) $change->lesson_id;
+        $before = $change->before_json ?? [];
+        if ($before === []) {
+            unset($assignment[$lessonKey]);
+        } else {
+            $assignment[$lessonKey] = $before;
+        }
+
+        $this->preview['assignment'] = $assignment;
+        $this->preview['unassigned'] = array_values(array_filter(
+            $this->preview['unassigned'] ?? [],
+            fn ($id): bool => (int) $id !== (int) $change->lesson_id,
+        ));
+        $this->preview['manual_override'] = true;
+        $this->preview['assignment_source'] = 'manual_preview';
+        $this->recordPreviewChange('undo_'.$change->action, $change->lesson_id, $change->after_json ?? [], $before);
+        $this->notification()->success('Cambio deshecho', 'Se restauró el estado anterior de la lección.');
+    }
+
+    public function restoreGeneratedPreview(): void
+    {
+        if (! $this->preview || ! array_key_exists('generated_assignment', $this->preview)) {
+            $this->notification()->warning('Generación requerida', 'Ejecuta primero una previsualización para poder restaurarla.');
+
+            return;
+        }
+
+        $this->preview['assignment'] = $this->preview['generated_assignment'];
+        $this->preview['unassigned'] = $this->preview['generated_unassigned'] ?? [];
+        $this->preview['manual_override'] = false;
+        $this->preview['assignment_source'] = 'solver';
+        $this->recordPreviewChange('restore_generated_preview');
+        $this->notification()->success('Preview restaurado', 'Se recuperó el resultado original del dry-run.');
     }
 
     // ─── Helpers ───────────────────────────────────────────────
@@ -2959,7 +4102,7 @@ class TimetableWizard extends Component
         $this->maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
         $this->strategy = in_array($calendar->strategy, TimetableCalendar::STRATEGIES, true)
             ? $calendar->strategy
-            : TimetableCalendar::STRATEGY_OPTIMIZED;
+            : TimetableCalendar::DEFAULT_STRATEGY;
         $this->reloadRooms();
     }
 
@@ -3144,7 +4287,7 @@ class TimetableWizard extends Component
                 'quality_score' => $selectedCalendar->quality_score !== null ? (float) $selectedCalendar->quality_score : null,
                 'period_minutes' => (int) $selectedCalendar->period_minutes,
                 'max_subjects_per_period' => (int) ($selectedCalendar->max_subjects_per_period ?? 2),
-                'strategy' => $selectedCalendar->strategy ?: TimetableCalendar::STRATEGY_OPTIMIZED,
+                'strategy' => $selectedCalendar->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
                 'lapso_name' => $selectedCalendar->lapso?->name,
                 'pestudio_name' => $selectedCalendar->pestudio?->name,
                 'is_editable' => $selectedCalendar->is_editable,
@@ -3213,6 +4356,7 @@ class TimetableWizard extends Component
             'periodsList' => $periodsList,
             'availabilityGrid' => $this->availabilityGrid(),
             'sectionPreviewGrid' => $sectionPreviewGrid,
+            'sectionSlotParity' => $this->sectionSlotParity(),
             'calendarPeriodMinutes' => $calendarPeriodMinutes,
             'roomPestudios' => $this->loadRoomPestudios(),
             'roomGrados' => $this->loadRoomGrados(),

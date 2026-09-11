@@ -35,7 +35,7 @@ final class TimetableSolver
 
     /**
      * @param  LessonToSchedule[]  $lessons
-     * @param  array<int, list<int>>  $availablePeriodsByTeacher  profesorId => periodIds (ya filtrado por turno y disponibilidad)
+     * @param  array<int, list<int>>  $availablePeriodsByTeacher  lessonId => periodIds (turno preferido primero)
      * @param  array<string, list<int>>  $roomsByType  roomType => roomIds compatibles
      * @param  array<int, array{day: int, order: int}>  $periodMeta  periodId => día/orden (heurística soft)
      */
@@ -97,11 +97,26 @@ final class TimetableSolver
         );
 
         $timedOut = false;
-        $this->backtrack($free, 0, $ctx, $assignment, $unassigned, $deadline, $timedOut);
-
-        return new SolverResult(
+        $bestAssignment = $assignment;
+        $bestUnassigned = array_values(array_unique(array_merge(
+            array_map('intval', $unassigned),
+            array_map(fn (LessonToSchedule $lesson): int => $lesson->lessonId, $free),
+        )));
+        $this->backtrack(
+            $free,
+            0,
+            $ctx,
             $assignment,
             $unassigned,
+            $deadline,
+            $timedOut,
+            $bestAssignment,
+            $bestUnassigned,
+        );
+
+        return new SolverResult(
+            $bestAssignment,
+            $bestUnassigned,
             $timedOut,
             microtime(true) - $started,
         );
@@ -111,6 +126,8 @@ final class TimetableSolver
      * @param  LessonToSchedule[]  $lessons
      * @param  array<int, list<SlotCandidate>>  $assignment
      * @param  array<int, int>  $unassigned
+     * @param  array<int, list<SlotCandidate>>  $bestAssignment
+     * @param  array<int, int>  $bestUnassigned
      */
     private function backtrack(
         array $lessons,
@@ -120,19 +137,19 @@ final class TimetableSolver
         array &$unassigned,
         float $deadline,
         bool &$timedOut,
+        array &$bestAssignment,
+        array &$bestUnassigned,
     ): bool {
+        $this->rememberBest($assignment, $unassigned, $bestAssignment, $bestUnassigned);
+
         if ($index >= count($lessons)) {
-            return true;
+            return $unassigned === [];
         }
 
         // ADR-TT-009: corte por tiempo conserva la solución parcial.
         if (microtime(true) > $deadline) {
             $timedOut = true;
-            for ($i = $index; $i < count($lessons); $i++) {
-                $unassigned[] = $lessons[$i]->lessonId;
-            }
-
-            return true;
+            return false;
         }
 
         $lesson = $lessons[$index];
@@ -144,7 +161,17 @@ final class TimetableSolver
             }
             $assignment[$lesson->lessonId] = $combo;
 
-            if ($this->backtrack($lessons, $index + 1, $ctx, $assignment, $unassigned, $deadline, $timedOut)) {
+            if ($this->backtrack(
+                $lessons,
+                $index + 1,
+                $ctx,
+                $assignment,
+                $unassigned,
+                $deadline,
+                $timedOut,
+                $bestAssignment,
+                $bestUnassigned,
+            )) {
                 return true;
             }
 
@@ -154,10 +181,57 @@ final class TimetableSolver
             unset($assignment[$lesson->lessonId]);
         }
 
-        // Sin combinación viable: se reporta como no asignada y se continúa.
+        // Se permite omitir esta lección, pero solo después de explorar las
+        // combinaciones. Así una asignación temprana no condena a una lección
+        // posterior cuando existe una redistribución completa.
         $unassigned[] = $lesson->lessonId;
+        $complete = $this->backtrack(
+            $lessons,
+            $index + 1,
+            $ctx,
+            $assignment,
+            $unassigned,
+            $deadline,
+            $timedOut,
+            $bestAssignment,
+            $bestUnassigned,
+        );
+        array_pop($unassigned);
 
-        return $this->backtrack($lessons, $index + 1, $ctx, $assignment, $unassigned, $deadline, $timedOut);
+        return $complete;
+    }
+
+    /**
+     * Conserva la mejor solución parcial cuando el problema no tiene una
+     * solución completa o vence el presupuesto de búsqueda.
+     *
+     * @param  array<int, list<SlotCandidate>>  $assignment
+     * @param  array<int, int>  $unassigned
+     * @param  array<int, list<SlotCandidate>>  $bestAssignment
+     * @param  array<int, int>  $bestUnassigned
+     */
+    private function rememberBest(
+        array $assignment,
+        array $unassigned,
+        array &$bestAssignment,
+        array &$bestUnassigned,
+    ): void {
+        $assignedBlocks = array_sum(array_map('count', $assignment));
+        $bestBlocks = array_sum(array_map('count', $bestAssignment));
+
+        if ($assignedBlocks <= $bestBlocks) {
+            return;
+        }
+
+        $bestAssignment = $assignment;
+        $bestUnassigned = array_values(array_unique(array_map('intval', $unassigned)));
+        $assignedIds = array_map('intval', array_keys($assignment));
+        foreach ($this->lessons as $lesson) {
+            if (! in_array($lesson->lessonId, $assignedIds, true)
+                && ! in_array($lesson->lessonId, $bestUnassigned, true)) {
+                $bestUnassigned[] = $lesson->lessonId;
+            }
+        }
     }
 
     /**
@@ -168,7 +242,9 @@ final class TimetableSolver
      */
     private function buildDomain(LessonToSchedule $lesson, SchedulingContext $ctx): array
     {
-        $base = $this->availablePeriodsByTeacher[$lesson->profesorId] ?? [];
+        $base = $this->availablePeriodsByTeacher[$lesson->lessonId]
+            ?? $this->availablePeriodsByTeacher[$lesson->profesorId]
+            ?? [];
         $domain = ['t' => [], 'p' => []];
 
         foreach ($base as $periodId) {

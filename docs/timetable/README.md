@@ -108,6 +108,11 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
   asignatura manda por defecto, editable).
 - Por lección: turno, `room_type_required` (solo aplica a bloques prácticos,
   ADR-TT-010), prioridad (mayor = más restrictivo), `locked`.
+- En la estrategia **optimized**, el turno configurado es la preferencia:
+  primero se intentan sus períodos y, si las restricciones dejan la lección sin
+  capacidad, se prueban los demás turnos del calendario. Las lecciones
+  `locked` conservan exclusivamente su turno configurado. El turno efectivo de
+  una asignación se determina por el período elegido.
 - Sub-grupos: si la `Pevaluacion` tiene `grupo_estable_id`, dos sub-grupos de la
   misma sección pueden dictarse **en paralelo** en el mismo período (cada uno con
   su profesor); la sección completa (`grupo_estable_id = NULL`) ocupa el período
@@ -293,13 +298,28 @@ Reglas de integridad (ADR-TT-002): validación en aplicación (`ConflictValidato
 ```bash
 php8.2 artisan migrate --force                              # tablas del módulo
 php8.2 artisan db:seed --class=TimetableShiftsSeeder --force  # turnos M/T (idempotente)
-php8.2 artisan timetable:backfill-horas [--dry-run|--force]   # horas de asignaturas por plan
-php8.2 artisan timetable:import-legacy --lapso=1              # base legacy (un calendario por pestudio)
+php8.2 artisan timetable:normalize-legacy-hours --lapso=1 --dry-run
+php8.2 artisan timetable:normalize-legacy-hours --lapso=1 --force # fuente normativa de horas
+# timetable:backfill-horas queda deprecado y solo se conserva por compatibilidad.
+php8.2 artisan timetable:import-legacy --lapso=1              # importa y deja el calendario optimizado por defecto
+php8.2 artisan timetable:import-legacy --lapso=1 --strategy=legacy # conserva explícitamente la estrategia legacy
 php8.2 artisan timetable:create-section-rooms --dry-run     # audita un aula por sección
 php8.2 artisan timetable:create-section-rooms               # crea aulas activas por sección
 ```
 La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
 `blueprint/school-timetable/legacy/csv`).
+
+### 10.2 Publicación, recuperación y observabilidad
+
+- El Step 5 revalida el preview en servidor antes de publicar.
+- Los conflictos duros bloquean la publicación; las advertencias se muestran
+  separadamente.
+- `Deshacer último cambio` restaura la última modificación manual registrada.
+- `Restaurar dry-run` recupera la asignación generada antes de editar el preview.
+- Las publicaciones y cambios manuales se registran en
+  `timetable_calendar_versions` y `timetable_change_logs`.
+- Las ejecuciones del solver escriben `correlation_id`, estrategia, calendario,
+  duración, asignadas y no asignadas en el canal `timetable`.
 
 ---
 

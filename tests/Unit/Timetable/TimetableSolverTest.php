@@ -99,6 +99,50 @@ class TimetableSolverTest extends TestCase
                 $byPeriodTeacher[$key] = true;
             }
         }
+
+    }
+
+    public function test_solver_revisits_earlier_assignments_to_preserve_all_blocks(): void
+    {
+        $first = new LessonToSchedule(
+            lessonId: 1,
+            seccionId: 500,
+            profesorId: 101,
+            shiftId: 10,
+            blocksT: 2,
+            blocksP: 0,
+        );
+        $second = new LessonToSchedule(
+            lessonId: 2,
+            seccionId: 500,
+            profesorId: 102,
+            shiftId: 10,
+            blocksT: 2,
+            blocksP: 0,
+        );
+
+        $solver = new TimetableSolver(
+            [$first, $second],
+            [
+                1 => [1, 2, 3, 4],
+                2 => [1, 2],
+            ],
+            ['aula' => [1]],
+            [
+                1 => ['day' => 1, 'order' => 1],
+                2 => ['day' => 1, 'order' => 2],
+                3 => ['day' => 2, 'order' => 1],
+                4 => ['day' => 3, 'order' => 1],
+            ],
+            5,
+            1,
+        );
+
+        $result = $solver->solve();
+
+        $this->assertTrue($result->isComplete());
+        $this->assertCount(2, $result->assignment[1]);
+        $this->assertCount(2, $result->assignment[2]);
     }
 
     public function test_infeasible_dataset_reports_unassigned_without_double_booking(): void

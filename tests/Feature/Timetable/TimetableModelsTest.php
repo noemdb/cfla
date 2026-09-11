@@ -18,8 +18,10 @@ use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
+use App\Services\Timetable\TimetableLessonPersistenceService;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Validation\ValidationException;
 use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
@@ -67,6 +69,28 @@ class TimetableModelsTest extends TestCase
         $this->assertSame(5, $lesson->blocks_needed);
         $this->assertNotNull($lesson->pevaluacion);
         $this->assertSame($fixture['pev']->id, $lesson->pevaluacion->id);
+    }
+
+    public function test_lesson_persistence_rejects_missing_pevaluacion(): void
+    {
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => Lapso::factory(),
+        ]);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Pevaluacion inexistente: #999999');
+
+        app(TimetableLessonPersistenceService::class)->persist($calendar->id, [[
+            'pev_id' => 999999,
+            'shift_id' => null,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]]);
+
+        $this->assertDatabaseMissing('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => 999999,
+        ]);
     }
 
     public function test_slot_persists_denormalized_teacher_and_section(): void

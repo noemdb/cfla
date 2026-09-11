@@ -9,6 +9,7 @@ use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
+use App\Models\app\Timetable\TimetableSlot;
 use App\Services\Timetable\TimetableViewService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -97,11 +98,23 @@ class TimetablePdfController extends Controller
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $seccion = Seccion::query()->with('grado')->findOrFail($seccionId);
 
-        if (! $calendar->preview_payload) {
+        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
 
         $assignment = collect($calendar->preview_payload['assignment'] ?? []);
+        if ($isPublishedSchedule) {
+            $assignment = TimetableSlot::query()
+                ->where('calendar_id', $calendar->id)
+                ->where('seccion_id', $seccionId)
+                ->get(['lesson_id', 'period_id', 'room_id'])
+                ->groupBy('lesson_id')
+                ->map(fn ($slots) => $slots->map(fn ($slot) => [
+                    'period_id' => (int) $slot->period_id,
+                    'room_id' => (int) ($slot->room_id ?? 0),
+                ])->values()->all());
+        }
 
         // Lecciones de la sección con su asignatura/profesor/grupo.
         $lessons = TimetableLesson::query()
@@ -110,40 +123,68 @@ class TimetablePdfController extends Controller
             ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.grupoEstable'])
             ->get();
 
-        // Períodos del calendario (id => día/orden/hora).
+        // Períodos del calendario (id => día/orden/hora), agrupados por turno
+        // para conservar la misma separación visual del Step 5.
         $periods = TimetablePeriod::query()
             ->where('calendar_id', $calendar->id)
+            ->with('shift')
             ->orderBy('day_of_week')
             ->orderBy('order_in_day')
             ->get()
             ->keyBy('id');
 
-        // grid[orden][día] = [['asignatura', 'profesor', 'grupo'], ...]
-        $grid = [];
+        $assignmentsByPeriod = [];
         foreach ($lessons as $lesson) {
             foreach ($assignment->get((string) $lesson->id, []) as $slot) {
-                $period = $periods->get($slot['period_id']);
+                $period = $periods->get((int) ($slot['period_id'] ?? 0));
                 if (! $period) {
                     continue;
                 }
                 $pev = $lesson->pevaluacion;
-                $grid[(int) $period->order_in_day][(int) $period->day_of_week][] = [
+                $assignmentsByPeriod[$period->id][] = [
                     'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                     'grupo' => $pev?->grupoEstable?->name,
+                    'room_id' => (int) ($slot['room_id'] ?? 0),
                 ];
             }
         }
+
+        $shiftGrids = $periods
+            ->groupBy('shift_id')
+            ->map(function ($shiftPeriods) use ($assignmentsByPeriod) {
+                return [
+                    'shift' => $shiftPeriods->first()->shift,
+                    'rows' => $shiftPeriods
+                        ->groupBy('order_in_day')
+                        ->sortKeys()
+                        ->map(function ($dayPeriods) use ($assignmentsByPeriod) {
+                            $rowPeriod = $dayPeriods->first();
+
+                            return [
+                                'period' => $rowPeriod,
+                                'days' => collect(range(1, 5))->mapWithKeys(function ($day) use ($dayPeriods, $assignmentsByPeriod) {
+                                    $period = $dayPeriods->firstWhere('day_of_week', $day);
+
+                                    return [$day => [
+                                        'period' => $period,
+                                        'assignments' => $period ? ($assignmentsByPeriod[$period->id] ?? []) : [],
+                                    ]];
+                                })->all(),
+                            ];
+                        })->values()->all(),
+                ];
+            })->values()->all();
 
         $institucion = \App\Models\app\Entity\Institucion::orderBy('created_at', 'DESC')->first();
 
         $pdf = Pdf::loadView('pdfs.timetable.preview-section', [
             'calendar' => $calendar,
             'seccion' => $seccion,
-            'grid' => $grid,
-            'periodsByOrder' => $periods->groupBy('order_in_day'),
+            'shiftGrids' => $shiftGrids,
             'institucion' => $institucion,
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'isPublishedSchedule' => $isPublishedSchedule,
         ]);
         $pdf->setPaper('letter', 'landscape');
 

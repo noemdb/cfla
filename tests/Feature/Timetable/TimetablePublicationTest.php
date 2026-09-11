@@ -17,6 +17,7 @@ use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use App\Services\Timetable\TimetableViewService;
+use App\Services\Timetable\TimetablePublicationReadinessService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Tests\Concerns\TimetableShiftHelper;
@@ -89,6 +90,31 @@ class TimetablePublicationTest extends TestCase
         $this->assertTrue($grid->has(1));
         $this->assertCount(1, $grid->get(1)->get(1)); // lunes, primer bloque
         $this->assertTrue($grid->get(1)->get(2)->isEmpty()); // martes, primer bloque (sin slot)
+    }
+
+    public function test_publication_rejects_a_partial_lesson_assignment(): void
+    {
+        $fixture = $this->publicationFixture();
+        $fixture['lesson']->update(['weekly_blocks_t' => 2]);
+
+        $readiness = app(TimetablePublicationReadinessService::class)->evaluate(
+            $fixture['calendar']->fresh(),
+            [
+                'assignment' => [
+                    (string) $fixture['lesson']->id => [
+                        ['period_id' => $fixture['period']->id],
+                    ],
+                ],
+                'unassigned' => [],
+            ],
+        );
+
+        $this->assertFalse($readiness['ready']);
+        $this->assertSame(0, $readiness['assigned']);
+        $this->assertSame('incomplete_assignment', $readiness['hard_conflicts'][0]['type']);
+        $this->assertSame(1, $readiness['hard_conflicts'][0]['missing_blocks']);
+        $this->assertSame($fixture['asignaturaA']->name, $readiness['hard_conflicts'][0]['subject']);
+        $this->assertSame('Asignación incompleta', $readiness['hard_conflicts'][0]['title']);
     }
 
     // ─── Fixtures ──────────────────────────────────────────────

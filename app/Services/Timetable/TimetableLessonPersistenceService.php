@@ -4,6 +4,7 @@ namespace App\Services\Timetable;
 
 use App\Models\app\Timetable\TimetableLesson;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final class TimetableLessonPersistenceService
 {
@@ -15,6 +16,38 @@ final class TimetableLessonPersistenceService
      */
     public function persist(int $calendarId, array $lessons): void
     {
+        $invalidPevaluacionRows = collect($lessons)
+            ->map(fn ($lesson, $key) => [
+                'key' => $key,
+                'id' => (int) ($lesson['pev_id'] ?? 0),
+            ])
+            ->filter(fn ($row) => $row['id'] <= 0);
+        $pevaluacionIds = collect($lessons)
+            ->map(fn ($lesson) => (int) ($lesson['pev_id'] ?? 0))
+            ->filter()
+            ->unique()
+            ->values();
+        $existingPevaluacionIds = \App\Models\app\Academy\Pevaluacion::query()
+            ->whereIn('id', $pevaluacionIds)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id);
+        $missingPevaluacionIds = $pevaluacionIds->diff($existingPevaluacionIds)->values();
+
+        if ($invalidPevaluacionRows->isNotEmpty() || $missingPevaluacionIds->isNotEmpty()) {
+            $invalidIds = $invalidPevaluacionRows
+                ->map(fn ($row) => (string) $row['key'])
+                ->values();
+            $references = $missingPevaluacionIds
+                ->map(fn ($id) => '#'.$id)
+                ->merge($invalidIds->map(fn ($key) => "fila {$key} sin ID"))
+                ->implode(', ');
+
+            throw ValidationException::withMessages([
+                'lessons' => 'No se pueden registrar lessons con Pevaluacion inexistente: '
+                    .$references.'.',
+            ]);
+        }
+
         DB::transaction(function () use ($calendarId, $lessons): void {
             foreach ($lessons as $lesson) {
                 $pevaluacionId = (int) ($lesson['pev_id'] ?? 0);

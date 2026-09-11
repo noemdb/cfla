@@ -229,6 +229,22 @@ class MultiCalendarTest extends TestCase
         ]);
     }
 
+    public function test_wizard_opens_published_calendar_on_step_5_with_grid(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->active()->create(['lapso_id' => $lapso->id]);
+        $this->makeSlotFor($calendar);
+
+        Livewire::withQueryParams(['calendarId' => $calendar->id])
+            ->actingAs($user)
+            ->test(TimetableWizard::class)
+            ->assertSet('calendarId', $calendar->id)
+            ->assertSet('generationState', 'published')
+            ->assertSet('currentStep', 5)
+            ->assertSee('Horario previsualizado', false);
+    }
+
     /**
      * Slot válido para un calendario (lección + período + slot con FK reales).
      */

@@ -306,6 +306,41 @@ class IndexComponent extends Component
         );
     }
 
+    // ─── DELETE ACTIVITY ────────────────────────────────────────
+
+    public function deleteActivity($id)
+    {
+        $activity = Activity::findOrFail($id);
+
+        if ($activity->status) {
+            $this->notification()->error(
+                title: 'No se puede eliminar',
+                description: 'Solo se pueden eliminar actividades en revisión.'
+            );
+
+            return;
+        }
+
+        try {
+            $activity->delete();
+        } catch (\Throwable $e) {
+            $this->notification()->error(
+                title: 'No se pudo eliminar',
+                description: 'La actividad tiene registros asociados que impiden su eliminación.'
+            );
+
+            return;
+        }
+
+        $this->close();
+        $this->modeIndex = true;
+
+        $this->notification()->success(
+            title: 'Actividad Eliminada',
+            description: 'La actividad se eliminó correctamente.'
+        );
+    }
+
     // ─── MODAL COMMENTS ─────────────────────────────────────────
 
     public function setModeComment($activitie_id)

@@ -32,10 +32,6 @@ class TimetableCalendar extends Model
         'active_lapso_key',
     ];
 
-    protected $attributes = [
-        'strategy' => self::STRATEGY_OPTIMIZED,
-    ];
-
     const STATUS_DRAFT = 'draft';
 
     const STATUS_GENERATING = 'generating';
@@ -48,9 +44,15 @@ class TimetableCalendar extends Model
 
     public const STRATEGY_LEGACY = 'legacy';
 
+    public const DEFAULT_STRATEGY = self::STRATEGY_OPTIMIZED;
+
     public const STRATEGIES = [
         self::STRATEGY_OPTIMIZED,
         self::STRATEGY_LEGACY,
+    ];
+
+    protected $attributes = [
+        'strategy' => self::DEFAULT_STRATEGY,
     ];
 
     public function lapso()
@@ -86,6 +88,16 @@ class TimetableCalendar extends Model
     public function availabilities()
     {
         return $this->hasMany(TimetableTeacherAvailability::class, 'calendar_id');
+    }
+
+    public function versions()
+    {
+        return $this->hasMany(TimetableCalendarVersion::class, 'calendar_id');
+    }
+
+    public function changeLogs()
+    {
+        return $this->hasMany(TimetableChangeLog::class, 'calendar_id');
     }
 
     public function scopeDraft($query)

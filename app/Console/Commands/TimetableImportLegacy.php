@@ -35,7 +35,8 @@ use Illuminate\Support\Facades\DB;
  *
  * Uso:
  *   php8.2 artisan timetable:import-legacy --lapso=1 --dry-run --force
- *   php8.2 artisan timetable:import-legacy --lapso=1
+ *   php8.2 artisan timetable:import-legacy --lapso=1 --strategy=optimized
+ *   php8.2 artisan timetable:import-legacy --lapso=1 --strategy=legacy
  */
 class TimetableImportLegacy extends Command
 {
@@ -43,6 +44,7 @@ class TimetableImportLegacy extends Command
         {--lapso=1 : Id del lapso destino}
         {--calendar-name= : Nombre del calendario borrador (default: "Horario 2025-2026 (legacy)")}
         {--csv-dir= : Directorio con los CSVs (default: blueprint/school-timetable/legacy/csv)}
+        {--strategy=optimized : Estrategia del calendario generado (optimized|legacy)}
         {--dry-run : Solo audit report, no persiste}
         {--force : Permite ejecutar sin --dry-run aunque haya errores de mapeo}
         {--replace : Elimina los borradores legacy previos del lapso (mismo nombre base) antes de importar}';
@@ -118,6 +120,13 @@ class TimetableImportLegacy extends Command
         $lapsoId = (int) $this->option('lapso');
         $dryRun = (bool) $this->option('dry-run');
         $csvDir = $this->option('csv-dir') ?: (string) config('timetable.legacy_csv_dir');
+        $strategy = (string) $this->option('strategy');
+
+        if (! in_array($strategy, TimetableCalendar::STRATEGIES, true)) {
+            $this->error('La estrategia debe ser optimized o legacy.');
+
+            return self::FAILURE;
+        }
 
         $slotsFile = "$csvDir/legacy_horario_secciones.csv";
         if (! is_file($slotsFile)) {
@@ -193,7 +202,7 @@ class TimetableImportLegacy extends Command
             }
         }
 
-        $calendars = $this->persistCalendar($lapsoId, $audit);
+        $calendars = $this->persistCalendar($lapsoId, $audit, $strategy);
         foreach ($calendars as $calendar) {
             $this->info('Calendario creado: id '.$calendar->id.' · '.$calendar->name);
             $this->info('  Lecciones: '.TimetableLesson::where('calendar_id', $calendar->id)->count().' · slots: '.TimetableSlot::where('calendar_id', $calendar->id)->count());
@@ -626,13 +635,13 @@ class TimetableImportLegacy extends Command
      *
      * @return array<int, TimetableCalendar>
      */
-    private function persistCalendar(int $lapsoId, array $audit): array
+    private function persistCalendar(int $lapsoId, array $audit, string $strategy): array
     {
         $baseName = $this->option('calendar-name') ?: 'Horario 2025-2026 (legacy)';
         $shiftM = TimetableShift::where('code', 'M')->first();
         $shiftT = TimetableShift::where('code', 'T')->first();
 
-        return DB::transaction(function () use ($lapsoId, $baseName, $audit, $shiftM, $shiftT) {
+        return DB::transaction(function () use ($lapsoId, $baseName, $audit, $shiftM, $shiftT, $strategy) {
             $calendars = [];
 
             $byPestudio = [];
@@ -657,7 +666,7 @@ class TimetableImportLegacy extends Command
                     'pestudio_id' => $pid,
                     'name' => $baseName.' · '.$group['name'],
                     'period_minutes' => 60,
-                    'strategy' => TimetableCalendar::STRATEGY_LEGACY,
+                    'strategy' => $strategy,
                     'status' => TimetableCalendar::STATUS_DRAFT,
                     'version' => 0,
                 ]);
