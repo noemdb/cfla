@@ -925,7 +925,15 @@ class TimetableImportLegacy extends Command
         if ($s === null) {
             return '';
         }
-        $s = iconv('UTF-8', 'ASCII//TRANSLIT', $s) ?: $s;
+
+        // Los CSV legacy pueden venir en Windows-1252 o contener bytes
+        // inválidos; iconv emite un warning que Laravel convierte en excepción.
+        if (! mb_check_encoding($s, 'UTF-8')) {
+            $s = mb_convert_encoding($s, 'UTF-8', 'Windows-1252');
+        }
+
+        $normalized = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+        $s = $normalized !== false ? $normalized : $s;
         $s = preg_replace('/\s+/', ' ', trim($s)) ?? '';
         $s = str_replace("'", '', $s);
 
