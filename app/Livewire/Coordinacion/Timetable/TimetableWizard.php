@@ -5109,9 +5109,22 @@ PROMPT;
 
         $lessons = $calendar->lessons()->with('pevaluacion')->get();
         $byPev = $lessons->keyBy('pevaluacion_id');
-        $periods = $calendar->periods()->get()->keyBy(fn ($period) => implode(':', [
-            $period->shift_id, $period->day_of_week, $period->order_in_day,
-        ]));
+        $periodsByIdentity = $calendar->periods()
+            ->get()
+            ->groupBy(fn ($period) => implode(':', [
+                $period->shift_id, $period->day_of_week, $period->order_in_day,
+            ]));
+        $duplicatePeriodKeys = $periodsByIdentity
+            ->filter(fn ($periodsForKey): bool => $periodsForKey->count() > 1)
+            ->map(fn ($periodsForKey): array => $periodsForKey->pluck('id')->map(fn ($id): int => (int) $id)->all())
+            ->all();
+        $periods = $periodsByIdentity->map(fn ($periodsForKey) => $periodsForKey->first());
+        if ($duplicatePeriodKeys !== []) {
+            Log::channel('timetable')->warning('Restore de slots encontró períodos duplicados', [
+                'calendar_id' => (int) $calendar->id,
+                'duplicate_period_keys' => $duplicatePeriodKeys,
+            ]);
+        }
         $rows = [];
         $unresolved = [];
         foreach ($payload['slots'] as $index => $slot) {

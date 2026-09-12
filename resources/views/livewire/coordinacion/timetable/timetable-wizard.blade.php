@@ -143,7 +143,7 @@
             {{-- Detalle del calendario seleccionado (antes: lista de todos los
                  calendarios del lapso; el switcher global ya cubre la elección). --}}
             @if ($selectedCalendarDetail)
-                <div x-data="{ scheduleDialogOpen: false }" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                <div x-data="{ scheduleDialogOpen: false, teacherTotalsDialogOpen: false }" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                         <div class="flex items-center gap-3">
                             <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">{{ $selectedCalendarDetail['name'] }}</h2>
@@ -195,58 +195,79 @@
                             </div>
                         @endforeach
                         @if (count($selectedCalendarDetail['teacher_totals'] ?? []))
-                            <div class="md:col-span-4 rounded-lg border border-sky-500/25 bg-sky-500/5 p-4">
-                                <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-                                    <div>
-                                        <div class="text-[10px] font-bold uppercase tracking-widest text-sky-700 dark:text-sky-300">
-                                            Resumen por profesor
-                                        </div>
-                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                            Total de lessons, bloques configurados y slots asignados en este calendario.
-                                        </div>
-                                    </div>
-                                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                                        {{ count($selectedCalendarDetail['teacher_totals']) }} profesores
-                                    </div>
+                            <div class="rounded-lg border border-sky-500/30 bg-sky-500/5 p-3">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-sky-700 dark:text-sky-300">
+                                    Resumen por profesor
                                 </div>
-                                <div class="space-y-2">
-                                    @foreach ($selectedCalendarDetail['teacher_totals'] as $teacher)
-                                        <div class="rounded-lg border border-sky-500/15 bg-white/40 p-3 dark:bg-white/[0.03]">
-                                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                                <div class="text-xs font-extrabold text-gray-800 dark:text-gray-100">
-                                                    {{ $teacher['name'] }}
-                                                    <span class="font-normal text-gray-400">#{{ $teacher['id'] }}</span>
+                                <button type="button"
+                                    x-on:click="teacherTotalsDialogOpen = true"
+                                    class="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-sky-700 hover:text-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/50 dark:text-sky-300"
+                                    aria-label="Ver resumen detallado por profesor">
+                                    Ver detalle
+                                    <span aria-hidden="true">→</span>
+                                </button>
+                            </div>
+                        @endif
+                        @if (count($selectedCalendarDetail['teacher_totals'] ?? []))
+                            <div x-cloak x-show="teacherTotalsDialogOpen"
+                                x-on:keydown.escape.window="teacherTotalsDialogOpen = false"
+                                class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
+                                role="dialog" aria-modal="true" aria-label="Resumen detallado por profesor">
+                                <div x-on:click.stop class="max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
+                                    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
+                                        <div>
+                                            <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                                                Resumen por profesor
+                                            </h3>
+                                            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                                {{ count($selectedCalendarDetail['teacher_totals']) }} profesores · lessons, bloques requeridos y asignaciones
+                                            </p>
+                                        </div>
+                                        <button type="button" x-on:click="teacherTotalsDialogOpen = false"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50 dark:hover:bg-white/10 dark:hover:text-white"
+                                            aria-label="Cerrar resumen por profesor">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="max-h-[75vh] space-y-2 overflow-y-auto p-4">
+                                        @foreach ($selectedCalendarDetail['teacher_totals'] as $teacher)
+                                            <div class="rounded-lg border border-sky-500/15 bg-sky-500/5 p-3 dark:bg-white/[0.03]">
+                                                <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                                    <div class="text-xs font-extrabold text-gray-800 dark:text-gray-100">
+                                                        {{ $teacher['name'] }}
+                                                        <span class="font-normal text-gray-400">#{{ $teacher['id'] }}</span>
+                                                    </div>
+                                                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                                        {{ $teacher['lessons'] }} lessons
+                                                    </div>
                                                 </div>
-                                                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                                                    {{ $teacher['lessons'] }} lessons
-                                                </div>
-                                            </div>
-                                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                                                <div>
-                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Teóricos</div>
-                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['blocks_t'] }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Prácticos</div>
-                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['blocks_p'] }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Requeridos</div>
-                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['required_blocks'] }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Asignados</div>
-                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['assigned_slots'] }}</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Pendientes</div>
-                                                    <div class="text-sm font-bold {{ $teacher['required_blocks'] > $teacher['assigned_slots'] ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-300' }}">
-                                                        {{ max(0, $teacher['required_blocks'] - $teacher['assigned_slots']) }}
+                                                <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                                                    <div>
+                                                        <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Teóricos</div>
+                                                        <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['blocks_t'] }}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Prácticos</div>
+                                                        <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['blocks_p'] }}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Requeridos</div>
+                                                        <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['required_blocks'] }}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Asignados</div>
+                                                        <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['assigned_slots'] }}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Pendientes</div>
+                                                        <div class="text-sm font-bold {{ $teacher['required_blocks'] > $teacher['assigned_slots'] ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-300' }}">
+                                                            {{ max(0, $teacher['required_blocks'] - $teacher['assigned_slots']) }}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         @endif

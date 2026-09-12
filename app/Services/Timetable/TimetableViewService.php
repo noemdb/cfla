@@ -88,7 +88,10 @@ class TimetableViewService
         foreach ($periods->groupBy('order_in_day') as $order => $group) {
             $row = collect();
             foreach (range(1, 5) as $day) {
-                $period = $group->first(fn ($p) => (int) $p->day_of_week === $day);
+                $period = $group
+                    ->filter(fn ($p) => (int) $p->day_of_week === $day)
+                    ->sortBy('id')
+                    ->first();
                 if (! $period) {
                     $row->put($day, collect());
 
