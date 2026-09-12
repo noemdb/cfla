@@ -22,7 +22,4 @@ php8.2 artisan timetable:normalize-legacy-hours --force --lapso=1
 
 # ----------------------------------------------------------------
 
-php8.2 artisan optimize:clear
-php8.2 artisan config:cache
-php8.2 artisan route:cache
-php8.2 artisan view:cache
+php8.2 artisan optimize:clear && php8.2 artisan config:cache && php8.2 artisan route:cache && php8.2 artisan view:cache
