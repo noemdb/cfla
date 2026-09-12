@@ -932,7 +932,9 @@ class TimetableImportLegacy extends Command
             $s = mb_convert_encoding($s, 'UTF-8', 'Windows-1252');
         }
 
-        $normalized = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+        // `//IGNORE` handles bad bytes in most libc builds; `@` is required
+        // because some production iconv implementations still emit a warning.
+        $normalized = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
         $s = $normalized !== false ? $normalized : $s;
         $s = preg_replace('/\s+/', ' ', trim($s)) ?? '';
         $s = str_replace("'", '', $s);

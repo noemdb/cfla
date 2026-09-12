@@ -5090,6 +5090,15 @@ PROMPT;
 
         $calendar = TimetableCalendar::query()->find($this->calendarId);
         $sectionId = (int) ($payload['section']['id'] ?? 0);
+        $activeSectionId = is_numeric($this->activeSeccionId) ? (int) $this->activeSeccionId : null;
+        if ($activeSectionId !== null && $sectionId !== $activeSectionId) {
+            $this->notification()->error(
+                'Sección incorrecta',
+                "El respaldo pertenece a la sección #{$sectionId}, pero la sección activa es #{$activeSectionId}. Selecciona la sección correspondiente antes de restaurar.",
+            );
+
+            return;
+        }
         if (! $calendar || (int) ($payload['calendar']['lapso_id'] ?? 0) !== (int) $calendar->lapso_id
             || (int) ($payload['calendar']['pestudio_id'] ?? 0) !== (int) $calendar->pestudio_id
         ) {
@@ -5104,7 +5113,8 @@ PROMPT;
             $period->shift_id, $period->day_of_week, $period->order_in_day,
         ]));
         $rows = [];
-        foreach ($payload['slots'] as $slot) {
+        $unresolved = [];
+        foreach ($payload['slots'] as $index => $slot) {
             $identity = $slot['academic_identity'] ?? [];
             $lesson = $byPev->get((int) ($slot['pevaluacion_id'] ?? 0));
             if (! $lesson || (int) $lesson->pevaluacion?->seccion_id !== $sectionId) {
@@ -5120,9 +5130,20 @@ PROMPT;
                 (int) ($periodData['order_in_day'] ?? 0),
             ]));
             if (! $lesson || ! $period) {
+                $unresolved[] = [
+                    'index' => (int) $index + 1,
+                    'pevaluacion_id' => (int) ($slot['pevaluacion_id'] ?? 0),
+                    'period' => implode(':', [
+                        (int) ($periodData['shift_id'] ?? 0),
+                        (int) ($periodData['day_of_week'] ?? 0),
+                        (int) ($periodData['order_in_day'] ?? 0),
+                    ]),
+                    'reason' => ! $lesson ? 'lesson no encontrada o fuera de la sección' : 'período no encontrado',
+                ];
+
                 continue;
             }
-            $rows[] = [
+            $row = [
                 'calendar_id' => $calendar->id,
                 'lesson_id' => $lesson->id,
                 'period_id' => $period->id,
@@ -5136,6 +5157,31 @@ PROMPT;
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
+            if (Schema::hasColumn('timetable_slots', 'is_practical')) {
+                $row['is_practical'] = (bool) ($slot['is_practical'] ?? false);
+            }
+            $rows[] = $row;
+        }
+        if ($unresolved !== []) {
+            $details = collect($unresolved)
+                ->take(5)
+                ->map(fn (array $item): string => "#{$item['index']} lesson {$item['pevaluacion_id']} / período {$item['period']}: {$item['reason']}")
+                ->implode('; ');
+            $remaining = count($unresolved) - min(5, count($unresolved));
+            $suffix = $remaining > 0 ? " También hay {$remaining} fila(s) adicional(es) sin resolver." : '';
+            Log::channel('timetable')->warning('Restore de slots rechazado por coincidencias incompletas', [
+                'calendar_id' => (int) $calendar->id,
+                'section_id' => $sectionId,
+                'backup_slot_count' => count($payload['slots']),
+                'resolved_slot_count' => count($rows),
+                'unresolved' => $unresolved,
+            ]);
+            $this->notification()->error(
+                'Restore cancelado',
+                "No se modificaron los slots porque el respaldo no coincide completamente con el calendario actual: {$details}.{$suffix}",
+            );
+
+            return;
         }
         if ($rows === []) {
             $this->notification()->error('Sin coincidencias', 'No se encontraron lessons y períodos compatibles para restaurar.');
@@ -5157,7 +5203,33 @@ PROMPT;
         }
 
         $this->slotsBackupFile = null;
-        $this->loadPublishedPreview($calendar->fresh());
+        $freshCalendar = $calendar->fresh();
+        if ($freshCalendar->status === TimetableCalendar::STATUS_ACTIVE) {
+            $this->loadPublishedPreview($freshCalendar);
+        } else {
+            $restoredAssignment = collect($rows)
+                ->groupBy('lesson_id')
+                ->map(fn ($lessonRows): array => $lessonRows->map(fn (array $row): array => [
+                    'period_id' => (int) $row['period_id'],
+                    'room_id' => $row['room_id'] !== null ? (int) $row['room_id'] : null,
+                    'is_practical' => (bool) ($row['is_practical'] ?? false),
+                ])->values()->all())
+                ->all();
+            $existingAssignment = is_array($this->preview['assignment'] ?? null)
+                ? $this->preview['assignment']
+                : [];
+            foreach ($lessonIds as $lessonId) {
+                unset($existingAssignment[(string) $lessonId], $existingAssignment[(int) $lessonId]);
+            }
+            $this->preview = array_merge($this->preview ?? [], [
+                'dry_run' => false,
+                'assignment' => array_merge($existingAssignment, $restoredAssignment),
+                'assignment_source' => 'restored_slots',
+                'unassigned' => [],
+                'assignment_diagnostics' => [],
+            ]);
+            $this->generationState = 'preview_ready';
+        }
         $this->notification()->success('Slots restaurados', 'Las asignaciones de la sección fueron restauradas y persistidas.');
     }
 
