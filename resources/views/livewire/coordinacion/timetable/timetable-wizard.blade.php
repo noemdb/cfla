@@ -194,6 +194,62 @@
                                 <div class="text-sm font-bold text-gray-900 dark:text-white break-words">{{ $value }}</div>
                             </div>
                         @endforeach
+                        @if (count($selectedCalendarDetail['teacher_totals'] ?? []))
+                            <div class="md:col-span-4 rounded-lg border border-sky-500/25 bg-sky-500/5 p-4">
+                                <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+                                    <div>
+                                        <div class="text-[10px] font-bold uppercase tracking-widest text-sky-700 dark:text-sky-300">
+                                            Resumen por profesor
+                                        </div>
+                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            Total de lessons, bloques configurados y slots asignados en este calendario.
+                                        </div>
+                                    </div>
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                        {{ count($selectedCalendarDetail['teacher_totals']) }} profesores
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    @foreach ($selectedCalendarDetail['teacher_totals'] as $teacher)
+                                        <div class="rounded-lg border border-sky-500/15 bg-white/40 p-3 dark:bg-white/[0.03]">
+                                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                                <div class="text-xs font-extrabold text-gray-800 dark:text-gray-100">
+                                                    {{ $teacher['name'] }}
+                                                    <span class="font-normal text-gray-400">#{{ $teacher['id'] }}</span>
+                                                </div>
+                                                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                                                    {{ $teacher['lessons'] }} lessons
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                                                <div>
+                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Teóricos</div>
+                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['blocks_t'] }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Prácticos</div>
+                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['blocks_p'] }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Requeridos</div>
+                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['required_blocks'] }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Asignados</div>
+                                                    <div class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ $teacher['assigned_slots'] }}</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-[9px] uppercase tracking-widest text-gray-500 dark:text-gray-400">Pendientes</div>
+                                                    <div class="text-sm font-bold {{ $teacher['required_blocks'] > $teacher['assigned_slots'] ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-300' }}">
+                                                        {{ max(0, $teacher['required_blocks'] - $teacher['assigned_slots']) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                         @if (count($selectedCalendarDetail['schedule_blocks'] ?? []))
                             <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
                                 <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300 mb-1">
@@ -1659,6 +1715,79 @@
         </div>
     @endif
 
+    @if ($showTeacherScheduleDialog)
+        <div class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/70 p-4"
+            role="dialog" aria-modal="true" aria-labelledby="teacher-schedule-title"
+            x-data x-on:keydown.escape.window="$wire.closeTeacherScheduleDialog()">
+            <div x-on:click.stop class="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-white/10">
+                    <div>
+                        <h2 id="teacher-schedule-title" class="text-sm font-extrabold text-gray-900 dark:text-white">Horario por profesor</h2>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lessons asignadas en la sección activa, organizadas por día y bloque.</p>
+                    </div>
+                    <button type="button" wire:click="closeTeacherScheduleDialog"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 dark:hover:bg-white/10 dark:hover:text-white"
+                        aria-label="Cerrar horario por profesor">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="border-b border-gray-200 bg-gray-50 px-5 py-3 dark:border-white/10 dark:bg-white/5">
+                    <label for="teacher-schedule-profesor" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Profesor</label>
+                    <select id="teacher-schedule-profesor" wire:model.live="teacherScheduleProfesorId"
+                        class="w-full max-w-xl rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/40 dark:border-white/10 dark:bg-gray-900 dark:text-white">
+                        @forelse ($teacherScheduleOptions as $teacher)
+                            <option value="{{ $teacher['id'] }}">{{ $teacher['name'] }}</option>
+                        @empty
+                            <option value="">No hay profesores asociados</option>
+                        @endforelse
+                    </select>
+                </div>
+                <div class="overflow-auto p-5">
+                    @if ($teacherScheduleGrid !== [])
+                        <table class="w-full min-w-[900px] table-fixed border-collapse text-left text-xs">
+                            <caption class="sr-only">Lessons del profesor seleccionado por día y bloque</caption>
+                            <thead>
+                                <tr class="border-b border-gray-200 bg-gray-50 text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
+                                    <th class="w-36 px-3 py-2.5">Turno · bloque</th>
+                                    @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as $dayLabel)
+                                        <th class="px-3 py-2.5 text-center">{{ $dayLabel }}</th>
+                                    @endforeach
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-white/5">
+                                @foreach ($teacherScheduleGrid as $row)
+                                    <tr>
+                                        <th scope="row" class="px-3 py-2.5 font-bold text-gray-700 dark:text-gray-200">
+                                            <span class="block">{{ $row['shift'] }}</span>
+                                            <span class="mt-0.5 block text-[9px] font-normal uppercase tracking-widest text-gray-500 dark:text-gray-400">{{ $row['code'] }} · #{{ $row['order'] }}</span>
+                                        </th>
+                                        @for ($day = 1; $day <= 5; $day++)
+                                            <td class="px-2 py-2 align-top">
+                                                @forelse ($row['cells'][$day] ?? [] as $lesson)
+                                                    <div class="mb-1 rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 p-2 last:mb-0">
+                                                        <div class="font-bold text-gray-900 dark:text-white">{{ $lesson['subject'] }}</div>
+                                                        <div class="mt-0.5 font-mono text-[10px] text-gray-500 dark:text-gray-400">{{ $lesson['start'] }}–{{ $lesson['end'] }}</div>
+                                                        <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Lesson #{{ $lesson['lesson_id'] }} · Sección {{ $lesson['section'] }}</div>
+                                                    </div>
+                                                @empty
+                                                    <span class="text-gray-300 dark:text-gray-700">—</span>
+                                                @endforelse
+                                            </td>
+                                        @endfor
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <div class="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
+                            El profesor seleccionado no tiene lessons asignadas en la sección activa.
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- ═══════════ Paso 5 · Generar ═══════════ --}}
     @if ($currentStep === 5)
         <div class="space-y-6" role="tabpanel" id="tt-step-5" aria-labelledby="tt-tab-5">
@@ -1685,6 +1814,17 @@
                         <span wire:loading.remove wire:target="openAiDryRunDialog,analyzeDryRunWithAi">Analizar con IA</span>
                         <span wire:loading wire:target="openAiDryRunDialog,analyzeDryRunWithAi">Analizando…</span>
                     </button>
+                    <a href="{{ route('app.planning.timetable.pdf.teachers', ['calendar' => $calendarId]) }}"
+                        target="_blank"
+                        rel="noopener"
+                        title="Generar un PDF con los horarios de todos los docentes del calendario"
+                        class="inline-flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-sm font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 2h9l3 3v17H6z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6M9 17h6M15 2v4h4"/>
+                        </svg>
+                        PDF docentes
+                    </a>
                     @endif
 
                     @if ($generationState === 'preview_ready' && $preview)
@@ -2360,6 +2500,18 @@
                                     class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
                                     <span wire:loading.remove wire:target="restoreCurrentSectionSlotsBackup">Restore slots</span>
                                     <span wire:loading wire:target="restoreCurrentSectionSlotsBackup">Restaurando…</span>
+                                </button>
+                                <button type="button"
+                                    wire:click="openTeacherScheduleDialog"
+                                    title="Consultar las lessons asignadas por profesor"
+                                    aria-label="Consultar horario por profesor"
+                                    class="inline-flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1.5 text-xs font-bold text-fuchsia-700 transition-colors hover:bg-fuchsia-500/20 dark:text-fuchsia-300">
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                    Horario docente
                                 </button>
                                 </div>
                             </div>

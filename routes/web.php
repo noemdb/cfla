@@ -294,6 +294,8 @@ Route::prefix('app')->name('app.')->group(function () {
             ->name('timetable.pdf.section');
         Route::get('/timetable/pdf/teacher/{calendar}/{profesor}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teacher'])
             ->name('timetable.pdf.teacher');
+        Route::get('/timetable/pdf/teachers/{calendar}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teachers'])
+            ->name('timetable.pdf.teachers');
         Route::get('/timetable/pdf/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'room'])
             ->name('timetable.pdf.room');
 
@@ -366,6 +368,8 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('timetable.pdf.section');
             Route::get('/timetable/pdf/teacher/{calendar}/{profesor}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teacher'])
                 ->name('timetable.pdf.teacher');
+            Route::get('/timetable/pdf/teachers/{calendar}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teachers'])
+                ->name('timetable.pdf.teachers');
             Route::get('/timetable/pdf/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'room'])
                 ->name('timetable.pdf.room');
             Route::get('/timetable/pdf/preview/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewSection'])

@@ -69,6 +69,46 @@ class TimetablePdfController extends Controller
         return $pdf->stream("horario-{$profesor->lastname}-{$profesor->name}.pdf");
     }
 
+    public function teachers(Request $request, $calendarId)
+    {
+        $calendar = $this->viewService->activeCalendarOrFail($calendarId);
+        $profesorIds = TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereNotNull('profesor_id')
+            ->distinct()
+            ->pluck('profesor_id');
+        $profesores = Profesor::query()
+            ->whereIn('id', $profesorIds)
+            ->orderBy('lastname')
+            ->orderBy('name')
+            ->get();
+        $institucion = \App\Models\app\Entity\Institucion::orderBy('created_at', 'DESC')->first();
+        $periods = $calendar->periods()
+            ->with('shift')
+            ->orderBy('shift_id')
+            ->orderBy('order_in_day')
+            ->orderBy('day_of_week')
+            ->get()
+            ->groupBy('order_in_day')
+            ->map(fn ($rows) => $rows->keyBy('day_of_week'));
+        $schedules = $profesores->map(fn (Profesor $profesor): array => [
+            'profesor' => $profesor,
+            'grid' => $this->viewService->gridForTeacher($calendar, (int) $profesor->id),
+            'periods' => $periods,
+        ])->values();
+
+        $pdf = Pdf::loadView('pdfs.timetable.teachers', [
+            'calendar' => $calendar,
+            'schedules' => $schedules,
+            'institucion' => $institucion,
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+        ]);
+
+        $pdf->setPaper('letter', 'portrait');
+
+        return $pdf->stream("horarios-docentes-{$calendar->id}.pdf");
+    }
+
     public function room(Request $request, $calendarId, $roomId)
     {
         $calendar = $this->viewService->activeCalendarOrFail($calendarId);

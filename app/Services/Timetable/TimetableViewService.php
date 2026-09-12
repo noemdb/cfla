@@ -50,7 +50,13 @@ class TimetableViewService
         $slots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->where('profesor_id', $profesorId)
-            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.grupoEstable'])
+            ->with([
+                'period',
+                'room',
+                'lesson.pevaluacion.pensum.asignatura',
+                'lesson.pevaluacion.seccion.grado',
+                'lesson.pevaluacion.grupoEstable',
+            ])
             ->get();
 
         return $this->buildGrid($calendar, $slots);

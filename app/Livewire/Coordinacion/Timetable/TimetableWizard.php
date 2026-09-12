@@ -269,6 +269,10 @@ class TimetableWizard extends Component
 
     public bool $showAiAnalysisModal = false;
 
+    public bool $showTeacherScheduleDialog = false;
+
+    public ?int $teacherScheduleProfesorId = null;
+
     /** Índice de día seleccionado en la vista de bloques (tabs). Persistido por calendario. */
     public int $selectedScheduleDayIndex = 0;
 
@@ -5157,6 +5161,103 @@ PROMPT;
         $this->notification()->success('Slots restaurados', 'Las asignaciones de la sección fueron restauradas y persistidas.');
     }
 
+    public function openTeacherScheduleDialog(): void
+    {
+        $options = $this->teacherScheduleOptions();
+        $this->teacherScheduleProfesorId = $options[0]['id'] ?? null;
+        $this->showTeacherScheduleDialog = true;
+    }
+
+    public function closeTeacherScheduleDialog(): void
+    {
+        $this->showTeacherScheduleDialog = false;
+    }
+
+    private function teacherScheduleOptions(): array
+    {
+        if (! $this->calendarId || ! is_numeric($this->activeSeccionId)) {
+            return [];
+        }
+
+        return TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion', fn ($query) => $query->where('seccion_id', (int) $this->activeSeccionId))
+            ->with('pevaluacion.profesor')
+            ->get()
+            ->map(fn (TimetableLesson $lesson): ?array => $lesson->pevaluacion?->profesor ? [
+                'id' => (int) $lesson->pevaluacion->profesor->id,
+                'name' => (string) ($lesson->pevaluacion->profesor->full_name
+                    ?? trim(($lesson->pevaluacion->profesor->lastname ?? '').' '.($lesson->pevaluacion->profesor->name ?? ''))),
+            ] : null)
+            ->filter()
+            ->unique('id')
+            ->sortBy('name')
+            ->values()
+            ->all();
+    }
+
+    private function teacherScheduleGrid(): array
+    {
+        if (! $this->calendarId || ! $this->teacherScheduleProfesorId || ! is_numeric($this->activeSeccionId)) {
+            return [];
+        }
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion', fn ($query) => $query
+                ->where('seccion_id', (int) $this->activeSeccionId)
+                ->where('profesor_id', (int) $this->teacherScheduleProfesorId))
+            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion')
+            ->get()
+            ->keyBy('id');
+        $periods = TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->with('shift:id,code,name')
+            ->orderBy('shift_id')
+            ->orderBy('order_in_day')
+            ->get();
+        $assignment = collect($this->preview['assignment'] ?? []);
+        $cells = [];
+
+        foreach ($lessons as $lesson) {
+            $slots = $assignment->get((string) $lesson->id, $assignment->get($lesson->id));
+            if ($slots === null) {
+                $slots = $lesson->slots()->get(['period_id'])->map(fn ($slot): array => [
+                    'period_id' => (int) $slot->period_id,
+                ])->all();
+            }
+
+            foreach ($slots as $slot) {
+                $period = $periods->firstWhere('id', (int) ($slot['period_id'] ?? 0));
+                if (! $period) {
+                    continue;
+                }
+                $key = $period->shift_id.':'.$period->order_in_day;
+                $cells[$key][$period->day_of_week][] = [
+                    'subject' => $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
+                    'section' => $lesson->pevaluacion?->seccion?->name ?? '—',
+                    'lesson_id' => (int) $lesson->id,
+                    'start' => substr((string) $period->start_time, 0, 5),
+                    'end' => substr((string) $period->end_time, 0, 5),
+                ];
+            }
+        }
+
+        return $periods
+            ->groupBy(fn (TimetablePeriod $period): string => $period->shift_id.':'.$period->order_in_day)
+            ->map(function ($periodGroup) use ($cells): array {
+                $period = $periodGroup->first();
+                return [
+                    'shift' => $period->shift?->name ?? 'Turno '.$period->shift_id,
+                    'code' => $period->shift?->code ?? 'T'.$period->shift_id,
+                    'order' => (int) $period->order_in_day,
+                    'cells' => $cells[$period->shift_id.':'.$period->order_in_day] ?? [],
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
     /**
      * Rehidrata la vista del Paso 5 desde los slots persistidos de un
      * calendario publicado, sin ejecutar nuevamente el solver.
@@ -6263,6 +6364,33 @@ PROMPT;
             $conflictsCount = \App\Models\app\Timetable\TimetableConflict::query()
                 ->where('calendar_id', $selectedCalendar->id)
                 ->count();
+            $calendarLessons = TimetableLesson::query()
+                ->where('calendar_id', $selectedCalendar->id)
+                ->with('pevaluacion.profesor')
+                ->withCount('slots')
+                ->get();
+            $teacherTotals = $calendarLessons
+                ->filter(fn (TimetableLesson $lesson): bool => (bool) $lesson->pevaluacion?->profesor_id)
+                ->groupBy(fn (TimetableLesson $lesson): int => (int) $lesson->pevaluacion->profesor_id)
+                ->map(function ($lessons): array {
+                    $profesor = $lessons->first()->pevaluacion->profesor;
+
+                    return [
+                        'id' => (int) $profesor->id,
+                        'name' => (string) ($profesor->full_name
+                            ?? trim(($profesor->lastname ?? '').' '.($profesor->name ?? ''))),
+                        'lessons' => $lessons->count(),
+                        'blocks_t' => $lessons->sum(fn (TimetableLesson $lesson): int => (int) $lesson->weekly_blocks_t),
+                        'blocks_p' => $lessons->sum(fn (TimetableLesson $lesson): int => (int) $lesson->weekly_blocks_p),
+                        'required_blocks' => $lessons->sum(
+                            fn (TimetableLesson $lesson): int => (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p
+                        ),
+                        'assigned_slots' => $lessons->sum(fn (TimetableLesson $lesson): int => (int) $lesson->slots_count),
+                    ];
+                })
+                ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values()
+                ->all();
             $selectedCalendarDetail = [
                 'id' => $selectedCalendar->id,
                 'name' => $selectedCalendar->name,
@@ -6281,9 +6409,10 @@ PROMPT;
                 'periods_count' => $periodsOfCalendar->count(),
                 'class_periods_count' => $periodsOfCalendar->where('is_break', false)->count(),
                 'break_periods_count' => $periodsOfCalendar->where('is_break', true)->count(),
-                'lessons_count' => TimetableLesson::query()->where('calendar_id', $selectedCalendar->id)->count(),
+                'lessons_count' => $calendarLessons->count(),
                 'slots_count' => $slotsCount,
                 'conflicts_count' => $conflictsCount,
+                'teacher_totals' => $teacherTotals,
                 'schedule_blocks' => $periodsOfCalendar
                     ->groupBy('day_of_week')
                     ->map(function ($dayPeriods) {
@@ -6318,6 +6447,12 @@ PROMPT;
                     })->values()->all(),
             ];
         }
+        $teacherScheduleOptions = $this->showTeacherScheduleDialog
+            ? $this->teacherScheduleOptions()
+            : [];
+        $teacherScheduleGrid = $this->showTeacherScheduleDialog
+            ? $this->teacherScheduleGrid()
+            : [];
 
         return view('livewire.coordinacion.timetable.timetable-wizard', [
             'lapsos' => $lapsos,
@@ -6351,6 +6486,8 @@ PROMPT;
             'editRoomSectionLinkedRooms' => $this->editRoomSectionLinkedRooms,
             'moduleRoutePrefix' => $this->moduleRoutePrefix(),
             'selectedCalendarDetail' => $selectedCalendarDetail,
+            'teacherScheduleOptions' => $teacherScheduleOptions,
+            'teacherScheduleGrid' => $teacherScheduleGrid,
         ])->layout($this->getLayout());
     }
 
