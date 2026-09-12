@@ -97,3 +97,55 @@ horario de **4TO A** es el siguiente:
 | Seminario de Investigación | 2 |
 | Ciencias de la Tierra | 1 |
 | Formación de la Soberanía Nacional | 1 |
+
+
+5to ano
+| Asignatura | Total |
+|---|---:|
+| Biología | 2 |
+| Castellano | 2 |
+| Educación Física | 3 |
+| Química | 2 |
+| Física | 2 |
+| Inglés | 6 |
+| Robótica | 2 |
+| Geografía, Historia y Ciudadanía | 2 |
+| Matemática | 2 |
+| Formación Humano Cristiana | 1 |
+| Orientación Vocacional | 1 |
+| Informática | 2 |
+| Seminario de Investigación | 2 |
+| Ciencias de la Tierra | 1 |
+| Formación de la Soberanía Nacional | 1 |
+
+2do Ano
+| Asignatura | Total |
+|---|---:|
+| Lengua y Literatura | 3 |
+| Biología, Ambiente y Tecnología | 2 |
+| Inglés | 6 |
+| Geografía, Historia y Soberanía Nacional | 2 |
+| Innovación Tecnológica y Productiva | 3 |
+| Educación Física | 3 |
+| Robótica | 2 |
+| Matemática | 3 |
+| Orientación Vocacional | 2 |
+| Formación Humano Cristiana | 1 |
+| Física | 1 |
+| Química | 1 |
+
+3er Ano
+| Asignatura | Total |
+|---|---:|
+| Biología, Ambiente y Tecnología | 2 |
+| Educación Física | 3 |
+| Física | 2 |
+| Química | 3 |
+| Inglés | 6 |
+| Robótica | 2 |
+| Geografía, Historia y Soberanía Nacional | 2 |
+| Matemática | 2 |
+| Formación Humano Cristiana | 1 |
+| Orientación Vocacional | 2 |
+| Innovación Tecnológica y Productiva | 3 |
+| Lengua y Literatura | 2 |

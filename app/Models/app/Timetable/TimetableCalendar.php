@@ -30,6 +30,7 @@ class TimetableCalendar extends Model
 
     protected $hidden = [
         'active_lapso_key',
+        'active_pestudio_key',
     ];
 
     const STATUS_DRAFT = 'draft';
@@ -126,11 +127,23 @@ class TimetableCalendar extends Model
     }
 
     /**
-     * PLAN-TIMETABLE-002 I-2 — Activo del lapso (máximo uno por lapso).
+     * PLAN-TIMETABLE-002 I-2 — Activo del plan de estudio.
      */
-    public static function activeForLapso($lapsoId): ?self
+    public static function activeForLapso($lapsoId, ?int $pestudioId = null): ?self
     {
-        return self::query()->forLapso($lapsoId)->active()->first();
+        return self::query()
+            ->forLapso($lapsoId)
+            ->when($pestudioId, fn ($query) => $query->where('pestudio_id', $pestudioId))
+            ->active()
+            ->first();
+    }
+
+    public static function activeForPestudio($pestudioId): ?self
+    {
+        return self::query()
+            ->where('pestudio_id', $pestudioId)
+            ->active()
+            ->first();
     }
 
     /**
@@ -163,7 +176,7 @@ class TimetableCalendar extends Model
 
         DB::transaction(function () {
             TimetableCalendar::query()
-                ->forLapso($this->lapso_id)
+                ->where('pestudio_id', $this->pestudio_id)
                 ->where('id', '!=', $this->id)
                 ->active()
                 ->update(['status' => self::STATUS_ARCHIVED]);

@@ -409,7 +409,8 @@ class TimetableWizardTest extends TestCase
             ->call('generatePeriods')
             ->call('savePeriods')
             ->assertHasNoErrors()
-            ->assertSet('currentStep', 2);
+            ->assertSet('currentStep', 2)
+            ->assertDispatched('wireui:notification');
 
         $this->assertGreaterThan(0, TimetablePeriod::query()->where('calendar_id', $calendar->id)->count());
     }
@@ -439,6 +440,55 @@ class TimetableWizardTest extends TestCase
             ->assertSee('Detalle de períodos')
             ->assertSee('Duración')
             ->assertSee('Descripción');
+    }
+
+    public function test_periods_can_be_created_edited_and_removed_per_specific_day(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $this->pevaluacionFixture($lapso->id);
+        $shift = $this->shift();
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('shiftId', $shift->id)
+            ->call('generatePeriods')
+            ->call('savePeriods')
+            ->assertHasNoErrors();
+
+        $mondayCount = TimetablePeriod::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('shift_id', $shift->id)
+            ->where('day_of_week', 1)
+            ->count();
+        $this->assertGreaterThan(1, $mondayCount);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('shiftId', $shift->id)
+            ->call('loadEditablePeriods');
+
+        $periods = $component->get('periods');
+        $periods[0]['day_of_week'] = 6;
+        $component
+            ->set('periods', $periods)
+            ->call('removePeriodBlock', 1)
+            ->call('savePeriods')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('timetable_periods', [
+            'calendar_id' => $calendar->id,
+            'shift_id' => $shift->id,
+            'day_of_week' => 6,
+        ]);
+        $this->assertLessThan($mondayCount, TimetablePeriod::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('shift_id', $shift->id)
+            ->where('day_of_week', 1)
+            ->count());
     }
 
     public function test_period_preview_requires_a_selected_shift(): void
@@ -1093,6 +1143,62 @@ class TimetableWizardTest extends TestCase
             ->set('calendarId', $calendar->id)
             ->assertSee('Matemáticas')
             ->assertDontSee('Química');
+    }
+
+    public function test_publish_ignores_selected_lesson_outside_active_academic_scope(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'status_active' => 'false',
+        ]);
+        $seccion = Seccion::factory()->create([
+            'grado_id' => $grado->id,
+            'status_active' => 'true',
+        ]);
+        $asignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+        $pensum = Pensum::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'grado_id' => $grado->id,
+            'asignatura_id' => $asignatura->id,
+        ]);
+        $profesor = Profesor::create([
+            'user_id' => User::factory()->create()->id,
+            'name' => 'Profesor',
+            'lastname' => 'Inactivo',
+            'ci_profesor' => 'scope-'.uniqid(),
+            'status_active' => 'true',
+        ]);
+        $pevaluacion = Pevaluacion::factory()->create([
+            'lapso_id' => $lapso->id,
+            'seccion_id' => $seccion->id,
+            'pensum_id' => $pensum->id,
+            'profesor_id' => $profesor->id,
+        ]);
+        $shift = $this->shift();
+        $lesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pevaluacion->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('selectedPevs', [$pevaluacion->id])
+            ->set('preview', [
+                'assignment' => [(string) $lesson->id => []],
+                'unassigned' => [],
+            ])
+            ->call('confirmAndPublish')
+            ->assertDispatched('wireui:notification');
+
+        $this->assertDatabaseMissing('timetable_slots', ['lesson_id' => $lesson->id]);
     }
 
     public function test_step3_derives_blocks_from_asignatura_hours(): void
@@ -2268,6 +2374,69 @@ class TimetableWizardTest extends TestCase
         ]);
     }
 
+    public function test_step5_persists_two_half_group_lessons_with_same_teacher_in_one_period(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shift = $this->shift();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id,
+            'shift_id' => $shift->id,
+            'day_of_week' => 1,
+            'order_in_day' => 1,
+            'is_break' => false,
+        ]);
+        $first = $this->pevaluacionFixture($lapso->id);
+        $second = $this->pevaluacionFixture($lapso->id);
+        $second['pev']->update(['profesor_id' => $first['profesor']->id]);
+        $firstLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $first['pev']->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+            'is_half_group' => true,
+        ]);
+        $secondLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $second['pev']->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+            'is_half_group' => true,
+        ]);
+        TimetableSlot::create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $firstLesson->id,
+            'period_id' => $period->id,
+            'profesor_id' => $first['profesor']->id,
+            'seccion_id' => $first['pev']->seccion_id,
+            'is_half_group' => true,
+            'locked' => true,
+            'is_manual_override' => true,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('activeSeccionId', $second['pev']->seccion_id)
+            ->set('preview', [
+                'assignment' => [
+                    (string) $secondLesson->id => [['period_id' => $period->id]],
+                ],
+            ])
+            ->call('persistCurrentSectionSlots')
+            ->assertDispatched('wireui:notification');
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $secondLesson->id,
+            'period_id' => $period->id,
+            'is_half_group' => true,
+        ]);
+    }
+
     public function test_step5_allows_swap_when_both_lessons_have_same_teacher(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
@@ -2309,6 +2478,51 @@ class TimetableWizardTest extends TestCase
             ->call('movePreviewLesson', $lessonA->id, $source->id, $target->id)
             ->assertSet('preview.assignment.'.((string) $lessonA->id).'.0.period_id', $target->id)
             ->assertSet('preview.assignment.'.((string) $lessonB->id).'.0.period_id', $source->id);
+    }
+
+    public function test_step5_shares_target_before_swapping_same_teacher_half_group_lessons(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shift = $this->shift();
+        $source = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+            'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,
+        ]);
+        $target = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+            'day_of_week' => 2, 'order_in_day' => 1, 'is_break' => false,
+        ]);
+        $first = $this->pevaluacionFixture($lapso->id);
+        $second = $this->pevaluacionFixture($lapso->id);
+        $second['pev']->update([
+            'seccion_id' => $first['pev']->seccion_id,
+            'profesor_id' => $first['profesor']->id,
+        ]);
+        $lessonA = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id, 'pevaluacion_id' => $first['pev']->id,
+            'shift_id' => $shift->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+            'is_half_group' => true,
+        ]);
+        $lessonB = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id, 'pevaluacion_id' => $second['pev']->id,
+            'shift_id' => $shift->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+            'is_half_group' => true,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('preview', [
+                'assignment' => [
+                    (string) $lessonA->id => [['period_id' => $source->id]],
+                    (string) $lessonB->id => [['period_id' => $target->id]],
+                ],
+            ])
+            ->call('movePreviewLesson', $lessonA->id, $source->id, $target->id)
+            ->assertSet('preview.assignment.'.((string) $lessonA->id).'.0.period_id', $target->id)
+            ->assertSet('preview.assignment.'.((string) $lessonB->id).'.0.period_id', $target->id);
     }
 
     public function test_step5_swaps_when_only_one_same_section_lesson_allows_half_group(): void

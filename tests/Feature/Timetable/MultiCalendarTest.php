@@ -5,6 +5,7 @@ namespace Tests\Feature\Timetable;
 use App\Jobs\Timetable\GenerateTimetableJob;
 use App\Livewire\Coordinacion\Timetable\TimetableWizard;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Pestudio;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
@@ -17,7 +18,7 @@ use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
- * PLAN-TIMETABLE-002 §6 — Varios horarios por lapso con máximo UNO activo.
+ * PLAN-TIMETABLE-002 §6 — Varios horarios por lapso con máximo UNO activo por plan.
  * Cubre: multi-borrador, democión en persist, índice DB, dryRun sin tocar al
  * activo, delete solo draft, activate() y resolución de lectores.
  */
@@ -88,21 +89,65 @@ class MultiCalendarTest extends TestCase
         $this->assertNotNull($draft->fresh()->preview_payload);
     }
 
-    public function test_db_forbids_two_active_per_lapso(): void
+    public function test_db_forbids_two_active_per_pestudio(): void
     {
         $lapso = Lapso::factory()->create();
-        $active = TimetableCalendar::factory()->active()->create(['lapso_id' => $lapso->id]);
-        $other = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $pestudio = Pestudio::factory()->create();
+        $active = TimetableCalendar::factory()->active()->create(['lapso_id' => $lapso->id, 'pestudio_id' => $pestudio->id]);
+        $other = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'pestudio_id' => $pestudio->id]);
 
         try {
             $other->update(['status' => TimetableCalendar::STATUS_ACTIVE]);
-            $this->fail('El índice único uq_active_lapso debió rechazar el segundo activo.');
+            $this->fail('El índice único uq_active_pestudio debió rechazar el segundo activo.');
         } catch (QueryException $e) {
-            $this->assertStringContainsString('uq_active_lapso', $e->getMessage());
+            $this->assertStringContainsString('uq_active_pestudio', $e->getMessage());
         }
 
         $this->assertSame(TimetableCalendar::STATUS_ACTIVE, $active->fresh()->status);
         $this->assertSame(TimetableCalendar::STATUS_DRAFT, $other->fresh()->status);
+    }
+
+    public function test_db_allows_active_calendars_for_different_pestudios_in_same_lapso(): void
+    {
+        $lapso = Lapso::factory()->create();
+        $firstPlan = Pestudio::factory()->create();
+        $secondPlan = Pestudio::factory()->create();
+
+        TimetableCalendar::factory()->active()->create([
+            'lapso_id' => $lapso->id,
+            'pestudio_id' => $firstPlan->id,
+        ]);
+        $second = TimetableCalendar::factory()->active()->create([
+            'lapso_id' => $lapso->id,
+            'pestudio_id' => $secondPlan->id,
+        ]);
+
+        $this->assertSame(TimetableCalendar::STATUS_ACTIVE, $second->fresh()->status);
+        $this->assertSame(2, TimetableCalendar::query()
+            ->where('lapso_id', $lapso->id)
+            ->where('status', TimetableCalendar::STATUS_ACTIVE)
+            ->count());
+    }
+
+    public function test_activation_archives_active_calendar_for_same_pestudio_in_another_lapso(): void
+    {
+        $firstLapso = Lapso::factory()->create();
+        $secondLapso = Lapso::factory()->create();
+        $pestudio = Pestudio::factory()->create();
+        $active = TimetableCalendar::factory()->active()->create([
+            'lapso_id' => $firstLapso->id,
+            'pestudio_id' => $pestudio->id,
+        ]);
+        $draft = TimetableCalendar::factory()->create([
+            'lapso_id' => $secondLapso->id,
+            'pestudio_id' => $pestudio->id,
+        ]);
+        $this->makeSlotFor($draft);
+
+        $draft->activate();
+
+        $this->assertSame(TimetableCalendar::STATUS_ARCHIVED, $active->fresh()->status);
+        $this->assertSame(TimetableCalendar::STATUS_ACTIVE, $draft->fresh()->status);
     }
 
     public function test_activate_promotes_draft_and_archives_previous_active(): void

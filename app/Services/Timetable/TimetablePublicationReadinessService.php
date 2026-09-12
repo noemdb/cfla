@@ -22,13 +22,26 @@ class TimetablePublicationReadinessService
     public function evaluate(TimetableCalendar $calendar, array $preview): array
     {
         $lessons = $calendar->lessons()
-            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion', 'pevaluacion.profesor')
+            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor')
             ->get()
+            ->filter(function (TimetableLesson $lesson): bool {
+                $pevaluacion = $lesson->pevaluacion;
+
+                // Las lessons huérfanas siguen siendo bloqueantes; las inactivas
+                // quedan fuera del resumen porque ya no pertenecen al alcance académico.
+                if (! $pevaluacion) {
+                    return true;
+                }
+
+                return $this->isActive($pevaluacion->seccion?->status_active)
+                    && $this->isActive($pevaluacion->grado?->status_active);
+            })
             ->keyBy('id');
         $periods = $calendar->periods()->get()->keyBy('id');
         $assignment = collect($preview['assignment'] ?? []);
         $unassigned = collect($preview['unassigned'] ?? [])
             ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id): bool => $lessons->has($id))
             ->unique()
             ->values();
         $hardConflicts = [];
@@ -81,14 +94,24 @@ class TimetablePublicationReadinessService
                 $key = $periodId.':';
 
                 if ($teacherId && isset($teacherPeriods[$key.$teacherId])) {
-                    $hardConflicts[] = $this->conflict($lesson, 'teacher_double_booked', $period, $periodId);
+                    $existingTeacherLesson = $lessons->get($teacherPeriods[$key.$teacherId]);
+                    $bothAllowHalfGroup = (bool) $lesson->is_half_group
+                        && (bool) $existingTeacherLesson?->is_half_group;
+                    if (! $bothAllowHalfGroup) {
+                        $hardConflicts[] = $this->conflict($lesson, 'teacher_double_booked', $period, $periodId);
+                    }
                 }
                 if ($sectionId && isset($sectionPeriods[$key.$sectionId])) {
-                    $existingSectionLesson = $lessons->get($sectionPeriods[$key.$sectionId]);
-                    $halfGroupPair = (bool) $lesson->is_half_group
-                        && (bool) $existingSectionLesson?->is_half_group;
-                    if (! $halfGroupPair) {
-                        $hardConflicts[] = $this->conflict($lesson, 'section_double_booked', $period, $periodId);
+                    foreach ($sectionPeriods[$key.$sectionId] as $existingSectionLessonId) {
+                        $existingSectionLesson = $lessons->get($existingSectionLessonId);
+                        $halfGroupPair = (bool) $lesson->is_half_group
+                            && (bool) $existingSectionLesson?->is_half_group;
+                        $sameStableGroup = $lesson->pevaluacion?->grupo_estable_id === null
+                            || $existingSectionLesson?->pevaluacion?->grupo_estable_id === null
+                            || (int) $lesson->pevaluacion?->grupo_estable_id === (int) $existingSectionLesson?->pevaluacion?->grupo_estable_id;
+                        if (! $halfGroupPair && $sameStableGroup) {
+                            $hardConflicts[] = $this->conflict($lesson, 'section_double_booked', $period, $periodId);
+                        }
                     }
                 }
                 if ($roomId && isset($roomPeriods[$key.$roomId])) {
@@ -96,10 +119,10 @@ class TimetablePublicationReadinessService
                 }
 
                 if ($teacherId) {
-                    $teacherPeriods[$key.$teacherId] = true;
+                    $teacherPeriods[$key.$teacherId] = (int) $lesson->id;
                 }
                 if ($sectionId) {
-                    $sectionPeriods[$key.$sectionId] = (int) $lesson->id;
+                    $sectionPeriods[$key.$sectionId][] = (int) $lesson->id;
                 }
                 if ($roomId) {
                     $roomPeriods[$key.$roomId] = true;
@@ -144,6 +167,7 @@ class TimetablePublicationReadinessService
     {
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
         $section = $lesson->pevaluacion?->seccion?->name ?? 'Sección sin nombre';
+        $grade = $lesson->pevaluacion?->grado?->name ?? 'Grado sin nombre';
         $teacher = trim(($lesson->pevaluacion?->profesor?->lastname ?? '').' '.($lesson->pevaluacion?->profesor?->name ?? ''));
         $labels = [
             'incomplete_assignment' => 'Asignación incompleta',
@@ -160,6 +184,7 @@ class TimetablePublicationReadinessService
             'title' => $labels[$type] ?? 'Conflicto bloqueante',
             'lesson_id' => (int) $lesson->id,
             'subject' => $subject,
+            'grade' => $grade,
             'section' => $section,
             'teacher' => $teacher !== '' ? $teacher : 'Sin docente',
             'period_id' => $periodId,
@@ -167,5 +192,10 @@ class TimetablePublicationReadinessService
                 ? ($period->period_label.' · '.substr((string) $period->start_time, 0, 5).'–'.substr((string) $period->end_time, 0, 5))
                 : 'Sin período válido',
         ];
+    }
+
+    private function isActive(mixed $status): bool
+    {
+        return $status === true || $status === 1 || $status === '1' || $status === 'true';
     }
 }

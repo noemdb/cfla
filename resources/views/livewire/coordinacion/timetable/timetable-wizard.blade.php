@@ -56,7 +56,7 @@
         <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-4 mb-6">
             <div class="flex flex-wrap items-center gap-3">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Horario</span>
-                <select wire:model.live="calendarId" class="flex-1 min-w-[200px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                <select wire:key="calendar-switcher-{{ collect($calendars)->map(fn ($calendar) => $calendar['id'].'-'.$calendar['status'].'-'.$calendar['version'])->implode('|') }}" wire:model.live="calendarId" class="flex-1 min-w-[200px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
                     <option value="">Seleccionar</option>
                     @foreach ($calendars as $c)
                         <option value="{{ $c['id'] }}">{{ $c['name'] }} ({{ $c['status'] }})</option>
@@ -143,7 +143,7 @@
             {{-- Detalle del calendario seleccionado (antes: lista de todos los
                  calendarios del lapso; el switcher global ya cubre la elección). --}}
             @if ($selectedCalendarDetail)
-                <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                <div x-data="{ scheduleDialogOpen: false }" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
                     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                         <div class="flex items-center gap-3">
                             <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">{{ $selectedCalendarDetail['name'] }}</h2>
@@ -194,10 +194,47 @@
                                 <div class="text-sm font-bold text-gray-900 dark:text-white break-words">{{ $value }}</div>
                             </div>
                         @endforeach
+                        @if (count($selectedCalendarDetail['schedule_blocks'] ?? []))
+                            <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300 mb-1">
+                                    Bloques de horario
+                                </div>
+                                <button type="button"
+                                    x-on:click="scheduleDialogOpen = true"
+                                    class="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-emerald-700 hover:text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:text-emerald-300"
+                                    aria-label="Ver bloques de horario del plan de estudio">
+                                    Ver detalle
+                                    <span aria-hidden="true">→</span>
+                                </button>
+                            </div>
+                        @endif
                     </div>
 
                     @if (count($selectedCalendarDetail['schedule_blocks'] ?? []))
-                        <div class="mt-5 rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
+                        <div x-cloak x-show="scheduleDialogOpen"
+                            x-on:keydown.escape.window="scheduleDialogOpen = false"
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
+                            role="dialog" aria-modal="true"
+                            aria-label="Bloques de horario del plan de estudio">
+                            <div x-on:click.stop class="max-h-[90vh] w-full max-w-7xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
+                                <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
+                                    <div>
+                                        <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                                            Bloques de horario del plan de estudio
+                                        </h3>
+                                        <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                            {{ $selectedCalendarDetail['pestudio_name'] ?? 'Plan de estudio seleccionado' }}
+                                            · detalle por día, turno y bloque
+                                        </p>
+                                    </div>
+                                    <button type="button" x-on:click="scheduleDialogOpen = false"
+                                        class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:hover:bg-white/10 dark:hover:text-white"
+                                        aria-label="Cerrar detalle de bloques de horario">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div class="overflow-auto p-4">
+                        <div class="rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
                             <div class="px-4 py-3 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <div>
@@ -282,6 +319,9 @@
                                 </table>
                             </div>
                         </div>
+                                </div>
+                            </div>
+                        </div>
                     @else
                         <div class="mt-5 rounded-lg border border-dashed border-gray-300 dark:border-white/10 px-4 py-5 text-center text-xs text-gray-500 dark:text-gray-400">
                             Este plan de estudio todavía no tiene bloques de horario registrados.
@@ -332,7 +372,7 @@
                         @endforeach
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
                         <select wire:model.live="shiftId" class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm">
                             <option value="0">Elige un turno</option>
                             @foreach ($shifts as $shift)
@@ -363,8 +403,11 @@
                         </button>
                         <button wire:click="savePeriods"
                             @disabled((int) $shiftId <= 0)
+                            wire:loading.attr="disabled"
+                            wire:target="savePeriods"
                             class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed">
-                            Guardar períodos (Lun–Vie)
+                            <span wire:loading.remove wire:target="savePeriods">Guardar períodos</span>
+                            <span wire:loading wire:target="savePeriods">Guardando…</span>
                         </button>
                         <button wire:click="regeneratePeriods"
                             @disabled((int) $shiftId <= 0)
@@ -397,6 +440,35 @@
                                     <span class="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">{{ $previewClassPeriods->count() }} clase</span>
                                     <span class="px-2 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">{{ $previewBreakPeriods->count() }} recreo</span>
                                 </div>
+                                <div class="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 p-2.5">
+                                    <label class="min-w-[150px] text-[10px] font-bold uppercase tracking-widest text-sky-700 dark:text-sky-300">
+                                        Día del bloque
+                                        <select wire:model.live="periodDayOfWeek"
+                                            class="mt-1 w-full rounded-md border border-sky-500/20 bg-white px-2 py-1.5 text-xs font-semibold text-gray-800 dark:bg-white/5 dark:text-gray-200">
+                                            @foreach ([1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'] as $day => $dayName)
+                                                <option value="{{ $day }}">{{ $dayName }}</option>
+                                            @endforeach
+                                        </select>
+                                    </label>
+                                    <label class="min-w-[220px] flex-1 text-[10px] font-bold uppercase tracking-widest text-sky-700 dark:text-sky-300">
+                                        Plan de estudio del bloque
+                                        <select wire:model.live="periodPestudioId"
+                                            class="mt-1 w-full rounded-md border border-sky-500/20 bg-white px-2 py-1.5 text-xs font-semibold text-gray-800 dark:bg-white/5 dark:text-gray-200">
+                                            <option value="0">Selecciona un plan</option>
+                                            @foreach ($this->calendarPestudios() as $pestudioId => $pestudioName)
+                                                <option value="{{ $pestudioId }}">{{ $pestudioName }}</option>
+                                            @endforeach
+                                        </select>
+                                    </label>
+                                    <button type="button" wire:click="addPeriodBlock"
+                                        class="rounded-md bg-sky-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-sky-700 disabled:opacity-50"
+                                        @disabled((int) $periodPestudioId <= 0)>
+                                        + Nuevo bloque
+                                    </button>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400">
+                                        El bloque nuevo se creará en el día seleccionado.
+                                    </span>
+                                </div>
                             </div>
 
                             <div class="mt-4 overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
@@ -404,6 +476,7 @@
                                     <thead class="bg-gray-50 dark:bg-white/5 text-left text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400">
                                         <tr>
                                             <th class="px-3 py-2">#</th>
+                                            <th class="px-3 py-2">Día</th>
                                             <th class="px-3 py-2">Pestudio</th>
                                             <th class="px-3 py-2">ID</th>
                                             <th class="px-3 py-2">Tipo</th>
@@ -423,8 +496,17 @@
                                                 $durationLabel = $hours > 0 ? $hours.' h' : '';
                                                 $durationLabel .= $minutes > 0 ? ($durationLabel ? ' ' : '').$minutes.' min' : '';
                                             @endphp
-                                            <tr class="border-t border-gray-100 dark:border-white/5 {{ $p['is_break'] ? 'bg-amber-500/5' : '' }}">
+                                            <tr wire:key="period-editor-{{ $p['id'] ?? 'new-'.$loop->index }}"
+                                                class="border-t border-gray-100 dark:border-white/5 {{ $p['is_break'] ? 'bg-amber-500/5' : '' }}">
                                                 <td class="px-3 py-2 font-bold text-gray-700 dark:text-gray-200">{{ $p['order'] }}</td>
+                                                <td class="px-3 py-2">
+                                                    <select wire:model="periods.{{ $loop->index }}.day_of_week"
+                                                        class="rounded border border-gray-200 bg-white/70 px-2 py-1 text-[11px] dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                                                        @foreach ([1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'] as $day => $dayName)
+                                                            <option value="{{ $day }}">{{ $dayName }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
                                                 <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ $p['pestudio'] }}</td>
                                                 <td class="px-3 py-2 font-mono text-gray-500 dark:text-gray-400">{{ $p['pestudio_id'] }}</td>
                                                 <td class="px-3 py-2">
@@ -453,7 +535,9 @@
                                                         class="w-full rounded border border-gray-200 bg-white/70 px-2 py-1 text-[11px] dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
                                                 </td>
                                                 <td class="px-3 py-2">
-                                                    <button type="button" wire:click="removePeriodBlock({{ $loop->index }})"
+                                                    <button type="button" wire:click="confirmRemovePeriodBlock({{ $loop->index }})"
+                                                        title="Eliminar bloque del editor"
+                                                        aria-label="Eliminar bloque {{ $p['order'] }} de {{ $p['pestudio'] }}"
                                                         class="rounded px-2 py-1 text-[10px] font-bold text-red-600 hover:bg-red-500/10 dark:text-red-300">
                                                         Eliminar
                                                     </button>
@@ -465,7 +549,7 @@
                             </div>
 
                             <p class="mt-3 text-[11px] text-gray-500 dark:text-gray-400">
-                                Esta es una vista previa por día del turno. Los períodos de clase y recreo se repetirán de lunes a viernes al guardar.
+                                Cada fila representa un período independiente de un día concreto. Puedes cambiar el día, la hora, el tipo o eliminar únicamente ese período.
                             </p>
                             <div class="mt-3 flex flex-wrap items-center gap-2">
                                 <button type="button" wire:click="addPeriodBlock"
@@ -473,7 +557,7 @@
                                     + Agregar bloque
                                 </button>
                                 <span class="text-[11px] text-gray-500 dark:text-gray-400">
-                                    Edita el detalle y elimina bloques antes de guardar.
+                                    Selecciona el plan y el día para crear un bloque independiente.
                                 </span>
                             </div>
                         </div>
@@ -1666,6 +1750,7 @@
                                                 <div class="text-xs font-bold text-gray-800 dark:text-gray-100">{{ $conflict['title'] ?? 'Conflicto bloqueante' }}</div>
                                                 <div class="mt-1 text-[11px] text-gray-600 dark:text-gray-300">
                                                     {{ $conflict['subject'] ?? 'Asignatura sin nombre' }}
+                                                    · Grado {{ $conflict['grade'] ?? '—' }}
                                                     · Sección {{ $conflict['section'] ?? '—' }}
                                                     · {{ $conflict['teacher'] ?? 'Sin docente' }}
                                                 </div>
@@ -1706,14 +1791,15 @@
                 @endif
 
                 @if (in_array($generationState, ['preview_ready', 'published'], true) && $preview)
+                    @php $generationReadiness = $this->publicationReadiness(); @endphp
                     <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="p-4 rounded-lg bg-white/5 border border-white/10">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Asignadas</div>
-                            <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ count($preview['assignment'] ?? []) }}</div>
+                            <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ $generationReadiness['assigned'] ?? 0 }}</div>
                         </div>
                         <div class="p-4 rounded-lg bg-white/5 border border-white/10">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Sin asignar</div>
-                            <div class="text-2xl font-extrabold text-red-500">{{ count($preview['unassigned'] ?? []) }}</div>
+                            <div class="text-2xl font-extrabold text-red-500">{{ $generationReadiness['unassigned'] ?? 0 }}</div>
                         </div>
                         <div class="p-4 rounded-lg bg-white/5 border border-white/10">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Tiempo</div>
@@ -2279,8 +2365,8 @@
                             </div>
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
                                 @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
-                                <div class="rounded-lg border border-gray-200 dark:border-white/10 p-3">
-                                    <div class="-mx-3 -mt-3 mb-3 flex items-center justify-between gap-3 rounded-t-lg border-b border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5 dark:border-emerald-400/10 dark:bg-emerald-400/5">
+                                <div class="rounded-lg border border-gray-200 dark:border-white/10 p-1.5">
+                                    <div class="-mx-1.5 -mt-1.5 mb-1.5 flex items-center justify-between gap-1.5 rounded-t-lg border-b border-emerald-500/15 bg-emerald-500/5 px-1.5 py-1 dark:border-emerald-400/10 dark:bg-emerald-400/5">
                                         <div class="flex min-w-0 items-center gap-2">
                                             <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300" aria-hidden="true">
                                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2298,7 +2384,7 @@
                                             </span>
                                         @endif
                                     </div>
-                                    <div class="grid grid-cols-6 gap-1">
+                                    <div class="grid grid-cols-6 gap-px">
                                         <div class="text-[10px] font-bold text-gray-400">Hora</div>
                                         @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as $dayLabel)
                                             <div class="text-[10px] font-bold text-gray-400 text-center">{{ $dayLabel }}</div>
@@ -2322,29 +2408,45 @@
                                                             x-on:dragover.prevent
                                                             x-on:drop.prevent="$wire.movePreviewLesson(parseInt(event.dataTransfer.getData('lesson-id')), parseInt(event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod->id }})"
                                                         @endif
-                                                        class="relative flex min-h-[44px] flex-col items-stretch justify-center gap-1 rounded p-1 {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:bg-amber-400/5 dark:text-amber-300/70' : ($cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : 'border border-transparent') }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
+                                                        class="relative flex min-h-[28px] flex-col items-stretch justify-center gap-px rounded p-px {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:bg-amber-400/5 dark:text-amber-300/70' : ($cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : 'border border-transparent') }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
                                                         @if ($cellAssignments)
                                                             @foreach ($cellAssignments as $cell)
                                                                 <div
                                                                     draggable="true"
                                                                     x-on:dragstart="event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
                                                                     title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
-                                                                    class="relative cursor-grab active:cursor-grabbing text-center leading-tight rounded {{ count($cellAssignments) > 1 ? 'bg-white/5 px-1 py-0.5' : '' }} {{ !empty($cell['is_half_group']) ? 'border border-solid border-violet-500/[0.02] bg-violet-500/[0.02]' : '' }}">
-                                                                    <button type="button"
-                                                                        wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }})"
-                                                                        title="Retirar esta lección del preview"
-                                                                        aria-label="Retirar {{ $cell['asignatura'] }} del preview"
-                                                                        class="absolute right-0 top-0 z-10 inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-300/70 bg-white/80 text-gray-400 transition-colors hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 dark:border-white/15 dark:bg-gray-900/50">
-                                                                        <span aria-hidden="true" class="text-xs leading-none">×</span>
-                                                                    </button>
-                                                                    <div class="flex items-center justify-center gap-1 pr-4 text-[10px] font-bold text-gray-900 dark:text-white">
+                                                                    class="flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight active:cursor-grabbing {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border border-solid border-violet-500/[0.02] bg-violet-500/[0.02]' : '' }}">
+                                                                    <div class="flex min-h-3.5 items-center justify-between gap-px">
+                                                                        <span class="sr-only">Acciones de {{ $cell['asignatura'] }}</span>
+                                                                        <span class="min-w-0 flex-1"></span>
+                                                                        <button type="button"
+                                                                            wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }})"
+                                                                            title="Retirar esta lección del preview"
+                                                                            aria-label="Retirar {{ $cell['asignatura'] }} del preview"
+                                                                            class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-gray-300/70 bg-white/80 text-[9px] font-bold leading-none text-gray-500 transition-colors hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 dark:border-white/15 dark:bg-gray-900/50 dark:text-gray-300">
+                                                                            <span aria-hidden="true">×</span>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="flex min-h-4 items-center justify-center gap-px px-px text-[9px] font-bold text-gray-900 dark:text-white">
                                                                         <span>{{ $cell['asignatura'] }}</span>
                                                                     </div>
                                                                     @if ($cell['profesor'])
-                                                                        <div class="pr-3 text-[9px] text-gray-500 dark:text-gray-400">{{ $cell['profesor'] }}</div>
+                                                                        <div class="px-px text-[8px] text-gray-500 dark:text-gray-400">{{ $cell['profesor'] }}</div>
                                                                     @endif
                                                                     @if ($cell['grupo'])
-                                                                        <div class="pr-3 text-[9px] text-emerald-600 dark:text-emerald-400">{{ $cell['grupo'] }}</div>
+                                                                        <div class="px-px text-[8px] text-emerald-600 dark:text-emerald-400">{{ $cell['grupo'] }}</div>
+                                                                    @endif
+                                                                    @if (!empty($cell['is_half_group']))
+                                                                        <div class="flex justify-end">
+                                                                            <button type="button"
+                                                                                wire:click.stop="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
+                                                                                title="Agregar una lección a este período"
+                                                                                aria-label="Agregar una lección al período {{ $targetPeriod?->period_label }}"
+                                                                                class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold leading-none text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                                                                <span aria-hidden="true">+</span>
+                                                                                <span class="sr-only">Agregar lección</span>
+                                                                            </button>
+                                                                        </div>
                                                                     @endif
                                                                 </div>
                                                             @endforeach
@@ -2354,11 +2456,12 @@
                                                             <button type="button"
                                                                 wire:click="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
                                                                 title="Agregar una lección a este período"
+                                                                aria-label="Agregar una lección al período {{ $targetPeriod?->period_label }}"
                                                                 class="absolute right-1 top-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                                                                 <span aria-hidden="true" class="text-sm leading-none">+</span>
                                                                 <span class="sr-only">Agregar lección</span>
                                                             </button>
-                                                            <span class="flex min-h-[44px] items-center justify-center text-xs text-gray-400 dark:text-gray-500">Vacío</span>
+                                                            <span class="flex min-h-[28px] items-center justify-center text-[9px] text-gray-400 dark:text-gray-500">Vacío</span>
                                                         @endif
                                                     </div>
                                                 @endfor

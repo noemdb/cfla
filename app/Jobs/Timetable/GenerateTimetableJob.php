@@ -500,7 +500,7 @@ class GenerateTimetableJob implements ShouldQueue
      *
      * PLAN-TIMETABLE-002 §4.3: antes de activar este calendario se demueve
      * (status=archived) al activo anterior del mismo lapso (I-4). Si dos
-     * publicaciones del mismo lapso corren a la vez, uq_active_lapso rechaza
+     * publicaciones del mismo plan corren a la vez, uq_active_pestudio rechaza
      * la segunda: se captura, se revierte el objetivo a draft y se loguea.
      */
     private function persist(TimetableCalendar $calendar, SolverResult $result, int $expectedVersion): void
@@ -526,9 +526,10 @@ class GenerateTimetableJob implements ShouldQueue
                     return;
                 }
 
-                // Democión del activo anterior del lapso antes de activar este.
+                // Democión del activo anterior del mismo plan de estudio
+                // antes de activar este. La unicidad es global por pestudio.
                 TimetableCalendar::query()
-                    ->forLapso($row->lapso_id)
+                    ->where('pestudio_id', $row->pestudio_id)
                     ->where('id', '!=', $row->id)
                     ->active()
                     ->update(['status' => TimetableCalendar::STATUS_ARCHIVED]);

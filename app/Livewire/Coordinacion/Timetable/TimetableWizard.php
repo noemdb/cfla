@@ -22,6 +22,7 @@ use App\Models\app\Timetable\TimetableTeacherAvailability;
 use App\Services\Timetable\TimetablePublicationReadinessService;
 use App\Services\Timetable\TimetableRoomEligibilityService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
@@ -83,6 +84,10 @@ class TimetableWizard extends Component
     public int $shiftId = 0;
 
     public array $periods = [];
+
+    public int $periodPestudioId = 0;
+
+    public int $periodDayOfWeek = 1;
 
     public bool $showShiftForm = false;
 
@@ -380,7 +385,7 @@ class TimetableWizard extends Component
             $this->pescolarId = $lapso->pescolar_id;
             $this->loadCalendars();
 
-            $active = TimetableCalendar::activeForLapso($lapso->id);
+            $active = TimetableCalendar::activeForLapso($lapso->id, $this->pestudioId ? (int) $this->pestudioId : null);
             if ($active) {
                 $this->calendarId = $active->id;
                 $this->loadCalendar($active);
@@ -732,16 +737,20 @@ class TimetableWizard extends Component
         $periods = [];
         foreach ($this->calendarPestudios() as $pid => $pestudioName) {
             $nivel = $this->levelForPestudio($pestudioName);
-            foreach ($this->estructuraFranjas($nivel, $shiftCode) as $i => $franja) {
-                $periods[] = [
-                    'pestudio_id' => $pid,
-                    'pestudio' => $pestudioName,
-                    'order' => $i + 1,
-                    'start' => $franja[0],
-                    'end' => $franja[1],
-                    'is_break' => $franja[2],
-                    'label' => $pestudioName.' · bloque '.($i + 1).' · '.$this->fmtMin($franja[0]).'–'.$this->fmtMin($franja[1]).($franja[2] ? ' (recreo)' : ''),
-                ];
+            foreach (range(1, 5) as $day) {
+                foreach ($this->estructuraFranjas($nivel, $shiftCode) as $i => $franja) {
+                    $periods[] = [
+                        'pestudio_id' => $pid,
+                        'pestudio' => $pestudioName,
+                        'day_of_week' => $day,
+                        'day_label' => $this->dayLabel($day),
+                        'order' => $i + 1,
+                        'start' => $franja[0],
+                        'end' => $franja[1],
+                        'is_break' => $franja[2],
+                        'label' => $pestudioName.' · '.$this->dayLabel($day).' · bloque '.($i + 1).' · '.$this->fmtMin($franja[0]).'–'.$this->fmtMin($franja[1]).($franja[2] ? ' (recreo)' : ''),
+                    ];
+                }
             }
         }
 
@@ -752,6 +761,7 @@ class TimetableWizard extends Component
         }
 
         $this->periods = $periods;
+        $this->periodPestudioId = (int) array_key_first($this->calendarPestudios());
     }
 
     public function savePeriods(): void
@@ -763,36 +773,47 @@ class TimetableWizard extends Component
 
         $calendar = TimetableCalendar::find($this->calendarId);
         if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_DRAFT) {
-            session()->flash('error', 'Solo puedes editar bloques de un calendario borrador.');
+            $this->notification()->error('Períodos no guardados', 'Solo puedes editar bloques de un calendario borrador.');
 
             return;
         }
         if ($this->periods === []) {
-            session()->flash('error', 'Debes conservar al menos un bloque antes de guardar.');
+            $this->notification()->warning('Períodos no guardados', 'Debes conservar al menos un bloque antes de guardar.');
 
             return;
         }
         foreach ($this->periods as $period) {
             if ((int) ($period['end'] ?? 0) <= (int) ($period['start'] ?? 0)) {
-                session()->flash('error', 'Cada bloque debe tener una hora final posterior a la inicial.');
+                $this->notification()->warning('Horario inválido', 'Cada bloque debe tener una hora final posterior a la inicial.');
 
                 return;
             }
         }
+        foreach (collect($this->periods)->groupBy(fn (array $period): string => ($period['pestudio_id'] ?? 0).':'.($period['day_of_week'] ?? 0)) as $pestudioPeriods) {
+            $ordered = $pestudioPeriods->sortBy('start')->values();
+            for ($index = 1; $index < $ordered->count(); $index++) {
+                if ((int) $ordered[$index]['start'] < (int) $ordered[$index - 1]['end']) {
+                    $this->notification()->warning('Períodos solapados', 'Los bloques del mismo plan de estudio no pueden solaparse en el mismo día.');
+
+                    return;
+                }
+            }
+        }
+        $this->normalizePeriodOrders();
 
         $existingPeriodIds = TimetablePeriod::query()
             ->where('calendar_id', $this->calendarId)
             ->where('shift_id', $this->shiftId)
             ->pluck('id');
         if ($existingPeriodIds->isNotEmpty() && TimetableSlot::query()->whereIn('period_id', $existingPeriodIds)->exists()) {
-            session()->flash('error', 'No se pueden modificar estos bloques porque ya tienen asignaciones de horario.');
+            $this->notification()->warning('Períodos protegidos', 'No se pueden modificar estos bloques porque ya tienen asignaciones de horario.');
 
             return;
         }
 
         $this->persistPeriods();
         $this->periods = [];
-        session()->flash('message', 'Períodos creados por plan de estudio (Lun–Vie).');
+        $this->notification()->success('Períodos guardados', 'Los períodos se crearon, actualizaron o eliminaron correctamente por día.');
         $this->goToStep(2);
     }
 
@@ -838,6 +859,7 @@ class TimetableWizard extends Component
             $query = TimetablePeriod::query()
                 ->where('calendar_id', $this->calendarId)
                 ->where('shift_id', $this->shiftId);
+            $query->orderBy('day_of_week');
             if ($hasPestudioColumn) {
                 $query->orderBy('pestudio_id');
             }
@@ -850,16 +872,17 @@ class TimetableWizard extends Component
             }
 
             $names = $this->calendarPestudios();
-            $this->periods = $rows->groupBy(fn (TimetablePeriod $period): string => ($period->pestudio_id ?? 0).':'.$period->order_in_day)
-                ->map(function ($group) use ($names): array {
-                    $period = $group->first();
+            $this->periods = $rows->map(function (TimetablePeriod $period) use ($names, $hasPestudioColumn): array {
                     $pestudioId = (int) ($period->pestudio_id ?? 0);
                     $start = $this->minutesFromTime($period->start_time);
                     $end = $this->minutesFromTime($period->end_time);
 
                     return [
+                        'id' => (int) $period->id,
                         'pestudio_id' => $hasPestudioColumn ? $pestudioId : 0,
                         'pestudio' => $names[$pestudioId] ?? 'Plan de estudio',
+                        'day_of_week' => (int) $period->day_of_week,
+                        'day_label' => $this->dayLabel((int) $period->day_of_week),
                         'order' => (int) $period->order_in_day,
                         'start' => $start,
                         'end' => $end,
@@ -868,57 +891,101 @@ class TimetableWizard extends Component
                     ];
                 })->values()->all();
             session()->flash('message', 'Bloques cargados para edición.');
+            $this->periodPestudioId = (int) ($this->periods[0]['pestudio_id'] ?? 0);
+            $this->periodDayOfWeek = (int) ($this->periods[0]['day_of_week'] ?? 1);
     }
 
-    public function addPeriodBlock(): void
+    public function addPeriodBlock(?int $pestudioId = null): void
     {
-            if ($this->periods === []) {
-                session()->flash('error', 'Genera o carga primero los bloques del turno.');
+            $pestudioId = $pestudioId ?: $this->periodPestudioId;
+            $pestudios = $this->calendarPestudios();
+            if (! isset($pestudios[$pestudioId])) {
+                session()->flash('error', 'Selecciona un plan de estudio válido para crear el bloque.');
 
                 return;
             }
 
-            $pestudioId = (int) ($this->periods[0]['pestudio_id'] ?? 0);
-            $pestudioName = $this->periods[0]['pestudio'] ?? 'Plan de estudio';
-            $order = count(array_filter($this->periods, fn (array $period): bool => (int) $period['pestudio_id'] === $pestudioId)) + 1;
-            $start = $this->periods[array_key_last($this->periods)]['end'] ?? 0;
+            $pestudioName = $pestudios[$pestudioId];
+            $samePestudio = array_values(array_filter(
+                $this->periods,
+                fn (array $period): bool => (int) ($period['pestudio_id'] ?? 0) === $pestudioId
+                    && (int) ($period['day_of_week'] ?? 0) === $this->periodDayOfWeek,
+            ));
+            $order = count($samePestudio) + 1;
+            $selectedShift = TimetableShift::find($this->shiftId);
+            $shiftStart = $selectedShift?->start_time ?? $this->shiftStart;
+            $start = $samePestudio !== []
+                ? (int) $samePestudio[array_key_last($samePestudio)]['end']
+                : $this->minutesFromTime($shiftStart);
 
             $this->periods[] = [
+                'id' => null,
                 'pestudio_id' => $pestudioId,
                 'pestudio' => $pestudioName,
+                'day_of_week' => $this->periodDayOfWeek,
+                'day_label' => $this->dayLabel($this->periodDayOfWeek),
                 'order' => $order,
                 'start' => $start,
                 'end' => min($start + 45, 23 * 60 + 59),
                 'is_break' => false,
                 'label' => '',
             ];
+            $this->periodPestudioId = $pestudioId;
     }
 
     public function removePeriodBlock(int $index): void
     {
-            if (! isset($this->periods[$index])) {
-                return;
+        if (! isset($this->periods[$index])) {
+            return;
+        }
+
+        $periodId = (int) ($this->periods[$index]['id'] ?? 0);
+        if ($periodId > 0 && TimetableSlot::query()->where('period_id', $periodId)->exists()) {
+            session()->flash('error', 'No se puede eliminar este bloque porque tiene asignaciones de horario.');
+
+            return;
+        }
+
+        unset($this->periods[$index]);
+        $this->periods = array_values($this->periods);
+        $orders = [];
+        foreach ($this->periods as &$period) {
+            $key = ($period['pestudio_id'] ?? 0).':'.($period['day_of_week'] ?? 0);
+            $orders[$key] = ($orders[$key] ?? 0) + 1;
+            $period['order'] = $orders[$key];
+        }
+        unset($period);
     }
 
-            unset($this->periods[$index]);
-            $this->periods = array_values($this->periods);
-            $orders = [];
-            foreach ($this->periods as &$period) {
-                $pestudioId = (int) ($period['pestudio_id'] ?? 0);
-                $orders[$pestudioId] = ($orders[$pestudioId] ?? 0) + 1;
-                $period['order'] = $orders[$pestudioId];
-            }
-            unset($period);
+    public function confirmRemovePeriodBlock(int $index): void
+    {
+        if (! isset($this->periods[$index])) {
+            return;
         }
 
-        public function updatePeriodTime(int $index, string $field, string $value): void
-        {
-            if (! isset($this->periods[$index]) || ! in_array($field, ['start', 'end'], true)) {
-                return;
-            }
+        $period = $this->periods[$index];
+        $this->dialog()->confirm([
+            'title' => 'Eliminar bloque de horario',
+            'description' => 'Se eliminará «'.$period['pestudio'].' · '.$this->dayLabel((int) ($period['day_of_week'] ?? 1)).' · Bloque '.$period['order'].'» al guardar.',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Eliminar',
+                'method' => 'removePeriodBlock',
+                'params' => $index,
+                'color' => 'negative',
+            ],
+            'reject' => ['label' => 'Cancelar'],
+        ]);
+    }
 
-            $this->periods[$index][$field] = $this->minutesFromTime($value);
+    public function updatePeriodTime(int $index, string $field, string $value): void
+    {
+        if (! isset($this->periods[$index]) || ! in_array($field, ['start', 'end'], true)) {
+            return;
         }
+
+        $this->periods[$index][$field] = $this->minutesFromTime($value);
+    }
 
     /** Persiste $this->periods (por pestudio) como períodos del calendario. */
     private function persistPeriods(): void
@@ -930,24 +997,49 @@ class TimetableWizard extends Component
                 ->delete();
 
             foreach ($this->periods as $p) {
-                foreach (range(1, 5) as $day) {
-                    $attributes = [
-                        'calendar_id' => $this->calendarId,
-                        'shift_id' => $this->shiftId,
-                        'day_of_week' => $day,
-                        'order_in_day' => $p['order'],
-                        'start_time' => $this->fmtMin($p['start']),
-                        'end_time' => $this->fmtMin($p['end']),
-                        'is_break' => $p['is_break'],
-                    ];
-                    if (Schema::hasColumn('timetable_periods', 'pestudio_id')) {
-                        $attributes['pestudio_id'] = $p['pestudio_id'] ?? null;
-                    }
-                    TimetablePeriod::create($attributes);
+                $attributes = [
+                    'calendar_id' => $this->calendarId,
+                    'shift_id' => $this->shiftId,
+                    'day_of_week' => (int) ($p['day_of_week'] ?? 1),
+                    'order_in_day' => $p['order'],
+                    'start_time' => $this->fmtMin($p['start']),
+                    'end_time' => $this->fmtMin($p['end']),
+                    'is_break' => $p['is_break'],
+                ];
+                if (Schema::hasColumn('timetable_periods', 'pestudio_id')) {
+                    $attributes['pestudio_id'] = $p['pestudio_id'] ?? null;
                 }
 
+                TimetablePeriod::create($attributes);
             }
         });
+    }
+
+    private function normalizePeriodOrders(): void
+    {
+        $orders = [];
+        foreach (collect($this->periods)->map(fn (array $period, int $index): array => [
+            'index' => $index,
+            'period' => $period,
+        ])->groupBy(
+            fn (array $item): string => ($item['period']['pestudio_id'] ?? 0).':'.($item['period']['day_of_week'] ?? 0)
+        ) as $periods) {
+            foreach ($periods->sortBy(fn (array $item): int => (int) ($item['period']['start'] ?? 0))->values() as $order => $item) {
+                $orders[$item['index']] = $order + 1;
+            }
+        }
+
+        foreach ($this->periods as $index => &$period) {
+            if (isset($orders[$index])) {
+                $period['order'] = $orders[$index];
+            }
+        }
+        unset($period);
+    }
+
+    private function dayLabel(int $day): string
+    {
+        return [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'][$day] ?? 'Día '.$day;
     }
 
     private function minutesFromTime(?string $time): int
@@ -958,7 +1050,7 @@ class TimetableWizard extends Component
     }
 
     /** Pestudios del calendario: el del calendario (si tiene) o los de sus pevs. */
-    private function calendarPestudios(): array
+    public function calendarPestudios(): array
     {
         $calendar = TimetableCalendar::find($this->calendarId);
         if (! $calendar) {
@@ -2093,6 +2185,36 @@ class TimetableWizard extends Component
         return $this->step3SortDir === 'desc'
             ? $pevaluaciones->sortByDesc($sortFn)
             : $pevaluaciones->sortBy($sortFn);
+    }
+
+    /**
+     * Lessons que pertenecen al alcance académico vigente del calendario.
+     *
+     * El estado de selectedPevs puede sobrevivir a un cambio de grado o a la
+     * desactivación de una sección. Por eso la publicación no debe confiar
+     * únicamente en esos IDs enviados por el navegador.
+     */
+    private function eligibleCalendarLessons(TimetableCalendar $calendar)
+    {
+        return $calendar->lessons()
+            ->with('pevaluacion.seccion.grado', 'pevaluacion.pensum.asignatura', 'pevaluacion.profesor')
+            ->whereHas('pevaluacion', function ($query) use ($calendar): void {
+                $query
+                    ->where('lapso_id', $calendar->lapso_id)
+                    ->whereHas('seccion', function ($sectionQuery) use ($calendar): void {
+                        $sectionQuery
+                            ->where('status_active', 'true')
+                            ->whereHas('grado', function ($gradeQuery) use ($calendar): void {
+                                $gradeQuery->where('grados.status_active', 'true');
+
+                                if ($calendar->pestudio_id) {
+                                    $gradeQuery->where('pestudio_id', $calendar->pestudio_id);
+                                }
+                            });
+                    });
+            })
+            ->get()
+            ->keyBy('id');
     }
 
     /**
@@ -3569,18 +3691,20 @@ class TimetableWizard extends Component
                 $bothAllowHalfGroup = (bool) $lesson->is_half_group
                     && (bool) $otherLesson->is_half_group;
                 $isSectionSwap = $sameSection && ! $bothAllowHalfGroup;
+                $sameTeacher = (int) $otherLesson->pevaluacion->profesor_id
+                    === (int) $lesson->pevaluacion->profesor_id;
 
-                if ((int) $otherLesson->pevaluacion->profesor_id === (int) $lesson->pevaluacion->profesor_id
-                    && ! $isSectionSwap) {
-                    $this->notification()->error(
-                        'Conflicto de docente',
-                        $this->teacherConflictMessage($lesson, $otherLesson, $targetPeriod),
-                    );
-
-                    return;
+                // Una celda compartible tiene prioridad sobre el intercambio:
+                // dos lessons de medio grupo deben convivir en el destino,
+                // incluso si pertenecen al mismo docente.
+                if ($bothAllowHalfGroup) {
+                    continue;
                 }
 
-                if ($isSectionSwap) {
+                // Cuando se intercambian las celdas, dos lessons del mismo
+                // docente no generan doble reserva: cada una ocupa el período
+                // que la otra deja libre.
+                if ($sameTeacher || $isSectionSwap) {
                     $swapLessonId = (int) $otherLessonId;
                     $swapSlotIndex = collect($otherSlots)->search(
                         fn (array $slot): bool => (int) ($slot['period_id'] ?? 0) === $newPeriodId,
@@ -3918,7 +4042,9 @@ class TimetableWizard extends Component
                 continue;
             }
 
-            if ((int) $targetLesson->pevaluacion->profesor_id === (int) $lesson->pevaluacion->profesor_id) {
+            $sameTeacher = (int) $targetLesson->pevaluacion->profesor_id === (int) $lesson->pevaluacion->profesor_id;
+            $bothAllowHalfGroup = (bool) $lesson->is_half_group && (bool) $targetLesson->is_half_group;
+            if ($sameTeacher && ! $bothAllowHalfGroup) {
                 $this->notification()->error(
                     'Conflicto de docente',
                     $this->teacherConflictMessage($lesson, $targetLesson, $period),
@@ -4736,7 +4862,7 @@ PROMPT;
             ->where('calendar_id', $calendar->id)
             ->whereIn('period_id', $periods->keys())
             ->whereNotIn('lesson_id', $lessonIds)
-            ->with('lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion')
+            ->with('lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.profesor')
             ->get();
         $conflicts = collect($assignmentRows)
             ->map(function (array $candidate) use ($persistedSlots): ?array {
@@ -4745,18 +4871,23 @@ PROMPT;
                         return false;
                     }
 
-                    $sameTeacher = (int) $slot->profesor_id === (int) $candidate['profesor_id'];
+                    $persistedTeacherId = (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id);
+                    $persistedSectionId = (int) ($slot->lesson?->pevaluacion?->seccion_id ?? $slot->seccion_id);
+                    $sameTeacher = $persistedTeacherId === (int) $candidate['profesor_id'];
+                    $bothHalfGroup = (bool) $slot->is_half_group && (bool) $candidate['is_half_group'];
                     $sameRoom = $candidate['room_id'] !== null
                         && $slot->room_id !== null
                         && (int) $slot->room_id === (int) $candidate['room_id'];
-                    $sameSection = (int) $slot->seccion_id === (int) $candidate['seccion_id']
+                    $sameSection = $persistedSectionId === (int) $candidate['seccion_id']
                         && (
                             $candidate['grupo_estable_id'] === null
                             || (int) $slot->grupo_estable_id === (int) $candidate['grupo_estable_id']
                             || $slot->grupo_estable_id === null
                         );
 
-                    return $sameTeacher || $sameRoom || $sameSection;
+                    return ($sameTeacher && ! $bothHalfGroup)
+                        || $sameRoom
+                        || ($sameSection && ! $bothHalfGroup);
                 });
 
                 if (! $existing) {
@@ -4767,9 +4898,13 @@ PROMPT;
                     'candidate_lesson_id' => (int) $candidate['lesson_id'],
                     'period_id' => (int) $candidate['period_id'],
                     'existing_lesson_id' => (int) $existing->lesson_id,
-                    'type' => (int) $existing->profesor_id === (int) $candidate['profesor_id']
+                    'type' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id) === (int) $candidate['profesor_id']
                         ? 'docente'
-                        : ((int) $existing->seccion_id === (int) $candidate['seccion_id'] ? 'sección' : 'aula'),
+                        : ((int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id) === (int) $candidate['seccion_id'] ? 'sección' : 'aula'),
+                    'candidate_profesor_id' => (int) $candidate['profesor_id'],
+                    'existing_profesor_id' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id),
+                    'candidate_section_id' => (int) $candidate['seccion_id'],
+                    'existing_section_id' => (int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id),
                     'subject' => $existing->lesson?->pevaluacion?->pensum?->asignatura?->name ?? 'otra asignatura',
                     'section' => $existing->lesson?->pevaluacion?->seccion?->name ?? (string) $existing->seccion_id,
                 ];
@@ -4791,7 +4926,10 @@ PROMPT;
                     ?? "lesson {$conflict['candidate_lesson_id']}";
 
                 return "{$conflict['type']} en {$periodLabel}: {$candidateSubject} colisiona con "
-                    ."{$conflict['subject']} · sección {$conflict['section']}";
+                    ."{$conflict['subject']} · sección {$conflict['section']} "
+                    .'(docente '.$conflict['candidate_profesor_id'].' vs '
+                    .$conflict['existing_profesor_id'].'; sección '
+                    .$conflict['candidate_section_id'].' vs '.$conflict['existing_section_id'].')';
             })->implode('; ');
 
             $this->notification()->error(
@@ -4815,9 +4953,32 @@ PROMPT;
             });
         } catch (\Illuminate\Database\QueryException $exception) {
             report($exception);
+            $periodDetails = collect($assignmentRows)
+                ->groupBy('period_id')
+                ->map(function ($rows, $periodId) use ($periods, $sectionLessons): string {
+                    $period = $periods->get((int) $periodId);
+                    $periodLabel = $period?->period_label ?? "período {$periodId}";
+                    $lessons = $rows->map(function (array $row) use ($sectionLessons): string {
+                        $lesson = $sectionLessons->get($row['lesson_id']);
+                        $subject = $lesson?->pevaluacion?->pensum?->asignatura?->name
+                            ?? "lesson {$row['lesson_id']}";
+                        $halfGroup = $row['is_half_group'] ? 'medio grupo' : 'grupo completo';
+
+                        return "{$subject} ({$halfGroup}, docente #{$row['profesor_id']})";
+                    })->implode(' + ');
+
+                    return "{$periodLabel}: {$lessons}";
+                })
+                ->values()
+                ->implode('; ');
+
             $this->notification()->error(
                 'Asignaciones no guardadas',
-                'No se guardaron los slots porque existe una colisión con otra lesson del calendario.',
+                'No se guardaron los slots porque la base de datos rechazó una combinación '
+                .'duplicada o incompatible. Revisa el día, bloque, docente, sección y aula '
+                .'de las asignaciones. Detalle de la sección activa: '.$periodDetails
+                .'. Si las lessons son de medio grupo, ambas deben tener habilitado «medio grupo» '
+                .'y no deben compartir un aula ocupada. No se modificó ninguna asignación.',
             );
 
             return;
@@ -5467,16 +5628,25 @@ PROMPT;
             return;
         }
 
-        $lessons = $calendar->lessons()
-            ->with('pevaluacion')
-            ->get()
-            ->keyBy('id');
+        $lessons = $this->eligibleCalendarLessons($calendar);
         $selectedPevIds = collect($this->selectedPevIds())->map(fn ($id): int => (int) $id);
+        $selectedPevIdsBeforeScope = $selectedPevIds;
         $selectedLessonIds = $lessons
             ->filter(fn (TimetableLesson $lesson): bool => $selectedPevIds->contains((int) $lesson->pevaluacion_id))
             ->keys()
             ->map(fn ($id): int => (int) $id)
             ->values();
+        $excludedSelectedPevIds = $selectedPevIdsBeforeScope
+            ->reject(fn (int $pevaluacionId): bool => $lessons->contains(
+                fn (TimetableLesson $lesson): bool => (int) $lesson->pevaluacion_id === $pevaluacionId
+            ))
+            ->values();
+        if ($excludedSelectedPevIds->isNotEmpty()) {
+            $this->notification()->warning(
+                'Lessons fuera del alcance',
+                'Se omitieron '.$excludedSelectedPevIds->count().' lesson(s) seleccionada(s) porque su grado, sección, plan de estudio o lapso ya no pertenece al calendario activo.',
+            );
+        }
         if ($selectedLessonIds->isEmpty()) {
             $this->notification()->warning(
                 'Sin lessons seleccionadas',
@@ -5517,32 +5687,72 @@ PROMPT;
         // Una publicación parcial conserva los slots fuera de alcance. Esos
         // slots también forman parte de la ocupación real y no pueden ser
         // reemplazados por una lesson seleccionada.
-        $preservedTeacherPeriods = TimetableSlot::query()
+        $preservedSlots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->whereNotIn('lesson_id', $publishableLessonIds)
-            ->get(['period_id', 'profesor_id'])
-            ->mapWithKeys(fn (TimetableSlot $slot): array => [
-                (int) $slot->period_id.':'.(int) $slot->profesor_id => true,
-            ]);
-        $preservedConflictSectionIds = collect($publishableLessonIds)
-            ->filter(function (int $lessonId) use ($lessons, $preservedTeacherPeriods): bool {
+            ->get(['lesson_id', 'period_id', 'profesor_id', 'seccion_id', 'room_id', 'is_half_group', 'grupo_estable_id']);
+        $preservedConflicts = collect($publishableLessonIds)
+            ->flatMap(function (int $lessonId) use ($lessons, $preservedSlots): array {
                 $lesson = $lessons->get($lessonId);
                 $teacherId = (int) ($lesson?->pevaluacion?->profesor_id ?? 0);
-
-                if ($teacherId === 0) {
-                    return false;
-                }
-
-                return collect($this->preview['assignment'][(string) $lessonId]
+                $sectionId = (int) ($lesson?->pevaluacion?->seccion_id ?? 0);
+                $assignments = $this->preview['assignment'][(string) $lessonId]
                     ?? $this->preview['assignment'][$lessonId]
-                    ?? [])
-                    ->contains(fn (array $slot): bool => $preservedTeacherPeriods->has(
-                        (int) ($slot['period_id'] ?? 0).':'.$teacherId,
-                    ));
+                    ?? [];
+
+                return collect($assignments)->flatMap(function (array $assignment) use (
+                    $lessonId,
+                    $lesson,
+                    $teacherId,
+                    $sectionId,
+                    $preservedSlots
+                ): array {
+                    $periodId = (int) ($assignment['period_id'] ?? 0);
+                    $existing = $preservedSlots->first(function (TimetableSlot $slot) use (
+                        $periodId,
+                        $teacherId,
+                        $sectionId,
+                        $lesson,
+                        $assignment
+                    ): bool {
+                        if ((int) $slot->period_id !== $periodId) {
+                            return false;
+                        }
+
+                        $bothHalfGroup = (bool) $slot->is_half_group
+                            && (bool) $lesson?->is_half_group;
+                        $sameTeacher = $teacherId > 0
+                            && (int) $slot->profesor_id === $teacherId
+                            && ! $bothHalfGroup;
+                        $sameSection = $sectionId > 0
+                            && (int) $slot->seccion_id === $sectionId
+                            && ! $bothHalfGroup;
+                        $sameRoom = ! empty($assignment['room_id'])
+                            && $slot->room_id !== null
+                            && (int) $slot->room_id === (int) $assignment['room_id'];
+
+                        return $sameTeacher || $sameSection || $sameRoom;
+                    });
+
+                    return $existing ? [[
+                        'lesson_id' => $lessonId,
+                        'period_id' => $periodId,
+                        'existing_lesson_id' => (int) $existing->lesson_id,
+                        'section_id' => $sectionId,
+                        'type' => (int) $existing->seccion_id === $sectionId
+                            ? 'section'
+                            : ((int) $existing->profesor_id === $teacherId ? 'teacher' : 'room'),
+                    ]] : [];
+                })->all();
             })
-            ->map(fn (int $lessonId): ?int => $lessons->get($lessonId)?->pevaluacion?->seccion_id
-                ? (int) $lessons->get($lessonId)->pevaluacion->seccion_id
-                : null)
+            ->unique(fn (array $conflict): string => implode(':', [
+                $conflict['lesson_id'],
+                $conflict['period_id'],
+                $conflict['existing_lesson_id'],
+            ]))
+            ->values();
+        $preservedConflictSectionIds = $preservedConflicts
+            ->pluck('section_id')
             ->filter()
             ->unique()
             ->values();
@@ -5553,11 +5763,13 @@ PROMPT;
         $preservedConflictCount = $preservedConflictSectionIds->count();
         if ($preservedConflictCount > 0) {
             $readiness['hard_conflicts'] = collect($readiness['hard_conflicts'] ?? [])
-                ->merge($preservedConflictSectionIds->map(fn (int $sectionId): array => [
+                ->merge($preservedConflicts->map(fn (array $conflict): array => [
                     'type' => 'preserved_slot_collision',
-                    'section_id' => $sectionId,
+                    'section_id' => $conflict['section_id'],
+                    'lesson_id' => $conflict['lesson_id'],
+                    'period_id' => $conflict['period_id'],
                     'title' => 'Colisión con horario preservado',
-                    'message' => 'La sección seleccionada usa un período ocupado por una lesson fuera del alcance de publicación.',
+                    'message' => 'La lesson seleccionada colisiona con una asignación preservada ('.$conflict['type'].').',
                 ]))
                 ->values()
                 ->all();
@@ -5596,6 +5808,105 @@ PROMPT;
                 (int) $lessonId => $slots,
             ])->all(),
         );
+        $publicationRows = collect($publishableLessonIds)->flatMap(function (int $lessonId) use ($lessons, $publishableAssignment): array {
+            $lesson = $lessons->get($lessonId);
+            $slots = $publishableAssignment[(string) $lessonId] ?? $publishableAssignment[$lessonId] ?? [];
+
+            return collect($slots)->map(fn (array $slot): array => [
+                'lesson_id' => $lessonId,
+                'period_id' => (int) ($slot['period_id'] ?? 0),
+                'teacher_id' => (int) ($lesson?->pevaluacion?->profesor_id ?? 0),
+                'section_id' => (int) ($lesson?->pevaluacion?->seccion_id ?? 0),
+                'grupo_estable_id' => $lesson?->pevaluacion?->grupo_estable_id
+                    ? (int) $lesson->pevaluacion->grupo_estable_id
+                    : null,
+                'is_half_group' => (bool) ($lesson?->is_half_group ?? false),
+            ])->all();
+        })->filter(fn (array $row): bool => $row['period_id'] > 0);
+        $internalPublicationConflict = $publicationRows
+            ->groupBy(fn (array $row): string => $row['period_id'].':'.$row['section_id'])
+            ->first(function ($rows): bool {
+                $complete = $rows->filter(fn (array $row): bool => ! $row['is_half_group'])->values();
+                for ($index = 0; $index < $complete->count(); $index++) {
+                    for ($otherIndex = $index + 1; $otherIndex < $complete->count(); $otherIndex++) {
+                        $firstGroup = $complete[$index]['grupo_estable_id'];
+                        $secondGroup = $complete[$otherIndex]['grupo_estable_id'];
+                        if ($firstGroup === null || $secondGroup === null || $firstGroup === $secondGroup) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            });
+        if ($internalPublicationConflict) {
+            $periodId = (int) $internalPublicationConflict->first()['period_id'];
+            $period = TimetablePeriod::query()->find($periodId);
+            $periodLabel = $period?->period_label ?? "período {$periodId}";
+            $sectionId = (int) $internalPublicationConflict->first()['section_id'];
+            $section = $lessons->get((int) $internalPublicationConflict->first()['lesson_id'])
+                ?->pevaluacion?->seccion;
+            $sectionName = $section?->name ?? 'Sección no disponible';
+            $conflictDetails = $internalPublicationConflict
+                ->filter(fn (array $row): bool => ! $row['is_half_group'])
+                ->filter(function (array $row) use ($internalPublicationConflict): bool {
+                    return $internalPublicationConflict->contains(function (array $other) use ($row): bool {
+                        if ($other['lesson_id'] === $row['lesson_id'] || $other['is_half_group']) {
+                            return false;
+                        }
+
+                        return $row['grupo_estable_id'] === null
+                            || $other['grupo_estable_id'] === null
+                            || $row['grupo_estable_id'] === $other['grupo_estable_id'];
+                    });
+                })
+                ->map(function (array $row) use ($lessons): array {
+                    $lesson = $lessons->get($row['lesson_id']);
+                    $pevaluacion = $lesson?->pevaluacion;
+
+                    return [
+                        'lesson_id' => (int) $row['lesson_id'],
+                        'subject' => (string) ($pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura'),
+                        'teacher_id' => (int) ($pevaluacion?->profesor_id ?? 0),
+                        'teacher' => (string) ($pevaluacion?->profesor?->full_name
+                            ?? $pevaluacion?->profesor?->name
+                            ?? 'Docente no disponible'),
+                        'section_id' => (int) ($pevaluacion?->seccion_id ?? 0),
+                        'section' => (string) ($pevaluacion?->seccion?->name ?? 'Sección no disponible'),
+                        'grupo_estable_id' => $row['grupo_estable_id'],
+                        'is_half_group' => (bool) $row['is_half_group'],
+                    ];
+                })
+                ->values();
+            $subjects = $conflictDetails
+                ->map(fn (array $detail): string => $detail['subject'].' (lesson #'.$detail['lesson_id'].', docente '
+                    .$detail['teacher'].' #'.$detail['teacher_id'].')')
+                ->implode(' y ');
+
+            Log::channel('timetable')->warning('Publicación bloqueada por colisión interna de sección', [
+                'calendar_id' => (int) $this->calendarId,
+                'selected_lesson_ids' => $selectedLessonIds->values()->all(),
+                'publishable_lesson_ids' => $publishableLessonIds,
+                'period_id' => $periodId,
+                'period_label' => $periodLabel,
+                'section_id' => $sectionId,
+                'section' => $sectionName,
+                'conflicts' => $conflictDetails->all(),
+                'publication_rows' => $internalPublicationConflict->values()->all(),
+                'preview_assignment_source' => $this->preview['assignment_source'] ?? null,
+                'manual_override' => (bool) ($this->preview['manual_override'] ?? false),
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->notification()->error(
+                'Publicación bloqueada',
+                "La sección {$sectionName} (#{$sectionId}) tiene más de una lesson de grupo completo "
+                ."en {$periodLabel}: {$subjects}. Cada lesson tiene que ocupar un período diferente, "
+                .'o ambas deben configurarse explícitamente como medio grupo si el caso académico lo permite.',
+            );
+
+            return;
+        }
         $publishablePreview = $this->preview;
         $publishablePreview['assignment'] = $scopedAssignment;
         $publishablePreview['unassigned'] = [];
@@ -5634,6 +5945,8 @@ PROMPT;
                     'La publicación no se completó: el calendario permanece en estado '.$publishedCalendar->status.'.',
                 );
             }
+            $publishedCalendar->refresh();
+            $this->loadCalendars();
             $lastVersion = (int) TimetableCalendarVersion::query()
                 ->where('calendar_id', $this->calendarId)
                 ->max('version');

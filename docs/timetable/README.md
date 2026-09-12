@@ -77,16 +77,18 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
 ### Paso 1 · Calendario
 
 1. Elegir el **lapso**. Se listan las **alternativas (calendarios)** del lapso:
-   N borradores + máximo **uno activo** (ADR-TT-014). Acciones por calendario:
+   N borradores + máximo **un calendario activo por `pestudio_id`** (ADR-TT-014). Distintos planes de estudio pueden tener calendarios activos simultáneamente. Acciones por calendario:
    **Continuar**, **Activar** (solo si ya tiene slots), **Eliminar** (solo `draft`).
 2. **Nuevo borrador**: nombre (único dentro del lapso, D-3) y `period_minutes`
    (duración del bloque: 30–120 min).
 3. **Turnos**: el catálogo `timetable_shifts` empieza **vacío** — se crean con el
    formulario "Nuevo turno" (code `M`/`T`, nombre, hora inicio/fin). El select de
    "Turno y períodos" solo muestra turnos ya creados.
-4. **Períodos**: botón *Generar períodos* crea 5 días (Lun–Vie) × 6 bloques por
-   turno, calculando `start_time`/`end_time` desde `shift.start_time` +
-   `period_minutes`. Los períodos `is_break` (recreos) nunca reciben slots.
+4. **Períodos**: botón *Generar períodos* crea los bloques iniciales para cada
+   día laboral (Lun–Vie) y plan de estudio. Desde el mismo paso cada período se
+   administra individualmente: se puede cambiar su día, horario, tipo,
+   descripción, crear bloques para un día concreto o eliminar solo ese registro.
+   Los períodos `is_break` (recreos) nunca reciben slots.
 
 > Si ya existe un calendario cargado, `mount()` abre el activo del lapso vigente
 > (`activeForCurrentLapso()`), con fallback al último `draft|active`.
@@ -171,7 +173,7 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
    parcial se libera para que el solver la recalcule; en Legacy se conserva la
    posición importada y se reporta como incompleta.
 3. **Confirmar y publicar**: persiste slots, demueve al activo anterior del lapso
-   a `archived` y activa este (invariante DB `uq_active_lapso`).
+   a `archived` y activa este para el mismo `pestudio_id` (invariante DB `uq_active_pestudio`).
 4. En la grilla del preview, cada lección asignada se puede arrastrar a otro
    período de clase del mismo turno. El movimiento valida docente y sección,
    excluye recreos y conserva el cambio al confirmar la publicación.
@@ -233,7 +235,7 @@ active ──(cierre de lapso / otra alternativa)──▶ archived (terminal, s
 ```
 
 - Máximo UNO `active` por lapso — garantizado **en BD** con columna generada
-  `active_lapso_key` + índice único (NULLs no colisionan).
+  `active_pestudio_key` + índice único (NULLs no colisionan).
 - `version` (bloqueo optimista, §15): cada escritura lo incrementa; un job o
   editor con versión desactualizada es rechazado.
 - Eliminar solo `draft` (`deleteDraft()`); archivados conservan historial.
@@ -285,9 +287,9 @@ timetable_shifts            catálogo global M/T (code único); se garantiza con
                             TimetableShiftsSeeder (M 07:00–12:30 · T 13:00–15:00)
 timetable_calendars         N por lapso · UNO POR PESTUDIO (pestudio_id, FK);
                             status; version; quality_score; preview_payload;
-                            active_lapso_key (generada) + uq_active_lapso
-timetable_periods           por calendario+turno+día (L–V × orden, is_break);
-                            heredan el pestudio del calendario (sin columna)
+                            active_pestudio_key (generada) + uq_active_pestudio
+timetable_periods           por calendario+turno+plan+día+orden (is_break);
+                            cada registro conserva su día específico
 timetable_rooms             catálogo global; code único; seccion_id opcional (aula por sección)
 timetable_lessons           1:1 con pevaluacion por calendario; bloques_t/p; room_type_required;
                             priority; locked; shift_id
