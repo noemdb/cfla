@@ -289,8 +289,9 @@ class TimetableWizard extends Component
                 $this->loadLessons();
                 $this->loadPublishedPreview($selectedCalendar);
 
-                // Horario ACTIVO/publicado: mostrar su grilla por defecto (Paso 5).
-                if ($this->generationState === 'published') {
+                // Mostrar la distribución persistida del calendario (publicada
+                // o draft con slots) sin exigir un nuevo dry-run.
+                if (in_array($this->generationState, ['published', 'preview_ready'], true)) {
                     $this->currentStep = 5;
                 }
             }
@@ -354,7 +355,7 @@ class TimetableWizard extends Component
         $this->loadAvailability();
         $this->loadPublishedPreview($selectedCalendar);
 
-        if ($this->generationState === 'published') {
+        if (in_array($this->generationState, ['published', 'preview_ready'], true)) {
             $this->currentStep = 5;
         }
         $this->selectedScheduleDayIndex = (int) session()->get(
@@ -5349,7 +5350,7 @@ PROMPT;
      */
     private function loadPublishedPreview(TimetableCalendar $calendar): void
     {
-        if ($calendar->status !== TimetableCalendar::STATUS_ACTIVE || ! $calendar->slots()->exists()) {
+        if (! $calendar->slots()->exists()) {
             return;
         }
 
@@ -5411,7 +5412,9 @@ PROMPT;
             'elapsed_seconds' => 0,
             'assignment_diagnostics' => $diagnostics,
         ];
-        $this->generationState = 'published';
+        $this->generationState = $calendar->status === TimetableCalendar::STATUS_ACTIVE
+            ? 'published'
+            : 'preview_ready';
     }
 
     /**

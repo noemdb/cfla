@@ -1818,7 +1818,7 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <button wire:click="runDryRun" @disabled($step3SelectedCount === 0) wire:loading.attr="disabled" wire:target="runDryRun"
                         class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
-                        <span wire:loading.remove wire:target="runDryRun">Previsualizar (dry-run)</span>
+                        <span wire:loading.remove wire:target="runDryRun">Generar draft</span>
                         <span wire:loading wire:target="runDryRun">Generando…</span>
                     </button>
                     @if (($selectedCalendarDetail['status'] ?? null) === 'active')
