@@ -5108,7 +5108,9 @@ PROMPT;
             return;
         }
 
-        $lessons = $calendar->lessons()->with('pevaluacion')->get();
+        $lessons = $calendar->lessons()
+            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor', 'pevaluacion.grupoEstable')
+            ->get();
         $byPev = $lessons->keyBy('pevaluacion_id');
         $periodsByIdentity = $calendar->periods()
             ->get()
@@ -5204,6 +5206,85 @@ PROMPT;
         }
 
         $lessonIds = $lessons->filter(fn ($lesson) => (int) $lesson->pevaluacion?->seccion_id === $sectionId)->pluck('id');
+        $preservedSlots = TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereNotIn('lesson_id', $lessonIds)
+            ->with([
+                'period.shift',
+                'lesson.pevaluacion.pensum.asignatura',
+                'lesson.pevaluacion.seccion.grado',
+                'lesson.pevaluacion.profesor',
+            ])
+            ->get();
+        $periodById = $calendar->periods()->with('shift')->get()->keyBy('id');
+        $restoreConflicts = [];
+        foreach ($rows as $row) {
+            $candidateLesson = $lessons->firstWhere('id', (int) $row['lesson_id']);
+            $period = $periodById->get((int) $row['period_id']);
+            if (! $candidateLesson || ! $period) {
+                continue;
+            }
+            $candidatePev = $candidateLesson->pevaluacion;
+            $conflicts = $preservedSlots->filter(function (TimetableSlot $existing) use ($row, $candidatePev): bool {
+                if ((int) $existing->period_id !== (int) $row['period_id']) {
+                    return false;
+                }
+
+                return (int) $existing->profesor_id === (int) ($candidatePev?->profesor_id ?? 0)
+                    || ($existing->room_id !== null && $row['room_id'] !== null
+                        && (int) $existing->room_id === (int) $row['room_id'])
+                    || (int) $existing->seccion_id === (int) $row['seccion_id'];
+            });
+            foreach ($conflicts as $existing) {
+                $existingPev = $existing->lesson?->pevaluacion;
+                $restoreConflicts[] = [
+                    'period' => $period->period_label,
+                    'shift' => $period->shift?->name ?? 'Turno '.$period->shift_id,
+                    'time' => substr((string) $period->start_time, 0, 5).'–'.substr((string) $period->end_time, 0, 5),
+                    'candidate_lesson_id' => (int) $candidateLesson->id,
+                    'candidate_subject' => $candidatePev?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
+                    'candidate_grade' => $candidatePev?->seccion?->grado?->name ?? 'Grado no disponible',
+                    'candidate_section' => $candidatePev?->seccion?->name ?? 'Sección no disponible',
+                    'candidate_teacher' => $candidatePev?->profesor?->full_name
+                        ?? trim(($candidatePev?->profesor?->lastname ?? '').' '.($candidatePev?->profesor?->name ?? '')),
+                    'existing_lesson_id' => (int) $existing->lesson_id,
+                    'existing_subject' => $existingPev?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
+                    'existing_grade' => $existingPev?->seccion?->grado?->name ?? 'Grado no disponible',
+                    'existing_section' => $existingPev?->seccion?->name ?? 'Sección no disponible',
+                    'existing_teacher' => $existingPev?->profesor?->full_name
+                        ?? trim(($existingPev?->profesor?->lastname ?? '').' '.($existingPev?->profesor?->name ?? '')),
+                    'existing_room_id' => $existing->room_id,
+                ];
+            }
+        }
+        if ($restoreConflicts !== []) {
+            $details = collect($restoreConflicts)
+                ->unique(fn (array $conflict): string => $conflict['candidate_lesson_id'].':'.$conflict['existing_lesson_id'].':'.$conflict['period'])
+                ->take(6)
+                ->map(fn (array $conflict): string =>
+                    "{$conflict['period']} · {$conflict['shift']} · {$conflict['time']}: "
+                    ."{$conflict['candidate_subject']} / {$conflict['candidate_grade']} {$conflict['candidate_section']} "
+                    ."· docente {$conflict['candidate_teacher']} colisiona con "
+                    ."{$conflict['existing_subject']} / {$conflict['existing_grade']} {$conflict['existing_section']} "
+                    ."· docente {$conflict['existing_teacher']} "
+                    ."(lessons #{$conflict['candidate_lesson_id']} y #{$conflict['existing_lesson_id']})"
+                )
+                ->implode('; ');
+            $remaining = count($restoreConflicts) - min(6, count($restoreConflicts));
+            $suffix = $remaining > 0 ? " También hay {$remaining} conflicto(s) adicional(es)." : '';
+            Log::channel('timetable')->warning('Restore de slots rechazado por colisión', [
+                'calendar_id' => (int) $calendar->id,
+                'section_id' => $sectionId,
+                'conflicts' => $restoreConflicts,
+            ]);
+            $this->notification()->error(
+                'Restore no completado',
+                "El respaldo no se aplicó porque colisiona con asignaciones preservadas: {$details}.{$suffix} "
+                .'Mueve la lesson del respaldo o libera el período indicado y vuelve a intentarlo.',
+            );
+
+            return;
+        }
         try {
             DB::transaction(function () use ($calendar, $sectionId, $lessonIds, $rows): void {
                 TimetableSlot::query()->where('calendar_id', $calendar->id)->whereIn('lesson_id', $lessonIds)->delete();
