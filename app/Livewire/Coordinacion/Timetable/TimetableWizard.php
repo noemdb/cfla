@@ -5468,9 +5468,10 @@ PROMPT;
         }
 
         try {
-            DB::transaction(function () use ($calendar, $lessonIds, $assignmentRows): void {
+            DB::transaction(function () use ($calendar, $sectionId, $lessonIds, $assignmentRows): void {
                 TimetableSlot::query()
                     ->where('calendar_id', $calendar->id)
+                    ->where('seccion_id', $sectionId)
                     ->whereIn('lesson_id', $lessonIds)
                     ->delete();
                 TimetableSlot::query()->insert($assignmentRows);
