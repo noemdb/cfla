@@ -3187,5 +3187,13 @@
     </x-modal-card>
 @endif
 
+    <div wire:loading class="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-transparent px-3 py-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+        <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span>cargando</span>
+    </div>
+
     @include('coordinacion.help-timetable-wizard')
 </div>
