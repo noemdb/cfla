@@ -5532,7 +5532,7 @@ PROMPT;
                     ->where('seccion_id', $sectionId)
                     ->whereIn('lesson_id', $lessonIds)
                     ->delete();
-                TimetableSlot::query()->insert($assignmentRows);
+                TimetableSlot::query()->insertOrIgnore($assignmentRows);
             });
         } catch (\Illuminate\Database\QueryException $exception) {
             report($exception);

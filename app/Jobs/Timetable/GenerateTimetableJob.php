@@ -771,7 +771,10 @@ class GenerateTimetableJob implements ShouldQueue
                     }
                 }
                 if ($slotRows !== []) {
-                    TimetableSlot::query()->insert($slotRows);
+                    // insertOrIgnore: si un slot colisiona con una asignación
+                    // preservada (p. ej. docente/periodo), se omite ese slot en
+                    // lugar de abortar toda la publicación (el resto se guarda).
+                    TimetableSlot::query()->insertOrIgnore($slotRows);
                 }
 
                 foreach ($result->unassigned as $lessonId) {
