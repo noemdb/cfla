@@ -10,9 +10,10 @@ use App\Models\app\Timetable\TimetableSlot;
 use App\Services\Timetable\Solver\LessonToSchedule;
 use App\Services\Timetable\Solver\SlotCandidate;
 use App\Services\Timetable\Solver\SolverResult;
-use App\Services\Timetable\Solver\TimetableSolver;
-use App\Services\Timetable\TimetableRoomEligibilityService;
+use App\Services\Timetable\Solver\TimetableSolverOrchestrator;
 use App\Services\Timetable\TimetableAvailabilityService;
+use App\Services\Timetable\TimetableCapacityAuditService;
+use App\Services\Timetable\TimetableRoomEligibilityService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -70,9 +71,10 @@ class GenerateTimetableJob implements ShouldQueue
         $calendar->update(['status' => 'generating']);
 
         $result = $this->runSolver($calendar);
+        $unassignedReasons = $this->unassignedReasons($calendar, $result);
 
         if ($this->dryRun) {
-            $this->storeDryRunPreview($calendar, $result);
+            $this->storeDryRunPreview($calendar, $result, $unassignedReasons);
         } else {
             $diff = $this->computeDiff($calendar, $result);
             $this->persist($calendar, $result, $expectedVersion);
@@ -85,6 +87,9 @@ class GenerateTimetableJob implements ShouldQueue
             'dry_run' => $this->dryRun,
             'elapsed_seconds' => round($result->elapsedSeconds, 2),
             'unassigned' => count($result->unassigned),
+            'unassigned_capacity_exceeded' => count($unassignedReasons['capacity_exceeded']),
+            'unassigned_not_found' => count($unassignedReasons['not_found']),
+            'capacity_summary' => $unassignedReasons['capacity_summary'],
             'timed_out' => $result->timedOut,
         ]);
 
@@ -234,15 +239,26 @@ class GenerateTimetableJob implements ShouldQueue
         $roomsByType = $this->buildRoomsByType($calendar);
         $periodMeta = $this->buildPeriodMeta($calendar);
 
-        return (new TimetableSolver(
+        $outcome = (new TimetableSolverOrchestrator(
             $dto,
             $availableByTeacher,
             $roomsByType,
             $periodMeta,
-            30,
-            max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
-        ))
-            ->solve();
+            budgetSeconds: (int) config('timetable.solver.budget_seconds', 30),
+            maxSubjectsPerPeriod: max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
+            restarts: (int) config('timetable.solver.restarts', 6),
+            attemptSeconds: (int) config('timetable.solver.attempt_seconds', 8),
+        ))->solve();
+
+        Log::channel('timetable')->info('GenerateTimetableJob: solver outcome', [
+            'correlation_id' => $this->correlationId(),
+            'calendar_id' => $this->calendarId,
+            'chosen' => $outcome->best->id,
+            'coverage_blocks' => $outcome->best->assignedBlocks,
+            'attempts' => $outcome->attemptSummary(),
+        ]);
+
+        return $outcome->toSolverResult();
     }
 
     /**
@@ -379,7 +395,7 @@ class GenerateTimetableJob implements ShouldQueue
             ->all();
     }
 
-    private function storeDryRunPreview(TimetableCalendar $calendar, SolverResult $result): void
+    private function storeDryRunPreview(TimetableCalendar $calendar, SolverResult $result, array $unassignedReasons = []): void
     {
         $assignment = $this->serializeAssignment($result);
         $unassigned = $result->unassigned;
@@ -436,10 +452,42 @@ class GenerateTimetableJob implements ShouldQueue
                 'elapsed_seconds' => round($result->elapsedSeconds, 2),
                 'assignment' => $assignment,
                 'unassigned' => $unassigned,
+                'unassigned_reasons' => $unassignedReasons,
                 'assignment_diagnostics' => $this->assignmentDiagnostics($calendar, $assignment),
             ],
             'status' => 'draft',
         ]);
+    }
+
+    /**
+     * PLAN-TIMETABLE-SOLVER-FALLBACK-001 §7 — Separa las lecciones no asignadas
+     * entre infactibilidad real de capacidad (C-1) y "no encontrado" (heurística).
+     *
+     * @return array{capacity_exceeded: list<int>, not_found: list<int>, capacity_summary: array<string,mixed>}
+     */
+    private function unassignedReasons(TimetableCalendar $calendar, SolverResult $result): array
+    {
+        $audit = app(TimetableCapacityAuditService::class)->audit($calendar);
+        $overCapacity = array_flip($audit->overCapacityLessonIds());
+
+        $capacityExceeded = [];
+        $notFound = [];
+
+        foreach ($result->unassigned as $lessonId) {
+            $lessonId = (int) $lessonId;
+
+            if (isset($overCapacity[$lessonId])) {
+                $capacityExceeded[] = $lessonId;
+            } else {
+                $notFound[] = $lessonId;
+            }
+        }
+
+        return [
+            'capacity_exceeded' => array_values($capacityExceeded),
+            'not_found' => array_values($notFound),
+            'capacity_summary' => $audit->summary(),
+        ];
     }
 
     /**

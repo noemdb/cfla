@@ -214,6 +214,9 @@ class OpenRouterService
             'max_tokens'           => $overrides['max_tokens'] ?? (int) config('openrouter.max_tokens', 2048),
             'max_completion_tokens' => $overrides['max_tokens'] ?? (int) config('openrouter.max_tokens', 2048),
             'temperature' => $overrides['temperature'] ?? (float) config('openrouter.temperature', 0.7),
+            ... (isset($overrides['response_format'])
+                ? ['response_format' => $overrides['response_format']]
+                : []),
         ];
     }
 

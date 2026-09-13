@@ -2,8 +2,9 @@
 
 namespace App\Services\Timetable;
 
-use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Timetable\TimetableLesson;
+use App\Models\app\Timetable\TimetableSlot;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -94,12 +95,37 @@ final class TimetableLessonPersistenceService
                         'shift_id' => (int) ($lesson['shift_id'] ?? 0),
                         'weekly_blocks_t' => max(0, (int) ($lesson['weekly_blocks_t'] ?? 0)),
                         'weekly_blocks_p' => max(0, (int) ($lesson['weekly_blocks_p'] ?? 0)),
-                        'room_type_required' => $lesson['room_type_required'] ?: null,
+                        'room_type_required' => $lesson['room_type_required'] ?? null,
                         'is_half_group' => (bool) ($lesson['is_half_group'] ?? false),
                         'priority' => max(0, (int) ($lesson['priority'] ?? 0)),
                         'locked' => (bool) ($lesson['locked'] ?? false),
                     ],
                 );
+
+                // Reconcilia slots huérfanos: si la lección pasó a necesitar
+                // menos bloques que slots guardados, se eliminan los sobrantes
+                // (los más nuevos). Evita que el paso 3 (bloques) y el paso 5
+                // (slots) queden inconsistentes, p. ej. 1 bloque con 2 slots.
+                $model = TimetableLesson::query()
+                    ->where('calendar_id', $calendarId)
+                    ->where('pevaluacion_id', $pevaluacionId)
+                    ->first();
+
+                if ($model === null) {
+                    continue;
+                }
+
+                $required = (int) $model->weekly_blocks_t + (int) $model->weekly_blocks_p;
+                $surplus = $model->slots()->count() - $required;
+
+                if ($surplus > 0) {
+                    $surplusIds = $model->slots()
+                        ->orderByDesc('id')
+                        ->limit($surplus)
+                        ->pluck('id');
+
+                    TimetableSlot::query()->whereIn('id', $surplusIds)->delete();
+                }
             }
         });
     }

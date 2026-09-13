@@ -1745,6 +1745,72 @@ class TimetableWizardTest extends TestCase
             ->assertSee('movePreviewLesson', false);
     }
 
+    public function test_step5_summary_counts_only_active_grades_and_sections(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shift = $this->shift();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id,
+            'shift_id' => $shift->id,
+            'day_of_week' => 1,
+            'order_in_day' => 1,
+            'is_break' => false,
+        ]);
+
+        $activeFixture = $this->pevaluacionFixture($lapso->id);
+        $inactiveGrade = Grado::factory()->create([
+            'pestudio_id' => $activeFixture['pev']->seccion->grado->pestudio_id,
+            'status_active' => 'false',
+        ]);
+        $inactiveSection = Seccion::factory()->create([
+            'grado_id' => $inactiveGrade->id,
+            'status_active' => 'true',
+        ]);
+        $inactivePev = Pevaluacion::factory()->create([
+            'lapso_id' => $lapso->id,
+            'seccion_id' => $inactiveSection->id,
+            'pensum_id' => $activeFixture['pev']->pensum_id,
+            'profesor_id' => $activeFixture['pev']->profesor_id,
+        ]);
+
+        $activeLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $activeFixture['pev']->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+        $inactiveLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $inactivePev->id,
+            'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('preview', [
+                'assignment' => [
+                    (string) $activeLesson->id => [['period_id' => $period->id]],
+                    (string) $inactiveLesson->id => [['period_id' => $period->id]],
+                ],
+                'unassigned' => [],
+            ]);
+
+        $checklist = $component->instance()->publishChecklist();
+
+        $this->assertSame(1, $checklist['secciones_con_horario']);
+        $this->assertSame(1, $checklist['asignadas']);
+
+        $component->set('preview.unassigned', [$inactiveLesson->id]);
+        $this->assertSame(0, $component->instance()->publishChecklist()['sin_asignar']);
+        $this->assertSame([], $component->instance()->generationConflictGroups());
+    }
+
     public function test_step5_reports_empty_cells_and_incomplete_lessons_for_active_section(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

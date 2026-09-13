@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Documentación normativa** | `blueprint/school-timetable/SPEC-TIMETABLE-001-v2.md` (spec v2.1) |
+| **Documentación normativa** | `blueprint/school-timetable/SPEC-TIMETABLE-001-v2.md` (contrato v2.2) |
 | **Plan multi-calendario** | `blueprint/school-timetable/PLAN-TIMETABLE-002-VARIOS-HORARIOS-POR-LAPSO.md` |
 | **Stack** | Laravel 10 · Livewire 3 · Alpine.js · MariaDB (`s2627`) · dompdf · Reverb |
 | **Estado** | Implementado y probado (84 tests / 233 assertions en `php8.2 artisan test --filter=Timetable`) |
@@ -185,10 +185,17 @@ Para auditar un calendario sin modificar datos:
 ```bash
 php8.2 artisan timetable:diagnose --calendar=4
 php8.2 artisan timetable:diagnose --calendar=4 --json
+
+# Capacidad: bloques imposibles de agendar por sección/docente (C-1)
+php8.2 artisan timetable:audit-capacity --calendar=4
+php8.2 artisan timetable:audit-capacity --json
 ```
 
 El diagnóstico informa bloques requeridos/asignados/faltantes, fijaciones
-parciales, duplicados y slots inválidos.
+parciales, duplicados y slots inválidos. `timetable:audit-capacity` informa, por
+sección y docente, la carga semanal vs. los períodos asignables y el **overflow**
+(bloques que ningún solver puede ubicar): úsalo para decidir si ajustar horas,
+períodos o turnos. Solo lectura.
 
 ---
 
@@ -223,6 +230,51 @@ el wizard).
   a `unassigned` (ADR-TT-009). Pool adaptativo de combinaciones con presupuesto
   de nodos (ADR-TT-011) para lecciones de muchos bloques.
 
+### 5.1 Orquestador con fallback y recursividad controlada
+
+`App\Services\Timetable\Solver\TimetableSolverOrchestrator` (PLAN-TIMETABLE-SOLVER-FALLBACK-001)
+envuelve al `TimetableSolver` y ejecuta una **cadena de intentos** sobre el mismo
+problema, conservando la mejor solución:
+
+| Intento | Orden de lecciones | Uso |
+|---|---|---|
+| `S1` | `constraint` (grado de restricción, comportamiento actual) | Línea base; recibe la mitad del presupuesto |
+| `S2` | `scarcity` (docente con menos períodos primero) | Liberar cuellos de botella |
+| `S3` | `blocks_desc` (más bloques primero) | Lecciones difíciles de ubicar |
+| `S4rN` | `random` (Fisher-Yates con semilla) | Reinicios reproducibles |
+
+- **Keep-best** por cobertura de bloques y, en empate, por `qualityScore`
+  (heurística soft §6.2). **Early stop** al alcanzar cobertura total.
+- **Recursividad acotada**: presupuesto global (`solver.budget_seconds`) + deadline
+  por intento (`solver.attempt_seconds`). Nunca explota en tiempo.
+- **Reproducibilidad**: los reinicios usan semilla fija (`S4r0`, `S4r1`, …).
+- `SolverOutcome` expone `attemptSummary()` que se registra en el canal `timetable`.
+
+Config (`config/timetable.php`, sobrescribible por env):
+
+```dotenv
+TIMETABLE_SOLVER_BUDGET_SECONDS=30
+TIMETABLE_SOLVER_ATTEMPT_SECONDS=8
+TIMETABLE_SOLVER_RESTARTS=6
+```
+
+> El orquestador **solo mejora el residual factible**. Los bloques que exceden la
+> capacidad real (sección o docente) son imposibles: se reportan con
+> `capacity_exceeded` (ver §5.2), no se resuelven con más intentos.
+
+### 5.2 Auditoría de capacidad (infactibilidad real)
+
+`App\Services\Timetable\TimetableCapacityAuditService` compara el volumen semanal
+requerido por cada **sección** y **docente** contra los períodos no-recreo de sus
+turnos. Un overflow positivo son bloques matemáticamente imposibles de agendar
+(no mejorables por el solver). El `GenerateTimetableJob` clasifica cada lección
+sin asignar en `preview_payload.unassigned_reasons`:
+
+- `capacity_exceeded` → la sección o el docente excede su capacidad (C-1).
+- `not_found` → hay capacidad pero la heurística/restricciones no la ubicaron.
+
+El Step 5 muestra ambos casos por separado con un aviso accionable.
+
 ---
 
 ## 6. Estados del calendario
@@ -234,7 +286,7 @@ draft ──(Generar)──▶ generating ──(solver ok)──▶ active  (de
 active ──(cierre de lapso / otra alternativa)──▶ archived (terminal, solo lectura)
 ```
 
-- Máximo UNO `active` por lapso — garantizado **en BD** con columna generada
+- Máximo UNO `active` por `pestudio_id` — garantizado **en BD** con columna generada
   `active_pestudio_key` + índice único (NULLs no colisionan).
 - `version` (bloqueo optimista, §15): cada escritura lo incrementa; un job o
   editor con versión desactualizada es rechazado.
@@ -357,6 +409,9 @@ La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
 | Bandeja suplente | `app/Livewire/Profesor/Timetable/SubstituteInbox.php` |
 | Vistas por rol | `app/Livewire/Timetable/TimetableRoleView.php` + `MyTimetable`, `Student\Lms\Timetable`, `SectionGrid` ×2 |
 | Solver | `app/Services/Timetable/Solver/{TimetableSolver,SchedulingContext,LessonToSchedule,SlotCandidate,SolverResult}.php` |
+| Orquestador de solver (fallback) | `app/Services/Timetable/Solver/{TimetableSolverOrchestrator,SolverAttemptConfig,AttemptResult,SolverOutcome}.php` |
+| Auditoría de capacidad | `app/Services/Timetable/{TimetableCapacityAuditService,CapacityAuditReport}.php` |
+| Comando auditoría de capacidad | `app/Console/Commands/TimetableAuditCapacity.php` |
 | Validador de conflictos | `app/Services/Timetable/ConflictValidator.php` |
 | Generación de grillas | `app/Services/Timetable/TimetableViewService.php` |
 | Sugerencia de suplentes | `app/Services/Timetable/SubstituteService.php` |
@@ -368,7 +423,7 @@ La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
 | Comando backfill de horas | `app/Console/Commands/TimetableBackfillHoras.php` |
 | Comando import legacy | `app/Console/Commands/TimetableImportLegacy.php` |
 | Seeder de turnos | `database/seeders/TimetableShiftsSeeder.php` |
-| Config del módulo | `config/timetable.php` (`legacy_csv_dir` vía `TIMETABLE_LEGACY_CSV_DIR`) |
+| Config del módulo | `config/timetable.php` (`legacy_csv_dir`, bloque `solver.*`) |
 | PDFs | `app/Http/Controllers/Timetable/TimetablePdfController.php`, vistas `resources/views/pdfs/timetable/` |
 | PDF del preview | `TimetablePdfController::previewSection()` · ruta `timetable.pdf.preview` |
 | Vistas públicas | `app/Http/Controllers/Timetable/TimetablePublicController.php`, `resources/views/timetable/public.blade.php` |
@@ -420,6 +475,11 @@ de borradores.
   dry-run y confirma la publicación primero.
 - **Lecciones sin asignar** — quedan como conflictos `unassigned` visibles en el
   editor; resuélvelas a mano (drag) o ajusta disponibilidad/aulas y regenera.
+- **Muchas lecciones sin asignar por capacidad** — corre
+  `php8.2 artisan timetable:audit-capacity --calendar=<id>`; si el overflow es > 0,
+  la sección o el docente piden más bloques que períodos hay en sus turnos:
+  ajusta horas, períodos o turnos (regenerar no los ubicará). El Step 5 lo
+  distingue de `not_found`.
 - **"Otro usuario modificó este horario"** — bloqueo optimista (§15): recarga la
   página para tomar la `version` vigente.
 - **T=0/P=0 en lecciones** — la asignatura no tiene `hour_t_week/hour_p_week`;

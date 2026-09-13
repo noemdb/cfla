@@ -1,19 +1,24 @@
-# PLAN-TIMETABLE-002: Varios horarios (borradores/alternativas) por lapso — máximo UNO activo
+# PLAN-TIMETABLE-002: Varios horarios por lapso — máximo UNO activo por pestudio
+
+> Las secciones de “estado actual” y el historial de fases conservan decisiones
+> anteriores para auditoría. Cuando difieran, prevalece SPEC-TIMETABLE-001-v2
+> v2.2: activo único por `pestudio_id`, no por `lapso_id`.
 
 | | |
 |---|---|
-| **Estado** | Plan ejecutado — F0–F7 completadas y verificadas (DoD §8 marcado) |
+| **Estado** | Plan ejecutado — F0–F7 completadas y verificadas (DoD §8 marcado); reglas consolidadas por `pestudio_id` en SPEC v2.2 |
 | **Stack** | Laravel 10 · Livewire 3 · MariaDB (db `s2627`, driver `mysql`) |
 | **Documento base** | `blueprint/school-timetable/SPEC-TIMETABLE-001-v2.md` |
-| **Relacionado** | `PLAN-TIMETABLE-002` describe el **cómo**; la spec se actualizará a v2.1 en la fase de docs |
+| **Relacionado** | `PLAN-TIMETABLE-002` describe el **cómo**; el contrato normativo es SPEC v2.2 |
 
 ---
 
 ## 1. Decisión de producto (tomada)
 
 > Se permite **varios calendarios (horarios) por `lapso_id`**, tratados como
-> **borradores / alternativas**, con **máximo UNO en estado `active`** por lapso.
-> El resto viven en `draft`, `generating` o `archived`.
+> **borradores / alternativas**, con **máximo UNO en estado `active` por
+> `pestudio_id`**. Distintos planes pueden estar activos simultáneamente en el
+> mismo lapso. El resto vive en `draft`, `generating` o `archived`.
 
 Esto **NO** habilita horarios vigentes simultáneos por ventanas de fecha (queda
 fuera de alcance; ver §11). La regla dura la impone la base de datos, no solo la
@@ -26,9 +31,9 @@ aplicación.
 | # | Invariante | Garantía |
 |---|---|---|
 | I-1 | Un lapso puede tener **0..N** calendarios | DB: se elimina `uq_calendar_lapso` |
-| I-2 | Por lapso, **a lo sumo 1** calendario con `status='active'` | DB: columna generada + índice único (§4.1) |
+| I-2 | Por `pestudio_id`, **a lo sumo 1** calendario con `status='active'` | DB: `active_pestudio_key` + índice único (§4.1) |
 | I-3 | `version` (bloqueo optimista §15) es **por calendario**, no por lapso | Aplica a la fila, ya es así; sin cambios |
-| I-4 | Activar un calendario **archiva** al activo anterior del mismo lapso | App: `persist()` del job y `activate()` del modelo (§4.2) |
+| I-4 | Activar un calendario **archiva** al activo anterior del mismo `pestudio_id` | App: `persist()` del job y `activate()` del modelo (§4.2) |
 | I-5 | `dryRun` **no** desactiva el calendario activo vigente | App: el dryRun solo toca el calendario objetivo |
 | I-6 | Los lectores (leadership/dirección/profesor/estudiante) resuelven **"el activo del lapso vigente"** | App: helper de resolución (§4.4) |
 | I-7 | Solo se puede eliminar un calendario en `draft` | App: guard en `deleteCalendar()` |
@@ -38,15 +43,17 @@ aplicación.
 
 ## 3. Estado actual (línea base, verificada)
 
-- **DB**: `uq_calendar_lapso` único sobre `timetable_calendars.lapso_id`
-  (migración `2026_08_15_000001_create_timetable_tables.php:47`).
+- **DB**: `uq_active_pestudio` único sobre la columna generada
+  `active_pestudio_key` (migración
+  `2026_09_11_000003_one_active_calendar_per_pestudio.php`).
 - **Wizard** (`app/Livewire/Coordinacion/Timetable/TimetableWizard.php` y el gemelo
   `app/Livewire/Planning/Timetable/TimetableWizard.php`):
-  - `createCalendar()` (línea 115) bloquea si `exists` para el lapso → guard a quitar.
+  - `createCalendar()` permite alternativas del mismo lapso; exige el
+    `pestudio_id` del calendario.
   - `mount()` (línea 82) elige el último `draft|active` → debe pasar a selector.
-- **Job** (`app/Jobs/Timetable/GenerateTimetableJob.php`): `persist()` (línea 224)
-  sube `version`, pone `status='active'` y regenera slots/conflictos → debe además
-  demover al activo anterior del lapso.
+- **Job** (`app/Jobs/Timetable/GenerateTimetableJob.php`): `persist()` sube
+  `version`, pone `status='active'` y regenera slots/conflictos; la democión se
+  limita al activo anterior del mismo `pestudio_id`.
 - **Lecturas** que resuelven "activo" globalmente (`->where('status','active')->latest('id')`):
   - `app/Livewire/Leadership/Timetable/SectionGrid.php:27`
   - `app/Livewire/Director/Timetable/SectionGrid.php` (gemelo)
@@ -63,18 +70,18 @@ aplicación.
 
 ### 4.1 Base de datos — integrada en la migración base (Fase 1)
 
-**Consolidación de migraciones**: como los cambios aún no llegan a producción, no se
-crea una migración nueva; el esquema final se integra **dentro de la migración base**
-`database/migrations/2026_08_15_000001_create_timetable_tables.php` (tabla
-`timetable_calendars`). En producción correrá directamente la base modificada y no
-existirá ningún `drop_unique_lapso_allow_multi_calendars`.
+**Estado aplicado:** la regla se implementó mediante la migración
+`2026_09_11_000003_one_active_calendar_per_pestudio.php`. No modificar una
+migración ya ejecutada para corregir esta regla; cualquier cambio futuro debe ser
+una migración aditiva y segura.
 
 ```php
 // En Schema::create('timetable_calendars', ...)
-$table->string('active_lapso_key', 20)
-    ->storedAs("IF(status = 'active', CONCAT('L', lapso_id), NULL)");
+$table->string('active_pestudio_key', 24)
+    ->virtualAs("IF(status = 'active' AND pestudio_id IS NOT NULL,
+        CONCAT('P', pestudio_id), NULL)");
 $table->index('lapso_id', 'idx_cal_lapso');          // backing de la FK
-$table->unique('active_lapso_key', 'uq_active_lapso');
+$table->unique('active_pestudio_key', 'uq_active_pestudio');
 // NO existe uq_calendar_lapso (la FK queda respaldada por idx_cal_lapso)
 ```
 
@@ -84,7 +91,7 @@ Notas:
 - `idx_cal_lapso` (no único) respalda la FK `lapso_id`; antes lo hacía el único
   `uq_calendar_lapso`. Sin índice explícito MySQL lo crearía implícito.
 - Datos existentes: no hay conflicto (máx. 1 por lapso).
-- `active_lapso_key` **no** va a `$fillable` ni `$casts` (columna generada, lectura).
+- `active_pestudio_key` **no** va a `$fillable` ni `$casts` (columna generada, lectura).
 
 ### 4.2 Modelo `TimetableCalendar` (Fase 1)
 
@@ -92,7 +99,7 @@ Notas:
 - Añadir métodos:
   - `activeForLapso($lapsoId): ?self` — activo del lapso (o null).
   - `activate(): void` — transacción: `UPDATE ... SET status='archived' WHERE
-    lapso_id=? AND id<>? AND status='active'`; luego `status='active'` en esta fila.
+    pestudio_id=? AND id<>? AND status='active'`; luego `status='active'` en esta fila.
     Usado por "promover borrador" cuando el borrador ya tiene slots generados.
   - `deleteDraft(): bool` — borra solo si `status='draft'` (cascada FK limpia
     periods/lessons/availability/slots/conflicts). Devuelve `false` si no es borrador.
@@ -111,8 +118,8 @@ En `persist()` (línea 224), reordenar la transacción:
 4. Regenerar slots/conflictos (sin cambios respecto al código actual).
 
 Manejo de carrera (dos confirmaciones simultáneas de distintos borradores del mismo
-lapso): envolver en `try/catch (\Illuminate\Database\QueryException $e)` — si salta el
-índice `uq_active_lapso`, loguear en canal `timetable` con `correlation_id` y
+`pestudio_id`): envolver en `try/catch (\Illuminate\Database\QueryException $e)` —
+si salta el índice `uq_active_pestudio`, loguear en canal `timetable` con `correlation_id` y
 **revertir** (el objetivo vuelve a `draft`); es equivalente al warning de versión actual.
 
 `dryRun` no cambia: el objetivo pasa a `draft` + `preview_payload`; el activo vigente

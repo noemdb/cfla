@@ -46,6 +46,7 @@ final class TimetableSolver
         private array $periodMeta = [],
         private int $timeLimitSeconds = 30,
         private int $maxSubjectsPerPeriod = 2,
+        private ?SolverAttemptConfig $config = null,
     ) {}
 
     public function solve(): SolverResult
@@ -73,6 +74,7 @@ final class TimetableSolver
                     $lesson->isHalfGroup,
                 )) {
                     $unassigned[] = $lesson->lessonId;
+
                     continue 2;
                 }
             }
@@ -122,15 +124,15 @@ final class TimetableSolver
             }
         }
 
-        // Lecciones libres por grado de restricción (ADR-TT-003).
+        // Lecciones libres ordenadas según la estrategia del intento (ADR-TT-003
+        // por defecto; el orquestador usa otras para explorar alternativas).
         $free = array_values(array_filter(
             $this->lessons,
             fn (LessonToSchedule $l) => ! $l->locked
                 || $l->blocksNeeded() <= 0
                 || count(array_unique(array_map('intval', $l->lockedPeriodIds))) !== $l->blocksNeeded(),
         ));
-        usort($free, fn (LessonToSchedule $a, LessonToSchedule $b) => $b->constraintDegree() <=> $a->constraintDegree()
-        );
+        $this->orderLessons($free);
 
         $timedOut = false;
         $bestAssignment = $assignment;
@@ -156,6 +158,76 @@ final class TimetableSolver
             $timedOut,
             microtime(true) - $started,
         );
+    }
+
+    /**
+     * Ordena las lecciones libres según la estrategia del intento.
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function orderLessons(array &$free): void
+    {
+        $ordering = $this->config->ordering ?? SolverAttemptConfig::ORDER_CONSTRAINT;
+
+        switch ($ordering) {
+            case SolverAttemptConfig::ORDER_SCARCITY:
+                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $this->scarcity($a) <=> $this->scarcity($b));
+                break;
+            case SolverAttemptConfig::ORDER_BLOCKS_DESC:
+                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->blocksNeeded() <=> $a->blocksNeeded());
+                break;
+            case SolverAttemptConfig::ORDER_RANDOM:
+                $this->deterministicShuffle($free, $this->config->seed);
+                break;
+            case SolverAttemptConfig::ORDER_CONSTRAINT:
+            default:
+                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree() <=> $a->constraintDegree());
+                break;
+        }
+    }
+
+    /**
+     * Períodos disponibles del docente (menor = más escaso = se asigna primero).
+     */
+    private function scarcity(LessonToSchedule $lesson): int
+    {
+        $base = $this->availablePeriodsByTeacher[$lesson->lessonId]
+            ?? $this->availablePeriodsByTeacher[$lesson->profesorId]
+            ?? [];
+
+        return count($base);
+    }
+
+    /**
+     * Fisher-Yates determinista por semilla (restarts reproducibles).
+     *
+     * @param  list<LessonToSchedule>  $items
+     */
+    private function deterministicShuffle(array &$items, int $seed): void
+    {
+        mt_srand($seed);
+
+        for ($i = count($items) - 1; $i > 0; $i--) {
+            $j = mt_rand(0, $i);
+            [$items[$i], $items[$j]] = [$items[$j], $items[$i]];
+        }
+    }
+
+    /**
+     * Score soft global de una asignación (suma del §6.2 por lección). Lo usa el
+     * orquestador para desempatar intentos con la misma cobertura.
+     *
+     * @param  array<int, list<SlotCandidate>>  $assignment
+     */
+    public function qualityScore(array $assignment): int
+    {
+        $score = 0;
+
+        foreach ($assignment as $slots) {
+            $score += $this->comboScore($slots);
+        }
+
+        return $score;
     }
 
     /**
@@ -185,6 +257,7 @@ final class TimetableSolver
         // ADR-TT-009: corte por tiempo conserva la solución parcial.
         if (microtime(true) > $deadline) {
             $timedOut = true;
+
             return false;
         }
 

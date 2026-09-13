@@ -6,19 +6,21 @@ use App\Imports\TimetableLessonsImport;
 use App\Jobs\Timetable\GenerateTimetableJob;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Timetable\TimetableAbsence;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableCalendarVersion;
 use App\Models\app\Timetable\TimetableChangeLog;
 use App\Models\app\Timetable\TimetableConflict;
-use App\Models\app\Timetable\TimetableAbsence;
-use App\Models\app\Timetable\TimetableSubstituteAssignment;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetableLessonDraftTrait;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
+use App\Models\app\Timetable\TimetableSubstituteAssignment;
 use App\Models\app\Timetable\TimetableTeacherAvailability;
+use App\Services\Timetable\TimetableAiDraftService;
+use App\Services\Timetable\TimetableCapacityAuditService;
 use App\Services\Timetable\TimetablePublicationReadinessService;
 use App\Services\Timetable\TimetableRoomEligibilityService;
 use Illuminate\Support\Facades\DB;
@@ -234,6 +236,8 @@ class TimetableWizard extends Component
     /** Archivo JSON de respaldo de las lessons del Paso 3. */
     public $lessonsBackupFile = null;
 
+    public $calendarLessonsBackupFile = null;
+
     /** Archivo JSON de respaldo de slots de la sección activa. */
     public $slotsBackupFile = null;
 
@@ -268,6 +272,18 @@ class TimetableWizard extends Component
     public bool $aiDryRunAnalysisBusy = false;
 
     public bool $showAiAnalysisModal = false;
+
+    public bool $aiDraftBusy = false;
+
+    public bool $showAiDraftModal = false;
+
+    public ?array $aiDraftResult = null;
+
+    public ?string $aiDraftError = null;
+
+    public ?string $aiDraftSnapshotHash = null;
+
+    public ?int $aiDraftSectionId = null;
 
     public bool $showTeacherScheduleDialog = false;
 
@@ -855,87 +871,87 @@ class TimetableWizard extends Component
 
     public function loadEditablePeriods(): void
     {
-            $this->validate([
-                'calendarId' => 'required',
-                'shiftId' => 'required|integer|gt:0',
-            ]);
+        $this->validate([
+            'calendarId' => 'required',
+            'shiftId' => 'required|integer|gt:0',
+        ]);
 
-            $hasPestudioColumn = Schema::hasColumn('timetable_periods', 'pestudio_id');
-            $query = TimetablePeriod::query()
-                ->where('calendar_id', $this->calendarId)
-                ->where('shift_id', $this->shiftId);
-            $query->orderBy('day_of_week');
-            if ($hasPestudioColumn) {
-                $query->orderBy('pestudio_id');
-            }
-            $rows = $query->orderBy('order_in_day')->get();
+        $hasPestudioColumn = Schema::hasColumn('timetable_periods', 'pestudio_id');
+        $query = TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->where('shift_id', $this->shiftId);
+        $query->orderBy('day_of_week');
+        if ($hasPestudioColumn) {
+            $query->orderBy('pestudio_id');
+        }
+        $rows = $query->orderBy('order_in_day')->get();
 
-            if ($rows->isEmpty()) {
-                session()->flash('error', 'No hay bloques guardados para este turno.');
+        if ($rows->isEmpty()) {
+            session()->flash('error', 'No hay bloques guardados para este turno.');
 
-                return;
-            }
+            return;
+        }
 
-            $names = $this->calendarPestudios();
-            $this->periods = $rows->map(function (TimetablePeriod $period) use ($names, $hasPestudioColumn): array {
-                    $pestudioId = (int) ($period->pestudio_id ?? 0);
-                    $start = $this->minutesFromTime($period->start_time);
-                    $end = $this->minutesFromTime($period->end_time);
+        $names = $this->calendarPestudios();
+        $this->periods = $rows->map(function (TimetablePeriod $period) use ($names, $hasPestudioColumn): array {
+            $pestudioId = (int) ($period->pestudio_id ?? 0);
+            $start = $this->minutesFromTime($period->start_time);
+            $end = $this->minutesFromTime($period->end_time);
 
-                    return [
-                        'id' => (int) $period->id,
-                        'pestudio_id' => $hasPestudioColumn ? $pestudioId : 0,
-                        'pestudio' => $names[$pestudioId] ?? 'Plan de estudio',
-                        'day_of_week' => (int) $period->day_of_week,
-                        'day_label' => $this->dayLabel((int) $period->day_of_week),
-                        'order' => (int) $period->order_in_day,
-                        'start' => $start,
-                        'end' => $end,
-                        'is_break' => (bool) $period->is_break,
-                        'label' => '',
-                    ];
-                })->values()->all();
-            session()->flash('message', 'Bloques cargados para edición.');
-            $this->periodPestudioId = (int) ($this->periods[0]['pestudio_id'] ?? 0);
-            $this->periodDayOfWeek = (int) ($this->periods[0]['day_of_week'] ?? 1);
+            return [
+                'id' => (int) $period->id,
+                'pestudio_id' => $hasPestudioColumn ? $pestudioId : 0,
+                'pestudio' => $names[$pestudioId] ?? 'Plan de estudio',
+                'day_of_week' => (int) $period->day_of_week,
+                'day_label' => $this->dayLabel((int) $period->day_of_week),
+                'order' => (int) $period->order_in_day,
+                'start' => $start,
+                'end' => $end,
+                'is_break' => (bool) $period->is_break,
+                'label' => '',
+            ];
+        })->values()->all();
+        session()->flash('message', 'Bloques cargados para edición.');
+        $this->periodPestudioId = (int) ($this->periods[0]['pestudio_id'] ?? 0);
+        $this->periodDayOfWeek = (int) ($this->periods[0]['day_of_week'] ?? 1);
     }
 
     public function addPeriodBlock(?int $pestudioId = null): void
     {
-            $pestudioId = $pestudioId ?: $this->periodPestudioId;
-            $pestudios = $this->calendarPestudios();
-            if (! isset($pestudios[$pestudioId])) {
-                session()->flash('error', 'Selecciona un plan de estudio válido para crear el bloque.');
+        $pestudioId = $pestudioId ?: $this->periodPestudioId;
+        $pestudios = $this->calendarPestudios();
+        if (! isset($pestudios[$pestudioId])) {
+            session()->flash('error', 'Selecciona un plan de estudio válido para crear el bloque.');
 
-                return;
-            }
+            return;
+        }
 
-            $pestudioName = $pestudios[$pestudioId];
-            $samePestudio = array_values(array_filter(
-                $this->periods,
-                fn (array $period): bool => (int) ($period['pestudio_id'] ?? 0) === $pestudioId
-                    && (int) ($period['day_of_week'] ?? 0) === $this->periodDayOfWeek,
-            ));
-            $order = count($samePestudio) + 1;
-            $selectedShift = TimetableShift::find($this->shiftId);
-            $shiftStart = $selectedShift?->start_time ?? $this->shiftStart;
-            $start = $samePestudio !== []
-                ? (int) $samePestudio[array_key_last($samePestudio)]['end']
-                : $this->minutesFromTime($shiftStart);
+        $pestudioName = $pestudios[$pestudioId];
+        $samePestudio = array_values(array_filter(
+            $this->periods,
+            fn (array $period): bool => (int) ($period['pestudio_id'] ?? 0) === $pestudioId
+                && (int) ($period['day_of_week'] ?? 0) === $this->periodDayOfWeek,
+        ));
+        $order = count($samePestudio) + 1;
+        $selectedShift = TimetableShift::find($this->shiftId);
+        $shiftStart = $selectedShift?->start_time ?? $this->shiftStart;
+        $start = $samePestudio !== []
+            ? (int) $samePestudio[array_key_last($samePestudio)]['end']
+            : $this->minutesFromTime($shiftStart);
 
-            $this->periods[] = [
-                'id' => null,
-                'pestudio_id' => $pestudioId,
-                'pestudio' => $pestudioName,
-                'day_of_week' => $this->periodDayOfWeek,
-                'day_label' => $this->dayLabel($this->periodDayOfWeek),
-                'order' => $order,
-                'start' => $start,
-                'end' => min($start + 45, 23 * 60 + 59),
-                'is_break' => false,
-                'label' => '',
-            ];
-            $this->periodPestudioId = $pestudioId;
+        $this->periods[] = [
+            'id' => null,
+            'pestudio_id' => $pestudioId,
+            'pestudio' => $pestudioName,
+            'day_of_week' => $this->periodDayOfWeek,
+            'day_label' => $this->dayLabel($this->periodDayOfWeek),
+            'order' => $order,
+            'start' => $start,
+            'end' => min($start + 45, 23 * 60 + 59),
+            'is_break' => false,
+            'label' => '',
+        ];
+        $this->periodPestudioId = $pestudioId;
     }
 
     public function removePeriodBlock(int $index): void
@@ -1714,7 +1730,7 @@ class TimetableWizard extends Component
     public function updatedSelectedPevs(): void
     {
         $this->lessonsDirty = true;
-        $this->loadLessons(false);
+        $this->loadLessons(false, false);
     }
 
     public function updatedLessons(): void
@@ -1941,7 +1957,7 @@ class TimetableWizard extends Component
             }
         }
 
-        $this->loadLessons();
+        $this->loadLessons(false, false);
     }
 
     /**
@@ -1975,7 +1991,7 @@ class TimetableWizard extends Component
         }
 
         $this->lessonsDirty = true;
-        $this->loadLessons();
+        $this->loadLessons(false, false);
     }
 
     /**
@@ -2155,6 +2171,7 @@ class TimetableWizard extends Component
         $query = Pevaluacion::query()
             ->with(['pensum.asignatura', 'seccion.grado.pestudio', 'profesor', 'grupoEstable'])
             ->where('lapso_id', $calendar->lapso_id)
+            ->whereHas('seccion', fn ($q) => $q->where('seccions.status_active', 'true'))
             ->whereHas('seccion.grado', fn ($q) => $q->where('grados.status_active', 'true'));
 
         // Paso 3: solo las lecciones del plan de estudio (pestudio) del calendario.
@@ -2238,7 +2255,7 @@ class TimetableWizard extends Component
         return $data['tabActivePevaluaciones'];
     }
 
-    public function loadLessons(bool $hydrateSavedSelection = false): void
+    public function loadLessons(bool $hydrateSavedSelection = false, bool $mergeSlottedSelection = true): void
     {
         if (! $this->calendarId) {
             $this->lessons = [];
@@ -2273,7 +2290,7 @@ class TimetableWizard extends Component
             ->whereHas('slots')
             ->pluck('pevaluacion_id')
             ->map(fn ($pevId): int => (int) $pevId);
-        if ($hydrateSavedSelection || $slottedPevIds->isNotEmpty()) {
+        if ($hydrateSavedSelection || ($mergeSlottedSelection && $slottedPevIds->isNotEmpty())) {
             $selectedIds = ($hydrateSavedSelection
                 ? $savedLessons->keys()
                 : collect($this->selectedPevIds()))
@@ -2902,33 +2919,178 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Valida y restaura la configuración del respaldo en el calendario activo.
+     * Descarga un respaldo JSON con TODAS las lessons del calendario
+     * seleccionado (todas las secciones). Mismo formato que el respaldo por
+     * sección, para reutilizar el flujo de restore.
+     */
+    public function downloadCalendarLessonsBackup()
+    {
+        if (! $this->calendarId) {
+            $this->notification()->warning(
+                'Calendario requerido',
+                'Selecciona un calendario antes de descargar el respaldo.',
+            );
+
+            return null;
+        }
+
+        $calendar = TimetableCalendar::query()
+            ->with(['lapso', 'pestudio', 'pescolar'])
+            ->find($this->calendarId);
+
+        if (! $calendar) {
+            $this->notification()->error('Calendario no encontrado', 'No se pudo generar el respaldo.');
+
+            return null;
+        }
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->with([
+                'pevaluacion.pensum.asignatura',
+                'pevaluacion.seccion.grado.pestudio',
+                'pevaluacion.profesor',
+                'pevaluacion.grupoEstable',
+            ])
+            ->get();
+
+        $lessonRows = $lessons->map(function (TimetableLesson $lesson): ?array {
+            $pev = $lesson->pevaluacion;
+
+            if (! $pev) {
+                return null;
+            }
+
+            $asignatura = $pev->pensum?->asignatura;
+            $seccion = $pev->seccion;
+            $grado = $seccion?->grado;
+            $pestudio = $grado?->pestudio;
+            $profesor = $pev->profesor;
+
+            return [
+                'pevaluacion_id' => (int) $pev->id,
+                'academic_identity' => [
+                    'lapso_id' => $pev->lapso_id,
+                    'pestudio_id' => $pestudio?->id,
+                    'grado_id' => $grado?->id,
+                    'seccion_id' => $seccion?->id,
+                    'pensum_id' => $pev->pensum_id,
+                    'profesor_id' => $pev->profesor_id,
+                    'grupo_estable_id' => $pev->grupo_estable_id,
+                    'asignatura_id' => $asignatura?->id,
+                ],
+                'labels' => [
+                    'pestudio' => $pestudio?->name,
+                    'grado' => $grado?->name,
+                    'seccion' => $seccion?->name,
+                    'asignatura' => $asignatura?->name,
+                    'profesor' => $profesor
+                        ? trim(($profesor->lastname ?? '').', '.($profesor->name ?? ''))
+                        : null,
+                    'lapso' => $pev->lapso?->name,
+                ],
+                'configuration' => [
+                    'shift_id' => (int) $lesson->shift_id,
+                    'weekly_blocks_t' => max(0, (int) $lesson->weekly_blocks_t),
+                    'weekly_blocks_p' => max(0, (int) $lesson->weekly_blocks_p),
+                    'room_type_required' => $lesson->room_type_required ?: null,
+                    'is_half_group' => (bool) $lesson->is_half_group,
+                    'priority' => max(0, (int) $lesson->priority),
+                    'locked' => (bool) $lesson->locked,
+                ],
+            ];
+        })->filter()->values()->all();
+
+        if ($lessonRows === []) {
+            $this->notification()->warning(
+                'Sin lessons para respaldar',
+                'El calendario seleccionado no tiene lessons configuradas.',
+            );
+
+            return null;
+        }
+
+        $backup = [
+            'format' => 'cfla-timetable-lessons-backup',
+            'version' => 1,
+            'scope' => 'calendar',
+            'exported_at' => now()->toIso8601String(),
+            'calendar' => [
+                'id' => (int) $calendar->id,
+                'name' => $calendar->name,
+                'lapso_id' => $calendar->lapso_id,
+                'lapso' => $calendar->lapso?->name,
+                'pescolar_id' => $calendar->pescolar_id,
+                'pestudio_id' => $calendar->pestudio_id,
+                'pestudio' => $calendar->pestudio?->name,
+                'period_minutes' => (int) $calendar->period_minutes,
+                'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
+            ],
+            'section' => null,
+            'lessons' => $lessonRows,
+        ];
+
+        $filename = 'respaldo-lessons-calendario-'.(int) $calendar->id
+            .'-completo-'.now()->format('Ymd_His').'.json';
+
+        return response()->streamDownload(function () use ($backup): void {
+            echo json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        }, $filename, ['Content-Type' => 'application/json; charset=UTF-8']);
+    }
+
+    /**
+     * Valida y restaura la configuración del respaldo en el calendario activo
+     * (respaldos iniciados desde el paso 3).
      */
     public function restoreLessonsBackup(): void
     {
-        if (! $this->calendarId || ! $this->lessonsBackupFile) {
+        if ($this->applyLessonsBackupFile($this->lessonsBackupFile)) {
+            $this->lessonsBackupFile = null;
+        }
+    }
+
+    /**
+     * Restaura la configuración de lessons de TODO el calendario desde el
+     * respaldo seleccionado en la barra superior.
+     */
+    public function restoreCalendarLessonsBackup(): void
+    {
+        if ($this->applyLessonsBackupFile($this->calendarLessonsBackupFile)) {
+            $this->calendarLessonsBackupFile = null;
+        }
+    }
+
+    /**
+     * Aplica un respaldo JSON de lessons al calendario activo. Devuelve true
+     * cuando el archivo fue procesado correctamente, para limpiar el input.
+     *
+     * @param  \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null  $file
+     */
+    private function applyLessonsBackupFile($file): bool
+    {
+        if (! $this->calendarId || ! $file) {
             $this->notification()->warning('Respaldo requerido', 'Selecciona un archivo JSON de lessons para restaurar.');
 
-            return;
+            return false;
         }
 
-        if (strtolower((string) $this->lessonsBackupFile->getClientOriginalExtension()) !== 'json'
-            || (int) $this->lessonsBackupFile->getSize() > 5 * 1024 * 1024
+        if (strtolower((string) $file->getClientOriginalExtension()) !== 'json'
+            || (int) $file->getSize() > 5 * 1024 * 1024
         ) {
             $this->notification()->error(
                 'Archivo no permitido',
                 'El respaldo debe ser un archivo JSON de hasta 5 MB.',
             );
 
-            return;
+            return false;
         }
 
         try {
-            $payload = json_decode($this->lessonsBackupFile->get(), true, 512, JSON_THROW_ON_ERROR);
+            $payload = json_decode($file->get(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $exception) {
             $this->notification()->error('JSON inválido', 'El archivo no tiene un formato de respaldo válido.');
 
-            return;
+            return false;
         }
 
         if (($payload['format'] ?? null) !== 'cfla-timetable-lessons-backup'
@@ -2937,7 +3099,7 @@ class TimetableWizard extends Component
         ) {
             $this->notification()->error('Respaldo incompatible', 'El archivo no corresponde a un respaldo de lessons de CFlat.');
 
-            return;
+            return false;
         }
 
         $calendar = TimetableCalendar::query()->find($this->calendarId);
@@ -2950,7 +3112,7 @@ class TimetableWizard extends Component
                 'El respaldo pertenece a otro lapso o plan de estudio.',
             );
 
-            return;
+            return false;
         }
 
         $pevaluaciones = Pevaluacion::query()
@@ -3013,13 +3175,12 @@ class TimetableWizard extends Component
         if ($restored === []) {
             $this->notification()->error('Sin coincidencias', 'No se encontraron Pevaluaciones compatibles para restaurar.');
 
-            return;
+            return false;
         }
 
         $this->persistTimetableLessonDraft((int) $calendar->id, $restored);
         $this->selectedPevs = collect($restored)->keys()->mapWithKeys(fn ($id) => [(int) $id => true])->all();
         $this->lessons = $restored;
-        $this->lessonsBackupFile = null;
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = now()->format('H:i:s');
         $message = count($restored).' lesson(s) restaurada(s).';
@@ -3027,6 +3188,8 @@ class TimetableWizard extends Component
             $message .= " {$skipped} fila(s) no coincidieron y fueron omitidas.";
         }
         $this->notification()->success('Respaldo restaurado', $message);
+
+        return true;
     }
 
     /** Normaliza el nombre de una asignatura para el índice de importación. */
@@ -3771,8 +3934,11 @@ class TimetableWizard extends Component
     /**
      * Quita una lección completa del preview sin eliminar su configuración
      * persistida. Sus celdas quedan disponibles para agregar otra lección.
+     *
+     * Si se recibe `$periodId`, quita SOLO ese bloque (celda) de la lección y
+     * conserva el resto de sus bloques asignados.
      */
-    public function removePreviewLesson(int $lessonId): void
+    public function removePreviewLesson(int $lessonId, ?int $periodId = null): void
     {
         if (! $this->preview || $lessonId <= 0) {
             return;
@@ -3794,13 +3960,8 @@ class TimetableWizard extends Component
 
         $assignment = $this->preview['assignment'] ?? [];
         $lessonKey = (string) $lessonId;
-        $lessonSlots = $assignment[$lessonKey] ?? $assignment[$lessonId] ?? [];
-        $hadAssignment = array_key_exists($lessonKey, $assignment)
-            || array_key_exists($lessonId, $assignment);
 
-        unset($assignment[$lessonKey], $assignment[$lessonId]);
-
-        if (! $hadAssignment) {
+        if (! array_key_exists($lessonKey, $assignment) && ! array_key_exists($lessonId, $assignment)) {
             $this->notification()->warning(
                 'Lección ya retirada',
                 'La lección no tenía asignaciones en el preview.',
@@ -3809,9 +3970,46 @@ class TimetableWizard extends Component
             return;
         }
 
+        $key = array_key_exists($lessonKey, $assignment) ? $lessonKey : $lessonId;
+        $slots = collect($assignment[$key]);
+
+        $removedAll = true;
+
+        if ($periodId === null) {
+            unset($assignment[$key]);
+        } else {
+            $remaining = $slots
+                ->reject(fn ($slot): bool => (int) data_get($slot, 'period_id') === $periodId)
+                ->values();
+
+            if ($remaining->count() === $slots->count()) {
+                $this->notification()->warning(
+                    'Bloque no encontrado',
+                    'El bloque ya no estaba asignado a la lección.',
+                );
+
+                return;
+            }
+
+            $removedAll = $remaining->isEmpty();
+
+            if ($removedAll) {
+                unset($assignment[$key]);
+            } else {
+                $assignment[$key] = $remaining->all();
+            }
+        }
+
         $unassigned = collect($this->preview['unassigned'] ?? [])
-            ->push($lessonId)
-            ->map(fn ($id) => (int) $id)
+            ->map(fn ($id): int => (int) $id);
+
+        if ($removedAll) {
+            $unassigned->push($lessonId);
+        } else {
+            $unassigned = $unassigned->reject(fn (int $id): bool => $id === $lessonId);
+        }
+
+        $unassigned = $unassigned
             ->filter()
             ->unique()
             ->values()
@@ -3823,13 +4021,16 @@ class TimetableWizard extends Component
         $this->preview['assignment_source'] = 'manual_preview';
 
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
+
         $this->notification()->success(
-            'Lección retirada',
-            $subject.' quedó sin asignar en el preview.',
+            $removedAll ? 'Lección retirada' : 'Bloque retirado',
+            $removedAll
+                ? $subject.' quedó sin asignar en el preview.'
+                : 'Se retiró un bloque de '.$subject.'; el resto se mantiene asignado.',
         );
     }
 
-    public function confirmRemovePreviewLesson(int $lessonId): void
+    public function confirmRemovePreviewLesson(int $lessonId, ?int $periodId = null): void
     {
         $lesson = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
@@ -3846,14 +4047,18 @@ class TimetableWizard extends Component
         }
 
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'esta lección';
+        $singleSlot = $periodId !== null;
+
         $this->dialog()->confirm([
-            'title' => '¿Retirar lección del preview?',
-            'description' => '«'.$subject.'» quedará sin asignar y sus celdas volverán a mostrar el botón +. La configuración guardada no se eliminará.',
+            'title' => $singleSlot ? '¿Retirar este bloque del preview?' : '¿Retirar lección del preview?',
+            'description' => $singleSlot
+                ? 'Se quitará «'.$subject.'» del bloque seleccionado; los demás bloques de la lección se mantienen. La configuración guardada no se eliminará.'
+                : '«'.$subject.'» quedará sin asignar y sus celdas volverán a mostrar el botón +. La configuración guardada no se eliminará.',
             'icon' => 'warning',
             'accept' => [
-                'label' => 'Sí, retirar',
+                'label' => $singleSlot ? 'Sí, retirar bloque' : 'Sí, retirar',
                 'method' => 'removePreviewLesson',
-                'params' => $lessonId,
+                'params' => [$lessonId, $periodId],
                 'color' => 'negative',
             ],
             'reject' => [
@@ -3923,6 +4128,7 @@ class TimetableWizard extends Component
                 'pevaluacion.pensum.asignatura',
                 'pevaluacion.seccion.grado',
                 'pevaluacion.profesor',
+                'pevaluacion.grupoEstable',
             ]);
 
         if ($this->addPreviewLessonSource === 'current') {
@@ -3960,6 +4166,7 @@ class TimetableWizard extends Component
                     $l->pevaluacion?->profesor?->name ?? '',
                     $l->pevaluacion?->seccion?->grado?->name ?? '',
                     $l->pevaluacion?->seccion?->name ?? '',
+                    $l->pevaluacion?->grupoEstable?->name ?? '',
                 ]));
 
                 return str_contains($haystack, $search);
@@ -4123,193 +4330,193 @@ class TimetableWizard extends Component
     }
 
     public function openAiDryRunDialog(): void
-        {
-                $calendar = $this->calendarId ? TimetableCalendar::query()->find($this->calendarId) : null;
-                if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
-                    $this->notification()->warning(
-                        'Horario no publicado',
-                        'El análisis IA solo está disponible para horarios publicados.',
-                    );
+    {
+        $calendar = $this->calendarId ? TimetableCalendar::query()->find($this->calendarId) : null;
+        if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
+            $this->notification()->warning(
+                'Horario no publicado',
+                'El análisis IA solo está disponible para horarios publicados.',
+            );
+
+            return;
+        }
+
+        $this->dialog()->confirm([
+            'title' => 'Analizar resultado con IA',
+            'description' => 'Se enviará a OpenRouter el contexto auditable del calendario seleccionado, incluyendo asignaciones, conflictos, disponibilidad y estructura real de las tablas. La IA solo podrá proponer mejoras sustentadas en esos datos.',
+            'icon' => 'question',
+            'accept' => [
+                'label' => 'Analizar resultado',
+                'method' => 'analyzeDryRunWithAi',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+            ],
+        ]);
+    }
+
+    public function analyzeDryRunWithAi(): void
+    {
+        $this->aiDryRunAnalysisBusy = true;
+
+        try {
+            $calendar = TimetableCalendar::query()
+                ->with(['lapso', 'pestudio', 'pescolar'])
+                ->find($this->calendarId);
+            if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
+                $this->notification()->warning('Horario no publicado', 'El análisis IA solo está disponible para horarios publicados.');
 
                 return;
             }
-
-            $this->dialog()->confirm([
-                'title' => 'Analizar resultado con IA',
-                'description' => 'Se enviará a OpenRouter el contexto auditable del calendario seleccionado, incluyendo asignaciones, conflictos, disponibilidad y estructura real de las tablas. La IA solo podrá proponer mejoras sustentadas en esos datos.',
-                'icon' => 'question',
-                'accept' => [
-                    'label' => 'Analizar resultado',
-                    'method' => 'analyzeDryRunWithAi',
-                ],
-                'reject' => [
-                    'label' => 'Cancelar',
-                ],
+            $lessons = $calendar->lessons()
+                ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado.pestudio', 'pevaluacion.profesor', 'shift'])
+                ->get();
+            $slotColumns = Schema::getColumnListing('timetable_slots');
+            $assignmentColumns = array_values(array_intersect(
+                ['lesson_id', 'period_id', 'room_id', 'is_practical'],
+                $slotColumns,
+            ));
+            $assignment = TimetableSlot::query()
+                ->where('calendar_id', $calendar->id)
+                ->get($assignmentColumns)
+                ->groupBy('lesson_id')
+                ->map(fn ($slots) => $slots->map(fn (TimetableSlot $slot): array => [
+                    'period_id' => (int) $slot->period_id,
+                    'room_id' => $slot->room_id ? (int) $slot->room_id : null,
+                    'is_practical' => in_array('is_practical', $assignmentColumns, true)
+                        && (bool) ($slot->is_practical ?? false),
+                ])->values()->all())
+                ->all();
+            $readiness = app(TimetablePublicationReadinessService::class)->evaluate($calendar, [
+                'assignment' => $assignment,
             ]);
-        }
+            $lessonContext = $lessons->map(function (TimetableLesson $lesson) use ($assignment): array {
+                $pev = $lesson->pevaluacion;
 
-        public function analyzeDryRunWithAi(): void
-        {
-                $this->aiDryRunAnalysisBusy = true;
-
-                try {
-                    $calendar = TimetableCalendar::query()
-                        ->with(['lapso', 'pestudio', 'pescolar'])
-                        ->find($this->calendarId);
-                    if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
-                        $this->notification()->warning('Horario no publicado', 'El análisis IA solo está disponible para horarios publicados.');
-
-                        return;
-                    }
-                $lessons = $calendar->lessons()
-                    ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado.pestudio', 'pevaluacion.profesor', 'shift'])
-                    ->get();
-                $slotColumns = Schema::getColumnListing('timetable_slots');
-                $assignmentColumns = array_values(array_intersect(
-                    ['lesson_id', 'period_id', 'room_id', 'is_practical'],
-                    $slotColumns,
-                ));
-                $assignment = TimetableSlot::query()
-                    ->where('calendar_id', $calendar->id)
-                    ->get($assignmentColumns)
-                    ->groupBy('lesson_id')
-                    ->map(fn ($slots) => $slots->map(fn (TimetableSlot $slot): array => [
-                        'period_id' => (int) $slot->period_id,
-                        'room_id' => $slot->room_id ? (int) $slot->room_id : null,
-                        'is_practical' => in_array('is_practical', $assignmentColumns, true)
-                            && (bool) ($slot->is_practical ?? false),
-                    ])->values()->all())
-                    ->all();
-                $readiness = app(TimetablePublicationReadinessService::class)->evaluate($calendar, [
-                    'assignment' => $assignment,
-                ]);
-                $lessonContext = $lessons->map(function (TimetableLesson $lesson) use ($assignment): array {
-                    $pev = $lesson->pevaluacion;
-
-                    return [
-                        'lesson_id' => (int) $lesson->id,
-                        'pevaluacion_id' => (int) $lesson->pevaluacion_id,
-                        'weekly_blocks_t' => (int) $lesson->weekly_blocks_t,
-                        'weekly_blocks_p' => (int) $lesson->weekly_blocks_p,
-                        'shift_id' => $lesson->shift_id ? (int) $lesson->shift_id : null,
-                        'room_type_required' => $lesson->room_type_required,
-                        'is_half_group' => (bool) $lesson->is_half_group,
-                        'assignment' => $assignment[(string) $lesson->id] ?? [],
-                        'subject' => $pev?->pensum?->asignatura?->name,
-                        'teacher' => $pev?->profesor
-                            ? trim(($pev->profesor->lastname ?? '').', '.($pev->profesor->name ?? ''))
-                            : null,
-                        'section_id' => $pev?->seccion_id ? (int) $pev->seccion_id : null,
-                        'section' => $pev?->seccion?->name,
-                        'grade_id' => $pev?->seccion?->grado_id ? (int) $pev->seccion->grado_id : null,
-                        'grade' => $pev?->seccion?->grado?->name,
-                        'pestudio' => $pev?->seccion?->grado?->pestudio?->name,
-                    ];
-                })->all();
-
-                $compactTable = function (string $tableName, array $preferredColumns, int $limit = 100) use ($calendar): array {
-                    if (! Schema::hasTable($tableName)) {
-                        return ['exists' => false, 'columns' => [], 'rows' => []];
-                    }
-
-                    $columns = Schema::getColumnListing($tableName);
-                    $selectedColumns = array_values(array_intersect($preferredColumns, $columns));
-                    if ($selectedColumns === []) {
-                        return ['exists' => true, 'columns' => $columns, 'rows' => []];
-                    }
-
-                    $query = DB::table($tableName)->select($selectedColumns);
-                    if (in_array('calendar_id', $columns, true)) {
-                        $query->where('calendar_id', $calendar->id);
-                    }
-                    if (in_array('created_at', $columns, true)) {
-                        $query->latest('created_at');
-                    } elseif (in_array('id', $columns, true)) {
-                        $query->latest('id');
-                    }
-
-                    return [
-                        'exists' => true,
-                        'columns' => $columns,
-                        'rows' => $query->limit($limit)->get()->map(fn ($row): array => (array) $row)->all(),
-                    ];
-                };
-
-                $tableContext = [
-                    'timetable_periods' => $compactTable('timetable_periods', [
-                        'id', 'calendar_id', 'shift_id', 'day_of_week', 'order_in_day',
-                        'start_time', 'end_time', 'period_label', 'is_break',
-                    ], 300),
-                    'timetable_conflicts' => $compactTable('timetable_conflicts', [
-                        'id', 'calendar_id', 'lesson_id', 'period_id', 'type', 'severity',
-                        'message', 'resolved_at', 'created_at',
-                    ], 200),
-                    'timetable_teacher_availability' => $compactTable('timetable_teacher_availability', [
-                        'id', 'calendar_id', 'profesor_id', 'shift_id', 'day_of_week',
-                        'period_id', 'is_available',
-                    ], 300),
-                    'timetable_calendar_versions' => $compactTable('timetable_calendar_versions', [
-                        'id', 'calendar_id', 'version', 'status', 'quality_score', 'created_at',
-                    ], 10),
-                    'timetable_change_logs' => $compactTable('timetable_change_logs', [
-                        'id', 'calendar_id', 'user_id', 'action', 'description', 'created_at',
-                    ], 30),
-                    'timetable_absences' => $compactTable('timetable_absences', [
-                        'id', 'calendar_id', 'profesor_id', 'starts_at', 'ends_at', 'status',
-                    ], 100),
-                    'timetable_substitute_assignments' => $compactTable('timetable_substitute_assignments', [
-                        'id', 'absence_id', 'substitute_profesor_id', 'starts_at', 'ends_at', 'status',
-                    ], 100),
+                return [
+                    'lesson_id' => (int) $lesson->id,
+                    'pevaluacion_id' => (int) $lesson->pevaluacion_id,
+                    'weekly_blocks_t' => (int) $lesson->weekly_blocks_t,
+                    'weekly_blocks_p' => (int) $lesson->weekly_blocks_p,
+                    'shift_id' => $lesson->shift_id ? (int) $lesson->shift_id : null,
+                    'room_type_required' => $lesson->room_type_required,
+                    'is_half_group' => (bool) $lesson->is_half_group,
+                    'assignment' => $assignment[(string) $lesson->id] ?? [],
+                    'subject' => $pev?->pensum?->asignatura?->name,
+                    'teacher' => $pev?->profesor
+                        ? trim(($pev->profesor->lastname ?? '').', '.($pev->profesor->name ?? ''))
+                        : null,
+                    'section_id' => $pev?->seccion_id ? (int) $pev->seccion_id : null,
+                    'section' => $pev?->seccion?->name,
+                    'grade_id' => $pev?->seccion?->grado_id ? (int) $pev->seccion->grado_id : null,
+                    'grade' => $pev?->seccion?->grado?->name,
+                    'pestudio' => $pev?->seccion?->grado?->pestudio?->name,
                 ];
+            })->all();
 
-                $sectionMetrics = collect($lessonContext)->groupBy('section_id')->map(
-                    fn ($items, $sectionId): array => [
-                        'section_id' => $sectionId ? (int) $sectionId : null,
-                        'section' => $items->first()['section'] ?? null,
-                        'grade' => $items->first()['grade'] ?? null,
-                        'lessons' => $items->count(),
-                        'required_blocks' => $items->sum(fn (array $item): int => $item['weekly_blocks_t'] + $item['weekly_blocks_p']),
-                        'assigned_blocks' => $items->sum(fn (array $item): int => count(collect($item['assignment'])->pluck('period_id')->filter()->unique())),
-                    ],
-                )->values()->all();
+            $compactTable = function (string $tableName, array $preferredColumns, int $limit = 100) use ($calendar): array {
+                if (! Schema::hasTable($tableName)) {
+                    return ['exists' => false, 'columns' => [], 'rows' => []];
+                }
 
-                $context = [
-                    'context_policy' => [
-                        'source' => 'published timetable_slots and deterministic Laravel aggregates',
-                        'raw_historical_rows_excluded' => true,
-                        'table_row_limits' => ['periods' => 300, 'conflicts' => 200, 'availability' => 300, 'versions' => 10, 'logs' => 30],
-                    ],
-                    'calendar' => [
-                        'id' => (int) $calendar->id,
-                        'name' => $calendar->name,
-                        'status' => $calendar->status,
-                        'period_minutes' => (int) $calendar->period_minutes,
-                        'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
-                        'quality_score' => $calendar->quality_score,
-                    ],
-                    'academic_context' => [
-                        'lapso' => $calendar->lapso ? ['id' => (int) $calendar->lapso->id, 'name' => $calendar->lapso->name] : null,
-                        'pestudio' => $calendar->pestudio ? ['id' => (int) $calendar->pestudio->id, 'name' => $calendar->pestudio->name] : null,
-                        'pescolar' => $calendar->pescolar ? ['id' => (int) $calendar->pescolar->id, 'name' => $calendar->pescolar->name] : null,
-                    ],
-                    'published_schedule' => true,
-                    'persisted_assignment_source' => 'timetable_slots',
-                    'assignment' => $assignment,
-                    'readiness' => $readiness,
-                    'lessons_with_context' => $lessonContext,
-                    'section_metrics' => $sectionMetrics,
-                    'tables' => $tableContext,
-                    'model_definitions' => [
-                        'TimetableCalendar' => ['table' => 'timetable_calendars', 'purpose' => 'Calendario y configuración global del horario.'],
-                        'TimetablePeriod' => ['table' => 'timetable_periods', 'purpose' => 'Períodos por día, turno, hora y receso.'],
-                        'TimetableLesson' => ['table' => 'timetable_lessons', 'purpose' => 'Carga semanal, turno, aula requerida y restricciones de cada lección.'],
-                        'TimetableSlot' => ['table' => 'timetable_slots', 'purpose' => 'Asignación persistida de lección, período, docente, sección y aula.'],
-                        'TimetableTeacherAvailability' => ['table' => 'timetable_teacher_availability', 'purpose' => 'Disponibilidad declarada de docentes.'],
-                        'TimetableConflict' => ['table' => 'timetable_conflicts', 'purpose' => 'Conflictos detectados durante generación o publicación.'],
-                    ],
+                $columns = Schema::getColumnListing($tableName);
+                $selectedColumns = array_values(array_intersect($preferredColumns, $columns));
+                if ($selectedColumns === []) {
+                    return ['exists' => true, 'columns' => $columns, 'rows' => []];
+                }
+
+                $query = DB::table($tableName)->select($selectedColumns);
+                if (in_array('calendar_id', $columns, true)) {
+                    $query->where('calendar_id', $calendar->id);
+                }
+                if (in_array('created_at', $columns, true)) {
+                    $query->latest('created_at');
+                } elseif (in_array('id', $columns, true)) {
+                    $query->latest('id');
+                }
+
+                return [
+                    'exists' => true,
+                    'columns' => $columns,
+                    'rows' => $query->limit($limit)->get()->map(fn ($row): array => (array) $row)->all(),
                 ];
+            };
 
-                $systemPrompt = <<<'PROMPT'
+            $tableContext = [
+                'timetable_periods' => $compactTable('timetable_periods', [
+                    'id', 'calendar_id', 'shift_id', 'day_of_week', 'order_in_day',
+                    'start_time', 'end_time', 'period_label', 'is_break',
+                ], 300),
+                'timetable_conflicts' => $compactTable('timetable_conflicts', [
+                    'id', 'calendar_id', 'lesson_id', 'period_id', 'type', 'severity',
+                    'message', 'resolved_at', 'created_at',
+                ], 200),
+                'timetable_teacher_availability' => $compactTable('timetable_teacher_availability', [
+                    'id', 'calendar_id', 'profesor_id', 'shift_id', 'day_of_week',
+                    'period_id', 'is_available',
+                ], 300),
+                'timetable_calendar_versions' => $compactTable('timetable_calendar_versions', [
+                    'id', 'calendar_id', 'version', 'status', 'quality_score', 'created_at',
+                ], 10),
+                'timetable_change_logs' => $compactTable('timetable_change_logs', [
+                    'id', 'calendar_id', 'user_id', 'action', 'description', 'created_at',
+                ], 30),
+                'timetable_absences' => $compactTable('timetable_absences', [
+                    'id', 'calendar_id', 'profesor_id', 'starts_at', 'ends_at', 'status',
+                ], 100),
+                'timetable_substitute_assignments' => $compactTable('timetable_substitute_assignments', [
+                    'id', 'absence_id', 'substitute_profesor_id', 'starts_at', 'ends_at', 'status',
+                ], 100),
+            ];
+
+            $sectionMetrics = collect($lessonContext)->groupBy('section_id')->map(
+                fn ($items, $sectionId): array => [
+                    'section_id' => $sectionId ? (int) $sectionId : null,
+                    'section' => $items->first()['section'] ?? null,
+                    'grade' => $items->first()['grade'] ?? null,
+                    'lessons' => $items->count(),
+                    'required_blocks' => $items->sum(fn (array $item): int => $item['weekly_blocks_t'] + $item['weekly_blocks_p']),
+                    'assigned_blocks' => $items->sum(fn (array $item): int => count(collect($item['assignment'])->pluck('period_id')->filter()->unique())),
+                ],
+            )->values()->all();
+
+            $context = [
+                'context_policy' => [
+                    'source' => 'published timetable_slots and deterministic Laravel aggregates',
+                    'raw_historical_rows_excluded' => true,
+                    'table_row_limits' => ['periods' => 300, 'conflicts' => 200, 'availability' => 300, 'versions' => 10, 'logs' => 30],
+                ],
+                'calendar' => [
+                    'id' => (int) $calendar->id,
+                    'name' => $calendar->name,
+                    'status' => $calendar->status,
+                    'period_minutes' => (int) $calendar->period_minutes,
+                    'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
+                    'quality_score' => $calendar->quality_score,
+                ],
+                'academic_context' => [
+                    'lapso' => $calendar->lapso ? ['id' => (int) $calendar->lapso->id, 'name' => $calendar->lapso->name] : null,
+                    'pestudio' => $calendar->pestudio ? ['id' => (int) $calendar->pestudio->id, 'name' => $calendar->pestudio->name] : null,
+                    'pescolar' => $calendar->pescolar ? ['id' => (int) $calendar->pescolar->id, 'name' => $calendar->pescolar->name] : null,
+                ],
+                'published_schedule' => true,
+                'persisted_assignment_source' => 'timetable_slots',
+                'assignment' => $assignment,
+                'readiness' => $readiness,
+                'lessons_with_context' => $lessonContext,
+                'section_metrics' => $sectionMetrics,
+                'tables' => $tableContext,
+                'model_definitions' => [
+                    'TimetableCalendar' => ['table' => 'timetable_calendars', 'purpose' => 'Calendario y configuración global del horario.'],
+                    'TimetablePeriod' => ['table' => 'timetable_periods', 'purpose' => 'Períodos por día, turno, hora y receso.'],
+                    'TimetableLesson' => ['table' => 'timetable_lessons', 'purpose' => 'Carga semanal, turno, aula requerida y restricciones de cada lección.'],
+                    'TimetableSlot' => ['table' => 'timetable_slots', 'purpose' => 'Asignación persistida de lección, período, docente, sección y aula.'],
+                    'TimetableTeacherAvailability' => ['table' => 'timetable_teacher_availability', 'purpose' => 'Disponibilidad declarada de docentes.'],
+                    'TimetableConflict' => ['table' => 'timetable_conflicts', 'purpose' => 'Conflictos detectados durante generación o publicación.'],
+                ],
+            ];
+
+            $systemPrompt = <<<'PROMPT'
 Eres un auditor experto de horarios escolares y optimización de restricciones.
 Analiza exclusivamente el JSON del horario publicado entregado por el sistema.
 REGLAS OBLIGATORIAS:
@@ -4331,42 +4538,142 @@ RESPONDE EN ESPAÑOL con esta estructura:
 7. Datos faltantes o límites del diagnóstico.
 PROMPT;
 
-                $userMessage = "Analiza este horario publicado del calendario {$calendar->id}. No uses conocimiento externo:\n\n"
-                    .json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-                $maxContextCharacters = 180000;
-                if (strlen($userMessage) > $maxContextCharacters) {
-                    $this->notification()->warning(
-                        'Contexto demasiado grande',
-                        'El calendario supera el límite seguro de análisis. Usa un análisis por sección o reduce el alcance.',
-                    );
-
-                    return;
-                }
-
-                $result = app(\App\Services\OpenRouterService::class)->ask(
-                    $systemPrompt,
-                    $userMessage,
-                    [
-                        'max_tokens' => 6000,
-                        'temperature' => 0.1,
-                        'timeout' => 180,
-                    ],
+            $userMessage = "Analiza este horario publicado del calendario {$calendar->id}. No uses conocimiento externo:\n\n"
+                .json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+            $maxContextCharacters = 180000;
+            if (strlen($userMessage) > $maxContextCharacters) {
+                $this->notification()->warning(
+                    'Contexto demasiado grande',
+                    'El calendario supera el límite seguro de análisis. Usa un análisis por sección o reduce el alcance.',
                 );
 
-                if (! $result['success']) {
-                    $this->notification()->error('Análisis IA no disponible', $result['error'] ?? 'OpenRouter no devolvió una respuesta.');
-
-                    return;
-                }
-
-                $this->aiDryRunAnalysis = $result['content'];
-                $this->aiDryRunAnalysisModel = $result['model'];
-                $this->showAiAnalysisModal = true;
-                $this->notification()->success('Análisis completado', 'La propuesta fue generada usando únicamente el contexto del calendario.');
-            } finally {
-                $this->aiDryRunAnalysisBusy = false;
+                return;
             }
+
+            $result = app(\App\Services\OpenRouterService::class)->ask(
+                $systemPrompt,
+                $userMessage,
+                [
+                    'max_tokens' => 6000,
+                    'temperature' => 0.1,
+                    'timeout' => 180,
+                ],
+            );
+
+            if (! $result['success']) {
+                $this->notification()->error('Análisis IA no disponible', $result['error'] ?? 'OpenRouter no devolvió una respuesta.');
+
+                return;
+            }
+
+            $this->aiDryRunAnalysis = $result['content'];
+            $this->aiDryRunAnalysisModel = $result['model'];
+            $this->showAiAnalysisModal = true;
+            $this->notification()->success('Análisis completado', 'La propuesta fue generada usando únicamente el contexto del calendario.');
+        } finally {
+            $this->aiDryRunAnalysisBusy = false;
         }
+    }
+
+    public function openAiDraftDialog(?int $sectionId = null): void
+    {
+        if (! $this->calendarId || ! $this->preview || ! is_array($this->preview['assignment'] ?? null)) {
+            $this->notification()->warning(
+                'Sin distribución para optimizar',
+                'Genera o carga primero la distribución actual del calendario.',
+            );
+
+            return;
+        }
+
+        $this->aiDraftError = null;
+        $this->aiDraftResult = null;
+        $this->aiDraftSectionId = $sectionId;
+        $this->showAiDraftModal = true;
+    }
+
+    public function generateAiDraft(): void
+    {
+        $this->aiDraftBusy = true;
+        $this->aiDraftError = null;
+
+        try {
+            $calendar = $this->calendarId
+                ? TimetableCalendar::query()->find($this->calendarId)
+                : null;
+            if (! $calendar || ! $this->preview) {
+                $this->aiDraftError = 'No existe una distribución disponible para generar una propuesta.';
+
+                return;
+            }
+
+            $result = app(TimetableAiDraftService::class)->propose(
+                $calendar,
+                $this->preview['assignment'] ?? [],
+                $this->aiDraftSectionId,
+            );
+            $this->aiDraftResult = $result;
+            $this->aiDraftSnapshotHash = $result['snapshot_hash'] ?? null;
+
+            if (! ($result['success'] ?? false)) {
+                $this->aiDraftError = $result['error'] ?? 'La propuesta fue rechazada.';
+                $this->notification()->warning('Propuesta no disponible', $this->aiDraftError);
+
+                return;
+            }
+
+            $this->notification()->success(
+                'Propuesta IA validada',
+                'La propuesta quedó disponible para revisión; todavía no modifica slots ni publica el calendario.',
+            );
+        } finally {
+            $this->aiDraftBusy = false;
+        }
+    }
+
+    public function applyAiDraftToPreview(): void
+    {
+        $result = $this->aiDraftResult;
+        if (! ($result['success'] ?? false) || ($result['status'] ?? null) !== 'validated') {
+            $this->notification()->warning(
+                'Propuesta no aplicable',
+                'Solo se pueden aplicar propuestas completamente validadas y sin conflictos bloqueantes.',
+            );
+
+            return;
+        }
+
+        $currentHash = hash('sha256', json_encode(
+            $this->preview['assignment'] ?? [],
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
+        ));
+        if ($currentHash !== ($result['snapshot_hash'] ?? null)) {
+            $this->notification()->error(
+                'Propuesta obsoleta',
+                'La distribución cambió desde la generación. Cierra esta propuesta y genera otra.',
+            );
+
+            return;
+        }
+
+        $this->preview['assignment'] = $result['proposed_assignment'];
+        $this->preview['unassigned'] = $result['proposed_unassigned'] ?? [];
+        $this->preview['assignment_source'] = 'ai_proposal';
+        $this->preview['ai_snapshot_hash'] = $result['snapshot_hash'];
+        $this->preview['ai_model'] = $result['model'] ?? null;
+        $this->preview['manual_override'] = true;
+        $this->recordPreviewChange(
+            'apply_ai_draft',
+            null,
+            [],
+            $result['proposed_assignment'],
+        );
+        $this->showAiDraftModal = false;
+        $this->notification()->success(
+            'Propuesta aplicada al preview',
+            'La distribución fue actualizada solo en el preview. Aún debes confirmarla para persistir/publicar.',
+        );
+    }
 
     public function runDryRun(): void
     {
@@ -4522,6 +4829,7 @@ PROMPT;
                     'source' => $slot['source'] ?? ($this->preview['assignment_source'] ?? null),
                 ];
             })->values()->all();
+
             return [
                 'lesson_id' => (int) $lessonId,
                 'pevaluacion_id' => $lesson?->pevaluacion_id,
@@ -4555,12 +4863,12 @@ PROMPT;
                 'is_half_group' => (bool) ($lesson?->is_half_group ?? false),
                 'room_id' => $slot['room_id'] ? (int) $slot['room_id'] : null,
             ])->all();
-                $readiness = [
-            'published' => true,
-            'source' => 'persisted_calendar',
-            'hard_conflicts' => $tableContext['timetable_conflicts']['rows'] ?? [],
-            'slots_count' => collect($assignment)->flatten(1)->count(),
-                ];
+            $readiness = [
+                'published' => true,
+                'source' => 'persisted_calendar',
+                'hard_conflicts' => $tableContext['timetable_conflicts']['rows'] ?? [],
+                'slots_count' => collect($assignment)->flatten(1)->count(),
+            ];
         })->groupBy('period_id')->map(fn ($rows): array => $rows->values()->all())->all();
         $candidateDiagnostics = $lessons->filter(function (TimetableLesson $lesson) use ($assignmentByLesson): bool {
             $detail = $assignmentByLesson->get((int) $lesson->id);
@@ -5261,8 +5569,7 @@ PROMPT;
             $details = collect($restoreConflicts)
                 ->unique(fn (array $conflict): string => $conflict['candidate_lesson_id'].':'.$conflict['existing_lesson_id'].':'.$conflict['period'])
                 ->take(6)
-                ->map(fn (array $conflict): string =>
-                    "{$conflict['period']} · {$conflict['shift']} · {$conflict['time']}: "
+                ->map(fn (array $conflict): string => "{$conflict['period']} · {$conflict['shift']} · {$conflict['time']}: "
                     ."{$conflict['candidate_subject']} / {$conflict['candidate_grade']} {$conflict['candidate_section']} "
                     ."· docente {$conflict['candidate_teacher']} colisiona con "
                     ."{$conflict['existing_subject']} / {$conflict['existing_grade']} {$conflict['existing_section']} "
@@ -5286,7 +5593,7 @@ PROMPT;
             return;
         }
         try {
-            DB::transaction(function () use ($calendar, $sectionId, $lessonIds, $rows): void {
+            DB::transaction(function () use ($calendar, $lessonIds, $rows): void {
                 TimetableSlot::query()->where('calendar_id', $calendar->id)->whereIn('lesson_id', $lessonIds)->delete();
                 TimetableSlot::query()->insert($rows);
             });
@@ -5414,6 +5721,7 @@ PROMPT;
             ->groupBy(fn (TimetablePeriod $period): string => $period->shift_id.':'.$period->order_in_day)
             ->map(function ($periodGroup) use ($cells): array {
                 $period = $periodGroup->first();
+
                 return [
                     'shift' => $period->shift?->name ?? 'Turno '.$period->shift_id,
                     'code' => $period->shift?->code ?? 'T'.$period->shift_id,
@@ -5554,14 +5862,32 @@ PROMPT;
         }
 
         $readiness = app(TimetablePublicationReadinessService::class)->evaluate($calendar, $this->preview);
-        $unassigned = collect($this->preview['unassigned'] ?? []);
+        $unassignedIds = collect($this->preview['unassigned'] ?? [])
+            ->map(fn ($id): int => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+        $activeUnassignedIds = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereIn('id', $unassignedIds->all())
+            ->whereHas('pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grade) => $grade->where('status_active', 'true'));
+            })
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id);
+        $unassigned = $activeUnassignedIds->values();
         $assignment = collect($this->preview['assignment'] ?? []);
 
         // Docentes con lecciones sin asignar (necesitan ajuste manual).
-        $unassignedLessonIds = $unassigned->map(fn ($v) => (int) $v)->all();
+        $unassignedLessonIds = $unassigned->all();
         $teachersAffected = TimetableLesson::query()
             ->whereIn('id', $unassignedLessonIds)
             ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grade) => $grade->where('status_active', 'true'));
+            })
             ->with('pevaluacion.profesor')
             ->get()
             ->map(fn ($lesson) => trim(
@@ -5573,17 +5899,22 @@ PROMPT;
             ->values();
 
         // Secciones con horario (al menos 1 slot asignado).
-        $seccionesConHorario = TimetableLesson::query()
+        $activeAssignedLessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
             ->whereIn('id', $assignment->keys()->map(fn ($v) => (int) $v))
+            ->whereHas('pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grade) => $grade->where('status_active', 'true'));
+            })
             ->with('pevaluacion')
-            ->get()
+            ->get();
+        $seccionesConHorario = $activeAssignedLessons
             ->pluck('pevaluacion.seccion_id')
             ->unique()
             ->count();
 
         return [
-            'asignadas' => $assignment->count(),
+            'asignadas' => $activeAssignedLessons->count(),
             'sin_asignar' => $unassigned->count(),
             'docentes_afectados' => $teachersAffected->count(),
             'docentes' => $teachersAffected->take(5)->implode(', '),
@@ -5623,7 +5954,34 @@ PROMPT;
             ->values()
             ->all();
 
-        return $readiness;
+        return array_merge($readiness, $this->capacityBreakdown($calendar));
+    }
+
+    /**
+     * PLAN-TIMETABLE-SOLVER-FALLBACK-001 §7 (FB-18) — Separa las lecciones sin
+     * asignar entre infactibilidad real de capacidad y "no encontrado".
+     *
+     * @return array{capacity_exceeded:int,not_found:int,capacity_summary:array<string,mixed>}
+     */
+    private function capacityBreakdown(TimetableCalendar $calendar): array
+    {
+        $audit = app(TimetableCapacityAuditService::class)->audit($calendar);
+        $summary = $audit->summary();
+        $overCapacity = array_flip($audit->overCapacityLessonIds());
+
+        $unassigned = collect($this->preview['unassigned'] ?? [])
+            ->map(fn ($id): int => (int) $id)
+            ->filter();
+
+        $capacityExceeded = $unassigned
+            ->filter(fn (int $id): bool => isset($overCapacity[$id]))
+            ->count();
+
+        return [
+            'capacity_exceeded' => $capacityExceeded,
+            'not_found' => max(0, $unassigned->count() - $capacityExceeded),
+            'capacity_summary' => $summary,
+        ];
     }
 
     /**
@@ -5649,6 +6007,10 @@ PROMPT;
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
             ->whereIn('id', $ids)
+            ->whereHas('pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grade) => $grade->where('status_active', 'true'));
+            })
             ->with('shift', 'slots.period', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor')
             ->get();
         $calendarStrategy = TimetableCalendar::query()
@@ -6740,7 +7102,14 @@ PROMPT;
 
         $activePestudio = collect($grouped)->firstWhere('pestudio_id', $this->activePestudioId) ?? collect($grouped)->first();
 
-        $tabGradoOptions = collect($activePestudio['grados'] ?? [])->map(fn ($g) => ['id' => $g['grado_id'], 'name' => $g['grado_name']])->values()->all();
+        $tabGradoOptions = collect($activePestudio['grados'] ?? [])
+            ->sortBy(fn (array $grado): array => [
+                $grado['grado_order'] ?? PHP_INT_MAX,
+                $grado['grado_name'] ?? '',
+            ])
+            ->map(fn ($g) => ['id' => $g['grado_id'], 'name' => $g['grado_name']])
+            ->values()
+            ->all();
 
         if ($tabGradoOptions !== [] && $this->activeGradoId === null) {
             $this->activeGradoId = $tabGradoOptions[0]['id'];
@@ -6796,6 +7165,9 @@ PROMPT;
                             return [
                                 'grado_id' => $grado ? (int) $grado->id : 'general',
                                 'grado_name' => $grado ? $grado->name : 'General',
+                                'grado_order' => $grado?->order !== null
+                                    ? (int) $grado->order
+                                    : PHP_INT_MAX,
                                 'secciones' => $gradoGroup
                                     ->groupBy(fn ($pev) => $pev->seccion?->id ?? 'general')
                                     ->map(function ($seccionGroup) {
@@ -6806,9 +7178,17 @@ PROMPT;
                                             'seccion_name' => $seccion ? $seccion->name : 'General',
                                             'pevaluaciones' => $seccionGroup->values(),
                                         ];
-                                    })->values()->all(),
+                                    })
+                                    ->values()
+                                    ->all(),
                             ];
-                        })->values()->all(),
+                        })
+                        ->sortBy(fn (array $grado): array => [
+                            $grado['grado_order'],
+                            $grado['grado_name'],
+                        ])
+                        ->values()
+                        ->all(),
                 ];
             })
             ->sortBy('pestudio_code')

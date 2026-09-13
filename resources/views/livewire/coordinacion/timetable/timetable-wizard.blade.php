@@ -1,7 +1,7 @@
 <div class="fade-in">
     {{-- Overlay de carga (patrón LessonWizard): paso 4 (disponibilidad) y paso 5 (generar) --}}
     <div wire:loading.flex
-         wire:target="setAllAvailable,saveAvailability,runDryRun,confirmAndPublish,analyzeDryRunWithAi"
+         wire:target="setAllAvailable,saveAvailability,runDryRun,confirmAndPublish,analyzeDryRunWithAi,generateAiDraft"
          class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-gray-900/90 backdrop-blur-md">
         <div class="flex flex-col items-center gap-4">
             <div class="relative w-14 h-14">
@@ -15,7 +15,9 @@
                 </div>
             </div>
             <p class="text-sm font-bold text-gray-700 dark:text-gray-200">
-                @if ($aiDryRunAnalysisBusy)
+                @if ($aiDraftBusy)
+                    Generando propuesta de draft con IA…
+                @elseif ($aiDryRunAnalysisBusy)
                     Analizando horario publicado con IA…
                 @else
                     {{ ($currentStep ?? 1) === 5 ? 'Generando horario…' : 'Procesando disponibilidad…' }}
@@ -64,6 +66,36 @@
                 </select>
                 <button wire:click="$set('showCreateCalendarForm', true)"
                     class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</button>
+
+                <button type="button"
+                    wire:click="downloadCalendarLessonsBackup"
+                    wire:loading.attr="disabled"
+                    wire:loading.class="opacity-50 cursor-not-allowed"
+                    wire:target="downloadCalendarLessonsBackup"
+                    {{ filled($calendarId) ? '' : 'disabled' }}
+                    title="Descargar respaldo JSON de todas las lessons del calendario seleccionado"
+                    class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
+                    <span wire:loading.remove wire:target="downloadCalendarLessonsBackup">Backup JSON</span>
+                    <span wire:loading wire:target="downloadCalendarLessonsBackup">Preparando…</span>
+                </button>
+
+                <label title="Seleccionar respaldo JSON de lessons del calendario completo"
+                    class="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
+                    <span>Elegir restore</span>
+                    <input type="file" wire:model="calendarLessonsBackupFile" accept="application/json,.json" class="sr-only">
+                </label>
+
+                <button type="button"
+                    wire:click="restoreCalendarLessonsBackup"
+                    wire:loading.attr="disabled"
+                    wire:loading.class="opacity-50 cursor-not-allowed"
+                    wire:target="restoreCalendarLessonsBackup,calendarLessonsBackupFile"
+                    {{ filled($calendarId) ? '' : 'disabled' }}
+                    title="Restaurar la configuración de lessons del calendario desde el JSON seleccionado"
+                    class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
+                    <span wire:loading.remove wire:target="restoreCalendarLessonsBackup">Restore</span>
+                    <span wire:loading wire:target="restoreCalendarLessonsBackup">Restaurando…</span>
+                </button>
                 {{-- <button wire:click="openEditCalendarForm"
                     {{ filled($calendarId) ? '' : 'disabled' }}
                     class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ filled($calendarId) ? 'bg-white/5 hover:bg-white/10 text-gray-300 border border-gray-200 dark:border-white/10' : 'bg-white/5 text-gray-500 border border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50' }}">
@@ -1821,6 +1853,16 @@
                         <span wire:loading.remove wire:target="runDryRun">Generar draft</span>
                         <span wire:loading wire:target="runDryRun">Generando…</span>
                     </button>
+                    <button type="button"
+                        wire:click="openAiDraftDialog"
+                        @disabled(!$preview)
+                        wire:loading.attr="disabled"
+                        wire:target="openAiDraftDialog,generateAiDraft"
+                        title="Generar una propuesta de distribución con OpenRouter sin publicar"
+                        class="inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
+                        <span wire:loading.remove wire:target="openAiDraftDialog,generateAiDraft">Proponer draft con IA</span>
+                        <span wire:loading wire:target="openAiDraftDialog,generateAiDraft">Generando propuesta…</span>
+                    </button>
                     @if (($selectedCalendarDetail['status'] ?? null) === 'active')
                     <button type="button"
                         wire:click="openAiDryRunDialog"
@@ -1967,6 +2009,26 @@
                             <div class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $preview['elapsed_seconds'] ?? 0 }}s</div>
                         </div>
                     </div>
+
+                    @if (($generationReadiness['capacity_exceeded'] ?? 0) > 0)
+                        <div class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
+                            <div class="font-bold text-amber-600 dark:text-amber-400">
+                                {{ $generationReadiness['capacity_exceeded'] }} lección(es) sin asignar por capacidad insuficiente (imposible de agendar)
+                            </div>
+                            <p class="mt-1 text-gray-600 dark:text-gray-300">
+                                La sección o el docente requieren más bloques que períodos hay en el turno
+                                ({{ $generationReadiness['capacity_summary']['overflow_blocks_sections'] ?? 0 }} bloques de sección ·
+                                {{ $generationReadiness['capacity_summary']['overflow_blocks_teachers'] ?? 0 }} de docente).
+                                Ajusta horas, períodos o turnos: regenerar no los ubicará.
+                            </p>
+                        </div>
+                    @endif
+
+                    @if (($generationReadiness['not_found'] ?? 0) > 0)
+                        <div class="mt-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-xs text-gray-600 dark:text-gray-300">
+                            {{ $generationReadiness['not_found'] }} lección(es) sin asignar por disponibilidad o heurística (no por capacidad). Revisa los conflictos y vuelve a generar.
+                        </div>
+                    @endif
 
                     @php
                         $activeConflictGroup = is_numeric($activeSeccionId)
@@ -2421,44 +2483,51 @@
                         @if ($step5GradeTab !== 'pestudio' && $step5SectionTab !== 'formats' && $preview && $periodsList->isNotEmpty())
                             @php $sectionGapSummary = $this->previewSectionGapSummary($activeSeccionId); @endphp
                             @if (($sectionGapSummary['empty_cells'] ?? 0) > 0 || !empty($sectionGapSummary['incomplete_lessons']))
-                                <div class="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4" role="status">
-                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                <details class="group mb-4 rounded-lg border border-sky-500/30 bg-sky-500/5 p-4" role="status">
+                                    <summary class="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 [&::-webkit-details-marker]:hidden">
                                         <div>
-                                            <div class="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                            <div class="text-[10px] font-bold uppercase tracking-widest text-sky-600 dark:text-sky-400">
                                                 Cobertura de la sección
                                             </div>
                                             <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
                                                 La generación por sección puede dejar períodos disponibles sin una lesson asignada.
                                             </p>
                                         </div>
-                                        <span class="rounded-md bg-amber-500/10 px-2 py-1 text-[10px] font-bold text-amber-700 dark:text-amber-300">
-                                            {{ $sectionGapSummary['empty_cells'] ?? 0 }} celda(s) vacía(s)
-                                        </span>
-                                    </div>
-                                    @if (!empty($sectionGapSummary['empty_periods']))
-                                        <div class="mt-3 flex flex-wrap gap-1.5">
-                                            @foreach ($sectionGapSummary['empty_periods'] as $emptyPeriod)
-                                                <span class="rounded-md border border-amber-500/20 bg-white/5 px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">
-                                                    {{ $emptyPeriod['day'] }} · {{ $emptyPeriod['time'] }}
-                                                </span>
-                                            @endforeach
+                                        <div class="flex items-center gap-2">
+                                            <span class="rounded-md bg-sky-500/10 px-2 py-1 text-[10px] font-bold text-sky-700 dark:text-sky-300">
+                                                {{ $sectionGapSummary['empty_cells'] ?? 0 }} celda(s) vacía(s)
+                                            </span>
+                                            <svg class="h-4 w-4 shrink-0 text-sky-700 transition-transform group-open:rotate-180 dark:text-sky-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                                            </svg>
                                         </div>
-                                    @endif
-                                    @if (!empty($sectionGapSummary['incomplete_lessons']))
-                                        <div class="mt-3 border-t border-amber-500/20 pt-3">
-                                            <div class="text-[10px] font-bold uppercase tracking-widest text-red-500">Lessons incompletas</div>
-                                            <div class="mt-1 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
-                                                @foreach ($sectionGapSummary['incomplete_lessons'] as $incompleteLesson)
-                                                    <div>
-                                                        <strong>{{ $incompleteLesson['subject'] }}</strong>:
-                                                        {{ $incompleteLesson['assigned'] }}/{{ $incompleteLesson['required'] }} bloques,
-                                                        faltan {{ $incompleteLesson['missing'] }}.
-                                                    </div>
+                                    </summary>
+                                    <div class="pt-3">
+                                        @if (!empty($sectionGapSummary['empty_periods']))
+                                            <div class="flex flex-wrap gap-1.5">
+                                                @foreach ($sectionGapSummary['empty_periods'] as $emptyPeriod)
+                                                    <span class="rounded-md border border-sky-500/20 bg-white/5 px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">
+                                                        {{ $emptyPeriod['day'] }} · {{ $emptyPeriod['time'] }}
+                                                    </span>
                                                 @endforeach
                                             </div>
-                                        </div>
-                                    @endif
-                                </div>
+                                        @endif
+                                        @if (!empty($sectionGapSummary['incomplete_lessons']))
+                                            <div class="mt-3 border-t border-sky-500/20 pt-3">
+                                                <div class="text-[10px] font-bold uppercase tracking-widest text-red-500">Lessons incompletas</div>
+                                                <div class="mt-1 space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
+                                                    @foreach ($sectionGapSummary['incomplete_lessons'] as $incompleteLesson)
+                                                        <div>
+                                                            <strong>{{ $incompleteLesson['subject'] }}</strong>:
+                                                            {{ $incompleteLesson['assigned'] }}/{{ $incompleteLesson['required'] }} bloques,
+                                                            faltan {{ $incompleteLesson['missing'] }}.
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </details>
                             @endif
                             <div id="timetable-preview-grid">
                             <div class="flex items-center justify-end pb-2">
@@ -2534,6 +2603,21 @@
                                     </svg>
                                     Horario docente
                                 </button>
+                                @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
+                                    <button type="button"
+                                        wire:click="openAiDraftDialog({{ (int) $activeSeccionId }})"
+                                        wire:loading.attr="disabled"
+                                        wire:target="openAiDraftDialog,generateAiDraft"
+                                        title="Proponer un draft IA usando solo las lessons de la sección activa"
+                                        aria-label="Proponer draft IA para la sección actual"
+                                        class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14v14H5z"/>
+                                        </svg>
+                                        Draft de sección
+                                    </button>
+                                @endif
                                 </div>
                             </div>
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
@@ -2593,7 +2677,7 @@
                                                                         <span class="sr-only">Acciones de {{ $cell['asignatura'] }}</span>
                                                                         <span class="min-w-0 flex-1"></span>
                                                                         <button type="button"
-                                                                            wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }})"
+                                                                            wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }}, {{ (int) $cell['period_id'] }})"
                                                                             title="Retirar esta lección del preview"
                                                                             aria-label="Retirar {{ $cell['asignatura'] }} del preview"
                                                                             class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-gray-300/70 bg-white/80 text-[9px] font-bold leading-none text-gray-500 transition-colors hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 dark:border-white/15 dark:bg-gray-900/50 dark:text-gray-300">
@@ -2690,6 +2774,106 @@
             >
                 Cerrar diagnóstico
             </button>
+        </x-slot>
+    </x-modal-card>
+
+    <x-modal-card
+        title="Propuesta de draft con IA"
+        blur="lg"
+        wire:model="showAiDraftModal"
+        max-width="5xl"
+        persistent
+    >
+        <div class="space-y-4">
+            @if (!$aiDraftResult)
+                <div class="rounded-lg border border-violet-500/20 bg-violet-500/5 p-4 text-sm text-gray-600 dark:text-gray-300">
+                    OpenRouter recibirá únicamente el contexto estructurado del calendario actual
+                    @if ($aiDraftSectionId)
+                        y las lessons de la sección #{{ $aiDraftSectionId }}.
+                    @endif
+                    La respuesta será validada localmente y no publicará ni escribirá slots automáticamente.
+                </div>
+                @if ($aiDraftError)
+                    <div class="rounded-lg border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-600 dark:text-red-300">
+                        {{ $aiDraftError }}
+                    </div>
+                @endif
+            @else
+                @if ($aiDraftResult['success'] ?? false)
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
+                        <div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+                                {{ ($aiDraftResult['status'] ?? '') === 'validated' ? 'Propuesta validada' : 'Propuesta parcial' }}
+                            </div>
+                            <div class="mt-1 text-sm text-gray-700 dark:text-gray-200">
+                                La propuesta está en revisión y todavía no modifica la base de datos.
+                            </div>
+                        </div>
+                        <div class="text-right text-[10px] text-gray-500 dark:text-gray-400">
+                            <div>Modelo: {{ $aiDraftResult['model'] ?? 'no disponible' }}</div>
+                            <div>Movimientos: {{ count($aiDraftResult['proposal']['moves'] ?? []) + count($aiDraftResult['proposal']['assignments'] ?? []) }}</div>
+                        </div>
+                    </div>
+                    @if (!empty($aiDraftResult['proposal']['summary']['objective']))
+                        <p class="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-gray-700 dark:text-gray-300">
+                            {{ $aiDraftResult['proposal']['summary']['objective'] }}
+                        </p>
+                    @endif
+                    @if (!empty($aiDraftResult['readiness']['hard_conflicts']))
+                        <div class="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm text-red-600 dark:text-red-300">
+                            La propuesta tiene un JSON válido, pero el calendario completo todavía presenta conflictos bloqueantes. No puede aplicarse al preview hasta resolverlos.
+                            <ul class="mt-2 list-disc space-y-1 pl-5 text-xs">
+                                @foreach ($aiDraftResult['readiness']['hard_conflicts'] as $conflict)
+                                    <li>
+                                        {{ $conflict['title'] ?? 'Conflicto bloqueante' }}
+                                        · lesson #{{ $conflict['lesson_id'] ?? '?' }}
+                                        @if (!empty($conflict['period']))
+                                            · {{ $conflict['period'] }}
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    <details class="rounded-lg border border-gray-200 dark:border-white/10">
+                        <summary class="cursor-pointer px-4 py-3 text-xs font-bold uppercase tracking-widest text-gray-500">
+                            Ver JSON validado
+                        </summary>
+                        <pre class="max-h-72 overflow-auto border-t border-gray-200 px-4 py-3 text-[11px] text-gray-700 dark:border-white/10 dark:text-gray-300">{{ json_encode($aiDraftResult['proposal'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+                    </details>
+                @else
+                    <div class="rounded-lg border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-600 dark:text-red-300">
+                        {{ $aiDraftResult['error'] ?? $aiDraftError ?? 'La propuesta fue rechazada.' }}
+                    </div>
+                    @if (!empty($aiDraftResult['errors']))
+                        <ul class="list-disc space-y-1 pl-5 text-xs text-red-600 dark:text-red-300">
+                            @foreach ($aiDraftResult['errors'] as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                @endif
+            @endif
+        </div>
+        <x-slot name="footer">
+            <div class="flex w-full flex-wrap justify-end gap-2">
+                <button type="button" wire:click="$set('showAiDraftModal', false)"
+                    class="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
+                    Cerrar
+                </button>
+                @if (!$aiDraftResult)
+                    <button type="button" wire:click="generateAiDraft" wire:loading.attr="disabled" wire:target="generateAiDraft"
+                        class="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-700 disabled:opacity-50">
+                        <span wire:loading.remove wire:target="generateAiDraft">Generar propuesta</span>
+                        <span wire:loading wire:target="generateAiDraft">Consultando OpenRouter…</span>
+                    </button>
+                @elseif (($aiDraftResult['success'] ?? false) && ($aiDraftResult['status'] ?? null) === 'validated')
+                    <button type="button" wire:click="applyAiDraftToPreview" wire:loading.attr="disabled" wire:target="applyAiDraftToPreview"
+                        class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">
+                        Aplicar al preview
+                    </button>
+                @endif
+            </div>
         </x-slot>
     </x-modal-card>
 
@@ -2886,6 +3070,9 @@
                         <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
                             {{ $availableLesson->pevaluacion?->seccion?->grado?->name ? $availableLesson->pevaluacion->seccion->grado->name.' · ' : '' }}Sección {{ $availableLesson->pevaluacion?->seccion?->name ?? '—' }}
                             @if ($teacherName) · {{ $teacherName }} @endif
+                            @if ($availableLesson->pevaluacion?->grupoEstable?->name)
+                                · Grupo estable: {{ $availableLesson->pevaluacion->grupoEstable->name }}
+                            @endif
                             @if ($isGradeCandidate) · Nueva en este calendario @endif
                         </span>
                     </span>

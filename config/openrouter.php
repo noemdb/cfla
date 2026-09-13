@@ -29,6 +29,17 @@ return [
 
     'timeout' => env('OPENROUTER_TIMEOUT', 60),
 
+    'timetable_ai_enabled' => env('TIMETABLE_AI_ENABLED', false),
+    'timetable_ai_openrouter_model' => env('TIMETABLE_AI_OPENROUTER_MODEL', 'qwen/qwen3-32b'),
+    'timetable_ai_openrouter_max_tokens' => env('TIMETABLE_AI_OPENROUTER_MAX_TOKENS', 8192),
+    'timetable_ai_openrouter_temperature' => env('TIMETABLE_AI_OPENROUTER_TEMPERATURE', 0.7),
+    'timetable_ai_openrouter_timeout' => env('TIMETABLE_AI_OPENROUTER_TIMEOUT', 300),
+    'timetable_ai_max_context_chars' => env('TIMETABLE_AI_MAX_CONTEXT_CHARS', 180000),
+    'timetable_ai_max_tokens' => env('TIMETABLE_AI_MAX_TOKENS', 8192),
+    'timetable_ai_temperature' => env('TIMETABLE_AI_TEMPERATURE', 0.1),
+    'timetable_ai_timeout' => env('TIMETABLE_AI_TIMEOUT', 300),
+    'timetable_ai_max_moves' => env('TIMETABLE_AI_MAX_MOVES', 100),
+
     /*
     |--------------------------------------------------------------------------
     | Model fallback chain (used by lesson wizard AI generation)

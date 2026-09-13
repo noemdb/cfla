@@ -16,4 +16,22 @@ return [
 
     'legacy_csv_dir' => env('TIMETABLE_LEGACY_CSV_DIR', base_path('blueprint/school-timetable/legacy/csv')),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Solver — estrategia con fallback (PLAN-TIMETABLE-SOLVER-FALLBACK-001)
+    |--------------------------------------------------------------------------
+    |
+    | budget_seconds: presupuesto total de la cadena de intentos por corrida.
+    | attempt_seconds: deadline de cada intento (salvo el primero, que recibe
+    |   la mitad del presupuesto para no penalizar el orden original).
+    | restarts: número de reinicios aleatorios deterministas (ORDER_RANDOM).
+    |
+    */
+
+    'solver' => [
+        'budget_seconds' => (int) env('TIMETABLE_SOLVER_BUDGET_SECONDS', 30),
+        'attempt_seconds' => (int) env('TIMETABLE_SOLVER_ATTEMPT_SECONDS', 8),
+        'restarts' => (int) env('TIMETABLE_SOLVER_RESTARTS', 6),
+    ],
+
 ];

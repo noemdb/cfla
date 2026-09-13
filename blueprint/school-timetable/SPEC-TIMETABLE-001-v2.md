@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | Draft v2.1 — nivel implementación (multi-calendario por lapso vía ADR-TT-014 / `PLAN-TIMETABLE-002`) |
+| **Estado** | Contrato de implementación v2.2 — normativo (multi-calendario por `pestudio_id`) |
 | **Stack** | Laravel 10 · Livewire 3 · Alpine.js · Tailwind 3 · MariaDB (db `s2627`, driver `mysql`) |
 | **Autor** | Staff Engineer spec para agente de código |
 | **Punto de partida** | `blueprint/school-timetable/specDrive01.md` (spec semilla de dominio genérico) |
@@ -16,6 +16,52 @@
 > **son** `Asignatura.hour_t_week`/`hour_p_week`, y la estructura
 > Pestudio→Grado→Seccion→Estudiant ya existe. Se añade solo lo que falta:
 > turnos (mañana/tarde), períodos, aulas, disponibilidad, resultado y ausencias.
+
+> **Regla de precedencia:** este documento, especialmente la sección
+> **Invariantes vigentes**, prevalece sobre cualquier DDL, pseudocódigo, ADR o
+> documento histórico que conserve una decisión anterior. Los fragmentos de
+> código de este documento son contractuales solo cuando están marcados como
+> contrato; el código ejecutable vigente y sus migraciones aplicadas son la
+> referencia de compatibilidad durante la transición.
+
+---
+
+## Invariantes vigentes (contrato obligatorio)
+
+Estas reglas son la fuente normativa para cualquier implementación nueva,
+migración, lector, solver o componente Livewire:
+
+1. **Calendarios:** puede haber múltiples calendarios por `lapso_id`, pero solo
+   uno `active` por `pestudio_id`. Planes distintos pueden estar activos en el
+   mismo lapso. La garantía de base de datos es `active_pestudio_key` +
+   `uq_active_pestudio`.
+2. **Catálogos:** no se duplican materias, docentes, grados, secciones ni
+   estudiantes. `Pevaluacion` es la fuente de la lesson.
+3. **Slots:** un dry-run, preview o propuesta IA no modifica
+   `timetable_slots`. Solo una operación explícita y validada puede persistir.
+4. **Concurrencia:** toda aplicación de preview comprueba `calendar.version` y
+   el `snapshot_hash` de la asignación que fue revisada. Si cambió, se rechaza
+   y se solicita recarga.
+5. **Recreos:** nunca reciben slots.
+6. **Ocupación docente:** un docente no puede tener dos asignaciones en el mismo
+   período, salvo la excepción explícita y validada de lessons de medio grupo.
+7. **Ocupación de sección:** una lesson de sección completa bloquea toda la
+   sección. Dos grupos estables distintos pueden compartir período solo si la
+   validación de grupos/medio grupo lo permite.
+8. **Aulas:** un `room_id` no puede repetirse en un período. `room_id = null`
+   significa que no se reserva un espacio dedicado; no significa aula ilimitada.
+9. **Turnos:** `optimized` trata `shift_id` como preferencia; `legacy` y lessons
+   `locked` lo tratan como restricción dura. Toda desviación permitida se
+   reporta como warning.
+10. **IA:** OpenRouter solo propone datos estructurados. Nunca puede publicar,
+    escribir slots directamente, cambiar permisos ni sustituir validaciones
+    locales.
+11. **Auditoría:** los cambios manuales se registran en
+    `timetable_change_logs`; no se asume una columna `updated_by` en
+    `timetable_slots` salvo migración normativa posterior.
+12. **Compatibilidad:** los DDL y pseudocódigos históricos de este archivo no
+    pueden utilizarse para revertir extensiones ya aplicadas sin una migración
+    explícita y revisión de datos.
 
 ---
 
@@ -78,21 +124,25 @@ CREATE TABLE timetable_shifts (
     end_time TIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Varios calendarios por lapso (PLAN-TIMETABLE-002 / ADR-TT-014): N borradores/
--- alternativas, máximo UNO activo. La columna generada STORED solo aporta clave
--- cuando status='active': los NULL no colisionan en índice único (I-2).
+-- Varios calendarios por lapso: N borradores/alternativas y máximo UNO activo
+-- por pestudio_id. Los planes de estudio distintos pueden estar activos en el
+-- mismo lapso. Los NULL no colisionan en un índice único.
 CREATE TABLE timetable_calendars (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     lapso_id BIGINT UNSIGNED NOT NULL,  -- FK → lapsos (período académico)
     pescolar_id BIGINT UNSIGNED NULL,   -- FK → pescolars (año escolar, opcional)
     name VARCHAR(120) NOT NULL,
     status ENUM('draft','generating','active','archived') DEFAULT 'draft',
-    active_lapso_key VARCHAR(20) GENERATED ALWAYS AS (IF(status='active', CONCAT('L', lapso_id), NULL)) STORED,
+    pestudio_id BIGINT UNSIGNED NULL,
+    active_pestudio_key VARCHAR(24) GENERATED ALWAYS AS (
+        IF(status='active' AND pestudio_id IS NOT NULL, CONCAT('P', pestudio_id), NULL)
+    ) VIRTUAL,
     period_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 45,
     version INT UNSIGNED NOT NULL DEFAULT 0,  -- §15 bloqueo optimista (por calendario)
     created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-    UNIQUE KEY uq_active_lapso (active_lapso_key),
+    UNIQUE KEY uq_active_pestudio (active_pestudio_key),
     CONSTRAINT fk_cal_lapso FOREIGN KEY (lapso_id) REFERENCES lapsos(id) ON DELETE CASCADE
+    -- En el esquema ejecutado, pestudio_id referencia pestudios.id.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Períodos/bloques del día, agrupados por turno.
@@ -163,14 +213,23 @@ CREATE TABLE timetable_slots (
     period_id BIGINT UNSIGNED NOT NULL,    -- FK → timetable_periods (implica día y turno)
     profesor_id BIGINT UNSIGNED NOT NULL,  -- FK → profesors (desnormalizado)
     seccion_id BIGINT UNSIGNED NOT NULL,   -- FK → seccions (desnormalizado)
+    grupo_estable_id BIGINT UNSIGNED NULL,
+    is_half_group BOOLEAN NOT NULL DEFAULT false,
+    slot_section_key VARCHAR(64) GENERATED ALWAYS AS (
+        IF(is_half_group = 1 AND grupo_estable_id IS NOT NULL,
+            CONCAT('S', seccion_id, ':G', grupo_estable_id),
+            CONCAT('S', seccion_id, ':0')
+        )
+    ) VIRTUAL,
     room_id BIGINT UNSIGNED NULL,          -- FK → timetable_rooms
+    is_practical BOOLEAN NOT NULL DEFAULT false,
     is_manual_override BOOLEAN NOT NULL DEFAULT false,
     locked BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
     -- Índices de integridad (reglas duras a nivel BD):
     -- un docente / una sección / un aula no pueden repetirse en el mismo período.
     UNIQUE KEY uq_slot_teacher (calendar_id, period_id, profesor_id),
-    UNIQUE KEY uq_slot_section (calendar_id, period_id, seccion_id),
+    UNIQUE KEY uq_slot_section (calendar_id, period_id, slot_section_key),
     UNIQUE KEY uq_slot_room (calendar_id, period_id, room_id),  -- NULL no colisiona en MySQL
     UNIQUE KEY uq_slot_lesson (calendar_id, period_id, lesson_id),
     CONSTRAINT fk_slot_cal FOREIGN KEY (calendar_id) REFERENCES timetable_calendars(id) ON DELETE CASCADE,
@@ -237,10 +296,11 @@ no se bloquean entre sí.
 - **Períodos:** `timetable_periods` se crean por turno y día (orden en el día,
   `start_time`, `end_time`, `is_break` para recreos). El recreo es un período
   marcado `is_break` que nunca recibe slots.
-- **Asignación de turno a sección:** en `timetable_lessons.shift_id`. La
-  coordinación decide el turno de cada sección al crear las lecciones; el motor
-  respeta que `lesson.shift_id == period.shift_id` (regla dura
-  `shift_mismatch`).
+- **Asignación de turno:** `timetable_lessons.shift_id` es la preferencia de la
+  sección/lección en estrategia `optimized`. El motor prueba primero ese turno
+  y puede usar otro si no existe capacidad, registrando la desviación. En
+  estrategia `legacy` y para una lesson `locked`, el turno es una restricción
+  dura (`shift_mismatch`).
 - **Horas → bloques:** para cada lección, el número de bloques semanales se
   deriva de `Asignatura.hour_t_week`/`hour_p_week` y `period_minutes`:
   `weekly_blocks_t = ceil(hour_t_week * 60 / period_minutes)` y
@@ -257,7 +317,7 @@ con `currentStep`, sin clases de pasos separadas, layout `coordinacion.layouts.a
 
 | Paso | Contenido | Validación |
 |---|---|---|
-| **1 · Calendario** | Elegir `Lapso`; se listan las **alternativas (calendarios)** del lapso (N borradores, máximo 1 activo, ADR-TT-014) con acciones Continuar/Activar/Eliminar(borrador); crear un nuevo borrador con `period_minutes`, turnos M/T y períodos por día (con recreos) | Lapso activo; `timetable_periods` no vacío; nombre de borrador único dentro del lapso |
+| **1 · Calendario** | Elegir `Lapso` y `Pestudio`; se listan las **alternativas (calendarios)** del plan (N borradores, máximo 1 activo por `pestudio_id`, ADR-TT-014) con acciones Continuar/Activar/Eliminar(borrador); crear un nuevo borrador con `period_minutes`, turnos M/T y períodos por día (con recreos) | Lapso y plan válidos; `timetable_periods` no vacío; nombre de borrador único dentro del lapso/plan |
 | **2 · Aulas** | CRUD de `timetable_rooms` (código único, capacidad, tipo) | `code` único, `capacity ≥ 1` |
 | **3 · Lecciones** | Seleccionar pevaluacions del lapso (de `Pevaluacion::where('lapso_id', ...)`), asignar turno, revisar bloques teóricos/prácticos derivados, `room_type_required`, prioridad | 1 pev por lección; bloques > 0; sección con turno coherente |
 | **4 · Disponibilidad** | Grilla día×período por docente (`timetable_teacher_availability`), con preset "todo disponible" | Al menos el turno de sus secciones |
@@ -305,7 +365,10 @@ Salida:  timetable_slots completos o solución parcial + infactibilidad
 ```
 
 **Reglas duras (nunca se violan):** docente doble, aula doble, sección doble,
-periodo en otro turno, disponibilidad marcada como no disponible.
+disponibilidad marcada como no disponible, período de recreo y turno incompatible
+con una lesson `locked` o con la estrategia `legacy`. En `optimized`, salir del
+turno preferido es permitido solo como degradación explícita y debe quedar en
+los warnings del resultado; no se presenta como coincidencia de turno.
 
 **Test de aceptación mínimos:** (a) dataset sintético factible pequeño → horario
 completo sin conflictos; (b) dataset infactible (docente sobresaturado) → reporta
@@ -333,6 +396,9 @@ final class LessonToSchedule
         public readonly int $priority,
         public readonly bool $locked,
         public readonly array $lockedPeriodIds = [], // si locked=true, períodos ya fijados
+        public readonly bool $isHalfGroup = false,
+        public readonly ?int $grupoEstableId = null,
+        public readonly array $preassignedSlots = [],
     ) {}
 
     public function blocksNeeded(): int { return $this->blocksT + $this->blocksP; }
@@ -547,11 +613,34 @@ nueva, `DECIMAL(8,2) NULL`) para que coordinación pueda comparar regeneraciones
 - serializa el resultado a `timetable_calendars.preview_payload` (columna
   `JSON NULL` nueva) para que el wizard lo muestre antes de "Confirmar y
   publicar".
-- Confirmar dispara un segundo job liviano que solo persiste el `preview_payload`
-  ya validado (evita recalcular).
+- el payload incluye `calendar_version`, `snapshot_hash`, `assignment`,
+  `unassigned`, warnings, score y metadatos de estrategia;
+- confirmar valida nuevamente versión, hash, IDs, períodos, aulas y conflictos;
+  solo después persiste el payload validado en slots;
+- si la versión o el hash cambiaron, se rechaza sin tocar slots y se solicita
+  generar una nueva previsualización;
+- una propuesta parcial nunca se convierte automáticamente en `active`.
 
 Esto es necesario porque una regeneración accidental sobre un calendario
 `active` no debe pisar el horario en producción sin que coordinación lo revise.
+
+### 6.4 Ocupación de sección, grupos estables y medio grupo
+
+La clave de ocupación de sección se interpreta así:
+
+| Asignación simultánea | Resultado |
+|---|---|
+| Misma sección + mismo grupo estable | Rechazada |
+| Sección completa (`grupo_estable_id = null`) + cualquier grupo | Rechazada |
+| Grupos estables distintos de la misma sección | Permitida solo si el validador confirma compatibilidad |
+| Dos lessons de medio grupo compatibles | Permitida |
+| Mismo docente en lessons de medio grupo compatibles | Permitida por la regla vigente; debe conservar `is_half_group` |
+| Aula dedicada repetida | Rechazada |
+
+La base de datos aporta la clave generada `slot_section_key`; la aplicación
+decide la compatibilidad de grupo estable, medio grupo, docente y sección antes
+de persistir. Nunca se debe eliminar la validación de aplicación para confiar
+solo en el índice.
 
 ---
 
@@ -640,7 +729,7 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 | **TT-002** | Integridad de conflictos en aplicación + índices únicos en BD | Defensa en profundidad (igual que ADR-004 de binnacle) |
 | **TT-003** | Orden de asignación por "grado de restricción" (heurística), no aleatorio | Mayor ratio de éxito del backtracking sin solver externo |
 | **TT-004** | Horas teóricas/prácticas derivadas de `Asignatura` pero ajustables en la lección | La asignatura define el default; la coordinación puede afinar |
-| **TT-005** | Turno es propiedad de la lección (sección), no del período global | Una sección entera comparte turno; el motor cruza `lesson.shift == period.shift` |
+| **TT-005** | `shift_id` es preferencia en `optimized`, pero restricción dura en `legacy` y para lessons locked | Conserva capacidad de recuperación sin ocultar desviaciones de turno |
 | **TT-006** | `is_coordinacion` e `is_planner` comparten el mismo set de permisos en el módulo | Flags nominales distintos (rol de UI "Coordinación"/"Planificación") con idéntico alcance operativo sobre el horario |
 | **TT-007** | Regenerar un calendario `active` siempre pasa por modo `dryRun`; los slots/lecciones `locked` se preservan íntegros | Nunca se pisa un horario publicado sin revisión explícita; lo fijado a mano no se reasigna |
 | **TT-008** | `roomBusy` en `SchedulingContext` solo se toca cuando `roomId !== null` | Evita que "periodId:" con `roomId=null` colisione entre secciones sin aula dedicada |
@@ -649,7 +738,9 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 | **TT-011** | Pool de candidatos del solver **adaptativo** y combinaciones con corte temprano | `C(14,7)=3432` era acotado pero un tope fijo de 14 huérfanaba lecciones de >14 bloques; ahora `pool = clamp(max(14, n), 26)` y `combine()` corta al llegar a `MAX_COMBOS_PER_LESSON`/presupuesto de nodos, y si `n > m/2` se generan combinaciones de EXCLUSIONES complementadas (`C(26,25)` se resuelve como `C(26,1)`) |
 | **TT-012** | Suplencias v1.2: registro de ausencia → slots afectados (por `day_of_week`) → suplente sugerido → asignación `pending` → notificación al suplente por cola | El suplente confirma/rechaza desde su bandeja; la asignación nunca es auto-confirmada |
 | **TT-013** | Leadership y Dirección acceden al horario **solo lectura** (cualquier sección del calendario activo), sin editor ni generación | Matriz RBAC §9: lectura para supervisión, escritura exclusiva coordinación/planning |
-| **TT-014** | Un lapso admite **N calendarios** (borradores/alternativas) con **máximo UNO `active`**; activar uno archiva al activo anterior del mismo lapso. Garantía dura: columna generada `active_lapso_key` + índice único `uq_active_lapso`. Lectores resuelven el **activo del lapso vigente** (`activeForCurrentLapso()`). Implementación: `PLAN-TIMETABLE-002` | Permite comparar/promover alternativas sin rediseñar conflictos ni el read-side; `archived` deja de ser código muerto; `version` sigue siendo por-calendario (I-4, I-6) |
+| **TT-014** | Un lapso admite **N calendarios** y cada `pestudio_id` admite como máximo UNO `active`; activar uno archiva el activo anterior del mismo plan. Garantía dura: `active_pestudio_key` + `uq_active_pestudio`. | Permite planes activos simultáneos y evita que un calendario de otro plan sea archivado |
+| **TT-015** | Medio grupo y grupo estable se validan por clave de ocupación de sección | Una sección completa bloquea la sección; grupos estables distintos pueden coexistir cuando la regla de compatibilidad lo permite |
+| **TT-016** | El preview es una representación versionada, no persistencia de slots | Dry-run y propuesta IA no modifican slots; aplicar exige versión/hash vigente y validación completa |
 
 ---
 
@@ -679,32 +770,34 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 - **Suplentes sin disponibilidad declarada**: el sistema sugiere con aviso
   (no bloquea); coordinación decide. La confirmación del suplente es explícita
   (ADR-TT-012).
-- **Carga docente cruzada entre lapsos**: un calendario por lapso es lo mínimo;
-  si la carga cambia entre lapsos, se crea un calendario por lapso (ya cubierto
-  por `uq_calendar_lapso`).
+- **Carga docente cruzada entre planes/lapsos**: se crea un calendario por
+  `pestudio_id` y lapso; la unicidad de activos es por plan (`uq_active_pestudio`).
 - **Docentes que dictan en ambos turnos**: el motor permite slots en M y T para
   el mismo docente, penalizando huecos y cruces diarios (soft).
 - **Recreos y horas especiales** (actos, deporte): períodos `is_break` y aulas
   tipo `patio/cancha` cubren la mayoría; casos puntuales se resuelven con slots
   manuales `locked`.
-- **Horas prácticas sin laboratorio**: si `room_type_required` se deja nulo, el
-  motor usa cualquier aula libre (el desglose T/P sigue siendo informativo).
+- **Semántica de aulas:** un bloque teórico normalmente usa `room_id = null`;
+  un bloque práctico requiere un aula compatible. Si
+  `room_type_required` es nulo, se permite cualquier aula activa compatible,
+  pero no se interpreta como aula ilimitada.
 
 ---
 
 ## 14. Máquina de estados — `timetable_calendars.status`
 
-**v2.1 (ADR-TT-014):** un lapso tiene **N calendarios** (`draft`/`generating`/
-`archived`/`active`), con **máximo UNO `active`** (columna generada `uq_active_lapso`).
+**v2.2 (ADR-TT-014):** un lapso tiene **N calendarios** (`draft`/`generating`/
+`archived`/`active`), con **máximo UNO `active` por `pestudio_id`**
+ (columna generada `uq_active_pestudio`).
 El `version` (§15) es **por calendario**.
 
 ```
 draft ──(wizard paso 5: "Generar")──▶ generating
 generating ──(solver termina, dry_run=false)──▶ draft   (si hay lecciones sin asignar → revisar)
-generating ──(solver termina, todo asignado, dry_run=false)──▶ active   (+ archiva al activo anterior del lapso)
+generating ──(solver termina, todo asignado, dry_run=false)──▶ active   (+ archiva al activo anterior del mismo pestudio)
 generating ──(solver termina, dry_run=true)──▶ draft    (con preview_payload listo para revisar)
 active ──(coordinación edita a mano vía §7)──▶ active   (no cambia de estado; slots individuales se marcan is_manual_override)
-active ──(se activa OTRA alternativa del mismo lapso)──▶ archived   (democión automática, persist()/activate())
+active ──(se activa OTRA alternativa del mismo pestudio)──▶ archived   (democión automática, persist()/activate())
 active ──(coordinación dispara "Regenerar")──▶ generating  (requiere confirmación explícita, ADR-TT-007)
 active ──(cierre de lapso)──▶ archived
 archived ──▶ (terminal; solo lectura, no editable; conserva su historial por calendar_id)
@@ -736,8 +829,8 @@ alternativa **no** desactiva al activo vigente del lapso (I-5).
   horario vigente y se la muestra a coordinación (ej. "12 lecciones cambian de
   período, 3 docentes afectados") antes de persistir — reutiliza el mismo
   payload de notificaciones del §10.
-- **Carrera de activación (v2.1, ADR-TT-014):** si dos coordinadores confirman
-  simultáneamente **distintos** borradores del mismo lapso, `uq_active_lapso`
+- **Carrera de activación (v2.2, ADR-TT-014):** si dos coordinadores confirman
+  simultáneamente distintos borradores del mismo `pestudio_id`, `uq_active_pestudio`
   rechaza el segundo; `GenerateTimetableJob::persist()` lo captura
   (`QueryException`), revierte el objetivo a `draft` y lo loguea (equivalente al
   warning de versión). El `version` es **por calendario**, no por lapso.
@@ -761,6 +854,7 @@ class TimetableWizard extends Component
 
     // Paso 5
     public bool $dryRun = true;
+    public ?string $previewSnapshotHash = null;
 
     public function nextStep(): void {}
     public function previousStep(): void {}
@@ -771,7 +865,7 @@ class TimetableWizard extends Component
     public function generate(): void {                    // paso 5, dispara job §6
         // valida status == draft, encola GenerateTimetableJob($this->calendarId, dryRun: $this->dryRun)
     }
-    public function confirmPreview(): void {}              // solo si dryRun=true y hay preview_payload
+    public function confirmPreview(): void {}              // valida version/hash y aplica el preview
 
     #[On('timetable.generated')]                           // evento del job (§6, Reverb)
     public function onGenerated(int $calendarId): void {}

@@ -34,7 +34,7 @@ class TimetablePublicationReadinessService
                 }
 
                 return $this->isActive($pevaluacion->seccion?->status_active)
-                    && $this->isActive($pevaluacion->grado?->status_active);
+                    && $this->isActive($pevaluacion->seccion?->grado?->status_active);
             })
             ->keyBy('id');
         $periods = $calendar->periods()->get()->keyBy('id');
