@@ -2568,19 +2568,6 @@
                                     <span wire:loading wire:target="downloadDryRunResult">Preparando…</span>
                                 </button>
                                 <button type="button"
-                                    wire:click="persistCurrentSectionSlots"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:target="persistCurrentSectionSlots"
-                                    title="Guardar en la base de datos los slots de la sección activa"
-                                    class="inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-300">
-                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l4 4L19 6"/>
-                                    </svg>
-                                    <span wire:loading.remove wire:target="persistCurrentSectionSlots">Guardar sección</span>
-                                    <span wire:loading wire:target="persistCurrentSectionSlots">Guardando…</span>
-                                </button>
-                                <button type="button"
                                     wire:click="downloadCurrentSectionSlotsBackup({{ (int) $activeSeccionId }})"
                                     wire:loading.attr="disabled"
                                     wire:loading.class="opacity-50 cursor-not-allowed"
@@ -3117,6 +3104,30 @@
         </x-slot>
     </x-modal-card>
 @endif
+
+    @if (in_array($generationState, ['preview_ready', 'published'], true) && $preview
+        && is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
+        <button type="button"
+            wire:click="persistCurrentSectionSlots"
+            wire:loading.attr="disabled"
+            wire:loading.class="opacity-50 cursor-not-allowed"
+            wire:target="persistCurrentSectionSlots"
+            title="Guardar en la base de datos los slots de la sección activa"
+            class="fixed z-40 w-12 h-12 rounded-full bottom-40 right-6 bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 hover:scale-110 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-300 group">
+            <span wire:loading.remove wire:target="persistCurrentSectionSlots" class="flex items-center justify-center">
+                <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l4 4L19 6"/>
+                </svg>
+                <span class="sr-only">Guardar sección</span>
+            </span>
+            <span wire:loading wire:target="persistCurrentSectionSlots" class="absolute inset-0 flex items-center justify-center">
+                <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </span>
+        </button>
+    @endif
 
     @include('coordinacion.help-timetable-wizard')
 </div>

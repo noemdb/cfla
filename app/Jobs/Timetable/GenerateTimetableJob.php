@@ -459,9 +459,16 @@ class GenerateTimetableJob implements ShouldQueue
             // Preserve lesson IDs as array keys; merge() reindexes numeric keys
             // and makes the preview grid unable to resolve lesson assignments.
             $assignment = $assignment + $untouchedAssignment;
+            // Solo se preservan lecciones de secciones/grados ACTIVOS: los de
+            // grados inactivos no deben inflar los motivos de no asignación.
+            $activeLessonIds = $this->activeSectionLessons($calendar)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
             $unassigned = collect($previous['unassigned'] ?? [])
                 ->filter(fn ($lessonId) => ! in_array((int) $lessonId, $scopedLessonIds, true))
-                ->merge($partialUntouchedIds)
+                ->filter(fn ($lessonId) => in_array((int) $lessonId, $activeLessonIds, true))
+                ->merge(collect($partialUntouchedIds)->filter(fn ($lessonId) => in_array((int) $lessonId, $activeLessonIds, true)))
                 ->merge($unassigned)
                 ->map(fn ($lessonId) => (int) $lessonId)
                 ->unique()

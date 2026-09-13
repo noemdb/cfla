@@ -5791,17 +5791,67 @@ PROMPT;
 
         $this->preview = [
             'dry_run' => false,
-            'assignment' => $assignment,
-            'unassigned' => array_values(array_unique($unassigned)),
+            'assignment' => $this->onlyActiveLessons($assignment, $calendar),
+            'unassigned' => array_values(array_unique($this->onlyActiveLessons($unassigned, $calendar))),
             'assignment_source' => 'published_slots',
             'strategy' => $calendar->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
             'timed_out' => false,
             'elapsed_seconds' => 0,
-            'assignment_diagnostics' => $diagnostics,
+            'assignment_diagnostics' => $this->onlyActiveDiagnostics($diagnostics, $calendar),
         ];
         $this->generationState = $calendar->status === TimetableCalendar::STATUS_ACTIVE
             ? 'published'
             : 'preview_ready';
+    }
+
+    /**
+     * Ids de lecciones de secciones y grados ACTIVOS del plan del calendario.
+     *
+     * @return array<int, bool>
+     */
+    private function activeLessonSet(TimetableCalendar $calendar): array
+    {
+        return $calendar->lessons()
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', function ($query) use ($calendar): void {
+                $query->where('grados.status_active', 'true');
+
+                if ($calendar->pestudio_id) {
+                    $query->where('grados.pestudio_id', $calendar->pestudio_id);
+                }
+            })
+            ->pluck('id')
+            ->mapWithKeys(fn ($id): array => [(int) $id => true])
+            ->all();
+    }
+
+    /**
+     * Filtra un mapa lessonId => slots (o lista de ids) a lecciones activas.
+     *
+     * @param  array<int|string, mixed>  $items
+     * @return array<int|string, mixed>
+     */
+    private function onlyActiveLessons(array $items, TimetableCalendar $calendar): array
+    {
+        $active = $this->activeLessonSet($calendar);
+
+        return collect($items)
+            ->filter(fn ($value, $key): bool => isset($active[(int) $key]))
+            ->all();
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $diagnostics
+     * @return list<array<string, mixed>>
+     */
+    private function onlyActiveDiagnostics(array $diagnostics, TimetableCalendar $calendar): array
+    {
+        $active = $this->activeLessonSet($calendar);
+
+        return collect($diagnostics)
+            ->filter(fn (array $row): bool => isset($active[(int) ($row['lesson_id'] ?? 0)]))
+            ->values()
+            ->all();
     }
 
     /**
