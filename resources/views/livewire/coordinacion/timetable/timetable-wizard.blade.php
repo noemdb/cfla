@@ -1391,7 +1391,7 @@
                 @endif
 
                 <div class="rounded-lg border border-gray-200 dark:border-white/10">
-                    @php $lockedSectionSet = $this->lockedSectionIdSet(); @endphp
+                    @php $lockedSectionSet = $lockedSectionIdSet; @endphp
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800/80">
                             <tr class="text-left text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
@@ -2352,7 +2352,7 @@
                                             class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                             {{ $step5SectionTab !== 'formats' && (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                             {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
-                                            @if (is_numeric($opt['id']) && $this->sectionTimetableLocked((int) $opt['id']))
+                                            @if (is_numeric($opt['id']) && isset($lockedSectionIdSet[(int) $opt['id']]))
                                                 <svg class="inline h-3 w-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                                                 </svg>
@@ -2736,7 +2736,7 @@
                                     <span wire:loading wire:target="downloadDryRunResult" class="sr-only">Preparando…</span>
                                 </button>
                                 @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
-                                    @php $sectionLocked = $this->activeSectionTimetableLocked(); @endphp
+                                    @php $sectionLocked = $activeSectionLocked; @endphp
                                     <button type="button"
                                         wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
                                         title="{{ $sectionLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
@@ -2756,7 +2756,7 @@
                             </div>
                             @php
                                 $sectionLockedGrid = is_numeric($activeSeccionId) && (int) $activeSeccionId > 0
-                                    ? $this->activeSectionTimetableLocked()
+                                    ? $activeSectionLocked
                                     : false;
                             @endphp
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)

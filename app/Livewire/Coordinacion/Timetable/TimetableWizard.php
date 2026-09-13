@@ -7624,6 +7624,8 @@ PROMPT;
             'tabGradoOptions' => $tabData['tabGradoOptions'],
             'tabSeccionOptions' => $tabData['tabSeccionOptions'],
             'tabActivePevaluaciones' => $tabData['tabActivePevaluaciones'],
+            'lockedSectionIdSet' => $this->lockedSectionIdSet(),
+            'activeSectionLocked' => $this->activeSectionTimetableLocked(),
             'savedPevIds' => $savedPevIds,
             'step3Warnings' => $step3Warnings,
             'generationConflictGroups' => $generationConflictGroups,
