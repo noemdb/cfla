@@ -4851,6 +4851,76 @@ PROMPT;
     }
 
     /**
+     * Genera un draft para la sección activa usando el solver (sin IA):
+     * ejecuta el dry-run acotado a las lessons de la sección actual.
+     */
+    public function generateSectionDraft(): void
+    {
+        if (! $this->calendarId || ! is_numeric($this->activeSeccionId) || (int) $this->activeSeccionId <= 0) {
+            $this->notification()->warning(
+                'Sección requerida',
+                'Selecciona una sección en el paso 5 antes de generar el draft.',
+            );
+
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            $this->notification()->error('Calendario no encontrado', 'No se pudo generar el draft.');
+
+            return;
+        }
+
+        $sectionId = (int) $this->activeSeccionId;
+        $pevIds = Pevaluacion::query()
+            ->where('lapso_id', $calendar->lapso_id)
+            ->where('seccion_id', $sectionId)
+            ->whereHas('seccion.grado', fn ($q) => $q->where('pestudio_id', $calendar->pestudio_id))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($pevIds === []) {
+            $this->notification()->warning(
+                'Sin lessons',
+                'La sección activa no tiene lessons en este calendario.',
+            );
+
+            return;
+        }
+
+        $this->aiDryRunAnalysis = null;
+        $this->aiDryRunAnalysisModel = null;
+        $this->showAiAnalysisModal = false;
+        $this->busy = true;
+        $this->generationState = 'generating';
+
+        try {
+            GenerateTimetableJob::dispatchSync(
+                $this->calendarId,
+                dryRun: true,
+                pevaluacionIds: $pevIds,
+            );
+            $calendar = TimetableCalendar::find($this->calendarId);
+            $this->preview = $calendar?->preview_payload;
+            if ($this->preview) {
+                $this->preview['generated_assignment'] = $this->preview['assignment'] ?? [];
+                $this->preview['generated_unassigned'] = $this->preview['unassigned'] ?? [];
+                $this->preview['preview_history'] = [];
+            }
+            $this->generationState = 'preview_ready';
+            $this->notification()->success(
+                'Draft de sección generado',
+                'El draft de la sección '.$sectionId.' se generó con el solver (sin IA).',
+            );
+        } finally {
+            $this->busy = false;
+        }
+    }
+
+    /**
      * Descarga un informe JSON auditable del último dry-run.
      */
     public function downloadDryRunResult(?int $seccionId = null)

@@ -2642,6 +2642,19 @@
                                         </svg>
                                         Draft de sección
                                     </button>
+                                    <button type="button"
+                                        wire:click="generateSectionDraft"
+                                        wire:loading.attr="disabled"
+                                        wire:target="generateSectionDraft"
+                                        title="Generar un draft de la sección activa con el solver (sin IA)"
+                                        aria-label="Generar draft de la sección actual con el solver"
+                                        class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                        <span wire:loading.remove wire:target="generateSectionDraft">Draft sección (solver)</span>
+                                        <span wire:loading wire:target="generateSectionDraft">Generando…</span>
+                                    </button>
                                 @endif
                                 </div>
                             </div>
