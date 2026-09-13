@@ -4399,7 +4399,7 @@ class TimetableWizard extends Component
     private function teacherConflictMessage(
         TimetableLesson $lesson,
         TimetableLesson $occupiedLesson,
-        TimetablePeriod $period,
+        TimetablePeriod $period
     ): string {
         $teacher = trim(($lesson->pevaluacion?->profesor?->lastname ?? '').' '.($lesson->pevaluacion?->profesor?->name ?? ''));
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La nueva lección';

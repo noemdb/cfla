@@ -71,7 +71,9 @@ class TimetablePdfController extends Controller
 
     public function teachers(Request $request, $calendarId)
     {
-        $calendar = $this->viewService->activeCalendarOrFail($calendarId);
+        // Este informe también se ofrece desde el selector de calendarios del
+        // wizard, donde el calendario puede seguir siendo un draft.
+        $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $profesorIds = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->whereNotNull('profesor_id')

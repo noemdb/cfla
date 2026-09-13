@@ -107,6 +107,17 @@
                     <span wire:loading.remove wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiar slots</span>
                     <span wire:loading wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiando…</span>
                 </button>
+                <a href="{{ $calendarId ? route($moduleRoutePrefix.'.timetable.pdf.teachers', ['calendar' => $calendarId]) : '#' }}"
+                    target="{{ $calendarId ? '_blank' : '_self' }}"
+                    rel="noopener"
+                    aria-disabled="{{ $calendarId ? 'false' : 'true' }}"
+                    title="Generar un PDF con los horarios de todos los profesores asociados al calendario"
+                    class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ $calendarId ? '' : 'pointer-events-none opacity-50' }}">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z"/>
+                    </svg>
+                    PDF profesores
+                </a>
                 {{-- <button wire:click="openEditCalendarForm"
                     {{ filled($calendarId) ? '' : 'disabled' }}
                     class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ filled($calendarId) ? 'bg-white/5 hover:bg-white/10 text-gray-300 border border-gray-200 dark:border-white/10' : 'bg-white/5 text-gray-500 border border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50' }}">
