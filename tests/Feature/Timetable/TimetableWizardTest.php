@@ -1414,12 +1414,13 @@ class TimetableWizardTest extends TestCase
             ->set('lessons', [
                 $fixture['pev']->id => [
                     'pev_id' => $fixture['pev']->id,
+                    'name' => 'Asignatura de prueba',
                     'shift_id' => 0,
                     'weekly_blocks_t' => 0,
                     'weekly_blocks_p' => 0,
                 ],
             ])
-            ->call('saveLessons')
+            ->call('autosaveLessons')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('timetable_lessons', [

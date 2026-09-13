@@ -165,3 +165,21 @@ horario de **4TO A** es el siguiente:
 | Orientación Vocacional | 2 |
 | Innovación Tecnológica y Productiva | 3 |
 | Lengua y Literatura | 2 |
+
+4to ano
+| Asignatura | Total |
+|---|---:|
+| Biología | 2 |
+| Castellano | 2 |
+| Educación Física | 3 |
+| Química | 2 |
+| Física | 2 |
+| Inglés | 6 |
+| Informática | 2 |
+| Robótica | 2 |
+| Geografía, Historia y Ciudadanía | 2 |
+| Matemática | 2 |
+| Formación Humano Cristiana | 1 |
+| Formación para la Soberanía Nacional | 1 |
+| Seminario de Investigación | 2 |
+| Orientación Vocacional | 1 |

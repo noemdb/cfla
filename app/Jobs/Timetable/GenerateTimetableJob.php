@@ -240,7 +240,9 @@ class GenerateTimetableJob implements ShouldQueue
             );
         }
 
-        $availableByTeacher = $this->buildAvailablePeriods($calendar, $dto);
+        $maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
+        $preservedBusy = $this->preservedBusy($calendar, $dto, $maxSubjectsPerPeriod);
+        $availableByTeacher = $this->buildAvailablePeriods($calendar, $dto, $preservedBusy, $maxSubjectsPerPeriod);
         $roomsByType = $this->buildRoomsByType($calendar);
         $periodMeta = $this->buildPeriodMeta($calendar);
 
@@ -359,10 +361,14 @@ class GenerateTimetableJob implements ShouldQueue
      * los demás turnos del calendario. Así el solver conserva la preferencia
      * del Step 3, pero puede usar otro turno si el preferido queda ocupado.
      *
+     * Se excluyen los períodos ocupados por slots preservados (lecciones que NO
+     * se están resolviendo) para evitar doble-booking de docente/sección.
+     *
      * @param  LessonToSchedule[]  $lessons
+     * @param  array{teacher: array<int,array<int,bool>>, section: array<int,array<int,list<bool>>>}  $preserved
      * @return array<int, list<int>> lessonId => periodIds
      */
-    private function buildAvailablePeriods(TimetableCalendar $calendar, array $lessons): array
+    private function buildAvailablePeriods(TimetableCalendar $calendar, array $lessons, array $preserved = [], int $maxSubjectsPerPeriod = 2): array
     {
         $periods = $calendar->periods()
             ->where('is_break', false)
@@ -375,6 +381,7 @@ class GenerateTimetableJob implements ShouldQueue
         foreach ($lessons as $lesson) {
             $profesorId = $lesson->profesorId;
             $shiftId = $lesson->shiftId;
+            $seccionId = $lesson->seccionId;
 
             $preferredPeriods = $byShift[$shiftId] ?? [];
             $fallbackPeriods = $lesson->locked
@@ -392,12 +399,88 @@ class GenerateTimetableJob implements ShouldQueue
                         $calendar->id,
                         $profesorId,
                         $p,
-                    ),
+                    ) && $this->periodIsFreeOfPreserved($p->id, $profesorId, $seccionId, $lesson->isHalfGroup, $preserved, $maxSubjectsPerPeriod),
                 ),
             ));
         }
 
         return $result;
+    }
+
+    /**
+     * ¿El período está libre de slots preservados (docente y sección)?
+     *
+     * @param  array{teacher: array<int,array<int,bool>>, section: array<int,array<int,list<bool>>>}  $preserved
+     */
+    private function periodIsFreeOfPreserved(
+        int $periodId,
+        int $profesorId,
+        int $seccionId,
+        bool $isHalfGroup,
+        array $preserved,
+        int $maxSubjectsPerPeriod = 2,
+    ): bool {
+        if (isset($preserved['teacher'][$periodId][$profesorId])) {
+            return false;
+        }
+
+        $sectionPreserved = $preserved['section'][$periodId][$seccionId] ?? [];
+
+        if ($sectionPreserved === []) {
+            return true;
+        }
+
+        $fullGroups = count(array_filter($sectionPreserved, fn (bool $half): bool => ! $half));
+
+        // Un grupo completo preservado ocupa la celda; un medio grupo preservado
+        // comparte solo con otro medio grupo (bajo el tope).
+        if ($fullGroups > 0) {
+            return false;
+        }
+
+        if (! $isHalfGroup) {
+            return false;
+        }
+
+        return count($sectionPreserved) < $maxSubjectsPerPeriod;
+    }
+
+    /**
+     * Ocupación de docente/sección por los slots preservados (lecciones que no
+     * forman parte del DTO en resolución). Evita que el solver doble-boquee.
+     *
+     * @param  LessonToSchedule[]  $lessons
+     * @return array{teacher: array<int,array<int,bool>>, section: array<int,array<int,list<bool>>>}
+     */
+    private function preservedBusy(TimetableCalendar $calendar, array $lessons, int $maxSubjectsPerPeriod = 2): array
+    {
+        $dtoLessonIds = [];
+        foreach ($lessons as $lesson) {
+            $dtoLessonIds[(int) $lesson->lessonId] = true;
+        }
+
+        if ($dtoLessonIds === []) {
+            return ['teacher' => [], 'section' => []];
+        }
+
+        $preserved = ['teacher' => [], 'section' => []];
+
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereNotIn('lesson_id', array_keys($dtoLessonIds))
+            ->with('lesson:id,is_half_group')
+            ->get(['id', 'lesson_id', 'period_id', 'profesor_id', 'seccion_id'])
+            ->each(function (TimetableSlot $slot) use (&$preserved): void {
+                $periodId = (int) $slot->period_id;
+                $profesorId = (int) $slot->profesor_id;
+                $seccionId = (int) $slot->seccion_id;
+                $half = (bool) $slot->lesson?->is_half_group;
+
+                $preserved['teacher'][$periodId][$profesorId] = true;
+                $preserved['section'][$periodId][$seccionId][] = $half;
+            });
+
+        return $preserved;
     }
 
     /**
