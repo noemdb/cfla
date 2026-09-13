@@ -6692,7 +6692,6 @@ PROMPT;
                 ->all();
         }
         $publishableSectionIds = $publishableSectionIds
-            ->reject(fn (int $sectionId): bool => $blockedSectionIds->contains($sectionId))
             ->values();
         $publishableLessonIds = $lessons
             ->filter(fn (TimetableLesson $lesson): bool => in_array((int) $lesson->id, $publishableLessonIds, true)
@@ -6827,9 +6826,9 @@ PROMPT;
         $publishablePreview = $this->preview;
         $publishablePreview['assignment'] = $scopedAssignment;
         $publishablePreview['unassigned'] = [];
-        $publishablePreview['partial_publish'] = $blockedSectionIds->isNotEmpty();
+        $publishablePreview['partial_publish'] = false;
         $publishablePreview['published_section_ids'] = $publishableSectionIds->all();
-        $publishablePreview['excluded_section_ids'] = $blockedSectionIds->all();
+        $publishablePreview['excluded_section_ids'] = [];
         $publishablePreview['selected_lesson_ids'] = $selectedLessonIds->all();
         $publishablePreview['preserved_lesson_ids'] = $preservedLessonIds;
 
