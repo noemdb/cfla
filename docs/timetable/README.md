@@ -242,6 +242,7 @@ problema, conservando la mejor solución:
 | `S2` | `scarcity` (docente con menos períodos primero) | Liberar cuellos de botella |
 | `S3` | `blocks_desc` (más bloques primero) | Lecciones difíciles de ubicar |
 | `S4rN` | `random` (Fisher-Yates con semilla) | Reinicios reproducibles |
+| `S7rN` | `repair` (prioriza las lecciones que quedaron sin asignar) | Reubicar bloqueantes (TT-CFP-11) |
 
 - **Keep-best** por cobertura de bloques y, en empate, por `qualityScore`
   (heurística soft §6.2). **Early stop** al alcanzar cobertura total.
@@ -249,6 +250,12 @@ problema, conservando la mejor solución:
   por intento (`solver.attempt_seconds`). Nunca explota en tiempo.
 - **Reproducibilidad**: los reinicios usan semilla fija (`S4r0`, `S4r1`, …).
 - `SolverOutcome` expone `attemptSummary()` que se registra en el canal `timetable`.
+
+**Tiempo real (F5):** el job emite `SolverStarted`, `SolverAttemptCompleted` y
+`SolverCompleted` por el canal público `timetable.{calendarId}` (Reverb), y el log
+de fin incluye `user_id` y `role`. El Step 5 muestra motivos accionables
+(`capacity_exceeded`, `not_found`) y avisa del grid asimétrico / estructura
+incompleta (`incomplete_initial_setup`).
 
 Config (`config/timetable.php`, sobrescribible por env):
 

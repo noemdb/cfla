@@ -5649,13 +5649,12 @@ PROMPT;
 
     private function teacherScheduleOptions(): array
     {
-        if (! $this->calendarId || ! is_numeric($this->activeSeccionId)) {
+        if (! $this->calendarId) {
             return [];
         }
 
         return TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
-            ->whereHas('pevaluacion', fn ($query) => $query->where('seccion_id', (int) $this->activeSeccionId))
             ->with('pevaluacion.profesor')
             ->get()
             ->map(fn (TimetableLesson $lesson): ?array => $lesson->pevaluacion?->profesor ? [
@@ -5672,14 +5671,13 @@ PROMPT;
 
     private function teacherScheduleGrid(): array
     {
-        if (! $this->calendarId || ! $this->teacherScheduleProfesorId || ! is_numeric($this->activeSeccionId)) {
+        if (! $this->calendarId || ! $this->teacherScheduleProfesorId) {
             return [];
         }
 
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
             ->whereHas('pevaluacion', fn ($query) => $query
-                ->where('seccion_id', (int) $this->activeSeccionId)
                 ->where('profesor_id', (int) $this->teacherScheduleProfesorId))
             ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion')
             ->get()

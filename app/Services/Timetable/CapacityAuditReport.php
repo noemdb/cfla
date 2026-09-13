@@ -17,12 +17,18 @@ final class CapacityAuditReport
      * @param  array<int,int>  $periodsByShift  shiftId => períodos no-break
      * @param  array<int, SectionRow>  $sections  seccionId => fila
      * @param  array<int, TeacherRow>  $teachers  profesorId => fila
+     * @param  array<int, array<int,int>>  $periodsByShiftDay  shiftId => day => períodos
+     * @param  list<int>  $asymmetricShifts  turnos con días de distinta cantidad de períodos
+     * @param  list<int>  $incompleteShifts  turnos usados sin períodos (o con días vacíos)
      */
     public function __construct(
         public readonly int $calendarId,
         public readonly array $periodsByShift,
         public readonly array $sections,
         public readonly array $teachers,
+        public readonly array $periodsByShiftDay = [],
+        public readonly array $asymmetricShifts = [],
+        public readonly array $incompleteShifts = [],
     ) {}
 
     /**
@@ -87,6 +93,20 @@ final class CapacityAuditReport
     }
 
     /**
+     * La estructura base está incompleta: algún turno usado no tiene períodos
+     * (TT-CFP-12 / `incomplete_initial_setup`).
+     */
+    public function hasIncompleteSetup(): bool
+    {
+        return $this->incompleteShifts !== [];
+    }
+
+    public function isGridAsymmetric(): bool
+    {
+        return $this->asymmetricShifts !== [];
+    }
+
+    /**
      * Resumen compacto para el preview_payload (sin listas completas).
      *
      * @return array<string,mixed>
@@ -99,6 +119,9 @@ final class CapacityAuditReport
             'overflow_blocks_teachers' => $this->overflowBlocksTeachers(),
             'overflow_sections' => count($this->overflowSections()),
             'overflow_teachers' => count($this->overflowTeachers()),
+            'asymmetric_shifts' => $this->asymmetricShifts,
+            'incomplete_shifts' => $this->incompleteShifts,
+            'incomplete_initial_setup' => $this->hasIncompleteSetup(),
         ];
     }
 
@@ -110,6 +133,9 @@ final class CapacityAuditReport
         return [
             'calendar_id' => $this->calendarId,
             'periods_by_shift' => $this->periodsByShift,
+            'periods_by_shift_day' => $this->periodsByShiftDay,
+            'asymmetric_shifts' => $this->asymmetricShifts,
+            'incomplete_shifts' => $this->incompleteShifts,
             'sections' => array_values($this->sections),
             'teachers' => array_values($this->teachers),
             'summary' => $this->summary(),

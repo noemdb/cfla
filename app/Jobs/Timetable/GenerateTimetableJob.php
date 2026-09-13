@@ -2,11 +2,15 @@
 
 namespace App\Jobs\Timetable;
 
+use App\Events\Timetable\SolverAttemptCompleted;
+use App\Events\Timetable\SolverCompleted;
+use App\Events\Timetable\SolverStarted;
 use App\Events\Timetable\TimetableGenerated;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetableSlot;
+use App\Services\Timetable\Solver\AttemptResult;
 use App\Services\Timetable\Solver\LessonToSchedule;
 use App\Services\Timetable\Solver\SlotCandidate;
 use App\Services\Timetable\Solver\SolverResult;
@@ -91,6 +95,8 @@ class GenerateTimetableJob implements ShouldQueue
             'unassigned_not_found' => count($unassignedReasons['not_found']),
             'capacity_summary' => $unassignedReasons['capacity_summary'],
             'timed_out' => $result->timedOut,
+            'user_id' => auth()->id(),
+            'role' => auth()->user()?->is_admin ? 'is_admin' : (auth()->check() ? 'user' : null),
         ]);
 
         broadcast(new TimetableGenerated($calendar->id, $this->dryRun, $result));
@@ -127,9 +133,8 @@ class GenerateTimetableJob implements ShouldQueue
             }
         }
 
-        $lessons = TimetableLesson::query()
+        $lessons = $this->activeSectionLessons($calendar)
             ->with('slots', 'pevaluacion', 'pevaluacion.pensum.asignatura', 'pevaluacion.seccion', 'pevaluacion.profesor')
-            ->where('calendar_id', $calendar->id)
             ->get();
         $scopedLessonIds = $this->scopedLessonIds($calendar);
         $previousAssignment = $this->previewPayload['assignment'] ?? $calendar->preview_payload['assignment'] ?? [];
@@ -239,6 +244,10 @@ class GenerateTimetableJob implements ShouldQueue
         $roomsByType = $this->buildRoomsByType($calendar);
         $periodMeta = $this->buildPeriodMeta($calendar);
 
+        $strategy = $calendar->strategy ?: TimetableCalendar::DEFAULT_STRATEGY;
+
+        broadcast(new SolverStarted($this->calendarId, $this->dryRun, $strategy));
+
         $outcome = (new TimetableSolverOrchestrator(
             $dto,
             $availableByTeacher,
@@ -248,7 +257,27 @@ class GenerateTimetableJob implements ShouldQueue
             maxSubjectsPerPeriod: max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
             restarts: (int) config('timetable.solver.restarts', 6),
             attemptSeconds: (int) config('timetable.solver.attempt_seconds', 8),
+            onAttempt: fn (AttemptResult $attempt) => broadcast(new SolverAttemptCompleted(
+                calendarId: $this->calendarId,
+                attemptId: $attempt->id,
+                assigned: $attempt->assignedBlocks,
+                unassigned: $attempt->unassignedCount(),
+                score: $attempt->qualityScore,
+                timedOut: $attempt->result->timedOut,
+                elapsedMs: (int) round($attempt->result->elapsedSeconds * 1000),
+            )),
         ))->solve();
+
+        broadcast(new SolverCompleted(
+            calendarId: $this->calendarId,
+            dryRun: $this->dryRun,
+            chosen: $outcome->best->id,
+            coverageBlocks: $outcome->best->assignedBlocks,
+            unassigned: $outcome->best->unassignedCount(),
+            timedOut: $outcome->best->result->timedOut,
+            elapsedMs: (int) round($outcome->best->result->elapsedSeconds * 1000),
+            attempts: $outcome->attemptSummary(),
+        ));
 
         Log::channel('timetable')->info('GenerateTimetableJob: solver outcome', [
             'correlation_id' => $this->correlationId(),
@@ -268,8 +297,7 @@ class GenerateTimetableJob implements ShouldQueue
      */
     private function legacyAssignment(TimetableCalendar $calendar): ?SolverResult
     {
-        $lessons = TimetableLesson::query()
-            ->where('calendar_id', $calendar->id)
+        $lessons = $this->activeSectionLessons($calendar)
             ->with('slots')
             ->get();
         $scopedLessonIds = $this->scopedLessonIds($calendar);
@@ -488,6 +516,25 @@ class GenerateTimetableJob implements ShouldQueue
             'not_found' => array_values($notFound),
             'capacity_summary' => $audit->summary(),
         ];
+    }
+
+    /**
+     * Lecciones del calendario que pertenecen a secciones y grados ACTIVOS del
+     * plan de estudio del calendario. Las secciones/grados desactivados no
+     * deben agendarse ni inflar los motivos de no asignación.
+     */
+    private function activeSectionLessons(TimetableCalendar $calendar)
+    {
+        return TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', function ($query) use ($calendar): void {
+                $query->where('grados.status_active', 'true');
+
+                if ($calendar->pestudio_id) {
+                    $query->where('grados.pestudio_id', $calendar->pestudio_id);
+                }
+            });
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Services\Timetable;
 
 use App\Models\app\Timetable\TimetableCalendar;
+use Illuminate\Support\Facades\Log;
 
 /**
  * PLAN-TIMETABLE-SOLVER-FALLBACK-001 §0/§7 — Auditoría de capacidad.
@@ -23,20 +24,43 @@ class TimetableCapacityAuditService
 
     public function audit(TimetableCalendar $calendar): CapacityAuditReport
     {
-        $periodsByShift = $calendar->periods()
+        $periods = $calendar->periods()
             ->where('is_break', false)
-            ->get(['id', 'shift_id'])
+            ->get(['id', 'shift_id', 'day_of_week']);
+
+        $periodsByShift = $periods
             ->groupBy('shift_id')
             ->map(fn ($group): int => $group->count())
             ->mapWithKeys(fn (int $count, $shiftId): array => [(int) $shiftId => $count])
             ->all();
 
+        // Grid real por turno y día (TT-CFP-12): el grid puede ser asimétrico
+        // (p. ej. lunes con distinta cantidad de períodos) y no debe asumirse.
+        $periodsByShiftDay = $periods
+            ->groupBy('shift_id')
+            ->map(fn ($group): array => $group
+                ->groupBy('day_of_week')
+                ->map(fn ($dayGroup): int => $dayGroup->count())
+                ->mapWithKeys(fn (int $count, $day): array => [(int) $day => $count])
+                ->all())
+            ->mapWithKeys(fn (array $days, $shiftId): array => [(int) $shiftId => $days])
+            ->all();
+
         $lessons = $calendar->lessons()
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', function ($query) use ($calendar): void {
+                $query->where('grados.status_active', 'true');
+
+                if ($calendar->pestudio_id) {
+                    $query->where('grados.pestudio_id', $calendar->pestudio_id);
+                }
+            })
             ->with(['pevaluacion' => fn ($query) => $query->select('id', 'profesor_id', 'seccion_id')])
             ->get(['id', 'pevaluacion_id', 'shift_id', 'weekly_blocks_t', 'weekly_blocks_p', 'is_half_group']);
 
         $sections = [];
         $teachers = [];
+        $usedShifts = [];
 
         foreach ($lessons as $lesson) {
             $pev = $lesson->pevaluacion;
@@ -54,6 +78,7 @@ class TimetableCapacityAuditService
             $shiftId = (int) $lesson->shift_id;
             $seccionId = (int) $pev->seccion_id;
             $profesorId = (int) $pev->profesor_id;
+            $usedShifts[$shiftId] = true;
 
             $sections[$seccionId] ??= [
                 'seccion_id' => $seccionId,
@@ -76,10 +101,12 @@ class TimetableCapacityAuditService
             $teachers[$profesorId]['lesson_ids'][] = (int) $lesson->id;
         }
 
+        $totalAssignable = (int) array_sum($periodsByShift);
+
         foreach ($sections as &$row) {
             $shiftIds = array_map('intval', array_keys($row['shift_ids']));
             $row['shift_ids'] = $shiftIds;
-            $row['capacity'] = $this->capacityFor($shiftIds, $periodsByShift);
+            $row['capacity'] = $totalAssignable;
             $row['overflow'] = max(0.0, $row['load'] - $row['capacity']);
         }
         unset($row);
@@ -87,7 +114,7 @@ class TimetableCapacityAuditService
         foreach ($teachers as &$row) {
             $shiftIds = array_map('intval', array_keys($row['shift_ids']));
             $row['shift_ids'] = $shiftIds;
-            $row['capacity'] = $this->capacityFor($shiftIds, $periodsByShift);
+            $row['capacity'] = $totalAssignable;
             $row['overflow'] = max(0, $row['load'] - $row['capacity']);
         }
         unset($row);
@@ -95,26 +122,41 @@ class TimetableCapacityAuditService
         ksort($sections);
         ksort($teachers);
 
+        $incompleteShifts = [];
+        $asymmetricShifts = [];
+
+        foreach (array_keys($usedShifts) as $shiftId) {
+            $shiftId = (int) $shiftId;
+
+            if (($periodsByShift[$shiftId] ?? 0) <= 0) {
+                $incompleteShifts[] = $shiftId;
+
+                continue;
+            }
+
+            $dayCounts = array_values($periodsByShiftDay[$shiftId] ?? []);
+
+            if (count(array_unique($dayCounts)) > 1) {
+                $asymmetricShifts[] = $shiftId;
+            }
+        }
+
+        if ($asymmetricShifts !== []) {
+            Log::channel('timetable')->debug('timetable.capacity.grid_asymmetry', [
+                'calendar_id' => (int) $calendar->id,
+                'asymmetric_shifts' => $asymmetricShifts,
+                'periods_by_shift_day' => $periodsByShiftDay,
+            ]);
+        }
+
         return new CapacityAuditReport(
             calendarId: (int) $calendar->id,
             periodsByShift: $periodsByShift,
             sections: $sections,
             teachers: $teachers,
+            periodsByShiftDay: $periodsByShiftDay,
+            asymmetricShifts: $asymmetricShifts,
+            incompleteShifts: $incompleteShifts,
         );
-    }
-
-    /**
-     * @param  list<int>  $shiftIds
-     * @param  array<int,int>  $periodsByShift
-     */
-    private function capacityFor(array $shiftIds, array $periodsByShift): int
-    {
-        $capacity = 0;
-
-        foreach ($shiftIds as $shiftId) {
-            $capacity += $periodsByShift[$shiftId] ?? 0;
-        }
-
-        return $capacity;
     }
 }

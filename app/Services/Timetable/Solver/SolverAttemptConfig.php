@@ -22,10 +22,17 @@ final class SolverAttemptConfig
     /** Orden aleatorio determinista por semilla (restarts). */
     public const ORDER_RANDOM = 'random';
 
+    /** Reparación: prioriza primero las lecciones que quedaron sin asignar. */
+    public const ORDER_REPAIR = 'repair';
+
+    /**
+     * @param  list<int>  $priorityLessonIds  lecciones a colocar primero (reparación)
+     */
     public function __construct(
         public readonly string $id = 'S1',
         public readonly string $ordering = self::ORDER_CONSTRAINT,
         public readonly int $seed = 0,
         public readonly int $timeLimitSeconds = 8,
+        public readonly array $priorityLessonIds = [],
     ) {}
 }

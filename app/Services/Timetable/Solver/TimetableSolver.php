@@ -179,11 +179,42 @@ final class TimetableSolver
             case SolverAttemptConfig::ORDER_RANDOM:
                 $this->deterministicShuffle($free, $this->config->seed);
                 break;
+            case SolverAttemptConfig::ORDER_REPAIR:
+                $this->repairOrder($free);
+                break;
             case SolverAttemptConfig::ORDER_CONSTRAINT:
             default:
                 usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree() <=> $a->constraintDegree());
                 break;
         }
+    }
+
+    /**
+     * Reparación (TT-CFP-11): coloca primero las lecciones indicadas en
+     * `priorityLessonIds` (las que quedaron sin asignar) y, entre ellas, las de
+     * más bloques; el resto se ordena por grado de restricción. Así el
+     * backtracking reubica a las "bloqueantes" para liberarles espacio.
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function repairOrder(array &$free): void
+    {
+        $priority = array_flip(array_map('intval', $this->config->priorityLessonIds ?? []));
+
+        usort($free, function (LessonToSchedule $a, LessonToSchedule $b) use ($priority): int {
+            $aPriority = isset($priority[$a->lessonId]) ? 1 : 0;
+            $bPriority = isset($priority[$b->lessonId]) ? 1 : 0;
+
+            if ($aPriority !== $bPriority) {
+                return $bPriority <=> $aPriority;
+            }
+
+            if ($aPriority === 1) {
+                return $b->blocksNeeded() <=> $a->blocksNeeded();
+            }
+
+            return $b->constraintDegree() <=> $a->constraintDegree();
+        });
     }
 
     /**

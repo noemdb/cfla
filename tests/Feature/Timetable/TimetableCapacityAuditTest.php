@@ -203,4 +203,78 @@ class TimetableCapacityAuditTest extends TestCase
         $this->assertNotEmpty($payload['unassigned_reasons']['capacity_exceeded']);
         $this->assertGreaterThan(0, $payload['unassigned_reasons']['capacity_summary']['overflow_blocks_sections']);
     }
+
+    public function test_grid_asymmetry_between_days_is_flagged(): void
+    {
+        $calendar = TimetableCalendar::factory()->create();
+        $shift = $this->makeShift();
+
+        foreach ([1 => 2, 2 => 3] as $day => $count) {
+            for ($order = 1; $order <= $count; $order++) {
+                TimetablePeriod::factory()->create([
+                    'calendar_id' => $calendar->id,
+                    'shift_id' => $shift->id,
+                    'day_of_week' => $day,
+                    'order_in_day' => $order,
+                    'is_break' => false,
+                ]);
+            }
+        }
+
+        $this->makeLesson($calendar, $shift, $this->makeProfesor(1), $this->makeSeccion(), 1);
+
+        $report = $this->audit($calendar);
+
+        $this->assertTrue($report->isGridAsymmetric());
+        $this->assertContains($shift->id, $report->asymmetricShifts);
+        $this->assertFalse($report->hasIncompleteSetup());
+    }
+
+    public function test_used_shift_without_periods_is_incomplete_setup(): void
+    {
+        $calendar = TimetableCalendar::factory()->create();
+        $shift = $this->makeShift();
+
+        // Lección en un turno sin períodos definidos.
+        $this->makeLesson($calendar, $shift, $this->makeProfesor(1), $this->makeSeccion(), 1);
+
+        $report = $this->audit($calendar);
+
+        $this->assertTrue($report->hasIncompleteSetup());
+        $this->assertContains($shift->id, $report->incompleteShifts);
+    }
+
+    public function test_inactive_grades_are_excluded_from_capacity_audit(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $calendar = TimetableCalendar::factory()->create(['pestudio_id' => $pestudio->id]);
+        $shift = $this->makeShift();
+
+        for ($day = 1; $day <= 5; $day++) {
+            for ($order = 1; $order <= 6; $order++) {
+                TimetablePeriod::factory()->create([
+                    'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+                    'day_of_week' => $day, 'order_in_day' => $order, 'is_break' => false,
+                ]);
+            }
+        }
+
+        // Grado activo: 1 bloque (cabe).
+        $gradoActivo = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccionActiva = Seccion::factory()->create(['grado_id' => $gradoActivo->id, 'status_active' => 'true']);
+        $this->makeLesson($calendar, $shift, $this->makeProfesor(1), $seccionActiva, 1);
+
+        // Grado inactivo: 40 bloques (excederían si se contaran).
+        $gradoInactivo = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'false']);
+        $seccionInactiva = Seccion::factory()->create(['grado_id' => $gradoInactivo->id, 'status_active' => 'true']);
+        for ($i = 0; $i < 10; $i++) {
+            $this->makeLesson($calendar, $shift, $this->makeProfesor(10 + $i), $seccionInactiva, 4);
+        }
+
+        $report = $this->audit($calendar);
+
+        $this->assertSame(0.0, $report->overflowBlocksSections());
+        $this->assertArrayHasKey($seccionActiva->id, $report->sections);
+        $this->assertArrayNotHasKey($seccionInactiva->id, $report->sections);
+    }
 }

@@ -30,6 +30,8 @@ final class TimetableSolverOrchestrator
         private int $maxSubjectsPerPeriod = 2,
         private int $restarts = 6,
         private int $attemptSeconds = 8,
+        private int $repairAttempts = 2,
+        private ?\Closure $onAttempt = null,
     ) {}
 
     public function solve(): SolverOutcome
@@ -41,44 +43,88 @@ final class TimetableSolverOrchestrator
         $best = null;
 
         foreach ($this->attemptConfigs() as $config) {
-            $remaining = $deadline - microtime(true);
+            $this->runAttempt($config, $deadline, $attempts, $best);
 
-            if ($remaining <= 0) {
-                break;
+            // Cobertura total: no hay nada más que ganar (early stop).
+            if ($best !== null && $best->isComplete()) {
+                return new SolverOutcome($best, $attempts);
             }
+        }
 
-            $solver = new TimetableSolver(
-                $this->lessons,
-                $this->availablePeriodsByTeacher,
-                $this->roomsByType,
-                $this->periodMeta,
-                max(1, min($config->timeLimitSeconds, (int) ceil($remaining))),
-                $this->maxSubjectsPerPeriod,
-                $config,
-            );
+        // Fase de reparación (TT-CFP-11): reintenta priorizando las lecciones
+        // que quedaron sin asignar, para que el backtracking reubique a las
+        // "bloqueantes" y les libere espacio.
+        if ($best !== null && ! $best->isComplete()) {
+            $priority = array_map('intval', $best->result->unassigned);
 
-            $result = $solver->solve();
-            $attempt = new AttemptResult(
-                $config->id,
-                $result,
-                $this->assignedBlocks($result->assignment),
-                $solver->qualityScore($result->assignment),
-            );
+            for ($i = 0; $i < max(0, $this->repairAttempts) && $priority !== []; $i++) {
+                if ($deadline - microtime(true) <= 0) {
+                    break;
+                }
 
-            $attempts[] = $attempt;
+                $config = new SolverAttemptConfig(
+                    'S7r'.$i,
+                    SolverAttemptConfig::ORDER_REPAIR,
+                    5000 + $i,
+                    $this->attemptSeconds,
+                    $priority,
+                );
 
-            if ($best === null || $this->isBetter($attempt, $best)) {
-                $best = $attempt;
-            }
+                $this->runAttempt($config, $deadline, $attempts, $best);
 
-            // Cobertura total con el mejor score posible de la cadena: no hay
-            // nada más que ganar (early stop).
-            if ($best->isComplete()) {
-                break;
+                if ($best->isComplete()) {
+                    break;
+                }
             }
         }
 
         return new SolverOutcome($best ?? $this->emptyOutcome(), $attempts);
+    }
+
+    /**
+     * Ejecuta un intento respetando el deadline global y actualiza el keep-best.
+     *
+     * @param  list<AttemptResult>  $attempts
+     */
+    private function runAttempt(
+        SolverAttemptConfig $config,
+        float $deadline,
+        array &$attempts,
+        ?AttemptResult &$best,
+    ): void {
+        $remaining = $deadline - microtime(true);
+
+        if ($remaining <= 0) {
+            return;
+        }
+
+        $solver = new TimetableSolver(
+            $this->lessons,
+            $this->availablePeriodsByTeacher,
+            $this->roomsByType,
+            $this->periodMeta,
+            max(1, min($config->timeLimitSeconds, (int) ceil($remaining))),
+            $this->maxSubjectsPerPeriod,
+            $config,
+        );
+
+        $result = $solver->solve();
+        $attempt = new AttemptResult(
+            $config->id,
+            $result,
+            $this->assignedBlocks($result->assignment),
+            $solver->qualityScore($result->assignment),
+        );
+
+        $attempts[] = $attempt;
+
+        if ($this->onAttempt !== null) {
+            ($this->onAttempt)($attempt);
+        }
+
+        if ($best === null || $this->isBetter($attempt, $best)) {
+            $best = $attempt;
+        }
     }
 
     /**

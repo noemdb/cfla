@@ -100,8 +100,8 @@ class TimetableSolverOrchestratorTest extends TestCase
         $this->assertFalse($outcome->best->isComplete());
         $this->assertNotEmpty($outcome->best->result->unassigned);
         $this->assertGreaterThan(0, $outcome->best->assignedBlocks);
-        // Cadena completa: S1 + S2 + S3 + 6 restarts.
-        $this->assertCount(9, $outcome->attempts);
+        // Cadena completa: S1 + S2 + S3 + 6 restarts + 2 intentos de reparación.
+        $this->assertCount(11, $outcome->attempts);
         $this->assertSame($outcome->best->result, $outcome->toSolverResult());
     }
 
@@ -159,6 +159,29 @@ class TimetableSolverOrchestratorTest extends TestCase
 
         $summary = $this->orchestrator($lessons, restarts: 2, available: $available)->solve()->attemptSummary();
 
-        $this->assertSame(['S1', 'S2', 'S3', 'S4r0', 'S4r1'], array_column($summary, 'id'));
+        $this->assertSame(
+            ['S1', 'S2', 'S3', 'S4r0', 'S4r1', 'S7r0', 'S7r1'],
+            array_column($summary, 'id'),
+        );
+    }
+
+    public function test_repair_attempts_prioritize_unassigned_lessons(): void
+    {
+        // El docente solo tiene 6 períodos para 2 lecciones de 4 y 3 bloques:
+        // la primera ordenación deja sin asignar la de 3; la reparación debe
+        // intentar colocarla primero sin empeorar la cobertura total.
+        $lessons = [
+            $this->lesson(1, 101, 4),
+            $this->lesson(2, 101, 3),
+        ];
+        $available = [101 => array_slice($this->periodIds, 0, 6)];
+
+        $outcome = $this->orchestrator($lessons, restarts: 0, available: $available)->solve();
+
+        $ids = array_column($outcome->attemptSummary(), 'id');
+        $this->assertContains('S7r0', $ids, 'debe ejecutarse al menos una reparación');
+
+        $repair = collect($outcome->attempts)->firstWhere('id', 'S7r0');
+        $this->assertGreaterThanOrEqual($repair->assignedBlocks, $outcome->best->assignedBlocks);
     }
 }

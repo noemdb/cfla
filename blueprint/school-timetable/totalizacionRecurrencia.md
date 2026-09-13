@@ -105,12 +105,14 @@ horario de **4TO A** es el siguiente:
 | Robótica | 2 |
 | Formación Humano Cristiana | 1 |
 | Geografía, Historia y Soberanía Nacional | 2 |
-| Innovación Tecnológica y Productiva | 2 |
+| Innovación Tecnológica y Productiva | 3 |
 | Orientación Vocacional | 2 |
 | Matemática | 3 |
-| Educación Física | 2 |
+| Educación Física | 3 |
 | Física | 1 |
 | Química | 1 |
+
+**Total general:** 29
 
 
 5to ano

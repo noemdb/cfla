@@ -1776,7 +1776,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-white/10">
                     <div>
                         <h2 id="teacher-schedule-title" class="text-sm font-extrabold text-gray-900 dark:text-white">Horario por profesor</h2>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lessons asignadas en la sección activa, organizadas por día y bloque.</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Toda la carga horaria asignada al profesor en las secciones del calendario.</p>
                     </div>
                     <button type="button" wire:click="closeTeacherScheduleDialog"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 dark:hover:bg-white/10 dark:hover:text-white"
@@ -1833,7 +1833,7 @@
                         </table>
                     @else
                         <div class="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
-                            El profesor seleccionado no tiene lessons asignadas en la sección activa.
+                            El profesor seleccionado no tiene lessons asignadas en ninguna sección del calendario.
                         </div>
                     @endif
                 </div>
@@ -2016,17 +2016,31 @@
                                 {{ $generationReadiness['capacity_exceeded'] }} lección(es) sin asignar por capacidad insuficiente (imposible de agendar)
                             </div>
                             <p class="mt-1 text-gray-600 dark:text-gray-300">
-                                La sección o el docente requieren más bloques que períodos hay en el turno
+                                La sección o el docente requieren más bloques que períodos asignables hay en el calendario
                                 ({{ $generationReadiness['capacity_summary']['overflow_blocks_sections'] ?? 0 }} bloques de sección ·
                                 {{ $generationReadiness['capacity_summary']['overflow_blocks_teachers'] ?? 0 }} de docente).
-                                Ajusta horas, períodos o turnos: regenerar no los ubicará.
                             </p>
+                            <ul class="mt-2 space-y-1 text-gray-600 dark:text-gray-300">
+                                <li class="flex gap-1.5"><span class="text-amber-500">→</span><span>Ajusta horas normalizadas, períodos o turnos: regenerar no las ubicará.</span></li>
+                                @if (($generationReadiness['capacity_summary']['incomplete_initial_setup'] ?? false))
+                                    <li class="flex gap-1.5"><span class="text-amber-500">→</span><span>Falta la estructura base: completa los períodos y turnos en el Paso 1.</span></li>
+                                @endif
+                                @if (!empty($generationReadiness['capacity_summary']['asymmetric_shifts'] ?? []))
+                                    <li class="flex gap-1.5"><span class="text-amber-500">→</span><span>Grid asimétrico en turno(s) {{ implode(', ', $generationReadiness['capacity_summary']['asymmetric_shifts']) }}: revisa días con distinta cantidad de períodos.</span></li>
+                                @endif
+                            </ul>
                         </div>
                     @endif
 
                     @if (($generationReadiness['not_found'] ?? 0) > 0)
                         <div class="mt-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-xs text-gray-600 dark:text-gray-300">
-                            {{ $generationReadiness['not_found'] }} lección(es) sin asignar por disponibilidad o heurística (no por capacidad). Revisa los conflictos y vuelve a generar.
+                            <div class="font-bold text-yellow-700 dark:text-yellow-400">
+                                {{ $generationReadiness['not_found'] }} lección(es) sin asignar por disponibilidad o heurística (no por capacidad)
+                            </div>
+                            <ul class="mt-1 space-y-1">
+                                <li class="flex gap-1.5"><span class="text-yellow-600">→</span><span>Vuelve a generar: la estrategia con fallback puede ubicarlas.</span></li>
+                                <li class="flex gap-1.5"><span class="text-yellow-600">→</span><span>Revisa los conflictos accionables y la disponibilidad del docente.</span></li>
+                            </ul>
                         </div>
                     @endif
 
