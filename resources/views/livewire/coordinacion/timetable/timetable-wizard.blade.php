@@ -1471,6 +1471,7 @@
                                     </td>
                                     <td class="px-3 py-2">
                                         <input type="number"
+                                            wire:key="lesson-prio-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected) wire:model="lessons.{{ $pev->id }}.priority" wire:change="autosaveLessons" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['priority'] ?? 0) : 0 }}"
                                             min="0" @disabled(! $selected)
@@ -1478,6 +1479,7 @@
                                     </td>
                                     <td class="px-3 py-2">
                                         <select
+                                            wire:key="lesson-shift-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected) wire:model="lessons.{{ $pev->id }}.shift_id" wire:change="autosaveLessons" @endif
                                             @disabled(! $selected)
                                             class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1491,6 +1493,7 @@
                                     </td>
                                     <td class="px-3 py-2">
                                         <select
+                                            wire:key="lesson-room-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected) wire:model="lessons.{{ $pev->id }}.room_type_required" wire:change="autosaveLessons" @endif
                                             @disabled(! $selected)
                                             class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1502,6 +1505,7 @@
                                     </td>
                                     <td class="px-3 py-2 text-center">
                                         <input type="checkbox"
+                                            wire:key="lesson-half-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected)
                                                 wire:model.live="lessons.{{ $pev->id }}.is_half_group"
                                                 wire:change="autosaveLessons"
