@@ -4380,6 +4380,7 @@ class TimetableWizard extends Component
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
         $this->recordPreviewChange('add_preview_lesson', $lesson->id, [], $lessonSlots);
+        $this->registerLessonInStep3($lesson);
         $this->closeAddPreviewLessonModal();
         if ($hasShiftMismatch) {
             $this->notification()->warning(
@@ -4411,6 +4412,37 @@ class TimetableWizard extends Component
             $period->period_label,
             $subject,
         );
+    }
+
+    /**
+     * Registra la lección en el estado del Paso 3 (selección + configuración)
+     * cuando se agrega manualmente desde el preview, para que Step 3 y Step 5
+     * queden consistentes.
+     */
+    private function registerLessonInStep3(TimetableLesson $lesson): void
+    {
+        $pevId = (int) $lesson->pevaluacion_id;
+
+        if ($pevId <= 0) {
+            return;
+        }
+
+        $this->selectedPevs[$pevId] = true;
+
+        if (is_array($this->lessons)) {
+            $this->lessons[$pevId] = [
+                'pev_id' => $pevId,
+                'shift_id' => (int) $lesson->shift_id,
+                'weekly_blocks_t' => (int) $lesson->weekly_blocks_t,
+                'weekly_blocks_p' => (int) $lesson->weekly_blocks_p,
+                'room_type_required' => $lesson->room_type_required ?: null,
+                'is_half_group' => (bool) $lesson->is_half_group,
+                'priority' => (int) $lesson->priority,
+                'locked' => (bool) $lesson->locked,
+            ];
+        }
+
+        $this->lessonsDirty = true;
     }
 
     public function openAiDryRunDialog(): void
@@ -5737,8 +5769,22 @@ PROMPT;
             return [];
         }
 
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            return [];
+        }
+
         return TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', function ($query) use ($calendar): void {
+                $query->where('grados.status_active', 'true');
+
+                if ($calendar->pestudio_id) {
+                    $query->where('grados.pestudio_id', $calendar->pestudio_id);
+                }
+            })
             ->with('pevaluacion.profesor')
             ->get()
             ->map(fn (TimetableLesson $lesson): ?array => $lesson->pevaluacion?->profesor ? [
@@ -5763,6 +5809,10 @@ PROMPT;
             ->where('calendar_id', $this->calendarId)
             ->whereHas('pevaluacion', fn ($query) => $query
                 ->where('profesor_id', (int) $this->teacherScheduleProfesorId))
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', function ($query): void {
+                $query->where('grados.status_active', 'true');
+            })
             ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion')
             ->get()
             ->keyBy('id');
@@ -5776,12 +5826,19 @@ PROMPT;
         $cells = [];
 
         foreach ($lessons as $lesson) {
-            $slots = $assignment->get((string) $lesson->id, $assignment->get($lesson->id));
-            if ($slots === null) {
-                $slots = $lesson->slots()->get(['period_id'])->map(fn ($slot): array => [
-                    'period_id' => (int) $slot->period_id,
-                ])->all();
-            }
+            // Union de slots: preview (estado actual) + slots persistidos, para
+            // mostrar la carga completa del profesor en TODAS las secciones,
+            // aunque el preview esté acotado a la sección activa.
+            $previewSlots = $assignment->get((string) $lesson->id, $assignment->get($lesson->id)) ?? [];
+            $persistedSlots = $lesson->slots()
+                ->get(['period_id'])
+                ->map(fn (TimetableSlot $slot): array => ['period_id' => (int) $slot->period_id])
+                ->all();
+            $slots = collect($previewSlots)
+                ->concat($persistedSlots)
+                ->unique('period_id')
+                ->values()
+                ->all();
 
             foreach ($slots as $slot) {
                 $period = $periods->firstWhere('id', (int) ($slot['period_id'] ?? 0));
