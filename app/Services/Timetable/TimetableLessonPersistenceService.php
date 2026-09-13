@@ -4,6 +4,7 @@ namespace App\Services\Timetable;
 
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Timetable\TimetableLesson;
+use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -80,10 +81,27 @@ final class TimetableLessonPersistenceService
         }
 
         DB::transaction(function () use ($calendarId, $lessons): void {
+            $fallbackShiftId = TimetableShift::query()->orderBy('id')->value('id');
+            $existingShiftIds = TimetableLesson::query()
+                ->where('calendar_id', $calendarId)
+                ->whereIn('pevaluacion_id', collect($lessons)->pluck('pev_id')->all())
+                ->pluck('shift_id', 'pevaluacion_id');
+
+            if ($fallbackShiftId === null && collect($lessons)->isNotEmpty()) {
+                throw ValidationException::withMessages([
+                    'lessons' => 'No hay turnos configurados para registrar las lessons del calendario.',
+                ]);
+            }
+
             foreach ($lessons as $lesson) {
                 $pevaluacionId = (int) $lesson['pev_id'];
                 if ($pevaluacionId <= 0) {
                     continue;
+                }
+
+                $shiftId = (int) ($lesson['shift_id'] ?? 0);
+                if ($shiftId <= 0 || ! TimetableShift::query()->whereKey($shiftId)->exists()) {
+                    $shiftId = (int) ($existingShiftIds[$pevaluacionId] ?? $fallbackShiftId);
                 }
 
                 TimetableLesson::query()->updateOrCreate(
@@ -92,7 +110,7 @@ final class TimetableLessonPersistenceService
                         'pevaluacion_id' => $pevaluacionId,
                     ],
                     [
-                        'shift_id' => (int) ($lesson['shift_id'] ?? 0),
+                        'shift_id' => $shiftId,
                         'weekly_blocks_t' => max(0, (int) ($lesson['weekly_blocks_t'] ?? 0)),
                         'weekly_blocks_p' => max(0, (int) ($lesson['weekly_blocks_p'] ?? 0)),
                         'room_type_required' => $lesson['room_type_required'] ?? null,

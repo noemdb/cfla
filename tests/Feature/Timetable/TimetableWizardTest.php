@@ -1400,6 +1400,35 @@ class TimetableWizardTest extends TestCase
         ]);
     }
 
+    public function test_step3_uses_a_valid_shift_when_livewire_rehydrates_zero_shift(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shift = $this->shift();
+        $fixture = $this->pevaluacionFixture($lapso->id);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('lessons', [
+                $fixture['pev']->id => [
+                    'pev_id' => $fixture['pev']->id,
+                    'shift_id' => 0,
+                    'weekly_blocks_t' => 0,
+                    'weekly_blocks_p' => 0,
+                ],
+            ])
+            ->call('saveLessons')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $fixture['pev']->id,
+            'shift_id' => $shift->id,
+        ]);
+    }
+
     public function test_orphan_fix_action_is_safe_when_no_orphans_exist(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

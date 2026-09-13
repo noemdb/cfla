@@ -4104,6 +4104,10 @@ class TimetableWizard extends Component
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
 
+        if ($removedAll) {
+            $this->unregisterLessonFromStep3($lesson);
+        }
+
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
 
         $this->notification()->success(
@@ -4440,6 +4444,27 @@ class TimetableWizard extends Component
                 'priority' => (int) $lesson->priority,
                 'locked' => (bool) $lesson->locked,
             ];
+        }
+
+        $this->lessonsDirty = true;
+    }
+
+    /**
+     * Inverso de registerLessonInStep3: al retirar por completo una lección del
+     * preview, se des-selecciona del Paso 3 para mantener la consistencia.
+     */
+    private function unregisterLessonFromStep3(TimetableLesson $lesson): void
+    {
+        $pevId = (int) $lesson->pevaluacion_id;
+
+        if ($pevId <= 0) {
+            return;
+        }
+
+        unset($this->selectedPevs[$pevId]);
+
+        if (is_array($this->lessons)) {
+            unset($this->lessons[$pevId]);
         }
 
         $this->lessonsDirty = true;
