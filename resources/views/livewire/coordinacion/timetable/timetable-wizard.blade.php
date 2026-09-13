@@ -64,8 +64,38 @@
                         <option value="{{ $c['id'] }}">{{ $c['name'] }} ({{ $c['status'] }})</option>
                     @endforeach
                 </select>
-                <button wire:click="$set('showCreateCalendarForm', true)"
-                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</button>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 mt-3">
+                @php
+                    $selectedCalendarPestudio = collect($calendars)->firstWhere('id', $calendarId)['pestudio_id'] ?? null;
+                @endphp
+                @if ($selectedCalendarPestudio)
+                    <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.pestudio-preview', ['calendar' => (int) $calendarId, 'pestudio' => (int) $selectedCalendarPestudio]) }}"
+                        target="_blank"
+                        rel="noopener"
+                        title="Generar un PDF consolidado del pestudio del calendario"
+                        class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l2-2h14l2 2"/>
+                        </svg>
+                        PDF P.Estudio
+                    </a>
+                @endif
+
+                <a href="{{ $calendarId ? route($moduleRoutePrefix.'.timetable.pdf.teachers', ['calendar' => $calendarId]) : '#' }}"
+                    target="{{ $calendarId ? '_blank' : '_self' }}"
+                    rel="noopener"
+                    aria-disabled="{{ $calendarId ? 'false' : 'true' }}"
+                    title="Generar un PDF con los horarios de todos los profesores asociados al calendario"
+                    class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ $calendarId ? '' : 'pointer-events-none opacity-50' }}">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z"/>
+                    </svg>
+                    PDF profesores
+                </a>
+                {{-- <button wire:click="$set('showCreateCalendarForm', true)"
+                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</button> --}}
 
                 <button type="button"
                     wire:click="downloadCalendarLessonsBackup"
@@ -98,26 +128,16 @@
                 </button>
                 <button type="button"
                     wire:click="confirmClearCalendarLessonAssignments"
+                    disabled
                     wire:loading.attr="disabled"
                     wire:loading.class="opacity-50 cursor-not-allowed"
                     wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments"
-                    {{ filled($calendarId) ? '' : 'disabled' }}
                     title="Quitar todos los slots del calendario sin eliminar la configuración de sus lessons"
-                    class="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
+                    class="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-700 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-amber-300">
                     <span wire:loading.remove wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiar slots</span>
                     <span wire:loading wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiando…</span>
                 </button>
-                <a href="{{ $calendarId ? route($moduleRoutePrefix.'.timetable.pdf.teachers', ['calendar' => $calendarId]) : '#' }}"
-                    target="{{ $calendarId ? '_blank' : '_self' }}"
-                    rel="noopener"
-                    aria-disabled="{{ $calendarId ? 'false' : 'true' }}"
-                    title="Generar un PDF con los horarios de todos los profesores asociados al calendario"
-                    class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ $calendarId ? '' : 'pointer-events-none opacity-50' }}">
-                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z"/>
-                    </svg>
-                    PDF profesores
-                </a>
+                
                 {{-- <button wire:click="openEditCalendarForm"
                     {{ filled($calendarId) ? '' : 'disabled' }}
                     class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ filled($calendarId) ? 'bg-white/5 hover:bg-white/10 text-gray-300 border border-gray-200 dark:border-white/10' : 'bg-white/5 text-gray-500 border border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50' }}">
@@ -1877,7 +1897,7 @@
                     </button>
                     <button type="button"
                         wire:click="openAiDraftDialog"
-                        @disabled(!$preview)
+                        disabled
                         wire:loading.attr="disabled"
                         wire:target="openAiDraftDialog,generateAiDraft"
                         title="Generar una propuesta de distribución con OpenRouter sin publicar"
@@ -1888,10 +1908,11 @@
                     @if (($selectedCalendarDetail['status'] ?? null) === 'active')
                     <button type="button"
                         wire:click="openAiDryRunDialog"
+                        disabled
                         wire:loading.attr="disabled"
                         wire:target="openAiDryRunDialog,analyzeDryRunWithAi"
                         title="Analizar el horario publicado con IA"
-                        class="inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                        class="inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-500/10 px-4 py-2.5 text-sm font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.75h4.5l.75 3.25 2.75 1.25 2.5-1.5 2.25 3.9-2.5 1.75v3.1l2.5 1.75-2.25 3.9-2.5-1.5-2.75 1.25-.75 3.25h-4.5L9 19.9l-2.75-1.25-2.5 1.5-2.25-3.9L4 14.5v-3.1L1.5 9.65l2.25-3.9 2.5 1.5L9 6.0l.75-2.25Z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10.25v3.5m0 2.5h.01"/>
@@ -1903,7 +1924,8 @@
                         target="_blank"
                         rel="noopener"
                         title="Generar un PDF con los horarios de todos los docentes del calendario"
-                        class="inline-flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-sm font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                        wire:loading.attr="disabled"
+                        class=" inline-flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-sm font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 2h9l3 3v17H6z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6M9 17h6M15 2v4h4"/>
@@ -2576,19 +2598,7 @@
                                     </svg>
                                     Exportar PDF
                                 </a>
-                                <button type="button"
-                                    wire:click="downloadDryRunResult({{ (int) $activeSeccionId }})"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:target="downloadDryRunResult"
-                                    title="Descargar informe JSON auditable del dry-run"
-                                    class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"></path>
-                                    </svg>
-                                    <span wire:loading.remove wire:target="downloadDryRunResult">Auditoría JSON</span>
-                                    <span wire:loading wire:target="downloadDryRunResult">Preparando…</span>
-                                </button>
+                                
                                 <button type="button"
                                     wire:click="persistCurrentSectionSlots"
                                     wire:loading.attr="disabled"
@@ -2602,31 +2612,7 @@
                                     <span wire:loading.remove wire:target="persistCurrentSectionSlots">Guardar sección</span>
                                     <span wire:loading wire:target="persistCurrentSectionSlots">Guardando…</span>
                                 </button>
-                                <button type="button"
-                                    wire:click="downloadCurrentSectionSlotsBackup({{ (int) $activeSeccionId }})"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:target="downloadCurrentSectionSlotsBackup"
-                                    title="Descargar respaldo JSON de los slots de la sección activa"
-                                    class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                                    <span wire:loading.remove wire:target="downloadCurrentSectionSlotsBackup">Backup slots</span>
-                                    <span wire:loading wire:target="downloadCurrentSectionSlotsBackup">Preparando…</span>
-                                </button>
-                                <label title="Seleccionar respaldo JSON de slots de la sección activa"
-                                    class="inline-flex cursor-pointer items-center gap-1.5 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
-                                    <span>Elegir restore</span>
-                                    <input type="file" wire:model="slotsBackupFile" accept="application/json,.json" class="sr-only">
-                                </label>
-                                <button type="button"
-                                    wire:click="restoreCurrentSectionSlotsBackup"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:target="restoreCurrentSectionSlotsBackup,slotsBackupFile"
-                                    title="Restaurar los slots de la sección activa desde un respaldo JSON"
-                                    class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
-                                    <span wire:loading.remove wire:target="restoreCurrentSectionSlotsBackup">Restore slots</span>
-                                    <span wire:loading wire:target="restoreCurrentSectionSlotsBackup">Restaurando…</span>
-                                </button>
+
                                 <button type="button"
                                     wire:click="openTeacherScheduleDialog"
                                     title="Consultar las lessons asignadas por profesor"
@@ -2639,9 +2625,39 @@
                                     </svg>
                                     Horario docente
                                 </button>
+
+                                <button type="button"
+                                    wire:click="downloadCurrentSectionSlotsBackup({{ (int) $activeSeccionId }})"
+                                    disabled
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="downloadCurrentSectionSlotsBackup"
+                                    title="Descargar respaldo JSON de los slots de la sección activa"
+                                    class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
+                                    <span wire:loading.remove wire:target="downloadCurrentSectionSlotsBackup">Backup slots</span>
+                                    <span wire:loading wire:target="downloadCurrentSectionSlotsBackup">Preparando…</span>
+                                </button>
+                                <label title="Seleccionar respaldo JSON de slots de la sección activa"
+                                    wire:loading.attr="disabled"
+                                    class="inline-flex cursor-pointer items-center gap-1.5 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300">
+                                    <span>Elegir restore</span>
+                                    <input type="file" wire:loading.attr="disabled" wire:model="slotsBackupFile" accept="application/json,.json" class="sr-only" disabled>
+                                </label>
+                                <button type="button"
+                                    wire:click="restoreCurrentSectionSlotsBackup"
+                                    disabled
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="restoreCurrentSectionSlotsBackup,slotsBackupFile"
+                                    title="Restaurar los slots de la sección activa desde un respaldo JSON"
+                                    class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
+                                    <span wire:loading.remove wire:target="restoreCurrentSectionSlotsBackup">Restore slots</span>
+                                    <span wire:loading wire:target="restoreCurrentSectionSlotsBackup">Restaurando…</span>
+                                </button>
                                 @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
                                     <button type="button"
                                         wire:click="openAiDraftDialog({{ (int) $activeSeccionId }})"
+                                        disabled
                                         wire:loading.attr="disabled"
                                         wire:target="openAiDraftDialog,generateAiDraft"
                                         title="Proponer un draft IA usando solo las lessons de la sección activa"
@@ -2667,6 +2683,20 @@
                                         <span wire:loading wire:target="generateSectionDraft">Generando…</span>
                                     </button>
                                 @endif
+                                <button type="button"
+                                    wire:click="downloadDryRunResult({{ (int) $activeSeccionId }})"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-50 cursor-not-allowed"
+                                    wire:target="downloadDryRunResult"
+                                    title="Descargar informe JSON auditable del dry-run"
+                                    class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"></path>
+                                    </svg>
+                                    <span wire:loading.remove wire:target="downloadDryRunResult">Auditoría JSON</span>
+                                    <span wire:loading wire:target="downloadDryRunResult">Preparando…</span>
+                                </button>
+
                                 </div>
                             </div>
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
