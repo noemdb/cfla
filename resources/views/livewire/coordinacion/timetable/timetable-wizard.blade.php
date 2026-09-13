@@ -1391,6 +1391,7 @@
                 @endif
 
                 <div class="rounded-lg border border-gray-200 dark:border-white/10">
+                    @php $lockedSectionSet = $this->lockedSectionIdSet(); @endphp
                     <table class="w-full text-sm">
                         <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800/80">
                             <tr class="text-left text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
@@ -1406,7 +1407,8 @@
                                                 wire:click="toggleSelectAllForSection({{ $bulkSectionId }})"
                                                 title="Seleccionar todas las asignaturas de {{ $bulkSectionLabel }}"
                                                 @checked($bulkSectionSelected)
-                                                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                                @disabled(isset($lockedSectionSet[$bulkSectionId]))
+                                                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed">
                                         @endif
                                         <span>Asignatura · Sección</span>
                                     </span>
@@ -1433,6 +1435,7 @@
                                 <th class="px-3 py-2">Turno</th>
                                 <th class="px-3 py-2">Aula req.</th>
                                 <th class="px-3 py-2 text-nowrap">Medio grupo</th>
+                                <th class="px-3 py-2 text-nowrap">Doc. compartido</th>
                                 <th class="px-3 py-2">Estado</th>
                             </tr>
                         </thead>
@@ -1443,45 +1446,47 @@
                                         || in_array($pev->id, array_map('intval', array_values($selectedPevs)), true);
                                     $derivedT = (int) ceil(((int) ($pev->pensum?->asignatura?->hour_t_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
                                     $derivedP = (int) ceil(((int) ($pev->pensum?->asignatura?->hour_p_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
+                                    $rowLocked = isset($lockedSectionSet[(int) $pev->seccion_id]);
                                 @endphp
                                 <tr class="border-t border-gray-100 dark:border-white/5 {{ $selected ? 'bg-emerald-500/5' : '' }}">
                                     <td class="px-3 py-2">
                                         <input type="checkbox"
                                             wire:key="select-pev-{{ $pev->id }}-{{ $selectionResetToken }}"
-                                            wire:model.live="selectedPevs.{{ $pev->id }}"
-                                            class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                            @if (! $rowLocked) wire:model.live="selectedPevs.{{ $pev->id }}" @endif
+                                            @disabled($rowLocked)
+                                            class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2 text-gray-900 dark:text-gray-200 font-medium">{{ $pev->pensum?->asignatura?->name }}{{ $pev->grupoEstable?->name ? ' · '.$pev->grupoEstable->name : '' }}</td>
                                     <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $pev->profesor?->lastname }}, {{ $pev->profesor?->name }}                                    </td>
                                     <td class="px-3 py-2">
                                         <input type="number"
                                             wire:key="lesson-blocks-t-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.weekly_blocks_t" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.weekly_blocks_t" wire:change="autosaveLessons" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['weekly_blocks_t'] ?? $derivedT) : $derivedT }}"
-                                            min="0" @disabled(! $selected)
+                                            min="0" @disabled(! $selected || $rowLocked)
                                             class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2">
                                         <input type="number"
                                             wire:key="lesson-blocks-p-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.weekly_blocks_p" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.weekly_blocks_p" wire:change="autosaveLessons" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['weekly_blocks_p'] ?? $derivedP) : $derivedP }}"
-                                            min="0" @disabled(! $selected)
+                                            min="0" @disabled(! $selected || $rowLocked)
                                             class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2">
                                         <input type="number"
                                             wire:key="lesson-prio-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.priority" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.priority" wire:change="autosaveLessons" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['priority'] ?? 0) : 0 }}"
-                                            min="0" @disabled(! $selected)
+                                            min="0" @disabled(! $selected || $rowLocked)
                                             class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2">
                                         <select
                                             wire:key="lesson-shift-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.shift_id" wire:change="autosaveLessons" @endif
-                                            @disabled(! $selected)
+                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.shift_id" wire:change="autosaveLessons" @endif
+                                            @disabled(! $selected || $rowLocked)
                                             class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
                                             @if (! $selected)
                                                 <option value="">Selecciona</option>
@@ -1494,8 +1499,8 @@
                                     <td class="px-3 py-2">
                                         <select
                                             wire:key="lesson-room-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected) wire:model="lessons.{{ $pev->id }}.room_type_required" wire:change="autosaveLessons" @endif
-                                            @disabled(! $selected)
+                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.room_type_required" wire:change="autosaveLessons" @endif
+                                            @disabled(! $selected || $rowLocked)
                                             class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
                                             <option value="">{{ $selected ? '—' : 'Selecciona' }}</option>
                                             @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
@@ -1506,13 +1511,24 @@
                                     <td class="px-3 py-2 text-center">
                                         <input type="checkbox"
                                             wire:key="lesson-half-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected)
+                                            @if ($selected && ! $rowLocked)
                                                 wire:model.live="lessons.{{ $pev->id }}.is_half_group"
                                                 wire:change="autosaveLessons"
                                             @endif
-                                            @disabled(! $selected)
+                                            @disabled(! $selected || $rowLocked)
                                             title="Comparte la celda con otra asignatura de medio grupo"
                                             class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed">
+                                    </td>
+                                    <td class="px-3 py-2 text-center">
+                                        <input type="checkbox"
+                                            wire:key="lesson-shared-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
+                                            @if ($selected && ! $rowLocked)
+                                                wire:model.live="lessons.{{ $pev->id }}.allow_shared_teacher"
+                                                wire:change="autosaveLessons"
+                                            @endif
+                                            @disabled(! $selected || $rowLocked)
+                                            title="Permite coincidir con otra lesson del mismo docente si ambas lessons tienen esta autorización"
+                                            class="rounded border-gray-300 text-violet-600 focus:ring-violet-500 disabled:opacity-60 disabled:cursor-not-allowed">
                                     </td>
                                     <td class="px-3 py-2 text-[10px] flex items-center gap-1.5">
                                         @if (isset($savedPevIds[$pev->id]))
@@ -2336,6 +2352,11 @@
                                             class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                             {{ $step5SectionTab !== 'formats' && (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
                                             {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
+                                            @if (is_numeric($opt['id']) && $this->sectionTimetableLocked((int) $opt['id']))
+                                                <svg class="inline h-3 w-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                                </svg>
+                                            @endif
                                         </button>
                                     @endforeach
                                     <button type="button" wire:click="showSectionFormats"
@@ -2596,11 +2617,12 @@
                                 <div class="inline-flex overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-white/10" role="group" aria-label="Exportar y auditar dry-run">
                                 <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId]) }}"
                                     target="_blank" rel="noopener"
+                                    title="Exportar el horario de la sección a PDF"
                                     class="inline-flex items-center gap-1.5 border-r border-gray-200 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 dark:border-white/10">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
-                                    Exportar PDF
+                                    <span class="sr-only">Exportar PDF</span>
                                 </a>
                                 
                                 <button type="button"
@@ -2609,12 +2631,13 @@
                                     wire:loading.class="opacity-50 cursor-not-allowed"
                                     wire:target="persistCurrentSectionSlots"
                                     title="Guardar en la base de datos los slots de la sección activa"
-                                    class="inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-300">
+                                    aria-label="Guardar sección"
+                                    class="inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-emerald-300">
                                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l4 4L19 6"/>
                                     </svg>
-                                    <span wire:loading.remove wire:target="persistCurrentSectionSlots">Guardar sección</span>
-                                    <span wire:loading wire:target="persistCurrentSectionSlots">Guardando…</span>
+                                    <span wire:loading.remove wire:target="persistCurrentSectionSlots" class="sr-only">Guardar sección</span>
+                                    <span wire:loading wire:target="persistCurrentSectionSlots" class="sr-only">Guardando…</span>
                                 </button>
 
                                 <button type="button"
@@ -2627,7 +2650,7 @@
                                         <circle cx="9" cy="7" r="4"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
                                     </svg>
-                                    Horario docente
+                                    <span class="sr-only">Horario docente</span>
                                 </button>
 
                                 <button type="button"
@@ -2637,14 +2660,21 @@
                                     wire:loading.class="opacity-50 cursor-not-allowed"
                                     wire:target="downloadCurrentSectionSlotsBackup"
                                     title="Descargar respaldo JSON de los slots de la sección activa"
+                                    aria-label="Backup slots"
                                     class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
-                                    <span wire:loading.remove wire:target="downloadCurrentSectionSlotsBackup">Backup slots</span>
-                                    <span wire:loading wire:target="downloadCurrentSectionSlotsBackup">Preparando…</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
+                                    </svg>
+                                    <span wire:loading.remove wire:target="downloadCurrentSectionSlotsBackup" class="sr-only">Backup slots</span>
+                                    <span wire:loading wire:target="downloadCurrentSectionSlotsBackup" class="sr-only">Preparando…</span>
                                 </button>
                                 <label title="Seleccionar respaldo JSON de slots de la sección activa"
                                     wire:loading.attr="disabled"
                                     class="inline-flex cursor-pointer items-center gap-1.5 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300">
-                                    <span>Elegir restore</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+                                    </svg>
+                                    <span class="sr-only">Elegir restore</span>
                                     <input type="file" wire:loading.attr="disabled" wire:model="slotsBackupFile" accept="application/json,.json" class="sr-only" disabled>
                                 </label>
                                 <button type="button"
@@ -2654,9 +2684,13 @@
                                     wire:loading.class="opacity-50 cursor-not-allowed"
                                     wire:target="restoreCurrentSectionSlotsBackup,slotsBackupFile"
                                     title="Restaurar los slots de la sección activa desde un respaldo JSON"
+                                    aria-label="Restore slots"
                                     class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
-                                    <span wire:loading.remove wire:target="restoreCurrentSectionSlotsBackup">Restore slots</span>
-                                    <span wire:loading wire:target="restoreCurrentSectionSlotsBackup">Restaurando…</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 9A7 7 0 0117 5.5L20 8M18.5 15A7 7 0 017 18.5L4 16"/>
+                                    </svg>
+                                    <span wire:loading.remove wire:target="restoreCurrentSectionSlotsBackup" class="sr-only">Restore slots</span>
+                                    <span wire:loading wire:target="restoreCurrentSectionSlotsBackup" class="sr-only">Restaurando…</span>
                                 </button>
                                 @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
                                     <button type="button"
@@ -2671,7 +2705,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14v14H5z"/>
                                         </svg>
-                                        Draft de sección
+                                        <span class="sr-only">Draft de sección</span>
                                     </button>
                                     <button type="button"
                                         wire:click="generateSectionDraft"
@@ -2683,8 +2717,8 @@
                                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                         </svg>
-                                        <span wire:loading.remove wire:target="generateSectionDraft">Draft sección (solver)</span>
-                                        <span wire:loading wire:target="generateSectionDraft">Generando…</span>
+                                        <span wire:loading.remove wire:target="generateSectionDraft" class="sr-only">Draft sección (solver)</span>
+                                        <span wire:loading wire:target="generateSectionDraft" class="sr-only">Generando…</span>
                                     </button>
                                 @endif
                                 <button type="button"
@@ -2693,19 +2727,41 @@
                                     wire:loading.class="opacity-50 cursor-not-allowed"
                                     wire:target="downloadDryRunResult"
                                     title="Descargar informe JSON auditable del dry-run"
+                                    aria-label="Auditoría JSON"
                                     class="inline-flex items-center gap-1.5 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"></path>
                                     </svg>
-                                    <span wire:loading.remove wire:target="downloadDryRunResult">Auditoría JSON</span>
-                                    <span wire:loading wire:target="downloadDryRunResult">Preparando…</span>
+                                    <span wire:loading.remove wire:target="downloadDryRunResult" class="sr-only">Auditoría JSON</span>
+                                    <span wire:loading wire:target="downloadDryRunResult" class="sr-only">Preparando…</span>
                                 </button>
+                                @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
+                                    @php $sectionLocked = $this->activeSectionTimetableLocked(); @endphp
+                                    <button type="button"
+                                        wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
+                                        title="{{ $sectionLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-colors {{ $sectionLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            @if ($sectionLocked)
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                            @else
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                            @endif
+                                        </svg>
+                                        <span class="sr-only">{{ $sectionLocked ? 'Bloqueado' : 'Bloquear' }}</span>
+                                    </button>
+                                @endif
 
                                 </div>
                             </div>
+                            @php
+                                $sectionLockedGrid = is_numeric($activeSeccionId) && (int) $activeSeccionId > 0
+                                    ? $this->activeSectionTimetableLocked()
+                                    : false;
+                            @endphp
                             @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
                                 @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
-                                <div class="rounded-lg border border-gray-200 dark:border-white/10 p-1.5">
+                                <div class="rounded-lg border border-gray-200 dark:border-white/10 p-1.5 {{ $sectionLockedGrid ? 'opacity-50 pointer-events-none select-none' : '' }}">
                                     <div class="-mx-1.5 -mt-1.5 mb-1.5 flex items-center justify-between gap-1.5 rounded-t-lg border-b border-emerald-500/15 bg-emerald-500/5 px-1.5 py-1 dark:border-emerald-400/10 dark:bg-emerald-400/5">
                                         <div class="flex min-w-0 items-center gap-2">
                                             <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300" aria-hidden="true">
@@ -2721,6 +2777,14 @@
                                         @if ($shift?->start_time)
                                             <span class="shrink-0 rounded-md bg-white/70 px-2 py-1 font-mono text-[10px] font-bold text-emerald-700 dark:bg-black/10 dark:text-emerald-300">
                                                 {{ substr((string) $shift->start_time, 0, 5) }}–{{ substr((string) $shift->end_time, 0, 5) }}
+                                            </span>
+                                        @endif
+                                        @if ($sectionLockedGrid)
+                                            <span class="shrink-0 rounded-md bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-600 dark:text-red-300">
+                                                <svg class="inline h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                                </svg>
+                                                Bloqueado
                                             </span>
                                         @endif
                                     </div>
@@ -2757,7 +2821,14 @@
                                                                     title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
                                                                     class="flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight active:cursor-grabbing {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border-2 border-solid border-violet-500/40 bg-violet-500/[0.06]' : '' }}">
                                                                     <div class="flex min-h-3.5 items-center justify-between gap-px">
-                                                                        <span class="sr-only">Acciones de {{ $cell['asignatura'] }}</span>
+                                                                        <label class="flex shrink-0 items-center" title="{{ $cell['locked'] ? 'Desbloquear este bloque' : 'Bloquear este bloque' }}">
+                                                                            <input type="checkbox"
+                                                                                wire:change="togglePreviewSlotLock({{ (int) $cell['lesson_id'] }}, {{ (int) $cell['period_id'] }})"
+                                                                                @checked($cell['locked'])
+                                                                                aria-label="Bloquear/desbloquear {{ $cell['asignatura'] }} en este período"
+                                                                                class="h-3 w-3 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                                                            <span class="sr-only">Bloquear/desbloquear {{ $cell['asignatura'] }}</span>
+                                                                        </label>
                                                                         <span class="min-w-0 flex-1"></span>
                                                                         <button type="button"
                                                                             wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }}, {{ (int) $cell['period_id'] }})"

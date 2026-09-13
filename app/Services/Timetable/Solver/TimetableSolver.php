@@ -72,6 +72,8 @@ final class TimetableSolver
                     $slot->roomId,
                     $lesson->grupoEstableId,
                     $lesson->isHalfGroup,
+                    $lesson->lessonId,
+                    $lesson->allowSharedTeacher,
                 )) {
                     $unassigned[] = $lesson->lessonId;
 
@@ -87,6 +89,8 @@ final class TimetableSolver
                     $slot->roomId,
                     $lesson->grupoEstableId,
                     $lesson->isHalfGroup,
+                    $lesson->lessonId,
+                    $lesson->allowSharedTeacher,
                 );
             }
             $assignment[$lesson->lessonId] = $lesson->preassignedSlots;
@@ -109,11 +113,11 @@ final class TimetableSolver
             $combo = [];
             $conflict = false;
             foreach ($lockedPeriods as $pId) {
-                if (! $ctx->isFree($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
+                if (! $ctx->isFree($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
                     $conflict = true;
                     break;
                 }
-                $ctx->occupy($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup);
+                $ctx->occupy($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher);
                 $combo[] = new SlotCandidate($pId, null, false);
             }
 
@@ -297,7 +301,7 @@ final class TimetableSolver
 
         foreach ($this->combinationsOfSize($domain, $lesson) as $combo) {
             foreach ($combo as $slot) {
-                $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup);
+                $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher);
             }
             $existingSlots = $assignment[$lesson->lessonId] ?? [];
             $assignment[$lesson->lessonId] = array_merge($existingSlots, $combo);
@@ -317,7 +321,7 @@ final class TimetableSolver
             }
 
             foreach ($combo as $slot) {
-                $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup);
+                $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId);
             }
             if ($existingSlots === []) {
                 unset($assignment[$lesson->lessonId]);
@@ -393,17 +397,17 @@ final class TimetableSolver
         $domain = ['t' => [], 'p' => []];
 
         foreach ($base as $periodId) {
-            if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
+            if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
                 $domain['t'][] = new SlotCandidate($periodId, null, false);
             }
 
             if ($lesson->roomTypeRequired !== null) {
                 foreach ($this->roomsByType[$lesson->roomTypeRequired] ?? [] as $roomId) {
-                    if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, $roomId, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
+                    if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, $roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
                         $domain['p'][] = new SlotCandidate($periodId, $roomId, true);
                     }
                 }
-            } elseif ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
+            } elseif ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
                 $domain['p'][] = new SlotCandidate($periodId, null, true);
             }
         }

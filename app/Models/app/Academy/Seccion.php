@@ -12,7 +12,11 @@ class Seccion extends Model
 
     protected $fillable = [
         'grado_id', 'name', 'description', 'amount_student', 'observation',
-        'status_active', 'comment_final', 'status_inscription_affects'
+        'status_active', 'comment_final', 'status_inscription_affects', 'timetable_locked',
+    ];
+
+    protected $casts = [
+        'timetable_locked' => 'boolean',
     ];
 
     protected $table = 'seccions';
@@ -25,7 +29,7 @@ class Seccion extends Model
         'observation' => 'Observaciones',
         'status_active' => 'Estado',
         'comment_final' => 'Observaciones Resumen Final',
-        'status_inscription_affects' => 'Contabiliza Inscripción'
+        'status_inscription_affects' => 'Contabiliza Inscripción',
     ];
 
     public function grado()
@@ -63,6 +67,7 @@ class Seccion extends Model
     public function getFullNameAttribute()
     {
         $gradoName = $this->grado ? $this->grado->name : '—';
+
         return "Secc. {$this->name} ({$gradoName})";
     }
 

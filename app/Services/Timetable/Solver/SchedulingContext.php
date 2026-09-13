@@ -15,8 +15,11 @@ final class SchedulingContext
         $this->maxSubjectsPerPeriod = max(1, $maxSubjectsPerPeriod);
     }
 
-    /** @var array<string, true> "periodId:profesorId" */
-    private array $teacherBusy = [];
+    /** @var array<string, array<int, bool>> "periodId:profesorId" => [lessonId => true] (ocupantes) */
+    private array $teacherOccupants = [];
+
+    /** @var array<string, array<int, bool>> "periodId:profesorId" => [lessonId => allow_shared_teacher] */
+    private array $teacherOccupantShared = [];
 
     /** @var array<string, true> "periodId:roomId" (solo roomId != null) */
     private array $roomBusy = [];
@@ -42,10 +45,31 @@ final class SchedulingContext
      * @param  int|null  $grupoEstableId  null = lección de sección completa.
      *                                    Un valor = sub-grupo (componente de formación).
      */
-    public function isFree(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null, bool $isHalfGroup = false): bool
-    {
-        if (isset($this->teacherBusy["$periodId:$profesorId"])) {
-            return false;
+    public function isFree(
+        int $periodId,
+        int $profesorId,
+        int $seccionId,
+        ?int $roomId,
+        ?int $grupoEstableId = null,
+        bool $isHalfGroup = false,
+        int $lessonId = 0,
+        bool $allowSharedTeacher = false,
+    ): bool {
+        $teacherKey = "$periodId:$profesorId";
+        $occupants = $this->teacherOccupants[$teacherKey] ?? [];
+
+        if ($occupants !== []) {
+            if (count($occupants) >= 2) {
+                return false;
+            }
+
+            $existingLessonId = array_key_first($occupants);
+            $existingShared = $this->teacherOccupantShared[$teacherKey][$existingLessonId] ?? false;
+
+            // La excepción de docente compartido exige AMBAS lessons autorizadas.
+            if (! ($allowSharedTeacher && $existingShared)) {
+                return false;
+            }
         }
 
         if ($roomId !== null && isset($this->roomBusy["$periodId:$roomId"])) {
@@ -75,9 +99,19 @@ final class SchedulingContext
     /**
      * @param  int|null  $grupoEstableId  null = lección de sección completa.
      */
-    public function occupy(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null, bool $isHalfGroup = false): void
-    {
-        $this->teacherBusy["$periodId:$profesorId"] = true;
+    public function occupy(
+        int $periodId,
+        int $profesorId,
+        int $seccionId,
+        ?int $roomId,
+        ?int $grupoEstableId = null,
+        bool $isHalfGroup = false,
+        int $lessonId = 0,
+        bool $allowSharedTeacher = false,
+    ): void {
+        $teacherKey = "$periodId:$profesorId";
+        $this->teacherOccupants[$teacherKey][$lessonId] = true;
+        $this->teacherOccupantShared[$teacherKey][$lessonId] = $allowSharedTeacher;
 
         if ($roomId !== null) {
             $this->roomBusy["$periodId:$roomId"] = true;
@@ -96,9 +130,22 @@ final class SchedulingContext
     /**
      * @param  int|null  $grupoEstableId  null = lección de sección completa.
      */
-    public function release(int $periodId, int $profesorId, int $seccionId, ?int $roomId, ?int $grupoEstableId = null, bool $isHalfGroup = false): void
-    {
-        unset($this->teacherBusy["$periodId:$profesorId"]);
+    public function release(
+        int $periodId,
+        int $profesorId,
+        int $seccionId,
+        ?int $roomId,
+        ?int $grupoEstableId = null,
+        bool $isHalfGroup = false,
+        int $lessonId = 0,
+    ): void {
+        $teacherKey = "$periodId:$profesorId";
+        unset($this->teacherOccupants[$teacherKey][$lessonId]);
+        unset($this->teacherOccupantShared[$teacherKey][$lessonId]);
+        if (($this->teacherOccupants[$teacherKey] ?? []) === []) {
+            unset($this->teacherOccupants[$teacherKey]);
+            unset($this->teacherOccupantShared[$teacherKey]);
+        }
 
         if ($roomId !== null) {
             unset($this->roomBusy["$periodId:$roomId"]);

@@ -6,6 +6,7 @@ use App\Imports\TimetableLessonsImport;
 use App\Jobs\Timetable\GenerateTimetableJob;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableAbsence;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableCalendarVersion;
@@ -1879,6 +1880,7 @@ class TimetableWizard extends Component
                         ? (string) data_get($sourceLesson, 'room_type_required')
                         : null,
                     'is_half_group' => filter_var(data_get($sourceLesson, 'is_half_group', false), FILTER_VALIDATE_BOOLEAN),
+                    'allow_shared_teacher' => false,
                     'priority' => (int) data_get($sourceLesson, 'priority', 0),
                     'locked' => (bool) data_get($sourceLesson, 'locked', false),
                 ])->save();
@@ -1966,6 +1968,10 @@ class TimetableWizard extends Component
     public function toggleSelectAllForSection(int $seccionId): void
     {
         if ($seccionId <= 0) {
+            return;
+        }
+
+        if ($this->blockIfSectionLocked($seccionId)) {
             return;
         }
 
@@ -2281,6 +2287,7 @@ class TimetableWizard extends Component
                 'weekly_blocks_p',
                 'room_type_required',
                 'is_half_group',
+                'allow_shared_teacher',
                 'priority',
                 'locked',
             ])
@@ -2325,6 +2332,7 @@ class TimetableWizard extends Component
                 $lesson['shift_id'] = (int) ($existing[$pev->id]['shift_id'] ?? $lesson['shift_id']);
                 $lesson['room_type_required'] = $existing[$pev->id]['room_type_required'] ?? null;
                 $lesson['is_half_group'] = (bool) ($existing[$pev->id]['is_half_group'] ?? false);
+                $lesson['allow_shared_teacher'] = (bool) ($existing[$pev->id]['allow_shared_teacher'] ?? false);
                 $lesson['weekly_blocks_t'] = (int) ($existing[$pev->id]['weekly_blocks_t'] ?? $lesson['weekly_blocks_t']);
                 $lesson['weekly_blocks_p'] = (int) ($existing[$pev->id]['weekly_blocks_p'] ?? $lesson['weekly_blocks_p']);
                 $lesson['priority'] = (int) ($existing[$pev->id]['priority'] ?? 0);
@@ -2333,6 +2341,7 @@ class TimetableWizard extends Component
                 $lesson['shift_id'] = (int) ($savedLesson->shift_id ?: $lesson['shift_id']);
                 $lesson['room_type_required'] = $savedLesson->room_type_required ?? null;
                 $lesson['is_half_group'] = (bool) ($savedLesson->is_half_group ?? false);
+                $lesson['allow_shared_teacher'] = (bool) ($savedLesson->allow_shared_teacher ?? false);
                 $lesson['priority'] = (int) ($savedLesson->priority ?? 0);
                 $lesson['locked'] = (bool) ($savedLesson->locked ?? false);
                 $savedBlocksT = (int) $savedLesson->weekly_blocks_t;
@@ -2414,6 +2423,7 @@ class TimetableWizard extends Component
             'shift_id' => $this->defaultShiftId(),
             'room_type_required' => null,
             'is_half_group' => false,
+            'allow_shared_teacher' => false,
             'priority' => 0,
             'locked' => false,
         ];
@@ -2868,6 +2878,7 @@ class TimetableWizard extends Component
                     'weekly_blocks_p' => max(0, (int) ($lesson['weekly_blocks_p'] ?? 0)),
                     'room_type_required' => $lesson['room_type_required'] ?: null,
                     'is_half_group' => (bool) ($lesson['is_half_group'] ?? false),
+                    'allow_shared_teacher' => (bool) ($lesson['allow_shared_teacher'] ?? false),
                     'priority' => max(0, (int) ($lesson['priority'] ?? 0)),
                     'locked' => (bool) ($lesson['locked'] ?? false),
                 ],
@@ -2995,6 +3006,7 @@ class TimetableWizard extends Component
                     'weekly_blocks_p' => max(0, (int) $lesson->weekly_blocks_p),
                     'room_type_required' => $lesson->room_type_required ?: null,
                     'is_half_group' => (bool) $lesson->is_half_group,
+                    'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
                     'priority' => max(0, (int) $lesson->priority),
                     'locked' => (bool) $lesson->locked,
                 ],
@@ -3251,6 +3263,7 @@ class TimetableWizard extends Component
                 'weekly_blocks_p' => max(0, (int) ($configuration['weekly_blocks_p'] ?? 0)),
                 'room_type_required' => $configuration['room_type_required'] ?? null,
                 'is_half_group' => (bool) ($configuration['is_half_group'] ?? false),
+                'allow_shared_teacher' => (bool) ($configuration['allow_shared_teacher'] ?? false),
                 'priority' => max(0, (int) ($configuration['priority'] ?? 0)),
                 'locked' => (bool) ($configuration['locked'] ?? false),
             ];
@@ -3660,6 +3673,7 @@ class TimetableWizard extends Component
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                     'grupo' => $pev?->grupoEstable?->name,
                     'is_half_group' => (bool) $lesson->is_half_group,
+                    'locked' => (bool) ($slot['locked'] ?? false),
                 ];
                 $cellLoad[$cellKey] = ($cellLoad[$cellKey] ?? 0) + 1;
             }
@@ -3860,6 +3874,174 @@ class TimetableWizard extends Component
         ];
     }
 
+    /**
+     * Bloquea/desbloquea el horario de una sección (persistencia en
+     * seccions.timetable_locked). Si está bloqueado, no se puede modificar.
+     */
+    public function toggleSectionTimetableLock(int $sectionId): void
+    {
+        $section = Seccion::query()->find($sectionId);
+
+        if (! $section) {
+            $this->notification()->error('Sección no encontrada', 'No se pudo cambiar el bloqueo del horario.');
+
+            return;
+        }
+
+        $section->update(['timetable_locked' => ! (bool) $section->timetable_locked]);
+
+        $this->notification()->success(
+            $section->timetable_locked ? 'Horario bloqueado' : 'Horario desbloqueado',
+            $section->timetable_locked
+                ? 'El horario de la sección quedó bloqueado: no se podrá modificar.'
+                : 'El horario de la sección quedó desbloqueado.',
+        );
+    }
+
+    public function activeSectionTimetableLocked(): bool
+    {
+        if (! is_numeric($this->activeSeccionId) || (int) $this->activeSeccionId <= 0) {
+            return false;
+        }
+
+        return $this->sectionTimetableLocked((int) $this->activeSeccionId);
+    }
+
+    public function sectionTimetableLocked(int $sectionId): bool
+    {
+        return (bool) Seccion::query()->whereKey($sectionId)->value('timetable_locked');
+    }
+
+    /**
+     * @param  list<int>  $sectionIds
+     */
+    public function hasLockedSections(array $sectionIds): bool
+    {
+        if ($sectionIds === []) {
+            return false;
+        }
+
+        return (bool) Seccion::query()
+            ->whereIn('id', $sectionIds)
+            ->where('timetable_locked', true)
+            ->exists();
+    }
+
+    /**
+     * @return array<int, bool> sectionId => true (horario bloqueado)
+     */
+    public function lockedSectionIdSet(): array
+    {
+        if (! $this->calendarId) {
+            return [];
+        }
+
+        $pestudioId = TimetableCalendar::query()->whereKey($this->calendarId)->value('pestudio_id');
+
+        return Seccion::query()
+            ->where('timetable_locked', true)
+            ->when($pestudioId, fn ($q) => $q->whereHas('grado', fn ($g) => $g->where('pestudio_id', $pestudioId)))
+            ->pluck('id')
+            ->mapWithKeys(fn ($id): array => [(int) $id => true])
+            ->all();
+    }
+
+    private function blockIfSectionLocked(int $sectionId): bool
+    {
+        if (! $this->sectionTimetableLocked($sectionId)) {
+            return false;
+        }
+
+        $this->notification()->error(
+            'Horario bloqueado',
+            'El horario de esta sección está bloqueado; no se puede modificar.',
+        );
+
+        return true;
+    }
+
+    /**
+     * Bloquea/desbloquea un slot específico del preview (persistencia en
+     * timetable_slots.locked). Si está bloqueado, ese bloque no se puede
+     * mover ni retirar.
+     */
+    public function togglePreviewSlotLock(int $lessonId, int $periodId): void
+    {
+        if (! $this->preview || $lessonId <= 0 || $periodId <= 0) {
+            return;
+        }
+
+        $assignment = $this->preview['assignment'] ?? [];
+        $key = array_key_exists((string) $lessonId, $assignment)
+            ? (string) $lessonId
+            : (array_key_exists($lessonId, $assignment) ? $lessonId : null);
+
+        if ($key === null) {
+            return;
+        }
+
+        $locked = null;
+
+        foreach ($assignment[$key] as &$slot) {
+            if ((int) ($slot['period_id'] ?? 0) === $periodId) {
+                $slot['locked'] = ! (bool) ($slot['locked'] ?? false);
+                $locked = (bool) $slot['locked'];
+                break;
+            }
+        }
+        unset($slot);
+
+        if ($locked === null) {
+            return;
+        }
+
+        $this->preview['assignment'] = $assignment;
+        $this->preview['manual_override'] = true;
+        $this->preview['assignment_source'] = 'manual_preview';
+
+        // Persistencia en timetable_slots si el slot ya existe en BD.
+        TimetableSlot::query()
+            ->where('calendar_id', $this->calendarId)
+            ->where('lesson_id', $lessonId)
+            ->where('period_id', $periodId)
+            ->update(['locked' => $locked]);
+
+        $this->notification()->success(
+            $locked ? 'Bloque bloqueado' : 'Bloque desbloqueado',
+            $locked
+                ? 'Este bloque quedó bloqueado: no se podrá mover ni retirar.'
+                : 'Este bloque quedó desbloqueado.',
+        );
+    }
+
+    public function previewSlotLocked(int $lessonId, int $periodId): bool
+    {
+        $assignment = $this->preview['assignment'] ?? [];
+        $slots = $assignment[(string) $lessonId] ?? $assignment[$lessonId] ?? [];
+
+        foreach ($slots as $slot) {
+            if ((int) ($slot['period_id'] ?? 0) === $periodId) {
+                return (bool) ($slot['locked'] ?? false);
+            }
+        }
+
+        return false;
+    }
+
+    private function blockIfSlotLocked(int $lessonId, int $periodId): bool
+    {
+        if (! $this->previewSlotLocked($lessonId, $periodId)) {
+            return false;
+        }
+
+        $this->notification()->error(
+            'Bloque bloqueado',
+            'Este bloque está bloqueado; no se puede modificar.',
+        );
+
+        return true;
+    }
+
     public function movePreviewLesson(int $lessonId, int $fromPeriodId, int $newPeriodId): void
     {
         if (! $this->preview || $lessonId <= 0 || $fromPeriodId <= 0 || $newPeriodId <= 0) {
@@ -3884,6 +4066,10 @@ class TimetableWizard extends Component
             return;
         }
 
+        if ($this->blockIfSectionLocked((int) $lesson->pevaluacion->seccion_id)) {
+            return;
+        }
+
         $assignment = $this->preview['assignment'] ?? [];
         $lessonKey = (string) $lessonId;
         $slots = $assignment[$lessonKey] ?? $assignment[$lessonId] ?? [];
@@ -3893,6 +4079,10 @@ class TimetableWizard extends Component
         );
 
         if ($slotIndex === false) {
+            return;
+        }
+
+        if ($this->blockIfSlotLocked($lessonId, $fromPeriodId)) {
             return;
         }
 
@@ -3942,14 +4132,16 @@ class TimetableWizard extends Component
                     === (int) $lesson->pevaluacion->seccion_id;
                 $bothAllowHalfGroup = (bool) $lesson->is_half_group
                     && (bool) $otherLesson->is_half_group;
+                $bothAllowShared = (bool) $lesson->allow_shared_teacher
+                    && (bool) $otherLesson->allow_shared_teacher;
                 $isSectionSwap = $sameSection && ! $bothAllowHalfGroup;
                 $sameTeacher = (int) $otherLesson->pevaluacion->profesor_id
                     === (int) $lesson->pevaluacion->profesor_id;
 
                 // Una celda compartible tiene prioridad sobre el intercambio:
-                // dos lessons de medio grupo deben convivir en el destino,
-                // incluso si pertenecen al mismo docente.
-                if ($bothAllowHalfGroup) {
+                // dos lessons de medio grupo o de docente compartido deben
+                // convivir en el destino, incluso si pertenecen al mismo docente.
+                if ($bothAllowHalfGroup || $bothAllowShared) {
                     continue;
                 }
 
@@ -4043,6 +4235,7 @@ class TimetableWizard extends Component
         $profesorId = (int) $lesson->pevaluacion->profesor_id;
         $seccionId = (int) $lesson->pevaluacion->seccion_id;
         $isHalfGroup = (bool) $lesson->is_half_group;
+        $isShared = (bool) $lesson->allow_shared_teacher;
 
         $slots = TimetableSlot::query()
             ->where('calendar_id', $this->calendarId)
@@ -4054,9 +4247,11 @@ class TimetableWizard extends Component
         foreach ($slots as $slot) {
             $slotTeacher = (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id);
             $slotHalf = (bool) ($slot->lesson?->is_half_group ?? false);
+            $slotShared = (bool) ($slot->lesson?->allow_shared_teacher ?? false);
             $bothHalf = $isHalfGroup && $slotHalf;
+            $bothShared = $isShared && $slotShared;
 
-            if ($slotTeacher === $profesorId && ! $bothHalf) {
+            if ($slotTeacher === $profesorId && ! $bothHalf && ! $bothShared) {
                 $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
                 $otherSection = $slot->lesson?->pevaluacion?->seccion?->name ?? 'otra sección';
 
@@ -4100,6 +4295,10 @@ class TimetableWizard extends Component
             return;
         }
 
+        if ($this->blockIfSectionLocked((int) $lesson->pevaluacion?->seccion_id)) {
+            return;
+        }
+
         $assignment = $this->preview['assignment'] ?? [];
         $lessonKey = (string) $lessonId;
 
@@ -4114,6 +4313,20 @@ class TimetableWizard extends Component
 
         $key = array_key_exists($lessonKey, $assignment) ? $lessonKey : $lessonId;
         $slots = collect($assignment[$key]);
+
+        if ($periodId === null
+            && $slots->contains(fn ($slot): bool => (bool) data_get($slot, 'locked', false))) {
+            $this->notification()->error(
+                'Bloque bloqueado',
+                'La lección tiene bloques bloqueados; no se puede retirar completa.',
+            );
+
+            return;
+        }
+
+        if ($periodId !== null && $this->blockIfSlotLocked($lessonId, $periodId)) {
+            return;
+        }
 
         $removedAll = true;
 
@@ -4380,6 +4593,10 @@ class TimetableWizard extends Component
             return;
         }
 
+        if ($this->blockIfSectionLocked((int) $lesson->pevaluacion->seccion_id)) {
+            return;
+        }
+
         $hasShiftMismatch = (int) $lesson->shift_id !== (int) $period->shift_id;
 
         $assignment = $this->preview['assignment'] ?? [];
@@ -4402,7 +4619,8 @@ class TimetableWizard extends Component
 
             $sameTeacher = (int) $targetLesson->pevaluacion->profesor_id === (int) $lesson->pevaluacion->profesor_id;
             $bothAllowHalfGroup = (bool) $lesson->is_half_group && (bool) $targetLesson->is_half_group;
-            if ($sameTeacher && ! $bothAllowHalfGroup) {
+            $bothAllowShared = (bool) $lesson->allow_shared_teacher && (bool) $targetLesson->allow_shared_teacher;
+            if ($sameTeacher && ! $bothAllowHalfGroup && ! $bothAllowShared) {
                 $this->notification()->error(
                     'Conflicto de docente',
                     $this->teacherConflictMessage($lesson, $targetLesson, $period),
@@ -4499,6 +4717,7 @@ class TimetableWizard extends Component
                 'weekly_blocks_p' => (int) $lesson->weekly_blocks_p,
                 'room_type_required' => $lesson->room_type_required ?: null,
                 'is_half_group' => (bool) $lesson->is_half_group,
+                'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
                 'priority' => (int) $lesson->priority,
                 'locked' => (bool) $lesson->locked,
             ];
@@ -4882,6 +5101,38 @@ PROMPT;
             return;
         }
 
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            session()->flash('error', 'Calendario no encontrado.');
+
+            return;
+        }
+
+        // No regenerar si alguna sección en el alcance tiene el horario bloqueado.
+        $selectedPevIds = $this->selectedPevIds();
+        $sectionIds = $selectedPevIds === []
+            ? Seccion::query()
+                ->whereHas('grado', fn ($q) => $q->where('pestudio_id', $calendar->pestudio_id))
+                ->pluck('id')
+                ->map(fn ($id): int => (int) $id)
+                ->all()
+            : Pevaluacion::query()
+                ->whereIn('id', $selectedPevIds)
+                ->pluck('seccion_id')
+                ->map(fn ($id): int => (int) $id)
+                ->unique()
+                ->all();
+
+        if ($this->hasLockedSections($sectionIds)) {
+            $this->notification()->error(
+                'Horario bloqueado',
+                'Hay secciones con el horario bloqueado; no se puede regenerar el horario.',
+            );
+
+            return;
+        }
+
         $this->aiDryRunAnalysis = null;
         $this->aiDryRunAnalysisModel = null;
         $this->showAiAnalysisModal = false;
@@ -4889,7 +5140,6 @@ PROMPT;
         $this->generationState = 'generating';
 
         try {
-            $selectedPevIds = $this->selectedPevIds();
             GenerateTimetableJob::dispatchSync(
                 $this->calendarId,
                 dryRun: true,
@@ -4932,6 +5182,11 @@ PROMPT;
         }
 
         $sectionId = (int) $this->activeSeccionId;
+
+        if ($this->blockIfSectionLocked($sectionId)) {
+            return;
+        }
+
         $pevIds = Pevaluacion::query()
             ->where('lapso_id', $calendar->lapso_id)
             ->where('seccion_id', $sectionId)
@@ -5385,6 +5640,10 @@ PROMPT;
             return;
         }
 
+        if ($this->blockIfSectionLocked($sectionId)) {
+            return;
+        }
+
         $calendar = TimetableCalendar::query()->find($this->calendarId);
         if (! $calendar) {
             $this->notification()->error('Calendario no encontrado', 'No se pudieron guardar las asignaciones.');
@@ -5417,8 +5676,9 @@ PROMPT;
                         ? (int) $lesson->pevaluacion->grupo_estable_id
                         : null,
                     'is_half_group' => (bool) $lesson->is_half_group,
+                    'allow_shared_teacher' => (bool) ($slot['allow_shared_teacher'] ?? $lesson->allow_shared_teacher),
                     'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
-                    'locked' => (bool) $lesson->locked,
+                    'locked' => (bool) ($slot['locked'] ?? $lesson->locked),
                     'is_manual_override' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -5448,15 +5708,46 @@ PROMPT;
             ->get();
         $conflicts = collect($assignmentRows)
             ->map(function (array $candidate) use ($persistedSlots): ?array {
+                $teacherConflicts = $persistedSlots->filter(function (TimetableSlot $slot) use ($candidate): bool {
+                    return (int) $slot->period_id === (int) $candidate['period_id']
+                        && (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id) === (int) $candidate['profesor_id'];
+                })->values();
+
+                if ($teacherConflicts->isNotEmpty()) {
+                    $count = $teacherConflicts->count();
+                    $allShared = $teacherConflicts->every(
+                        fn (TimetableSlot $slot): bool => (bool) ($slot->lesson?->allow_shared_teacher ?? $slot->allow_shared_teacher),
+                    );
+                    $bothHalfGroup = $teacherConflicts->every(
+                        fn (TimetableSlot $slot): bool => (bool) $slot->is_half_group,
+                    ) && (bool) $candidate['is_half_group'];
+                    $bothShared = $allShared && (bool) $candidate['allow_shared_teacher'];
+
+                    if ($count >= 2 || ! ($bothHalfGroup || $bothShared)) {
+                        $existing = $teacherConflicts->first();
+
+                        return [
+                            'candidate_lesson_id' => (int) $candidate['lesson_id'],
+                            'period_id' => (int) $candidate['period_id'],
+                            'existing_lesson_id' => (int) $existing->lesson_id,
+                            'type' => 'docente',
+                            'candidate_profesor_id' => (int) $candidate['profesor_id'],
+                            'existing_profesor_id' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id),
+                            'candidate_section_id' => (int) $candidate['seccion_id'],
+                            'existing_section_id' => (int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id),
+                            'subject' => $existing->lesson?->pevaluacion?->pensum?->asignatura?->name ?? 'otra asignatura',
+                            'section' => $existing->lesson?->pevaluacion?->seccion?->name ?? (string) $existing->seccion_id,
+                        ];
+                    }
+                }
+
+                // Aula y sección (la excepción de docente compartido no las relaja).
                 $existing = $persistedSlots->first(function (TimetableSlot $slot) use ($candidate): bool {
                     if ((int) $slot->period_id !== (int) $candidate['period_id']) {
                         return false;
                     }
 
-                    $persistedTeacherId = (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id);
                     $persistedSectionId = (int) ($slot->lesson?->pevaluacion?->seccion_id ?? $slot->seccion_id);
-                    $sameTeacher = $persistedTeacherId === (int) $candidate['profesor_id'];
-                    $bothHalfGroup = (bool) $slot->is_half_group && (bool) $candidate['is_half_group'];
                     $sameRoom = $candidate['room_id'] !== null
                         && $slot->room_id !== null
                         && (int) $slot->room_id === (int) $candidate['room_id'];
@@ -5467,9 +5758,7 @@ PROMPT;
                             || $slot->grupo_estable_id === null
                         );
 
-                    return ($sameTeacher && ! $bothHalfGroup)
-                        || $sameRoom
-                        || ($sameSection && ! $bothHalfGroup);
+                    return $sameRoom || $sameSection;
                 });
 
                 if (! $existing) {
@@ -5480,9 +5769,7 @@ PROMPT;
                     'candidate_lesson_id' => (int) $candidate['lesson_id'],
                     'period_id' => (int) $candidate['period_id'],
                     'existing_lesson_id' => (int) $existing->lesson_id,
-                    'type' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id) === (int) $candidate['profesor_id']
-                        ? 'docente'
-                        : ((int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id) === (int) $candidate['seccion_id'] ? 'sección' : 'aula'),
+                    'type' => (int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id) === (int) $candidate['seccion_id'] ? 'sección' : 'aula',
                     'candidate_profesor_id' => (int) $candidate['profesor_id'],
                     'existing_profesor_id' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id),
                     'candidate_section_id' => (int) $candidate['seccion_id'],

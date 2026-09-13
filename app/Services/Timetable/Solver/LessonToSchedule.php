@@ -26,6 +26,8 @@ final class LessonToSchedule
         /** Sub-grupo (componente de formación). null = lección de sección completa. */
         public readonly ?int $grupoEstableId = null,
         public readonly bool $isHalfGroup = false,
+        /** Docente compartido: puede atender dos lessons en el mismo bloque. */
+        public readonly bool $allowSharedTeacher = false,
         /** @var list<SlotCandidate> Slots válidos ya asignados que deben conservarse. */
         public readonly array $preassignedSlots = [],
     ) {}

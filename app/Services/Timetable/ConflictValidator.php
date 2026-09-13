@@ -5,7 +5,6 @@ namespace App\Services\Timetable;
 use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableSlot;
-use App\Services\Timetable\TimetableAvailabilityService;
 
 /**
  * SPEC-TIMETABLE-001 §6 — Validación síncrona de las reglas duras.
@@ -56,6 +55,8 @@ class ConflictValidator
         }
 
         // Docente doble: otro slot (distinto al ignorado) ocupa al docente.
+        // Se permite el docente compartido solo si AMBAS lessons lo autorizan
+        // (o ambas son de medio grupo), y nunca una tercera ocupación.
         $conflictQuery = function (int $calendarId, int $periodId, ?int $ignoreSlotId) {
             return TimetableSlot::query()
                 ->where('calendar_id', $calendarId)
@@ -63,10 +64,24 @@ class ConflictValidator
                 ->when($ignoreSlotId, fn ($q) => $q->where('id', '!=', $ignoreSlotId));
         };
 
-        if ($conflictQuery($calendarId, $periodId, $ignoreSlotId)
+        $teacherConflicts = $conflictQuery($calendarId, $periodId, $ignoreSlotId)
             ->where('profesor_id', $profesorId)
-            ->exists()) {
-            $reasons[] = 'El docente ya tiene clase en ese período.';
+            ->with('lesson')
+            ->get();
+
+        if ($teacherConflicts->isNotEmpty()) {
+            $count = $teacherConflicts->count();
+            $allShareable = $teacherConflicts->every(
+                fn ($slot): bool => (bool) ($slot->lesson?->allow_shared_teacher ?? false),
+            );
+            $bothHalfGroup = $teacherConflicts->every(
+                fn ($slot): bool => (bool) ($slot->is_half_group ?? $slot->lesson?->is_half_group ?? false),
+            ) && (bool) $lesson->is_half_group;
+            $candidateShared = (bool) $lesson->allow_shared_teacher;
+
+            if ($count >= 2 || ! ($bothHalfGroup || ($candidateShared && $allShareable))) {
+                $reasons[] = 'El docente ya tiene clase en ese período.';
+            }
         }
 
         // Una pareja de medio grupo puede compartir la celda; la sección

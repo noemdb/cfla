@@ -16,13 +16,14 @@ class TimetableSlot extends Model
     protected $fillable = [
         'calendar_id', 'lesson_id', 'period_id', 'profesor_id', 'seccion_id',
         'grupo_estable_id', 'room_id', 'is_manual_override', 'locked',
-        'is_half_group',
+        'is_half_group', 'allow_shared_teacher',
     ];
 
     protected $casts = [
         'is_manual_override' => 'boolean',
         'locked' => 'boolean',
         'is_half_group' => 'boolean',
+        'allow_shared_teacher' => 'boolean',
     ];
 
     protected $hidden = [

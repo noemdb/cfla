@@ -17,7 +17,7 @@ class TimetableLesson extends Model
     protected $fillable = [
         'calendar_id', 'pevaluacion_id', 'shift_id',
         'weekly_blocks_t', 'weekly_blocks_p', 'room_type_required',
-        'is_half_group', 'priority', 'locked',
+        'is_half_group', 'priority', 'locked', 'allow_shared_teacher',
     ];
 
     protected $casts = [
@@ -26,6 +26,7 @@ class TimetableLesson extends Model
         'is_half_group' => 'boolean',
         'priority' => 'integer',
         'locked' => 'boolean',
+        'allow_shared_teacher' => 'boolean',
     ];
 
     public function calendar()

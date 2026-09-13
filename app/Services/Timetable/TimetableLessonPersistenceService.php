@@ -115,6 +115,7 @@ final class TimetableLessonPersistenceService
                         'weekly_blocks_p' => max(0, (int) ($lesson['weekly_blocks_p'] ?? 0)),
                         'room_type_required' => $lesson['room_type_required'] ?? null,
                         'is_half_group' => (bool) ($lesson['is_half_group'] ?? false),
+                        'allow_shared_teacher' => (bool) ($lesson['allow_shared_teacher'] ?? false),
                         'priority' => max(0, (int) ($lesson['priority'] ?? 0)),
                         'locked' => (bool) ($lesson['locked'] ?? false),
                     ],

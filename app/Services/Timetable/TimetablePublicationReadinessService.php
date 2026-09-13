@@ -82,6 +82,7 @@ class TimetablePublicationReadinessService
                 $period = $periods->get($periodId);
                 if (! $period) {
                     $hardConflicts[] = $this->conflict($lesson, 'period_not_in_calendar', null, $periodId);
+
                     continue;
                 }
                 if ($period->is_break) {
@@ -93,11 +94,20 @@ class TimetablePublicationReadinessService
                 $roomId = (int) ($slot['room_id'] ?? 0);
                 $key = $periodId.':';
 
-                if ($teacherId && isset($teacherPeriods[$key.$teacherId])) {
-                    $existingTeacherLesson = $lessons->get($teacherPeriods[$key.$teacherId]);
-                    $bothAllowHalfGroup = (bool) $lesson->is_half_group
-                        && (bool) $existingTeacherLesson?->is_half_group;
-                    if (! $bothAllowHalfGroup) {
+                if ($teacherId && ! empty($teacherPeriods[$key.$teacherId] ?? [])) {
+                    $existingTeacherLessons = collect($teacherPeriods[$key.$teacherId])
+                        ->map(fn ($id) => $lessons->get($id))
+                        ->filter();
+                    $count = $existingTeacherLessons->count();
+                    $allShared = $existingTeacherLessons->every(
+                        fn ($l): bool => (bool) ($l?->allow_shared_teacher ?? false),
+                    );
+                    $bothAllowHalfGroup = $existingTeacherLessons->every(
+                        fn ($l): bool => (bool) ($l?->is_half_group ?? false),
+                    ) && (bool) $lesson->is_half_group;
+                    $candidateShared = (bool) $lesson->allow_shared_teacher;
+
+                    if ($count >= 2 || ! ($bothAllowHalfGroup || ($candidateShared && $allShared))) {
                         $hardConflicts[] = $this->conflict($lesson, 'teacher_double_booked', $period, $periodId);
                     }
                 }
@@ -119,7 +129,7 @@ class TimetablePublicationReadinessService
                 }
 
                 if ($teacherId) {
-                    $teacherPeriods[$key.$teacherId] = (int) $lesson->id;
+                    $teacherPeriods[$key.$teacherId][] = (int) $lesson->id;
                 }
                 if ($sectionId) {
                     $sectionPeriods[$key.$sectionId][] = (int) $lesson->id;
@@ -163,8 +173,7 @@ class TimetablePublicationReadinessService
         string $type,
         ?TimetablePeriod $period,
         int $periodId = 0,
-    ): array
-    {
+    ): array {
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
         $section = $lesson->pevaluacion?->seccion?->name ?? 'Sección sin nombre';
         $grade = $lesson->pevaluacion?->grado?->name ?? 'Grado sin nombre';
