@@ -96,6 +96,17 @@
                     <span wire:loading.remove wire:target="restoreCalendarLessonsBackup">Restore</span>
                     <span wire:loading wire:target="restoreCalendarLessonsBackup">Restaurando…</span>
                 </button>
+                <button type="button"
+                    wire:click="confirmClearCalendarLessonAssignments"
+                    wire:loading.attr="disabled"
+                    wire:loading.class="opacity-50 cursor-not-allowed"
+                    wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments"
+                    {{ filled($calendarId) ? '' : 'disabled' }}
+                    title="Quitar todos los slots del calendario sin eliminar la configuración de sus lessons"
+                    class="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
+                    <span wire:loading.remove wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiar slots</span>
+                    <span wire:loading wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiando…</span>
+                </button>
                 {{-- <button wire:click="openEditCalendarForm"
                     {{ filled($calendarId) ? '' : 'disabled' }}
                     class="px-4 py-2 rounded-lg text-xs font-bold transition-all {{ filled($calendarId) ? 'bg-white/5 hover:bg-white/10 text-gray-300 border border-gray-200 dark:border-white/10' : 'bg-white/5 text-gray-500 border border-gray-200 dark:border-white/10 cursor-not-allowed opacity-50' }}">

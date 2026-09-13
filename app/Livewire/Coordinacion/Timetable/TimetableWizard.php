@@ -3061,6 +3061,90 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Desasigna todos los slots del calendario, conservando la configuración
+     * de sus lessons para que pueda generarse un nuevo draft.
+     */
+    public function confirmClearCalendarLessonAssignments(): void
+    {
+        if (! $this->calendarId) {
+            $this->notification()->warning(
+                'Calendario requerido',
+                'Selecciona un calendario antes de limpiar sus asignaciones.',
+            );
+
+            return;
+        }
+
+        $this->dialog()->confirm([
+            'title' => '¿Limpiar asignaciones del calendario?',
+            'description' => 'Se quitarán todos los slots del calendario, pero se conservará la configuración de las lessons. Esta acción no elimina las lessons.',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Sí, limpiar slots',
+                'method' => 'clearCalendarLessonAssignments',
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'color' => 'secondary',
+            ],
+        ]);
+    }
+
+    public function clearCalendarLessonAssignments(): void
+    {
+        if (! $this->calendarId) {
+            $this->notification()->warning(
+                'Calendario requerido',
+                'Selecciona un calendario antes de limpiar sus asignaciones.',
+            );
+
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+        if (! $calendar) {
+            $this->notification()->error('Calendario no encontrado', 'No se pudo localizar el calendario seleccionado.');
+
+            return;
+        }
+
+        $lessonIds = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        DB::transaction(function () use ($calendar, $lessonIds): void {
+            TimetableSlot::query()
+                ->where('calendar_id', $calendar->id)
+                ->delete();
+
+            $preview = $calendar->preview_payload;
+            if (is_array($preview)) {
+                $preview['assignment'] = [];
+                $preview['unassigned'] = $lessonIds;
+                $preview['generated_assignment'] = [];
+                $preview['generated_unassigned'] = $lessonIds;
+                $preview['assignment_source'] = 'cleared';
+                $preview['manual_override'] = true;
+                $calendar->preview_payload = $preview;
+            }
+
+            $calendar->save();
+        });
+
+        $this->preview = is_array($calendar->preview_payload)
+            ? $calendar->preview_payload
+            : null;
+        $this->generationState = $this->preview ? 'preview_ready' : 'idle';
+        $this->notification()->success(
+            'Asignaciones limpiadas',
+            count($lessonIds).' lesson(s) quedaron sin slots. La configuración de lessons se conservó.',
+        );
+    }
+
+    /**
      * Aplica un respaldo JSON de lessons al calendario activo. Devuelve true
      * cuando el archivo fue procesado correctamente, para limpiar el input.
      *
