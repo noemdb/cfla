@@ -19,9 +19,9 @@
                     <a href="{{ route('plannings.activities.index') }}" class="btn btn-sm btn-outline-success mr-2" title="Refrescar">
                         <i class="fas fa-sync-alt"></i>
                     </a>
-                    <small class="text-muted font-italic" style="opacity:0.7;">
+                    {{-- <small class="text-muted font-italic" style="opacity:0.7;">
                         <i class="fa fa-user-tie mr-1"></i>Diseñado por: Prof. Carmin Cortez
-                    </small>
+                    </small> --}}
                 </div>
             </div>
 

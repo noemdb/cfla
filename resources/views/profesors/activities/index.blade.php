@@ -49,7 +49,7 @@
                     </svg>
                     Módulo Planificación Académica
                 </h3>
-                <span class="text-[10px] text-gray-500 font-medium tracking-wider">Diseñado por: Prof. Carmin Cortez</span>
+                {{-- <span class="text-[10px] text-gray-500 font-medium tracking-wider">Diseñado por: Prof. Carmin Cortez</span> --}}
             </div>
         </div>
 
