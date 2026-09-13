@@ -50,6 +50,10 @@ class TimetableViewService
         $slots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->where('profesor_id', $profesorId)
+            ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
+            })
             ->with([
                 'period',
                 'room',
@@ -88,16 +92,19 @@ class TimetableViewService
         foreach ($periods->groupBy('order_in_day') as $order => $group) {
             $row = collect();
             foreach (range(1, 5) as $day) {
-                $period = $group
+                // Solo períodos de clase (no recreos) de ese día. En turnos donde
+                // un mismo order_in_day comparte recreo del otro turno, se debe
+                // tomar el período de clase real (p. ej. turno tarde order 2).
+                $dayPeriods = $group
                     ->filter(fn ($p) => (int) $p->day_of_week === $day)
-                    ->sortBy('id')
-                    ->first();
-                if (! $period) {
-                    $row->put($day, collect());
-
-                    continue;
+                    ->reject(fn ($p) => (bool) $p->is_break)
+                    ->sortBy('id');
+                $cell = collect();
+                foreach ($dayPeriods as $period) {
+                    $cell = $cell->merge(
+                        $slots->filter(fn ($s) => (int) $s->period_id === (int) $period->id)->values(),
+                    );
                 }
-                $cell = $slots->filter(fn ($s) => (int) $s->period_id === (int) $period->id);
                 $row->put($day, $cell->values());
             }
             $rows->put((int) $order, $row);

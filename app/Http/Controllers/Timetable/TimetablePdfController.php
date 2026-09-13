@@ -77,6 +77,10 @@ class TimetablePdfController extends Controller
         $profesorIds = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->whereNotNull('profesor_id')
+            ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
+            })
             ->distinct()
             ->pluck('profesor_id');
         $profesores = Profesor::query()
