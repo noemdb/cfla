@@ -8,8 +8,8 @@ use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
-use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use Livewire\Attributes\Layout;
@@ -19,10 +19,11 @@ use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WithPagination, WireUiActions;
+    use WireUiActions, WithPagination;
 
     // Modal modes
     public $modeIndex = true;
+
     public $modeForm = false;
 
     // Form Object
@@ -30,31 +31,48 @@ class IndexComponent extends Component
 
     // Select lists del formulario (cascading)
     public $pestudios;
+
     public $grados = [];
+
     public $secciones = [];
+
     public $pensums = [];
+
     public $profesors = [];
+
     public $profesors_search = '';
+
     public $lapsos;
+
     public $escalas;
+
     public $grupos_estables;
 
     // Filters
     public $search = '';
+
     public $filter_pestudio = '';
+
     public $filter_profesor = '';
+
     public $filter_grado = '';
+
     public $filter_seccion = '';
+
     public $filter_asignatura = '';
+
     public $filter_lapso = '';
 
     // Opciones de los selects de filtro (independientes de las del formulario)
     public $filter_grados = [];
+
     public $filter_secciones = [];
+
     public $filter_asignaturas = [];
 
     // Sorting
     public $sortField = 'pevaluacions.created_at';
+
     public $sortDirection = 'desc';
 
     // Confirm delete
@@ -62,6 +80,7 @@ class IndexComponent extends Component
 
     // Preview
     public $previewMode = false;
+
     public $previewPevaluacion = null;
 
     // Pagination
@@ -100,39 +119,39 @@ class IndexComponent extends Component
     public function render()
     {
         $query = Pevaluacion::with([
-                'profesor', 'lapso', 'seccion', 'pensum.asignatura', 'pensum.pestudio',
-                'pensum.grado', 'grupoEstable',
-            ])
+            'profesor', 'lapso', 'seccion', 'pensum.asignatura', 'pensum.pestudio',
+            'pensum.grado', 'grupoEstable',
+        ])
             ->withCount('activities')
             ->withPlanningModule();
 
         // Search across related models
         if ($this->search) {
             $query->where(function ($q) {
-                $q->whereHas('profesor', fn($sq) => $sq->where('name', 'like', "%{$this->search}%")
+                $q->whereHas('profesor', fn ($sq) => $sq->where('name', 'like', "%{$this->search}%")
                     ->orWhere('lastname', 'like', "%{$this->search}%"))
-                  ->orWhereHas('pensum.asignatura', fn($sq) => $sq->where('name', 'like', "%{$this->search}%")
-                    ->orWhere('code', 'like', "%{$this->search}%"))
-                  ->orWhereHas('seccion', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"))
-                  ->orWhereHas('lapso', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"));
+                    ->orWhereHas('pensum.asignatura', fn ($sq) => $sq->where('name', 'like', "%{$this->search}%")
+                        ->orWhere('code', 'like', "%{$this->search}%"))
+                    ->orWhereHas('seccion', fn ($sq) => $sq->where('name', 'like', "%{$this->search}%"))
+                    ->orWhereHas('lapso', fn ($sq) => $sq->where('name', 'like', "%{$this->search}%"));
             });
         }
 
         // Filters
         if ($this->filter_pestudio) {
-            $query->whereHas('pensum.pestudio', fn($q) => $q->where('id', $this->filter_pestudio));
+            $query->whereHas('pensum.pestudio', fn ($q) => $q->where('id', $this->filter_pestudio));
         }
         if ($this->filter_profesor) {
             $query->where('profesor_id', $this->filter_profesor);
         }
         if ($this->filter_grado) {
-            $query->whereHas('seccion', fn($q) => $q->where('grado_id', $this->filter_grado));
+            $query->whereHas('seccion', fn ($q) => $q->where('grado_id', $this->filter_grado));
         }
         if ($this->filter_seccion) {
             $query->where('seccion_id', $this->filter_seccion);
         }
         if ($this->filter_asignatura) {
-            $query->whereHas('pensum', fn($q) => $q->where('asignatura_id', $this->filter_asignatura));
+            $query->whereHas('pensum', fn ($q) => $q->where('asignatura_id', $this->filter_asignatura));
         }
         if ($this->filter_lapso) {
             $query->where('lapso_id', $this->filter_lapso);
@@ -189,8 +208,8 @@ class IndexComponent extends Component
                 ->pluck('full_name', 'id')
                 ->toArray();
 
-            $this->pensums = Pensum::whereHas('grado', fn($q) => $q->where('id', $value))
-                ->whereHas('pestudio', fn($q) => $q->where('id', $this->form->pestudio_id))
+            $this->pensums = Pensum::whereHas('grado', fn ($q) => $q->where('id', $value))
+                ->whereHas('pestudio', fn ($q) => $q->where('id', $this->form->pestudio_id))
                 ->where('status_active', true)
                 ->with('asignatura')
                 ->get()
@@ -204,14 +223,46 @@ class IndexComponent extends Component
 
     // ─── FILTERS UPDATE RESET PAGE ──────────────────────────────
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingFilterPestudio() { $this->resetPage(); }
-    public function updatingFilterProfesor() { $this->resetPage(); }
-    public function updatingFilterGrado() { $this->resetPage(); $this->filter_seccion = ''; }
-    public function updatingFilterSeccion() { $this->resetPage(); }
-    public function updatingFilterAsignatura() { $this->resetPage(); }
-    public function updatingFilterLapso() { $this->resetPage(); }
-    public function updatingPaginate() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterPestudio()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterProfesor()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterGrado()
+    {
+        $this->resetPage();
+        $this->filter_seccion = '';
+    }
+
+    public function updatingFilterSeccion()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterAsignatura()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterLapso()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPaginate()
+    {
+        $this->resetPage();
+    }
 
     public function updatedFilterPestudio($value)
     {
@@ -272,7 +323,7 @@ class IndexComponent extends Component
 
         $this->filter_asignaturas = Pensum::query()
             ->where('pestudio_id', $this->filter_pestudio)
-            ->when($this->filter_grado, fn($q) => $q->where('grado_id', $this->filter_grado))
+            ->when($this->filter_grado, fn ($q) => $q->where('grado_id', $this->filter_grado))
             ->where('status_active', true)
             ->with('asignatura')
             ->get()
@@ -344,8 +395,66 @@ class IndexComponent extends Component
         $this->grados = [];
         $this->secciones = [];
         $this->pensums = [];
+        $this->profesors = [];
         $this->close();
         $this->modeForm = true;
+
+        // Prefill del formulario con los filtros activos, si los hubiera.
+        if ($this->filter_pestudio) {
+            $this->form->pestudio_id = (int) $this->filter_pestudio;
+            $this->grados = Grado::where('pestudio_id', $this->form->pestudio_id)
+                ->where('status_active', 'true')
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray();
+            $this->profesors = Profesor::where('status_active', true)
+                ->orderBy('lastname')
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray();
+        }
+
+        if ($this->filter_grado && $this->filter_pestudio) {
+            $this->form->grado_id = (int) $this->filter_grado;
+            $this->secciones = Seccion::where('grado_id', $this->form->grado_id)
+                ->where('status_active', true)
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray();
+            $this->pensums = Pensum::whereHas('grado', fn ($q) => $q->where('id', $this->form->grado_id))
+                ->whereHas('pestudio', fn ($q) => $q->where('id', $this->form->pestudio_id))
+                ->where('status_active', true)
+                ->with('asignatura')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray();
+        }
+
+        if ($this->filter_seccion) {
+            $this->form->seccion_id = (int) $this->filter_seccion;
+        }
+
+        if ($this->filter_asignatura && $this->form->pestudio_id && $this->form->grado_id) {
+            $pensum = Pensum::where('asignatura_id', (int) $this->filter_asignatura)
+                ->whereHas('grado', fn ($q) => $q->where('id', $this->form->grado_id))
+                ->whereHas('pestudio', fn ($q) => $q->where('id', $this->form->pestudio_id))
+                ->where('status_active', true)
+                ->first();
+            if ($pensum) {
+                $this->form->pensum_id = (int) $pensum->id;
+            }
+        }
+
+        if ($this->filter_profesor) {
+            $this->form->profesor_id = (int) $this->filter_profesor;
+        }
+
+        if ($this->filter_lapso) {
+            $this->form->lapso_id = (int) $this->filter_lapso;
+        }
     }
 
     public function edit($id)
@@ -360,6 +469,7 @@ class IndexComponent extends Component
                 title: 'Lapso Cerrado',
                 description: 'No se puede editar una carga académica de un lapso cerrado.'
             );
+
             return;
         }
 
@@ -381,8 +491,8 @@ class IndexComponent extends Component
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->pensums = Pensum::whereHas('grado', fn($q) => $q->where('id', $this->form->grado_id))
-            ->whereHas('pestudio', fn($q) => $q->where('id', $this->form->pestudio_id))
+        $this->pensums = Pensum::whereHas('grado', fn ($q) => $q->where('id', $this->form->grado_id))
+            ->whereHas('pestudio', fn ($q) => $q->where('id', $this->form->pestudio_id))
             ->where('status_active', true)
             ->with('asignatura')
             ->get()
@@ -423,6 +533,7 @@ class IndexComponent extends Component
                 title: 'Carga Académica Duplicada',
                 description: 'Ya existe una asignación para esta área de formación, sección, lapso y grupo estable.'
             );
+
             return;
         }
 
@@ -470,6 +581,7 @@ class IndexComponent extends Component
                 description: "La asignación tiene {$pevaluacion->activities_count} actividad(es) registrada(s). Elimínelas primero."
             );
             $this->cancelDelete();
+
             return;
         }
 
@@ -490,8 +602,8 @@ class IndexComponent extends Component
             'profesor', 'lapso', 'seccion', 'pensum.asignatura', 'pensum.pestudio',
             'pensum.grado', 'escala', 'grupoEstable',
         ])
-        ->withCount('activities')
-        ->findOrFail($id);
+            ->withCount('activities')
+            ->findOrFail($id);
         $this->previewMode = true;
     }
 

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Timetable;
 
 use App\Http\Controllers\Controller;
-use App\Models\app\Academy\Profesor;
-use App\Models\app\Academy\Seccion;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
@@ -262,7 +262,12 @@ class TimetablePdfController extends Controller
     {
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $grado = Grado::query()->findOrFail($gradoId);
-        $sections = Seccion::query()->where('grado_id', $grado->id)->with('grado')->orderBy('name')->get();
+        $sections = Seccion::query()
+            ->where('grado_id', $grado->id)
+            ->with('grado')
+            ->where('status_active', 'true')
+            ->orderBy('name')
+            ->get();
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
 
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
@@ -279,6 +284,8 @@ class TimetablePdfController extends Controller
             ->keyBy('id');
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $calendar->id)
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('status_active', 'true'))
             ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion'])
             ->get();
 
@@ -382,7 +389,8 @@ class TimetablePdfController extends Controller
         $pestudio = Pestudio::query()->findOrFail($pestudioId);
         $grades = Grado::query()
             ->where('pestudio_id', $pestudio->id)
-            ->with(['seccions' => fn ($query) => $query->orderBy('name')])
+            ->where('status_active', 'true')
+            ->with(['seccions' => fn ($query) => $query->where('status_active', 'true')->orderBy('name')])
             ->orderBy('order')
             ->orderBy('name')
             ->get();
@@ -402,6 +410,8 @@ class TimetablePdfController extends Controller
             ->keyBy('id');
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $calendar->id)
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('status_active', 'true'))
             ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion.grado'])
             ->get();
 
