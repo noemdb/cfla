@@ -3969,6 +3969,11 @@ class TimetableWizard extends Component
             $swapKey = (string) $swapLessonId;
             $swapSlots = $assignment[$swapKey] ?? $assignment[$swapLessonId] ?? [];
 
+            if ($this->blockIfCrossSectionCollision($lessonId, $newPeriodId)
+                || $this->blockIfCrossSectionCollision($swapLessonId, $fromPeriodId)) {
+                return;
+            }
+
             $slots[$slotIndex]['period_id'] = $newPeriodId;
             $swapSlots[$swapSlotIndex]['period_id'] = $fromPeriodId;
             $assignment[$lessonKey] = array_values($slots);
@@ -3996,6 +4001,10 @@ class TimetableWizard extends Component
             return;
         }
 
+        if ($this->blockIfCrossSectionCollision($lessonId, $newPeriodId)) {
+            return;
+        }
+
         $slots[$slotIndex]['period_id'] = $newPeriodId;
         $assignment[$lessonKey] = array_values($slots);
         $this->preview['assignment'] = $assignment;
@@ -4013,6 +4022,55 @@ class TimetableWizard extends Component
                 'La lección se movió correctamente en el preview.',
             );
         }
+    }
+
+    /**
+     * Bloquea el movimiento si la lección, al ubicarse en $periodId, colisiona
+     * con un slot preservado de OTRA sección (mismo docente). Mismas
+     * validaciones bloqueantes que al guardar la sección.
+     */
+    private function blockIfCrossSectionCollision(int $lessonId, int $periodId): bool
+    {
+        $lesson = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.seccion', 'pevaluacion.profesor'])
+            ->find($lessonId);
+
+        if (! $lesson?->pevaluacion) {
+            return false;
+        }
+
+        $profesorId = (int) $lesson->pevaluacion->profesor_id;
+        $seccionId = (int) $lesson->pevaluacion->seccion_id;
+        $isHalfGroup = (bool) $lesson->is_half_group;
+
+        $slots = TimetableSlot::query()
+            ->where('calendar_id', $this->calendarId)
+            ->where('period_id', $periodId)
+            ->whereHas('lesson.pevaluacion', fn ($q) => $q->where('seccion_id', '!=', $seccionId))
+            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.profesor'])
+            ->get();
+
+        foreach ($slots as $slot) {
+            $slotTeacher = (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id);
+            $slotHalf = (bool) ($slot->lesson?->is_half_group ?? false);
+            $bothHalf = $isHalfGroup && $slotHalf;
+
+            if ($slotTeacher === $profesorId && ! $bothHalf) {
+                $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
+                $otherSection = $slot->lesson?->pevaluacion?->seccion?->name ?? 'otra sección';
+
+                $this->notification()->error(
+                    'Movimiento bloqueado',
+                    "«{$subject}» colisiona en ese período con una asignación de la sección {$otherSection} "
+                    .'del docente #'.$profesorId.'. Elige otro bloque o reubica la otra sección.',
+                );
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
