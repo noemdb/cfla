@@ -2684,7 +2684,7 @@
                                                                     draggable="true"
                                                                     x-on:dragstart="event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
                                                                     title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
-                                                                    class="flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight active:cursor-grabbing {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border border-solid border-violet-500/[0.02] bg-violet-500/[0.02]' : '' }}">
+                                                                    class="flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight active:cursor-grabbing {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border-2 border-solid border-violet-500/40 bg-violet-500/[0.06]' : '' }}">
                                                                     <div class="flex min-h-3.5 items-center justify-between gap-px">
                                                                         <span class="sr-only">Acciones de {{ $cell['asignatura'] }}</span>
                                                                         <span class="min-w-0 flex-1"></span>
