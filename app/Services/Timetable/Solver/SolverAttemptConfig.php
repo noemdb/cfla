@@ -26,6 +26,12 @@ final class SolverAttemptConfig
     public const ORDER_REPAIR = 'repair';
 
     /**
+     * HG-03: prioriza los medio-grupos (y los agrupa por sección) antes que el
+     * resto, para que las mitades de una misma sección compartan período.
+     */
+    public const ORDER_HALF_GROUP_FIRST = 'half_group_first';
+
+    /**
      * @param  list<int>  $priorityLessonIds  lecciones a colocar primero (reparación)
      */
     public function __construct(

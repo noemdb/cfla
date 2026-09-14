@@ -428,6 +428,12 @@ class GenerateTimetableJobTest extends TestCase
                 ->values()
                 ->all(),
         );
+
+        // HG-05: las dos mitades quedan agrupadas en un único período.
+        $this->assertSame(2, (int) ($payload['half_group_metrics']['half_group_lessons'] ?? 0));
+        $this->assertSame(1, (int) ($payload['half_group_metrics']['half_group_grouped_periods'] ?? 0));
+        $this->assertSame(0, (int) ($payload['half_group_metrics']['half_group_isolated'] ?? 0));
+        $this->assertSame(0, (int) ($payload['half_group_metrics']['half_group_unassigned'] ?? 0));
     }
 
     public function test_job_pairs_four_half_group_lessons_into_two_periods(): void
@@ -565,6 +571,60 @@ class GenerateTimetableJobTest extends TestCase
         $this->assertSame(0, $diff['changed']);
         $this->assertSame(0, $diff['removed']);
         $this->assertSame([], $diff['profesores_afectados']);
+    }
+
+    public function test_optimized_solver_ignores_preserved_slots_from_inactive_grades(): void
+    {
+        $fixture = $this->smallFeasibleFixture();
+        $calendar = $fixture['calendar'];
+
+        // Grado inactivo con slots persistidos del MISMO docente que una
+        // lección activa. Antes contaminaba `preservedBusy` y bloqueaba los
+        // períodos del docente activo.
+        $gradoInactivo = Grado::factory()->create([
+            'pestudio_id' => $fixture['lessonA']->pevaluacion->pensum->pestudio_id,
+            'status_active' => 'false',
+        ]);
+        $seccionInactiva = Seccion::factory()->create([
+            'grado_id' => $gradoInactivo->id,
+            'status_active' => 'true',
+        ]);
+        $pensumInactivo = Pensum::factory()->create([
+            'pestudio_id' => $gradoInactivo->pestudio_id,
+            'grado_id' => $gradoInactivo->id,
+            'asignatura_id' => $fixture['lessonA']->pevaluacion->pensum->asignatura_id,
+        ]);
+        $pevInactiva = Pevaluacion::factory()->create([
+            'profesor_id' => $fixture['profesorA']->id,
+            'seccion_id' => $seccionInactiva->id,
+            'pensum_id' => $pensumInactivo->id,
+            'lapso_id' => $calendar->lapso_id,
+        ]);
+        $lessonInactiva = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pevInactiva->id,
+            'shift_id' => $fixture['shift']->id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+        TimetableSlot::create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lessonInactiva->id,
+            'period_id' => $fixture['periods'][0]->id,
+            'profesor_id' => $fixture['profesorA']->id,
+            'seccion_id' => $seccionInactiva->id,
+        ]);
+
+        GenerateTimetableJob::dispatchSync($calendar->id, dryRun: true);
+
+        $payload = $calendar->fresh()->preview_payload;
+        $this->assertSame([], $payload['unassigned'], 'los slots de grados inactivos no deben bloquear');
+        $this->assertCount(2, $payload['assignment']);
+        $this->assertEmpty(
+            collect($payload['assignment_diagnostics'])
+                ->filter(fn (array $d) => (int) $d['lesson_id'] === (int) $lessonInactiva->id),
+            'las lessons de grados inactivos no aparecen en el diagnóstico',
+        );
     }
 
     // ─── Fixtures ──────────────────────────────────────────────

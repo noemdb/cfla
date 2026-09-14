@@ -25,6 +25,9 @@ return [
     | attempt_seconds: deadline de cada intento (salvo el primero, que recibe
     |   la mitad del presupuesto para no penalizar el orden original).
     | restarts: número de reinicios aleatorios deterministas (ORDER_RANDOM).
+    | half_group_priority: prioriza y agrupa los medio-grupos (HG-01..HG-04).
+    | half_group_bonus: puntos soft por agrupar un medio-grupo junto a otro de
+    |   la misma sección (debe ser < 100, el peso de "día distinto").
     |
     */
 
@@ -32,6 +35,8 @@ return [
         'budget_seconds' => (int) env('TIMETABLE_SOLVER_BUDGET_SECONDS', 30),
         'attempt_seconds' => (int) env('TIMETABLE_SOLVER_ATTEMPT_SECONDS', 8),
         'restarts' => (int) env('TIMETABLE_SOLVER_RESTARTS', 6),
+        'half_group_priority' => (bool) env('TIMETABLE_SOLVER_HALF_GROUP_PRIORITY', true),
+        'half_group_bonus' => (int) env('TIMETABLE_SOLVER_HALF_GROUP_BONUS', 20),
     ],
 
 ];

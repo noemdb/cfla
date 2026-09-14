@@ -16,6 +16,7 @@
 5. [ADR-TT-012-05: Presupuesto Dinámico por Contexto](#adr-tt-012-05)
 6. [ADR-TT-012-06: Audit Trail para Solver Invocations](#adr-tt-012-06)
 7. [ADR-TT-012-07: Pre-check Factibilidad (C-1 Detection)](#adr-tt-012-07)
+8. [ADR-TT-012-08: Medio-grupos prioritarios y agrupados](#adr-tt-012-08)
 
 ---
 
@@ -477,6 +478,50 @@ public function orchestrate(TimetableDTO $dto): SolverOutcome {
 - Grid validation (incluye quirk lunes)
 - Logging para debugging
 
+<a name="adr-tt-012-08"></a>
+
+## ADR-TT-012-08: Medio-grupos prioritarios y agrupados
+
+**Decisión**: priorizar la asignación de las `TimetableLesson` con `is_half_group = true` y, dentro de lo posible, agrupar sus bloques en el mismo período de la sección, respetando `max_subjects_per_period`.
+
+### Contexto
+
+- El solver ya permite que dos medio-grupos de una misma sección compartan período (`SchedulingContext::isFree/occupy`), con tope `max_subjects_per_period`.
+- Existía una preferencia débil de agrupación en `buildDomain()` (orden por `halfGroupLoad`), pero **se perdía** porque `combinationsOfSize()` re-ordena todo por `comboScore`, que no la incluía.
+- `constraintDegree()` y las estrategias del orquestador **no** consideraban `is_half_group`: un grupo completo podía consumir la celda que dos mitades necesitaban.
+- `max_subjects_per_period` vive en `timetable_calendars`, no en `pestudios`. Un calendario pertenece a un único pestudio, por lo que el valor del calendario es el efectivo del plan.
+
+### Alternativas
+
+| Alternativa | Pros | Contras | Decisión |
+|---|---|---|---|
+| **Prioridad + agrupación blanda** | ✅ Favorece medio-grupos sin volver infactible el dataset; ✅ conserva reglas duras | ⚠️ No garantiza agrupación al 100% | ✅ **ELEGIDA** |
+| Pareo bipartito obligatorio (duro) | ✅ Agrupación garantizada cuando existe combinación | ❌ Puede reducir cobertura global y volver infactible datasets hoy resolubles | ❌ Descartado |
+| Sin cambios (baseline) | ✅ Cero riesgo | ❌ Medio-grupos dispersos; celda consumida por grupo completo | ❌ Descartado |
+
+### Decision
+
+- **HG-01**: `LessonToSchedule::constraintDegree(bool $halfGroupPriority)` suma `+6` a los medio-grupos.
+- **HG-02**: `TimetableSolver::comboScore($combo, $ctx, $lesson)` suma `halfGroupBonus` por celda que ya agrupa medio-grupos de la sección (por debajo de `+100` de "día distinto").
+- **HG-03**: nueva estrategia `SolverAttemptConfig::ORDER_HALF_GROUP_FIRST` e intento `S1h` en el orquestador.
+- **HG-04**: `clusterHalfGroupsBySection()` reagrupa de forma estable los medio-grupos de una sección (pareo **blando**).
+- **HG-05**: `SolverOutcome::halfGroupMetrics()` expone agrupación/aislamiento.
+- **HG-10**: `TimetablePublicationReadinessService` emite warning no bloqueante `half_group_isolated`.
+- **HG-09**: configurable vía `config/timetable.php` (`half_group_priority`, `half_group_bonus`).
+
+### Implicaciones
+
+- ✅ Prioriza medio-grupos sin introducir una regla dura nueva (no reduce cobertura).
+- ✅ La agrupación sobrevive al re-ordenamiento de combos (antes se perdía).
+- ✅ Compatibilidad total: la salida sigue siendo `SlotCandidate[]`; persistencia y snapshot sin cambios.
+- ⚠️ La agrupación es una preferencia, no una garantía; el warning de readiness informa los aislados.
+
+### Dependencias
+
+- `SchedulingContext::halfGroupLoad()` (existente).
+- `timetable_calendars.max_subjects_per_period` (fuente del tope; D1).
+- `TimetableSolverTest`, `SharedTeacherSolverTest` y `HalfGroupSolverTest` (HG-11).
+
 ---
 
 ## 🎯 Matriz de Decisiones
@@ -490,6 +535,7 @@ public function orchestrate(TimetableDTO $dto): SolverOutcome {
 | 012-05 | Dinámico por contexto | Global fixed | SLA-driven UX | Config clear, tests de valores |
 | 012-06 | Audit DB + logs | Solo logs | Queryable, compliance | Retention policy, archiving strategy |
 | 012-07 | Pre-check factibilidad | Solver solo | Fail-fast, user guidance | Logging detallado, test fixtures |
+| 012-08 | Medio-grupos prioritarios + agrupación blanda | Pareo bipartito duro | Favorece agrupación sin reducir cobertura; conserva reglas duras | Flag configurable, warning de aislados, tests |
 
 ---
 

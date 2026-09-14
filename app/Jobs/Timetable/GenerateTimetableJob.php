@@ -42,6 +42,13 @@ class GenerateTimetableJob implements ShouldQueue
 
     public $timeout = 120;
 
+    /**
+     * HG-05 — Métricas de agrupación de medio-grupos del último solve.
+     *
+     * @var array{half_group_lessons:int, half_group_grouped_periods:int, half_group_isolated:int, half_group_unassigned:int}
+     */
+    private array $halfGroupMetrics = [];
+
     public function __construct(
         public int $calendarId,
         public bool $dryRun = false,
@@ -94,6 +101,7 @@ class GenerateTimetableJob implements ShouldQueue
             'unassigned_capacity_exceeded' => count($unassignedReasons['capacity_exceeded']),
             'unassigned_not_found' => count($unassignedReasons['not_found']),
             'capacity_summary' => $unassignedReasons['capacity_summary'],
+            'half_group_metrics' => $this->halfGroupMetrics,
             'timed_out' => $result->timedOut,
             'user_id' => auth()->id(),
             'role' => auth()->user()?->is_admin ? 'is_admin' : (auth()->check() ? 'user' : null),
@@ -269,8 +277,12 @@ class GenerateTimetableJob implements ShouldQueue
                 timedOut: $attempt->result->timedOut,
                 elapsedMs: (int) round($attempt->result->elapsedSeconds * 1000),
             )),
+            halfGroupPriority: (bool) config('timetable.solver.half_group_priority', true),
+            halfGroupBonus: max(0, (int) config('timetable.solver.half_group_bonus', 20)),
         ))->solve();
 
+        $halfGroupMetrics = $outcome->halfGroupMetrics($dto);
+        $this->halfGroupMetrics = $halfGroupMetrics;
         broadcast(new SolverCompleted(
             calendarId: $this->calendarId,
             dryRun: $this->dryRun,
@@ -469,6 +481,19 @@ class GenerateTimetableJob implements ShouldQueue
         TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->whereNotIn('lesson_id', array_keys($dtoLessonIds))
+            // Solo los slots de secciones/grados ACTIVOS del plan del calendario
+            // cuentan como ocupación preservada. Los de grados/secciones
+            // desactivados (status_active=false) u otro lapso/pestudio no deben
+            // bloquear al solver ni consumir períodos de los grados activos.
+            ->whereHas('lesson.pevaluacion', fn ($query) => $query->where('lapso_id', $calendar->lapso_id))
+            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('lesson.pevaluacion.seccion.grado', function ($query) use ($calendar): void {
+                $query->where('grados.status_active', 'true');
+
+                if ($calendar->pestudio_id) {
+                    $query->where('grados.pestudio_id', $calendar->pestudio_id);
+                }
+            })
             ->with('lesson:id,is_half_group')
             ->get(['id', 'lesson_id', 'period_id', 'profesor_id', 'seccion_id'])
             ->each(function (TimetableSlot $slot) use (&$preserved): void {
@@ -571,8 +596,9 @@ class GenerateTimetableJob implements ShouldQueue
                 'elapsed_seconds' => round($result->elapsedSeconds, 2),
                 'assignment' => $assignment,
                 'unassigned' => $unassigned,
-                'unassigned_reasons' => $unassignedReasons,
-                'assignment_diagnostics' => $this->assignmentDiagnostics($calendar, $assignment),
+            'unassigned_reasons' => $unassignedReasons,
+            'half_group_metrics' => $this->halfGroupMetrics,
+            'assignment_diagnostics' => $this->assignmentDiagnostics($calendar, $assignment),
             ],
             'status' => 'draft',
         ]);
@@ -656,7 +682,7 @@ class GenerateTimetableJob implements ShouldQueue
      */
     private function assignmentDiagnostics(TimetableCalendar $calendar, array $assignment): array
     {
-        return $calendar->lessons()
+        return $this->activeSectionLessons($calendar)
             ->get(['id', 'weekly_blocks_t', 'weekly_blocks_p'])
             ->map(function (TimetableLesson $lesson) use ($assignment): ?array {
                 $required = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;

@@ -2161,6 +2161,24 @@
                         </div>
                     @endif
 
+                    @php $halfGroupMetrics = $preview['half_group_metrics'] ?? null; @endphp
+                    @if (is_array($halfGroupMetrics) && (($halfGroupMetrics['half_group_lessons'] ?? 0) > 0))
+                        <div class="mt-3 rounded-lg border border-sky-500/30 bg-sky-500/10 p-3 text-xs text-gray-600 dark:text-gray-300">
+                            <div class="font-bold text-sky-700 dark:text-sky-300">
+                                Medio-grupos: {{ $halfGroupMetrics['half_group_grouped_periods'] ?? 0 }} período(s) agrupado(s)
+                                · {{ $halfGroupMetrics['half_group_isolated'] ?? 0 }} aislado(s)
+                                · {{ $halfGroupMetrics['half_group_unassigned'] ?? 0 }} sin asignar
+                                de {{ $halfGroupMetrics['half_group_lessons'] ?? 0 }} lección(es)
+                            </div>
+                            @if (($halfGroupMetrics['half_group_isolated'] ?? 0) > 0)
+                                <p class="mt-1">
+                                    Hay medio-grupos que no comparten período con su par de sección. Es una preferencia de agrupación, no un bloqueo:
+                                    revisa el tope de asignaturas por período, la disponibilidad del docente o ejecuta otra generación.
+                                </p>
+                            @endif
+                        </div>
+                    @endif
+
                     @php
                         $activeConflictGroup = is_numeric($activeSeccionId)
                             ? ($generationConflictGroups[(int) $activeSeccionId] ?? null)

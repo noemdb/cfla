@@ -58,10 +58,15 @@ final class LessonToSchedule
     /**
      * Máscara de restricción para ADR-TT-003 (orden por grado de restricción).
      * Mayor valor = más restrictivo = se asigna primero.
+     *
+     * HG-01: cuando la prioridad de medio-grupo está activa, las lecciones
+     * `is_half_group` se consideran más restrictivas (peso 6) para que la
+     * búsqueda las coloque antes que un grupo completo de igual prioridad.
      */
-    public function constraintDegree(): int
+    public function constraintDegree(bool $halfGroupPriority = false): int
     {
         return ($this->priority * 10)
+            + ($halfGroupPriority && $this->isHalfGroup ? 6 : 0)
             + ($this->roomTypeRequired !== null ? 5 : 0)
             + min($this->blocksNeeded(), 9);
     }

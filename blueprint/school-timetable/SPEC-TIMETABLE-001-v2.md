@@ -600,6 +600,28 @@ score(solution) = Σ por lección:
 score más bajo = mejor. Se usa solo para elegir entre combinaciones candidatas
 del mismo dominio (desempate), no como criterio de aceptación — las reglas
 duras del §6 siguen siendo obligatorias.
+
+**Medio-grupos (HG-01..HG-05).** Cuando `config('timetable.solver.half_group_priority')`
+está activo:
+
+- `LessonToSchedule::constraintDegree()` suma `+6` a las lessons `is_half_group`,
+  de modo que la búsqueda las explora antes que un grupo completo de igual
+  prioridad.
+- `TimetableSolver::comboScore()` suma `half_group_bonus` (por defecto `20`,
+  siempre menor que el `+100` de "día distinto") por cada celda que ya agrupa un
+  medio-grupo de la misma sección, según `SchedulingContext::halfGroupLoad()`.
+- El orquestador antepone un intento `S1h` con la estrategia
+  `ORDER_HALF_GROUP_FIRST` y reagrupa (`clusterHalfGroupsBySection`) las mitades
+  de una misma sección de forma estable.
+- La agrupación es una **preferencia blanda**, nunca una regla dura: si no hay
+  celda conjunta viable (tope `max_subjects_per_period`, disponibilidad,
+  docente), la mitad puede ubicarse en otro período.
+- El resultado se reporta en `SolverOutcome::halfGroupMetrics()`
+  (`half_group_lessons`, `half_group_grouped_periods`, `half_group_isolated`,
+  `half_group_unassigned`) y en `preview_payload.half_group_metrics`.
+- El tope de paralelos es `timetable_calendars.max_subjects_per_period` (no una
+  columna de `pestudios`); el calendario pertenece a un único pestudio, por lo
+  que su valor es el efectivo del plan.
 ```
 
 Persistir el `score` final en `timetable_calendars.quality_score` (columna
@@ -636,6 +658,11 @@ La clave de ocupación de sección se interpreta así:
 | Dos lessons de medio grupo compatibles | Permitida |
 | Mismo docente en lessons de medio grupo compatibles | Permitida por la regla vigente; debe conservar `is_half_group` |
 | Aula dedicada repetida | Rechazada |
+
+> **Nota (HG).** Con `half_group_priority` activo, el solver **favorece** que
+> los medio-grupos de una misma sección compartan período (agrupación blanda,
+> §6.2), sin relajar ninguna de las reglas duras de esta tabla. El tope de
+> medio-grupos por celda sigue siendo `max_subjects_per_period`.
 
 La base de datos aporta la clave generada `slot_section_key`; la aplicación
 decide la compatibilidad de grupo estable, medio grupo, docente y sección antes

@@ -32,6 +32,8 @@ final class TimetableSolverOrchestrator
         private int $attemptSeconds = 8,
         private int $repairAttempts = 2,
         private ?\Closure $onAttempt = null,
+        private bool $halfGroupPriority = false,
+        private int $halfGroupBonus = 20,
     ) {}
 
     public function solve(): SolverOutcome
@@ -106,6 +108,8 @@ final class TimetableSolverOrchestrator
             max(1, min($config->timeLimitSeconds, (int) ceil($remaining))),
             $this->maxSubjectsPerPeriod,
             $config,
+            $this->halfGroupPriority,
+            $this->halfGroupBonus,
         );
 
         $result = $solver->solve();
@@ -140,9 +144,16 @@ final class TimetableSolverOrchestrator
 
         $configs = [
             new SolverAttemptConfig('S1', SolverAttemptConfig::ORDER_CONSTRAINT, 0, $firstAttemptSeconds),
-            new SolverAttemptConfig('S2', SolverAttemptConfig::ORDER_SCARCITY, 0, $this->attemptSeconds),
-            new SolverAttemptConfig('S3', SolverAttemptConfig::ORDER_BLOCKS_DESC, 0, $this->attemptSeconds),
         ];
+
+        // HG-03: cuando la prioridad de medio-grupo está activa, se antepone un
+        // intento que las coloca primero y las agrupa por sección.
+        if ($this->halfGroupPriority) {
+            $configs[] = new SolverAttemptConfig('S1h', SolverAttemptConfig::ORDER_HALF_GROUP_FIRST, 0, $this->attemptSeconds);
+        }
+
+        $configs[] = new SolverAttemptConfig('S2', SolverAttemptConfig::ORDER_SCARCITY, 0, $this->attemptSeconds);
+        $configs[] = new SolverAttemptConfig('S3', SolverAttemptConfig::ORDER_BLOCKS_DESC, 0, $this->attemptSeconds);
 
         for ($i = 0; $i < max(0, $this->restarts); $i++) {
             $configs[] = new SolverAttemptConfig('S4r'.$i, SolverAttemptConfig::ORDER_RANDOM, 1000 + $i, $this->attemptSeconds);

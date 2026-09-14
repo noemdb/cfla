@@ -24,7 +24,7 @@ class TimetablePublicationReadinessService
         $lessons = $calendar->lessons()
             ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor')
             ->get()
-            ->filter(function (TimetableLesson $lesson): bool {
+            ->filter(function (TimetableLesson $lesson) use ($calendar): bool {
                 $pevaluacion = $lesson->pevaluacion;
 
                 // Las lessons huérfanas siguen siendo bloqueantes; las inactivas
@@ -33,8 +33,19 @@ class TimetablePublicationReadinessService
                     return true;
                 }
 
-                return $this->isActive($pevaluacion->seccion?->status_active)
-                    && $this->isActive($pevaluacion->seccion?->grado?->status_active);
+                // Excluye grados/secciones desactivados y datos fuera del lapso o
+                // plan de estudio del calendario: no deben contar como bloqueantes.
+                if ((int) $pevaluacion->lapso_id !== (int) $calendar->lapso_id) {
+                    return false;
+                }
+
+                if (! $this->isActive($pevaluacion->seccion?->status_active)
+                    || ! $this->isActive($pevaluacion->seccion?->grado?->status_active)) {
+                    return false;
+                }
+
+                return ! $calendar->pestudio_id
+                    || (int) $pevaluacion->seccion?->grado?->pestudio_id === (int) $calendar->pestudio_id;
             })
             ->keyBy('id');
         $periods = $calendar->periods()->get()->keyBy('id');
@@ -147,6 +158,17 @@ class TimetablePublicationReadinessService
             ];
         }
 
+        // HG-10: warning no bloqueante si hay medio-grupos aislados (su mitad no
+        // comparte período). No impide publicar, pero se informa a coordinación.
+        $isolatedHalfGroups = $this->isolatedHalfGroups($lessons, $assignment);
+        if ($isolatedHalfGroups > 0) {
+            $warnings[] = [
+                'type' => 'half_group_isolated',
+                'count' => $isolatedHalfGroups,
+                'message' => "Hay {$isolatedHalfGroups} medio-grupo(s) sin agrupar en un mismo período con su par de sección.",
+            ];
+        }
+
         $coverage = $requiredBlocks > 0 ? round(($assignedBlocks / $requiredBlocks) * 100, 2) : 100.0;
         $score = max(0, round($coverage - (count($hardConflicts) * 10), 2));
 
@@ -167,13 +189,51 @@ class TimetablePublicationReadinessService
         ];
     }
 
+    /**
+     * HG-10 — Cuenta los bloques de medio-grupo asignados en un período
+     * (sección·período) que no comparten celda con otro medio-grupo de la misma
+     * sección. Es la métrica de "medio-grupos aislados".
+     *
+     * @param  \Illuminate\Support\Collection<int, TimetableLesson>  $lessons
+     * @param  \Illuminate\Support\Collection<string, mixed>  $assignment
+     */
+    private function isolatedHalfGroups($lessons, $assignment): int
+    {
+        $cells = [];
+
+        foreach ($lessons as $lesson) {
+            if (! $lesson->is_half_group || ! $lesson->pevaluacion) {
+                continue;
+            }
+
+            $slots = collect($assignment->get((string) $lesson->id, $assignment->get($lesson->id, [])));
+            foreach ($slots as $slot) {
+                $periodId = (int) ($slot['period_id'] ?? 0);
+                if ($periodId <= 0) {
+                    continue;
+                }
+
+                $key = $periodId.':'.(int) $lesson->pevaluacion->seccion_id;
+                $cells[$key] = ($cells[$key] ?? 0) + 1;
+            }
+        }
+
+        $isolated = 0;
+        foreach ($cells as $count) {
+            if ($count < 2) {
+                $isolated += $count;
+            }
+        }
+
+        return $isolated;
+    }
+
     private function conflict(
         TimetableLesson $lesson,
         string $type,
         ?TimetablePeriod $period,
         int $periodId = 0,
-    ): array {
-        $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
+    ): array {        $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
         $section = $lesson->pevaluacion?->seccion?->name ?? 'Sección sin nombre';
         $grade = $lesson->pevaluacion?->grado?->name ?? 'Grado sin nombre';
         $teacher = trim(($lesson->pevaluacion?->profesor?->lastname ?? '').' '.($lesson->pevaluacion?->profesor?->name ?? ''));

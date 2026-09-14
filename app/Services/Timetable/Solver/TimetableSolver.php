@@ -39,6 +39,9 @@ final class TimetableSolver
      * @param  array<string, list<int>>  $roomsByType  roomType => roomIds compatibles
      * @param  array<int, array{day: int, order: int}>  $periodMeta  periodId => día/orden (heurística soft)
      */
+    /** @var array<int, LessonToSchedule> */
+    private array $lessonById = [];
+
     public function __construct(
         private array $lessons,
         private array $availablePeriodsByTeacher,
@@ -47,7 +50,13 @@ final class TimetableSolver
         private int $timeLimitSeconds = 30,
         private int $maxSubjectsPerPeriod = 2,
         private ?SolverAttemptConfig $config = null,
-    ) {}
+        private bool $halfGroupPriority = false,
+        private int $halfGroupBonus = 0,
+    ) {
+        foreach ($this->lessons as $lesson) {
+            $this->lessonById[$lesson->lessonId] = $lesson;
+        }
+    }
 
     public function solve(): SolverResult
     {
@@ -186,11 +195,89 @@ final class TimetableSolver
             case SolverAttemptConfig::ORDER_REPAIR:
                 $this->repairOrder($free);
                 break;
+            case SolverAttemptConfig::ORDER_HALF_GROUP_FIRST:
+                $this->halfGroupOrder($free);
+                break;
             case SolverAttemptConfig::ORDER_CONSTRAINT:
             default:
-                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree() <=> $a->constraintDegree());
+                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree($this->halfGroupPriority) <=> $a->constraintDegree($this->halfGroupPriority));
                 break;
         }
+
+        // HG-04: pareo blando. Cuando la prioridad de medio-grupo está activa,
+        // se clusterizan los medio-grupos de una misma sección de forma
+        // consecutiva para que el backtracking explore juntos a sus pares.
+        if ($this->halfGroupPriority && $ordering !== SolverAttemptConfig::ORDER_HALF_GROUP_FIRST) {
+            $this->clusterHalfGroupsBySection($free);
+        }
+    }
+
+    /**
+     * HG-03 — Orden que prioriza medio-grupos: primero los `isHalfGroup`,
+     * agrupados por sección (HG-04) y, dentro de cada sección, por grado de
+     * restricción. El resto conserva el orden por restricción.
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function halfGroupOrder(array &$free): void
+    {
+        usort($free, function (LessonToSchedule $a, LessonToSchedule $b): int {
+            if ($a->isHalfGroup !== $b->isHalfGroup) {
+                return $b->isHalfGroup <=> $a->isHalfGroup;
+            }
+
+            if ($a->isHalfGroup && $a->seccionId !== $b->seccionId) {
+                return $a->seccionId <=> $b->seccionId;
+            }
+
+            return $b->constraintDegree($this->halfGroupPriority) <=> $a->constraintDegree($this->halfGroupPriority);
+        });
+    }
+
+    /**
+     * HG-04 — Reordena de forma estable para que los medio-grupos de una misma
+     * sección queden consecutivos, sin alterar el orden relativo del resto.
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function clusterHalfGroupsBySection(array &$free): void
+    {
+        $index = [];
+        foreach ($free as $position => $lesson) {
+            if ($lesson->isHalfGroup) {
+                $index[$lesson->seccionId][] = $position;
+            }
+        }
+
+        // Solo hay algo que agrupar si una sección tiene 2+ medio-grupos.
+        $sectionsToCluster = array_filter($index, fn (array $positions): bool => count($positions) > 1);
+        if ($sectionsToCluster === []) {
+            return;
+        }
+
+        $absorbed = [];
+        foreach ($sectionsToCluster as $positions) {
+            foreach (array_slice($positions, 1) as $source) {
+                $absorbed[$source] = true;
+            }
+        }
+
+        $reordered = [];
+        foreach ($free as $position => $lesson) {
+            if (isset($absorbed[$position])) {
+                continue;
+            }
+
+            $reordered[] = $lesson;
+
+            if ($lesson->isHalfGroup && isset($sectionsToCluster[$lesson->seccionId])) {
+                foreach (array_slice($sectionsToCluster[$lesson->seccionId], 1) as $source) {
+                    $reordered[] = $free[$source];
+                }
+            }
+        }
+
+        $free = $reordered;
     }
 
     /**
@@ -252,17 +339,55 @@ final class TimetableSolver
      * Score soft global de una asignación (suma del §6.2 por lección). Lo usa el
      * orquestador para desempatar intentos con la misma cobertura.
      *
+     * HG-05: incorpora el bonus de agrupación de medio-grupos para que, ante
+     * igual cobertura, se prefiera la asignación que agrupa más mitades de una
+     * misma sección en un mismo período.
+     *
      * @param  array<int, list<SlotCandidate>>  $assignment
      */
     public function qualityScore(array $assignment): int
     {
         $score = 0;
 
-        foreach ($assignment as $slots) {
+        foreach ($assignment as $lessonId => $slots) {
             $score += $this->comboScore($slots);
         }
 
-        return $score;
+        return $score + $this->halfGroupGroupingScore($assignment);
+    }
+
+    /**
+     * HG-05 — Bonus por agrupar medio-grupos de una misma sección en el mismo
+     * período. Cuenta, por celda (período·sección), las parejas formadas.
+     *
+     * @param  array<int, list<SlotCandidate>>  $assignment
+     */
+    private function halfGroupGroupingScore(array $assignment): int
+    {
+        if (! $this->halfGroupPriority || $this->halfGroupBonus <= 0) {
+            return 0;
+        }
+
+        $cells = [];
+        foreach ($assignment as $lessonId => $slots) {
+            $lesson = $this->lessonById[(int) $lessonId] ?? null;
+            if (! $lesson || ! $lesson->isHalfGroup) {
+                continue;
+            }
+
+            foreach ($slots as $slot) {
+                $key = $slot->periodId.':'.$lesson->seccionId;
+                $cells[$key] = ($cells[$key] ?? 0) + 1;
+            }
+        }
+
+        $bonus = 0;
+        foreach ($cells as $count) {
+            // n mitades en la misma celda forman n-1 parejas agrupadas.
+            $bonus += max(0, $count - 1) * $this->halfGroupBonus;
+        }
+
+        return $bonus;
     }
 
     /**
@@ -299,7 +424,7 @@ final class TimetableSolver
         $lesson = $lessons[$index];
         $domain = $this->buildDomain($lesson, $ctx);
 
-        foreach ($this->combinationsOfSize($domain, $lesson) as $combo) {
+        foreach ($this->combinationsOfSize($domain, $lesson, $ctx) as $combo) {
             foreach ($combo as $slot) {
                 $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher);
             }
@@ -438,10 +563,10 @@ final class TimetableSolver
      * @param  array{t: list<SlotCandidate>, p: list<SlotCandidate>}  $domain
      * @return iterable<list<SlotCandidate>>
      */
-    private function combinationsOfSize(array $domain, LessonToSchedule $lesson): iterable
+    private function combinationsOfSize(array $domain, LessonToSchedule $lesson, SchedulingContext $ctx): iterable
     {
-        $tCombos = $this->pickCombinations($domain['t'], $lesson->remainingBlocksT());
-        $pCombos = $this->pickCombinations($domain['p'], $lesson->remainingBlocksP());
+        $tCombos = $this->pickCombinations($domain['t'], $lesson->remainingBlocksT(), $ctx, $lesson);
+        $pCombos = $this->pickCombinations($domain['p'], $lesson->remainingBlocksP(), $ctx, $lesson);
 
         $results = [];
         foreach ($tCombos as $tCombo) {
@@ -455,7 +580,7 @@ final class TimetableSolver
             }
         }
 
-        usort($results, fn (array $a, array $b) => $this->comboScore($b) <=> $this->comboScore($a)
+        usort($results, fn (array $a, array $b) => $this->comboScore($b, $ctx, $lesson) <=> $this->comboScore($a, $ctx, $lesson)
         );
 
         yield from array_slice($results, 0, self::MAX_COMBOS_PER_LESSON);
@@ -469,7 +594,7 @@ final class TimetableSolver
      * @param  list<SlotCandidate>  $candidates
      * @return list<list<SlotCandidate>>
      */
-    private function pickCombinations(array $candidates, int $n): array
+    private function pickCombinations(array $candidates, int $n, ?SchedulingContext $ctx = null, ?LessonToSchedule $lesson = null): array
     {
         if ($n <= 0) {
             return [[]];
@@ -480,7 +605,7 @@ final class TimetableSolver
         }
 
         // Ordenar candidatos por heurística para quedarnos con el mejor pool.
-        usort($candidates, fn (SlotCandidate $a, SlotCandidate $b) => $this->comboScore([$b]) <=> $this->comboScore([$a])
+        usort($candidates, fn (SlotCandidate $a, SlotCandidate $b) => $this->comboScore([$b], $ctx, $lesson) <=> $this->comboScore([$a], $ctx, $lesson)
         );
 
         // ADR-TT-011: el pool crece adaptativamente con $n para que una lección
@@ -517,7 +642,7 @@ final class TimetableSolver
             $this->combine($pool, $n, 0, [], $results, $nodes);
         }
 
-        usort($results, fn (array $a, array $b) => $this->comboScore($b) <=> $this->comboScore($a)
+        usort($results, fn (array $a, array $b) => $this->comboScore($b, $ctx, $lesson) <=> $this->comboScore($a, $ctx, $lesson)
         );
 
         return array_slice($results, 0, self::MAX_COMBOS_PER_LESSON);
@@ -557,10 +682,11 @@ final class TimetableSolver
      *  - +100 por día distinto usado (distribuir bloques)
      *  - -50 por día consecutivo entre bloques de la misma lección (si >1)
      *  - -10 por bloque teórico en período tardío (order > 3)
+     *  - HG-02: +halfGroupBonus por celda que ya agrupa medio-grupos de la sección
      *
      * @param  list<SlotCandidate>  $combo
      */
-    private function comboScore(array $combo): int
+    private function comboScore(array $combo, ?SchedulingContext $ctx = null, ?LessonToSchedule $lesson = null): int
     {
         $score = 0;
         $days = [];
@@ -571,6 +697,12 @@ final class TimetableSolver
                 if (! $slot->isPractical && $meta['order'] > 3) {
                     $score -= 10;
                 }
+            }
+
+            if ($ctx !== null && $lesson !== null
+                && $this->halfGroupPriority && $lesson->isHalfGroup
+                && $ctx->halfGroupLoad($slot->periodId, $lesson->seccionId) > 0) {
+                $score += $this->halfGroupBonus;
             }
         }
 
