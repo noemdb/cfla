@@ -239,6 +239,8 @@ class TimetableWizard extends Component
 
     public $calendarLessonsBackupFile = null;
 
+    public $allCalendarsBackupFile = null;
+
     /** Archivo JSON de respaldo de slots de la sección activa. */
     public $slotsBackupFile = null;
 
@@ -2948,31 +2950,12 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Descarga un respaldo JSON con TODAS las lessons del calendario
-     * seleccionado (todas las secciones). Mismo formato que el respaldo por
-     * sección, para reutilizar el flujo de restore.
+     * Filas de lessons (formato de respaldo) de un calendario.
+     *
+     * @return list<array<string, mixed>>
      */
-    public function downloadCalendarLessonsBackup()
+    private function calendarLessonsRows(TimetableCalendar $calendar): array
     {
-        if (! $this->calendarId) {
-            $this->notification()->warning(
-                'Calendario requerido',
-                'Selecciona un calendario antes de descargar el respaldo.',
-            );
-
-            return null;
-        }
-
-        $calendar = TimetableCalendar::query()
-            ->with(['lapso', 'pestudio', 'pescolar'])
-            ->find($this->calendarId);
-
-        if (! $calendar) {
-            $this->notification()->error('Calendario no encontrado', 'No se pudo generar el respaldo.');
-
-            return null;
-        }
-
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $calendar->id)
             ->with([
@@ -2983,7 +2966,7 @@ class TimetableWizard extends Component
             ])
             ->get();
 
-        $lessonRows = $lessons->map(function (TimetableLesson $lesson): ?array {
+        return $lessons->map(function (TimetableLesson $lesson): ?array {
             $pev = $lesson->pevaluacion;
 
             if (! $pev) {
@@ -3030,6 +3013,35 @@ class TimetableWizard extends Component
                 ],
             ];
         })->filter()->values()->all();
+    }
+
+    /**
+     * Descarga un respaldo JSON con TODAS las lessons del calendario
+     * seleccionado (todas las secciones). Mismo formato que el respaldo por
+     * sección, para reutilizar el flujo de restore.
+     */
+    public function downloadCalendarLessonsBackup()
+    {
+        if (! $this->calendarId) {
+            $this->notification()->warning(
+                'Calendario requerido',
+                'Selecciona un calendario antes de descargar el respaldo.',
+            );
+
+            return null;
+        }
+
+        $calendar = TimetableCalendar::query()
+            ->with(['lapso', 'pestudio', 'pescolar'])
+            ->find($this->calendarId);
+
+        if (! $calendar) {
+            $this->notification()->error('Calendario no encontrado', 'No se pudo generar el respaldo.');
+
+            return null;
+        }
+
+        $lessonRows = $this->calendarLessonsRows($calendar);
 
         if ($lessonRows === []) {
             $this->notification()->warning(
@@ -3069,6 +3081,56 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Descarga un respaldo JSON con las lessons de TODOS los calendarios
+     * (todos los pestudios/planes activos). Formato agrupado por calendario.
+     */
+    public function downloadAllCalendarsBackup()
+    {
+        $calendars = TimetableCalendar::query()
+            ->with(['lapso', 'pestudio', 'pescolar'])
+            ->orderBy('id')
+            ->get();
+
+        $entries = $calendars->map(function (TimetableCalendar $calendar): ?array {
+            $rows = $this->calendarLessonsRows($calendar);
+
+            return [
+                'calendar' => [
+                    'id' => (int) $calendar->id,
+                    'name' => $calendar->name,
+                    'lapso_id' => $calendar->lapso_id,
+                    'lapso' => $calendar->lapso?->name,
+                    'pescolar_id' => $calendar->pescolar_id,
+                    'pestudio_id' => $calendar->pestudio_id,
+                    'pestudio' => $calendar->pestudio?->name,
+                    'period_minutes' => (int) $calendar->period_minutes,
+                    'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
+                ],
+                'lessons' => $rows,
+            ];
+        })->filter(fn (?array $entry): bool => $entry !== null && $entry['lessons'] !== [])->values()->all();
+
+        if ($entries === []) {
+            $this->notification()->warning('Sin lessons para respaldar', 'No hay calendarios con lessons configuradas.');
+
+            return null;
+        }
+
+        $backup = [
+            'format' => 'cfla-timetable-calendars-backup',
+            'version' => 1,
+            'exported_at' => now()->toIso8601String(),
+            'calendars' => $entries,
+        ];
+
+        $filename = 'respaldo-lessons-todos-los-calendarios-'.now()->format('Ymd_His').'.json';
+
+        return response()->streamDownload(function () use ($backup): void {
+            echo json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        }, $filename, ['Content-Type' => 'application/json; charset=UTF-8']);
+    }
+
+    /**
      * Valida y restaura la configuración del respaldo en el calendario activo
      * (respaldos iniciados desde el paso 3).
      */
@@ -3088,6 +3150,89 @@ class TimetableWizard extends Component
         if ($this->applyLessonsBackupFile($this->calendarLessonsBackupFile)) {
             $this->calendarLessonsBackupFile = null;
         }
+    }
+
+    /**
+     * Restaura el respaldo de TODOS los calendarios (todos los pestudios/planes
+     * activos). Aplica cada bloque de lessons a su calendario correspondiente.
+     */
+    public function restoreAllCalendarsBackup(): void
+    {
+        if (! $this->allCalendarsBackupFile) {
+            $this->notification()->warning('Respaldo requerido', 'Selecciona un archivo JSON de todos los calendarios.');
+
+            return;
+        }
+
+        if (strtolower((string) $this->allCalendarsBackupFile->getClientOriginalExtension()) !== 'json'
+            || (int) $this->allCalendarsBackupFile->getSize() > 10 * 1024 * 1024
+        ) {
+            $this->notification()->error('Archivo no permitido', 'El respaldo debe ser un archivo JSON de hasta 10 MB.');
+
+            return;
+        }
+
+        try {
+            $payload = json_decode($this->allCalendarsBackupFile->get(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $exception) {
+            $this->notification()->error('JSON inválido', 'El archivo no tiene un formato de respaldo válido.');
+
+            return;
+        }
+
+        if (($payload['format'] ?? null) !== 'cfla-timetable-calendars-backup'
+            || (int) ($payload['version'] ?? 0) !== 1
+            || ! is_array($payload['calendars'] ?? null)
+        ) {
+            $this->notification()->error('Respaldo incompatible', 'El archivo no corresponde a un respaldo de todos los calendarios de CFlat.');
+
+            return;
+        }
+
+        $totalRestored = 0;
+        $totalSkipped = 0;
+        $applied = 0;
+        $notFound = 0;
+
+        foreach ($payload['calendars'] as $entry) {
+            if (! is_array($entry) || ! is_array($entry['lessons'] ?? null) || ! is_array($entry['calendar'] ?? null)) {
+                continue;
+            }
+
+            $bc = $entry['calendar'];
+            $calendar = TimetableCalendar::query()
+                ->when(isset($bc['id']), fn ($q) => $q->whereKey((int) $bc['id']))
+                ->where('lapso_id', (int) ($bc['lapso_id'] ?? 0))
+                ->where('pestudio_id', (int) ($bc['pestudio_id'] ?? 0))
+                ->first();
+
+            if (! $calendar) {
+                $notFound++;
+
+                continue;
+            }
+
+            $result = $this->restoreLessonsToCalendar($calendar, $entry);
+            $totalRestored += count($result['restored']);
+            $totalSkipped += $result['skipped'];
+            $applied++;
+        }
+
+        if ($applied === 0) {
+            $this->notification()->error('Sin calendarios compatibles', 'No se encontraron calendarios que coincidan con el respaldo.');
+
+            return;
+        }
+
+        $this->allCalendarsBackupFile = null;
+        $message = "{$totalRestored} lesson(s) restaurada(s) en {$applied} calendario(s).";
+        if ($notFound > 0) {
+            $message .= " {$notFound} calendario(s) no coincidieron.";
+        }
+        if ($totalSkipped > 0) {
+            $message .= " {$totalSkipped} fila(s) omitida(s).";
+        }
+        $this->notification()->success('Respaldo restaurado', $message);
     }
 
     /**
@@ -3229,6 +3374,37 @@ class TimetableWizard extends Component
             return false;
         }
 
+        $result = $this->restoreLessonsToCalendar($calendar, $payload);
+        $restored = $result['restored'];
+        $skipped = $result['skipped'];
+
+        if ($restored === []) {
+            $this->notification()->error('Sin coincidencias', 'No se encontraron Pevaluaciones compatibles para restaurar.');
+
+            return false;
+        }
+
+        $this->selectedPevs = collect($restored)->keys()->mapWithKeys(fn ($id) => [(int) $id => true])->all();
+        $this->lessons = $restored;
+        $this->lessonsDirty = false;
+        $this->lessonsSavedAt = now()->format('H:i:s');
+        $message = count($restored).' lesson(s) restaurada(s).';
+        if ($skipped > 0) {
+            $message .= " {$skipped} fila(s) no coincidieron y fueron omitidas.";
+        }
+        $this->notification()->success('Respaldo restaurado', $message);
+
+        return true;
+    }
+
+    /**
+     * Aplica un payload de lessons a un calendario concreto. Devuelve las
+     * lessons restauradas (mapa pev_id => config) y las filas omitidas.
+     *
+     * @return array{restored: array<int, array<string, mixed>>, skipped: int}
+     */
+    private function restoreLessonsToCalendar(TimetableCalendar $calendar, array $payload): array
+    {
         $pevaluaciones = Pevaluacion::query()
             ->with(['seccion.grado.pestudio', 'pensum.asignatura', 'profesor'])
             ->where('lapso_id', $calendar->lapso_id)
@@ -3287,24 +3463,11 @@ class TimetableWizard extends Component
             ];
         }
 
-        if ($restored === []) {
-            $this->notification()->error('Sin coincidencias', 'No se encontraron Pevaluaciones compatibles para restaurar.');
-
-            return false;
+        if ($restored !== []) {
+            $this->persistTimetableLessonDraft((int) $calendar->id, $restored);
         }
 
-        $this->persistTimetableLessonDraft((int) $calendar->id, $restored);
-        $this->selectedPevs = collect($restored)->keys()->mapWithKeys(fn ($id) => [(int) $id => true])->all();
-        $this->lessons = $restored;
-        $this->lessonsDirty = false;
-        $this->lessonsSavedAt = now()->format('H:i:s');
-        $message = count($restored).' lesson(s) restaurada(s).';
-        if ($skipped > 0) {
-            $message .= " {$skipped} fila(s) no coincidieron y fueron omitidas.";
-        }
-        $this->notification()->success('Respaldo restaurado', $message);
-
-        return true;
+        return ['restored' => $restored, 'skipped' => $skipped];
     }
 
     /** Normaliza el nombre de una asignatura para el índice de importación. */
@@ -3928,6 +4091,42 @@ class TimetableWizard extends Component
     public function sectionTimetableLocked(int $sectionId): bool
     {
         return (bool) Seccion::query()->whereKey($sectionId)->value('timetable_locked');
+    }
+
+    /**
+     * True si todas las secciones ACTIVAS del grado están bloqueadas.
+     */
+    public function gradeAllSectionsLocked($gradoId): bool
+    {
+        if (! is_numeric($gradoId) || (int) $gradoId <= 0) {
+            return false;
+        }
+
+        $query = Seccion::query()
+            ->where('grado_id', (int) $gradoId)
+            ->where('status_active', true);
+
+        $total = (clone $query)->count();
+
+        return $total > 0 && (clone $query)->where('timetable_locked', false)->count() === 0;
+    }
+
+    /**
+     * True si todas las secciones ACTIVAS de todos los grados del pestudio están bloqueadas.
+     */
+    public function pestudioAllSectionsLocked($pestudioId): bool
+    {
+        if (! is_numeric($pestudioId) || (int) $pestudioId <= 0) {
+            return false;
+        }
+
+        $query = Seccion::query()
+            ->whereHas('grado', fn ($g) => $g->where('pestudio_id', (int) $pestudioId))
+            ->where('status_active', true);
+
+        $total = (clone $query)->count();
+
+        return $total > 0 && (clone $query)->where('timetable_locked', false)->count() === 0;
     }
 
     /**
