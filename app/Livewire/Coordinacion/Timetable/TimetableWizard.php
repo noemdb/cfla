@@ -2005,6 +2005,12 @@ class TimetableWizard extends Component
      */
     public function bulkAssignShift(): void
     {
+        if ($this->activeSectionTimetableLocked()) {
+            $this->notifyLockedSection();
+
+            return;
+        }
+
         if (! $this->bulkShiftId) {
             return;
         }
@@ -2023,6 +2029,12 @@ class TimetableWizard extends Component
      */
     public function bulkAssignRoomType(): void
     {
+        if ($this->activeSectionTimetableLocked()) {
+            $this->notifyLockedSection();
+
+            return;
+        }
+
         if ($this->lessons === []) {
             $this->notification()->warning(
                 'Sin lecciones seleccionadas',
@@ -2088,6 +2100,12 @@ class TimetableWizard extends Component
      */
     public function resetLessonCheckboxes(): void
     {
+        if ($this->activeSectionTimetableLocked()) {
+            $this->notifyLockedSection('no se puede modificar la selección.');
+
+            return;
+        }
+
         $this->selectedPevs = [];
         $this->lessons = [];
         $this->selectionResetToken++;
@@ -3952,12 +3970,17 @@ class TimetableWizard extends Component
             return false;
         }
 
-        $this->notification()->error(
-            'Horario bloqueado',
-            'El horario de esta sección está bloqueado; no se puede modificar.',
-        );
+        $this->notifyLockedSection();
 
         return true;
+    }
+
+    private function notifyLockedSection(string $detail = 'no se puede modificar.'): void
+    {
+        $this->notification()->error(
+            'Horario bloqueado',
+            'El horario de esta sección está bloqueado; '.$detail,
+        );
     }
 
     /**
@@ -5714,7 +5737,6 @@ PROMPT;
                 })->values();
 
                 if ($teacherConflicts->isNotEmpty()) {
-                    $count = $teacherConflicts->count();
                     $allShared = $teacherConflicts->every(
                         fn (TimetableSlot $slot): bool => (bool) ($slot->lesson?->allow_shared_teacher ?? $slot->allow_shared_teacher),
                     );
@@ -5723,7 +5745,7 @@ PROMPT;
                     ) && (bool) $candidate['is_half_group'];
                     $bothShared = $allShared && (bool) $candidate['allow_shared_teacher'];
 
-                    if ($count >= 2 || ! ($bothHalfGroup || $bothShared)) {
+                    if (! ($bothHalfGroup || $bothShared)) {
                         $existing = $teacherConflicts->first();
 
                         return [
@@ -6983,9 +7005,12 @@ PROMPT;
 
                         $bothHalfGroup = (bool) $slot->is_half_group
                             && (bool) $lesson?->is_half_group;
+                        $bothShared = (bool) ($slot->lesson?->allow_shared_teacher ?? $slot->allow_shared_teacher)
+                            && (bool) ($lesson?->allow_shared_teacher ?? false);
                         $sameTeacher = $teacherId > 0
                             && (int) $slot->profesor_id === $teacherId
-                            && ! $bothHalfGroup;
+                            && ! $bothHalfGroup
+                            && ! $bothShared;
                         $sameSection = $sectionId > 0
                             && (int) $slot->seccion_id === $sectionId
                             && ! $bothHalfGroup;

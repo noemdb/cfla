@@ -77,7 +77,7 @@ class SharedTeacherSolverTest extends TestCase
         $this->assertCount(1, $result->assignment, 'una autorizada y otra no: no pueden coincidir');
     }
 
-    public function test_third_shared_lesson_is_rejected(): void
+    public function test_third_shared_lesson_is_allowed_when_all_authorized(): void
     {
         $available = [101 => [1]];
         $lessons = [
@@ -89,10 +89,10 @@ class SharedTeacherSolverTest extends TestCase
         $solver = new TimetableSolver($lessons, $available, ['aula' => [1]], $this->periodMeta, 30, 2);
         $result = $solver->solve();
 
-        $this->assertLessThan(3, count($result->assignment), 'una tercera lesson del mismo docente es rechazada');
+        $this->assertCount(3, $result->assignment, 'si todas autorizan, la tercera también es permitida');
     }
 
-    public function test_context_allows_shared_pair_and_rejects_third(): void
+    public function test_context_allows_shared_pair_and_third_when_all_authorized(): void
     {
         $ctx = new SchedulingContext(2);
 
@@ -102,6 +102,6 @@ class SharedTeacherSolverTest extends TestCase
         $this->assertTrue($ctx->isFree(1, 101, 200, null, null, false, 2, true));
         $ctx->occupy(1, 101, 200, null, null, false, 2, true);
 
-        $this->assertFalse($ctx->isFree(1, 101, 300, null, null, false, 3, true), 'tercera ocupación rechazada');
+        $this->assertTrue($ctx->isFree(1, 101, 300, null, null, false, 3, true), 'tercera autorizada permitida');
     }
 }

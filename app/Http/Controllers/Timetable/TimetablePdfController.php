@@ -89,26 +89,9 @@ class TimetablePdfController extends Controller
             ->orderBy('name')
             ->get();
         $institucion = \App\Models\app\Entity\Institucion::orderBy('created_at', 'DESC')->first();
-        $periods = $calendar->periods()
-            ->with('shift')
-            ->orderBy('shift_id')
-            ->orderBy('order_in_day')
-            ->orderBy('day_of_week')
-            ->get()
-            ->groupBy('order_in_day')
-            ->map(function ($rows) {
-                return $rows->groupBy('day_of_week')
-                    ->mapWithKeys(function ($dayRows, $day) {
-                        $teaching = $dayRows->first(fn ($p) => ! $p->is_break);
-
-                        return [(int) $day => $teaching ?? $dayRows->first()];
-                    });
-            })
-            ->sortBy(fn ($rows): string => (string) ($rows->first()?->start_time ?? '99:99:99'));
         $schedules = $profesores->map(fn (Profesor $profesor): array => [
             'profesor' => $profesor,
-            'grid' => $this->viewService->gridForTeacher($calendar, (int) $profesor->id),
-            'periods' => $periods,
+            'shifts' => $this->viewService->teacherShiftSchedules($calendar, (int) $profesor->id),
         ])->values();
 
         $pdf = Pdf::loadView('pdfs.timetable.teachers', [

@@ -1008,7 +1008,9 @@
                     <div class="col-span-1 sm:col-span-2 lg:col-span-5 flex items-center gap-2">
                         <button wire:click="bulkAssignShift" wire:loading.attr="disabled" wire:target="bulkAssignShift"
                             wire:loading.class="opacity-50 cursor-not-allowed"
-                            class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10">
+                            @disabled($this->activeSectionTimetableLocked())
+                            title="{{ $this->activeSectionTimetableLocked() ? 'La sección tiene el horario bloqueado' : 'Aplicar el turno seleccionado a las lecciones' }}"
+                            class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10 disabled:cursor-not-allowed disabled:opacity-50">
                             <span wire:loading.remove wire:target="bulkAssignShift">Aplicar turno</span>
                             <span wire:loading wire:target="bulkAssignShift" class="inline-flex items-center gap-1.5">
                                 <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -1017,7 +1019,9 @@
                         </button>
                         <button wire:click="bulkAssignRoomType" wire:loading.attr="disabled" wire:target="bulkAssignRoomType"
                             wire:loading.class="opacity-50 cursor-not-allowed"
-                            class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10">
+                            @disabled($this->activeSectionTimetableLocked())
+                            title="{{ $this->activeSectionTimetableLocked() ? 'La sección tiene el horario bloqueado' : 'Aplicar el tipo de aula seleccionado a las lecciones' }}"
+                            class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-white/10 disabled:cursor-not-allowed disabled:opacity-50">
                             <span wire:loading.remove wire:target="bulkAssignRoomType">Aplicar aula</span>
                             <span wire:loading wire:target="bulkAssignRoomType" class="inline-flex items-center gap-1.5">
                                 <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -1027,7 +1031,10 @@
                         <button type="button" wire:click="resetLessonCheckboxes"
                             wire:loading.attr="disabled" wire:target="resetLessonCheckboxes"
                             wire:loading.class="opacity-50 cursor-not-allowed"
-                            class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/20">
+                            @disabled($this->activeSectionTimetableLocked())
+                            title="{{ $this->activeSectionTimetableLocked() ? 'La sección tiene el horario bloqueado' : 'Desmarcar todas las lecciones seleccionadas' }}"
+                            aria-label="Desmarcar todo"
+                            class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50">
                             <span wire:loading.remove wire:target="resetLessonCheckboxes">Desmarcar todo</span>
                             <span wire:loading wire:target="resetLessonCheckboxes">Reiniciando…</span>
                         </button>
@@ -2630,7 +2637,8 @@
                                     wire:loading.attr="disabled"
                                     wire:loading.class="opacity-50 cursor-not-allowed"
                                     wire:target="persistCurrentSectionSlots"
-                                    title="Guardar en la base de datos los slots de la sección activa"
+                                    @disabled($this->activeSectionTimetableLocked())
+                                    title="{{ $this->activeSectionTimetableLocked() ? 'La sección tiene el horario bloqueado' : 'Guardar en la base de datos los slots de la sección activa' }}"
                                     aria-label="Guardar sección"
                                     class="inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-emerald-300">
                                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

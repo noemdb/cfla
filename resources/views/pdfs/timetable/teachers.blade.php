@@ -17,65 +17,73 @@
         td.time{text-align:center;font-weight:700;width:42px;background:#f0fdf4;}
         .subject{font-weight:700;font-size:6pt;}
         .section{font-size:5pt;color:#4b5563;}
-        .break{background:#fff7ed;color:#c2410c;text-align:center;font-weight:700;font-size:5.5pt;}
+        .break{background:#fef3c7;color:#b45309;text-align:center;font-weight:800;font-size:7pt;letter-spacing:0.5px;}
         .footer{text-align:center;font-size:5.5pt;color:#6b7280;margin-top:3px;padding-top:2px;border-top:1px solid #ccc;}
     </style>
 </head>
 <body>
-    @forelse ($schedules->chunk(3) as $pageSchedules)
+    @forelse ($schedules->chunk(2) as $pageSchedules)
         <div class="teacher-page">
             @foreach ($pageSchedules as $schedule)
                 <div class="teacher-card">
                     <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
                     <h2>HORARIO — Docente {{ $schedule['profesor']->lastname }}, {{ $schedule['profesor']->name }}</h2>
                     <div class="subhead">{{ $calendar->name }} · {{ $fecha }}</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Bloque / hora</th>
-                                <th>Lunes</th>
-                                <th>Martes</th>
-                                <th>Miércoles</th>
-                                <th>Jueves</th>
-                                <th>Viernes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($schedule['periods'] as $order => $dayPeriods)
+                    @foreach ($schedule['shifts'] as $shiftSchedule)
+                        <div class="subhead" style="margin-top:6px;font-weight:800;color:#0d9488;">
+                            TURNO: {{ $shiftSchedule['shift']->name ?? ('Turno '.$shiftSchedule['shift']->id) }}
+                            @if ($shiftSchedule['shift']->start_time)
+                                ({{ substr((string) $shiftSchedule['shift']->start_time, 0, 5) }}–{{ substr((string) $shiftSchedule['shift']->end_time, 0, 5) }})
+                            @endif
+                        </div>
+                        <table>
+                            <thead>
                                 <tr>
-                                    @php($firstPeriod = $dayPeriods->first())
-                                    <td class="time">
-                                        {{ $order }}º<br>
-                                        <span class="section">{{ substr((string) $firstPeriod->start_time, 0, 5) }}–{{ substr((string) $firstPeriod->end_time, 0, 5) }}</span>
-                                    </td>
-                                    @foreach (range(1, 5) as $day)
-                                        @php($period = $dayPeriods->get($day))
-                                        <td class="{{ $period?->is_break ? 'break' : '' }}">
-                                            @if ($period?->is_break)
-                                                RECESO
-                                            @else
-                                                @forelse ($schedule['grid']->get($order, collect())->get($day, collect()) as $slot)
-                                                    <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
-                                                    <div class="section">
-                                                        {{ $slot->lesson?->pevaluacion?->seccion?->grado?->name ?? '' }}
-                                                        · {{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}
-                                                        @if ($slot->grupo_estable_id)
-                                                            · {{ $slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id }}
-                                                        @endif
-                                                        @if ($slot->room?->code)
-                                                            · Aula {{ $slot->room->code }}
-                                                        @endif
-                                                    </div>
-                                                @empty
-                                                    <span class="section">&nbsp;</span>
-                                                @endforelse
-                                            @endif
-                                        </td>
-                                    @endforeach
+                                    <th>Bloque / hora</th>
+                                    <th>Lunes</th>
+                                    <th>Martes</th>
+                                    <th>Miércoles</th>
+                                    <th>Jueves</th>
+                                    <th>Viernes</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($shiftSchedule['periods'] as $order => $dayPeriods)
+                                    <tr>
+                                        @php($firstPeriod = $dayPeriods->first())
+                                        <td class="time">
+                                            {{ $order }}º<br>
+                                            <span class="section">{{ substr((string) $firstPeriod->start_time, 0, 5) }}–{{ substr((string) $firstPeriod->end_time, 0, 5) }}</span>
+                                        </td>
+                                        @foreach (range(1, 5) as $day)
+                                            @php($period = $dayPeriods->get($day))
+                                            <td class="{{ $period?->is_break ? 'break' : '' }}">
+                                                @if ($period?->is_break)
+                                                    RECESO
+                                                @else
+                                                    @forelse ($shiftSchedule['grid']->get($order, collect())->get($day, collect()) as $slot)
+                                                        <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
+                                                        <div class="section">
+                                                            {{ $slot->lesson?->pevaluacion?->seccion?->grado?->name ?? '' }}
+                                                            · {{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}
+                                                            @if ($slot->grupo_estable_id)
+                                                                · {{ $slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id }}
+                                                            @endif
+                                                            @if ($slot->room?->code)
+                                                                · Aula {{ $slot->room->code }}
+                                                            @endif
+                                                        </div>
+                                                    @empty
+                                                        <span class="section">&nbsp;</span>
+                                                    @endforelse
+                                                @endif
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endforeach
                 </div>
             @endforeach
             <div class="footer">

@@ -80,6 +80,68 @@ class TimetableViewService
     /**
      * @return Collection<int, Collection<int, Collection<int, TimetableSlot>>>
      */
+    /**
+     * Schedules del docente separados por turno, para que los recreos de cada
+     * turno se muestren correctamente (sin conflación de turnos).
+     *
+     * @return list<array{shift: TimetableShift, periods: \Illuminate\Support\Collection, grid: \Illuminate\Support\Collection}>
+     */
+    public function teacherShiftSchedules(TimetableCalendar $calendar, int $profesorId): array
+    {
+        $slots = TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('profesor_id', $profesorId)
+            ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
+            })
+            ->with(['period', 'room', 'lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion.grado', 'lesson.pevaluacion.grupoEstable'])
+            ->get();
+
+        $shiftIds = $calendar->periods()->pluck('shift_id')->unique()->values();
+        $shifts = \App\Models\app\Timetable\TimetableShift::query()->whereIn('id', $shiftIds)->get();
+
+        $schedules = [];
+
+        foreach ($shifts as $shift) {
+            $shiftPeriods = $calendar->periods()
+                ->where('shift_id', $shift->id)
+                ->with('shift')
+                ->orderBy('day_of_week')
+                ->orderBy('order_in_day')
+                ->get()
+                ->groupBy('order_in_day');
+
+            $grid = collect();
+
+            foreach ($shiftPeriods as $order => $group) {
+                $row = collect();
+                foreach (range(1, 5) as $day) {
+                    $dayPeriods = $group
+                        ->filter(fn ($p) => (int) $p->day_of_week === $day)
+                        ->reject(fn ($p) => (bool) $p->is_break)
+                        ->sortBy('id');
+                    $cell = collect();
+                    foreach ($dayPeriods as $period) {
+                        $cell = $cell->merge($slots->filter(fn ($s) => (int) $s->period_id === (int) $period->id)->values());
+                    }
+                    $row->put($day, $cell->values());
+                }
+                $grid->put((int) $order, $row);
+            }
+
+            $periods = $shiftPeriods->map(fn ($group) => $group->keyBy('day_of_week'));
+
+            $schedules[] = [
+                'shift' => $shift,
+                'periods' => $periods,
+                'grid' => $grid,
+            ];
+        }
+
+        return $schedules;
+    }
+
     private function buildGrid(TimetableCalendar $calendar, Collection $slots): Collection
     {
         $periods = $calendar->periods()

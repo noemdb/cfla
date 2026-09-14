@@ -70,7 +70,6 @@ class ConflictValidator
             ->get();
 
         if ($teacherConflicts->isNotEmpty()) {
-            $count = $teacherConflicts->count();
             $allShareable = $teacherConflicts->every(
                 fn ($slot): bool => (bool) ($slot->lesson?->allow_shared_teacher ?? false),
             );
@@ -79,7 +78,7 @@ class ConflictValidator
             ) && (bool) $lesson->is_half_group;
             $candidateShared = (bool) $lesson->allow_shared_teacher;
 
-            if ($count >= 2 || ! ($bothHalfGroup || ($candidateShared && $allShareable))) {
+            if (! ($bothHalfGroup || ($candidateShared && $allShareable))) {
                 $reasons[] = 'El docente ya tiene clase en ese período.';
             }
         }

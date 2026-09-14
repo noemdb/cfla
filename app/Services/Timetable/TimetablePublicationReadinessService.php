@@ -98,7 +98,6 @@ class TimetablePublicationReadinessService
                     $existingTeacherLessons = collect($teacherPeriods[$key.$teacherId])
                         ->map(fn ($id) => $lessons->get($id))
                         ->filter();
-                    $count = $existingTeacherLessons->count();
                     $allShared = $existingTeacherLessons->every(
                         fn ($l): bool => (bool) ($l?->allow_shared_teacher ?? false),
                     );
@@ -107,7 +106,7 @@ class TimetablePublicationReadinessService
                     ) && (bool) $lesson->is_half_group;
                     $candidateShared = (bool) $lesson->allow_shared_teacher;
 
-                    if ($count >= 2 || ! ($bothAllowHalfGroup || ($candidateShared && $allShared))) {
+                    if (! ($bothAllowHalfGroup || ($candidateShared && $allShared))) {
                         $hardConflicts[] = $this->conflict($lesson, 'teacher_double_booked', $period, $periodId);
                     }
                 }

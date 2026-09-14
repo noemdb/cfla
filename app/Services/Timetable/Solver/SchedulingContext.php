@@ -59,15 +59,13 @@ final class SchedulingContext
         $occupants = $this->teacherOccupants[$teacherKey] ?? [];
 
         if ($occupants !== []) {
-            if (count($occupants) >= 2) {
-                return false;
-            }
+            $allShared = collect($occupants)->keys()->every(
+                fn ($lessonId): bool => (bool) ($this->teacherOccupantShared[$teacherKey][$lessonId] ?? false),
+            );
 
-            $existingLessonId = array_key_first($occupants);
-            $existingShared = $this->teacherOccupantShared[$teacherKey][$existingLessonId] ?? false;
-
-            // La excepción de docente compartido exige AMBAS lessons autorizadas.
-            if (! ($allowSharedTeacher && $existingShared)) {
+            // La excepción de docente compartido exige que TODAS las lessons
+            // ocupantes estén autorizadas y que la candidata también lo esté.
+            if (! ($allowSharedTeacher && $allShared)) {
                 return false;
             }
         }
