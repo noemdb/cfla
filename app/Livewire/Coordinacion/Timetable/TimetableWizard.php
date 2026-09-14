@@ -21,12 +21,14 @@ use App\Models\app\Timetable\TimetableSlot;
 use App\Models\app\Timetable\TimetableSubstituteAssignment;
 use App\Models\app\Timetable\TimetableTeacherAvailability;
 use App\Services\Timetable\TimetableAiDraftService;
+use App\Services\Timetable\TimetableCalendarSnapshotService;
 use App\Services\Timetable\TimetableCapacityAuditService;
 use App\Services\Timetable\TimetablePublicationReadinessService;
 use App\Services\Timetable\TimetableRoomEligibilityService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -43,6 +45,13 @@ use WireUi\Traits\WireUiActions;
 class TimetableWizard extends Component
 {
     use TimetableLessonDraftTrait, WireUiActions, WithFileUploads;
+
+    /**
+     * SPEC-TIMETABLE-SNAPSHOT-001 §9.2 — Clave de sesión donde vive el snapshot
+     * validado pendiente de confirmar junto al preview que lo respalda. Se
+     * aísla por calendario para que cambiar de calendario invalide el pendiente.
+     */
+    private const SNAPSHOT_SESSION_KEY = 'timetable.snapshot.pending';
 
     public int $currentStep = 1;
 
@@ -240,6 +249,16 @@ class TimetableWizard extends Component
     public $calendarLessonsBackupFile = null;
 
     public $allCalendarsBackupFile = null;
+
+    /**
+     * SPEC-TIMETABLE-SNAPSHOT-001 §9.2 — Preview del snapshot pendiente de
+     * confirmar. Se guarda en sesión junto al payload validado; aquí sólo vive
+     * el resumen que consume la vista.
+     */
+    public ?array $snapshotPreview = null;
+
+    /** §9.5 — Auto-backup del último restore aplicado ("Deshacer último restore"). */
+    public ?string $lastSnapshotAutoBackup = null;
 
     /** Archivo JSON de respaldo de slots de la sección activa. */
     public $slotsBackupFile = null;
@@ -3098,9 +3117,13 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Descarga un respaldo JSON con TODAS las lessons del calendario
-     * seleccionado (todas las secciones). Mismo formato que el respaldo por
-     * sección, para reutilizar el flujo de restore.
+     * SPEC-TIMETABLE-SNAPSHOT-001 §8 — Descarga un snapshot completo del
+     * calendario seleccionado: configuración, períodos, bloqueos de sección,
+     * disponibilidad, lessons y slots, con el checksum semántico (§7) y el
+     * bloque `playbook` (§5.7).
+     *
+     * Sustituye al antiguo respaldo de sólo-lessons: aplicar este archivo
+     * REEMPLAZA el horario del calendario en vez de sumarle lessons.
      */
     public function downloadCalendarLessonsBackup()
     {
@@ -3123,9 +3146,9 @@ class TimetableWizard extends Component
             return null;
         }
 
-        $lessonRows = $this->calendarLessonsRows($calendar);
+        $snapshot = $this->snapshotService()->build($calendar);
 
-        if ($lessonRows === []) {
+        if (($snapshot['lessons'] ?? []) === []) {
             $this->notification()->warning(
                 'Sin lessons para respaldar',
                 'El calendario seleccionado no tiene lessons configuradas.',
@@ -3134,32 +3157,10 @@ class TimetableWizard extends Component
             return null;
         }
 
-        $backup = [
-            'format' => 'cfla-timetable-lessons-backup',
-            'version' => 1,
-            'scope' => 'calendar',
-            'exported_at' => now()->toIso8601String(),
-            'schema' => $this->timetableBackupSchema(),
-            'calendar' => [
-                'id' => (int) $calendar->id,
-                'name' => $calendar->name,
-                'lapso_id' => $calendar->lapso_id,
-                'lapso' => $calendar->lapso?->name,
-                'pescolar_id' => $calendar->pescolar_id,
-                'pestudio_id' => $calendar->pestudio_id,
-                'pestudio' => $calendar->pestudio?->name,
-                'period_minutes' => (int) $calendar->period_minutes,
-                'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
-            ],
-            'section' => null,
-            'lessons' => $lessonRows,
-        ];
+        $filename = 'snapshot-calendario-'.(int) $calendar->id.'-'.now()->format('Ymd_His').'.json';
 
-        $filename = 'respaldo-lessons-calendario-'.(int) $calendar->id
-            .'-completo-'.now()->format('Ymd_His').'.json';
-
-        return response()->streamDownload(function () use ($backup): void {
-            echo json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        return response()->streamDownload(function () use ($snapshot): void {
+            echo json_encode($snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         }, $filename, ['Content-Type' => 'application/json; charset=UTF-8']);
     }
 
@@ -3226,8 +3227,19 @@ class TimetableWizard extends Component
     }
 
     /**
+     * §12 — Al elegir el archivo se calcula el preview y se abre el modal de
+     * confirmación. El restore ya no aplica directo: primero se previsualiza.
+     */
+    public function updatedCalendarLessonsBackupFile(): void
+    {
+        $this->restoreCalendarLessonsBackup();
+    }
+
+    /**
      * Restaura la configuración de lessons de TODO el calendario desde el
-     * respaldo seleccionado en la barra superior.
+     * respaldo seleccionado en la barra superior. Enruta por formato (§10):
+     * un snapshot completo pasa por preview + confirmación; un respaldo legacy
+     * `cfla-timetable-lessons-backup` conserva el flujo aditivo.
      */
     public function restoreCalendarLessonsBackup(): void
     {
@@ -3404,8 +3416,8 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Aplica un respaldo JSON de lessons al calendario activo. Devuelve true
-     * cuando el archivo fue procesado correctamente, para limpiar el input.
+     * Valida el archivo subido y enruta el payload según su formato. Devuelve
+     * true cuando el archivo fue procesado correctamente, para limpiar el input.
      *
      * @param  \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null  $file
      */
@@ -3436,10 +3448,419 @@ class TimetableWizard extends Component
             return false;
         }
 
-        if (($payload['format'] ?? null) !== 'cfla-timetable-lessons-backup'
-            || (int) ($payload['version'] ?? 0) !== 1
-            || ! is_array($payload['lessons'] ?? null)
-        ) {
+        if (! is_array($payload)) {
+            $this->notification()->error('JSON inválido', 'El archivo no contiene un objeto JSON.');
+
+            return false;
+        }
+
+        return $this->routeBackupPayload($payload);
+    }
+
+    /**
+     * §10 — Compatibilidad: enruta un payload ya decodificado según su formato.
+     * Los snapshots completos entran al flujo de preview + confirmación
+     * (§9.2/§12); los respaldos legacy `cfla-timetable-lessons-backup`
+     * conservan el flujo aditivo.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function routeBackupPayload(array $payload): bool
+    {
+        $format = $payload['format'] ?? null;
+
+        if ($format === TimetableCalendarSnapshotService::FORMAT) {
+            return $this->routeSnapshotPayload($payload);
+        }
+
+        if ($format === TimetableCalendarSnapshotService::LEGACY_FORMAT) {
+            return $this->applyLegacyLessonsPayload($payload);
+        }
+
+        $this->notification()->error(
+            'Respaldo incompatible',
+            'El archivo no corresponde a un snapshot ni a un respaldo de lessons de CFlat.',
+        );
+
+        return false;
+    }
+
+    /**
+     * §9.1–§9.2 — Valida el snapshot, calcula el preview contra la base de
+     * datos (sin escribir nada) y abre el modal de confirmación. Devuelve true
+     * cuando el archivo fue aceptado, aunque la aplicación quede pendiente de
+     * confirmación.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function routeSnapshotPayload(array $payload): bool
+    {
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            $this->notification()->error('Calendario no encontrado', 'No se pudo localizar el calendario seleccionado.');
+
+            return false;
+        }
+
+        $service = $this->snapshotService();
+
+        try {
+            $service->verify($payload);
+        } catch (\InvalidArgumentException $exception) {
+            $this->notification()->error('Snapshot no válido', $exception->getMessage());
+
+            return false;
+        }
+
+        if (! $this->snapshotMatchesCalendar($calendar, $payload)) {
+            $this->notification()->error(
+                'Calendario incompatible',
+                'El snapshot pertenece a otro lapso o plan de estudio.',
+            );
+
+            return false;
+        }
+
+        try {
+            $preview = $service->preview($calendar, $payload);
+        } catch (\Throwable $exception) {
+            $this->notification()->error('No se pudo previsualizar el snapshot', $exception->getMessage());
+
+            return false;
+        }
+
+        $this->storePendingSnapshot($payload, $preview);
+        $this->snapshotPreview = $preview;
+        $this->confirmSnapshotRestore($calendar, $preview);
+
+        return true;
+    }
+
+    /** §9.1.5 — El snapshot debe pertenecer al lapso y plan del calendario activo. */
+    private function snapshotMatchesCalendar(TimetableCalendar $calendar, array $payload): bool
+    {
+        $backupCalendar = is_array($payload['calendar'] ?? null) ? $payload['calendar'] : [];
+
+        return (int) ($backupCalendar['lapso_id'] ?? 0) === (int) $calendar->lapso_id
+            && (int) ($backupCalendar['pestudio_id'] ?? 0) === (int) $calendar->pestudio_id;
+    }
+
+    /** §12 — Acción "Deshacer último restore" (auto-backup del último apply, §9.5). */
+    public function undoLastSnapshotRestore(): void
+    {
+        if (! $this->lastSnapshotAutoBackup) {
+            $this->notification()->warning('Nada que deshacer', 'No hay un auto-backup de esta sesión.');
+
+            return;
+        }
+
+        $disk = Storage::disk('local');
+
+        if (! $disk->exists($this->lastSnapshotAutoBackup)) {
+            $this->lastSnapshotAutoBackup = null;
+            $this->notification()->error(
+                'Auto-backup no disponible',
+                'El archivo de respaldo automático ya no está en el servidor.',
+            );
+
+            return;
+        }
+
+        try {
+            $payload = json_decode($disk->get($this->lastSnapshotAutoBackup), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $exception) {
+            $this->notification()->error('Auto-backup ilegible', 'El respaldo automático no se pudo leer.');
+
+            return;
+        }
+
+        if (! is_array($payload)) {
+            $this->notification()->error('Auto-backup ilegible', 'El respaldo automático no contiene un objeto JSON.');
+
+            return;
+        }
+
+        $this->routeSnapshotPayload($payload);
+    }
+
+    /**
+     * §9.3 — Aplica el snapshot pendiente. Revalida la concurrencia (D5),
+     * escribe el auto-backup y reemplaza el horario dentro de una transacción.
+     */
+    public function applySnapshotRestore(): void
+    {
+        $pending = $this->pendingSnapshot();
+
+        if ($pending === null) {
+            $this->notification()->error('Sin snapshot pendiente', 'Vuelve a seleccionar el archivo JSON.');
+
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            $this->cancelSnapshotRestore();
+            $this->notification()->error('Calendario no encontrado', 'No se pudo localizar el calendario seleccionado.');
+
+            return;
+        }
+
+        try {
+            $report = $this->snapshotService()->apply($calendar, $pending['payload'], $pending['preview']);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->notification()->error(
+                'Snapshot inválido',
+                (string) (collect($exception->errors())->flatten()->first() ?? 'Los datos del snapshot no son válidos.'),
+            );
+
+            return;
+        } catch (\Throwable $exception) {
+            // Incluye el aborto por concurrencia (D5) y el fallo del auto-backup.
+            $this->notification()->error('No se pudo aplicar el snapshot', $exception->getMessage());
+
+            return;
+        }
+
+        $this->forgetPendingSnapshot();
+        $this->snapshotPreview = null;
+        $this->calendarLessonsBackupFile = null;
+        $this->lastSnapshotAutoBackup = is_string($report['auto_backup'] ?? null) ? $report['auto_backup'] : null;
+
+        $fresh = $calendar->fresh() ?? $calendar;
+        $this->loadCalendar($fresh);
+        $this->loadLessons();
+        $this->loadPublishedPreview($fresh);
+
+        $this->notification()->success('Snapshot aplicado', $this->snapshotReportMessage($report));
+    }
+
+    /**
+     * §12 — Reabre el modal de confirmación del snapshot pendiente. Permite
+     * recuperar el preview guardado en sesión (§9.2) si el modal se cerró sin
+     * decidir, sin volver a subir el archivo.
+     */
+    public function reviewPendingSnapshot(): void
+    {
+        $pending = $this->pendingSnapshot();
+
+        if ($pending === null) {
+            $this->snapshotPreview = null;
+            $this->notification()->warning('Sin snapshot pendiente', 'Vuelve a seleccionar el archivo JSON.');
+
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if (! $calendar) {
+            $this->cancelSnapshotRestore();
+            $this->notification()->error('Calendario no encontrado', 'No se pudo localizar el calendario seleccionado.');
+
+            return;
+        }
+
+        $this->snapshotPreview = $pending['preview'];
+        $this->confirmSnapshotRestore($calendar, $pending['preview']);
+    }
+
+    /** §12 — Cancela el restore pendiente (acción "Cancelar" del modal). */
+    public function cancelSnapshotRestore(): void
+    {
+        $this->forgetPendingSnapshot();
+        $this->snapshotPreview = null;
+        $this->calendarLessonsBackupFile = null;
+    }
+
+    /**
+     * §12 / §9.2 — Modal de confirmación con el resumen del preview. WireUI
+     * inyecta la descripción como HTML (`innerHTML`), por eso el resumen se
+     * compone con etiquetas básicas, sin clases de Tailwind que no estén
+     * garantizadas en el CSS compilado.
+     *
+     * @param  array<string, mixed>  $preview
+     */
+    private function confirmSnapshotRestore(TimetableCalendar $calendar, array $preview): void
+    {
+        $this->dialog()->confirm([
+            'title' => '¿Aplicar snapshot al calendario?',
+            'description' => $this->snapshotPreviewSummary($calendar, $preview),
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Aplicar snapshot',
+                'method' => 'applySnapshotRestore',
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'method' => 'cancelSnapshotRestore',
+                'color' => 'secondary',
+            ],
+        ]);
+    }
+
+    /**
+     * §12 — Resumen legible del preview para el modal.
+     *
+     * @param  array<string, mixed>  $preview
+     */
+    private function snapshotPreviewSummary(TimetableCalendar $calendar, array $preview): string
+    {
+        $lessons = is_array($preview['lessons'] ?? null) ? $preview['lessons'] : [];
+        $slots = is_array($preview['slots'] ?? null) ? $preview['slots'] : [];
+        $availability = is_array($preview['availability'] ?? null) ? $preview['availability'] : [];
+        $lockChanges = is_array($preview['section_locks']['changes'] ?? null) ? $preview['section_locks']['changes'] : [];
+        $collisions = is_array($preview['collisions'] ?? null) ? $preview['collisions'] : [];
+        $warnings = is_array($preview['warnings'] ?? null) ? $preview['warnings'] : [];
+
+        $mode = ($preview['mode'] ?? 'additive') === 'replace'
+            ? 'reemplazo total del horario'
+            : 'aditivo (sólo lessons)';
+
+        $lines = [];
+        $lines[] = '<strong>'.e((string) $calendar->name).'</strong> · '.$mode.'.';
+
+        $lines[] = 'Lessons: '.(int) ($lessons['snapshot'] ?? 0).' en el snapshot, '
+            .(int) ($lessons['resolvable'] ?? 0).' vinculables, '
+            .(int) ($lessons['unresolvable'] ?? 0).' sin vincular, '
+            .(int) ($lessons['lost'] ?? 0).' se perderán.';
+
+        if (($slots['present'] ?? false) === true) {
+            $line = 'Slots: '.(int) ($slots['current'] ?? 0).' actuales → '.(int) ($slots['insertable'] ?? 0).' del snapshot';
+            if ((int) ($slots['deduplicated'] ?? 0) > 0) {
+                $line .= ', '.(int) $slots['deduplicated'].' deduplicados';
+            }
+            if ((int) ($slots['skipped'] ?? 0) > 0) {
+                $line .= ', '.(int) $slots['skipped'].' descartados';
+            }
+            $lines[] = $line.'.';
+        } else {
+            $lines[] = 'Slots: no incluidos en el snapshot; se conservan los '.(int) ($slots['current'] ?? 0).' actuales.';
+        }
+
+        $lines[] = 'Disponibilidad docente: '.(int) ($availability['current'] ?? 0).' → '.(int) ($availability['snapshot'] ?? 0).'.';
+
+        if ($lockChanges !== []) {
+            $lines[] = 'Bloqueos de sección: '.count($lockChanges).' cambio(s).';
+        }
+
+        if ((int) ($slots['periods_to_create'] ?? 0) > 0) {
+            $lines[] = 'Se crearán '.(int) $slots['periods_to_create'].' período(s) faltantes.';
+        }
+
+        if ($collisions !== []) {
+            $lines[] = '<strong>'.count($collisions).' colisión(es) de unicidad</strong>: se insertan las primeras y se descartan las repetidas.';
+        }
+
+        if ($warnings !== []) {
+            $lines[] = '<strong>'.count($warnings).' advertencia(s)</strong>: '
+                .e(implode(' · ', array_map(fn ($warning) => $this->snapshotWarningText($warning), $warnings))).'.';
+        }
+
+        $lines[] = 'Antes de aplicar se escribe un snapshot del estado actual para poder deshacer.';
+
+        if (($calendar->status ?? null) === 'active') {
+            $lines[] = '<strong>Este calendario está publicado (activo).</strong> El snapshot reemplaza el horario vigente: se eliminan los slots y lessons actuales y se reinsertan los del archivo.';
+        } else {
+            $lines[] = 'Se eliminan los slots y lessons actuales del calendario y se reinsertan los del archivo.';
+        }
+
+        return implode('<br>', $lines);
+    }
+
+    /** Texto legible de una advertencia del preview (§9.2). */
+    private function snapshotWarningText(mixed $warning): string
+    {
+        if (is_string($warning)) {
+            return $warning;
+        }
+
+        if (is_array($warning)) {
+            return (string) ($warning['message'] ?? $warning['type'] ?? json_encode($warning));
+        }
+
+        return (string) $warning;
+    }
+
+    /** §9.3 — Mensaje de éxito tras aplicar el snapshot. */
+    private function snapshotReportMessage(array $report): string
+    {
+        $parts = [
+            (int) ($report['lessons'] ?? 0).' lesson(s)',
+            (int) ($report['slots'] ?? 0).' slot(s)',
+        ];
+
+        if ((int) ($report['slots_skipped'] ?? 0) > 0) {
+            $parts[] = (int) $report['slots_skipped'].' slot(s) descartado(s)';
+        }
+
+        if ((int) ($report['collisions_resolved'] ?? 0) > 0) {
+            $parts[] = (int) $report['collisions_resolved'].' colisión(es) resuelta(s)';
+        }
+
+        if ((int) ($report['periods_created'] ?? 0) > 0) {
+            $parts[] = (int) $report['periods_created'].' período(s) creado(s)';
+        }
+
+        $message = implode(', ', $parts).' escritos.';
+
+        return is_string($report['auto_backup'] ?? null)
+            ? $message.' Auto-backup disponible para deshacer.'
+            : $message;
+    }
+
+    /** §9.2 — Guarda el payload validado y su preview en la sesión, por calendario. */
+    private function storePendingSnapshot(array $payload, array $preview): void
+    {
+        session()->put($this->pendingSnapshotKey(), [
+            'payload' => $payload,
+            'preview' => $preview,
+        ]);
+    }
+
+    /**
+     * @return array{payload: array<string, mixed>, preview: array<string, mixed>}|null
+     */
+    private function pendingSnapshot(): ?array
+    {
+        $entry = session()->get($this->pendingSnapshotKey());
+
+        if (! is_array($entry) || ! is_array($entry['payload'] ?? null)) {
+            return null;
+        }
+
+        return [
+            'payload' => $entry['payload'],
+            'preview' => is_array($entry['preview'] ?? null) ? $entry['preview'] : [],
+        ];
+    }
+
+    private function forgetPendingSnapshot(): void
+    {
+        session()->forget($this->pendingSnapshotKey());
+    }
+
+    private function pendingSnapshotKey(): string
+    {
+        return self::SNAPSHOT_SESSION_KEY.'.'.(int) $this->calendarId;
+    }
+
+    private function snapshotService(): TimetableCalendarSnapshotService
+    {
+        return app(TimetableCalendarSnapshotService::class);
+    }
+
+    /**
+     * §10 — Respaldo legacy `cfla-timetable-lessons-backup`: aplica sólo la
+     * configuración de lessons de forma aditiva, sin tocar slots ni
+     * disponibilidad (comportamiento previo al snapshot).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function applyLegacyLessonsPayload(array $payload): bool
+    {
+        if ((int) ($payload['version'] ?? 0) !== 1 || ! is_array($payload['lessons'] ?? null)) {
             $this->notification()->error('Respaldo incompatible', 'El archivo no corresponde a un respaldo de lessons de CFlat.');
 
             return false;

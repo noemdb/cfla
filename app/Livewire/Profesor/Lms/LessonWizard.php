@@ -6151,7 +6151,8 @@ PROMPT;
             });
         }
 
-        $activities = $query->orderBy('finicial', 'desc')->paginate(12);
+        // Orden cronológico según la fecha de inicio de la actividad (Activity.finicial)
+        $activities = $query->orderBy('finicial', 'asc')->paginate(12);
 
         // Listas para filtros
         $listLapso = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');

@@ -7,7 +7,7 @@
 
                 {{-- Asignatura (sortable) --}}
                 <th class="px-2 py-2.5 text-left">
-                    <a href="{{ route('app.profesors.activities.index', array_merge(request()->query(), ['sort' => 'asignaturas.name', 'direction' => $sort === 'asignaturas.name' && $direction === 'asc' ? 'desc' : 'asc'])) }}"
+                    <button type="button" wire:click="sortBy('asignaturas.name')"
                         class="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">
                         Asignatura
                         @if($sort === 'asignaturas.name')
@@ -15,12 +15,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                             </svg>
                         @endif
-                    </a>
+                    </button>
                 </th>
 
                 {{-- Grado / Sección (sortable by grado) --}}
                 <th class="px-2 py-2.5 text-left">
-                    <a href="{{ route('app.profesors.activities.index', array_merge(request()->query(), ['sort' => 'grados.name', 'direction' => $sort === 'grados.name' && $direction === 'asc' ? 'desc' : 'asc'])) }}"
+                    <button type="button" wire:click="sortBy('grados.name')"
                         class="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">
                         Grado / Sección
                         @if($sort === 'grados.name')
@@ -28,20 +28,21 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                             </svg>
                         @endif
-                    </a>
+                    </button>
                 </th>
 
-                {{-- Fechas (sortable by finicial de lapsos) --}}
+                {{-- Fechas (sortable por fecha de inicio de la primera actividad) --}}
                 <th class="px-2 py-2.5 text-left">
-                    <a href="{{ route('app.profesors.activities.index', array_merge(request()->query(), ['sort' => 'lapsos.finicial', 'direction' => $sort === 'lapsos.finicial' && $direction === 'asc' ? 'desc' : 'asc'])) }}"
-                        class="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">
+                    <button type="button" wire:click="sortBy('activities.finicial')"
+                        class="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors"
+                        title="Ordenar por fecha de inicio de la primera actividad">
                         Fechas
-                        @if($sort === 'lapsos.finicial')
+                        @if($sort === 'activities.finicial')
                             <svg class="w-3 h-3 {{ $direction === 'asc' ? 'text-emerald-400' : 'text-emerald-400 rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                             </svg>
                         @endif
-                    </a>
+                    </button>
                 </th>
 
                 {{-- Actividades --}}

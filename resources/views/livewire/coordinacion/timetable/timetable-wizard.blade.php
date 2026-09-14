@@ -139,29 +139,31 @@
                     wire:loading.class="opacity-50 cursor-not-allowed"
                     wire:target="downloadCalendarLessonsBackup"
                     {{ filled($calendarId) ? '' : 'disabled' }}
-                    title="Descargar respaldo JSON de todas las lessons del calendario seleccionado"
+                    title="Snapshot JSON: snapshot completo del calendario (configuración + horario), reemplazable desde el restore"
                     class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
-                    <span wire:loading.remove wire:target="downloadCalendarLessonsBackup">Backup JSON</span>
+                    <span wire:loading.remove wire:target="downloadCalendarLessonsBackup">Snapshot JSON</span>
                     <span wire:loading wire:target="downloadCalendarLessonsBackup">Preparando…</span>
                 </button>
 
-                <label title="Seleccionar respaldo JSON de lessons del calendario completo"
+                <label title="Elegir un snapshot o respaldo JSON: se previsualiza el diff antes de aplicar nada"
                     class="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
-                    <span>Elegir restore</span>
+                    <span wire:loading.remove wire:target="calendarLessonsBackupFile">Elegir snapshot</span>
+                    <span wire:loading wire:target="calendarLessonsBackupFile">Leyendo…</span>
                     <input type="file" wire:model="calendarLessonsBackupFile" accept="application/json,.json" class="sr-only">
                 </label>
 
-                <button type="button"
-                    wire:click="restoreCalendarLessonsBackup"
-                    wire:loading.attr="disabled"
-                    wire:loading.class="opacity-50 cursor-not-allowed"
-                    wire:target="restoreCalendarLessonsBackup,calendarLessonsBackupFile"
-                    {{ filled($calendarId) ? '' : 'disabled' }}
-                    title="Restaurar la configuración de lessons del calendario desde el JSON seleccionado"
-                    class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
-                    <span wire:loading.remove wire:target="restoreCalendarLessonsBackup">Restore</span>
-                    <span wire:loading wire:target="restoreCalendarLessonsBackup">Restaurando…</span>
-                </button>
+                @if ($lastSnapshotAutoBackup)
+                    <button type="button"
+                        wire:click="undoLastSnapshotRestore"
+                        wire:loading.attr="disabled"
+                        wire:loading.class="opacity-50 cursor-not-allowed"
+                        wire:target="undoLastSnapshotRestore"
+                        title="Volver al estado previo al último snapshot aplicado, usando el auto-backup escrito antes de reemplazar"
+                        class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                        <span wire:loading.remove wire:target="undoLastSnapshotRestore">Deshacer último restore</span>
+                        <span wire:loading wire:target="undoLastSnapshotRestore">Reabriendo…</span>
+                    </button>
+                @endif
                 <button type="button"
                     wire:click="confirmClearCalendarLessonAssignments"
                     disabled
@@ -173,6 +175,43 @@
                     <span wire:loading.remove wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiar slots</span>
                     <span wire:loading wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiando…</span>
                 </button>
+
+                @if ($snapshotPreview)
+                    @php
+                        $previewMode = ($snapshotPreview['mode'] ?? 'additive') === 'replace' ? 'replace' : 'additive';
+                        $previewLessons = (int) ($snapshotPreview['lessons']['resolvable'] ?? 0);
+                        $previewSlots = (int) ($snapshotPreview['slots']['insertable'] ?? 0);
+                        $previewSkipped = (int) ($snapshotPreview['slots']['skipped'] ?? 0);
+                        $previewCollisions = count($snapshotPreview['collisions'] ?? []);
+                    @endphp
+                    <div class="mt-3 flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-amber-300/50 bg-amber-50/70 px-3 py-2 text-[11px] text-amber-900 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+                        <span>
+                            Snapshot previsualizado ·
+                            @if ($previewMode === 'replace')
+                                reemplaza con <strong>{{ $previewSlots }}</strong> slot(s) y
+                            @else
+                                agrega
+                            @endif
+                            <strong>{{ $previewLessons }}</strong> lesson(s)
+                            @if ($previewSkipped > 0) · {{ $previewSkipped }} descartado(s) @endif
+                            @if ($previewCollisions > 0) · {{ $previewCollisions }} colisión(es) @endif
+                        </span>
+                        <button type="button"
+                            wire:click="reviewPendingSnapshot"
+                            wire:loading.attr="disabled"
+                            wire:target="reviewPendingSnapshot,applySnapshotRestore"
+                            class="inline-flex items-center gap-1.5 rounded-md bg-amber-600/15 px-2.5 py-1 font-bold text-amber-800 transition-colors hover:bg-amber-600/25 dark:text-amber-200">
+                            Revisar y aplicar
+                        </button>
+                        <button type="button"
+                            wire:click="cancelSnapshotRestore"
+                            wire:loading.attr="disabled"
+                            wire:target="cancelSnapshotRestore"
+                            class="inline-flex items-center gap-1.5 rounded-md bg-white/40 px-2.5 py-1 font-bold text-amber-800 transition-colors hover:bg-white/60 dark:bg-white/5 dark:text-amber-200 dark:hover:bg-white/10">
+                            Descartar
+                        </button>
+                    </div>
+                @endif
                 
                 {{-- <button wire:click="openEditCalendarForm"
                     {{ filled($calendarId) ? '' : 'disabled' }}

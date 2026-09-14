@@ -36,8 +36,10 @@ class PevaluacionList extends Component
 
     public $filter_observations = false;
 
-    public $sort = 'pevaluacions.created_at';
-    public $direction = 'desc';
+    // Orden cronológico por defecto según la fecha de inicio de la primera
+    // actividad (Activity.finicial) de cada área de formación.
+    public $sort = 'activities.finicial';
+    public $direction = 'asc';
 
     public $paginate = 15;
 
@@ -91,6 +93,29 @@ class PevaluacionList extends Component
         $this->resetPage();
     }
 
+    /**
+     * Cambia el ordenamiento del listado.
+     *
+     * Acepta los campos expuestos en los encabezados de la tabla. Al ordenar
+     * por `activities.finicial` se usa la fecha de inicio de la primera
+     * actividad del área de formación (orden cronológico).
+     */
+    public function sortBy($field)
+    {
+        if (! in_array($field, ['asignaturas.name', 'grados.name', 'lapsos.name', 'lapsos.finicial', 'activities.finicial'], true)) {
+            return;
+        }
+
+        if ($this->sort === $field) {
+            $this->direction = $this->direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sort = $field;
+            $this->direction = 'asc';
+        }
+
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
         $this->reset(['pestudio_id', 'grado_id', 'seccion_id', 'status_activities', 'filter_status', 'filter_observations']);
@@ -104,9 +129,9 @@ class PevaluacionList extends Component
         // ── Pevaluacions query ──
         $allowedSorts = [
             'asignaturas.name', 'grados.name', 'lapsos.name',
-            'lapsos.finicial', 'pevaluacions.created_at',
+            'lapsos.finicial', 'pevaluacions.created_at', 'activities.finicial',
         ];
-        $sort = in_array($this->sort, $allowedSorts) ? $this->sort : 'pevaluacions.created_at';
+        $sort = in_array($this->sort, $allowedSorts) ? $this->sort : 'activities.finicial';
         $direction = $this->direction === 'asc' ? 'asc' : 'desc';
 
         $pevaluacionsQuery = Pevaluacion::select('pevaluacions.*')
@@ -159,10 +184,20 @@ class PevaluacionList extends Component
                 ->where('pevaluacions.observations', '!=', '');
         }
 
+        // Orden cronológico por la fecha de inicio de la primera actividad
+        // (Activity.finicial). Las áreas sin actividades quedan al final.
+        if ($sort === 'activities.finicial') {
+            $pevaluacionsQuery->withMin('activities as first_activity_finicial', 'finicial')
+                ->orderByRaw('first_activity_finicial IS NULL')
+                ->orderBy('first_activity_finicial', $direction);
+        } else {
+            $pevaluacionsQuery->orderBy($sort, $direction);
+        }
+
         $pevaluacions = $pevaluacionsQuery->with([
             'activities.achievements', 'pensum.asignatura',
             'pensum.grado.pestudio', 'seccion', 'lapso', 'grupoEstable',
-        ])->orderBy($sort, $direction)->paginate($this->paginate);
+        ])->paginate($this->paginate);
 
         // ── Filter lists ──
         $list_pestudio = Pestudio::where('planning_module', true)
