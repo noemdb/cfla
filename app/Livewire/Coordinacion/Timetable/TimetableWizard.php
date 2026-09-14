@@ -3016,6 +3016,88 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Documentación técnica del contrato de respaldo (legible por un agente IA).
+     * Se embebe como clave `schema` en cada respaldo generado. Preciso, sin
+     * prosa: cada campo define su tipo, su uso en restore y su semántica.
+     */
+    private function timetableBackupSchema(): array
+    {
+        return [
+            'format' => [
+                'type' => 'string',
+                'enum' => ['cfla-timetable-calendars-backup', 'cfla-timetable-lessons-backup'],
+                'desc' => 'Contrato de respaldo. Restore valida igualdad exacta; cualquier otro valor se rechaza.',
+            ],
+            'version' => [
+                'type' => 'int',
+                'current' => 1,
+                'desc' => 'Version del schema. Incrementar ante cambios incompatibles (breaking). Restore exige version===1.',
+            ],
+            'exported_at' => [
+                'type' => 'string',
+                'format' => 'ISO8601',
+                'desc' => 'Fecha de exportacion. Solo informativa; no usada en restore.',
+            ],
+            'scope' => [
+                'type' => 'string',
+                'enum' => ['calendar'],
+                'desc' => 'Presente solo en respaldo de UN calendario (cfla-timetable-lessons-backup). Ausente en el respaldo de todos.',
+            ],
+            'calendar' => [
+                'type' => 'object',
+                'desc' => 'Identidad del calendario exportado (respaldo unico). Restore busca el destino por lapso_id+pestudio_id, NO por id (los ids no son portables entre entornos).',
+                'fields' => [
+                    'id' => 'int. PK local. Solo informativo; no se usa para emparejar en restore.',
+                    'name' => 'string. Etiqueta.',
+                    'lapso_id' => 'int. FK lapso. Parte de la clave de emparejamiento.',
+                    'lapso' => 'string. Etiqueta.',
+                    'pescolar_id' => 'int. FK periodo escolar.',
+                    'pestudio_id' => 'int. FK pestudio. Parte de la clave de emparejamiento.',
+                    'pestudio' => 'string. Etiqueta.',
+                    'period_minutes' => 'int. Duracion del slot en minutos.',
+                    'max_subjects_per_period' => 'int. Maximo de asignaturas por slot.',
+                ],
+            ],
+            'calendars' => [
+                'type' => 'array',
+                'desc' => 'Solo respaldo de todos (cfla-timetable-calendars-backup). Cada entrada es {calendar, lessons}. Restore itera entradas, empareja por lapso_id+pestudio_id y omite las que no coinciden.',
+            ],
+            'section' => [
+                'type' => 'null|object',
+                'desc' => 'Alcance por seccion (respaldo parcial). null en respaldo de calendario completo.',
+            ],
+            'lessons' => [
+                'type' => 'array',
+                'desc' => 'Filas de leccion. Cada fila es una unidad de configuracion que se aplica a una pevaluacion en restore.',
+            ],
+            'lesson_row' => [
+                'pevaluacion_id' => 'int. PK local de pevaluaciones. Solo informativo; en restore se re-enlaza por academic_identity.',
+                'academic_identity' => [
+                    'type' => 'object',
+                    'desc' => 'FKs usadas para re-vincular la leccion a su pevaluacion en restore. Todas deben resolverse; si alguna falla la fila se omite.',
+                    'fields' => ['lapso_id', 'pestudio_id', 'grado_id', 'seccion_id', 'pensum_id', 'profesor_id', 'grupo_estable_id', 'asignatura_id'],
+                ],
+                'labels' => 'object. Etiquetas de pestudio/grado/seccion/asignatura/profesor/lapso. Solo informativas; nunca se usan para emparejar.',
+                'configuration' => [
+                    'shift_id' => 'int. Bloque de turno/dia al que se asigna la leccion.',
+                    'weekly_blocks_t' => 'int>=0. Bloques teoricos semanales.',
+                    'weekly_blocks_p' => 'int>=0. Bloques practicos semanales.',
+                    'room_type_required' => 'string|null. Restriccion de tipo de aula (null = cualquiera).',
+                    'is_half_group' => 'bool. true = leccion partida en medio-grupo: los bloques se aplican por medio-grupo; el solver la trata como dos unidades asignables independientes (duplica la demanda cuando se programan ambas mitades).',
+                    'allow_shared_teacher' => 'bool. true = el profesor puede solaparse en el tiempo entre varias lecciones (modo docente compartido). Se escribe en la leccion al restaurar.',
+                    'priority' => 'int>=0. Prioridad de programacion (mayor se asigna antes).',
+                    'locked' => 'bool. Bloqueo a nivel de leccion: solver/UI mantienen la leccion fija. Distinto del bloqueo a nivel de seccion seccions.timetable_locked.',
+                ],
+            ],
+            'seccion_timetable_locked' => [
+                'location' => 'seccions.timetable_locked (columna de BD, NO esta en este JSON)',
+                'type' => 'bool',
+                'desc' => 'Congela el horario completo de la seccion. Gatea la regeneracion del solver y la edicion manual de slots de esa seccion. Los tabs de grado/pestudio muestran un candado cuando TODAS las secciones activas de ese alcance estan bloqueadas. Es mas grueso que el locked por leccion.',
+            ],
+        ];
+    }
+
+    /**
      * Descarga un respaldo JSON con TODAS las lessons del calendario
      * seleccionado (todas las secciones). Mismo formato que el respaldo por
      * sección, para reutilizar el flujo de restore.
@@ -3057,6 +3139,7 @@ class TimetableWizard extends Component
             'version' => 1,
             'scope' => 'calendar',
             'exported_at' => now()->toIso8601String(),
+            'schema' => $this->timetableBackupSchema(),
             'calendar' => [
                 'id' => (int) $calendar->id,
                 'name' => $calendar->name,
@@ -3120,6 +3203,7 @@ class TimetableWizard extends Component
             'format' => 'cfla-timetable-calendars-backup',
             'version' => 1,
             'exported_at' => now()->toIso8601String(),
+            'schema' => $this->timetableBackupSchema(),
             'calendars' => $entries,
         ];
 
