@@ -6151,8 +6151,13 @@ PROMPT;
             });
         }
 
-        // Orden cronológico según la fecha de inicio de la actividad (Activity.finicial)
-        $activities = $query->orderBy('finicial', 'asc')->paginate(12);
+        // Orden cronológico según la fecha de publicación (lmsPublication.publish_at).
+        // Las actividades sin publicación quedan al final del listado.
+        $publishAtSubquery = '(SELECT publish_at FROM lms_activity_publications WHERE lms_activity_publications.activity_id = activities.id LIMIT 1)';
+        $activities = $query
+            ->orderByRaw("{$publishAtSubquery} IS NULL ASC")
+            ->orderByRaw("{$publishAtSubquery} ASC")
+            ->paginate(12);
 
         // Listas para filtros
         $listLapso = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
