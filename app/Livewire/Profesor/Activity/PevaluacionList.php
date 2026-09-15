@@ -9,6 +9,7 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
@@ -120,6 +121,16 @@ class PevaluacionList extends Component
     {
         $this->reset(['pestudio_id', 'grado_id', 'seccion_id', 'status_activities', 'filter_status', 'filter_observations']);
         $this->resetPage();
+    }
+
+    /**
+     * Tras importar actividades desde el wizard, refresca el listado para
+     * actualizar los conteos de actividades/indicadores.
+     */
+    #[On('activity-imported')]
+    public function refreshAfterImport(): void
+    {
+        // Sin lógica adicional: el re-render del componente actualiza los conteos.
     }
 
     public function render()

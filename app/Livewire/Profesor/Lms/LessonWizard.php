@@ -6151,12 +6151,12 @@ PROMPT;
             });
         }
 
-        // Orden cronológico según la fecha de publicación (lmsPublication.publish_at).
-        // Las actividades sin publicación quedan al final del listado.
-        $publishAtSubquery = '(SELECT publish_at FROM lms_activity_publications WHERE lms_activity_publications.activity_id = activities.id LIMIT 1)';
+        // Orden cronológico según la fecha inicial de la actividad (activities.finicial).
+        // Las actividades sin fecha inicial quedan al final del listado.
         $activities = $query
-            ->orderByRaw("{$publishAtSubquery} IS NULL ASC")
-            ->orderByRaw("{$publishAtSubquery} ASC")
+            ->orderByRaw('activities.finicial IS NULL ASC')
+            ->orderBy('activities.finicial', 'asc')
+            ->orderBy('activities.id', 'asc')
             ->paginate(12);
 
         // Listas para filtros

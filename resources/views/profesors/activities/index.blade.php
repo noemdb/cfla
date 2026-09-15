@@ -36,6 +36,7 @@
         
     </div>
     @livewire('profesor.activity.competencias-dialog')
+    @livewire('profesor.activity.activity-import-wizard')
 
     {{-- Main card --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
