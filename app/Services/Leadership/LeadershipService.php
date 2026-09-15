@@ -156,8 +156,12 @@ class LeadershipService
      */
     public function getAssignedProfesores(): Collection
     {
+        // Solo profesores activos (status_active = 'true'); omite desactivados.
         if ($this->isUnrestricted()) {
-            return Profesor::query()->distinct()->get();
+            return Profesor::query()
+                ->where('status_active', 'true')
+                ->distinct()
+                ->get();
         }
 
         $asignaturaIds = $this->getAssignedAsignaturaIds();
@@ -165,7 +169,10 @@ class LeadershipService
 
         return Profesor::whereHas('pevaluacions.pensum', function ($q) use ($asignaturaIds) {
             $q->whereIn('asignatura_id', $asignaturaIds);
-        })->distinct()->get();
+        })
+            ->where('status_active', 'true')
+            ->distinct()
+            ->get();
     }
 
     /**

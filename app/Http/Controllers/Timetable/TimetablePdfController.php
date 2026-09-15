@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
@@ -382,6 +383,37 @@ class TimetablePdfController extends Controller
     {
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $pestudio = Pestudio::query()->findOrFail($pestudioId);
+
+        $schedules = $this->buildPestudioSchedules($calendar, $pestudio);
+
+        $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
+        $pdf = Pdf::loadView('pdfs.timetable.preview-pestudio', [
+            'calendar' => $calendar,
+            'pestudio' => $pestudio,
+            'gradeSchedules' => $schedules['gradeSchedules'],
+            'institucion' => $institucion,
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'isPublishedSchedule' => $schedules['isPublishedSchedule'],
+        ]);
+        $pdf->setPaper('letter', 'landscape');
+
+        return $pdf->stream("horarios-{$pestudio->name}.pdf");
+    }
+
+    /**
+     * Horarios por grado/sección de un P.ESTUDIO para un calendario (compartido
+     * por el PDF de un P.Estudio y el consolidado de todos los P.Estudios).
+     *
+     * @return array{isPublishedSchedule: bool, gradeSchedules: \Illuminate\Support\Collection<int, array>}
+     */
+    private function buildPestudioSchedules(TimetableCalendar $calendar, Pestudio $pestudio): array
+    {
+        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+
+        if (! $calendar->preview_payload && ! $isPublishedSchedule) {
+            abort(404, 'No hay vista previa para este calendario.');
+        }
+
         $grades = Grado::query()
             ->where('pestudio_id', $pestudio->id)
             ->where('status_active', 'true')
@@ -389,11 +421,6 @@ class TimetablePdfController extends Controller
             ->orderBy('order')
             ->orderBy('name')
             ->get();
-        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
-
-        if (! $calendar->preview_payload && ! $isPublishedSchedule) {
-            abort(404, 'No hay vista previa para este calendario.');
-        }
 
         $assignment = collect($calendar->preview_payload['assignment'] ?? []);
         $periods = TimetablePeriod::query()
@@ -491,18 +518,134 @@ class TimetablePdfController extends Controller
             return ['grado' => $grado, 'sectionSchedules' => $sectionSchedules];
         })->filter(fn (array $schedule): bool => $schedule['sectionSchedules'] !== [])->values();
 
-        $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
-        $pdf = Pdf::loadView('pdfs.timetable.preview-pestudio', [
-            'calendar' => $calendar,
-            'pestudio' => $pestudio,
+        return [
+            'isPublishedSchedule' => $isPublishedSchedule,
             'gradeSchedules' => $gradeSchedules,
+        ];
+    }
+
+    /**
+     * PDF consolidado de TODOS los P.Estudios con calendario activo del lapso
+     * vigente (un bloque por P.Estudio).
+     */
+    public function previewAllPestudios(Request $request)
+    {
+        $lapso = Lapso::current();
+        if (! $lapso) {
+            abort(404, 'No hay lapso vigente.');
+        }
+
+        $calendars = TimetableCalendar::query()
+            ->forLapso($lapso->id)
+            ->active()
+            ->with('pestudio')
+            ->orderBy('pestudio_id')
+            ->get();
+
+        $pestudiosData = $calendars->map(function (TimetableCalendar $calendar): ?array {
+            $pestudio = $calendar->pestudio;
+            if (! $pestudio) {
+                return null;
+            }
+
+            if (! $calendar->preview_payload && $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
+                return null;
+            }
+
+            $schedules = $this->buildPestudioSchedules($calendar, $pestudio);
+            if ($schedules['gradeSchedules']->isEmpty()) {
+                return null;
+            }
+
+            return [
+                'calendar' => $calendar,
+                'pestudio' => $pestudio,
+                'isPublishedSchedule' => $schedules['isPublishedSchedule'],
+                'gradeSchedules' => $schedules['gradeSchedules'],
+            ];
+        })->filter()->values();
+
+        if ($pestudiosData->isEmpty()) {
+            abort(404, 'No hay horarios disponibles para los P.Estudios del lapso vigente.');
+        }
+
+        $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
+        $pdf = Pdf::loadView('pdfs.timetable.preview-all-pestudios', [
+            'lapso' => $lapso,
+            'pestudiosData' => $pestudiosData,
             'institucion' => $institucion,
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
-            'isPublishedSchedule' => $isPublishedSchedule,
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("horarios-{$pestudio->name}.pdf");
+        return $pdf->stream('horarios-todos-pestudios.pdf');
+    }
+
+    /**
+     * PDF consolidado de los horarios de TODOS los profesores con asignaciones
+     * en los calendarios activos del lapso vigente.
+     */
+    public function allTeachers(Request $request)
+    {
+        $lapso = Lapso::current();
+        if (! $lapso) {
+            abort(404, 'No hay lapso vigente.');
+        }
+
+        $calendars = TimetableCalendar::query()
+            ->forLapso($lapso->id)
+            ->active()
+            ->with('pestudio')
+            ->orderBy('pestudio_id')
+            ->get();
+
+        $calendarsData = $calendars->map(function (TimetableCalendar $calendar): ?array {
+            $profesorIds = TimetableSlot::query()
+                ->where('calendar_id', $calendar->id)
+                ->whereNotNull('profesor_id')
+                ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
+                    $query->where('status_active', 'true')
+                        ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
+                })
+                ->distinct()
+                ->pluck('profesor_id');
+
+            $profesores = Profesor::query()
+                ->whereIn('id', $profesorIds)
+                ->orderBy('lastname')
+                ->orderBy('name')
+                ->get();
+
+            $schedules = $profesores->map(fn (Profesor $profesor): array => [
+                'profesor' => $profesor,
+                'shifts' => $this->viewService->teacherShiftSchedules($calendar, (int) $profesor->id),
+            ])->values();
+
+            if ($schedules->isEmpty()) {
+                return null;
+            }
+
+            return [
+                'calendar' => $calendar,
+                'pestudio' => $calendar->pestudio,
+                'schedules' => $schedules,
+            ];
+        })->filter()->values();
+
+        if ($calendarsData->isEmpty()) {
+            abort(404, 'No hay docentes con asignaciones en los calendarios activos del lapso vigente.');
+        }
+
+        $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
+        $pdf = Pdf::loadView('pdfs.timetable.teachers-all', [
+            'lapso' => $lapso,
+            'calendarsData' => $calendarsData,
+            'institucion' => $institucion,
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+        ]);
+        $pdf->setPaper('letter', 'portrait');
+
+        return $pdf->stream('horarios-docentes-todos.pdf');
     }
 
     /**
@@ -573,66 +716,60 @@ class TimetablePdfController extends Controller
             ->values();
         $rooms = TimetableRoom::query()->whereIn('id', $roomIds)->get()->keyBy('id');
 
-        $areaSchedules = $asignaturas->map(function (Asignatura $asignatura) use ($lessons, $assignment, $periods, $rooms): ?array {
-            $asignaturaLessons = $lessons->filter(
-                fn (TimetableLesson $lesson): bool => (int) $lesson->pevaluacion?->pensum?->asignatura_id === (int) $asignatura->id
-            );
-
-            if ($asignaturaLessons->isEmpty()) {
-                return null;
-            }
-
-            $assignmentsByPeriod = [];
-            foreach ($asignaturaLessons as $lesson) {
-                foreach ($assignment->get((string) $lesson->id, $assignment->get($lesson->id, [])) as $slot) {
-                    $period = $periods->get((int) ($slot['period_id'] ?? 0));
-                    if (! $period) {
-                        continue;
-                    }
-
-                    $pev = $lesson->pevaluacion;
-                    $assignmentsByPeriod[$period->id][] = [
-                        'seccion' => $pev?->seccion?->name ?? '',
-                        'grado' => $pev?->seccion?->grado?->name ?? '',
-                        'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
-                        'grupo' => $pev?->grupoEstable?->name,
-                        'room' => $rooms->get((int) ($slot['room_id'] ?? 0))?->name,
-                    ];
+        // Grilla única: todas las asignaturas del área en el mismo horario.
+        $assignmentsByPeriod = [];
+        foreach ($lessons as $lesson) {
+            foreach ($assignment->get((string) $lesson->id, $assignment->get($lesson->id, [])) as $slot) {
+                $period = $periods->get((int) ($slot['period_id'] ?? 0));
+                if (! $period) {
+                    continue;
                 }
-            }
 
-            $shiftGrids = $periods->groupBy('shift_id')->map(function ($shiftPeriods) use ($assignmentsByPeriod): array {
-                return [
-                    'shift' => $shiftPeriods->first()->shift,
-                    'rows' => $shiftPeriods->groupBy('order_in_day')->sortKeys()->map(function ($dayPeriods) use ($assignmentsByPeriod): array {
-                        $rowPeriod = $dayPeriods->first();
-
-                        return [
-                            'period' => $rowPeriod,
-                            'days' => collect(range(1, 5))->mapWithKeys(function (int $day) use ($dayPeriods, $assignmentsByPeriod): array {
-                                $period = $dayPeriods->firstWhere('day_of_week', $day);
-
-                                return [$day => [
-                                    'period' => $period,
-                                    'assignments' => $period ? ($assignmentsByPeriod[$period->id] ?? []) : [],
-                                ]];
-                            })->all(),
-                        ];
-                    })->values()->all(),
+                $pev = $lesson->pevaluacion;
+                $assignmentsByPeriod[$period->id][] = [
+                    'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
+                    'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
+                    'grado' => $pev?->seccion?->grado?->name ?? '',
+                    'seccion' => $pev?->seccion?->name ?? '',
+                    'grupo' => $pev?->grupoEstable?->name,
+                    'room' => $rooms->get((int) ($slot['room_id'] ?? 0))?->name,
                 ];
-            })->values()->all();
+            }
+        }
 
+        // Orden estable por asignatura dentro de cada celda.
+        foreach ($assignmentsByPeriod as $periodId => $cells) {
+            usort($cells, fn (array $a, array $b): int => strcasecmp($a['asignatura'], $b['asignatura']));
+            $assignmentsByPeriod[$periodId] = $cells;
+        }
+
+        $shiftGrids = $periods->groupBy('shift_id')->map(function ($shiftPeriods) use ($assignmentsByPeriod): array {
             return [
-                'asignatura' => $asignatura,
-                'shiftGrids' => $shiftGrids,
+                'shift' => $shiftPeriods->first()->shift,
+                'rows' => $shiftPeriods->groupBy('order_in_day')->sortKeys()->map(function ($dayPeriods) use ($assignmentsByPeriod): array {
+                    $rowPeriod = $dayPeriods->first();
+
+                    return [
+                        'period' => $rowPeriod,
+                        'days' => collect(range(1, 5))->mapWithKeys(function (int $day) use ($dayPeriods, $assignmentsByPeriod): array {
+                            $period = $dayPeriods->firstWhere('day_of_week', $day);
+
+                            return [$day => [
+                                'period' => $period,
+                                'assignments' => $period ? ($assignmentsByPeriod[$period->id] ?? []) : [],
+                            ]];
+                        })->all(),
+                    ];
+                })->values()->all(),
             ];
-        })->filter()->values();
+        })->values()->all();
 
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
         $pdf = Pdf::loadView('pdfs.timetable.preview-area', [
             'calendar' => $calendar,
             'area' => $area,
-            'areaSchedules' => $areaSchedules,
+            'shiftGrids' => $shiftGrids,
+            'asignaturasCount' => $asignaturas->count(),
             'institucion' => $institucion,
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
             'isPublishedSchedule' => $isPublishedSchedule,

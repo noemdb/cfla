@@ -113,6 +113,29 @@
                 <span wire:loading.remove wire:target="openAreaFormatModal">Formato por área</span>
                 <span wire:loading wire:target="openAreaFormatModal">Abriendo…</span>
             </button>
+            <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
+                target="_blank"
+                rel="noopener"
+                title="Generar un PDF consolidado con los horarios de todos los P.Estudios con calendario activo del lapso vigente"
+                aria-label="PDF todos los P.Estudios"
+                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l2-2h14l2 2"/>
+                </svg>
+                PDF todos P.Estudios
+            </a>
+            <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}"
+                target="_blank"
+                rel="noopener"
+                title="Generar un PDF con los horarios de todos los profesores de los calendarios activos del lapso vigente"
+                aria-label="PDF todos los profesores"
+                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z"/>
+                </svg>
+                PDF profesores
+            </a>
         </div>
     </div>
 

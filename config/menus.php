@@ -527,19 +527,21 @@ return [
     */
     'layouts' => [
         'admin' => [
-            'groups' => ['admin', 'coordinacion', 'planning', 'profesor', 'director'],
+            // 'seguimiento' se filtra por permiso is_leadership: solo aparece
+            // para usuarios con ese rol, aunque su layout primario sea admin.
+            'groups' => ['admin', 'coordinacion', 'planning', 'profesor', 'director', 'seguimiento'],
         ],
         'coordinacion' => [
-            'groups' => ['coordinacion', 'planning', 'coordinacion_profesor', 'admin', 'director'],
+            'groups' => ['coordinacion', 'planning', 'coordinacion_profesor', 'admin', 'director', 'seguimiento'],
         ],
         'director' => [
-            'groups' => ['director', 'coordinacion', 'admin', 'planning', 'profesor'],
+            'groups' => ['director', 'coordinacion', 'admin', 'planning', 'profesor', 'seguimiento'],
         ],
         'profesor' => [
-            'groups' => ['profesor'],
+            'groups' => ['profesor', 'seguimiento'],
         ],
         'planning' => [
-            'groups' => ['planning', 'profesor', 'coordinacion', 'admin', 'director'],
+            'groups' => ['planning', 'profesor', 'coordinacion', 'admin', 'director', 'seguimiento'],
         ],
         'leadership' => [
             'groups' => ['seguimiento', 'planning', 'coordinacion', 'director', 'admin', 'profesor'],

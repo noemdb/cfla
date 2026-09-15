@@ -29,8 +29,10 @@ class ProfesorList extends Component
         $service = app(CoordinacionScopeService::class, [
             'user' => Auth::user()
         ]);
+        // Solo profesores activos: comparación explícita contra el ENUM
+        // ('true'/'false'), robusta ante el orden del ENUM y el binding.
         $this->profesores = $service->scopeProfesores(Profesor::query())
-            ->where('status_active', true)
+            ->where('status_active', 'true')
             ->get();
     }
 
