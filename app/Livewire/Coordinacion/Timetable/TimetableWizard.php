@@ -5176,6 +5176,8 @@ class TimetableWizard extends Component
         if ($swapLessonId !== null && $swapSlotIndex !== false && $swapSlotIndex !== null) {
             $swapKey = (string) $swapLessonId;
             $swapSlots = $assignment[$swapKey] ?? $assignment[$swapLessonId] ?? [];
+            $swapOriginalSlots = $swapSlots;
+            $previousPreview = $this->preview;
 
             if ($this->blockIfCrossSectionCollision($lessonId, $newPeriodId)
                 || $this->blockIfCrossSectionCollision($swapLessonId, $fromPeriodId)) {
@@ -5189,7 +5191,20 @@ class TimetableWizard extends Component
             $this->preview['assignment'] = $assignment;
             $this->preview['manual_override'] = true;
             $this->preview['assignment_source'] = 'manual_preview';
-            $this->recordPreviewChange('swap_preview_lessons', $lessonId, $originalSlots, [
+
+            // Las dos lecciones pueden pertenecer a secciones distintas, así que
+            // el intercambio se persiste aquí y no depende de «Guardar sección».
+            if (! $this->persistPreviewLessonSlotsToDatabase([$lessonId, $swapLessonId])) {
+                $this->preview = $previousPreview;
+
+                return;
+            }
+
+            $this->recordPreviewChange('swap_preview_lessons', $lessonId, [
+                'lesson' => $originalSlots,
+                'swap_lesson_id' => $swapLessonId,
+                'swap_slots' => $swapOriginalSlots,
+            ], [
                 'lesson' => $slots,
                 'swap_lesson_id' => $swapLessonId,
                 'swap_slots' => $swapSlots,
@@ -6729,6 +6744,96 @@ PROMPT;
         return response()->streamDownload(function () use ($report): void {
             echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
         }, $filename, ['Content-Type' => 'application/json; charset=UTF-8']);
+    }
+
+    /**
+     * Persiste en la base de datos los slots de las lecciones indicadas a
+     * partir de la previsualización actual (delete + insert por lección).
+     *
+     * Se usa tras un intercambio manual del paso 5: las dos lecciones pueden
+     * pertenecer a secciones distintas, por lo que «Guardar sección» no las
+     * cubriría. Devuelve false si la persistencia falla.
+     *
+     * @param  list<int>  $lessonIds
+     */
+    private function persistPreviewLessonSlotsToDatabase(array $lessonIds): bool
+    {
+        if (! $this->calendarId || $lessonIds === []) {
+            return false;
+        }
+
+        $lessonIds = array_values(array_unique(array_map('intval', $lessonIds)));
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereIn('id', $lessonIds)
+            ->with('pevaluacion')
+            ->get()
+            ->keyBy('id');
+
+        $assignment = collect($this->preview['assignment'] ?? []);
+        $rows = [];
+
+        foreach ($lessonIds as $lessonId) {
+            $lesson = $lessons->get($lessonId);
+
+            if (! $lesson?->pevaluacion) {
+                continue;
+            }
+
+            $slots = collect($assignment->get((string) $lessonId, $assignment->get($lessonId, [])))
+                ->unique(fn (array $slot): int => (int) ($slot['period_id'] ?? 0));
+
+            foreach ($slots as $slot) {
+                $periodId = (int) ($slot['period_id'] ?? 0);
+
+                if ($periodId <= 0) {
+                    continue;
+                }
+
+                $rows[] = [
+                    'calendar_id' => (int) $this->calendarId,
+                    'lesson_id' => (int) $lessonId,
+                    'period_id' => $periodId,
+                    'profesor_id' => (int) $lesson->pevaluacion->profesor_id,
+                    'seccion_id' => (int) $lesson->pevaluacion->seccion_id,
+                    'grupo_estable_id' => $lesson->pevaluacion->grupo_estable_id
+                        ? (int) $lesson->pevaluacion->grupo_estable_id
+                        : null,
+                    'is_half_group' => (bool) $lesson->is_half_group,
+                    'allow_shared_teacher' => (bool) ($slot['allow_shared_teacher'] ?? $lesson->allow_shared_teacher),
+                    'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
+                    'locked' => (bool) ($slot['locked'] ?? $lesson->locked),
+                    'is_manual_override' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        try {
+            DB::transaction(function () use ($lessonIds, $rows): void {
+                TimetableSlot::query()
+                    ->where('calendar_id', $this->calendarId)
+                    ->whereIn('lesson_id', $lessonIds)
+                    ->delete();
+
+                if ($rows !== []) {
+                    TimetableSlot::query()->insertOrIgnore($rows);
+                }
+            });
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            $this->notification()->error(
+                'Intercambio no guardado',
+                'No se pudo persistir el intercambio en la base de datos; no se modificó ninguna asignación.',
+            );
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -8420,7 +8525,7 @@ PROMPT;
             ->where('calendar_id', $this->calendarId)
             ->where('user_id', auth()->id())
             ->where('metadata_json->preview', true)
-            ->whereNotIn('action', ['undo_move_preview_lesson', 'undo_remove_preview_lesson', 'undo_add_preview_lesson'])
+            ->whereNotIn('action', ['undo_move_preview_lesson', 'undo_remove_preview_lesson', 'undo_add_preview_lesson', 'undo_swap_preview_lessons'])
             ->latest('id')
             ->first();
 
@@ -8433,6 +8538,29 @@ PROMPT;
         $assignment = $this->preview['assignment'] ?? [];
         $lessonKey = (string) $change->lesson_id;
         $before = $change->before_json ?? [];
+
+        // Intercambio: restaurar las dos lecciones afectadas y persistir.
+        if (is_array($before) && array_key_exists('lesson', $before)) {
+            $swapLessonId = (int) ($before['swap_lesson_id'] ?? 0);
+
+            if ($swapLessonId > 0) {
+                $assignment[$lessonKey] = $before['lesson'] ?? [];
+                $assignment[(string) $swapLessonId] = $before['swap_slots'] ?? [];
+                $this->preview['assignment'] = $assignment;
+                $this->preview['manual_override'] = true;
+                $this->preview['assignment_source'] = 'manual_preview';
+
+                $this->persistPreviewLessonSlotsToDatabase([(int) $change->lesson_id, $swapLessonId]);
+                $this->recordPreviewChange('undo_'.$change->action, $change->lesson_id, $change->after_json ?? [], $before);
+                $this->notification()->success(
+                    'Cambio deshecho',
+                    'Se restauró el estado anterior de las lecciones intercambiadas.',
+                );
+
+                return;
+            }
+        }
+
         if ($before === []) {
             unset($assignment[$lessonKey]);
         } else {
