@@ -100,6 +100,7 @@
             </div>
             <select wire:model.live="chartRange"
                     class="bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-emerald-500 focus:outline-none">
+                <option value="24h">Últimas 24 horas</option>
                 <option value="7d">Últimos 7 días</option>
                 <option value="30d">Últimos 30 días</option>
                 <option value="3m">Últimos 3 meses</option>

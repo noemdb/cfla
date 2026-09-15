@@ -38,10 +38,10 @@ class IndexComponent extends Component
      * Rango del chart de actividad de la bitácora (dropdown).
      */
     #[Url(as: 'range', history: true)]
-    public string $chartRange = '7d';
+    public string $chartRange = '24h';
 
     /**
-     * Serie del chart: [['x' => 'Y-m-d', 'y' => n], …].
+     * Serie del chart: [['x' => 'Y-m-d' | 'Y-m-d H:00', 'y' => n], …].
      */
     public array $chartEntries = [];
 
@@ -79,22 +79,30 @@ class IndexComponent extends Component
     }
 
     /**
-     * Cuenta los registros de la bitácora agrupados por día para el rango
-     * seleccionado, aplicando los mismos filtros de la tabla (búsqueda,
-     * categoría, severidad y fechas). Alimenta el chart ApexCharts del panel.
+     * Cuenta los registros de la bitácora para el rango seleccionado, aplicando
+     * los mismos filtros de la tabla (búsqueda, categoría, severidad y fechas).
+     * Agrupa por hora en la ventana de 24h y por día en el resto. Alimenta el
+     * chart ApexCharts del panel.
      */
     private function loadChartData(): void
     {
+        $isHourly = $this->chartRange === '24h';
+
         $since = match ($this->chartRange) {
+            '24h' => now()->subDay(),
             '7d' => now()->subDays(7)->startOfDay(),
             '30d' => now()->subDays(30)->startOfDay(),
             '3m' => now()->subMonths(3)->startOfDay(),
             'all' => null,
-            default => now()->subDays(7)->startOfDay(),
+            default => now()->subDay(),
         };
 
+        $bucket = $isHourly
+            ? "DATE_FORMAT(created_at, '%Y-%m-%d %H:00')"
+            : 'DATE(created_at)';
+
         $query = $this->applyFilters(BinnacleEntry::query())
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->selectRaw($bucket.' as date, COUNT(*) as total')
             ->groupBy('date')
             ->orderBy('date');
 

@@ -290,12 +290,13 @@ class BinnacleFase2Test extends TestCase
         ]);
 
         $admin = User::factory()->create(['is_admin' => true]);
-        $since = now()->subDays(7)->startOfDay();
+        // El rango por defecto del chart es "Últimas 24 horas".
+        $since = now()->subDay();
 
         $component = Livewire::actingAs($admin)
             ->test(\App\Livewire\Admin\Binnacle\IndexComponent::class);
 
-        // Sin filtros: total del rango = registros de los últimos 7 días.
+        // Sin filtros: total del rango = registros de las últimas 24 horas.
         $component->assertSet(
             'chartTotal',
             BinnacleEntry::where('created_at', '>=', $since)->count()
