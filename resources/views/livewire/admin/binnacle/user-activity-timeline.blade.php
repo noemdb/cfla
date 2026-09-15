@@ -50,7 +50,7 @@
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Rango de fechas</label>
                 @php
-                    $rangeShort = [7 => '7d', 15 => '15d', 30 => '30d', 90 => '3m', 0 => 'Todo'];
+                    $rangeShort = [1 => '24h', 7 => '7d', 15 => '15d', 30 => '30d', 90 => '3m', 0 => 'Todo'];
                 @endphp
                 {{-- Segmented control: botones unidos como un solo control; exactamente uno activo. --}}
                 <div role="radiogroup" aria-label="Rango de fechas"

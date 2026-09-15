@@ -210,6 +210,23 @@ class BinnacleFase2Test extends TestCase
             ->assertOk();
     }
 
+    public function test_timeline_defaults_to_last_24_hours(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $component = Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\Binnacle\UserActivityTimeline::class);
+
+        $component->assertSet('rangeDays', 1)
+            ->assertSee('24h');
+
+        $this->assertSame('Últimas 24 horas', \App\Livewire\Admin\Binnacle\UserActivityTimeline::DATE_RANGES[1]);
+
+        // La ventana es rodante de 24 h, no el día natural anterior.
+        $dateFrom = \Carbon\Carbon::parse($component->get('dateFrom'));
+        $this->assertTrue($dateFrom->greaterThan(now()->subDay()->subMinute()));
+    }
+
     public function test_timeline_shows_global_feed_without_user(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

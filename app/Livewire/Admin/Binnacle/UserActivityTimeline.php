@@ -33,13 +33,14 @@ class UserActivityTimeline extends Component
 
     public ?string $userSearch = '';
 
-    /** Rango de días a visualizar (7 por defecto). */
-    public int $rangeDays = 7;
+    /** Rango de días a visualizar (24 horas por defecto; 1 = últimas 24 h). */
+    public int $rangeDays = 1;
 
     /** Modo "mi actividad": bloquea la consulta al usuario autenticado. */
     public bool $selfMode = false;
 
     public const DATE_RANGES = [
+        1 => 'Últimas 24 horas',
         7 => 'Últimos 7 días',
         15 => 'Últimos 15 días',
         30 => 'Últimos 30 días',
@@ -104,6 +105,14 @@ class UserActivityTimeline extends Component
             return;
         }
 
+        // "Últimas 24 horas": ventana rodante exacta (no el día natural anterior).
+        if ($this->rangeDays === 1) {
+            $this->dateFrom = now()->subDay()->format('Y-m-d H:i:s');
+            $this->dateTo = now()->format('Y-m-d H:i:s');
+
+            return;
+        }
+
         $this->dateFrom = now()->subDays($this->rangeDays)->startOfDay()->format('Y-m-d H:i:s');
         $this->dateTo = now()->endOfDay()->format('Y-m-d H:i:s');
     }
@@ -116,7 +125,7 @@ class UserActivityTimeline extends Component
 
     public function clearFilters(): void
     {
-        $this->rangeDays = 7;
+        $this->rangeDays = 1;
         $this->applyDateRange();
         $this->eventType = null;
         $this->category = null;
@@ -156,7 +165,7 @@ class UserActivityTimeline extends Component
 
         $grouped = $entries->groupBy(fn ($e) => $e->created_at?->toDateString());
 
-        $hasFilters = $this->rangeDays !== 7
+        $hasFilters = $this->rangeDays !== 1
             || (bool) ($this->eventType || $this->category || $this->severity || $this->search);
 
         return view('livewire.admin.binnacle.user-activity-timeline', [
