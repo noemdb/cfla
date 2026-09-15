@@ -2457,16 +2457,39 @@
                             <div class="border-b border-gray-200 dark:border-white/10">
                                 <nav class="flex w-full overflow-x-auto">
                                     @foreach ($tabPestudioOptions as $opt)
-                                        <button type="button" wire:click="selectStep5Pestudio({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
-                                            class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
-                                            {{ (string) $activePestudioId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
-                                            {{ $opt['name'] }}
-                                            @if ($opt['id'] !== 'general' && $this->pestudioAllSectionsLocked($opt['id']))
-                                                <svg class="inline-block h-3 w-3 ml-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" title="Todas las secciones activas de este pestudio están bloqueadas">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                                </svg>
-                                            @endif
-                                        </button>
+                                        @if ($opt['id'] !== 'general')
+                                            @php $pestudioTabLocked = $this->pestudioAllSectionsLocked($opt['id']); @endphp
+                                            <div class="flex min-w-0 flex-1 border-b-2 {{ (string) $activePestudioId === (string) $opt['id'] ? 'border-emerald-500' : 'border-transparent' }}">
+                                                <button type="button" wire:click="selectStep5Pestudio({{ (int) $opt['id'] }})"
+                                                    class="min-w-0 flex-1 px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-200
+                                                    {{ (string) $activePestudioId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                                    {{ $opt['name'] }}
+                                                </button>
+                                                <button type="button"
+                                                    wire:key="pestudio-lock-{{ (int) $opt['id'] }}-{{ $pestudioTabLocked ? 'locked' : 'unlocked' }}"
+                                                    wire:click="togglePestudioTimetableLock({{ (int) $opt['id'] }})"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="togglePestudioTimetableLock"
+                                                    title="{{ $pestudioTabLocked ? 'Desbloquear el horario de este P.Estudio' : 'Bloquear el horario de este P.Estudio' }}"
+                                                    aria-label="{{ $pestudioTabLocked ? 'Desbloquear' : 'Bloquear' }} horario de {{ $opt['name'] }}"
+                                                    class="shrink-0 px-2 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $pestudioTabLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
+                                                    <svg class="inline h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        @if ($pestudioTabLocked)
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                                        @else
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 10.5V6.75a3.75 3.75 0 10-7.5 0M6.75 10.5h10.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25z"/>
+                                                        @endif
+                                                    </svg>
+                                                    <span class="sr-only">{{ $pestudioTabLocked ? 'Bloqueado' : 'Desbloqueado' }}</span>
+                                                </button>
+                                            </div>
+                                        @else
+                                            <button type="button" wire:click="selectStep5Pestudio('general')"
+                                                class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
+                                                {{ (string) $activePestudioId === 'general' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                                {{ $opt['name'] }}
+                                            </button>
+                                        @endif
                                     @endforeach
                                 </nav>
                             </div>
@@ -2486,14 +2509,19 @@
                                                     {{ $opt['name'] }}
                                                 </button>
                                                 <button type="button"
+                                                    wire:key="grade-lock-{{ (int) $opt['id'] }}-{{ $gradeTabLocked ? 'locked' : 'unlocked' }}"
                                                     wire:click="toggleGradeTimetableLock({{ (int) $opt['id'] }})"
                                                     wire:loading.attr="disabled"
                                                     wire:target="toggleGradeTimetableLock"
                                                     title="{{ $gradeTabLocked ? 'Desbloquear el horario de este grado' : 'Bloquear el horario de este grado' }}"
                                                     aria-label="{{ $gradeTabLocked ? 'Desbloquear' : 'Bloquear' }} horario de {{ $opt['name'] }}"
-                                                    class="shrink-0 px-2 py-2 text-emerald-500 transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                                                    class="shrink-0 px-2 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $gradeTabLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
                                                     <svg class="inline h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                        @if ($gradeTabLocked)
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                                        @else
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 10.5V6.75a3.75 3.75 0 10-7.5 0M6.75 10.5h10.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25z"/>
+                                                        @endif
                                                     </svg>
                                                     <span class="sr-only">{{ $gradeTabLocked ? 'Bloqueado' : 'Desbloqueado' }}</span>
                                                 </button>
@@ -2536,7 +2564,7 @@
                                                     wire:target="toggleSectionTimetableLock"
                                                     title="{{ $sectionTabLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
                                                     aria-label="{{ $sectionTabLocked ? 'Desbloquear' : 'Bloquear' }} horario de {{ $opt['label'] ?? 'la sección '.$opt['name'] }}"
-                                                    class="shrink-0 px-2 py-2 text-amber-500 transition-colors hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                                                    class="shrink-0 px-2 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $sectionTabLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
                                                     <svg class="inline h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                         @if ($sectionTabLocked)
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>

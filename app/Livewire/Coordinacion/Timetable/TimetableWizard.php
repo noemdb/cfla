@@ -4875,6 +4875,37 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Bloquea o desbloquea el horario de todas las secciones activas de todos
+     * los grados de un P.Estudio. Si el P.Estudio está completamente bloqueado,
+     * la acción desbloquea; en cualquier otro caso, bloquea las restantes.
+     */
+    public function togglePestudioTimetableLock(int $pestudioId): void
+    {
+        $query = Seccion::query()
+            ->whereHas('grado', fn ($g) => $g->where('pestudio_id', $pestudioId))
+            ->where('status_active', true);
+
+        if (! $query->exists()) {
+            $this->notification()->error(
+                'P.Estudio no encontrado',
+                'No se encontraron secciones activas para cambiar el bloqueo.',
+            );
+
+            return;
+        }
+
+        $locked = $this->pestudioAllSectionsLocked($pestudioId);
+        $query->update(['timetable_locked' => ! $locked]);
+
+        $this->notification()->success(
+            ! $locked ? 'Horario del P.Estudio bloqueado' : 'Horario del P.Estudio desbloqueado',
+            ! $locked
+                ? 'Todas las secciones activas del P.Estudio quedaron bloqueadas.'
+                : 'Todas las secciones activas del P.Estudio quedaron desbloqueadas.',
+        );
+    }
+
+    /**
      * True si todas las secciones ACTIVAS de todos los grados del pestudio están bloqueadas.
      */
     public function pestudioAllSectionsLocked($pestudioId): bool
