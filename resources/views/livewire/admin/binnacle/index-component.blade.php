@@ -81,6 +81,36 @@
         </div>
     </div>
 
+    <!-- Chart: actividad registrada en la bitácora (tiempo real) -->
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-4" wire:poll.5000ms="refreshChart">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 4 4 5-6"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Actividad en la bitácora</h3>
+                    <p class="text-xs text-gray-500">
+                        <span class="text-emerald-400 font-bold">{{ number_format($chartTotal) }}</span>
+                        registros según filtros y rango · actualización en vivo
+                    </p>
+                </div>
+            </div>
+            <select wire:model.live="chartRange"
+                    class="bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-emerald-500 focus:outline-none">
+                <option value="7d">Últimos 7 días</option>
+                <option value="30d">Últimos 30 días</option>
+                <option value="3m">Últimos 3 meses</option>
+                <option value="all">Todo el histórico</option>
+            </select>
+        </div>
+        <div wire:ignore>
+            <div id="binnacle-entries-chart" class="w-full" style="min-height: 260px;"></div>
+        </div>
+    </div>
+
     <!-- Table -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
@@ -307,4 +337,100 @@
             </div>
         </div>
     @endif
+
+    @script
+<script>
+    let binnacleEntriesChart = null;
+
+    async function initBinnacleEntriesChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('binnacle-entries-chart');
+        if (!el) return;
+
+        if (binnacleEntriesChart) binnacleEntriesChart.destroy();
+
+        // $wire.get() evita el Proxy de Livewire en el array.
+        const rawData = await $wire.get('chartEntries') ?? [];
+
+        binnacleEntriesChart = new window.ApexCharts(el, {
+            series: [{
+                name: 'Registros',
+                data: rawData,
+            }],
+            chart: {
+                type: 'area',
+                height: 280,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                animations: { enabled: true, easing: 'easeinout', speed: 400 },
+                fontFamily: 'Inter, system-ui, sans-serif',
+            },
+            colors: ['#10b981'],
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            markers: {
+                size: 3,
+                colors: ['#10b981'],
+                strokeColors: '#0f172a',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.45,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: {
+                    style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 },
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 },
+                },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: {
+                borderColor: '#37415140',
+                strokeDashArray: 4,
+            },
+            tooltip: {
+                theme: 'dark',
+                y: {
+                    formatter: function (val) {
+                        return val + ' registro(s)';
+                    },
+                },
+            },
+            noData: {
+                text: 'Sin registros en el rango seleccionado',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        binnacleEntriesChart.render();
+    }
+
+    // Este bloque corre tras el mount de Livewire: $wire ya está disponible.
+    initBinnacleEntriesChart();
+    $wire.$watch('chartEntries', () => initBinnacleEntriesChart());
+</script>
+    @endscript
 </div>

@@ -250,10 +250,8 @@ class IndexComponent extends Component
             ];
         });
 
-        $this->totalActivities = $this->peducativoMainIndicators->sum('activities_count');
-        $this->totalProfesoresActivos = Profesor::where('status_active', 'true')
-            ->has('pevaluacions')
-            ->count();
+        // ══ Global KPI boxes (no dependen del lapso ni de los filtros) ══
+        $this->loadGlobalKpis();
 
         // ══ TAB 2: Profesores data — only selected lapso ══
         $this->tab2Data = [];
@@ -433,11 +431,6 @@ class IndexComponent extends Component
             }
         }
 
-        // ══ Global: Diagnósticos activos ══
-        $this->totalDiagActive = DiagMain::where('active', true)
-            ->where('lapso_id', $this->selectedLapsoId)
-            ->count();
-
         // ══ Chart: Activities per day ══
         $this->loadChartActivitiesByDay();
 
@@ -446,9 +439,6 @@ class IndexComponent extends Component
 
         // ══ Chart: Scheduled publications per day ══
         $this->loadChartScheduledByDay();
-
-        // ══ Lesson stats (scoped by selected lapso) ══
-        $this->loadLessonStats($this->selectedLapsoId);
 
         // ══ Registration flow charts (global, with date range) ══
         $this->loadRegistrationFlowCharts();
@@ -667,47 +657,39 @@ class IndexComponent extends Component
     }
 
     /**
-     * Load lesson stats for the selected lapso.
-     * Total (registradas) = published + scheduled + drafts (including activities without LMS publication record),
-     * matching the same 3-series logic used in loadRegistrationFlowCharts().
+     * KPIs globales del dashboard (no dependen del lapso ni de los filtros).
      */
-    private function loadLessonStats(?int $lapsoId = null)
+    private function loadGlobalKpis(): void
     {
-        $lapsoScope = function ($q) use ($lapsoId) {
-            if ($lapsoId) {
-                $q->whereHas('activity.pevaluacion', fn ($pq) => $pq->where('lapso_id', $lapsoId));
-            }
-        };
+        $this->totalActivities = Activity::count();
+        $this->totalProfesoresActivos = Profesor::where('status_active', 'true')
+            ->has('pevaluacions')
+            ->count();
+        $this->totalDiagActive = DiagMain::where('active', true)->count();
+
+        $this->loadLessonStats();
+    }
+
+    /**
+     * Lecciones globales (sin filtro de lapso).
+     *
+     * Total = actividades con al menos una sección o algún recurso asociado
+     * (`Activity::withLmsContent()`), la misma lógica del monitor LMS.
+     * Publicadas/Programadas = publicaciones por estado, sin scope de lapso.
+     */
+    private function loadLessonStats(): void
+    {
+        $this->lessonTotal = Activity::withLmsContent()->count();
 
         $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
-            ->tap($lapsoScope)
             ->where('status', 'PUBLISHED')
             ->whereNotNull('published_at')
             ->count();
         $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
-            ->tap($lapsoScope)
             ->whereNotNull('publish_at')
             ->where('status', '!=', 'PUBLISHED')
             ->count();
 
-        // Drafts: activities WITH a publication record (publish_at NULL, no PUBLISHED)
-        // and activities WITHOUT any publication record (via LEFT JOIN).
-        $draftsQuery = \App\Models\app\Academy\Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
-            ->whereNull('lms_activity_publications.publish_at')
-            ->where(function ($q) {
-                $q->whereNull('lms_activity_publications.status')
-                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
-            });
-
-        if ($lapsoId) {
-            $draftsQuery->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
-                ->where('pevaluacions.lapso_id', $lapsoId)
-                ->whereNull('pevaluacions.deleted_at');
-        }
-
-        $draftsCount = $draftsQuery->count(\Illuminate\Support\Facades\DB::raw('DISTINCT activities.id'));
-
-        $this->lessonTotal = $this->lessonPublished + $this->lessonScheduled + $draftsCount;
         $this->lessonPublishedPct = $this->lessonTotal > 0 ? round(($this->lessonPublished / $this->lessonTotal) * 100, 1) : 0;
         $this->lessonScheduledPct = $this->lessonTotal > 0 ? round(($this->lessonScheduled / $this->lessonTotal) * 100, 1) : 0;
     }

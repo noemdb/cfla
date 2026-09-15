@@ -102,9 +102,9 @@ class MonitorStatsTest extends TestCase
             ->test(MonitorStats::class)
             ->assertStatus(200)
             ->assertSet('scheduled', $baselineScheduled + 1)
-            ->assertSet('total', Activity::count())
-            ->assertSet('withContent', Activity::whereHas('lmsSections')->count())
-            ->assertSee('Programadas');
+            ->assertSet('total', Activity::withLmsContent()->count())
+            ->assertSee('Programadas')
+            ->assertSee('Total de Lecciones');
     }
 
     /** @test */

@@ -26,8 +26,6 @@ class MonitorStats extends Component
 
     public int $archived = 0;
 
-    public int $withContent = 0;
-
     public int $totalActivities = 0;
 
     protected function getListeners(): array
@@ -59,12 +57,11 @@ class MonitorStats extends Component
             LmsPublicationService::cacheTtlSeconds(),
             function (): array {
                 return [
-                    'total' => Activity::count(),
+                    'total' => Activity::withLmsContent()->count(),
                     'published' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'PUBLISHED'))->count(),
                     'scheduled' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))->count(),
                     'draft' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'DRAFT'))->count(),
                     'archived' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'ARCHIVED'))->count(),
-                    'withContent' => Activity::whereHas('lmsSections')->count(),
                     'totalActivities' => Activity::count(),
                 ];
             }
@@ -75,7 +72,6 @@ class MonitorStats extends Component
         $this->scheduled = $stats['scheduled'];
         $this->draft = $stats['draft'];
         $this->archived = $stats['archived'];
-        $this->withContent = $stats['withContent'];
         $this->totalActivities = $stats['totalActivities'];
     }
 

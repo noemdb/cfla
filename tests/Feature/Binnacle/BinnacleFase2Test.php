@@ -269,4 +269,53 @@ class BinnacleFase2Test extends TestCase
             ->assertSet('showEntryDetails', false)
             ->assertSet('viewingEntryId', null);
     }
+
+    public function test_chart_respects_filters(): void
+    {
+        BinnacleEntry::forceCreate([
+            'uuid' => fake()->uuid(),
+            'event_type' => 'chart_probe',
+            'event_category' => 'user_action',
+            'event_severity' => 'info',
+            'title' => 'Alpha',
+            'created_at' => now(),
+        ]);
+        BinnacleEntry::forceCreate([
+            'uuid' => fake()->uuid(),
+            'event_type' => 'chart_probe',
+            'event_category' => 'error',
+            'event_severity' => 'critical',
+            'title' => 'Beta',
+            'created_at' => now(),
+        ]);
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $since = now()->subDays(7)->startOfDay();
+
+        $component = Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\Binnacle\IndexComponent::class);
+
+        // Sin filtros: total del rango = registros de los últimos 7 días.
+        $component->assertSet(
+            'chartTotal',
+            BinnacleEntry::where('created_at', '>=', $since)->count()
+        );
+
+        // Con filtro de categoría, el chart sólo cuenta esa categoría.
+        $component->set('category', 'error');
+
+        $expected = BinnacleEntry::where('event_category', 'error')
+            ->where('created_at', '>=', $since)
+            ->count();
+
+        $component->assertSet('chartTotal', $expected);
+
+        $sum = collect($component->get('chartEntries'))->sum('y');
+        $this->assertSame($expected, $sum);
+
+        // Con filtro de severidad incompatible, el chart queda vacío.
+        $component->set('severity', 'debug');
+        $component->assertSet('chartTotal', 0);
+        $this->assertSame([], $component->get('chartEntries'));
+    }
 }

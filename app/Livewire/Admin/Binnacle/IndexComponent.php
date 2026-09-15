@@ -34,6 +34,22 @@ class IndexComponent extends Component
     #[Url(as: 'to', history: true)]
     public ?string $dateTo = null;
 
+    /**
+     * Rango del chart de actividad de la bitácora (dropdown).
+     */
+    #[Url(as: 'range', history: true)]
+    public string $chartRange = '7d';
+
+    /**
+     * Serie del chart: [['x' => 'Y-m-d', 'y' => n], …].
+     */
+    public array $chartEntries = [];
+
+    /**
+     * Total de registros en el rango seleccionado (contador en vivo).
+     */
+    public int $chartTotal = 0;
+
     public function mount(): void
     {
         // Meta-auditoría (Spec §6 / Fase 4): quién consulta la bitácora.
@@ -45,12 +61,66 @@ class IndexComponent extends Component
                 'subject' => auth()->user(),
             ]);
         }
+
+        $this->loadChartData();
+    }
+
+    public function updatedChartRange(): void
+    {
+        $this->loadChartData();
+    }
+
+    /**
+     * Refresco en tiempo real del chart (wire:poll).
+     */
+    public function refreshChart(): void
+    {
+        $this->loadChartData();
+    }
+
+    /**
+     * Cuenta los registros de la bitácora agrupados por día para el rango
+     * seleccionado, aplicando los mismos filtros de la tabla (búsqueda,
+     * categoría, severidad y fechas). Alimenta el chart ApexCharts del panel.
+     */
+    private function loadChartData(): void
+    {
+        $since = match ($this->chartRange) {
+            '7d' => now()->subDays(7)->startOfDay(),
+            '30d' => now()->subDays(30)->startOfDay(),
+            '3m' => now()->subMonths(3)->startOfDay(),
+            'all' => null,
+            default => now()->subDays(7)->startOfDay(),
+        };
+
+        $query = $this->applyFilters(BinnacleEntry::query())
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date');
+
+        if ($since) {
+            $query->where('created_at', '>=', $since);
+        }
+
+        $this->chartEntries = $query->get()->map(fn ($row) => [
+            'x' => $row->date,
+            'y' => (int) $row->total,
+        ])->toArray();
+
+        $countQuery = $this->applyFilters(BinnacleEntry::query());
+
+        if ($since) {
+            $countQuery->where('created_at', '>=', $since);
+        }
+
+        $this->chartTotal = $countQuery->count();
     }
 
     public function resetFilters(): void
     {
         $this->reset(['search', 'category', 'severity', 'dateFrom', 'dateTo']);
         $this->resetPage();
+        $this->loadChartData();
     }
 
     public function updatingPaginate(): void
@@ -81,6 +151,16 @@ class IndexComponent extends Component
     public function updatingDateTo(): void
     {
         $this->resetPage();
+    }
+
+    /**
+     * Recalcula el chart cuando cambia cualquier filtro de la tabla.
+     */
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['search', 'category', 'severity', 'dateFrom', 'dateTo'], true)) {
+            $this->loadChartData();
+        }
     }
 
     public function openEntryDetails(int $entryId): void
@@ -121,9 +201,13 @@ class IndexComponent extends Component
         ]);
     }
 
-    public function query()
+    /**
+     * Aplica los filtros comunes (búsqueda, categoría, severidad y fechas).
+     * Fuente única para la tabla (`query()`) y el chart (`loadChartData()`).
+     */
+    private function applyFilters($query)
     {
-        return BinnacleEntry::query()
+        return $query
             ->when($this->search, function ($q) {
                 $needle = '%'.$this->search.'%';
                 $q->where(function ($sub) use ($needle) {
@@ -139,7 +223,12 @@ class IndexComponent extends Component
             ->when($this->category, fn ($q) => $q->where('event_category', $this->category))
             ->when($this->severity, fn ($q) => $q->where('event_severity', $this->severity))
             ->when($this->dateFrom, fn ($q) => $q->where('created_at', '>=', $this->dateFrom.' 00:00:00'))
-            ->when($this->dateTo, fn ($q) => $q->where('created_at', '<=', $this->dateTo.' 23:59:59'))
+            ->when($this->dateTo, fn ($q) => $q->where('created_at', '<=', $this->dateTo.' 23:59:59'));
+    }
+
+    public function query()
+    {
+        return $this->applyFilters(BinnacleEntry::query())
             ->orderByDesc('created_at');
     }
 

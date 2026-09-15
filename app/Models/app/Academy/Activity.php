@@ -122,6 +122,23 @@ class Activity extends Model implements \App\Contracts\Auditable
         return $this->comments()->where('is_approved', true);
     }
 
+    /**
+     * Lecciones con contenido: al menos una sección o algún recurso asociado
+     * (recursos, enlaces o embeds HTML).
+     *
+     * Fuente única para el KPI de "Total de Lecciones" del monitor LMS y del
+     * dashboard de indicadores, para que ambos midan lo mismo.
+     */
+    public function scopeWithLmsContent($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereHas('lmsSections')
+                ->orWhereHas('lmsResources')
+                ->orWhereHas('lmsLinks')
+                ->orWhereHas('lmsHtmlEmbeds');
+        });
+    }
+
     public function isLmsPublished(): bool
     {
         return $this->lmsPublication?->isVisibleToStudents() ?? false;
