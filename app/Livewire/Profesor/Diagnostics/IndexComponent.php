@@ -2,110 +2,156 @@
 
 namespace App\Livewire\Profesor\Diagnostics;
 
-use App\Models\app\Instrument\DiagQuestion;
-use App\Models\app\Instrument\DiagOption;
-use App\Models\app\Instrument\DiagSession;
+use App\Models\app\Academy\Inscripcion;
+use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Pensum;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Seccion;
 use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Instrument\DiagMain;
+use App\Models\app\Instrument\DiagOption;
+use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagReport;
-use App\Models\app\Instrument\DiagReportAiDraft;
-use App\Models\app\Instrument\DiagReferent;
-use App\Models\app\Instrument\DiagCompetency;
-use App\Models\app\Academy\Pensum;
-use App\Models\app\Academy\Grado;
-use App\Models\app\Academy\Seccion;
-use App\Models\app\Academy\Profesor;
-use App\Models\app\Academy\Lapso;
-use App\Models\app\Academy\Pescolar;
-use App\Models\app\Academy\Inscripcion;
-use App\Models\app\Entity\Institucion;
-use App\Models\app\Entity\Autoridad;
+use App\Models\app\Instrument\DiagSession;
 use App\Models\app\Learner\Estudiant;
-use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WireUiActions, WithPagination;
-    use \App\Http\Livewire\Evaluacion\Diagnostic\QwenReportTrait;
     use \App\Http\Livewire\Evaluacion\Diagnostic\DeepSeekReportTrait;
     use \App\Http\Livewire\Evaluacion\Diagnostic\GeminiReportTrait;
-    use \App\Http\Livewire\Evaluacion\Diagnostic\OpenRouterReportTrait;
     use \App\Http\Livewire\Evaluacion\Diagnostic\NvidiaReportTrait;
+    use \App\Http\Livewire\Evaluacion\Diagnostic\OpenRouterReportTrait;
+    use \App\Http\Livewire\Evaluacion\Diagnostic\QwenReportTrait;
+    use WireUiActions, WithPagination;
 
     public $cacheKey;
+
     public $lastUpdated;
 
     // Propiedades principales
     public $activeTab = 'dashboard';
+
     public $showQuestionModal = false;
+
     public $SessionModalReport = false;
+
     public $editingQuestion = null;
+
     public $selectedSession = null;
+
     public $wizardStep = 1;
 
     public $selectedPensumId = null;
+
     public $profesor = null;
+
     public $pensumIds = [];
+
+    public $seccionIds = [];
+
+    // Carga académica (pevaluacions) del profesor en el lapso actual
+    public $lapsoId = null;
+
+    public $cargaPevaluacions = [];
 
     // Propiedades del formulario de preguntas
     public $pregunta = '';
+
     public $tipo_pregunta = 'multiple';
+
     public $orden = 1;
+
     public $activo = true;
+
     public $options = [];
+
     public $correct_option_index = 0;
+
     public $min_value = 1;
+
     public $max_value = 10;
+
     public $pensum_id = null;
+
     public $weighing = null;
+
     public $difficulty = null;
+
     public $diag_main_id = null;
+
     public $expected_answer = '';
 
     // Filtros y búsqueda
     public $search = '';
+
     public $filterType = '';
+
     public $filterSubject = '';
+
     public $sortBy = 'created_at';
+
     public $sortDirection = 'desc';
 
     public $filterStatus = '';
+
     public $filterPensum = '';
 
     public $sessionsGradoFilter = '';
+
     public $dateRange = '365';
 
     // Sessions tab filters
     public $searchSessions = '';
+
     public $filterDateFrom = '';
+
     public $filterDateTo = '';
 
     // New filters
     public $filterDiagMainId = '';
+
     public $filterGradoId = '';
+
     public $filterSeccionId = '';
+
     public $list_grados;
+
     public $list_secciones = [];
 
     // AI Report properties
     public $selectedReport = null;
+
     public $showReportModal = false;
+
     public $isLoading = false;
+
     public $selected_ai_service = 'qwen';
+
     public $showSessionDetailsModal = false;
+
     public $showSessionAnswersModal = false;
+
     protected $selectedSessionAnswers = [];
+
     protected $selectedSessionData = null;
+
     protected $selectedStudentData = null;
+
+    // Lapso actual resuelto (no serializable, se recalcula por request)
+    protected $currentLapsoModel = null;
+
+    protected $currentLapsoResolved = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -134,12 +180,144 @@ class IndexComponent extends Component
     {
         $this->resetOptions();
         $this->profesor = Profesor::where('user_id', Auth::user()->id)->first();
-        $this->pensumIds = $this->profesor?->pensums?->pluck('id')->toArray() ?? [];
-        $this->cacheKey = 'diagnostics_' . Auth::id();
-        $this->lastUpdated = now();
 
-        // Load grados for filter grade for profesor
-        $this->list_grados = Profesor::list_grado($this->profesor->id);
+        // El módulo se acota a la carga académica del lapso actual:
+        // pevaluacions = profesor + lapso + seccion + pensum.
+        $this->lapsoId = Lapso::current()?->id;
+
+        $this->loadCargaAcademica();
+
+        $this->cacheKey = 'diagnostics_'.Auth::id();
+        $this->lastUpdated = now();
+    }
+
+    /**
+     * Carga las pevaluacions (carga académica) del profesor para el lapso
+     * actual y deriva de ahí los pensums, secciones y grados visibles.
+     */
+    protected function loadCargaAcademica(): void
+    {
+        if (! $this->profesor) {
+            $this->cargaPevaluacions = collect();
+            $this->pensumIds = [];
+            $this->seccionIds = [];
+            $this->list_grados = collect();
+
+            return;
+        }
+
+        $query = Pevaluacion::with(['pensum.asignatura', 'pensum.grado', 'seccion', 'lapso'])
+            ->where('profesor_id', $this->profesor->id);
+
+        if ($this->lapsoId) {
+            $query->where('lapso_id', $this->lapsoId);
+        }
+
+        $this->cargaPevaluacions = $query->get()
+            ->filter(fn ($pevaluacion) => $pevaluacion->pensum !== null)
+            ->values();
+
+        $this->pensumIds = $this->cargaPevaluacions->pluck('pensum_id')
+            ->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+
+        $this->seccionIds = $this->cargaPevaluacions->pluck('seccion_id')
+            ->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+
+        $this->list_grados = $this->cargaPevaluacions
+            ->map(fn ($pevaluacion) => $pevaluacion->pensum?->grado)
+            ->filter()
+            ->unique('id')
+            ->sortBy('name')
+            ->values();
+    }
+
+    /**
+     * Pensums efectivos a consultar: el seleccionado en el filtro de área
+     * (si pertenece a la carga) o todos los de la carga académica.
+     */
+    protected function scopedPensumIds(): array
+    {
+        if ($this->selectedPensumId && in_array((int) $this->selectedPensumId, $this->pensumIds, true)) {
+            return [(int) $this->selectedPensumId];
+        }
+
+        return $this->pensumIds;
+    }
+
+    /**
+     * Secciones efectivas a consultar: las de la carga académica,
+     * opcionalmente acotadas por el filtro de sección.
+     */
+    protected function scopedSeccionIds(): array
+    {
+        if ($this->filterSeccionId && in_array((int) $this->filterSeccionId, $this->seccionIds, true)) {
+            return [(int) $this->filterSeccionId];
+        }
+
+        return $this->seccionIds;
+    }
+
+    /**
+     * Acota una consulta de sesiones al lapso actual. Las sesiones creadas
+     * por el estudiante (Diagnostic::startDiagnostic) no guardan lapso_id, por
+     * lo que se infiere desde la pevaluacion comparando la fecha de inicio
+     * contra el rango del lapso (finicial - ffinal).
+     */
+    protected function currentLapso(): ?Lapso
+    {
+        if (! $this->currentLapsoResolved) {
+            $this->currentLapsoModel = $this->lapsoId ? Lapso::find($this->lapsoId) : null;
+            $this->currentLapsoResolved = true;
+        }
+
+        return $this->currentLapsoModel;
+    }
+
+    protected function scopeToLapso($query, string $dateColumn = 'iniciado_at'): void
+    {
+        $lapso = $this->currentLapso();
+
+        if (! $lapso || ! $lapso->finicial || ! $lapso->ffinal) {
+            return;
+        }
+
+        $finicial = $lapso->finicial;
+        $ffinal = $lapso->ffinal;
+
+        $query->where(function ($q) use ($dateColumn, $finicial, $ffinal) {
+            $q->where('lapso_id', $this->lapsoId)
+                ->orWhere(function ($qq) use ($dateColumn, $finicial, $ffinal) {
+                    $qq->whereNull('lapso_id')
+                        ->whereDate($dateColumn, '>=', $finicial)
+                        ->whereDate($dateColumn, '<=', $ffinal);
+                });
+        });
+    }
+
+    /**
+     * Restringe una consulta de sesiones (o de respuestas vía whereHas('session'))
+     * a la carga académica: pensum + sección del estudiante + lapso.
+     */
+    protected function scopeToCarga($query, string $dateColumn = 'iniciado_at'): void
+    {
+        $pensumIds = $this->scopedPensumIds();
+
+        if (empty($pensumIds)) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->whereIn('pensum_id', $pensumIds);
+
+        $seccionIds = $this->scopedSeccionIds();
+        if (! empty($seccionIds)) {
+            $query->whereHas('estudiant.inscripcion', function ($q) use ($seccionIds) {
+                $q->whereIn('seccion_id', $seccionIds);
+            });
+        }
+
+        $this->scopeToLapso($query, $dateColumn);
     }
 
     public function updatedFilterDiagMainId()
@@ -155,6 +333,7 @@ class IndexComponent extends Component
 
         if ($this->filterGradoId) {
             $this->list_secciones = Seccion::where('grado_id', $this->filterGradoId)
+                ->whereIn('id', $this->seccionIds)
                 ->where('status_active', 'true')
                 ->get();
         }
@@ -167,23 +346,31 @@ class IndexComponent extends Component
 
     public function getPensumIdsProperty()
     {
-        if ($this->selectedPensumId) {
-            return [$this->selectedPensumId];
-        }
-        return $this->profesor ? $this->profesor->pensums->pluck('id')->toArray() : [];
+        return $this->scopedPensumIds();
+    }
+
+    protected function statsCacheKey(): string
+    {
+        return 'diag_prof_stats_'.Auth::id()
+            .'_'.($this->lapsoId ?? 'none')
+            .'_'.($this->selectedPensumId ?? 'all')
+            .'_'.($this->filterDiagMainId ?: 'all')
+            .'_'.($this->filterGradoId ?: 'all')
+            .'_'.($this->filterSeccionId ?: 'all');
     }
 
     public function getStatsProperty()
     {
-        $filtersKey = "_{$this->filterDiagMainId}_{$this->filterGradoId}_{$this->filterSeccionId}";
-        $cacheKey = "stats_" . Auth::id() . "_" . ($this->selectedPensumId ?? 'all') . $filtersKey;
-
-        return Cache::remember($cacheKey, 1800, function () {
-            $pensumIds = $this->pensumIds;
+        return Cache::remember($this->statsCacheKey(), 1800, function () {
+            $pensumIds = $this->scopedPensumIds();
+            $seccionIds = $this->scopedSeccionIds();
 
             $accuracyStats = $this->getStudentAccuracyStats();
 
-            $applyFilters = function ($query) {
+            // Sesiones de la carga académica (pensum + sección + lapso) y filtros.
+            $sessionScope = function ($query) {
+                $this->scopeToCarga($query);
+
                 if ($this->filterDiagMainId) {
                     $query->where('diag_main_id', $this->filterDiagMainId);
                 }
@@ -192,51 +379,55 @@ class IndexComponent extends Component
                         $q->where('grado_id', $this->filterGradoId);
                     });
                 }
-                if ($this->filterSeccionId) {
-                    $query->whereHas('estudiant.inscripcion', function ($q) {
-                        $q->where('seccion_id', $this->filterSeccionId);
-                    });
-                }
             };
 
+            $questionQuery = DiagQuestion::whereIn('pensum_id', $pensumIds ?: [0]);
+            if ($this->filterDiagMainId) {
+                $questionQuery->where('diag_main_id', $this->filterDiagMainId);
+            }
+            if ($this->filterGradoId) {
+                $questionQuery->whereHas('pensum', function ($q) {
+                    $q->where('grado_id', $this->filterGradoId);
+                });
+            }
+
             return [
-                'total_questions' => DiagQuestion::whereIn('pensum_id', $pensumIds)
-                    ->when($this->filterGradoId, function ($q) {
-                        $q->whereHas('pensum', function ($qq) {
-                            $qq->where('grado_id', $this->filterGradoId);
-                        });
-                    })->count(),
+                'total_questions' => $questionQuery->count(),
 
-                'total_sessions' => DiagSession::whereIn('pensum_id', $pensumIds)
-                    ->where(function ($q) use ($applyFilters) {
-                        $applyFilters($q);
-                    })->count(),
+                'total_sessions' => DiagSession::where($sessionScope)->count(),
 
-                'completed_sessions' => DiagSession::whereIn('pensum_id', $pensumIds)
-                    ->whereNotNull('completado_at')
-                    ->where(function ($q) use ($applyFilters) {
-                        $applyFilters($q);
-                    })->count(),
+                'completed_sessions' => DiagSession::whereNotNull('completado_at')
+                    ->where($sessionScope)->count(),
 
-                'active_sessions' => DiagSession::whereIn('pensum_id', $pensumIds)
-                    ->where('activo', true)
+                'active_sessions' => DiagSession::where('activo', true)
                     ->whereNull('completado_at')
-                    ->where(function ($q) use ($applyFilters) {
-                        $applyFilters($q);
-                    })->count(),
+                    ->where($sessionScope)->count(),
 
                 'student_accuracy' => $accuracyStats['accuracy'] ?? 0,
                 'correct_answers' => $accuracyStats['correct_answers'] ?? 0,
                 'total_answered' => $accuracyStats['total_answered'] ?? 0,
+
+                'students_with_sessions' => (int) DiagSession::where($sessionScope)
+                    ->distinct()->count('estudiant_id'),
+
+                'total_students' => empty($seccionIds) ? 0 : (int) Inscripcion::whereIn('seccion_id', $seccionIds)
+                    ->distinct()->count('estudiant_id'),
             ];
         });
     }
 
     public function getSubjectsProperty()
     {
-        return $this->profesor && $this->profesor->pensums
-            ? $this->profesor->pensums->pluck('asignatura.full_name', 'id')
-            : collect();
+        $subjects = [];
+
+        foreach ($this->cargaPevaluacions as $pevaluacion) {
+            if ($pevaluacion->pensum && ! isset($subjects[$pevaluacion->pensum_id])) {
+                $subjects[$pevaluacion->pensum_id] = $pevaluacion->pensum->asignatura?->full_name
+                    ?? $pevaluacion->pensum->full_name;
+            }
+        }
+
+        return collect($subjects);
     }
 
     public function updatedSelectedPensumId()
@@ -248,8 +439,7 @@ class IndexComponent extends Component
 
     public function clearCache()
     {
-        Cache::forget("stats_" . Auth::id() . "_" . ($this->selectedPensumId ?? 'all'));
-        Cache::forget("stats_" . Auth::id() . "_all");
+        Cache::forget($this->statsCacheKey());
     }
 
     public function resetOptions()
@@ -288,7 +478,7 @@ class IndexComponent extends Component
             'activo' => 'boolean',
             'weighing' => 'integer|min:1|max:5',
             'difficulty' => 'string',
-            'pensum_id' => 'required|exists:pensums,id',
+            'pensum_id' => ['required', 'exists:pensums,id', Rule::in($this->pensumIds)],
         ];
 
         if ($this->tipo_pregunta === 'multiple') {
@@ -323,7 +513,19 @@ class IndexComponent extends Component
         $this->wizardStep = 1;
 
         if ($questionId) {
-            $this->editingQuestion = DiagQuestion::with('options')->find($questionId);
+            $this->editingQuestion = DiagQuestion::with('options')
+                ->whereIn('pensum_id', $this->pensumIds ?: [0])
+                ->find($questionId);
+
+            if (! $this->editingQuestion) {
+                $this->notification()->error(
+                    'Pregunta no disponible',
+                    'La pregunta no pertenece a su carga académica.'
+                );
+
+                return;
+            }
+
             $this->pregunta = $this->editingQuestion->pregunta;
             $this->tipo_pregunta = $this->editingQuestion->tipo_pregunta;
             $this->orden = $this->editingQuestion->orden ?? 1;
@@ -397,7 +599,7 @@ class IndexComponent extends Component
 
                 $optionsData = [];
                 foreach ($this->options as $index => $option) {
-                    if (!empty($option['opcion'])) {
+                    if (! empty($option['opcion'])) {
                         $optionsData[] = [
                             'question_id' => $question->id,
                             'opcion' => $option['opcion'],
@@ -409,7 +611,7 @@ class IndexComponent extends Component
                     }
                 }
 
-                if (!empty($optionsData)) {
+                if (! empty($optionsData)) {
                     DiagOption::insert($optionsData);
                 }
             }
@@ -426,7 +628,7 @@ class IndexComponent extends Component
             DB::rollBack();
             $this->notification()->error(
                 'Error',
-                'Ocurrió un error al guardar la pregunta: ' . $e->getMessage()
+                'Ocurrió un error al guardar la pregunta: '.$e->getMessage()
             );
         }
     }
@@ -461,11 +663,12 @@ class IndexComponent extends Component
     {
         if ($this->wizardStep === 1) {
             $this->validate([
-                'pensum_id' => 'required|exists:pensums,id',
+                'pensum_id' => ['required', 'exists:pensums,id', Rule::in($this->pensumIds)],
                 'tipo_pregunta' => 'required|in:multiple,open,scale',
             ], [
                 'pensum_id.required' => 'Debe seleccionar un área de formación.',
                 'pensum_id.exists' => 'El área de formación seleccionada no es válida.',
+                'pensum_id.in' => 'El área de formación no pertenece a su carga académica.',
                 'tipo_pregunta.required' => 'Debe seleccionar un tipo de pregunta.',
                 'tipo_pregunta.in' => 'El tipo de pregunta seleccionado no es válido.',
             ]);
@@ -483,7 +686,7 @@ class IndexComponent extends Component
             if ($this->tipo_pregunta === 'multiple') {
                 $rules['options'] = 'required|array|min:2|max:6';
                 $rules['options.*.opcion'] = 'required|string|max:200';
-                $rules['correct_option_index'] = 'required|integer|min:0|max:' . (count($this->options) - 1);
+                $rules['correct_option_index'] = 'required|integer|min:0|max:'.(count($this->options) - 1);
 
                 $messages['options.required'] = 'Debe agregar al menos 2 opciones.';
                 $messages['options.min'] = 'Debe tener al menos 2 opciones.';
@@ -578,7 +781,8 @@ class IndexComponent extends Component
         try {
             DB::beginTransaction();
 
-            $question = DiagQuestion::findOrFail($questionId);
+            $question = DiagQuestion::whereIn('pensum_id', $this->pensumIds ?: [0])
+                ->findOrFail($questionId);
 
             $hasAnswers = DiagAnswer::where('question_id', $questionId)->exists();
 
@@ -587,6 +791,7 @@ class IndexComponent extends Component
                     'No se puede eliminar',
                     'Esta pregunta tiene respuestas asociadas y no puede ser eliminada.'
                 );
+
                 return;
             }
 
@@ -603,7 +808,7 @@ class IndexComponent extends Component
             DB::rollBack();
             $this->notification()->error(
                 'Error',
-                'Ocurrió un error al eliminar la pregunta: ' . $e->getMessage()
+                'Ocurrió un error al eliminar la pregunta: '.$e->getMessage()
             );
         }
     }
@@ -657,7 +862,7 @@ class IndexComponent extends Component
             });
         }
 
-        $sessions->whereIn('pensum_id', $this->pensumIds);
+        $this->scopeToCarga($sessions);
 
         $studentSessions = $sessions->get();
 
@@ -748,7 +953,10 @@ class IndexComponent extends Component
             ->whereNotNull('completado_at')
             ->whereHas('question', function ($query) {
                 $query->where('activo', 1)
-                    ->whereIn('pensum_id', $this->pensumIds);
+                    ->whereIn('pensum_id', $this->scopedPensumIds());
+            })
+            ->whereHas('session', function ($query) {
+                $this->scopeToCarga($query);
             })
             ->orderBy('completado_at')
             ->get();
@@ -796,167 +1004,28 @@ class IndexComponent extends Component
         $this->selectedStudentData = null;
     }
 
-    private function getSessionsPaginated()
-    {
-        try {
-            $query = DiagSession::with(['estudiant', 'pensum.grado', 'answers'])
-                ->select('estudiant_id')
-                ->selectRaw('
-                    COUNT(DISTINCT diag_sessions.id) as total_sessions,
-                    COUNT(DISTINCT CASE WHEN completado_at IS NOT NULL THEN diag_sessions.id END) as completed_sessions,
-                    MAX(iniciado_at) as last_session_date,
-                    MIN(iniciado_at) as first_session_date,
-                    SUM(CASE WHEN completado_at IS NOT NULL THEN 1 ELSE 0 END) as sessions_completed,
-                    AVG(CASE
-                        WHEN completado_at IS NOT NULL AND iniciado_at IS NOT NULL
-                        THEN TIMESTAMPDIFF(MINUTE, iniciado_at, completado_at)
-                        ELSE NULL
-                    END) as avg_duration_minutes
-                ')
-                ->whereIn('pensum_id', $this->pensumIds);
-
-            if ($this->filterDiagMainId) {
-                $query->where('diag_sessions.diag_main_id', $this->filterDiagMainId);
-            }
-
-            if ($this->filterGradoId) {
-                $query->whereHas('pensum', function ($q) {
-                    $q->where('grado_id', $this->filterGradoId);
-                });
-            }
-
-            if ($this->filterSeccionId) {
-                $query->whereHas('estudiant.inscripcion', function ($q) {
-                    $q->where('seccion_id', $this->filterSeccionId);
-                });
-            }
-
-            if ($this->sessionsGradoFilter) {
-                $query->whereHas('pensum', function ($q) {
-                    $q->where('grado_id', $this->sessionsGradoFilter);
-                });
-            }
-
-            $dateFilter = now()->subDays($this->dateRange);
-            $query->where('diag_sessions.iniciado_at', '>=', $dateFilter);
-
-            $students = $query->groupBy('estudiant_id')
-                ->orderBy('last_session_date', 'desc')
-                ->paginate(15, ['*'], 'sessionsPage');
-
-            $students->getCollection()->transform(function ($studentData) {
-                try {
-                    $student = Estudiant::find($studentData->estudiant_id);
-
-                    if ($student) {
-                        $studentData->estudiant = $student;
-
-                        $sessions = DiagSession::with(['pensum.grado', 'answers'])
-                            ->where('estudiant_id', $studentData->estudiant_id)
-                            ->whereIn('pensum_id', $this->pensumIds)
-                            ->where('iniciado_at', '>=', now()->subDays($this->dateRange));
-
-                        if ($this->filterDiagMainId) {
-                            $sessions->where('diag_main_id', $this->filterDiagMainId);
-                        }
-
-                        if ($this->filterGradoId) {
-                            $sessions->whereHas('pensum', function ($q) {
-                                $q->where('grado_id', $this->filterGradoId);
-                            });
-                        }
-
-                        if ($this->filterSeccionId) {
-                            $sessions->whereHas('estudiant.inscripcion', function ($q) {
-                                $q->where('seccion_id', $this->filterSeccionId);
-                            });
-                        }
-
-                        if ($this->sessionsGradoFilter) {
-                            $sessions->whereHas('pensum', function ($q) {
-                                $q->where('grado_id', $this->sessionsGradoFilter);
-                            });
-                        }
-
-                        $studentData->sessions = $sessions->get();
-
-                        $totalQuestions = 0;
-                        $answeredQuestions = 0;
-
-                        foreach ($studentData->sessions as $session) {
-                            $sessionTotalQuestions = DiagQuestion::where('pensum_id', $session->pensum_id)
-                                ->where('activo', 1)
-                                ->count();
-                            $sessionAnsweredQuestions = $session->answers->where('completado_at', '!=', null)->count();
-
-                            $totalQuestions += $sessionTotalQuestions;
-                            $answeredQuestions += $sessionAnsweredQuestions;
-                        }
-
-                        $studentData->overall_progress = $totalQuestions > 0
-                            ? round(($answeredQuestions * 100.0) / $totalQuestions, 0)
-                            : 0;
-                        $studentData->total_questions = $totalQuestions;
-                        $studentData->answered_questions = $answeredQuestions;
-
-                        $studentData->grados = $studentData->sessions->pluck('pensum.grado')->unique()->filter();
-                    } else {
-                        $studentData->estudiant = (object) [
-                            'full_name' => 'Estudiante no encontrado',
-                            'gsemail' => 'N/A',
-                            'ci_estudiant' => 'N/A',
-                        ];
-                        $studentData->sessions = collect([]);
-                        $studentData->overall_progress = 0;
-                        $studentData->total_questions = 0;
-                        $studentData->answered_questions = 0;
-                        $studentData->grados = collect([]);
-                    }
-
-                    return $studentData;
-                } catch (\Exception $e) {
-                    Log::error('Error processing student data: ' . $e->getMessage());
-                    $studentData->estudiant = (object) [
-                        'full_name' => 'Error al cargar datos',
-                        'gsemail' => 'N/A',
-                        'ci_estudiant' => 'N/A',
-                    ];
-                    $studentData->sessions = collect([]);
-                    $studentData->overall_progress = 0;
-                    $studentData->total_questions = 0;
-                    $studentData->answered_questions = 0;
-                    $studentData->grados = collect([]);
-                    return $studentData;
-                }
-            });
-
-            return $students;
-        } catch (\Exception $e) {
-            Log::error('Error in getSessionsPaginated: ' . $e->getMessage());
-            return new \Illuminate\Pagination\LengthAwarePaginator(
-                collect([]),
-                0,
-                15,
-                1,
-                [
-                    'path' => request()->url(),
-                    'pageName' => 'sessionsPage',
-                ]
-            );
-        }
-    }
-
     public function render()
     {
-        $pensumIds = $this->pensumIds;
+        $pensumIds = $this->scopedPensumIds();
 
         $questions = $this->getQuestionsPaginationView();
 
-        $sessions = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers'])
-            ->select(['id', 'estudiant_id', 'pensum_id', 'diag_main_id', 'iniciado_at', 'completado_at', 'progreso', 'total_preguntas', 'activo'])
-            ->when($pensumIds, function ($query) use ($pensumIds) {
-                $query->whereIn('pensum_id', $pensumIds);
-            })
+        $sessionsQuery = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers'])
+            ->select(['id', 'estudiant_id', 'pensum_id', 'diag_main_id', 'iniciado_at', 'completado_at', 'progreso', 'total_preguntas', 'activo']);
+
+        $this->scopeToCarga($sessionsQuery);
+
+        if ($this->filterDiagMainId) {
+            $sessionsQuery->where('diag_main_id', $this->filterDiagMainId);
+        }
+
+        if ($this->filterGradoId) {
+            $sessionsQuery->whereHas('pensum', function ($q) {
+                $q->where('grado_id', $this->filterGradoId);
+            });
+        }
+
+        $sessions = $sessionsQuery
             ->when($this->filterStatus, function ($query) {
                 if ($this->filterStatus === 'completed') {
                     $query->whereNotNull('completado_at');
@@ -974,7 +1043,6 @@ class IndexComponent extends Component
 
         $stats = $this->getStatsProperty();
 
-        $sessionsPaginated = $this->getSessionsPaginated();
         $generalStats = [
             'total_sessions' => $stats['total_sessions'] ?? 0,
             'completed_sessions' => $stats['completed_sessions'] ?? 0,
@@ -983,22 +1051,36 @@ class IndexComponent extends Component
         $selectedSessionObject = null;
         if ($this->selectedSession && $this->SessionModalReport) {
             $selectedSessionObject = DiagSession::with(['answers.question', 'answers.selectedOption'])
+                ->whereIn('pensum_id', $pensumIds ?: [0])
                 ->find($this->selectedSession);
         }
+
+        $allSessionsQuery = DiagSession::query();
+        $this->scopeToCarga($allSessionsQuery);
+
+        $cargaPensums = $this->cargaPevaluacions
+            ->map(fn ($pevaluacion) => $pevaluacion->pensum)
+            ->filter()
+            ->unique('id')
+            ->sortBy(fn ($pensum) => $pensum->asignatura?->name ?? $pensum->full_name)
+            ->values();
 
         return view('livewire.profesor.diagnostics.index-component', [
             'questions' => $questions,
             'sessions' => $sessions,
             'stats' => $stats,
             'subjects' => $this->subjects,
-            'allQuestions' => DiagQuestion::whereIn('pensum_id', $pensumIds)->get(),
-            'allSessions' => DiagSession::whereIn('pensum_id', $pensumIds)->get(),
+            'allQuestions' => DiagQuestion::whereIn('pensum_id', $pensumIds ?: [0])->get(),
+            'allSessions' => $allSessionsQuery->get(),
             'allAnswers' => DiagAnswer::whereHas('question', function ($q) use ($pensumIds) {
-                $q->whereIn('pensum_id', $pensumIds);
+                $q->whereIn('pensum_id', $pensumIds ?: [0]);
+            })->whereHas('session', function ($q) {
+                $this->scopeToCarga($q);
             })->with(['selectedOption', 'question'])->get(),
             'questionTypes' => ['multiple', 'open', 'scale'],
             'profesor' => $this->profesor,
-            'sessionsPaginated' => $sessionsPaginated,
+            'cargaPensums' => $cargaPensums,
+            'lapso' => $this->currentLapso(),
             'generalStats' => $generalStats,
             'showSessionDetailsModal' => $this->showSessionDetailsModal,
             'showSessionAnswersModal' => $this->showSessionAnswersModal,
@@ -1006,7 +1088,13 @@ class IndexComponent extends Component
             'selectedSessionData' => $this->selectedSessionData,
             'selectedStudentData' => $this->selectedStudentData,
             'selectedSession' => $selectedSessionObject,
-            'diagMains' => DiagMain::all(),
+            'diagMains' => DiagMain::query()
+                ->when($this->lapsoId, function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('lapso_id', $this->lapsoId)->orWhereNull('lapso_id');
+                    });
+                })
+                ->get(),
             'diagMainCurrent' => DiagMain::find($this->filterDiagMainId),
             'list_grados' => $this->list_grados,
             'list_secciones' => $this->list_secciones,
@@ -1015,14 +1103,12 @@ class IndexComponent extends Component
 
     private function getQuestionsPaginationView()
     {
-        $pensumIds = $this->pensumIds;
+        $pensumIds = $this->scopedPensumIds();
 
         $questions = DiagQuestion::with(['options', 'pensum.asignatura'])
-            ->when($pensumIds, function ($query) use ($pensumIds) {
-                $query->whereIn('pensum_id', $pensumIds);
-            })
+            ->whereIn('pensum_id', $pensumIds ?: [0])
             ->when($this->search, function ($query) {
-                $query->where('pregunta', 'like', '%' . $this->search . '%');
+                $query->where('pregunta', 'like', '%'.$this->search.'%');
             })
             ->when($this->filterType, function ($query) {
                 $query->where('tipo_pregunta', $this->filterType);
@@ -1039,7 +1125,7 @@ class IndexComponent extends Component
     private function getStudentAccuracyStats()
     {
         try {
-            $pensumIds = $this->pensumIds;
+            $pensumIds = $this->scopedPensumIds();
 
             if (empty($pensumIds)) {
                 return [
@@ -1052,8 +1138,8 @@ class IndexComponent extends Component
             $query = DiagAnswer::with(['selectedOption', 'question.pensum'])
                 ->whereNotNull('completado_at')
                 ->whereNotNull('option_id')
-                ->whereHas('session', function ($q) use ($pensumIds) {
-                    $q->whereIn('pensum_id', $pensumIds);
+                ->whereHas('session', function ($q) {
+                    $this->scopeToCarga($q);
 
                     if ($this->filterDiagMainId) {
                         $q->where('diag_main_id', $this->filterDiagMainId);
@@ -1062,12 +1148,6 @@ class IndexComponent extends Component
                     if ($this->filterGradoId) {
                         $q->whereHas('pensum', function ($qq) {
                             $qq->where('grado_id', $this->filterGradoId);
-                        });
-                    }
-
-                    if ($this->filterSeccionId) {
-                        $q->whereHas('estudiant.inscripcion', function ($qq) {
-                            $qq->where('seccion_id', $this->filterSeccionId);
                         });
                     }
                 })
@@ -1100,7 +1180,8 @@ class IndexComponent extends Component
                 'total_answered' => $totalAnswered,
             ];
         } catch (Exception $e) {
-            Log::error('Error in getStudentAccuracyStats (Professor): ' . $e->getMessage());
+            Log::error('Error in getStudentAccuracyStats (Professor): '.$e->getMessage());
+
             return [
                 'accuracy' => 0,
                 'correct_answers' => 0,
@@ -1137,7 +1218,7 @@ class IndexComponent extends Component
                 );
             }
         } catch (Exception $e) {
-            Log::error('Error getting AI report (Profesor): ' . $e->getMessage());
+            Log::error('Error getting AI report (Profesor): '.$e->getMessage());
             $this->notification()->error(
                 'Error',
                 'Ocurrió un error al buscar el reporte.'
@@ -1157,7 +1238,7 @@ class IndexComponent extends Component
                 $draftRaw = $report->latestDraft->output_text ?? '{}';
                 $draftData = json_decode($draftRaw, true);
 
-                if (!is_array($draftData)) {
+                if (! is_array($draftData)) {
                     $draftData = [];
                 }
 
@@ -1203,7 +1284,7 @@ class IndexComponent extends Component
                 );
             }
         } catch (Exception $e) {
-            Log::error('Error viewing report (Profesor): ' . $e->getMessage());
+            Log::error('Error viewing report (Profesor): '.$e->getMessage());
             $this->notification()->error(
                 'Error',
                 'Ocurrió un error al cargar el reporte.'

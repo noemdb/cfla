@@ -12,6 +12,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
+use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableSlot;
@@ -170,7 +171,6 @@ class TimetableCalendarBackupTest extends TestCase
             $periods[$order] = TimetablePeriod::factory()->create([
                 'calendar_id' => $f['calendar']->id,
                 'shift_id' => $f['shift']->id,
-                'pestudio_id' => $f['pestudio']->id,
                 'day_of_week' => 1,
                 'order_in_day' => $order,
                 'start_time' => $start,
@@ -427,10 +427,11 @@ class TimetableCalendarBackupTest extends TestCase
         $this->assertSame(1, $preview['availability']['current']);
         $this->assertSame(1, $preview['availability']['snapshot']);
 
-        // Sello de concurrencia para `apply()` (D5).
-        $this->assertSame((int) $f['calendar']->version, $preview['version']);
+        // Sello de concurrencia para `apply()` (D5). El hash refleja el estado
+        // real de la BD (fresh), no atributos no persistidos del modelo.
+        $this->assertSame((int) $f['calendar']->fresh()->version, $preview['version']);
         $this->assertSame(
-            $this->snapshotService()->checksum($this->snapshotService()->build($f['calendar'])),
+            $this->snapshotService()->checksum($this->snapshotService()->build($f['calendar']->fresh())),
             $preview['state_hash'],
         );
 
@@ -898,9 +899,13 @@ class TimetableCalendarBackupTest extends TestCase
             $this->assertTrue(method_exists($class, $method), "El playbook cita un método inexistente: {$reference}()");
         }
 
-        // Toda constante de orden del solver debe aparecer documentada.
+        // Toda constante de orden del solver debe aparecer documentada. El
+        // playbook usa la forma normalizada (`constraint`, no `ORDER_CONSTRAINT`).
         $constants = array_keys((new \ReflectionClass(SolverAttemptConfig::class))->getConstants());
-        $orders = array_values(array_filter($constants, fn (string $name): bool => str_starts_with($name, 'ORDER_')));
+        $orders = array_values(array_map(
+            fn (string $name): string => strtolower(substr($name, strlen('ORDER_'))),
+            array_filter($constants, fn (string $name): bool => str_starts_with($name, 'ORDER_')),
+        ));
         $documented = array_column($playbook['soft_rules']['ordering'], 'order');
 
         sort($orders);
@@ -957,5 +962,420 @@ class TimetableCalendarBackupTest extends TestCase
             ],
             $expected,
         );
+    }
+
+    // ─── Reset global del módulo de horarios (barra superior) ─────────────
+
+    public function test_clear_all_timetable_data_purges_operational_data_and_keeps_calendars(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+        Seccion::query()->whereKey($f['pevA']->seccion_id)->update(['timetable_locked' => true]);
+        $f['calendar']->update([
+            'status' => TimetableCalendar::STATUS_ACTIVE,
+            'quality_score' => 10,
+        ]);
+
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(2, TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(1, TimetableTeacherAvailability::query()->where('calendar_id', $f['calendar']->id)->count());
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->call('clearAllTimetableData')
+            ->assertDispatched('wireui:notification');
+
+        // Datos operativos eliminados en TODOS los calendarios.
+        $this->assertSame(0, TimetableLesson::query()->count());
+        $this->assertSame(0, TimetableSlot::query()->count());
+        $this->assertSame(0, TimetableTeacherAvailability::query()->count());
+        $this->assertSame(0, TimetableConflict::query()->count());
+
+        // Estructura conservada: calendarios, períodos, turnos y aulas.
+        $this->assertTrue(TimetableCalendar::query()->whereKey($f['calendar']->id)->exists());
+        $this->assertSame(4, TimetablePeriod::query()->where('calendar_id', $f['calendar']->id)->count());
+
+        // Bloqueos de sección liberados.
+        $this->assertFalse((bool) Seccion::query()->whereKey($f['pevA']->seccion_id)->value('timetable_locked'));
+
+        // Estado derivado y publicación reiniciados.
+        $calendar = TimetableCalendar::query()->findOrFail($f['calendar']->id);
+        $this->assertNull($calendar->preview_payload);
+        $this->assertNull($calendar->quality_score);
+        $this->assertSame(TimetableCalendar::STATUS_DRAFT, $calendar->status);
+    }
+
+    public function test_clear_all_timetable_data_requires_double_confirmation(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+
+        $component = Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->call('confirmClearAllTimetableData')
+            ->assertDispatched('wireui:confirm-dialog', function ($eventName, $params) {
+                $options = $params[0]['options'] ?? [];
+
+                return ($options['accept']['method'] ?? '') === 'confirmClearAllTimetableDataFinal'
+                    && ($options['icon'] ?? '') === 'warning';
+            });
+
+        // El primer diálogo no borra nada.
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+
+        // El segundo diálogo tampoco borra: solo confirma con el impacto real.
+        $component->call('confirmClearAllTimetableDataFinal')
+            ->assertDispatched('wireui:confirm-dialog', function ($eventName, $params) {
+                $options = $params[0]['options'] ?? [];
+
+                return ($options['accept']['method'] ?? '') === 'clearAllTimetableData'
+                    && ($options['icon'] ?? '') === 'error';
+            });
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+
+        // Solo el tercer paso borra.
+        $component->call('clearAllTimetableData');
+        $this->assertSame(0, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+    }
+
+    public function test_clear_all_timetable_data_writes_re_aplicable_pre_reset_backups(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->call('clearAllTimetableData');
+
+        // El resguardo pre-reset del calendario con datos existe y es un
+        // snapshot v2 completo (lessons + slots).
+        $files = collect(Storage::disk('local')->files(TimetableCalendarSnapshotService::AUTO_BACKUP_DIR))
+            ->filter(fn (string $path): bool => str_contains($path, 'pre-reset-'.$f['calendar']->id.'-'));
+        $this->assertCount(1, $files);
+
+        $payload = json_decode(
+            Storage::disk('local')->get($files->first()),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+        $this->assertSame('cfla-timetable-calendar-snapshot', $payload['format']);
+        $this->assertCount(2, $payload['lessons']);
+        $this->assertCount(2, $payload['slots']);
+
+        // Es re-aplicable: restaura lessons + slots desde el resguardo.
+        $calendar = TimetableCalendar::query()->findOrFail($f['calendar']->id);
+        $service = $this->snapshotService();
+        $service->apply($calendar, $payload, $service->preview($calendar, $payload));
+
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(2, TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->count());
+    }
+
+    public function test_clear_all_timetable_data_aborts_when_the_safety_backup_fails(): void
+    {
+        $f = $this->snapshotFixture();
+
+        // Disco local imposible de escribir: el resguardo pre-reset falla y
+        // el borrado debe abortarse sin tocar la base.
+        config()->set('filesystems.disks.local', [
+            'driver' => 'local',
+            'root' => '/dev/null/timetable-snapshots-imposible',
+        ]);
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->call('clearAllTimetableData');
+
+        // Sin red de seguridad no se borra NADA.
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(2, TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->count());
+    }
+
+    // ─── Respaldo/restore de TODOS los calendarios (v2, snapshot completo) ──
+
+    public function test_all_calendars_backup_v2_downloads_full_snapshots_with_slots(): void
+    {
+        $f = $this->snapshotFixture();
+
+        $component = Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id);
+
+        $response = $component->instance()->downloadAllCalendarsBackup();
+        ob_start();
+        $response->sendContent();
+        $json = (string) ob_get_clean();
+        $backup = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('cfla-timetable-calendars-backup', $backup['format']);
+        $this->assertSame(2, $backup['version']);
+
+        $entry = collect($backup['calendars'])->firstWhere('calendar.id', $f['calendar']->id);
+        $this->assertNotNull($entry, 'El snapshot de todos debe incluir el calendario del fixture.');
+        $this->assertSame(TimetableCalendar::STATUS_DRAFT, $entry['calendar']['status']);
+        $this->assertArrayHasKey('slots', $entry);
+        $this->assertCount(2, $entry['slots']);
+        $this->assertArrayHasKey('availability', $entry);
+        // Documentación no se duplica por calendario.
+        $this->assertArrayNotHasKey('schema', $entry);
+        $this->assertArrayNotHasKey('playbook', $entry);
+    }
+
+    public function test_all_calendars_backup_restores_published_status(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+        $f['calendar']->activate();
+
+        $snapshot = $this->snapshotService()->build($f['calendar']->fresh());
+        $this->assertSame(TimetableCalendar::STATUS_ACTIVE, $snapshot['calendar']['status']);
+
+        TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->delete();
+        $file = UploadedFile::fake()->createWithContent('published.json', json_encode([
+            'format' => 'cfla-timetable-calendars-backup',
+            'version' => 2,
+            'calendars' => [$snapshot],
+        ], JSON_THROW_ON_ERROR));
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->set('allCalendarsBackupFile', $file)
+            ->call('restoreAllCalendarsBackup');
+
+        $restored = $f['calendar']->fresh();
+        $this->assertSame(TimetableCalendar::STATUS_ACTIVE, $restored->status);
+        $this->assertSame(2, $restored->slots()->count());
+    }
+
+    public function test_all_calendars_backup_exports_draft_assignments_without_persisted_slots(): void
+    {
+        $f = $this->snapshotFixture();
+        $f['calendar']->update([
+            'preview_payload' => [
+                'dry_run' => true,
+                'assignment' => [
+                    (string) $f['lessonA']->id => [['period_id' => $f['periods'][1]->id]],
+                    (string) $f['lessonB']->id => [['period_id' => $f['periods'][2]->id]],
+                ],
+            ],
+        ]);
+        TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->delete();
+
+        $component = Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id);
+        $response = $component->instance()->downloadAllCalendarsBackup();
+        ob_start();
+        $response->sendContent();
+        $backup = json_decode((string) ob_get_clean(), true, 512, JSON_THROW_ON_ERROR);
+
+        $entry = collect($backup['calendars'])->firstWhere('calendar.id', $f['calendar']->id);
+        $this->assertCount(2, $entry['slots']);
+    }
+
+    public function test_all_calendars_backup_v2_restores_the_schedule(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+
+        $snapshot = $this->snapshotService()->build($f['calendar']);
+        unset($snapshot['schema'], $snapshot['playbook']);
+
+        $backup = [
+            'format' => 'cfla-timetable-calendars-backup',
+            'version' => 2,
+            'calendars' => [$snapshot],
+        ];
+        $json = json_encode($backup, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        // Contexto limpio: sin horario ni lessons.
+        TimetableSlot::query()->delete();
+        TimetableLesson::query()->delete();
+        $this->assertSame(0, TimetableSlot::query()->count());
+
+        $file = UploadedFile::fake()->createWithContent('todos.json', $json);
+
+        $wizard = Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->set('allCalendarsBackupFile', $file)
+            ->call('restoreAllCalendarsBackup')
+            ->assertDispatched('wireui:notification');
+
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(2, TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->count());
+
+        // El paso 5 debe poder pintar el horario restaurado.
+        $this->assertSame(5, $wizard->get('currentStep'));
+        $this->assertContains($wizard->get('generationState'), ['preview_ready', 'published']);
+        $preview = $wizard->get('preview');
+        $this->assertIsArray($preview);
+        $this->assertNotEmpty($preview['assignment'] ?? []);
+    }
+
+    public function test_snapshot_uses_dry_run_assignment_when_slots_are_not_published(): void
+    {
+        $f = $this->snapshotFixture();
+        $lessonA = $f['lessonA'];
+        $lessonB = $f['lessonB'];
+
+        $f['calendar']->update([
+            'preview_payload' => [
+                'dry_run' => true,
+                'assignment' => [
+                    (string) $lessonA->id => [['period_id' => $f['periods'][1]->id]],
+                    (string) $lessonB->id => [['period_id' => $f['periods'][2]->id]],
+                ],
+            ],
+        ]);
+        TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->delete();
+
+        $snapshot = $this->snapshotService()->build($f['calendar']->fresh());
+
+        $this->assertCount(2, $snapshot['slots']);
+        $this->assertSame($f['pevA']->id, $snapshot['slots'][0]['pevaluacion_id']);
+        $this->assertSame($f['pevB']->id, $snapshot['slots'][1]['pevaluacion_id']);
+    }
+
+    public function test_all_calendars_backup_v1_legacy_remains_additive(): void
+    {
+        $f = $this->snapshotFixture();
+
+        $backup = [
+            'format' => 'cfla-timetable-calendars-backup',
+            'version' => 1,
+            'calendars' => [[
+                'calendar' => [
+                    'id' => $f['calendar']->id,
+                    'lapso_id' => $f['calendar']->lapso_id,
+                    'pestudio_id' => $f['calendar']->pestudio_id,
+                ],
+                'lessons' => [[
+                    'pevaluacion_id' => $f['pevA']->id,
+                    'academic_identity' => [
+                        'seccion_id' => $f['pevA']->seccion_id,
+                        'pensum_id' => $f['pevA']->pensum_id,
+                        'profesor_id' => $f['pevA']->profesor_id,
+                        'grupo_estable_id' => null,
+                    ],
+                    'configuration' => [
+                        'shift_id' => $f['shift']->id,
+                        'weekly_blocks_t' => 5,
+                        'weekly_blocks_p' => 0,
+                    ],
+                ]],
+            ]],
+        ];
+
+        $file = UploadedFile::fake()->createWithContent('legacy.json', json_encode($backup));
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->set('allCalendarsBackupFile', $file)
+            ->call('restoreAllCalendarsBackup')
+            ->assertDispatched('wireui:notification', function ($eventName, $params) {
+                $description = (string) ($params[0]['options']['description'] ?? '');
+
+                return str_contains($description, 'solo lessons')
+                    && str_contains($description, 'no trae horario');
+            });
+
+        // Aditivo: los slots existentes no se tocan; la lesson se actualiza.
+        $this->assertSame(2, TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(
+            5,
+            (int) TimetableLesson::query()
+                ->where('calendar_id', $f['calendar']->id)
+                ->where('pevaluacion_id', $f['pevA']->id)
+                ->value('weekly_blocks_t'),
+        );
+    }
+
+    public function test_all_calendars_backup_v2_without_horario_warns_in_the_notification(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+        $service = $this->snapshotService();
+
+        // Snapshot sin horario y sin períodos: ni el restore ni el draft
+        // automático pueden producir slots.
+        $snapshot = $service->build($f['calendar']);
+        unset($snapshot['schema'], $snapshot['playbook']);
+        $snapshot['slots'] = [];
+        $snapshot['periods'] = [];
+        $snapshot['checksum'] = $service->checksum($snapshot);
+
+        TimetableSlot::query()->delete();
+        TimetableLesson::query()->delete();
+        TimetablePeriod::query()->delete();
+
+        $file = UploadedFile::fake()->createWithContent('sin-horario.json', json_encode([
+            'format' => 'cfla-timetable-calendars-backup',
+            'version' => 2,
+            'calendars' => [$snapshot],
+        ], JSON_THROW_ON_ERROR));
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->set('allCalendarsBackupFile', $file)
+            ->call('restoreAllCalendarsBackup')
+            ->assertDispatched('wireui:notification', function ($eventName, $params) {
+                $description = (string) ($params[0]['options']['description'] ?? '');
+
+                return str_contains($description, 'no contenía horario')
+                    && str_contains($description, '0 slot(s)');
+            });
+
+        // Lessons restauradas; sin horario.
+        $this->assertSame(2, TimetableLesson::query()->where('calendar_id', $f['calendar']->id)->count());
+        $this->assertSame(0, TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->count());
+    }
+
+    public function test_confirm_and_publish_publishes_a_saved_preview_without_step3_selection(): void
+    {
+        Storage::fake('local');
+        $f = $this->snapshotFixture();
+
+        // Estado post-recarga: dry-run guardado en preview_payload, sin slots
+        // persistidos y sin selección del paso 3 (se pierde al recargar).
+        $f['lessonB']->update(['weekly_blocks_t' => 2]);
+        $f['calendar']->update([
+            'preview_payload' => [
+                'dry_run' => true,
+                'assignment' => [
+                    (string) $f['lessonA']->id => [
+                        ['period_id' => $f['periods'][1]->id],
+                        ['period_id' => $f['periods'][2]->id],
+                    ],
+                    (string) $f['lessonB']->id => [
+                        ['period_id' => $f['periods'][3]->id],
+                        ['period_id' => $f['periods'][4]->id],
+                    ],
+                ],
+            ],
+        ]);
+        TimetableSlot::query()->where('calendar_id', $f['calendar']->id)->delete();
+
+        $component = Livewire::withQueryParams(['calendarId' => $f['calendar']->id])
+            ->actingAs($f['user'])
+            ->test(TimetableWizard::class);
+
+        $this->assertSame([], $component->get('selectedPevs'));
+        $this->assertNotNull($component->get('preview'));
+
+        // Antes este paso fallaba con "Sin lessons seleccionadas".
+        $component->call('confirmAndPublish');
+
+        $calendar = $f['calendar']->fresh();
+        $this->assertSame(TimetableCalendar::STATUS_ACTIVE, $calendar->status);
+        $this->assertSame(4, $calendar->slots()->count());
     }
 }

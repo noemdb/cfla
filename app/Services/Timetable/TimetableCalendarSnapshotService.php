@@ -92,6 +92,7 @@ final class TimetableCalendarSnapshotService
                 'period_minutes' => (int) $calendar->period_minutes,
                 'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
                 'strategy' => $calendar->strategy,
+                'status' => (string) $calendar->status,
             ],
             'periods' => $this->periodRows($calendar),
             'section_locks' => $this->sectionLockRows($calendar),
@@ -240,6 +241,7 @@ final class TimetableCalendarSnapshotService
                     'period_minutes' => 'int. Duración del bloque en minutos.',
                     'max_subjects_per_period' => 'int. Tope de medio-grupos por celda (D-6).',
                     'strategy' => 'string. optimized|legacy.',
+                    'status' => 'string. Estado del calendario: draft, active o archived.',
                 ],
             ],
             'periods' => [
@@ -418,10 +420,15 @@ final class TimetableCalendarSnapshotService
 
         $availability = $payload['availability'] ?? [];
 
+        // Sello de concurrencia contra el estado REAL de la BD, no contra el
+        // modelo en memoria (que puede traer atributos no persistidos): apply()
+        // revalida con `fresh()` y debe comparar manzanas con manzanas (D5).
+        $fresh = $calendar->fresh() ?? $calendar;
+
         return [
             'mode' => $mode,
-            'version' => (int) $calendar->version,
-            'state_hash' => $this->checksum($this->build($calendar)),
+            'version' => (int) $fresh->version,
+            'state_hash' => $this->checksum($this->build($fresh)),
             'lessons' => [
                 'snapshot' => $snapshotRows,
                 'resolvable' => count($resolved),
@@ -531,9 +538,11 @@ final class TimetableCalendarSnapshotService
      * Escribe el snapshot del estado ACTUAL del calendario antes de tocarlo
      * (§9.3). Es un snapshot válido y re-aplicable → "Deshacer último restore".
      *
+     * @param  string  $prefix  Prefijo del archivo: `auto` (restore) o
+     *                          `pre-reset` (borrado total del módulo).
      * @return string Ruta relativa dentro del disco `local`.
      */
-    public function writeAutoBackup(TimetableCalendar $calendar): string
+    public function writeAutoBackup(TimetableCalendar $calendar, string $prefix = 'auto'): string
     {
         $json = json_encode(
             $this->build($calendar),
@@ -541,15 +550,16 @@ final class TimetableCalendarSnapshotService
         );
 
         $file = sprintf(
-            '%s/auto-%d-%s-%s.json',
+            '%s/%s-%d-%s-%s.json',
             self::AUTO_BACKUP_DIR,
+            $prefix,
             (int) $calendar->id,
             now()->format('Ymd_His'),
             substr(hash('sha256', $json), 0, 8),
         );
 
         if (! Storage::disk('local')->put($file, $json)) {
-            throw new RuntimeException('No se pudo escribir el auto-backup; el restore se abortó sin tocar el horario.');
+            throw new RuntimeException('No se pudo escribir el auto-backup; la operación se abortó sin tocar el horario.');
         }
 
         return $file;
@@ -1147,12 +1157,14 @@ final class TimetableCalendarSnapshotService
         $shiftCodes = $this->shiftCodes();
         $hasPractical = Schema::hasColumn('timetable_slots', 'is_practical');
 
-        return TimetableSlot::query()
+        $persisted = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->with(['period', 'lesson:id,pevaluacion_id'])
             ->orderBy('id')
-            ->get()
-            ->map(function (TimetableSlot $slot) use ($shiftCodes, $hasPractical): array {
+            ->get();
+
+        if ($persisted->isNotEmpty()) {
+            return $persisted->map(function (TimetableSlot $slot) use ($shiftCodes, $hasPractical): array {
                 $period = $slot->period;
 
                 $row = [
@@ -1177,8 +1189,73 @@ final class TimetableCalendarSnapshotService
                 }
 
                 return $row;
-            })
-            ->all();
+            })->all();
+        }
+
+        // A dry-run stores its assignment in preview_payload until publication.
+        // Preserve that schedule too; otherwise a complete backup would contain
+        // all lessons but silently lose the visible draft timetable.
+        $assignment = is_array($calendar->preview_payload)
+            ? ($calendar->preview_payload['assignment'] ?? [])
+            : [];
+        if (! is_array($assignment) || $assignment === []) {
+            return [];
+        }
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->with('pevaluacion:id,profesor_id,seccion_id,grupo_estable_id')
+            ->get(['id', 'pevaluacion_id']);
+        $lessons = $lessons->keyBy('id');
+        $periods = TimetablePeriod::query()
+            ->where('calendar_id', $calendar->id)
+            ->get()
+            ->keyBy('id');
+        $rows = [];
+
+        foreach ($assignment as $lessonId => $slots) {
+            $lesson = $lessons->get((int) $lessonId);
+            if (! $lesson || ! is_array($slots)) {
+                continue;
+            }
+
+            foreach ($slots as $slot) {
+                if (! is_array($slot)) {
+                    continue;
+                }
+                $period = $periods->get((int) ($slot['period_id'] ?? 0));
+                if (! $period) {
+                    continue;
+                }
+                $pevaluacion = $lesson->pevaluacion;
+                if (! $pevaluacion) {
+                    continue;
+                }
+
+                $rows[] = [
+                    'pevaluacion_id' => (int) $lesson->pevaluacion_id,
+                    'period' => [
+                        'shift_code' => $shiftCodes[(int) $period->shift_id] ?? null,
+                        'day_of_week' => (int) $period->day_of_week,
+                        'order_in_day' => (int) $period->order_in_day,
+                    ],
+                    'room_id' => isset($slot['room_id']) && $slot['room_id'] !== null
+                        ? (int) $slot['room_id']
+                        : null,
+                    'profesor_id' => (int) $pevaluacion->profesor_id,
+                    'seccion_id' => (int) $pevaluacion->seccion_id,
+                    'grupo_estable_id' => $pevaluacion->grupo_estable_id !== null
+                        ? (int) $pevaluacion->grupo_estable_id
+                        : null,
+                    'is_manual_override' => (bool) ($slot['is_manual_override'] ?? false),
+                    'locked' => (bool) ($slot['locked'] ?? false),
+                    'is_half_group' => (bool) ($slot['is_half_group'] ?? false),
+                    'allow_shared_teacher' => (bool) ($slot['allow_shared_teacher'] ?? false),
+                ];
+            }
+        }
+
+        return $rows;
     }
 
     /**

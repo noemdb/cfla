@@ -10,6 +10,7 @@ use App\Services\ActivityImprovementService;
 use App\Services\KimiService;
 use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
+use App\Services\TokenRouterService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -398,8 +399,8 @@ class ActivitySupplementTest extends TestCase
             ->willReturn([
                 'success' => true,
                 'content' => '## Título mejorado\n\nTexto reorganizado con **énfasis**.',
-                'model'   => 'test-model',
-                'error'   => null,
+                'model' => 'test-model',
+                'error' => null,
             ]);
         $this->app->instance(ActivityImprovementService::class, $mock);
 
@@ -428,8 +429,8 @@ class ActivitySupplementTest extends TestCase
             ->willReturn([
                 'success' => false,
                 'content' => null,
-                'model'   => null,
-                'error'   => 'Servicio IA caído',
+                'model' => null,
+                'error' => 'Servicio IA caído',
             ]);
         $this->app->instance(ActivityImprovementService::class, $mock);
 
@@ -448,25 +449,26 @@ class ActivitySupplementTest extends TestCase
      */
     public function test_improve_supplement_text_strips_markdown_fences(): void
     {
-        // Se mockean los 3 servicios de IA que inyecta el constructor.
+        // Se mockean los servicios de IA que inyecta el constructor.
         $openRouter = $this->createMock(OpenRouterService::class);
         $nvidia = $this->createMock(NvidiaService::class);
         $kimi = $this->createMock(KimiService::class);
+        $tokenRouter = $this->createMock(TokenRouterService::class);
 
-        $raw = "```md" . "\n" . "## Título" . "\n" . "\n" . "Texto formateado." . "\n" . "```";
-        $expected = "## Título" . "\n" . "\n" . "Texto formateado.";
+        $raw = '```md'."\n".'## Título'."\n"."\n".'Texto formateado.'."\n".'```';
+        $expected = '## Título'."\n"."\n".'Texto formateado.';
 
         $openRouter->expects($this->once())
             ->method('ask')
             ->willReturn([
                 'success' => true,
                 'content' => $raw,
-                'model'   => 'test-model',
-                'usage'   => null,
-                'error'   => null,
+                'model' => 'test-model',
+                'usage' => null,
+                'error' => null,
             ]);
 
-        $service = new ActivityImprovementService($openRouter, $nvidia, $kimi);
+        $service = new ActivityImprovementService($openRouter, $nvidia, $kimi, $tokenRouter);
 
         $result = $service->improveSupplementText(
             text: 'texto original',
@@ -655,5 +657,25 @@ class ActivitySupplementTest extends TestCase
             ->call('generateSupplementText')
             ->assertSet('supplementFormatMode', 'detallado')
             ->assertSet('supplementText', 'ok');
+    }
+
+    /**
+     * Regresión: el bloque `@script` debe envolver su JS en `<script>…</script>`.
+     * Sin el wrapper Livewire extrae "" y Alpine evalúa `__self.result = }`,
+     * lanzando en consola "Alpine Expression Error: Unexpected token '}'".
+     */
+    public function test_supplement_dropzone_script_is_wrapped_in_script_tag(): void
+    {
+        $chain = $this->createEvaluacionChain();
+        $user = $this->createProfesorUser($chain['profesorId']);
+
+        $html = Livewire::actingAs($user)
+            ->test(IndexComponent::class, ['id' => $chain['pevaluacionId']])
+            ->html();
+
+        $this->assertMatchesRegularExpression(
+            '/&lt;script&gt;[^"]{0,80}window\.handleSupplementImageDrop/',
+            $html,
+        );
     }
 }

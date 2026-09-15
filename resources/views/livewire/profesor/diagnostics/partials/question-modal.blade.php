@@ -52,7 +52,7 @@
                         <select wire:model="pensum_id"
                             class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
                             <option value="">Seleccione un área</option>
-                            @foreach($profesor->pensums as $pensum)
+                            @foreach($cargaPensums as $pensum)
                                 <option value="{{ $pensum->id }}">{{ $pensum->asignatura_name ?? $pensum->full_name }}</option>
                             @endforeach
                         </select>

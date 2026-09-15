@@ -53,7 +53,7 @@
                 wire:loading.attr="disabled"
                 wire:loading.class="opacity-50 cursor-not-allowed"
                 wire:target="downloadAllCalendarsBackup"
-                title="Descargar respaldo JSON de las lessons de TODOS los calendarios"
+                title="Descargar snapshot completo (configuración + horario) de TODOS los calendarios"
                 aria-label="Backup de todos los calendarios"
                 class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -75,7 +75,7 @@
                 wire:loading.attr="disabled"
                 wire:loading.class="opacity-50 cursor-not-allowed"
                 wire:target="restoreAllCalendarsBackup,allCalendarsBackupFile"
-                title="Restaurar la configuración de lessons de TODOS los calendarios desde el JSON seleccionado"
+                title="Restaurar el snapshot completo (configuración + horario) de TODOS los calendarios desde el JSON seleccionado"
                 aria-label="Restore de todos los calendarios"
                 class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -83,6 +83,21 @@
                 </svg>
                 <span wire:loading.remove wire:target="restoreAllCalendarsBackup" class="sr-only">Restore todos</span>
                 <span wire:loading wire:target="restoreAllCalendarsBackup" class="sr-only">Restaurando…</span>
+            </button>
+            <button type="button"
+                wire:click="confirmClearAllTimetableData"
+                wire:loading.attr="disabled"
+                wire:loading.class="opacity-50 cursor-not-allowed"
+                wire:target="confirmClearAllTimetableData,clearAllTimetableData"
+                title="Eliminar los datos operativos de horarios (lessons, slots, disponibilidad, conflictos, historial, suplencias y ausencias) de TODOS los calendarios, para restaurar desde un contexto limpio"
+                aria-label="Limpiar todos los datos de horarios"
+                class="inline-flex items-center gap-1.5 rounded-md bg-rose-500/10 px-2.5 py-1 text-[11px] font-bold text-rose-700 transition-colors hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-rose-300">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v11a2 2 0 002 2h6a2 2 0 002-2V7M10 11v6M14 11v6"/>
+                </svg>
+                <span wire:loading.remove wire:target="confirmClearAllTimetableData,clearAllTimetableData">Reset horarios</span>
+                <span wire:loading wire:target="clearAllTimetableData">Limpiando…</span>
+                <span wire:loading wire:target="confirmClearAllTimetableData">Abriendo…</span>
             </button>
         </div>
     </div>
@@ -309,6 +324,23 @@
                                 <span wire:loading.remove wire:target="duplicateCalendar">Duplicar</span>
                                 <span wire:loading wire:target="duplicateCalendar">Duplicando…</span>
                             </button>
+                            @if ($selectedCalendarDetail['status'] === 'archived')
+                                <button wire:click="unarchiveCalendar({{ $selectedCalendarDetail['id'] }})"
+                                    wire:loading.attr="disabled" wire:target="unarchiveCalendar"
+                                    title="Restaurar este calendario archivado como borrador"
+                                    class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10">
+                                    <span wire:loading.remove wire:target="unarchiveCalendar">Desarchivar</span>
+                                    <span wire:loading wire:target="unarchiveCalendar">Restaurando…</span>
+                                </button>
+                            @else
+                                <button wire:click="archiveCalendar({{ $selectedCalendarDetail['id'] }})"
+                                    wire:loading.attr="disabled" wire:target="archiveCalendar"
+                                    title="Archivar este calendario: deja de estar editable y no participa del activo del plan"
+                                    class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 text-xs font-bold border border-amber-500/20">
+                                    <span wire:loading.remove wire:target="archiveCalendar">Archivar</span>
+                                    <span wire:loading wire:target="archiveCalendar">Archivando…</span>
+                                </button>
+                            @endif
                             @if ($selectedCalendarDetail['status'] === 'draft')
                                 <button wire:click="activateCalendar({{ $selectedCalendarDetail['id'] }})"
                                     class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-200 text-xs font-bold border border-gray-200 dark:border-white/10">Activar</button>
@@ -1160,7 +1192,11 @@
                                     {{ $opt['name'] }}
                                     @if ($opt['id'] !== 'general' && $this->pestudioAllSectionsLocked($opt['id']))
                                         <svg class="inline-block h-3 w-3 ml-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" title="Todas las secciones activas de este pestudio están bloqueadas">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                            @if ($gradeTabLocked)
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                            @else
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 10.5V6.75a3.75 3.75 0 10-7.5 0M6.75 10.5h10.5A2.25 2.25 0 0119.5 12.75v6.75a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25z"/>
+                                            @endif
                                         </svg>
                                     @endif
                                 </button>
@@ -2441,16 +2477,33 @@
                             <div class="border-b border-gray-200 dark:border-white/10">
                                 <nav class="flex w-full overflow-x-auto">
                                     @foreach ($tabGradoOptions as $opt)
-                                        <button type="button" wire:click="selectStep5Grade({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
-                                            class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
-                                            {{ $step5GradeTab !== 'pestudio' && (string) $activeGradoId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
-                                            {{ $opt['name'] }}
-                                            @if ($opt['id'] !== 'general' && $this->gradeAllSectionsLocked($opt['id']))
-                                                <svg class="inline-block h-3 w-3 ml-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" title="Todas las secciones activas de este grado están bloqueadas">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                                </svg>
-                                            @endif
-                                        </button>
+                                        @if ($opt['id'] !== 'general')
+                                            @php $gradeTabLocked = $this->gradeAllSectionsLocked($opt['id']); @endphp
+                                            <div class="flex min-w-0 flex-1 border-b-2 {{ $step5GradeTab !== 'pestudio' && (string) $activeGradoId === (string) $opt['id'] ? 'border-emerald-500' : 'border-transparent' }}">
+                                                <button type="button" wire:click="selectStep5Grade({{ (int) $opt['id'] }})"
+                                                    class="min-w-0 flex-1 px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-200
+                                                    {{ $step5GradeTab !== 'pestudio' && (string) $activeGradoId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                                    {{ $opt['name'] }}
+                                                </button>
+                                                <button type="button"
+                                                    wire:click="toggleGradeTimetableLock({{ (int) $opt['id'] }})"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="toggleGradeTimetableLock"
+                                                    title="{{ $gradeTabLocked ? 'Desbloquear el horario de este grado' : 'Bloquear el horario de este grado' }}"
+                                                    aria-label="{{ $gradeTabLocked ? 'Desbloquear' : 'Bloquear' }} horario de {{ $opt['name'] }}"
+                                                    class="shrink-0 px-2 py-2 text-emerald-500 transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                                                    <svg class="inline h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                    </svg>
+                                                    <span class="sr-only">{{ $gradeTabLocked ? 'Bloqueado' : 'Desbloqueado' }}</span>
+                                                </button>
+                                            </div>
+                                        @else
+                                            <button type="button" wire:click="selectStep5Grade('general')"
+                                                class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300">
+                                                {{ $opt['name'] }}
+                                            </button>
+                                        @endif
                                     @endforeach
                                     <button type="button" wire:click="showPestudioFormats"
                                         title="Formatos PDF"
@@ -2468,16 +2521,38 @@
                             <div class="border-b border-gray-200 dark:border-white/10">
                                 <nav class="flex w-full overflow-x-auto">
                                     @foreach ($tabSeccionOptions as $opt)
-                                        <button type="button" wire:click="selectStep5Section({{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
-                                            class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
-                                            {{ $step5SectionTab !== 'formats' && (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
-                                            {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
-                                            @if (is_numeric($opt['id']) && isset($lockedSectionIdSet[(int) $opt['id']]))
-                                                <svg class="inline h-3 w-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
-                                                </svg>
-                                            @endif
-                                        </button>
+                                        @if (is_numeric($opt['id']))
+                                            @php $sectionTabLocked = isset($lockedSectionIdSet[(int) $opt['id']]); @endphp
+                                            <div class="flex min-w-0 flex-1 border-b-2 {{ $step5SectionTab !== 'formats' && (string) $activeSeccionId === (string) $opt['id'] ? 'border-emerald-500' : 'border-transparent' }}">
+                                                <button type="button" wire:click="selectStep5Section({{ (int) $opt['id'] }})"
+                                                    class="min-w-0 flex-1 px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-200
+                                                    {{ $step5SectionTab !== 'formats' && (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300' }}">
+                                                    {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
+                                                </button>
+                                                <button type="button"
+                                                    wire:key="section-lock-{{ (int) $opt['id'] }}-{{ $sectionTabLocked ? 'locked' : 'unlocked' }}"
+                                                    wire:click="toggleSectionTimetableLock({{ (int) $opt['id'] }})"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="toggleSectionTimetableLock"
+                                                    title="{{ $sectionTabLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
+                                                    aria-label="{{ $sectionTabLocked ? 'Desbloquear' : 'Bloquear' }} horario de {{ $opt['label'] ?? 'la sección '.$opt['name'] }}"
+                                                    class="shrink-0 px-2 py-2 text-amber-500 transition-colors hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                                                    <svg class="inline h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        @if ($sectionTabLocked)
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                                        @else
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 10.5V6.75a3.75 3.75 0 10-7.5 0M6.75 10.5h10.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25z"/>
+                                                        @endif
+                                                    </svg>
+                                                    <span class="sr-only">{{ $sectionTabLocked ? 'Bloqueado' : 'Desbloqueado' }}</span>
+                                                </button>
+                                            </div>
+                                        @else
+                                            <button type="button" wire:click="selectStep5Section('general')"
+                                                class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300">
+                                                {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
+                                            </button>
+                                        @endif
                                     @endforeach
                                     <button type="button" wire:click="showSectionFormats"
                                         title="Formatos PDF"
@@ -3303,6 +3378,18 @@
                 @if (!is_numeric($activeSeccionId))
                     <span class="self-center text-[10px] text-amber-600 dark:text-amber-300">Selecciona una sección para consultar el grado.</span>
                 @endif
+            </div>
+
+            {{-- Tipo de hora del bloque que se agrega --}}
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <select wire:model.live="addPreviewLessonType"
+                    class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:ring-emerald-500/50 outline-none dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                    <option value="theory">Hora teórica</option>
+                    <option value="practice">Hora práctica</option>
+                </select>
+                <span class="self-center text-[10px] text-gray-500 dark:text-gray-400">
+                    El bloque agregado se contará como {{ $addPreviewLessonType === 'practice' ? 'práctica' : 'teórica' }} en el Paso 3.
+                </span>
             </div>
             <div class="relative">
                 <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

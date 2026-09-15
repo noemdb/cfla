@@ -1742,17 +1742,19 @@
     @endif
 
     @script
-        window.handleSupplementImageDrop = function (event) {
-            const files = event.dataTransfer.files;
-            if (files.length > 0) {
-                const dt = new DataTransfer();
-                dt.items.add(files[0]);
-                const el = document.getElementById('supplement_image_input');
-                el.files = dt.files;
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        };
+        <script>
+            window.handleSupplementImageDrop = function (event) {
+                const files = event.dataTransfer.files;
+                if (files.length > 0) {
+                    const dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    const el = document.getElementById('supplement_image_input');
+                    el.files = dt.files;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            };
+        </script>
     @endscript
 
     {{-- Create Activity Modal (root level) --}}

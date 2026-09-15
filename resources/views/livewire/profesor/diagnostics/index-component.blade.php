@@ -20,13 +20,21 @@
                     </svg>
                     {{ $profesor->full_name ?? 'Profesor' }}
                 </h3>
-                @if($profesor && $profesor->pensums->isNotEmpty())
+                @if(!empty($cargaPensums) && $cargaPensums->isNotEmpty())
                     <div class="flex items-center gap-2">
+                        @if($lapso)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-gray-400 border border-white/10">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                {{ $lapso->name }}
+                            </span>
+                        @endif
                         <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación:</span>
                         <select wire:model.live="selectedPensumId"
                             class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 min-w-[200px]">
                             <option value="">Todas las áreas</option>
-                            @foreach($profesor->pensums as $pensum)
+                            @foreach($cargaPensums as $pensum)
                                 <option value="{{ $pensum->id }}">{{ $pensum->full_name ?? $pensum->asignatura_name }}</option>
                             @endforeach
                         </select>

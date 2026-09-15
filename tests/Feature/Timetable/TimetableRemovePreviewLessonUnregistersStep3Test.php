@@ -91,10 +91,17 @@ class TimetableRemovePreviewLessonUnregistersStep3Test extends TestCase
         $this->assertArrayHasKey($f['pev']->id, $component->get('selectedPevs'));
         $this->assertArrayHasKey($f['pev']->id, $component->get('lessons'));
 
+        // El Paso 3 decrementa al bloque realmente restante (1) y la lesson
+        // persistida queda sincronizada.
+        $lessons = $component->get('lessons');
+        $this->assertSame(1, (int) ($lessons[$f['pev']->id]['weekly_blocks_t'] ?? 0));
+        $this->assertSame(1, (int) $f['lesson']->fresh()->weekly_blocks_t);
+
         $component->call('removePreviewLesson', $f['lesson']->id, $f['period2']->id);
 
-        // Retiro completo: des-seleccionada del Paso 3.
+        // Retiro completo: des-seleccionada del Paso 3 y demanda en cero.
         $this->assertArrayNotHasKey($f['pev']->id, $component->get('selectedPevs'));
         $this->assertArrayNotHasKey($f['pev']->id, $component->get('lessons'));
+        $this->assertSame(0, (int) $f['lesson']->fresh()->weekly_blocks_t);
     }
 }

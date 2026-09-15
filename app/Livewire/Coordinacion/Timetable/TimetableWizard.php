@@ -175,6 +175,9 @@ class TimetableWizard extends Component
 
     public string $addPreviewLessonSource = 'grade';
 
+    /** Tipo de hora del bloque que se agrega desde el preview: theory|practice. */
+    public string $addPreviewLessonType = 'theory';
+
     // Pestañas pestudio → grado → sección (PLAN-ACTIVITIES-001)
     public $activePestudioId = null;
 
@@ -725,6 +728,57 @@ class TimetableWizard extends Component
         }
         $this->loadCalendars();
         session()->flash('message', 'Borrador eliminado.');
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 — Archiva un calendario (draft/active → archived).
+     * Deja de listarse como editable y no participa del "activo" del plan de
+     * estudio. Es reversible con `unarchiveCalendar()`.
+     */
+    public function archiveCalendar($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar || $calendar->status === TimetableCalendar::STATUS_ARCHIVED) {
+            session()->flash('error', 'El calendario seleccionado no se puede archivar.');
+
+            return;
+        }
+
+        if ($calendar->status === TimetableCalendar::STATUS_GENERATING) {
+            session()->flash('error', 'Espera a que termine la generación antes de archivar este calendario.');
+
+            return;
+        }
+
+        $wasActive = $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        $calendar->update(['status' => TimetableCalendar::STATUS_ARCHIVED]);
+
+        $this->loadCalendars();
+        session()->flash(
+            'message',
+            'Calendario «'.$calendar->name.'» archivado.'
+            .($wasActive ? ' El plan de estudio quedó sin calendario activo.' : ''),
+        );
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 — Restaura un calendario archivado como borrador para
+     * revisarlo y volver a activarlo. No se reactiva directo para no pisar al
+     * activo vigente del plan de estudio.
+     */
+    public function unarchiveCalendar($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_ARCHIVED) {
+            session()->flash('error', 'El calendario seleccionado no está archivado.');
+
+            return;
+        }
+
+        $calendar->update(['status' => TimetableCalendar::STATUS_DRAFT]);
+
+        $this->loadCalendars();
+        session()->flash('message', 'Calendario «'.$calendar->name.'» restaurado como borrador.');
     }
 
     public function createShift(): void
@@ -2969,72 +3023,6 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Filas de lessons (formato de respaldo) de un calendario.
-     *
-     * @return list<array<string, mixed>>
-     */
-    private function calendarLessonsRows(TimetableCalendar $calendar): array
-    {
-        $lessons = TimetableLesson::query()
-            ->where('calendar_id', $calendar->id)
-            ->with([
-                'pevaluacion.pensum.asignatura',
-                'pevaluacion.seccion.grado.pestudio',
-                'pevaluacion.profesor',
-                'pevaluacion.grupoEstable',
-            ])
-            ->get();
-
-        return $lessons->map(function (TimetableLesson $lesson): ?array {
-            $pev = $lesson->pevaluacion;
-
-            if (! $pev) {
-                return null;
-            }
-
-            $asignatura = $pev->pensum?->asignatura;
-            $seccion = $pev->seccion;
-            $grado = $seccion?->grado;
-            $pestudio = $grado?->pestudio;
-            $profesor = $pev->profesor;
-
-            return [
-                'pevaluacion_id' => (int) $pev->id,
-                'academic_identity' => [
-                    'lapso_id' => $pev->lapso_id,
-                    'pestudio_id' => $pestudio?->id,
-                    'grado_id' => $grado?->id,
-                    'seccion_id' => $seccion?->id,
-                    'pensum_id' => $pev->pensum_id,
-                    'profesor_id' => $pev->profesor_id,
-                    'grupo_estable_id' => $pev->grupo_estable_id,
-                    'asignatura_id' => $asignatura?->id,
-                ],
-                'labels' => [
-                    'pestudio' => $pestudio?->name,
-                    'grado' => $grado?->name,
-                    'seccion' => $seccion?->name,
-                    'asignatura' => $asignatura?->name,
-                    'profesor' => $profesor
-                        ? trim(($profesor->lastname ?? '').', '.($profesor->name ?? ''))
-                        : null,
-                    'lapso' => $pev->lapso?->name,
-                ],
-                'configuration' => [
-                    'shift_id' => (int) $lesson->shift_id,
-                    'weekly_blocks_t' => max(0, (int) $lesson->weekly_blocks_t),
-                    'weekly_blocks_p' => max(0, (int) $lesson->weekly_blocks_p),
-                    'room_type_required' => $lesson->room_type_required ?: null,
-                    'is_half_group' => (bool) $lesson->is_half_group,
-                    'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
-                    'priority' => max(0, (int) $lesson->priority),
-                    'locked' => (bool) $lesson->locked,
-                ],
-            ];
-        })->filter()->values()->all();
-    }
-
-    /**
      * Documentación técnica del contrato de respaldo (legible por un agente IA).
      * Se embebe como clave `schema` en cada respaldo generado. Preciso, sin
      * prosa: cada campo define su tipo, su uso en restore y su semántica.
@@ -3049,8 +3037,8 @@ class TimetableWizard extends Component
             ],
             'version' => [
                 'type' => 'int',
-                'current' => 1,
-                'desc' => 'Version del schema. Incrementar ante cambios incompatibles (breaking). Restore exige version===1.',
+                'current' => 2,
+                'desc' => 'Version del schema. v1 = solo lessons (aditivo). v2 = snapshot completo por calendario (lessons + periods + availability + section_locks + slots), reemplaza el horario. Restore acepta v1 y v2.',
             ],
             'exported_at' => [
                 'type' => 'string',
@@ -3079,7 +3067,7 @@ class TimetableWizard extends Component
             ],
             'calendars' => [
                 'type' => 'array',
-                'desc' => 'Solo respaldo de todos (cfla-timetable-calendars-backup). Cada entrada es {calendar, lessons}. Restore itera entradas, empareja por lapso_id+pestudio_id y omite las que no coinciden.',
+                'desc' => 'Solo respaldo de todos (cfla-timetable-calendars-backup). En v2 cada entrada es un snapshot completo del calendario (mismo contrato que cfla-timetable-calendar-snapshot, sin schema/playbook para no duplicarlos). En v1 cada entrada es {calendar, lessons}. Restore empareja por lapso_id+pestudio_id (con respaldo en id) y omite las que no coinciden.',
             ],
             'section' => [
                 'type' => 'null|object',
@@ -3165,8 +3153,10 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Descarga un respaldo JSON con las lessons de TODOS los calendarios
-     * (todos los pestudios/planes activos). Formato agrupado por calendario.
+     * Descarga un snapshot COMPLETO de TODOS los calendarios (todos los
+     * pestudios/planes): configuración, períodos, disponibilidad, bloqueos de
+     * sección, lessons y slots. Restaurarlo devuelve el horario, no solo la
+     * configuración.
      */
     public function downloadAllCalendarsBackup()
     {
@@ -3175,24 +3165,40 @@ class TimetableWizard extends Component
             ->orderBy('id')
             ->get();
 
-        $entries = $calendars->map(function (TimetableCalendar $calendar): ?array {
-            $rows = $this->calendarLessonsRows($calendar);
+        $service = $this->snapshotService();
 
-            return [
-                'calendar' => [
-                    'id' => (int) $calendar->id,
-                    'name' => $calendar->name,
-                    'lapso_id' => $calendar->lapso_id,
-                    'lapso' => $calendar->lapso?->name,
-                    'pescolar_id' => $calendar->pescolar_id,
-                    'pestudio_id' => $calendar->pestudio_id,
-                    'pestudio' => $calendar->pestudio?->name,
-                    'period_minutes' => (int) $calendar->period_minutes,
-                    'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
-                ],
-                'lessons' => $rows,
-            ];
-        })->filter(fn (?array $entry): bool => $entry !== null && $entry['lessons'] !== [])->values()->all();
+        $entries = $calendars->map(function (TimetableCalendar $calendar) use ($service): ?array {
+            $originalStatus = $calendar->status;
+            // A legacy calendar may have lessons and periods but no persisted
+            // slots or draft assignment yet. Build the draft before exporting
+            // so the all-calendars backup contains the current schedule data.
+            $hasPreviewAssignment = is_array($calendar->preview_payload)
+                && is_array($calendar->preview_payload['assignment'] ?? null)
+                && $calendar->preview_payload['assignment'] !== [];
+            if (! $calendar->slots()->exists() && ! $hasPreviewAssignment) {
+                GenerateTimetableJob::dispatchSync(
+                    (int) $calendar->id,
+                    dryRun: true,
+                    pevaluacionIds: null,
+                );
+                $calendar->refresh();
+                if ($calendar->status !== $originalStatus) {
+                    $calendar->update(['status' => $originalStatus]);
+                    $calendar->refresh();
+                }
+            }
+
+            $snapshot = $service->build($calendar);
+
+            if (($snapshot['lessons'] ?? []) === []) {
+                return null;
+            }
+
+            // `schema` y `playbook` son documentación: no se duplican N veces.
+            unset($snapshot['schema'], $snapshot['playbook']);
+
+            return $snapshot;
+        })->filter()->values()->all();
 
         if ($entries === []) {
             $this->notification()->warning('Sin lessons para respaldar', 'No hay calendarios con lessons configuradas.');
@@ -3202,13 +3208,13 @@ class TimetableWizard extends Component
 
         $backup = [
             'format' => 'cfla-timetable-calendars-backup',
-            'version' => 1,
+            'version' => 2,
             'exported_at' => now()->toIso8601String(),
             'schema' => $this->timetableBackupSchema(),
             'calendars' => $entries,
         ];
 
-        $filename = 'respaldo-lessons-todos-los-calendarios-'.now()->format('Ymd_His').'.json';
+        $filename = 'snapshot-todos-los-calendarios-'.now()->format('Ymd_His').'.json';
 
         return response()->streamDownload(function () use ($backup): void {
             echo json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
@@ -3249,8 +3255,10 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Restaura el respaldo de TODOS los calendarios (todos los pestudios/planes
-     * activos). Aplica cada bloque de lessons a su calendario correspondiente.
+     * Restaura el respaldo de TODOS los calendarios. En v2 cada entrada es un
+     * snapshot completo y se aplica con semántica de reemplazo (devuelve el
+     * horario); en v1 (legacy) cada entrada es solo lessons y se aplica de
+     * forma aditiva.
      */
     public function restoreAllCalendarsBackup(): void
     {
@@ -3261,9 +3269,9 @@ class TimetableWizard extends Component
         }
 
         if (strtolower((string) $this->allCalendarsBackupFile->getClientOriginalExtension()) !== 'json'
-            || (int) $this->allCalendarsBackupFile->getSize() > 10 * 1024 * 1024
+            || (int) $this->allCalendarsBackupFile->getSize() > 50 * 1024 * 1024
         ) {
-            $this->notification()->error('Archivo no permitido', 'El respaldo debe ser un archivo JSON de hasta 10 MB.');
+            $this->notification()->error('Archivo no permitido', 'El respaldo debe ser un archivo JSON de hasta 50 MB.');
 
             return;
         }
@@ -3276,8 +3284,9 @@ class TimetableWizard extends Component
             return;
         }
 
+        $version = (int) ($payload['version'] ?? 0);
         if (($payload['format'] ?? null) !== 'cfla-timetable-calendars-backup'
-            || (int) ($payload['version'] ?? 0) !== 1
+            || ! in_array($version, [1, 2], true)
             || ! is_array($payload['calendars'] ?? null)
         ) {
             $this->notification()->error('Respaldo incompatible', 'El archivo no corresponde a un respaldo de todos los calendarios de CFlat.');
@@ -3285,10 +3294,15 @@ class TimetableWizard extends Component
             return;
         }
 
-        $totalRestored = 0;
+        $service = $this->snapshotService();
+
+        $totalLessons = 0;
+        $totalSlots = 0;
         $totalSkipped = 0;
         $applied = 0;
         $notFound = 0;
+        $failed = 0;
+        $touchedCalendarIds = [];
 
         foreach ($payload['calendars'] as $entry) {
             if (! is_array($entry) || ! is_array($entry['lessons'] ?? null) || ! is_array($entry['calendar'] ?? null)) {
@@ -3308,9 +3322,53 @@ class TimetableWizard extends Component
                 continue;
             }
 
+            // v2 con bloque `slots` → snapshot completo (reemplazo, devuelve horario).
+            if ($version >= 2 && array_key_exists('slots', $entry)) {
+                try {
+                    $requestedStatus = $entry['calendar']['status'] ?? $calendar->status;
+                    $service->verify($entry);
+                    $preview = $service->preview($calendar, $entry);
+                    $report = $service->apply($calendar, $entry, $preview);
+                } catch (\Throwable $exception) {
+                    $failed++;
+
+                    continue;
+                }
+
+                $totalLessons += (int) ($report['lessons'] ?? 0);
+                $totalSlots += (int) ($report['slots'] ?? 0);
+                $totalSkipped += (int) ($report['slots_skipped'] ?? 0);
+
+                // Reaplica el estado del snapshot (§10): un backup activo se
+                // re-activa; sin slots no hay horario publicable y queda draft.
+                $restored = TimetableCalendar::query()->find((int) $calendar->id);
+                if ($requestedStatus === TimetableCalendar::STATUS_ACTIVE) {
+                    if ($restored?->slots()->exists()) {
+                        $restored->activate();
+                    } else {
+                        // Un snapshot sin slots no contiene un horario
+                        // publicable; conserva el preview generado como draft.
+                        $restored?->update(['status' => TimetableCalendar::STATUS_DRAFT]);
+                    }
+                } elseif (in_array($requestedStatus, [
+                    TimetableCalendar::STATUS_DRAFT,
+                    TimetableCalendar::STATUS_ARCHIVED,
+                ], true)) {
+                    $restored?->update(['status' => $requestedStatus]);
+                }
+
+                $touchedCalendarIds[] = (int) $calendar->id;
+                $applied++;
+
+                continue;
+            }
+
+            // v1 o snapshot sin slots → aditivo (comportamiento previo).
             $result = $this->restoreLessonsToCalendar($calendar, $entry);
-            $totalRestored += count($result['restored']);
+            $totalLessons += count($result['restored']);
             $totalSkipped += $result['skipped'];
+
+            $touchedCalendarIds[] = (int) $calendar->id;
             $applied++;
         }
 
@@ -3321,14 +3379,182 @@ class TimetableWizard extends Component
         }
 
         $this->allCalendarsBackupFile = null;
-        $message = "{$totalRestored} lesson(s) restaurada(s) en {$applied} calendario(s).";
+        $this->loadCalendars();
+
+        // Refresca el calendario seleccionado para que el paso 5 muestre el horario.
+        if ($this->calendarId && in_array((int) $this->calendarId, $touchedCalendarIds, true)) {
+            $this->selectCalendar((int) $this->calendarId);
+            $this->currentStep = 5;
+        }
+
+        $message = "{$totalLessons} lesson(s) y {$totalSlots} slot(s) restaurado(s) en {$applied} calendario(s).";
         if ($notFound > 0) {
             $message .= " {$notFound} calendario(s) no coincidieron.";
+        }
+        if ($failed > 0) {
+            $message .= " {$failed} calendario(s) fallaron (revisa el formato del snapshot).";
         }
         if ($totalSkipped > 0) {
             $message .= " {$totalSkipped} fila(s) omitida(s).";
         }
+
+        // El "0 slots" nunca debe ser un misterio: explica por qué el paso 5
+        // puede quedar sin grid.
+        if ($version === 1) {
+            $message .= ' ATENCIÓN: respaldo v1 (solo lessons) — el archivo no trae horario: el paso 5 quedará sin grid hasta generar uno o restaurar un snapshot v2.';
+        } elseif ($version >= 2 && $totalSlots === 0) {
+            $message .= ' ATENCIÓN: el snapshot no contenía horario (0 slots) — el paso 5 no mostrará grid hasta generar uno o restaurar un snapshot con slots.';
+        }
+
         $this->notification()->success('Respaldo restaurado', $message);
+    }
+
+    /**
+     * Primer paso (doble confirmación) para limpiar TODOS los datos operativos
+     * del módulo de horarios de todos los calendarios: lessons, slots,
+     * disponibilidad, conflictos, versiones, historial, suplencias y ausencias.
+     *
+     * Conserva calendarios, turnos, aulas y períodos para poder restaurar
+     * después desde un respaldo JSON en un contexto limpio. El segundo paso
+     * (`confirmClearAllTimetableDataFinal`) resume el impacto real.
+     */
+    public function confirmClearAllTimetableData(): void
+    {
+        $this->dialog()->confirm([
+            'title' => '¿Limpiar los datos de horarios de todos los calendarios?',
+            'description' => 'Se eliminarán lessons, slots, disponibilidad docente, conflictos, versiones, historial de cambios, suplencias y ausencias de TODOS los calendarios. Se conservan los calendarios, turnos, aulas y períodos. Esta acción es irreversible.',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Continuar',
+                'method' => 'confirmClearAllTimetableDataFinal',
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'color' => 'secondary',
+            ],
+        ]);
+    }
+
+    /**
+     * Segundo paso: confirma con el impacto real (conteos) antes de borrar.
+     */
+    public function confirmClearAllTimetableDataFinal(): void
+    {
+        $counts = $this->timetableDataCounts();
+
+        $this->dialog()->confirm([
+            'title' => 'Confirmación final: eliminar todo',
+            'description' => "Se borrarán {$counts['lessons']} lesson(s), {$counts['slots']} slot(s), {$counts['availability']} disponibilidad(es), {$counts['conflicts']} conflicto(s), {$counts['absences']} ausencia(s), {$counts['substitutes']} suplencia(s), {$counts['versions']} versión(es) y {$counts['logs']} registro(s) de historial. Los calendarios activos volverán a borrador. ANTES de borrar se escribe un resguardo snapshot por calendario (re-aplicable desde «Elegir snapshot»); si el resguardo falla, no se borra nada.",
+            'icon' => 'error',
+            'accept' => [
+                'label' => 'Sí, eliminar todo',
+                'method' => 'clearAllTimetableData',
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'color' => 'secondary',
+            ],
+        ]);
+    }
+
+    /**
+     * Ejecuta la limpieza de los datos operativos de horarios de todos los
+     * calendarios y deja el wizard en un contexto limpio para restaurar.
+     *
+     * Red de seguridad (SPEC-TIMETABLE-SNAPSHOT-001 §9.3): antes de borrar se
+     * escribe un snapshot re-aplicable por calendario con datos. Si algún
+     * resguardo falla, el borrado se aborta por completo.
+     */
+    public function clearAllTimetableData(): void
+    {
+        $counts = $this->timetableDataCounts();
+        $service = $this->snapshotService();
+
+        // 1) Resguardos pre-reset: snapshot completo por calendario con datos.
+        $backups = [];
+        try {
+            TimetableCalendar::query()->orderBy('id')->get()->each(
+                function (TimetableCalendar $calendar) use ($service, &$backups): void {
+                    $hasData = $calendar->lessons()->exists() || $calendar->slots()->exists();
+                    if (! $hasData) {
+                        return;
+                    }
+
+                    $backups[] = $service->writeAutoBackup($calendar, 'pre-reset');
+                },
+            );
+        } catch (\Throwable $exception) {
+            $this->notification()->error(
+                'No se pudo resguardar: borrado abortado',
+                'No se eliminó nada. '.$exception->getMessage(),
+            );
+
+            return;
+        }
+
+        DB::transaction(function (): void {
+            // Orden respetando FKs: primero las dependencias de slots/lessons.
+            TimetableSubstituteAssignment::query()->delete();
+            TimetableAbsence::query()->delete();
+            TimetableConflict::query()->delete();
+            TimetableSlot::query()->delete();
+            TimetableTeacherAvailability::query()->delete();
+            TimetableLesson::query()->delete();
+            TimetableChangeLog::query()->delete();
+            TimetableCalendarVersion::query()->delete();
+
+            // Datos derivados del calendario: sin lessons/slots quedan obsoletos.
+            TimetableCalendar::query()->update([
+                'preview_payload' => null,
+                'active_job_id' => null,
+                'quality_score' => null,
+            ]);
+
+            // Un calendario sin horario no puede seguir publicado.
+            TimetableCalendar::query()
+                ->whereIn('status', [TimetableCalendar::STATUS_ACTIVE, TimetableCalendar::STATUS_GENERATING])
+                ->update(['status' => TimetableCalendar::STATUS_DRAFT]);
+
+            // Los bloqueos de sección dejan de tener sentido sin horario.
+            if (Schema::hasColumn('seccions', 'timetable_locked')) {
+                Seccion::query()->where('timetable_locked', true)->update(['timetable_locked' => false]);
+            }
+        });
+
+        // Estado en memoria del wizard.
+        $this->preview = null;
+        $this->generationState = null;
+        $this->snapshotPreview = null;
+        $this->lastSnapshotAutoBackup = null;
+        $this->loadCalendars();
+
+        $message = "Se eliminaron {$counts['lessons']} lesson(s) y {$counts['slots']} slot(s).";
+        if ($backups !== []) {
+            $message .= ' Resguardos pre-reset (re-aplicables con «Elegir snapshot»): '.implode(' · ', $backups);
+        }
+
+        $this->notification()->success('Horarios reiniciados', $message);
+    }
+
+    /**
+     * Conteos de los datos que borra `clearAllTimetableData()`.
+     *
+     * @return array{lessons: int, slots: int, availability: int, conflicts: int, absences: int, substitutes: int, versions: int, logs: int}
+     */
+    private function timetableDataCounts(): array
+    {
+        return [
+            'lessons' => TimetableLesson::query()->count(),
+            'slots' => TimetableSlot::query()->count(),
+            'availability' => TimetableTeacherAvailability::query()->count(),
+            'conflicts' => TimetableConflict::query()->count(),
+            'absences' => TimetableAbsence::query()->count(),
+            'substitutes' => TimetableSubstituteAssignment::query()->count(),
+            'versions' => TimetableCalendarVersion::query()->count(),
+            'logs' => TimetableChangeLog::query()->count(),
+        ];
     }
 
     /**
@@ -4575,6 +4801,7 @@ class TimetableWizard extends Component
         }
 
         $section->update(['timetable_locked' => ! (bool) $section->timetable_locked]);
+        $section->refresh();
 
         $this->notification()->success(
             $section->timetable_locked ? 'Horario bloqueado' : 'Horario desbloqueado',
@@ -4614,6 +4841,37 @@ class TimetableWizard extends Component
         $total = (clone $query)->count();
 
         return $total > 0 && (clone $query)->where('timetable_locked', false)->count() === 0;
+    }
+
+    /**
+     * Bloquea o desbloquea el horario de todas las secciones activas de un
+     * grado. Si el grado está completamente bloqueado, la acción desbloquea;
+     * en cualquier otro caso, bloquea las secciones restantes.
+     */
+    public function toggleGradeTimetableLock(int $gradeId): void
+    {
+        $query = Seccion::query()
+            ->where('grado_id', $gradeId)
+            ->where('status_active', true);
+
+        if (! $query->exists()) {
+            $this->notification()->error(
+                'Grado no encontrado',
+                'No se encontraron secciones activas para cambiar el bloqueo.',
+            );
+
+            return;
+        }
+
+        $locked = $this->gradeAllSectionsLocked($gradeId);
+        $query->update(['timetable_locked' => ! $locked]);
+
+        $this->notification()->success(
+            ! $locked ? 'Horario del grado bloqueado' : 'Horario del grado desbloqueado',
+            ! $locked
+                ? 'Todas las secciones activas del grado quedaron bloqueadas.'
+                : 'Todas las secciones activas del grado quedaron desbloqueadas.',
+        );
     }
 
     /**
@@ -5104,6 +5362,11 @@ class TimetableWizard extends Component
 
         if ($removedAll) {
             $this->unregisterLessonFromStep3($lesson);
+            // Sin bloques en el preview la demanda del Paso 3 es cero, para que
+            // la publicación no la reporte como asignación incompleta.
+            $lesson->update(['weekly_blocks_t' => 0, 'weekly_blocks_p' => 0]);
+        } else {
+            $this->syncPreviewLessonBlocksToStep3((int) $lesson->id);
         }
 
         $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
@@ -5170,6 +5433,7 @@ class TimetableWizard extends Component
         $this->addPreviewLessonPeriodId = $periodId;
         $this->addPreviewLessonSearch = '';
         $this->addPreviewLessonSource = 'grade';
+        $this->addPreviewLessonType = 'theory';
         $this->showAddPreviewLessonModal = true;
     }
 
@@ -5179,6 +5443,7 @@ class TimetableWizard extends Component
         $this->addPreviewLessonPeriodId = null;
         $this->addPreviewLessonSearch = '';
         $this->addPreviewLessonSource = 'grade';
+        $this->addPreviewLessonType = 'theory';
     }
 
     /** Período destino del modal de «agregar lección» (para mostrar su contexto). */
@@ -5377,7 +5642,8 @@ class TimetableWizard extends Component
             return;
         }
 
-        $lessonSlots[] = ['period_id' => $period->id, 'room_id' => null, 'is_practical' => false];
+        $isPractical = $this->addPreviewLessonType === 'practice';
+        $lessonSlots[] = ['period_id' => $period->id, 'room_id' => null, 'is_practical' => $isPractical];
         $assignment[$lessonKey] = array_values($lessonSlots);
         $this->preview['assignment'] = $assignment;
         $this->preview['unassigned'] = array_values(array_filter(
@@ -5388,6 +5654,8 @@ class TimetableWizard extends Component
         $this->preview['assignment_source'] = 'manual_preview';
         $this->recordPreviewChange('add_preview_lesson', $lesson->id, [], $lessonSlots);
         $this->registerLessonInStep3($lesson);
+        // El bloque agregado actualiza la demanda del Paso 3 (teóricas/prácticas).
+        $this->syncPreviewLessonBlocksToStep3((int) $lesson->id);
         $this->closeAddPreviewLessonModal();
         if ($hasShiftMismatch) {
             $this->notification()->warning(
@@ -5472,6 +5740,88 @@ class TimetableWizard extends Component
         }
 
         $this->lessonsDirty = true;
+    }
+
+    /**
+     * Refleja en las variables del Paso 3 (y en la lesson persistida) los
+     * bloques reales del preview para esa lesson: los teóricos y prácticos se
+     * cuentan según `is_practical` de cada slot asignado. Así, agregar o quitar
+     * un slot en el Paso 5 actualiza la demanda del Paso 3 y la publicación no
+     * la marca como incompleta.
+     */
+    private function syncPreviewLessonBlocksToStep3(int $lessonId): void
+    {
+        $lesson = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->find($lessonId);
+
+        if (! $lesson) {
+            return;
+        }
+
+        $pevId = (int) $lesson->pevaluacion_id;
+        if ($pevId <= 0) {
+            return;
+        }
+
+        [$theory, $practice] = $this->previewBlockCounts($lessonId);
+
+        if ((int) $lesson->weekly_blocks_t !== $theory || (int) $lesson->weekly_blocks_p !== $practice) {
+            $lesson->update([
+                'weekly_blocks_t' => $theory,
+                'weekly_blocks_p' => $practice,
+            ]);
+        }
+
+        $this->selectedPevs[$pevId] = true;
+
+        if (! is_array($this->lessons)) {
+            $this->lessons = [];
+        }
+
+        $config = is_array($this->lessons[$pevId] ?? null) ? $this->lessons[$pevId] : [];
+        $this->lessons[$pevId] = array_merge([
+            'pev_id' => $pevId,
+            'shift_id' => (int) $lesson->shift_id,
+            'room_type_required' => $lesson->room_type_required ?: null,
+            'is_half_group' => (bool) $lesson->is_half_group,
+            'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
+            'priority' => (int) $lesson->priority,
+            'locked' => (bool) $lesson->locked,
+        ], $config, [
+            'weekly_blocks_t' => $theory,
+            'weekly_blocks_p' => $practice,
+        ]);
+
+        $this->lessonsDirty = true;
+    }
+
+    /**
+     * Cuenta los bloques del preview para una lesson separando teóricos y
+     * prácticos (`is_practical`).
+     *
+     * @return array{0: int, 1: int} [teóricos, prácticos]
+     */
+    private function previewBlockCounts(int $lessonId): array
+    {
+        $assignment = $this->preview['assignment'] ?? [];
+        $slots = $assignment[(string) $lessonId] ?? $assignment[$lessonId] ?? [];
+        $theory = 0;
+        $practice = 0;
+
+        foreach ((array) $slots as $slot) {
+            if (! is_array($slot)) {
+                continue;
+            }
+
+            if (! empty($slot['is_practical'])) {
+                $practice++;
+            } else {
+                $theory++;
+            }
+        }
+
+        return [$theory, $practice];
     }
 
     public function openAiDryRunDialog(): void
@@ -7046,6 +7396,12 @@ PROMPT;
     private function loadPublishedPreview(TimetableCalendar $calendar): void
     {
         if (! $calendar->slots()->exists()) {
+            $savedPreview = $calendar->preview_payload;
+            if (is_array($savedPreview) && is_array($savedPreview['assignment'] ?? null)) {
+                $this->preview = $savedPreview;
+                $this->generationState = 'preview_ready';
+            }
+
             return;
         }
 
@@ -7618,6 +7974,21 @@ PROMPT;
 
         $lessons = $this->eligibleCalendarLessons($calendar);
         $selectedPevIds = collect($this->selectedPevIds())->map(fn ($id): int => (int) $id);
+
+        // Un preview restaurado o rehidratado desde la BD (slots persistidos o
+        // dry-run guardado en preview_payload) no depende de la selección
+        // manual del paso 3 — que se pierde al recargar la página: el alcance
+        // de publicación son las lessons con asignación en el propio preview.
+        if ($selectedPevIds->isEmpty() && ! empty($this->preview['assignment'])) {
+            $assignedLessonIds = collect($this->preview['assignment'])
+                ->filter(fn ($assignments): bool => ! empty($assignments))
+                ->keys()
+                ->map(fn ($lessonId): int => (int) $lessonId);
+            $selectedPevIds = $lessons
+                ->filter(fn (TimetableLesson $lesson): bool => $assignedLessonIds->contains((int) $lesson->id))
+                ->map(fn (TimetableLesson $lesson): int => (int) $lesson->pevaluacion_id)
+                ->values();
+        }
         $selectedPevIdsBeforeScope = $selectedPevIds;
         $selectedLessonIds = $lessons
             ->filter(fn (TimetableLesson $lesson): bool => $selectedPevIds->contains((int) $lesson->pevaluacion_id))
@@ -8430,9 +8801,20 @@ PROMPT;
                 $compatibleRooms = $roomsByType->get($lesson['room_type_required'], collect());
                 if ($compatibleRooms->isEmpty()) {
                     $list[] = 'No hay aulas activas de tipo '.$lesson['room_type_required'];
-                } elseif (($pev?->seccion?->amount_student ?? 0) > 0
-                    && $compatibleRooms->max('capacity') < (int) $pev->seccion->amount_student) {
-                    $list[] = 'La capacidad máxima del aula es menor que la matrícula de la sección';
+                } else {
+                    // Un medio grupo ocupa el aula con la mitad de la sección:
+                    // la capacidad debe cubrir esa mitad, no la matrícula completa.
+                    $isHalfGroup = (bool) ($lesson['is_half_group'] ?? false);
+                    $students = (int) ($pev?->seccion?->amount_student ?? 0);
+                    if ($isHalfGroup && $students > 0) {
+                        $students = (int) ceil($students / 2);
+                    }
+
+                    if ($students > 0 && $compatibleRooms->max('capacity') < $students) {
+                        $list[] = $isHalfGroup
+                            ? 'La capacidad máxima del aula es menor que la mitad de la matrícula (medio grupo)'
+                            : 'La capacidad máxima del aula es menor que la matrícula de la sección';
+                    }
                 }
             }
 

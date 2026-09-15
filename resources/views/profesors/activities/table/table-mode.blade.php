@@ -93,9 +93,16 @@
                     {{-- Asignatura --}}
                     <td class="px-2 py-2.5">
                         <div class="flex items-center justify-between gap-2">
-                            <span class="text-white text-xs font-semibold max-w-[180px]">
-                                {{ $subjectName }}
-                            </span>                            
+                            <div class="min-w-0">
+                                <span class="block text-white text-xs font-semibold max-w-[180px] truncate">
+                                    {{ $subjectName }}
+                                </span>
+                                @if($pevaluacion->grupoEstable)
+                                    <span class="block text-[9px] text-gray-500 mt-0.5 truncate max-w-[180px]" title="{{ $pevaluacion->grupoEstable->name }}">
+                                        Comp. Formación: {{ $pevaluacion->grupoEstable->name }}
+                                    </span>
+                                @endif
+                            </div>
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                                 {{ $pevaluacion->lapso?->name ?? '—' }}
                             </span>

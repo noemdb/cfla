@@ -182,6 +182,76 @@ class MultiCalendarTest extends TestCase
         $this->assertDatabaseHas('timetable_calendars', ['id' => $archived->id]);
     }
 
+    public function test_wizard_archives_and_unarchives_calendar(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $draft = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('lapsoId', $lapso->id)
+            ->call('archiveCalendar', $draft->id);
+
+        $this->assertSame(TimetableCalendar::STATUS_ARCHIVED, $draft->fresh()->status);
+
+        // Desarchivar vuelve a borrador (no directo a activo).
+        $component->call('unarchiveCalendar', $draft->id);
+        $this->assertSame(TimetableCalendar::STATUS_DRAFT, $draft->fresh()->status);
+    }
+
+    public function test_wizard_archive_active_calendar_leaves_plan_without_active(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $active = TimetableCalendar::factory()->active()->create(['lapso_id' => $lapso->id]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('lapsoId', $lapso->id)
+            ->call('archiveCalendar', $active->id);
+
+        $this->assertSame(TimetableCalendar::STATUS_ARCHIVED, $active->fresh()->status);
+        $this->assertNull(TimetableCalendar::activeForLapso($lapso->id));
+    }
+
+    public function test_wizard_cannot_archive_already_archived_or_generating_calendar(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $archived = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso->id,
+            'status' => TimetableCalendar::STATUS_ARCHIVED,
+        ]);
+        $generating = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso->id,
+            'status' => TimetableCalendar::STATUS_GENERATING,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('lapsoId', $lapso->id)
+            ->call('archiveCalendar', $archived->id)
+            ->call('archiveCalendar', $generating->id);
+
+        $this->assertSame(TimetableCalendar::STATUS_ARCHIVED, $archived->fresh()->status);
+        $this->assertSame(TimetableCalendar::STATUS_GENERATING, $generating->fresh()->status);
+    }
+
+    public function test_wizard_unarchive_rejects_non_archived_calendar(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $draft = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('lapsoId', $lapso->id)
+            ->call('unarchiveCalendar', $draft->id);
+
+        $this->assertSame(TimetableCalendar::STATUS_DRAFT, $draft->fresh()->status);
+    }
+
     public function test_wizard_rejects_activating_draft_without_slots(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
