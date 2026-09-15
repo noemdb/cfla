@@ -156,6 +156,7 @@ Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', '
         Route::get('binnacle', \App\Livewire\Admin\Binnacle\IndexComponent::class)->name('binnacle');
         Route::get('binnacle/dashboard', \App\Livewire\Admin\Binnacle\DashboardComponent::class)->name('binnacle.dashboard');
         Route::get('binnacle/timeline', \App\Livewire\Admin\Binnacle\UserActivityTimeline::class)->name('binnacle.timeline');
+        Route::get('binnacle/log/url', \App\Livewire\Admin\Binnacle\UrlLogComponent::class)->name('binnacle.log.url');
     });
 
     Route::middleware(['binnacle.export'])->group(function () {
@@ -306,6 +307,8 @@ Route::prefix('app')->name('app.')->group(function () {
             ->name('timetable.pdf.grade-preview');
         Route::get('/timetable/pdf/pestudio-preview/{calendar}/{pestudio}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewPestudio'])
             ->name('timetable.pdf.pestudio-preview');
+        Route::get('/timetable/pdf/area-preview/{calendar}/{area}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewArea'])
+            ->name('timetable.pdf.area-preview');
 
         // Diagramas de flujo: hub e infografías (documentos estáticos).
         // Cada archivo `docs/infografia/flujo{Studly}.html` se publica como
@@ -378,6 +381,8 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('timetable.pdf.grade-preview');
             Route::get('/timetable/pdf/pestudio-preview/{calendar}/{pestudio}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewPestudio'])
                 ->name('timetable.pdf.pestudio-preview');
+            Route::get('/timetable/pdf/area-preview/{calendar}/{area}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'previewArea'])
+                ->name('timetable.pdf.area-preview');
         });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────

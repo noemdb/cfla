@@ -70,6 +70,7 @@ class UserActivityTimeline extends Component
         'binnacle_accessed' => 'Acceso al panel',
         'exception_thrown' => 'Excepción',
         'info_probe' => 'Sonda de sistema',
+        'sql_select' => 'Consulta SQL',
     ];
 
     public const CATEGORIES = [
@@ -141,14 +142,17 @@ class UserActivityTimeline extends Component
             ->limit(10)
             ->get(['id', 'username', 'email']);
 
+        $filters = [
+            'event_type' => $this->eventType,
+            'category' => $this->category,
+            'severity' => $this->severity,
+            'search' => $this->search,
+        ];
+
+        // Con usuario seleccionado → su línea; sin usuario → feed global.
         $entries = $this->userId
-            ? Binnacle::getUserActivityTimeline($this->userId, $this->dateFrom, $this->dateTo, [
-                'event_type' => $this->eventType,
-                'category' => $this->category,
-                'severity' => $this->severity,
-                'search' => $this->search,
-            ])
-            : collect();
+            ? Binnacle::getUserActivityTimeline($this->userId, $this->dateFrom, $this->dateTo, $filters)
+            : Binnacle::getActivityFeed($this->dateFrom, $this->dateTo, $filters);
 
         $grouped = $entries->groupBy(fn ($e) => $e->created_at?->toDateString());
 
@@ -161,6 +165,7 @@ class UserActivityTimeline extends Component
             'entries' => $entries,
             'grouped' => $grouped,
             'hasFilters' => $hasFilters,
+            'isGlobalFeed' => $this->userId === null,
         ]);
     }
 

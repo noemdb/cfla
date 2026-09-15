@@ -210,6 +210,41 @@ class BinnacleFase2Test extends TestCase
             ->assertOk();
     }
 
+    public function test_timeline_shows_global_feed_without_user(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $target = User::factory()->create();
+
+        BinnacleEntry::forceCreate([
+            'uuid' => fake()->uuid(),
+            'event_type' => 'user_login',
+            'event_category' => 'authentication',
+            'event_severity' => 'info',
+            'title' => 'Evento feed global',
+            'description' => 'Descripción del evento de prueba',
+            'subject_type' => User::class,
+            'subject_id' => $target->id,
+            'subject_identifier' => $target->username,
+            'created_at' => now(),
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\Binnacle\UserActivityTimeline::class)
+            ->assertSet('userId', null)
+            ->assertSee('Evento feed global')
+            ->assertSee('Feed global')
+            // Tarjeta enriquecida: usuario, descripción y etiqueta de metadata.
+            ->assertSee('Usuario')
+            ->assertSee($target->username)
+            ->assertSee('Descripción del evento de prueba')
+            ->assertSee('Descripción')
+            // Segmented control del rango (un solo control, con segmento activo).
+            ->assertSee('role="radiogroup"', false)
+            ->assertSee('aria-checked="true"', false)
+            // Tarjeta de evento como <article>.
+            ->assertSee('<article', false);
+    }
+
     public function test_model_viewed_is_restricted_by_allowlist(): void
     {
         // Post NO está en config('binnacle.viewed_models'): se ignora.

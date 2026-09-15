@@ -99,6 +99,20 @@
                 <span wire:loading wire:target="clearAllTimetableData">Limpiando…</span>
                 <span wire:loading wire:target="confirmClearAllTimetableData">Abriendo…</span>
             </button>
+            <button type="button"
+                wire:click="openAreaFormatModal"
+                wire:loading.attr="disabled"
+                wire:loading.class="opacity-50 cursor-not-allowed"
+                wire:target="openAreaFormatModal"
+                title="Generar un formato tipo horario por las asignaturas asociadas a un área de conocimiento"
+                aria-label="Formato por área de conocimiento"
+                class="inline-flex items-center gap-1.5 rounded-md bg-teal-500/10 px-2.5 py-1 text-[11px] font-bold text-teal-700 transition-colors hover:bg-teal-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-teal-300">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span wire:loading.remove wire:target="openAreaFormatModal">Formato por área</span>
+                <span wire:loading wire:target="openAreaFormatModal">Abriendo…</span>
+            </button>
         </div>
     </div>
 
@@ -3489,6 +3503,147 @@
                     class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">
                     Cancelar
                 </button>
+            </div>
+        </x-slot>
+    </x-modal-card>
+@endif
+
+@if ($showAreaFormatModal)
+    @php
+        $areaOptions = $this->areaFormatOptions();
+        $areaFormatCalendar = $this->areaFormatCalendar();
+        $areaFormatUrl = $this->areaFormatUrl();
+    @endphp
+    <x-modal-card title="Formato por área de conocimiento" blur="lg" wire:model="showAreaFormatModal" align="center" max-width="md">
+        <div class="space-y-3">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                Genera un formato tipo horario (grilla días × bloques) por cada asignatura asociada al área de conocimiento, cruzando todas las secciones activas del calendario.
+            </p>
+
+            @if ($areaOptions->isEmpty())
+                <div class="rounded-lg border border-dashed border-gray-300 px-3 py-6 text-center text-xs text-gray-400 dark:border-white/10">
+                    No hay áreas de conocimiento activas.
+                </div>
+            @else
+                @php $selectedArea = $areaFormatId ? $areaOptions->firstWhere('id', (int) $areaFormatId) : null; @endphp
+                <div class="relative" x-data="{ open: false, q: '' }"
+                     x-on:keydown.escape.window="open = false"
+                     @click.outside="open = false">
+                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">Área de conocimiento</label>
+
+                    {{-- Trigger --}}
+                    <button type="button" x-on:click="open = !open"
+                        class="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left outline-none transition-colors focus:border-teal-500 focus:ring-2 focus:ring-teal-500/50 dark:border-white/10 dark:bg-white/5">
+                        @if ($selectedArea)
+                            <span class="min-w-0">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $selectedArea->name }}</span>
+                                    @if ($selectedArea->code)
+                                        <span class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-white/10 dark:text-gray-300">{{ $selectedArea->code }}</span>
+                                    @endif
+                                </span>
+                                <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                                    {{ $selectedArea->pestudio?->name ?? 'Sin P.Estudio' }} · {{ $selectedArea->campo_conocimientos_count }} asignatura(s)
+                                </span>
+                            </span>
+                        @else
+                            <span class="text-sm text-gray-400">Seleccionar área…</span>
+                        @endif
+                        <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    {{-- Panel --}}
+                    <div x-show="open" x-cloak x-transition.origin.top
+                        class="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-gray-900">
+                        <div class="border-b border-gray-100 p-2 dark:border-white/5">
+                            <input type="text" x-model="q" placeholder="Buscar área, código o P.Estudio…"
+                                class="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 placeholder-gray-400 outline-none focus:border-teal-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            @foreach ($areaOptions as $areaOption)
+                                @php
+                                    $isSelected = (string) $areaFormatId === (string) $areaOption->id;
+                                    $haystack = mb_strtolower(implode(' ', array_filter([
+                                        $areaOption->name, $areaOption->code, $areaOption->code_sm,
+                                        $areaOption->pestudio?->name, $areaOption->peducativo?->name,
+                                    ])));
+                                @endphp
+                                <button type="button"
+                                    wire:key="area-opt-{{ $areaOption->id }}"
+                                    wire:click="$set('areaFormatId', '{{ $areaOption->id }}')"
+                                    x-on:click="open = false"
+                                    x-show="q === '' || @js($haystack).includes(q.toLowerCase())"
+                                    class="flex w-full items-start justify-between gap-2 px-3 py-2 text-left transition-colors {{ $isSelected ? 'bg-teal-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
+                                    <span class="min-w-0">
+                                        <span class="flex items-center gap-1.5">
+                                            <span class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $areaOption->name }}</span>
+                                            @if ($areaOption->code)
+                                                <span class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-white/10 dark:text-gray-300">{{ $areaOption->code }}</span>
+                                            @endif
+                                        </span>
+                                        <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                                            {{ $areaOption->pestudio?->name ?? 'Sin P.Estudio' }}
+                                            @if ($areaOption->peducativo?->name) · {{ $areaOption->peducativo->name }} @endif
+                                        </span>
+                                        <span class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                            <span class="inline-flex items-center gap-1 rounded bg-teal-500/10 px-1.5 py-0.5 font-bold text-teal-700 dark:text-teal-300">
+                                                {{ $areaOption->campo_conocimientos_count }} asignatura(s)
+                                            </span>
+                                            @if ($areaOption->leader)
+                                                <span class="truncate">Líder: {{ $areaOption->leader->username }}</span>
+                                            @endif
+                                        </span>
+                                    </span>
+                                    @if ($isSelected)
+                                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-teal-600 dark:text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    @endif
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                @if ($selectedArea)
+                    @if ($areaFormatCalendar)
+                        <div class="rounded-lg border border-teal-500/20 bg-teal-500/5 px-3 py-2.5 text-[11px] text-teal-700 dark:text-teal-300">
+                            Se generará el formato de <strong>{{ $selectedArea->name }}</strong>
+                            ({{ $selectedArea->campo_conocimientos_count }} asignatura(s)) usando el horario
+                            <strong>{{ $areaFormatCalendar->name }}</strong> en una nueva pestaña.
+                        </div>
+                    @else
+                        <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300">
+                            No hay un calendario activo para el P.Estudio de <strong>{{ $selectedArea->name }}</strong>.
+                            Genera o activa un horario para ese P.Estudio.
+                        </div>
+                    @endif
+                @endif
+            @endif
+        </div>
+        <x-slot name="footer">
+            <div class="flex items-center justify-between gap-3">
+                <button type="button" wire:click="closeAreaFormatModal"
+                    class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">
+                    Cancelar
+                </button>
+                @if ($areaFormatUrl)
+                    <a href="{{ $areaFormatUrl }}" target="_blank" rel="noopener"
+                        x-on:click="$wire.closeAreaFormatModal()"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-bold text-white hover:bg-teal-700">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Generar formato
+                    </a>
+                @else
+                    <button type="button" disabled
+                        class="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg bg-teal-600/40 px-4 py-2 text-sm font-bold text-white/70">
+                        Generar formato
+                    </button>
+                @endif
             </div>
         </x-slot>
     </x-modal-card>

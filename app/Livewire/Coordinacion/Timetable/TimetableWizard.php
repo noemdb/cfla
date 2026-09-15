@@ -4,6 +4,7 @@ namespace App\Livewire\Coordinacion\Timetable;
 
 use App\Imports\TimetableLessonsImport;
 use App\Jobs\Timetable\GenerateTimetableJob;
+use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Seccion;
@@ -177,6 +178,11 @@ class TimetableWizard extends Component
 
     /** Tipo de hora del bloque que se agrega desde el preview: theory|practice. */
     public string $addPreviewLessonType = 'theory';
+
+    /** Modal «Formato por área de conocimiento» (Step 5 / toolbar). */
+    public bool $showAreaFormatModal = false;
+
+    public ?string $areaFormatId = null;
 
     // Pestañas pestudio → grado → sección (PLAN-ACTIVITIES-001)
     public $activePestudioId = null;
@@ -5492,6 +5498,94 @@ class TimetableWizard extends Component
         $this->addPreviewLessonType = 'theory';
     }
 
+    /**
+     * Abre el modal «Formato por área de conocimiento» (Step 5 / toolbar).
+     * No requiere un calendario seleccionado: se resuelve a partir del área.
+     */
+    public function openAreaFormatModal(): void
+    {
+        $this->areaFormatId = null;
+        $this->showAreaFormatModal = true;
+    }
+
+    public function closeAreaFormatModal(): void
+    {
+        $this->showAreaFormatModal = false;
+        $this->areaFormatId = null;
+    }
+
+    /**
+     * Áreas de conocimiento activas (no eliminadas) con el número de
+     * asignaturas asociadas (pivote campo_conocimientos). Sin filtro por
+     * P.Estudio ni P.Educativo: el usuario elige el área manualmente.
+     */
+    public function areaFormatOptions()
+    {
+        return AreaConocimiento::query()
+            ->with(['pestudio', 'peducativo', 'leader'])
+            ->withCount('campo_conocimientos')
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Calendario que se usará para el formato del área seleccionada.
+     *
+     * Prioridad:
+     *  1) El calendario en edición del wizard, si su P.Estudio coincide con el
+     *     del área (o el área no tiene P.Estudio).
+     *  2) El calendario activo del P.Estudio del área.
+     *  3) El calendario activo del lapso vigente.
+     */
+    public function areaFormatCalendar(): ?TimetableCalendar
+    {
+        if (! $this->areaFormatId) {
+            return null;
+        }
+
+        $area = AreaConocimiento::query()->find($this->areaFormatId);
+        if (! $area) {
+            return null;
+        }
+
+        $areaPestudioId = $area->pestudio_id ? (int) $area->pestudio_id : null;
+
+        if ($this->calendarId) {
+            $calendar = TimetableCalendar::query()->find($this->calendarId);
+            if ($calendar && ($areaPestudioId === null || (int) $calendar->pestudio_id === $areaPestudioId)) {
+                return $calendar;
+            }
+        }
+
+        if ($areaPestudioId !== null) {
+            $calendar = TimetableCalendar::activeForPestudio($areaPestudioId);
+            if ($calendar) {
+                return $calendar;
+            }
+        }
+
+        return TimetableCalendar::activeForCurrentLapso();
+    }
+
+    /**
+     * URL del PDF del formato por asignaturas del área seleccionada.
+     * Devuelve null si aún no hay área seleccionada o no se resuelve calendario.
+     */
+    public function areaFormatUrl(): ?string
+    {
+        $calendar = $this->areaFormatCalendar();
+
+        if (! $calendar || ! $this->areaFormatId) {
+            return null;
+        }
+
+        return route($this->moduleRoutePrefix().'.timetable.pdf.area-preview', [
+            'calendar' => (int) $calendar->id,
+            'area' => (int) $this->areaFormatId,
+        ]);
+    }
+
     /** Período destino del modal de «agregar lección» (para mostrar su contexto). */
     public function addPreviewPeriod(): ?TimetablePeriod
     {
@@ -5688,6 +5782,9 @@ class TimetableWizard extends Component
             return;
         }
 
+        $previousPreview = $this->preview;
+        $lessonSlotsBefore = $lessonSlots;
+
         $isPractical = $this->addPreviewLessonType === 'practice';
         $lessonSlots[] = ['period_id' => $period->id, 'room_id' => null, 'is_practical' => $isPractical];
         $assignment[$lessonKey] = array_values($lessonSlots);
@@ -5698,7 +5795,15 @@ class TimetableWizard extends Component
         ));
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
-        $this->recordPreviewChange('add_preview_lesson', $lesson->id, [], $lessonSlots);
+
+        // Persistir el bloque agregado para que no dependa de «Guardar sección».
+        if (! $this->persistPreviewLessonSlotsToDatabase([(int) $lesson->id])) {
+            $this->preview = $previousPreview;
+
+            return;
+        }
+
+        $this->recordPreviewChange('add_preview_lesson', $lesson->id, $lessonSlotsBefore, $lessonSlots);
         $this->registerLessonInStep3($lesson);
         // El bloque agregado actualiza la demanda del Paso 3 (teóricas/prácticas).
         $this->syncPreviewLessonBlocksToStep3((int) $lesson->id);
@@ -8574,6 +8679,10 @@ PROMPT;
         ));
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
+
+        // Reflejar en la base de datos el estado restaurado de la lección.
+        $this->persistPreviewLessonSlotsToDatabase([(int) $change->lesson_id]);
+
         $this->recordPreviewChange('undo_'.$change->action, $change->lesson_id, $change->after_json ?? [], $before);
         $this->notification()->success('Cambio deshecho', 'Se restauró el estado anterior de la lección.');
     }

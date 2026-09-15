@@ -103,6 +103,31 @@ class Binnacle
             ->get();
     }
 
+    /**
+     * Feed global de actividad (sin filtrar por usuario), con los mismos
+     * filtros de fecha/tipo/categoría/severidad/búsqueda que la línea por
+     * usuario. Se usa cuando no hay un usuario seleccionado.
+     */
+    public static function getActivityFeed(?string $start = null, ?string $end = null, array $filters = []): Collection
+    {
+        return BinnacleEntry::query()
+            ->when($start, fn ($q) => $q->where('created_at', '>=', $start))
+            ->when($end, fn ($q) => $q->where('created_at', '<=', $end))
+            ->when($filters['event_type'] ?? null, fn ($q, $v) => $q->where('event_type', $v))
+            ->when($filters['category'] ?? null, fn ($q, $v) => $q->where('event_category', $v))
+            ->when($filters['severity'] ?? null, fn ($q, $v) => $q->where('event_severity', $v))
+            ->when($filters['search'] ?? null, function ($q, $v) {
+                $needle = '%'.$v.'%';
+
+                return $q->where(fn ($s) => $s
+                    ->where('title', 'like', $needle)
+                    ->orWhere('description', 'like', $needle));
+            })
+            ->orderByDesc('created_at')
+            ->limit(500)
+            ->get();
+    }
+
     public static function systemSubject(): array
     {
         return ['type' => 'System', 'id' => null, 'identifier' => 'system'];
