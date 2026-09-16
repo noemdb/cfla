@@ -36,106 +36,102 @@
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-white/5 text-sm font-bold">
                 Paso {{ $currentStep }} de 5
             </span>
-            <button wire:click="refreshWizard"
-                wire:loading.attr="disabled"
-                wire:target="refreshWizard"
-                type="button"
-                title="Reiniciar selección y elegir otro calendario"
-                aria-label="Reiniciar selección y elegir otro calendario"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-sm font-bold transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 9A7 7 0 0117 5.5L20 8M18.5 15A7 7 0 017 18.5L4 16"/>
-                </svg>
-                <span>Reiniciar</span>
-            </button>
-            <button type="button"
-                wire:click="downloadAllCalendarsBackup"
-                wire:loading.attr="disabled"
-                wire:loading.class="opacity-50 cursor-not-allowed"
-                wire:target="downloadAllCalendarsBackup"
-                title="Descargar snapshot completo (configuración + horario) de TODOS los calendarios"
-                aria-label="Backup de todos los calendarios"
-                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
-                </svg>
-                <span wire:loading.remove wire:target="downloadAllCalendarsBackup" class="sr-only">Backup todos</span>
-                <span wire:loading wire:target="downloadAllCalendarsBackup" class="sr-only">Preparando…</span>
-            </button>
-            <label title="Seleccionar respaldo JSON de todos los calendarios"
-                class="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
-                </svg>
-                <span class="sr-only">Elegir restore (todos)</span>
-                <input type="file" wire:model="allCalendarsBackupFile" accept="application/json,.json" class="sr-only">
-            </label>
-            <button type="button"
-                wire:click="restoreAllCalendarsBackup"
-                wire:loading.attr="disabled"
-                wire:loading.class="opacity-50 cursor-not-allowed"
-                wire:target="restoreAllCalendarsBackup,allCalendarsBackupFile"
-                title="Restaurar el snapshot completo (configuración + horario) de TODOS los calendarios desde el JSON seleccionado"
-                aria-label="Restore de todos los calendarios"
-                class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 9A7 7 0 0117 5.5L20 8M18.5 15A7 7 0 017 18.5L4 16"/>
-                </svg>
-                <span wire:loading.remove wire:target="restoreAllCalendarsBackup" class="sr-only">Restore todos</span>
-                <span wire:loading wire:target="restoreAllCalendarsBackup" class="sr-only">Restaurando…</span>
-            </button>
-            <button type="button"
-                wire:click="confirmClearAllTimetableData"
-                wire:loading.attr="disabled"
-                wire:loading.class="opacity-50 cursor-not-allowed"
-                wire:target="confirmClearAllTimetableData,clearAllTimetableData"
-                title="Eliminar los datos operativos de horarios (lessons, slots, disponibilidad, conflictos, historial, suplencias y ausencias) de TODOS los calendarios, para restaurar desde un contexto limpio"
-                aria-label="Limpiar todos los datos de horarios"
-                class="inline-flex items-center gap-1.5 rounded-md bg-rose-500/10 px-2.5 py-1 text-[11px] font-bold text-rose-700 transition-colors hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-rose-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v11a2 2 0 002 2h6a2 2 0 002-2V7M10 11v6M14 11v6"/>
-                </svg>
-                <span wire:loading.remove wire:target="confirmClearAllTimetableData,clearAllTimetableData">Reset horarios</span>
-                <span wire:loading wire:target="clearAllTimetableData">Limpiando…</span>
-                <span wire:loading wire:target="confirmClearAllTimetableData">Abriendo…</span>
-            </button>
-            <button type="button"
-                wire:click="openAreaFormatModal"
-                wire:loading.attr="disabled"
-                wire:loading.class="opacity-50 cursor-not-allowed"
-                wire:target="openAreaFormatModal"
-                title="Generar un formato tipo horario por las asignaturas asociadas a un área de conocimiento"
-                aria-label="Formato por área de conocimiento"
-                class="inline-flex items-center gap-1.5 rounded-md bg-teal-500/10 px-2.5 py-1 text-[11px] font-bold text-teal-700 transition-colors hover:bg-teal-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-teal-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span wire:loading.remove wire:target="openAreaFormatModal">Formato por área</span>
-                <span wire:loading wire:target="openAreaFormatModal">Abriendo…</span>
-            </button>
-            <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
-                target="_blank"
-                rel="noopener"
-                title="Generar un PDF consolidado con los horarios de todos los P.Estudios con calendario activo del lapso vigente"
-                aria-label="PDF todos los P.Estudios"
-                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l2-2h14l2 2"/>
-                </svg>
-                PDF todos P.Estudios
-            </a>
-            <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}"
-                target="_blank"
-                rel="noopener"
-                title="Generar un PDF con los horarios de todos los profesores de los calendarios activos del lapso vigente"
-                aria-label="PDF todos los profesores"
-                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z"/>
-                </svg>
-                PDF profesores
-            </a>
+
+            {{-- Dropdown: acciones de mantenimiento sobre los calendarios --}}
+            <x-dropdown position="bottom-end" width="3xl" height="auto">
+                <x-slot name="trigger">
+                    <button type="button"
+                        title="Acciones de mantenimiento de los calendarios"
+                        aria-label="Acciones de mantenimiento de los calendarios"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-600 dark:text-gray-300 border border-white/5 text-sm font-bold transition-all">
+                        <x-icon name="wrench-screwdriver" class="w-4 h-4" />
+                        <span>Acciones</span>
+                        <x-icon name="chevron-down" class="w-3.5 h-3.5 opacity-70" />
+                    </button>
+                </x-slot>
+
+                <x-dropdown.item
+                    wire:click="refreshWizard"
+                    wire:loading.attr="disabled"
+                    wire:target="refreshWizard"
+                    icon="arrow-path"
+                    label="Reiniciar selección" />
+
+                <x-dropdown.item
+                    wire:click="downloadAllCalendarsBackup"
+                    wire:loading.attr="disabled"
+                    wire:target="downloadAllCalendarsBackup"
+                    icon="arrow-down-tray">
+                    <span wire:loading.remove wire:target="downloadAllCalendarsBackup">Backup de todos</span>
+                    <span wire:loading wire:target="downloadAllCalendarsBackup">Preparando…</span>
+                </x-dropdown.item>
+
+                <label title="Seleccionar respaldo JSON de todos los calendarios"
+                    class="text-secondary-600 px-4 py-2 text-sm flex items-center cursor-pointer rounded-md transition-colors duration-150 hover:text-secondary-900 hover:bg-secondary-100 dark:text-secondary-400 dark:hover:bg-secondary-700">
+                    <x-icon name="folder-arrow-down" class="w-5 h-5 mr-2" />
+                    <span wire:loading.remove wire:target="allCalendarsBackupFile">Elegir respaldo (JSON)</span>
+                    <span wire:loading wire:target="allCalendarsBackupFile">Cargando…</span>
+                    <input type="file" wire:model="allCalendarsBackupFile" accept="application/json,.json" class="sr-only">
+                </label>
+
+                <x-dropdown.item
+                    wire:click="restoreAllCalendarsBackup"
+                    wire:loading.attr="disabled"
+                    wire:target="restoreAllCalendarsBackup,allCalendarsBackupFile"
+                    icon="arrow-up-tray">
+                    <span wire:loading.remove wire:target="restoreAllCalendarsBackup">Restore de todos</span>
+                    <span wire:loading wire:target="restoreAllCalendarsBackup">Restaurando…</span>
+                </x-dropdown.item>
+
+                <x-dropdown.item
+                    wire:click="confirmClearAllTimetableData"
+                    wire:loading.attr="disabled"
+                    wire:target="confirmClearAllTimetableData,clearAllTimetableData"
+                    icon="trash"
+                    separator>
+                    <span wire:loading.remove wire:target="confirmClearAllTimetableData,clearAllTimetableData">Reset horarios</span>
+                    <span wire:loading wire:target="clearAllTimetableData">Limpiando…</span>
+                    <span wire:loading wire:target="confirmClearAllTimetableData">Abriendo…</span>
+                </x-dropdown.item>
+            </x-dropdown>
+
+            {{-- Dropdown: formatos y exportaciones --}}
+            <x-dropdown position="bottom-end" width="3xl" height="auto">
+                <x-slot name="trigger">
+                    <button type="button"
+                        title="Formatos y reportes"
+                        aria-label="Formatos y reportes"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-600 dark:text-gray-300 border border-white/5 text-sm font-bold transition-all">
+                        <x-icon name="document-text" class="w-4 h-4" />
+                        <span>Formatos</span>
+                        <x-icon name="chevron-down" class="w-3.5 h-3.5 opacity-70" />
+                    </button>
+                </x-slot>
+
+                <x-dropdown.item
+                    wire:click="openAreaFormatModal"
+                    wire:loading.attr="disabled"
+                    wire:target="openAreaFormatModal"
+                    icon="document-text">
+                    <span wire:loading.remove wire:target="openAreaFormatModal">Formato por área</span>
+                    <span wire:loading wire:target="openAreaFormatModal">Abriendo…</span>
+                </x-dropdown.item>
+
+                <x-dropdown.item
+                    href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
+                    target="_blank"
+                    rel="noopener"
+                    icon="folder"
+                    label="PDF todos P.Estudios"
+                    separator />
+
+                <x-dropdown.item
+                    href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}"
+                    target="_blank"
+                    rel="noopener"
+                    icon="document-arrow-down"
+                    label="PDF profesores" />
+            </x-dropdown>
         </div>
     </div>
 
