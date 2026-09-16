@@ -2123,9 +2123,17 @@
                                             <td class="px-2 py-2 align-top">
                                                 @forelse ($row['cells'][$day] ?? [] as $lesson)
                                                     <div class="mb-1 rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 p-2 last:mb-0">
-                                                        <div class="font-bold text-gray-900 dark:text-white">{{ $lesson['subject'] }}</div>
+                                                        <div class="flex items-start justify-between gap-1">
+                                                            <div class="font-bold text-gray-900 dark:text-white">{{ $lesson['subject'] }}</div>
+                                                            @if (!empty($lesson['pestudio_code']))
+                                                                <span class="shrink-0 rounded bg-fuchsia-500/10 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-fuchsia-700 dark:text-fuchsia-300">{{ $lesson['pestudio_code'] }}</span>
+                                                            @endif
+                                                        </div>
                                                         <div class="mt-0.5 font-mono text-[10px] text-gray-500 dark:text-gray-400">{{ $lesson['start'] }}–{{ $lesson['end'] }}</div>
-                                                        <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Lesson #{{ $lesson['lesson_id'] }} · Sección {{ $lesson['section'] }}</div>
+                                                        <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                                            @if (!empty($lesson['grado'])){{ $lesson['grado'] }} · @endif Sección {{ $lesson['section'] }}
+                                                        </div>
+                                                        <div class="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">Lesson #{{ $lesson['lesson_id'] }}</div>
                                                     </div>
                                                 @empty
                                                     <span class="text-gray-300 dark:text-gray-700">—</span>
@@ -3152,29 +3160,13 @@
                                                             x-on:drop.prevent="$wire.movePreviewLesson(parseInt(event.dataTransfer.getData('lesson-id')), parseInt(event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod->id }})"
                                                         @endif
                                                         class="relative flex min-h-[28px] flex-col items-stretch justify-center gap-px rounded p-px {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:bg-amber-400/5 dark:text-amber-300/70' : ($cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : 'border border-transparent') }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
-                                                        @php
-                                                            $cellCollisionPestudios = collect($cellAssignments)
-                                                                ->filter(fn ($assignment) => ! empty($assignment['collision']))
-                                                                ->flatMap(fn ($assignment) => $assignment['collision_pestudios'] ?? [])
-                                                                ->unique()
-                                                                ->values();
-                                                        @endphp
-                                                        @if ($cellCollisionPestudios->isNotEmpty())
-                                                            <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
-                                                                title="Colisión de horario del docente con: {{ $cellCollisionPestudios->implode(', ') }}"
-                                                                aria-label="Colisión de horario del docente con {{ $cellCollisionPestudios->implode(', ') }}">
-                                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-                                                                </svg>
-                                                            </span>
-                                                        @endif
                                                         @if ($cellAssignments)
                                                             @foreach ($cellAssignments as $cell)
                                                                 <div
                                                                     draggable="true"
                                                                     x-on:dragstart="event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
                                                                     title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
-                                                                    class="flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight active:cursor-grabbing {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border-2 border-solid border-violet-500/40 bg-violet-500/[0.06]' : '' }}">
+                                                                    class="relative flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight active:cursor-grabbing {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border-2 border-solid border-violet-500/40 bg-violet-500/[0.06]' : '' }}">
                                                                     <div class="flex min-h-3.5 items-center justify-between gap-px">
                                                                         <label class="flex shrink-0 items-center" title="{{ $cell['locked'] ? 'Desbloquear este bloque' : 'Bloquear este bloque' }}">
                                                                             <input type="checkbox"
@@ -3213,6 +3205,15 @@
                                                                                 <span class="sr-only">Agregar lección</span>
                                                                             </button>
                                                                         </div>
+                                                                    @endif
+                                                                    @if (!empty($cell['collision']))
+                                                                        <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
+                                                                            title="Colisión de horario del docente con: {{ implode(', ', $cell['collision_pestudios']) }}"
+                                                                            aria-label="Colisión de horario del docente con {{ implode(', ', $cell['collision_pestudios']) }}">
+                                                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                                                            </svg>
+                                                                        </span>
                                                                     @endif
                                                                 </div>
                                                             @endforeach

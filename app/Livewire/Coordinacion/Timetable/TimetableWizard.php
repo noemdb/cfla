@@ -4688,13 +4688,17 @@ class TimetableWizard extends Component
         $slots = TimetableSlot::query()
             ->whereIn('calendar_id', $pestudioByCalendar->keys())
             ->whereNotNull('profesor_id')
-            ->with('period:id,day_of_week,start_time,end_time')
+            // Solo cuentan asignaciones de secciones/grados ACTIVOS: un slot
+            // huérfano de un grado inactivo no representa carga real del docente.
+            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
+            ->with('period:id,day_of_week,start_time,end_time,is_break')
             ->get(['profesor_id', 'calendar_id', 'period_id']);
 
         $map = [];
         foreach ($slots as $slot) {
             $period = $slot->period;
-            if (! $period) {
+            if (! $period || $period->is_break) {
                 continue;
             }
             $map[(int) $slot->profesor_id][] = [
@@ -7714,7 +7718,7 @@ PROMPT;
 
         $calendarsById = TimetableCalendar::query()
             ->whereIn('id', $calendarIds)
-            ->with('pestudio:id,name')
+            ->with('pestudio:id,name,code')
             ->get()
             ->keyBy('id');
 
@@ -7724,7 +7728,7 @@ PROMPT;
                 ->where('profesor_id', (int) $this->teacherScheduleProfesorId))
             ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
             ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
-            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion')
+            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado')
             ->get()
             ->groupBy('calendar_id');
 
@@ -7778,6 +7782,8 @@ PROMPT;
                     $cells[$key][$period->day_of_week][] = [
                         'subject' => $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
                         'section' => $lesson->pevaluacion?->seccion?->name ?? '—',
+                        'grado' => $lesson->pevaluacion?->seccion?->grado?->name ?? '',
+                        'pestudio_code' => (string) ($calendar->pestudio?->code ?? ''),
                         'lesson_id' => (int) $lesson->id,
                         'start' => substr((string) $period->start_time, 0, 5),
                         'end' => substr((string) $period->end_time, 0, 5),
