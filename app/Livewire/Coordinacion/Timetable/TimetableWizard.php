@@ -5859,6 +5859,10 @@ class TimetableWizard extends Component
             ->map(fn ($id) => (int) $id)
             ->all();
 
+        // Las colisiones no bloquean el agregado: se acumulan como aviso y se
+        // agrega la lección igualmente (se notifica al final).
+        $collisionWarning = null;
+
         foreach ($targetLessonIds as $targetLessonId) {
             $targetLesson = TimetableLesson::query()
                 ->where('calendar_id', $this->calendarId)
@@ -5872,22 +5876,15 @@ class TimetableWizard extends Component
             $bothAllowHalfGroup = (bool) $lesson->is_half_group && (bool) $targetLesson->is_half_group;
             $bothAllowShared = (bool) $lesson->allow_shared_teacher && (bool) $targetLesson->allow_shared_teacher;
             if ($sameTeacher && ! $bothAllowHalfGroup && ! $bothAllowShared) {
-                $this->notification()->error(
-                    'Conflicto de docente',
-                    $this->teacherConflictMessage($lesson, $targetLesson, $period),
-                );
+                $collisionWarning ??= $this->teacherConflictMessage($lesson, $targetLesson, $period);
 
-                return;
+                continue;
             }
 
             if ((int) $targetLesson->pevaluacion->seccion_id === (int) $lesson->pevaluacion->seccion_id
                 && (! $lesson->is_half_group || ! $targetLesson->is_half_group)) {
-                $this->notification()->error(
-                    'Conflicto de sección',
-                    'La sección ya tiene una lección en ese período. Usa Drag and Drop para intercambiarla.',
-                );
-
-                return;
+                $collisionWarning ??= 'La sección ya tiene una lección en ese período (sección '
+                    .($targetLesson->pevaluacion?->seccion?->name ?? '').'). Revisa el horario o reubica la otra lesson.';
             }
         }
 
@@ -5927,7 +5924,9 @@ class TimetableWizard extends Component
         // El bloque agregado actualiza la demanda del Paso 3 (teóricas/prácticas).
         $this->syncPreviewLessonBlocksToStep3((int) $lesson->id);
         $this->closeAddPreviewLessonModal();
-        if ($hasShiftMismatch) {
+        if ($collisionWarning !== null) {
+            $this->notification()->warning('Lección agregada con colisión', $collisionWarning);
+        } elseif ($hasShiftMismatch) {
             $this->notification()->warning(
                 'Lección agregada con advertencia',
                 'La lección se agregó a un período de otro turno distinto al configurado.',
