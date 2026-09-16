@@ -662,6 +662,69 @@ class TimetablePdfController extends Controller
     }
 
     /**
+     * Totalización de bloques por docente en los calendarios activos del lapso
+     * vigente: nombre, CI, total de bloques asignados y horas académicas
+     * (2 × bloques).
+     */
+    public function teacherBlockTotals(Request $request)
+    {
+        $lapso = Lapso::current();
+        if (! $lapso) {
+            abort(404, 'No hay lapso vigente.');
+        }
+
+        $calendarIds = TimetableCalendar::query()
+            ->forLapso($lapso->id)
+            ->active()
+            ->pluck('id');
+
+        if ($calendarIds->isEmpty()) {
+            abort(404, 'No hay calendarios activos en el lapso vigente.');
+        }
+
+        $slots = TimetableSlot::query()
+            ->whereIn('calendar_id', $calendarIds)
+            ->whereNotNull('profesor_id')
+            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
+            ->with('lesson.pevaluacion.profesor')
+            ->get(['profesor_id', 'lesson_id']);
+
+        $rows = $slots
+            ->groupBy('profesor_id')
+            ->map(function ($group): array {
+                $profesor = $group->first()->lesson?->pevaluacion?->profesor;
+                $blocks = $group->count();
+
+                return [
+                    'name' => trim(($profesor?->lastname ?? '').' '.($profesor?->name ?? '')) ?: 'Sin nombre',
+                    'ci' => (string) ($profesor?->ci_profesor ?? '—'),
+                    'blocks' => $blocks,
+                    'hours' => $blocks * 2,
+                ];
+            })
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        if ($rows->isEmpty()) {
+            abort(404, 'No hay docentes con bloques asignados en los calendarios activos del lapso vigente.');
+        }
+
+        $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
+        $pdf = Pdf::loadView('pdfs.timetable.teacher-block-totals', [
+            'rows' => $rows,
+            'lapso' => $lapso,
+            'institucion' => $institucion,
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'totalBlocks' => $rows->sum('blocks'),
+            'totalHours' => $rows->sum('hours'),
+        ]);
+        $pdf->setPaper('letter', 'portrait');
+
+        return $pdf->stream('totalizacion-bloques-docentes.pdf');
+    }
+
+    /**
      * Formato tipo horario por asignaturas asociadas a un área de conocimiento.
      *
      * Una grilla días × bloques por cada asignatura del área, cruzando todas

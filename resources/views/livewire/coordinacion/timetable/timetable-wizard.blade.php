@@ -129,6 +129,14 @@
                     rel="noopener"
                     icon="document-arrow-down"
                     label="PDF profesores" />
+
+                <x-dropdown.item
+                    href="{{ route($moduleRoutePrefix.'.timetable.pdf.teacher-block-totals') }}"
+                    target="_blank"
+                    rel="noopener"
+                    icon="table-cells"
+                    label="Totalización por docente"
+                    separator />
             </x-dropdown>
         </div>
     </div>

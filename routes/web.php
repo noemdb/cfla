@@ -313,6 +313,8 @@ Route::prefix('app')->name('app.')->group(function () {
             ->name('timetable.pdf.all-pestudios');
         Route::get('/timetable/pdf/all-teachers', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'allTeachers'])
             ->name('timetable.pdf.all-teachers');
+        Route::get('/timetable/pdf/teacher-block-totals', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teacherBlockTotals'])
+            ->name('timetable.pdf.teacher-block-totals');
 
         // Diagramas de flujo: hub e infografías (documentos estáticos).
         // Cada archivo `docs/infografia/flujo{Studly}.html` se publica como
@@ -391,6 +393,8 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('timetable.pdf.all-pestudios');
             Route::get('/timetable/pdf/all-teachers', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'allTeachers'])
                 ->name('timetable.pdf.all-teachers');
+            Route::get('/timetable/pdf/teacher-block-totals', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teacherBlockTotals'])
+                ->name('timetable.pdf.teacher-block-totals');
         });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────

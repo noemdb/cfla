@@ -7240,14 +7240,41 @@ PROMPT;
             })->implode('; ')
             : null;
 
+        // Periodos del preview por lesson: solo se sincronizan las lessons que
+        // el preview incluye. Las asignaciones persistidas de otras lessons de
+        // la sección se conservan intactas (no se eliminan).
+        $previewPeriodsByLesson = [];
+        foreach ($lessonIds as $lessonId) {
+            $previewSlots = $assignment->get((string) $lessonId, $assignment->get($lessonId, null));
+
+            if (! is_array($previewSlots)) {
+                continue;
+            }
+
+            $previewPeriodsByLesson[$lessonId] = collect($previewSlots)
+                ->pluck('period_id')
+                ->map(fn ($periodId): int => (int) $periodId)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+        }
+
         try {
-            DB::transaction(function () use ($calendar, $sectionId, $lessonIds, $assignmentRows): void {
-                TimetableSlot::query()
-                    ->where('calendar_id', $calendar->id)
-                    ->where('seccion_id', $sectionId)
-                    ->whereIn('lesson_id', $lessonIds)
-                    ->delete();
-                TimetableSlot::query()->insertOrIgnore($assignmentRows);
+            DB::transaction(function () use ($calendar, $previewPeriodsByLesson, $assignmentRows): void {
+                foreach ($previewPeriodsByLesson as $lessonId => $periodIds) {
+                    // Quita únicamente los bloques que esa lesson ya no tiene en
+                    // el preview (reubicados/retirados); el resto permanece.
+                    TimetableSlot::query()
+                        ->where('calendar_id', $calendar->id)
+                        ->where('lesson_id', (int) $lessonId)
+                        ->whereNotIn('period_id', $periodIds)
+                        ->delete();
+                }
+
+                if ($assignmentRows !== []) {
+                    TimetableSlot::query()->insertOrIgnore($assignmentRows);
+                }
             });
         } catch (\Illuminate\Database\QueryException $exception) {
             report($exception);
