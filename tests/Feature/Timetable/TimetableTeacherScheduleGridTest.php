@@ -100,15 +100,17 @@ class TimetableTeacherScheduleGridTest extends TestCase
                 ],
             ]);
 
-        $ref = new \ReflectionMethod(TimetableWizard::class, 'teacherScheduleGrid');
+        $ref = new \ReflectionMethod(TimetableWizard::class, 'teacherScheduleCalendarGrids');
         $ref->setAccessible(true);
-        $grid = $ref->invoke($wizard->instance());
+        $blocks = $ref->invoke($wizard->instance());
 
         $lessonIds = [];
-        foreach ($grid as $row) {
-            foreach ($row['cells'] as $cells) {
-                foreach ($cells as $cell) {
-                    $lessonIds[] = (int) $cell['lesson_id'];
+        foreach ($blocks as $block) {
+            foreach ($block['rows'] as $row) {
+                foreach ($row['cells'] as $cells) {
+                    foreach ($cells as $cell) {
+                        $lessonIds[] = (int) $cell['lesson_id'];
+                    }
                 }
             }
         }

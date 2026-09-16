@@ -2067,7 +2067,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-white/10">
                     <div>
                         <h2 id="teacher-schedule-title" class="text-sm font-extrabold text-gray-900 dark:text-white">Horario por profesor</h2>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Toda la carga horaria asignada al profesor en las secciones del calendario.</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Toda la carga horaria asignada al profesor en las secciones de todos los calendarios/P.Estudios del lapso.</p>
                     </div>
                     <button type="button" wire:click="closeTeacherScheduleDialog"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 dark:hover:bg-white/10 dark:hover:text-white"
@@ -2086,8 +2086,22 @@
                         @endforelse
                     </select>
                 </div>
+                @if ($teacherScheduleCalendars !== [])
+                    <div class="flex border-b border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5"
+                        role="tablist" aria-label="P.Estudios del horario docente">
+                        @foreach ($teacherScheduleCalendars as $cal)
+                            @php $tabActive = (int) ($teacherScheduleActiveCalendarId ?? 0) === (int) $cal['calendar_id']; @endphp
+                            <button type="button" role="tab" aria-selected="{{ $tabActive ? 'true' : 'false' }}"
+                                wire:click="setTeacherScheduleTab({{ $cal['calendar_id'] }})"
+                                title="{{ $cal['calendar'] }}"
+                                class="flex-1 basis-0 border-b-2 px-3 py-2 text-center text-xs font-bold transition-colors {{ $tabActive ? 'border-fuchsia-500 text-fuchsia-700 dark:text-fuchsia-300' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                                {{ $cal['pestudio'] }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
                 <div class="overflow-auto p-5">
-                    @if ($teacherScheduleGrid !== [])
+                    @if ($teacherScheduleHasAssignments)
                         <table class="w-full min-w-[900px] table-fixed border-collapse text-left text-xs">
                             <caption class="sr-only">Lessons del profesor seleccionado por día y bloque</caption>
                             <thead>
@@ -2124,7 +2138,7 @@
                         </table>
                     @else
                         <div class="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
-                            El profesor seleccionado no tiene lessons asignadas en ninguna sección del calendario.
+                            El profesor seleccionado no tiene lessons asignadas en este P.Estudio.
                         </div>
                     @endif
                 </div>
