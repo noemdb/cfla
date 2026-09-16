@@ -679,6 +679,7 @@ class TimetableWizard extends Component
                     'calendar_id' => $copy->id, 'pevaluacion_id' => $lesson->pevaluacion_id, 'shift_id' => $lesson->shift_id,
                     'weekly_blocks_t' => $lesson->weekly_blocks_t, 'weekly_blocks_p' => $lesson->weekly_blocks_p,
                     'room_type_required' => $lesson->room_type_required, 'is_half_group' => $lesson->is_half_group,
+                    'allow_shared_teacher' => $lesson->allow_shared_teacher,
                     'priority' => $lesson->priority, 'locked' => $lesson->locked,
                 ]);
                 foreach ($lesson->slots as $slot) {
@@ -692,6 +693,7 @@ class TimetableWizard extends Component
                         'profesor_id' => $slot->profesor_id, 'seccion_id' => $slot->seccion_id,
                         'grupo_estable_id' => $slot->grupo_estable_id, 'room_id' => $slot->room_id,
                         'is_half_group' => $slot->is_half_group,
+                        'allow_shared_teacher' => $slot->allow_shared_teacher,
                         'locked' => $slot->locked, 'is_manual_override' => $slot->is_manual_override,
                     ]);
                 }
