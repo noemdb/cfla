@@ -564,6 +564,34 @@ class IndexComponent extends Component
     }
 
     /**
+     * Abre un dialog (WireUI) con el detalle completo de la pregunta.
+     */
+    public function showQuestionDetails($questionId)
+    {
+        $question = DiagQuestion::with(['options', 'pensum.asignatura', 'diagMain', 'competency', 'indicator'])
+            ->whereIn('pensum_id', $this->pensumIds ?: [0])
+            ->find($questionId);
+
+        if (! $question) {
+            $this->notification()->error(
+                'Pregunta no disponible',
+                'La pregunta no pertenece a su carga académica.'
+            );
+
+            return;
+        }
+
+        $this->dialog()->show([
+            'icon' => 'info',
+            'style' => 'center',
+            'title' => 'Detalle de la pregunta',
+            'description' => view('livewire.profesor.diagnostics.partials.question-details', [
+                'question' => $question,
+            ])->render(),
+        ]);
+    }
+
+    /**
      * Genera una pregunta de diagnóstico con IA (OpenRouter) enriquecida con
      * las actividades del lapso y los referentes/competencias/indicadores del
      * área de formación seleccionada.
