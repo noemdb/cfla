@@ -7239,38 +7239,36 @@ PROMPT;
             })->implode('; ')
             : null;
 
-        // Periodos del preview por lesson: solo se sincronizan las lessons que
-        // el preview incluye. Las asignaciones persistidas de otras lessons de
-        // la sección se conservan intactas (no se eliminan).
-        $previewPeriodsByLesson = [];
-        foreach ($lessonIds as $lessonId) {
-            $previewSlots = $assignment->get((string) $lessonId, $assignment->get($lessonId, null));
+        // Las colisiones de docente no impiden guardar: al marcar la asignación
+        // como docente compartido, la clave única (calendar, período, docente)
+        // incluye la lesson y la fila se persiste sin eliminar la existente.
+        $teacherConflictKeys = $conflicts
+            ->where('type', 'docente')
+            ->mapWithKeys(fn (array $conflict): array => [
+                ((int) $conflict['candidate_lesson_id']).':'.((int) $conflict['period_id']) => true,
+            ])
+            ->all();
 
-            if (! is_array($previewSlots)) {
-                continue;
-            }
-
-            $previewPeriodsByLesson[$lessonId] = collect($previewSlots)
-                ->pluck('period_id')
-                ->map(fn ($periodId): int => (int) $periodId)
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
+        $candidateTeacherCounts = [];
+        foreach ($assignmentRows as $row) {
+            $teacherKey = $row['profesor_id'].':'.$row['period_id'];
+            $candidateTeacherCounts[$teacherKey] = ($candidateTeacherCounts[$teacherKey] ?? 0) + 1;
         }
 
-        try {
-            DB::transaction(function () use ($calendar, $previewPeriodsByLesson, $assignmentRows): void {
-                foreach ($previewPeriodsByLesson as $lessonId => $periodIds) {
-                    // Quita únicamente los bloques que esa lesson ya no tiene en
-                    // el preview (reubicados/retirados); el resto permanece.
-                    TimetableSlot::query()
-                        ->where('calendar_id', $calendar->id)
-                        ->where('lesson_id', (int) $lessonId)
-                        ->whereNotIn('period_id', $periodIds)
-                        ->delete();
-                }
+        foreach ($assignmentRows as $index => $row) {
+            $teacherKey = $row['profesor_id'].':'.$row['period_id'];
 
+            if (isset($teacherConflictKeys[$row['lesson_id'].':'.$row['period_id']])
+                || ($candidateTeacherCounts[$teacherKey] ?? 0) > 1) {
+                $assignmentRows[$index]['allow_shared_teacher'] = true;
+            }
+        }
+
+        // Guardado aditivo: este método NUNCA elimina asignaciones. Solo agrega
+        // (o conserva) los slots del preview; las asignaciones persistidas
+        // existentes permanecen intactas.
+        try {
+            DB::transaction(function () use ($assignmentRows): void {
                 if ($assignmentRows !== []) {
                     TimetableSlot::query()->insertOrIgnore($assignmentRows);
                 }
