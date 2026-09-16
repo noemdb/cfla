@@ -4629,7 +4629,11 @@ class TimetableWizard extends Component
                         if ($busy['day'] === (int) $period->day_of_week
                             && $startMin < $busy['end']
                             && $endMin > $busy['start']) {
-                            $collisionPestudios[$busy['pestudio']] = true;
+                            $collisionPestudios[collect([
+                                $busy['pestudio'] ?? '',
+                                $busy['grado'] ?? '',
+                                $busy['section'] ?? '',
+                            ])->filter(fn ($value) => filled($value))->implode(' · ')] = true;
                         }
                     }
                 }
@@ -4658,7 +4662,7 @@ class TimetableWizard extends Component
      * lapso (excluye el P.Estudio del calendario en edición). Permite detectar
      * colisiones de horario del docente entre P.Estudios.
      *
-     * @return array<int, list<array{pestudio:string, day:int, start:int, end:int}>>
+     * @return array<int, list<array{pestudio:string, grado:string, section:string, day:int, start:int, end:int}>>
      */
     private function teacherExternalBusyMap(): array
     {
@@ -4692,8 +4696,12 @@ class TimetableWizard extends Component
             // huérfano de un grado inactivo no representa carga real del docente.
             ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
             ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
-            ->with('period:id,day_of_week,start_time,end_time,is_break')
-            ->get(['profesor_id', 'calendar_id', 'period_id']);
+            ->with([
+                'period:id,day_of_week,start_time,end_time,is_break',
+                'lesson.pevaluacion.seccion:id,name,grado_id',
+                'lesson.pevaluacion.seccion.grado:id,name',
+            ])
+            ->get(['profesor_id', 'calendar_id', 'period_id', 'lesson_id']);
 
         $map = [];
         foreach ($slots as $slot) {
@@ -4701,8 +4709,11 @@ class TimetableWizard extends Component
             if (! $period || $period->is_break) {
                 continue;
             }
+            $section = $slot->lesson?->pevaluacion?->seccion;
             $map[(int) $slot->profesor_id][] = [
                 'pestudio' => $pestudioByCalendar->get((int) $slot->calendar_id, 'P.Estudio'),
+                'grado' => (string) ($section?->grado?->name ?? ''),
+                'section' => (string) ($section?->name ?? ''),
                 'day' => (int) $period->day_of_week,
                 'start' => $this->minOfDay((string) $period->start_time),
                 'end' => $this->minOfDay((string) $period->end_time),
