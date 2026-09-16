@@ -62,11 +62,16 @@ final class LessonToSchedule
      * HG-01: cuando la prioridad de medio-grupo está activa, las lecciones
      * `is_half_group` se consideran más restrictivas (peso 6) para que la
      * búsqueda las coloque antes que un grupo completo de igual prioridad.
+     *
+     * ST-01: cuando la prioridad de docente compartido está activa, las
+     * lecciones `allow_shared_teacher` reciben un peso extra para colocarlas
+     * antes y facilitar su agrupación por período.
      */
-    public function constraintDegree(bool $halfGroupPriority = false): int
+    public function constraintDegree(bool $halfGroupPriority = false, bool $sharedTeacherPriority = false): int
     {
         return ($this->priority * 10)
             + ($halfGroupPriority && $this->isHalfGroup ? 6 : 0)
+            + ($sharedTeacherPriority && $this->allowSharedTeacher ? 4 : 0)
             + ($this->roomTypeRequired !== null ? 5 : 0)
             + min($this->blocksNeeded(), 9);
     }

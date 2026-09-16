@@ -34,6 +34,8 @@ final class TimetableSolverOrchestrator
         private ?\Closure $onAttempt = null,
         private bool $halfGroupPriority = false,
         private int $halfGroupBonus = 20,
+        private bool $sharedTeacherPriority = false,
+        private int $sharedTeacherBonus = 15,
     ) {}
 
     public function solve(): SolverOutcome
@@ -110,6 +112,8 @@ final class TimetableSolverOrchestrator
             $config,
             $this->halfGroupPriority,
             $this->halfGroupBonus,
+            $this->sharedTeacherPriority,
+            $this->sharedTeacherBonus,
         );
 
         $result = $solver->solve();
@@ -150,6 +154,12 @@ final class TimetableSolverOrchestrator
         // intento que las coloca primero y las agrupa por sección.
         if ($this->halfGroupPriority) {
             $configs[] = new SolverAttemptConfig('S1h', SolverAttemptConfig::ORDER_HALF_GROUP_FIRST, 0, $this->attemptSeconds);
+        }
+
+        // ST-01: cuando la prioridad de docente compartido está activa, se
+        // antepone un intento que las coloca primero y las agrupa por docente.
+        if ($this->sharedTeacherPriority) {
+            $configs[] = new SolverAttemptConfig('S1s', SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST, 0, $this->attemptSeconds);
         }
 
         $configs[] = new SolverAttemptConfig('S2', SolverAttemptConfig::ORDER_SCARCITY, 0, $this->attemptSeconds);

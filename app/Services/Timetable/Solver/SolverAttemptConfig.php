@@ -32,6 +32,12 @@ final class SolverAttemptConfig
     public const ORDER_HALF_GROUP_FIRST = 'half_group_first';
 
     /**
+     * ST-01: prioriza las lecciones con `allow_shared_teacher` (agrupadas por
+     * docente) para consolidar los bloques compartidos en un mismo período.
+     */
+    public const ORDER_SHARED_TEACHER_FIRST = 'shared_teacher_first';
+
+    /**
      * @param  list<int>  $priorityLessonIds  lecciones a colocar primero (reparación)
      */
     public function __construct(

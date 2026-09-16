@@ -52,6 +52,8 @@ final class TimetableSolver
         private ?SolverAttemptConfig $config = null,
         private bool $halfGroupPriority = false,
         private int $halfGroupBonus = 0,
+        private bool $sharedTeacherPriority = false,
+        private int $sharedTeacherBonus = 0,
     ) {
         foreach ($this->lessons as $lesson) {
             $this->lessonById[$lesson->lessonId] = $lesson;
@@ -198,9 +200,12 @@ final class TimetableSolver
             case SolverAttemptConfig::ORDER_HALF_GROUP_FIRST:
                 $this->halfGroupOrder($free);
                 break;
+            case SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST:
+                $this->sharedTeacherOrder($free);
+                break;
             case SolverAttemptConfig::ORDER_CONSTRAINT:
             default:
-                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree($this->halfGroupPriority) <=> $a->constraintDegree($this->halfGroupPriority));
+                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority));
                 break;
         }
 
@@ -209,6 +214,13 @@ final class TimetableSolver
         // consecutiva para que el backtracking explore juntos a sus pares.
         if ($this->halfGroupPriority && $ordering !== SolverAttemptConfig::ORDER_HALF_GROUP_FIRST) {
             $this->clusterHalfGroupsBySection($free);
+        }
+
+        // ST-02: pareo blando de docente compartido. Clusteriza las lecciones
+        // `allow_shared_teacher` de un mismo docente para que el backtracking
+        // explore juntas sus asignaciones compartidas.
+        if ($this->sharedTeacherPriority && $ordering !== SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST) {
+            $this->clusterSharedTeachersByTeacher($free);
         }
     }
 
@@ -230,8 +242,76 @@ final class TimetableSolver
                 return $a->seccionId <=> $b->seccionId;
             }
 
-            return $b->constraintDegree($this->halfGroupPriority) <=> $a->constraintDegree($this->halfGroupPriority);
+            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority);
         });
+    }
+
+    /**
+     * ST-01 — Orden que prioriza las lecciones de docente compartido
+     * (`allow_shared_teacher`), agrupadas por docente, y luego por grado de
+     * restricción. Así se consolidan los bloques compartidos en un período.
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function sharedTeacherOrder(array &$free): void
+    {
+        usort($free, function (LessonToSchedule $a, LessonToSchedule $b): int {
+            if ($a->allowSharedTeacher !== $b->allowSharedTeacher) {
+                return $b->allowSharedTeacher <=> $a->allowSharedTeacher;
+            }
+
+            if ($a->allowSharedTeacher && $a->profesorId !== $b->profesorId) {
+                return $a->profesorId <=> $b->profesorId;
+            }
+
+            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority);
+        });
+    }
+
+    /**
+     * ST-02 — Reordena de forma estable para que las lecciones de docente
+     * compartido de un mismo profesor queden consecutivas, sin alterar el orden
+     * relativo del resto.
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function clusterSharedTeachersByTeacher(array &$free): void
+    {
+        $index = [];
+        foreach ($free as $position => $lesson) {
+            if ($lesson->allowSharedTeacher) {
+                $index[$lesson->profesorId][] = $position;
+            }
+        }
+
+        $teachersToCluster = array_filter($index, fn (array $positions): bool => count($positions) > 1);
+        if ($teachersToCluster === []) {
+            return;
+        }
+
+        $absorbed = [];
+        foreach ($teachersToCluster as $positions) {
+            foreach (array_slice($positions, 1) as $source) {
+                $absorbed[$source] = true;
+            }
+        }
+
+        $reordered = [];
+        foreach ($free as $position => $lesson) {
+            if (isset($absorbed[$position])) {
+                continue;
+            }
+
+            $reordered[] = $lesson;
+
+            if ($lesson->allowSharedTeacher && isset($teachersToCluster[$lesson->profesorId])) {
+                foreach (array_slice($teachersToCluster[$lesson->profesorId], 1) as $source) {
+                    $reordered[] = $free[$source];
+                }
+            }
+        }
+
+        $free = $reordered;
     }
 
     /**
@@ -353,7 +433,44 @@ final class TimetableSolver
             $score += $this->comboScore($slots);
         }
 
-        return $score + $this->halfGroupGroupingScore($assignment);
+        return $score
+            + $this->halfGroupGroupingScore($assignment)
+            + $this->sharedTeacherGroupingScore($assignment);
+    }
+
+    /**
+     * ST-03 — Bonus por agrupar lecciones de docente compartido del mismo
+     * profesor en el mismo período. Cuenta, por celda (período·docente), las
+     * parejas formadas.
+     *
+     * @param  array<int, list<SlotCandidate>>  $assignment
+     */
+    private function sharedTeacherGroupingScore(array $assignment): int
+    {
+        if (! $this->sharedTeacherPriority || $this->sharedTeacherBonus <= 0) {
+            return 0;
+        }
+
+        $cells = [];
+        foreach ($assignment as $lessonId => $slots) {
+            $lesson = $this->lessonById[(int) $lessonId] ?? null;
+            if (! $lesson || ! $lesson->allowSharedTeacher) {
+                continue;
+            }
+
+            foreach ($slots as $slot) {
+                $key = $slot->periodId.':'.$lesson->profesorId;
+                $cells[$key] = ($cells[$key] ?? 0) + 1;
+            }
+        }
+
+        $bonus = 0;
+        foreach ($cells as $count) {
+            // n lecciones compartidas en la misma celda forman n-1 parejas.
+            $bonus += max(0, $count - 1) * $this->sharedTeacherBonus;
+        }
+
+        return $bonus;
     }
 
     /**

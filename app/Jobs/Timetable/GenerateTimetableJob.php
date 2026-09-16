@@ -9,6 +9,7 @@ use App\Events\Timetable\TimetableGenerated;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
+use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Services\Timetable\Solver\AttemptResult;
 use App\Services\Timetable\Solver\LessonToSchedule;
@@ -251,7 +252,8 @@ class GenerateTimetableJob implements ShouldQueue
 
         $maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
         $preservedBusy = $this->preservedBusy($calendar, $dto, $maxSubjectsPerPeriod);
-        $availableByTeacher = $this->buildAvailablePeriods($calendar, $dto, $preservedBusy, $maxSubjectsPerPeriod);
+        $externalBusy = $this->externalTeacherBusyMap($calendar);
+        $availableByTeacher = $this->buildAvailablePeriods($calendar, $dto, $preservedBusy, $maxSubjectsPerPeriod, $externalBusy);
         $roomsByType = $this->buildRoomsByType($calendar);
         $periodMeta = $this->buildPeriodMeta($calendar);
 
@@ -279,6 +281,8 @@ class GenerateTimetableJob implements ShouldQueue
             )),
             halfGroupPriority: (bool) config('timetable.solver.half_group_priority', true),
             halfGroupBonus: max(0, (int) config('timetable.solver.half_group_bonus', 20)),
+            sharedTeacherPriority: (bool) config('timetable.solver.shared_teacher_priority', true),
+            sharedTeacherBonus: max(0, (int) config('timetable.solver.shared_teacher_bonus', 15)),
         ))->solve();
 
         $halfGroupMetrics = $outcome->halfGroupMetrics($dto);
@@ -381,11 +385,11 @@ class GenerateTimetableJob implements ShouldQueue
      * @param  array{teacher: array<int,array<int,bool>>, section: array<int,array<int,list<bool>>>}  $preserved
      * @return array<int, list<int>> lessonId => periodIds
      */
-    private function buildAvailablePeriods(TimetableCalendar $calendar, array $lessons, array $preserved = [], int $maxSubjectsPerPeriod = 2): array
+    private function buildAvailablePeriods(TimetableCalendar $calendar, array $lessons, array $preserved = [], int $maxSubjectsPerPeriod = 2, array $externalBusy = []): array
     {
         $periods = $calendar->periods()
             ->where('is_break', false)
-            ->get(['id', 'shift_id', 'day_of_week', 'order_in_day']);
+            ->get(['id', 'shift_id', 'day_of_week', 'order_in_day', 'start_time', 'end_time']);
         $byShift = $periods->groupBy('shift_id')->map(fn ($g) => $g->values()->all())->all();
 
         $availability = app(TimetableAvailabilityService::class);
@@ -412,7 +416,9 @@ class GenerateTimetableJob implements ShouldQueue
                         $calendar->id,
                         $profesorId,
                         $p,
-                    ) && $this->periodIsFreeOfPreserved($p->id, $profesorId, $seccionId, $lesson->isHalfGroup, $preserved, $maxSubjectsPerPeriod),
+                    )
+                        && ! $this->periodOverlapsExternalBusy($p, $externalBusy[$profesorId] ?? [])
+                        && $this->periodIsFreeOfPreserved($p->id, $profesorId, $seccionId, $lesson->isHalfGroup, $preserved, $maxSubjectsPerPeriod),
                 ),
             ));
         }
@@ -456,6 +462,82 @@ class GenerateTimetableJob implements ShouldQueue
         }
 
         return count($sectionPreserved) < $maxSubjectsPerPeriod;
+    }
+
+    /**
+     * Intervalos (día + hora) en que cada docente ya está ocupado en OTROS
+     * P.Estudios activos del lapso. El solver los usa como restricción para
+     * evitar colisiones de horario entre P.Estudios.
+     *
+     * @return array<int, list<array{day:int, start:int, end:int}>>
+     */
+    private function externalTeacherBusyMap(TimetableCalendar $calendar): array
+    {
+        $otherCalendarIds = TimetableCalendar::query()
+            ->forLapso($calendar->lapso_id)
+            ->active()
+            ->where('id', '!=', $calendar->id)
+            ->when($calendar->pestudio_id, fn ($query) => $query->where('pestudio_id', '!=', $calendar->pestudio_id))
+            ->pluck('id');
+
+        if ($otherCalendarIds->isEmpty()) {
+            return [];
+        }
+
+        $slots = TimetableSlot::query()
+            ->whereIn('calendar_id', $otherCalendarIds)
+            ->whereNotNull('profesor_id')
+            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
+            ->with('period:id,day_of_week,start_time,end_time,is_break')
+            ->get(['profesor_id', 'period_id']);
+
+        $map = [];
+        foreach ($slots as $slot) {
+            $period = $slot->period;
+            if (! $period || $period->is_break) {
+                continue;
+            }
+            $map[(int) $slot->profesor_id][] = [
+                'day' => (int) $period->day_of_week,
+                'start' => $this->minutes((string) $period->start_time),
+                'end' => $this->minutes((string) $period->end_time),
+            ];
+        }
+
+        return $map;
+    }
+
+    /**
+     * ¿El período del calendario en edición solapa una ocupación externa del docente?
+     *
+     * @param  list<array{day:int, start:int, end:int}>  $busy
+     */
+    private function periodOverlapsExternalBusy(TimetablePeriod $period, array $busy): bool
+    {
+        if ($busy === []) {
+            return false;
+        }
+
+        $start = $this->minutes((string) $period->start_time);
+        $end = $this->minutes((string) $period->end_time);
+
+        foreach ($busy as $entry) {
+            if ($entry['day'] === (int) $period->day_of_week
+                && $start < $entry['end']
+                && $end > $entry['start']) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function minutes(string $time): int
+    {
+        [$hours, $minutes] = array_pad(explode(':', $time), 2, '0');
+
+        return ((int) $hours) * 60 + (int) $minutes;
     }
 
     /**

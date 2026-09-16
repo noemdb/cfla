@@ -28,6 +28,10 @@ return [
     | half_group_priority: prioriza y agrupa los medio-grupos (HG-01..HG-04).
     | half_group_bonus: puntos soft por agrupar un medio-grupo junto a otro de
     |   la misma sección (debe ser < 100, el peso de "día distinto").
+    | shared_teacher_priority: prioriza y agrupa las lecciones con
+    |   allow_shared_teacher (ST-01..ST-03), consolidando sus bloques.
+    | shared_teacher_bonus: puntos soft por agrupar dos lecciones de docente
+    |   compartido del mismo profesor en el mismo período (< 100).
     |
     */
 
@@ -37,6 +41,8 @@ return [
         'restarts' => (int) env('TIMETABLE_SOLVER_RESTARTS', 6),
         'half_group_priority' => (bool) env('TIMETABLE_SOLVER_HALF_GROUP_PRIORITY', true),
         'half_group_bonus' => (int) env('TIMETABLE_SOLVER_HALF_GROUP_BONUS', 20),
+        'shared_teacher_priority' => (bool) env('TIMETABLE_SOLVER_SHARED_TEACHER_PRIORITY', true),
+        'shared_teacher_bonus' => (int) env('TIMETABLE_SOLVER_SHARED_TEACHER_BONUS', 15),
     ],
 
 ];
