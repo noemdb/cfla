@@ -40,14 +40,13 @@
             {{-- Dropdown: acciones de mantenimiento sobre los calendarios --}}
             <x-dropdown position="bottom-end" width="3xl" height="auto">
                 <x-slot name="trigger">
-                    <button type="button"
-                        title="Acciones de mantenimiento de los calendarios"
-                        aria-label="Acciones de mantenimiento de los calendarios"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-600 dark:text-gray-300 border border-white/5 text-sm font-bold transition-all">
-                        <x-icon name="wrench-screwdriver" class="w-4 h-4" />
-                        <span>Acciones</span>
-                        <x-icon name="chevron-down" class="w-3.5 h-3.5 opacity-70" />
-                    </button>
+                    <x-button
+                        label="Acciones"
+                        icon="wrench-screwdriver"
+                        right-icon="chevron-down"
+                        color="base"
+                        variant="outline"
+                        class="font-bold" />
                 </x-slot>
 
                 <x-dropdown.item
@@ -98,14 +97,13 @@
             {{-- Dropdown: formatos y exportaciones --}}
             <x-dropdown position="bottom-end" width="3xl" height="auto">
                 <x-slot name="trigger">
-                    <button type="button"
-                        title="Formatos y reportes"
-                        aria-label="Formatos y reportes"
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-600 dark:text-gray-300 border border-white/5 text-sm font-bold transition-all">
-                        <x-icon name="document-text" class="w-4 h-4" />
-                        <span>Formatos</span>
-                        <x-icon name="chevron-down" class="w-3.5 h-3.5 opacity-70" />
-                    </button>
+                    <x-button
+                        label="Formatos"
+                        icon="document-text"
+                        right-icon="chevron-down"
+                        color="base"
+                        variant="outline"
+                        class="font-bold" />
                 </x-slot>
 
                 <x-dropdown.item
@@ -142,87 +140,139 @@
         <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-4 mb-6">
             <div class="flex flex-wrap items-center gap-3">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Horario</span>
-                <select wire:key="calendar-switcher-{{ collect($calendars)->map(fn ($calendar) => $calendar['id'].'-'.$calendar['status'].'-'.$calendar['version'])->implode('|') }}" wire:model.live="calendarId" class="flex-1 min-w-[200px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                    <option value="">Seleccionar</option>
-                    @foreach ($calendars as $c)
-                        <option value="{{ $c['id'] }}">{{ $c['name'] }} ({{ $c['status'] }})</option>
-                    @endforeach
-                </select>
+                @php
+                    $selectedCalendar = collect($calendars)->firstWhere('id', $calendarId);
+                    $calendarStatusMeta = function (string $status): array {
+                        return match ($status) {
+                            'active' => ['label' => 'Activo', 'class' => 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'],
+                            'archived' => ['label' => 'Archivado', 'class' => 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-gray-400'],
+                            'generating' => ['label' => 'Generando', 'class' => 'bg-amber-500/15 text-amber-700 dark:text-amber-300'],
+                            default => ['label' => 'Borrador', 'class' => 'bg-sky-500/15 text-sky-700 dark:text-sky-300'],
+                        };
+                    };
+                @endphp
+                <div class="flex-1 min-w-[200px] [&>div]:w-full">
+                    <x-dropdown
+                        wire:key="calendar-switcher-{{ collect($calendars)->map(fn ($calendar) => $calendar['id'].'-'.$calendar['status'].'-'.$calendar['version'])->implode('|') }}"
+                        position="bottom-start"
+                        height="auto"
+                        class="!w-full">
+                        <x-slot name="trigger">
+                            <x-button
+                                :label="$selectedCalendar['name'] ?? 'Seleccionar'"
+                                icon="calendar-days"
+                                right-icon="chevron-down"
+                                color="base"
+                                variant="outline"
+                                full
+                                class="font-bold" />
+                        </x-slot>
+
+                        <x-dropdown.item wire:click="$set('calendarId', '')" label="Seleccionar" class="w-full" />
+
+                        @foreach ($calendars as $c)
+                            @php
+                                $statusMeta = $calendarStatusMeta($c['status']);
+                            @endphp
+                            <x-dropdown.item
+                                wire:click="$set('calendarId', {{ (int) $c['id'] }})"
+                                class="w-full {{ ($c['status'] ?? '') === 'archived' ? 'opacity-60' : '' }}">
+                                <span class="flex w-full items-center gap-2 min-w-0">
+                                    <span class="flex-1 break-words">{{ $c['name'] }}</span>
+                                    <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
+                                </span>
+                            </x-dropdown.item>
+                        @endforeach
+                    </x-dropdown>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 mt-3">
+
                 @php
                     $selectedCalendarPestudio = collect($calendars)->firstWhere('id', $calendarId)['pestudio_id'] ?? null;
                 @endphp
-                @if ($selectedCalendarPestudio)
-                    <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.pestudio-preview', ['calendar' => (int) $calendarId, 'pestudio' => (int) $selectedCalendarPestudio]) }}"
-                        target="_blank"
+
+                {{-- Dropdown: reportes PDF del calendario en edición --}}
+                <x-dropdown position="bottom-end" width="3xl" height="auto">
+                    <x-slot name="trigger">
+                        <x-button
+                            label="Reportes"
+                            icon="document-arrow-down"
+                            right-icon="chevron-down"
+                            color="base"
+                            variant="outline"
+                            class="font-bold" />
+                    </x-slot>
+
+                    @if ($selectedCalendarPestudio)
+                        <x-dropdown.item
+                            href="{{ route($moduleRoutePrefix.'.timetable.pdf.pestudio-preview', ['calendar' => (int) $calendarId, 'pestudio' => (int) $selectedCalendarPestudio]) }}"
+                            target="_blank"
+                            rel="noopener"
+                            icon="folder"
+                            label="PDF P.Estudio" />
+                    @endif
+
+                    <x-dropdown.item
+                        href="{{ $calendarId ? route($moduleRoutePrefix.'.timetable.pdf.teachers', ['calendar' => $calendarId]) : '#' }}"
+                        target="{{ $calendarId ? '_blank' : '_self' }}"
                         rel="noopener"
-                        title="Generar un PDF consolidado del pestudio del calendario"
-                        class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l2-2h14l2 2"/>
-                        </svg>
-                        PDF P.Estudio
-                    </a>
-                @endif
+                        aria-disabled="{{ $calendarId ? 'false' : 'true' }}"
+                        icon="document-arrow-down"
+                        label="PDF profesores"
+                        class="{{ $calendarId ? '' : 'pointer-events-none opacity-50' }}" />
+                </x-dropdown>
 
-                <a href="{{ $calendarId ? route($moduleRoutePrefix.'.timetable.pdf.teachers', ['calendar' => $calendarId]) : '#' }}"
-                    target="{{ $calendarId ? '_blank' : '_self' }}"
-                    rel="noopener"
-                    aria-disabled="{{ $calendarId ? 'false' : 'true' }}"
-                    title="Generar un PDF con los horarios de todos los profesores asociados al calendario"
-                    class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ $calendarId ? '' : 'pointer-events-none opacity-50' }}">
-                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0-3-3m3 3 3-3m2 8H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2Z"/>
-                    </svg>
-                    PDF profesores
-                </a>
-                {{-- <button wire:click="$set('showCreateCalendarForm', true)"
-                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</button> --}}
+                {{-- Dropdown: snapshots y respaldo del calendario --}}
+                <x-dropdown position="bottom-end" width="4xl" height="auto">
+                    <x-slot name="trigger">
+                        <x-button
+                            label="Respaldo"
+                            icon="circle-stack"
+                            right-icon="chevron-down"
+                            color="base"
+                            variant="outline"
+                            class="font-bold" />
+                    </x-slot>
 
-                <button type="button"
-                    wire:click="downloadCalendarLessonsBackup"
-                    wire:loading.attr="disabled"
-                    wire:loading.class="opacity-50 cursor-not-allowed"
-                    wire:target="downloadCalendarLessonsBackup"
-                    {{ filled($calendarId) ? '' : 'disabled' }}
-                    title="Snapshot JSON: snapshot completo del calendario (configuración + horario), reemplazable desde el restore"
-                    class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300 {{ filled($calendarId) ? '' : 'opacity-50 cursor-not-allowed' }}">
-                    <span wire:loading.remove wire:target="downloadCalendarLessonsBackup">Snapshot JSON</span>
-                    <span wire:loading wire:target="downloadCalendarLessonsBackup">Preparando…</span>
-                </button>
-
-                <label title="Elegir un snapshot o respaldo JSON: se previsualiza el diff antes de aplicar nada"
-                    class="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
-                    <span wire:loading.remove wire:target="calendarLessonsBackupFile">Elegir snapshot</span>
-                    <span wire:loading wire:target="calendarLessonsBackupFile">Leyendo…</span>
-                    <input type="file" wire:model="calendarLessonsBackupFile" accept="application/json,.json" class="sr-only">
-                </label>
-
-                @if ($lastSnapshotAutoBackup)
-                    <button type="button"
-                        wire:click="undoLastSnapshotRestore"
+                    <x-dropdown.item
+                        wire:click="downloadCalendarLessonsBackup"
                         wire:loading.attr="disabled"
-                        wire:loading.class="opacity-50 cursor-not-allowed"
-                        wire:target="undoLastSnapshotRestore"
-                        title="Volver al estado previo al último snapshot aplicado, usando el auto-backup escrito antes de reemplazar"
-                        class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
-                        <span wire:loading.remove wire:target="undoLastSnapshotRestore">Deshacer último restore</span>
-                        <span wire:loading wire:target="undoLastSnapshotRestore">Reabriendo…</span>
-                    </button>
-                @endif
-                <button type="button"
-                    wire:click="confirmClearCalendarLessonAssignments"
-                    disabled
-                    wire:loading.attr="disabled"
-                    wire:loading.class="opacity-50 cursor-not-allowed"
-                    wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments"
-                    title="Quitar todos los slots del calendario sin eliminar la configuración de sus lessons"
-                    class="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-700 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-amber-300">
-                    <span wire:loading.remove wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiar slots</span>
-                    <span wire:loading wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments">Limpiando…</span>
-                </button>
+                        wire:target="downloadCalendarLessonsBackup"
+                        icon="arrow-down-tray"
+                        class="{{ filled($calendarId) ? '' : 'pointer-events-none opacity-50' }}">
+                        <span wire:loading.remove wire:target="downloadCalendarLessonsBackup">Snapshot JSON</span>
+                        <span wire:loading wire:target="downloadCalendarLessonsBackup">Preparando…</span>
+                    </x-dropdown.item>
+
+                    <label title="Elegir un snapshot o respaldo JSON: se previsualiza el diff antes de aplicar nada"
+                        class="text-secondary-600 px-4 py-2 text-sm flex items-center cursor-pointer rounded-md transition-colors duration-150 hover:text-secondary-900 hover:bg-secondary-100 dark:text-secondary-400 dark:hover:bg-secondary-700">
+                        <x-icon name="folder-arrow-down" class="w-5 h-5 mr-2" />
+                        <span wire:loading.remove wire:target="calendarLessonsBackupFile">Elegir snapshot</span>
+                        <span wire:loading wire:target="calendarLessonsBackupFile">Leyendo…</span>
+                        <input type="file" wire:model="calendarLessonsBackupFile" accept="application/json,.json" class="sr-only">
+                    </label>
+
+                    @if ($lastSnapshotAutoBackup)
+                        <x-dropdown.item
+                            wire:click="undoLastSnapshotRestore"
+                            wire:loading.attr="disabled"
+                            wire:target="undoLastSnapshotRestore"
+                            icon="arrow-uturn-left">
+                            <span wire:loading.remove wire:target="undoLastSnapshotRestore">Deshacer último restore</span>
+                            <span wire:loading wire:target="undoLastSnapshotRestore">Reabriendo…</span>
+                        </x-dropdown.item>
+                    @endif
+
+                    <x-dropdown.item
+                        wire:click="confirmClearCalendarLessonAssignments"
+                        disabled
+                        wire:loading.attr="disabled"
+                        wire:target="confirmClearCalendarLessonAssignments,clearCalendarLessonAssignments"
+                        icon="trash"
+                        separator
+                        class="pointer-events-none opacity-50">
+                        <span>Limpiar slots</span>
+                    </x-dropdown.item>
+                </x-dropdown>
 
                 @if ($snapshotPreview)
                     @php
@@ -307,15 +357,33 @@
         </div>
     </div>
 
-    {{-- Flash --}}
-    @if (session()->has('message'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-medium">{{ session('message') }}</div>
-    @endif
-    @if (session()->has('error'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm font-medium">{{ session('error') }}</div>
-    @endif
-    @if (session()->has('warning'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-sm font-medium" role="status">{{ session('warning') }}</div>
+    {{-- Flash → toasts WireUI --}}
+    @if (session()->has('message') || session()->has('error') || session()->has('warning'))
+        @script
+        <script>
+            @if (session()->has('message'))
+                window.$wireui.notify({
+                    title: 'Listo',
+                    description: @js(session('message')),
+                    icon: 'success',
+                });
+            @endif
+            @if (session()->has('warning'))
+                window.$wireui.notify({
+                    title: 'Atención',
+                    description: @js(session('warning')),
+                    icon: 'warning',
+                });
+            @endif
+            @if (session()->has('error'))
+                window.$wireui.notify({
+                    title: 'Error',
+                    description: @js(session('error')),
+                    icon: 'error',
+                });
+            @endif
+        </script>
+        @endscript
     @endif
 
     @if ($errors->any())

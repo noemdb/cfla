@@ -107,7 +107,24 @@
                 @elseif($wizardStep === 2)
                     {{-- Step 2: Contenido --}}
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Pregunta</label>
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400">Pregunta</label>
+                            <button type="button" wire:click="generateQuestionWithAi"
+                                wire:loading.attr="disabled"
+                                wire:target="generateQuestionWithAi"
+                                title="Generar la pregunta con IA usando las actividades y referentes del área"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
+                                <svg wire:loading.remove wire:target="generateQuestionWithAi" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <svg wire:loading wire:target="generateQuestionWithAi" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <span wire:loading.remove wire:target="generateQuestionWithAi">Generar con IA</span>
+                                <span wire:loading wire:target="generateQuestionWithAi">Generando…</span>
+                            </button>
+                        </div>
                         <textarea wire:model="pregunta" rows="3"
                             class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
                             placeholder="Escriba el enunciado de la pregunta..."></textarea>

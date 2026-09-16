@@ -597,7 +597,10 @@ class TimetableWizard extends Component
         }
 
         if (! $calendar->slots()->exists()) {
-            session()->flash('error', 'El borrador no tiene horario generado. Ejecuta el dry-run y confirma la publicación para activarlo.');
+            $this->notification()->error(
+                'Sin horario generado',
+                'El borrador no tiene horario generado. Ejecuta el dry-run y confirma la publicación para activarlo.',
+            );
 
             return;
         }
@@ -605,10 +608,14 @@ class TimetableWizard extends Component
         $calendar->activate();
         $this->loadCalendars();
         if ($this->calendarId === $calendar->id) {
-            $this->generationState = 'published';
-            $this->preview = null;
+            // Rehidrata el horario publicado para que el Paso 5 lo muestre sin
+            // necesidad de recargar la página.
+            $this->loadPublishedPreview($calendar);
         }
-        session()->flash('message', 'Calendario «'.$calendar->name.'» activado. El activo anterior quedó archivado.');
+        $this->notification()->success(
+            'Calendario activado',
+            'Calendario «'.$calendar->name.'» activado. El activo anterior quedó archivado.',
+        );
     }
 
     /**

@@ -271,3 +271,16 @@ html.dark .supplement-preview::-webkit-scrollbar-thumb,
 html.dark .modal-scroll::-webkit-scrollbar-thumb {
     background: rgba(71, 85, 105, 0.6);
 }
+
+/* ============================================================
+   WireUI dropdown popover — borde sutil en modo oscuro.
+   El borde por defecto (secondary-600) resalta demasiado sobre
+   el fondo oscuro y no sigue el estilo border-white/5 del tema.
+   ============================================================ */
+html.dark [x-ref="popover"] > div {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark [x-ref="triggerContainer"] button {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}

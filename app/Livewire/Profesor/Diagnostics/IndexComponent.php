@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Profesor\Diagnostics;
 
+use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
@@ -12,9 +13,11 @@ use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagOption;
 use App\Models\app\Instrument\DiagQuestion;
+use App\Models\app\Instrument\DiagReferent;
 use App\Models\app\Instrument\DiagReport;
 use App\Models\app\Instrument\DiagSession;
 use App\Models\app\Learner\Estudiant;
+use App\Services\OpenRouterService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +46,8 @@ class IndexComponent extends Component
     public $activeTab = 'dashboard';
 
     public $showQuestionModal = false;
+
+    public $generatingQuestion = false;
 
     public $SessionModalReport = false;
 
@@ -556,6 +561,265 @@ class IndexComponent extends Component
 
         $this->showQuestionModal = true;
         $this->dispatch('refreshCharts');
+    }
+
+    /**
+     * Genera una pregunta de diagnóstico con IA (OpenRouter) enriquecida con
+     * las actividades del lapso y los referentes/competencias/indicadores del
+     * área de formación seleccionada.
+     */
+    public function generateQuestionWithAi()
+    {
+        if (! $this->pensum_id || ! in_array((int) $this->pensum_id, $this->pensumIds, true)) {
+            $this->notification()->warning(
+                'Área requerida',
+                'Selecciona primero el área de formación y el tipo de pregunta.'
+            );
+
+            return;
+        }
+
+        $this->generatingQuestion = true;
+
+        try {
+            $pensum = Pensum::with(['asignatura', 'grado', 'pestudio'])->find($this->pensum_id);
+
+            if (! $pensum) {
+                $this->notification()->error(
+                    'Área no disponible',
+                    'No se encontró el área de formación seleccionada.'
+                );
+
+                return;
+            }
+
+            $result = app(OpenRouterService::class)->ask(
+                $this->buildQuestionSystemPrompt(),
+                $this->buildQuestionUserPrompt($pensum),
+                ['max_tokens' => 1500, 'temperature' => 0.7, 'timeout' => 120],
+            );
+
+            if (! ($result['success'] ?? false)) {
+                $this->notification()->error(
+                    'Error al generar',
+                    $result['error'] ?? 'No se pudo generar la pregunta.'
+                );
+
+                return;
+            }
+
+            $payload = $this->parseQuestionAiPayload($result['content'] ?? null);
+
+            if (! $payload) {
+                $this->notification()->error(
+                    'Respuesta inválida',
+                    'La IA no devolvió una pregunta con formato válido. Intenta nuevamente.'
+                );
+
+                return;
+            }
+
+            $this->applyQuestionAiPayload($payload);
+
+            $this->notification()->success(
+                'Pregunta generada',
+                'Revisa y ajusta la pregunta antes de guardarla.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Diagnostics AI question generation failed', [
+                'user_id' => Auth::id(),
+                'pensum_id' => $this->pensum_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        } finally {
+            $this->generatingQuestion = false;
+        }
+    }
+
+    private function buildQuestionSystemPrompt(): string
+    {
+        return <<<'PROMPT'
+Eres docente venezolano experto en evaluación diagnóstica.
+Generas preguntas de diagnóstico de alta calidad pedagógica, alineadas al área de formación, al grado y a los referentes, competencias e indicadores entregados.
+
+REGLAS:
+- Español formal, claro y preciso; lenguaje pedagógico.
+- Una sola pregunta por respuesta, contextualizada y con valor diagnóstico.
+- Si el tipo es "multiple": 4 opciones plausibles, solo una correcta, e incluye "correct_index" (0-3).
+- Si el tipo es "open": incluye "expected_answer" con criterios de evaluación.
+- Si el tipo es "scale": incluye "min_value" y "max_value" (rango 1-5).
+- Evita repetir preguntas ya registradas.
+- Responde EXCLUSIVAMENTE con un objeto JSON válido, sin markdown ni texto adicional.
+
+FORMATO JSON:
+{"pregunta":"...","options":["...","...","...","..."],"correct_index":0,"expected_answer":"...","min_value":1,"max_value":5}
+PROMPT;
+    }
+
+    private function buildQuestionUserPrompt(Pensum $pensum): string
+    {
+        $asignatura = $pensum->asignatura?->name ?? $pensum->full_name ?? '—';
+        $grado = $pensum->grado?->name ?? '—';
+
+        $tipoLabel = match ($this->tipo_pregunta) {
+            'multiple' => 'Selección múltiple (una sola respuesta correcta)',
+            'open' => 'Pregunta abierta (respuesta libre)',
+            'scale' => 'Escala de valoración',
+            default => (string) $this->tipo_pregunta,
+        };
+
+        $activitiesText = $this->questionActivitiesContext($pensum);
+        $referentsText = $this->questionReferentsContext($pensum);
+
+        return <<<PROMPT
+### Área de formación
+{$asignatura} · {$grado}
+
+### Tipo de pregunta solicitado
+{$tipoLabel}
+
+### Actividades y contenidos del lapso
+{$activitiesText}
+
+### Referentes, competencias e indicadores
+{$referentsText}
+
+Genera la pregunta de diagnóstico.
+PROMPT;
+    }
+
+    /**
+     * Contexto de actividades (LMS) del área de formación para el lapso actual.
+     */
+    private function questionActivitiesContext(Pensum $pensum): string
+    {
+        $activities = Activity::query()
+            ->whereHas('pevaluacion', function ($q) use ($pensum) {
+                $q->where('pensum_id', $pensum->id);
+
+                if ($this->lapsoId) {
+                    $q->where('lapso_id', $this->lapsoId);
+                }
+
+                if ($this->profesor) {
+                    $q->where('profesor_id', $this->profesor->id);
+                }
+            })
+            ->latest('created_at')
+            ->limit(8)
+            ->get(['topic', 'thematic', 'description', 'teaching', 'learning', 'references', 'observations']);
+
+        if ($activities->isEmpty()) {
+            return '—';
+        }
+
+        return $activities->map(function (Activity $activity): string {
+            return collect([
+                'Tema generador' => $activity->topic,
+                'Tejido temático' => $activity->thematic,
+                'Actividad evaluativa' => $activity->description,
+                'Enseñanza' => $activity->teaching,
+                'Aprendizaje' => $activity->learning,
+                'Referentes teóricos' => $activity->references,
+                'ODS/Sistematización' => $activity->observations,
+            ])
+                ->filter(fn ($value) => filled($value))
+                ->map(fn ($value, $key) => "  - {$key}: ".mb_substr(trim((string) $value), 0, 300))
+                ->implode("\n");
+        })->implode("\n");
+    }
+
+    /**
+     * Contexto de referentes → competencias → indicadores del área.
+     */
+    private function questionReferentsContext(Pensum $pensum): string
+    {
+        $referents = DiagReferent::with([
+            'competencies' => fn ($q) => $q->where('pensum_id', $pensum->id),
+            'competencies.indicators',
+        ])
+            ->where('pestudio_id', $pensum->pestudio_id)
+            ->where('active', true)
+            ->get();
+
+        if ($referents->isEmpty()) {
+            return '—';
+        }
+
+        return $referents->map(function (DiagReferent $referent): string {
+            $lines = ["Referente: {$referent->name} ({$referent->code})"];
+
+            foreach ($referent->competencies as $competency) {
+                $lines[] = '  Competencia: '.mb_substr(trim((string) $competency->name), 0, 200);
+
+                foreach ($competency->indicators as $indicator) {
+                    $lines[] = '    Indicador: '.mb_substr(trim((string) $indicator->description), 0, 200);
+                }
+            }
+
+            return implode("\n", $lines);
+        })->implode("\n");
+    }
+
+    private function parseQuestionAiPayload(?string $content): ?array
+    {
+        $content = trim((string) $content);
+
+        if ($content === '') {
+            return null;
+        }
+
+        // Quita fences de markdown ```json ... ```
+        $content = trim((string) preg_replace('/^```(?:json)?\s*|\s*```$/i', '', $content));
+
+        $data = json_decode($content, true);
+
+        if (! is_array($data) && preg_match('/\{.*\}/s', $content, $matches)) {
+            $data = json_decode($matches[0], true);
+        }
+
+        if (! is_array($data) || blank($data['pregunta'] ?? null)) {
+            return null;
+        }
+
+        return $data;
+    }
+
+    private function applyQuestionAiPayload(array $payload): void
+    {
+        $this->pregunta = mb_substr(trim((string) $payload['pregunta']), 0, 500);
+
+        if ($this->tipo_pregunta === 'multiple') {
+            $options = collect($payload['options'] ?? [])
+                ->map(fn ($option) => is_array($option) ? ($option['opcion'] ?? '') : (string) $option)
+                ->map(fn ($option) => mb_substr(trim($option), 0, 200))
+                ->filter()
+                ->take(6)
+                ->values();
+
+            if ($options->count() < 2) {
+                $options = collect(['', '']);
+            }
+
+            $this->options = $options->map(fn ($opcion, $index) => [
+                'opcion' => $opcion,
+                'valor' => 0,
+                'orden' => $index + 1,
+            ])->all();
+
+            $correct = (int) ($payload['correct_index'] ?? 0);
+            $this->correct_option_index = max(0, min($correct, count($this->options) - 1));
+        } elseif ($this->tipo_pregunta === 'open') {
+            $this->expected_answer = mb_substr(trim((string) ($payload['expected_answer'] ?? '')), 0, 1000);
+        } elseif ($this->tipo_pregunta === 'scale') {
+            $min = (int) ($payload['min_value'] ?? 1);
+            $max = (int) ($payload['max_value'] ?? 5);
+
+            $this->min_value = max(1, min(9, $min));
+            $this->max_value = max($this->min_value + 1, min(10, $max));
+        }
     }
 
     public function saveQuestion()

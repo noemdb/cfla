@@ -10,7 +10,7 @@
         .subhead{text-align:center;font-size:6.5pt;color:#6b7280;margin-bottom:4px;}
         .teacher-page{page-break-after:always;width:100%;}
         .teacher-card{display:block;width:100%;padding:0 4px;}
-        .teacher-card + .teacher-card{border-top:1px solid #9ca3af;margin-top:8px;padding-top:8px;}
+        .teacher-card + .teacher-card{border-top:1px solid #9ca3af;margin-top:6px;padding-top:6px;}
         table{width:100%;border-collapse:collapse;}
         td,th{border:1px solid #333;padding:2px 3px;vertical-align:top;font-size:6.5pt;line-height:1.2;}
         th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:6pt;padding:3px;}
@@ -27,7 +27,7 @@
             $calendar = $calendarData['calendar'];
             $pestudio = $calendarData['pestudio'];
         @endphp
-        @foreach ($calendarData['schedules']->chunk(2) as $pageSchedules)
+        @foreach ($calendarData['schedules']->chunk(3) as $pageSchedules)
             <div class="teacher-page">
                 @foreach ($pageSchedules as $schedule)
                     <div class="teacher-card">
