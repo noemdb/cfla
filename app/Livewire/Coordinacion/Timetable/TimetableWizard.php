@@ -5308,10 +5308,8 @@ class TimetableWizard extends Component
             $swapOriginalSlots = $swapSlots;
             $previousPreview = $this->preview;
 
-            if ($this->blockIfCrossSectionCollision($lessonId, $newPeriodId)
-                || $this->blockIfCrossSectionCollision($swapLessonId, $fromPeriodId)) {
-                return;
-            }
+            $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId)
+                ?? $this->detectCrossSectionCollision($swapLessonId, $fromPeriodId);
 
             $slots[$slotIndex]['period_id'] = $newPeriodId;
             $swapSlots[$swapSlotIndex]['period_id'] = $fromPeriodId;
@@ -5338,7 +5336,9 @@ class TimetableWizard extends Component
                 'swap_lesson_id' => $swapLessonId,
                 'swap_slots' => $swapSlots,
             ]);
-            if ($hasShiftMismatch) {
+            if ($collisionWarning !== null) {
+                $this->notification()->warning('Posible colisión de docente', $collisionWarning);
+            } elseif ($hasShiftMismatch) {
                 $this->notification()->warning(
                     'Lecciones intercambiadas con advertencia',
                     'El intercambio se realizó, pero una o ambas lecciones quedaron en un turno distinto al configurado.',
@@ -5353,9 +5353,7 @@ class TimetableWizard extends Component
             return;
         }
 
-        if ($this->blockIfCrossSectionCollision($lessonId, $newPeriodId)) {
-            return;
-        }
+        $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId);
 
         $slots[$slotIndex]['period_id'] = $newPeriodId;
         $assignment[$lessonKey] = array_values($slots);
@@ -5363,7 +5361,9 @@ class TimetableWizard extends Component
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
         $this->recordPreviewChange('move_preview_lesson', $lessonId, $originalSlots, $slots);
-        if ($hasShiftMismatch) {
+        if ($collisionWarning !== null) {
+            $this->notification()->warning('Posible colisión de docente', $collisionWarning);
+        } elseif ($hasShiftMismatch) {
             $this->notification()->warning(
                 'Lección reubicada con advertencia',
                 'La lección se movió a un período de otro turno distinto al configurado.',
@@ -5377,11 +5377,12 @@ class TimetableWizard extends Component
     }
 
     /**
-     * Bloquea el movimiento si la lección, al ubicarse en $periodId, colisiona
-     * con un slot preservado de OTRA sección (mismo docente). Mismas
-     * validaciones bloqueantes que al guardar la sección.
+     * Detecta si la lección, al ubicarse en $periodId, colisiona con un slot
+     * preservado de OTRA sección (mismo docente). No bloquea: devuelve el
+     * mensaje de advertencia (o null) para que el movimiento se aplique y solo
+     * se notifique al usuario.
      */
-    private function blockIfCrossSectionCollision(int $lessonId, int $periodId): bool
+    private function detectCrossSectionCollision(int $lessonId, int $periodId): ?string
     {
         $lesson = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
@@ -5389,7 +5390,7 @@ class TimetableWizard extends Component
             ->find($lessonId);
 
         if (! $lesson?->pevaluacion) {
-            return false;
+            return null;
         }
 
         $profesorId = (int) $lesson->pevaluacion->profesor_id;
@@ -5415,17 +5416,12 @@ class TimetableWizard extends Component
                 $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
                 $otherSection = $slot->lesson?->pevaluacion?->seccion?->name ?? 'otra sección';
 
-                $this->notification()->error(
-                    'Movimiento bloqueado',
-                    "«{$subject}» colisiona en ese período con una asignación de la sección {$otherSection} "
-                    .'del docente #'.$profesorId.'. Elige otro bloque o reubica la otra sección.',
-                );
-
-                return true;
+                return "«{$subject}» colisiona en ese período con una asignación de la sección {$otherSection} "
+                    .'del docente #'.$profesorId.'. Revisa el horario o reubica la otra sección.';
             }
         }
 
-        return false;
+        return null;
     }
 
     /**

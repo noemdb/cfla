@@ -22,10 +22,11 @@ use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
- * El drag-and-drop del paso 5 debe bloquear el movimiento cuando la lección
- * colisiona con un slot preservado de otra sección (mismo docente).
+ * El drag-and-drop del paso 5 NO debe bloquear el movimiento cuando la lección
+ * colisiona con un slot preservado de otra sección (mismo docente): se aplica
+ * el movimiento y solo se muestra un aviso (toast).
  */
-class TimetableMovePreviewLessonBlockingTest extends TestCase
+class TimetableMovePreviewLessonWarningTest extends TestCase
 {
     use DatabaseTransactions, TimetableShiftHelper;
 
@@ -52,7 +53,7 @@ class TimetableMovePreviewLessonBlockingTest extends TestCase
         ]);
     }
 
-    public function test_move_is_blocked_by_other_section_slot(): void
+    public function test_move_is_applied_with_warning_by_other_section_slot(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
@@ -98,14 +99,15 @@ class TimetableMovePreviewLessonBlockingTest extends TestCase
                 ],
                 'unassigned' => [],
             ])
-            ->call('movePreviewLesson', $lessonA->id, $periodA->id, $periodB->id);
+            ->call('movePreviewLesson', $lessonA->id, $periodA->id, $periodB->id)
+            ->assertDispatched('wireui:notification');
 
-        // El movimiento debe quedar bloqueado: la lección A sigue en su período.
+        // El movimiento se aplica aunque colisione; solo se avisa al usuario.
         $assignment = $component->get('preview.assignment');
         $this->assertSame(
-            [$periodA->id],
+            [$periodB->id],
             array_column($assignment[(string) $lessonA->id], 'period_id'),
-            'el movimiento debe bloquearse por colisión con otra sección',
+            'el movimiento debe aplicarse (no bloquearse) aunque colisione con otra sección',
         );
     }
 }
