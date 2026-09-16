@@ -143,12 +143,13 @@ class TimetablePdfController extends Controller
         $seccion = Seccion::query()->with('grado')->findOrFail($seccionId);
 
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
 
         $assignment = collect($calendar->preview_payload['assignment'] ?? []);
-        if ($isPublishedSchedule) {
+        if ($usePersistedSlots) {
             $assignment = TimetableSlot::query()
                 ->where('calendar_id', $calendar->id)
                 ->where('seccion_id', $seccionId)
@@ -265,6 +266,7 @@ class TimetablePdfController extends Controller
             ->orderBy('name')
             ->get();
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
 
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
@@ -290,11 +292,11 @@ class TimetablePdfController extends Controller
             $assignment,
             $periods,
             $lessons,
-            $isPublishedSchedule
+            $usePersistedSlots
         ): array {
             $sectionLessons = $lessons->filter(fn (TimetableLesson $lesson): bool => (int) $lesson->pevaluacion?->seccion_id === (int) $section->id);
             $sectionAssignment = $assignment;
-            if ($isPublishedSchedule) {
+            if ($usePersistedSlots) {
                 $sectionAssignment = TimetableSlot::query()
                     ->where('calendar_id', $calendar->id)
                     ->where('seccion_id', $section->id)
@@ -401,6 +403,16 @@ class TimetablePdfController extends Controller
     }
 
     /**
+     * Indica si el horario debe resolverse desde los slots persistidos en BD
+     * (calendario publicado o clonado, cuyo `preview_payload` no contiene
+     * 'assignment') en lugar del payload de vista previa (dry-run).
+     */
+    private function shouldUsePersistedSlots(TimetableCalendar $calendar): bool
+    {
+        return ! is_array($calendar->preview_payload['assignment'] ?? null);
+    }
+
+    /**
      * Horarios por grado/sección de un P.ESTUDIO para un calendario (compartido
      * por el PDF de un P.Estudio y el consolidado de todos los P.Estudios).
      *
@@ -409,6 +421,7 @@ class TimetablePdfController extends Controller
     private function buildPestudioSchedules(TimetableCalendar $calendar, Pestudio $pestudio): array
     {
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
 
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
@@ -442,17 +455,17 @@ class TimetablePdfController extends Controller
             $assignment,
             $periods,
             $lessons,
-            $isPublishedSchedule
+            $usePersistedSlots
         ): array {
             $sectionSchedules = $grado->seccions->map(function (Seccion $section) use (
                 $calendar,
                 $assignment,
                 $periods,
                 $lessons,
-                $isPublishedSchedule
+                $usePersistedSlots
             ): array {
                 $sectionLessons = $lessons->filter(fn (TimetableLesson $lesson): bool => (int) $lesson->pevaluacion?->seccion_id === (int) $section->id);
-                $sectionAssignment = $isPublishedSchedule
+                $sectionAssignment = $usePersistedSlots
                     ? TimetableSlot::query()->where('calendar_id', $calendar->id)->where('seccion_id', $section->id)
                         ->get(['lesson_id', 'period_id', 'room_id'])->groupBy('lesson_id')
                         ->map(fn ($slots) => $slots->map(fn ($slot) => [
@@ -660,12 +673,13 @@ class TimetablePdfController extends Controller
         $area = AreaConocimiento::query()->with('pestudio')->findOrFail($areaId);
 
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
 
         $assignment = collect($calendar->preview_payload['assignment'] ?? []);
-        if ($isPublishedSchedule) {
+        if ($usePersistedSlots) {
             $assignment = TimetableSlot::query()
                 ->where('calendar_id', $calendar->id)
                 ->get(['lesson_id', 'period_id', 'room_id'])
