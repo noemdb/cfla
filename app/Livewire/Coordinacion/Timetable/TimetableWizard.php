@@ -635,90 +635,110 @@ class TimetableWizard extends Component
             return;
         }
 
-        $copy = DB::transaction(function () use ($source) {
-            $copyNumber = TimetableCalendar::query()
-                ->where('lapso_id', $source->lapso_id)
-                ->where('name', 'like', $source->name.' (copia%')
-                ->count() + 1;
-            $copyName = $source->name.' (copia v'.((int) $source->version).' · '.$copyNumber.')';
+        try {
+            $copy = DB::transaction(function () use ($source) {
+                return $this->duplicateCalendarIntoCopy($source);
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
 
-            $copy = TimetableCalendar::create([
-                'lapso_id' => $source->lapso_id,
-                'pescolar_id' => $source->pescolar_id,
-                'pestudio_id' => $source->pestudio_id,
-                'name' => $copyName,
-                'period_minutes' => $source->period_minutes,
-                'max_subjects_per_period' => $source->max_subjects_per_period,
-                'strategy' => $source->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
-                'status' => TimetableCalendar::STATUS_DRAFT,
-                'version' => 0,
-                'quality_score' => $source->quality_score,
-                'preview_payload' => [
-                    'duplicated_from' => [
-                        'calendar_id' => (int) $source->id,
-                        'name' => $source->name,
-                        'status' => $source->status,
-                        'version' => (int) $source->version,
-                        'duplicated_at' => now()->toIso8601String(),
-                    ],
-                ],
-            ]);
+            $this->notification()->error(
+                'Duplicación no completada',
+                'No se pudo duplicar el calendario. Revisa el log para conocer la causa técnica.',
+            );
 
-            $periodMap = [];
-            foreach ($source->periods()->get() as $period) {
-                $newPeriod = TimetablePeriod::create([
-                    'calendar_id' => $copy->id, 'shift_id' => $period->shift_id,
-                    'day_of_week' => $period->day_of_week, 'order_in_day' => $period->order_in_day,
-                    'start_time' => $period->start_time, 'end_time' => $period->end_time, 'is_break' => $period->is_break,
-                ]);
-                $periodMap[$period->id] = $newPeriod->id;
-            }
-
-            foreach ($source->lessons()->with('slots')->get() as $lesson) {
-                $newLesson = TimetableLesson::create([
-                    'calendar_id' => $copy->id, 'pevaluacion_id' => $lesson->pevaluacion_id, 'shift_id' => $lesson->shift_id,
-                    'weekly_blocks_t' => $lesson->weekly_blocks_t, 'weekly_blocks_p' => $lesson->weekly_blocks_p,
-                    'room_type_required' => $lesson->room_type_required, 'is_half_group' => $lesson->is_half_group,
-                    'allow_shared_teacher' => $lesson->allow_shared_teacher,
-                    'priority' => $lesson->priority, 'locked' => $lesson->locked,
-                ]);
-                foreach ($lesson->slots as $slot) {
-                    $newPeriodId = $periodMap[$slot->period_id] ?? null;
-                    if (! $newPeriodId) {
-                        continue;
-                    }
-
-                    TimetableSlot::create([
-                        'calendar_id' => $copy->id, 'lesson_id' => $newLesson->id, 'period_id' => $newPeriodId,
-                        'profesor_id' => $slot->profesor_id, 'seccion_id' => $slot->seccion_id,
-                        'grupo_estable_id' => $slot->grupo_estable_id, 'room_id' => $slot->room_id,
-                        'is_half_group' => $slot->is_half_group,
-                        'allow_shared_teacher' => $slot->allow_shared_teacher,
-                        'locked' => $slot->locked, 'is_manual_override' => $slot->is_manual_override,
-                    ]);
-                }
-
-            }
-
-            foreach ($source->availabilities()->get() as $availability) {
-                TimetableTeacherAvailability::create([
-                    'calendar_id' => $copy->id,
-                    'profesor_id' => $availability->profesor_id,
-                    'shift_id' => $availability->shift_id,
-                    'day_of_week' => $availability->day_of_week,
-                    'order_in_day' => $availability->order_in_day,
-                    'start_time' => $availability->start_time,
-                    'end_time' => $availability->end_time,
-                    'is_available' => $availability->is_available,
-                ]);
-            }
-
-            return $copy;
-        });
+            return;
+        }
 
         $this->loadCalendars();
         $this->selectCalendar($copy->id);
         session()->flash('message', 'Calendario duplicado como borrador: «'.$copy->name.'». Origen: «'.$source->name.'» v'.$source->version.'.');
+    }
+
+    /**
+     * Copia periodos, lessons, slots y disponibilidad del calendario origen en
+     * un nuevo borrador dentro de una transacción. Extraído de
+     * {@see duplicateCalendar()} para poder envolverlo en manejo de errores.
+     */
+    private function duplicateCalendarIntoCopy(TimetableCalendar $source): TimetableCalendar
+    {
+        $copyNumber = TimetableCalendar::query()
+            ->where('lapso_id', $source->lapso_id)
+            ->where('name', 'like', $source->name.' (copia%')
+            ->count() + 1;
+        $copyName = $source->name.' (copia v'.((int) $source->version).' · '.$copyNumber.')';
+
+        $copy = TimetableCalendar::create([
+            'lapso_id' => $source->lapso_id,
+            'pescolar_id' => $source->pescolar_id,
+            'pestudio_id' => $source->pestudio_id,
+            'name' => $copyName,
+            'period_minutes' => $source->period_minutes,
+            'max_subjects_per_period' => $source->max_subjects_per_period,
+            'strategy' => $source->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
+            'status' => TimetableCalendar::STATUS_DRAFT,
+            'version' => 0,
+            'quality_score' => $source->quality_score,
+            'preview_payload' => [
+                'duplicated_from' => [
+                    'calendar_id' => (int) $source->id,
+                    'name' => $source->name,
+                    'status' => $source->status,
+                    'version' => (int) $source->version,
+                    'duplicated_at' => now()->toIso8601String(),
+                ],
+            ],
+        ]);
+
+        $periodMap = [];
+        foreach ($source->periods()->get() as $period) {
+            $newPeriod = TimetablePeriod::create([
+                'calendar_id' => $copy->id, 'shift_id' => $period->shift_id,
+                'day_of_week' => $period->day_of_week, 'order_in_day' => $period->order_in_day,
+                'start_time' => $period->start_time, 'end_time' => $period->end_time, 'is_break' => $period->is_break,
+            ]);
+            $periodMap[$period->id] = $newPeriod->id;
+        }
+
+        foreach ($source->lessons()->with('slots')->get() as $lesson) {
+            $newLesson = TimetableLesson::create([
+                'calendar_id' => $copy->id, 'pevaluacion_id' => $lesson->pevaluacion_id, 'shift_id' => $lesson->shift_id,
+                'weekly_blocks_t' => $lesson->weekly_blocks_t, 'weekly_blocks_p' => $lesson->weekly_blocks_p,
+                'room_type_required' => $lesson->room_type_required, 'is_half_group' => $lesson->is_half_group,
+                'allow_shared_teacher' => $lesson->allow_shared_teacher,
+                'priority' => $lesson->priority, 'locked' => $lesson->locked,
+            ]);
+            foreach ($lesson->slots as $slot) {
+                $newPeriodId = $periodMap[$slot->period_id] ?? null;
+                if (! $newPeriodId) {
+                    continue;
+                }
+
+                TimetableSlot::create([
+                    'calendar_id' => $copy->id, 'lesson_id' => $newLesson->id, 'period_id' => $newPeriodId,
+                    'profesor_id' => $slot->profesor_id, 'seccion_id' => $slot->seccion_id,
+                    'grupo_estable_id' => $slot->grupo_estable_id, 'room_id' => $slot->room_id,
+                    'is_half_group' => $slot->is_half_group,
+                    'allow_shared_teacher' => $slot->allow_shared_teacher,
+                    'locked' => $slot->locked, 'is_manual_override' => $slot->is_manual_override,
+                ]);
+            }
+        }
+
+        foreach ($source->availabilities()->get() as $availability) {
+            TimetableTeacherAvailability::create([
+                'calendar_id' => $copy->id,
+                'profesor_id' => $availability->profesor_id,
+                'shift_id' => $availability->shift_id,
+                'day_of_week' => $availability->day_of_week,
+                'order_in_day' => $availability->order_in_day,
+                'start_time' => $availability->start_time,
+                'end_time' => $availability->end_time,
+                'is_available' => $availability->is_available,
+            ]);
+        }
+
+        return $copy;
     }
 
     /**
