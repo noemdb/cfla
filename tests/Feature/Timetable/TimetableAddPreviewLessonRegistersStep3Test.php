@@ -190,4 +190,72 @@ class TimetableAddPreviewLessonRegistersStep3Test extends TestCase
         $this->assertSame(1, (int) $lesson->fresh()->weekly_blocks_p);
         $this->assertSame(0, (int) $lesson->fresh()->weekly_blocks_t);
     }
+
+    public function test_add_preview_lesson_persists_even_when_teacher_has_collision(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccionA = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        $seccionB = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        $profesor = Profesor::create([
+            'user_id' => $user->id, 'name' => 'Carmin', 'lastname' => 'Cortez',
+            'ci_profesor' => '9604', 'status_active' => 'true',
+        ]);
+        $asignatura = Asignatura::factory()->create(['hour_t_week' => 2, 'hour_p_week' => 0]);
+        $pensum = Pensum::factory()->create([
+            'pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignatura->id,
+        ]);
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso->id, 'pestudio_id' => $pestudio->id,
+        ]);
+        $shift = $this->makeShift();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+            'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,
+        ]);
+
+        $existingPev = Pevaluacion::factory()->create([
+            'profesor_id' => $profesor->id, 'seccion_id' => $seccionA->id,
+            'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id,
+        ]);
+        $existingLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id, 'pevaluacion_id' => $existingPev->id,
+            'shift_id' => $shift->id, 'weekly_blocks_t' => 2, 'weekly_blocks_p' => 0,
+        ]);
+        \App\Models\app\Timetable\TimetableSlot::create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $existingLesson->id,
+            'period_id' => $period->id,
+            'profesor_id' => $profesor->id,
+            'seccion_id' => $seccionA->id,
+            'is_half_group' => false,
+            'locked' => true,
+            'is_manual_override' => true,
+        ]);
+
+        $newPev = Pevaluacion::factory()->create([
+            'profesor_id' => $profesor->id, 'seccion_id' => $seccionB->id,
+            'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id,
+        ]);
+        $newLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id, 'pevaluacion_id' => $newPev->id,
+            'shift_id' => $shift->id, 'weekly_blocks_t' => 2, 'weekly_blocks_p' => 0,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('preview', ['assignment' => [], 'unassigned' => [$newLesson->id]])
+            ->call('openAddPreviewLessonModal', $period->id)
+            ->call('addPreviewLesson', $newLesson->id);
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $newLesson->id,
+            'period_id' => $period->id,
+            'profesor_id' => $profesor->id,
+        ]);
+    }
 }

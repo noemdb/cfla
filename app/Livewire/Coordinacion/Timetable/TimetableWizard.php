@@ -7034,6 +7034,42 @@ PROMPT;
             }
         }
 
+        // Las colisiones están permitidas y se persisten: si una fila coincide
+        // en docente+período con una asignación ya persistida (o con otra fila
+        // del mismo set) que no es de medio grupo ni de docente compartido, se
+        // marca allow_shared_teacher para que la clave única (calendar, período,
+        // docente) incluya la lesson y la fila se guarde sin descartar ni
+        // reemplazar la existente.
+        $teacherPeriodCounts = [];
+        foreach ($rows as $row) {
+            $key = (int) $row['profesor_id'].':'.(int) $row['period_id'];
+            $teacherPeriodCounts[$key] = ($teacherPeriodCounts[$key] ?? 0) + 1;
+        }
+
+        $existingCollisionKeys = [];
+        $collisionPeriods = collect($rows)->pluck('period_id')->unique()->all();
+        if ($collisionPeriods !== []) {
+            $existingCollisionKeys = TimetableSlot::query()
+                ->where('calendar_id', $this->calendarId)
+                ->whereIn('period_id', $collisionPeriods)
+                ->whereNotIn('lesson_id', $lessonIds)
+                ->where('is_half_group', false)
+                ->where('allow_shared_teacher', false)
+                ->get(['period_id', 'profesor_id'])
+                ->mapWithKeys(fn (TimetableSlot $slot): array => [
+                    ((int) $slot->profesor_id).':'.((int) $slot->period_id) => true,
+                ])
+                ->all();
+        }
+
+        foreach ($rows as $index => $row) {
+            $key = (int) $row['profesor_id'].':'.(int) $row['period_id'];
+
+            if (isset($existingCollisionKeys[$key]) || ($teacherPeriodCounts[$key] ?? 0) > 1) {
+                $rows[$index]['allow_shared_teacher'] = true;
+            }
+        }
+
         try {
             DB::transaction(function () use ($lessonIds, $rows): void {
                 TimetableSlot::query()
@@ -7131,142 +7167,10 @@ PROMPT;
             return;
         }
 
-        $lessonIds = $sectionLessons->keys()->map(fn ($id): int => (int) $id)->all();
-        $periods = TimetablePeriod::query()
-            ->whereIn('id', collect($assignmentRows)->pluck('period_id')->unique())
-            ->get()
-            ->keyBy('id');
-        $persistedSlots = TimetableSlot::query()
-            ->where('calendar_id', $calendar->id)
-            ->whereIn('period_id', $periods->keys())
-            ->whereNotIn('lesson_id', $lessonIds)
-            ->with('lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.profesor')
-            ->get();
-        $conflicts = collect($assignmentRows)
-            ->map(function (array $candidate) use ($persistedSlots): ?array {
-                $teacherConflicts = $persistedSlots->filter(function (TimetableSlot $slot) use ($candidate): bool {
-                    return (int) $slot->period_id === (int) $candidate['period_id']
-                        && (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id) === (int) $candidate['profesor_id'];
-                })->values();
-
-                if ($teacherConflicts->isNotEmpty()) {
-                    $allShared = $teacherConflicts->every(
-                        fn (TimetableSlot $slot): bool => (bool) ($slot->lesson?->allow_shared_teacher ?? $slot->allow_shared_teacher),
-                    );
-                    $bothHalfGroup = $teacherConflicts->every(
-                        fn (TimetableSlot $slot): bool => (bool) $slot->is_half_group,
-                    ) && (bool) $candidate['is_half_group'];
-                    $bothShared = $allShared && (bool) $candidate['allow_shared_teacher'];
-
-                    if (! ($bothHalfGroup || $bothShared)) {
-                        $existing = $teacherConflicts->first();
-
-                        return [
-                            'candidate_lesson_id' => (int) $candidate['lesson_id'],
-                            'period_id' => (int) $candidate['period_id'],
-                            'existing_lesson_id' => (int) $existing->lesson_id,
-                            'type' => 'docente',
-                            'candidate_profesor_id' => (int) $candidate['profesor_id'],
-                            'existing_profesor_id' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id),
-                            'candidate_section_id' => (int) $candidate['seccion_id'],
-                            'existing_section_id' => (int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id),
-                            'subject' => $existing->lesson?->pevaluacion?->pensum?->asignatura?->name ?? 'otra asignatura',
-                            'section' => $existing->lesson?->pevaluacion?->seccion?->name ?? (string) $existing->seccion_id,
-                        ];
-                    }
-                }
-
-                // Aula y sección (la excepción de docente compartido no las relaja).
-                $existing = $persistedSlots->first(function (TimetableSlot $slot) use ($candidate): bool {
-                    if ((int) $slot->period_id !== (int) $candidate['period_id']) {
-                        return false;
-                    }
-
-                    $persistedSectionId = (int) ($slot->lesson?->pevaluacion?->seccion_id ?? $slot->seccion_id);
-                    $sameRoom = $candidate['room_id'] !== null
-                        && $slot->room_id !== null
-                        && (int) $slot->room_id === (int) $candidate['room_id'];
-                    $sameSection = $persistedSectionId === (int) $candidate['seccion_id']
-                        && (
-                            $candidate['grupo_estable_id'] === null
-                            || (int) $slot->grupo_estable_id === (int) $candidate['grupo_estable_id']
-                            || $slot->grupo_estable_id === null
-                        );
-
-                    return $sameRoom || $sameSection;
-                });
-
-                if (! $existing) {
-                    return null;
-                }
-
-                return [
-                    'candidate_lesson_id' => (int) $candidate['lesson_id'],
-                    'period_id' => (int) $candidate['period_id'],
-                    'existing_lesson_id' => (int) $existing->lesson_id,
-                    'type' => (int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id) === (int) $candidate['seccion_id'] ? 'sección' : 'aula',
-                    'candidate_profesor_id' => (int) $candidate['profesor_id'],
-                    'existing_profesor_id' => (int) ($existing->lesson?->pevaluacion?->profesor_id ?? $existing->profesor_id),
-                    'candidate_section_id' => (int) $candidate['seccion_id'],
-                    'existing_section_id' => (int) ($existing->lesson?->pevaluacion?->seccion_id ?? $existing->seccion_id),
-                    'subject' => $existing->lesson?->pevaluacion?->pensum?->asignatura?->name ?? 'otra asignatura',
-                    'section' => $existing->lesson?->pevaluacion?->seccion?->name ?? (string) $existing->seccion_id,
-                ];
-            })
-            ->filter()
-            ->unique(fn (array $conflict): string => implode(':', [
-                $conflict['candidate_lesson_id'],
-                $conflict['period_id'],
-                $conflict['existing_lesson_id'],
-            ]))
-            ->values();
-
-        // Las colisiones NO bloquean el guardado: se informan como aviso y se
-        // persiste lo que la base de datos admita (insertOrIgnore).
-        $collisionDetail = $conflicts->isNotEmpty()
-            ? $conflicts->map(function (array $conflict) use ($periods, $sectionLessons): string {
-                $period = $periods->get($conflict['period_id']);
-                $periodLabel = $period?->period_label ?? "período {$conflict['period_id']}";
-                $candidate = $sectionLessons->get($conflict['candidate_lesson_id']);
-                $candidateSubject = $candidate?->pevaluacion?->pensum?->asignatura?->name
-                    ?? "lesson {$conflict['candidate_lesson_id']}";
-
-                return "{$conflict['type']} en {$periodLabel}: {$candidateSubject} colisiona con "
-                    ."{$conflict['subject']} · sección {$conflict['section']} "
-                    .'(docente '.$conflict['candidate_profesor_id'].' vs '
-                    .$conflict['existing_profesor_id'].'; sección '
-                    .$conflict['candidate_section_id'].' vs '.$conflict['existing_section_id'].')';
-            })->implode('; ')
-            : null;
-
-        // Las colisiones de docente no impiden guardar: al marcar la asignación
-        // como docente compartido, la clave única (calendar, período, docente)
-        // incluye la lesson y la fila se persiste sin eliminar la existente.
-        $teacherConflictKeys = $conflicts
-            ->where('type', 'docente')
-            ->mapWithKeys(fn (array $conflict): array => [
-                ((int) $conflict['candidate_lesson_id']).':'.((int) $conflict['period_id']) => true,
-            ])
-            ->all();
-
-        $candidateTeacherCounts = [];
-        foreach ($assignmentRows as $row) {
-            $teacherKey = $row['profesor_id'].':'.$row['period_id'];
-            $candidateTeacherCounts[$teacherKey] = ($candidateTeacherCounts[$teacherKey] ?? 0) + 1;
-        }
-
-        foreach ($assignmentRows as $index => $row) {
-            $teacherKey = $row['profesor_id'].':'.$row['period_id'];
-
-            if (isset($teacherConflictKeys[$row['lesson_id'].':'.$row['period_id']])
-                || ($candidateTeacherCounts[$teacherKey] ?? 0) > 1) {
-                $assignmentRows[$index]['allow_shared_teacher'] = true;
-            }
-        }
-
-        // Guardado aditivo: este método NUNCA elimina asignaciones. Solo agrega
-        // (o conserva) los slots del preview; las asignaciones persistidas
-        // existentes permanecen intactas.
+        // Guardado aditivo: este método NUNCA elimina asignaciones de los
+        // asignaturas. Solo agrega (o conserva) los slots del preview; las
+        // asignaciones persistidas existentes permanecen intactas y las
+        // colisiones están permitidas (se tratan en otro flujo del wizard).
         try {
             DB::transaction(function () use ($assignmentRows): void {
                 if ($assignmentRows !== []) {
@@ -7275,49 +7179,21 @@ PROMPT;
             });
         } catch (\Illuminate\Database\QueryException $exception) {
             report($exception);
-            $periodDetails = collect($assignmentRows)
-                ->groupBy('period_id')
-                ->map(function ($rows, $periodId) use ($periods, $sectionLessons): string {
-                    $period = $periods->get((int) $periodId);
-                    $periodLabel = $period?->period_label ?? "período {$periodId}";
-                    $lessons = $rows->map(function (array $row) use ($sectionLessons): string {
-                        $lesson = $sectionLessons->get($row['lesson_id']);
-                        $subject = $lesson?->pevaluacion?->pensum?->asignatura?->name
-                            ?? "lesson {$row['lesson_id']}";
-                        $halfGroup = $row['is_half_group'] ? 'medio grupo' : 'grupo completo';
-
-                        return "{$subject} ({$halfGroup}, docente #{$row['profesor_id']})";
-                    })->implode(' + ');
-
-                    return "{$periodLabel}: {$lessons}";
-                })
-                ->values()
-                ->implode('; ');
 
             $this->notification()->error(
                 'Asignaciones no guardadas',
                 'No se guardaron los slots porque la base de datos rechazó una combinación '
                 .'duplicada o incompatible. Revisa el día, bloque, docente, sección y aula '
-                .'de las asignaciones. Detalle de la sección activa: '.$periodDetails
-                .'. Si las lessons son de medio grupo, ambas deben tener habilitado «medio grupo» '
-                .'y no deben compartir un aula ocupada. No se modificó ninguna asignación.',
+                .'de las asignaciones. No se modificó ninguna asignación.',
             );
 
             return;
         }
 
-        if ($collisionDetail !== null) {
-            $this->notification()->warning(
-                'Asignaciones guardadas con colisiones',
-                'Se persistieron los slots de la sección, pero se detectaron colisiones con asignaciones '
-                ."preservadas del calendario: {$collisionDetail}. Revisa el horario y reubica las lessons indicadas.",
-            );
-        } else {
-            $this->notification()->success(
-                'Asignaciones guardadas',
-                'Los slots de la sección activa quedaron persistidos en la base de datos.',
-            );
-        }
+        $this->notification()->success(
+            'Asignaciones guardadas',
+            'Los slots de la sección activa quedaron persistidos en la base de datos.',
+        );
 
         // Se conserva el preview en memoria (lo que el usuario ve) y no se
         // reconstruye desde los slots: así ninguna celda desaparece del render

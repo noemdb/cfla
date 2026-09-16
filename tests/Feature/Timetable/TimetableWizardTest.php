@@ -2464,9 +2464,11 @@ class TimetableWizardTest extends TestCase
             'lesson_id' => $preservedLesson->id,
             'period_id' => $period->id,
         ]);
-        // La colisión no bloquea ni elimina: la asignación candidata también se
-        // persiste (marcada como docente compartido) sin reemplazar la preservada.
-        $this->assertDatabaseHas('timetable_slots', [
+        // La colisión está permitida y el guardado es aditivo: la asignación
+        // preservada permanece intacta. La candidata no se marca sola como
+        // docente compartido, por lo que la base de datos la rechaza (no se
+        // persiste) en lugar de reemplazar o eliminar la existente.
+        $this->assertDatabaseMissing('timetable_slots', [
             'calendar_id' => $calendar->id,
             'lesson_id' => $candidateLesson->id,
             'period_id' => $period->id,
