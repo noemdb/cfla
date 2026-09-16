@@ -2760,6 +2760,59 @@ class TimetableWizardTest extends TestCase
         $this->assertSame([], $grid);
     }
 
+    public function test_persist_current_section_respects_max_subjects_per_period(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso->id,
+            'max_subjects_per_period' => 2,
+        ]);
+        $shift = $this->shift();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id,
+            'shift_id' => $shift->id,
+            'day_of_week' => 1,
+            'order_in_day' => 1,
+            'is_break' => false,
+        ]);
+
+        $f1 = $this->pevaluacionFixture($lapso->id);
+        $f2 = $this->pevaluacionFixture($lapso->id);
+        $f3 = $this->pevaluacionFixture($lapso->id);
+        $f2['pev']->update(['seccion_id' => $f1['pev']->seccion_id]);
+        $f3['pev']->update(['seccion_id' => $f1['pev']->seccion_id]);
+
+        $lessons = [];
+        foreach ([$f1, $f2, $f3] as $f) {
+            $lessons[] = TimetableLesson::factory()->create([
+                'calendar_id' => $calendar->id,
+                'pevaluacion_id' => $f['pev']->id,
+                'shift_id' => $shift->id,
+                'weekly_blocks_t' => 1,
+                'weekly_blocks_p' => 0,
+            ]);
+        }
+
+        $assignment = [];
+        foreach ($lessons as $lesson) {
+            $assignment[(string) $lesson->id] = [['period_id' => $period->id]];
+        }
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('activeSeccionId', $f1['pev']->seccion_id)
+            ->set('preview', ['assignment' => $assignment, 'unassigned' => []])
+            ->call('persistCurrentSectionSlots');
+
+        $count = \App\Models\app\Timetable\TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('period_id', $period->id)
+            ->count();
+        $this->assertSame(2, $count);
+    }
+
     public function test_step1_shows_selected_calendar_detail(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

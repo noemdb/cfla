@@ -4586,8 +4586,12 @@ class TimetableWizard extends Component
 
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
-            ->whereHas('pevaluacion', fn ($q) => $q->where('seccion_id', $seccionId))
-            ->with('pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.grupoEstable')
+            ->with(
+                'pevaluacion.pensum.asignatura',
+                'pevaluacion.profesor',
+                'pevaluacion.grupoEstable',
+                'pevaluacion.seccion.grado',
+            )
             ->get();
 
         $periodMap = TimetablePeriod::query()
@@ -4599,8 +4603,40 @@ class TimetableWizard extends Component
         $cellLoad = [];
         $externalBusy = $this->teacherExternalBusyMap();
 
+        // Ocupación del docente DENTRO del mismo calendario (otras secciones del
+        // mismo P.Estudio) tomada del propio preview: alimenta el badge de
+        // colisión intra-calendario entre secciones.
+        $pestudioName = (string) (TimetableCalendar::query()->with('pestudio:id,name')->find($this->calendarId)?->pestudio?->name ?? 'P.Estudio');
+        $previewBusy = [];
+        foreach ($lessons as $busyLesson) {
+            $busyPev = $busyLesson->pevaluacion;
+            $busyTeacherId = (int) ($busyPev?->profesor_id ?? 0);
+            if (! $busyPev || $busyTeacherId <= 0) {
+                continue;
+            }
+            foreach (($assignment[(string) $busyLesson->id] ?? $assignment[(int) $busyLesson->id] ?? []) as $busySlot) {
+                $busyPeriod = $periodMap->get((int) ($busySlot['period_id'] ?? 0));
+                if (! $busyPeriod || $busyPeriod->is_break) {
+                    continue;
+                }
+                $busySection = $busyPev->seccion;
+                $previewBusy[$busyTeacherId][] = [
+                    'lesson_id' => (int) $busyLesson->id,
+                    'pestudio' => $pestudioName,
+                    'grado' => (string) ($busySection?->grado?->name ?? ''),
+                    'section' => (string) ($busySection?->name ?? ''),
+                    'day' => (int) $busyPeriod->day_of_week,
+                    'start' => $this->minOfDay((string) $busyPeriod->start_time),
+                    'end' => $this->minOfDay((string) $busyPeriod->end_time),
+                ];
+            }
+        }
+
         $grid = [];
         foreach ($lessons as $lesson) {
+            if (! $lesson->pevaluacion || (int) $lesson->pevaluacion->seccion_id !== (int) $seccionId) {
+                continue;
+            }
             $slots = $assignment[(string) $lesson->id]
                 ?? $assignment[(int) $lesson->id]
                 ?? [];
@@ -4618,14 +4654,22 @@ class TimetableWizard extends Component
                 $pev = $lesson->pevaluacion;
                 $teacherId = (int) ($pev?->profesor_id ?? 0);
 
-                // Colisión del docente con otros P.Estudios activos del lapso:
-                // mismo día con solapamiento de horas.
+                // Colisión del docente con otros P.Estudios activos del lapso o
+                // con otra sección del mismo calendario: mismo día con
+                // solapamiento de horas. Se excluye la propia lección.
                 $collisionPestudios = [];
                 if ($teacherId > 0) {
                     $startMin = $this->minOfDay((string) $period->start_time);
                     $endMin = $this->minOfDay((string) $period->end_time);
 
-                    foreach ($externalBusy[$teacherId] ?? [] as $busy) {
+                    $busyEntries = array_merge(
+                        $externalBusy[$teacherId] ?? [],
+                        $previewBusy[$teacherId] ?? [],
+                    );
+                    foreach ($busyEntries as $busy) {
+                        if ((int) ($busy['lesson_id'] ?? 0) === (int) $lesson->id) {
+                            continue;
+                        }
                         if ($busy['day'] === (int) $period->day_of_week
                             && $startMin < $busy['end']
                             && $endMin > $busy['start']) {
@@ -5437,6 +5481,8 @@ class TimetableWizard extends Component
             return;
         }
 
+        $previousPreview = $this->preview;
+
         $lesson = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
             ->with('pevaluacion.pensum.asignatura')
@@ -5531,6 +5577,16 @@ class TimetableWizard extends Component
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
 
+        // La retirada también se refleja en la base de datos para que la
+        // lección no reaparezca al recargar o al reconstruir el preview desde
+        // los slots persistidos. Se eliminan los slots de la lección (del
+        // bloque indicado, si no se retira completa).
+        if (! $this->persistPreviewLessonRemoval((int) $lessonId, $periodId, $removedAll)) {
+            $this->preview = $previousPreview;
+
+            return;
+        }
+
         if ($removedAll) {
             $this->unregisterLessonFromStep3($lesson);
             // Sin bloques en el preview la demanda del Paso 3 es cero, para que
@@ -5548,6 +5604,39 @@ class TimetableWizard extends Component
                 ? $subject.' quedó sin asignar en el preview.'
                 : 'Se retiró un bloque de '.$subject.'; el resto se mantiene asignado.',
         );
+    }
+
+    /**
+     * Elimina de la base de datos los slots persistidos de una lección.
+     * Si `$periodId` se indica y no se retira la lección completa, borra solo
+     * ese bloque. Se usa para que la retirada del preview sea persistente.
+     */
+    private function persistPreviewLessonRemoval(int $lessonId, ?int $periodId, bool $removedAll): bool
+    {
+        try {
+            DB::transaction(function () use ($lessonId, $periodId, $removedAll): void {
+                $query = TimetableSlot::query()
+                    ->where('calendar_id', $this->calendarId)
+                    ->where('lesson_id', $lessonId);
+
+                if (! $removedAll && $periodId !== null) {
+                    $query->where('period_id', $periodId);
+                }
+
+                $query->delete();
+            });
+
+            return true;
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            $this->notification()->error(
+                'Retirada no persistida',
+                'No se pudo actualizar la base de datos; la lección podría reaparecer al recargar. Revisa el log.',
+            );
+
+            return false;
+        }
     }
 
     public function confirmRemovePreviewLesson(int $lessonId, ?int $periodId = null): void

@@ -104,4 +104,41 @@ class TimetableRemovePreviewLessonUnregistersStep3Test extends TestCase
         $this->assertArrayNotHasKey($f['pev']->id, $component->get('lessons'));
         $this->assertSame(0, (int) $f['lesson']->fresh()->weekly_blocks_t);
     }
+
+    public function test_removing_block_deletes_persisted_slot_from_database(): void
+    {
+        $f = $this->fixture();
+        \App\Models\app\Timetable\TimetableSlot::create([
+            'calendar_id' => $f['calendar']->id,
+            'lesson_id' => $f['lesson']->id,
+            'period_id' => $f['period1']->id,
+            'profesor_id' => $f['pev']->profesor_id,
+            'seccion_id' => $f['pev']->seccion_id,
+            'is_half_group' => false,
+            'locked' => true,
+            'is_manual_override' => true,
+        ]);
+
+        Livewire::actingAs($f['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $f['calendar']->id)
+            ->set('preview', [
+                'assignment' => [
+                    (string) $f['lesson']->id => [
+                        ['period_id' => $f['period1']->id],
+                        ['period_id' => $f['period2']->id],
+                    ],
+                ],
+                'unassigned' => [],
+            ])
+            ->call('removePreviewLesson', $f['lesson']->id, $f['period1']->id);
+
+        // El bloque retirado se elimina también de la base de datos para que no
+        // reaparezca al recargar el preview desde los slots persistidos.
+        $this->assertDatabaseMissing('timetable_slots', [
+            'calendar_id' => $f['calendar']->id,
+            'lesson_id' => $f['lesson']->id,
+            'period_id' => $f['period1']->id,
+        ]);
+    }
 }
