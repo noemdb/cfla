@@ -30,6 +30,18 @@ class TimetablePdfController extends Controller
 {
     public function __construct(private TimetableViewService $viewService) {}
 
+    /**
+     * Los informes multi-registro (todos los docentes, todos los grados, etc.)
+     * generan un único documento HTML que dompdf debe parsear y renderizar; el
+     * límite por defecto (128M) se agota fácilmente. Se sube para estas
+     * exportaciones puntuales.
+     */
+    private function raisePdfMemoryLimit(): void
+    {
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(300);
+    }
+
     public function section(Request $request, $calendarId, $seccionId)
     {
         $calendar = $this->viewService->activeCalendarOrFail($calendarId);
@@ -76,6 +88,8 @@ class TimetablePdfController extends Controller
 
     public function teachers(Request $request, $calendarId)
     {
+        $this->raisePdfMemoryLimit();
+
         // Este informe también se ofrece desde el selector de calendarios del
         // wizard, donde el calendario puede seguir siendo un draft.
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
@@ -257,6 +271,8 @@ class TimetablePdfController extends Controller
 
     public function previewGrade(Request $request, $calendarId, $gradoId)
     {
+        $this->raisePdfMemoryLimit();
+
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $grado = Grado::query()->findOrFail($gradoId);
         $sections = Seccion::query()
@@ -383,6 +399,8 @@ class TimetablePdfController extends Controller
 
     public function previewPestudio(Request $request, $calendarId, $pestudioId)
     {
+        $this->raisePdfMemoryLimit();
+
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $pestudio = Pestudio::query()->findOrFail($pestudioId);
 
@@ -543,6 +561,8 @@ class TimetablePdfController extends Controller
      */
     public function previewAllPestudios(Request $request)
     {
+        $this->raisePdfMemoryLimit();
+
         $lapso = Lapso::current();
         if (! $lapso) {
             abort(404, 'No hay lapso vigente.');
@@ -600,6 +620,8 @@ class TimetablePdfController extends Controller
      */
     public function allTeachers(Request $request)
     {
+        $this->raisePdfMemoryLimit();
+
         $lapso = Lapso::current();
         if (! $lapso) {
             abort(404, 'No hay lapso vigente.');
@@ -650,15 +672,16 @@ class TimetablePdfController extends Controller
         }
 
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
-        $pdf = Pdf::loadView('pdfs.timetable.teachers-all', [
+
+        // Se renderiza como HTML (no PDF): el consolidado de todos los docentes
+        // del lapso genera un documento tan grande que dompdf agota la memoria
+        // en el servidor. El navegador renderiza el HTML sin ese límite.
+        return view('timetable.teachers-all', [
             'lapso' => $lapso,
             'calendarsData' => $calendarsData,
             'institucion' => $institucion,
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
         ]);
-        $pdf->setPaper('letter', 'portrait');
-
-        return $pdf->stream('horarios-docentes-todos.pdf');
     }
 
     /**
@@ -732,6 +755,8 @@ class TimetablePdfController extends Controller
      */
     public function previewArea(Request $request, $calendarId, $areaId)
     {
+        $this->raisePdfMemoryLimit();
+
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $area = AreaConocimiento::query()->with('pestudio')->findOrFail($areaId);
 
