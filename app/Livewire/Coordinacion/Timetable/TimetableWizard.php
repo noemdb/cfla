@@ -7319,7 +7319,9 @@ PROMPT;
             );
         }
 
-        $this->loadPublishedPreview($calendar->fresh());
+        // Se conserva el preview en memoria (lo que el usuario ve) y no se
+        // reconstruye desde los slots: así ninguna celda desaparece del render
+        // tras guardar. El guardado ya es persistente y aditivo.
     }
 
     public function downloadCurrentSectionSlotsBackup(?int $seccionId = null)

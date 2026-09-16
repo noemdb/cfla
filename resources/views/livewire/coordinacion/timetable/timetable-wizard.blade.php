@@ -3163,6 +3163,7 @@
                                                     @endphp
                                                     @php $isBreak = (bool) ($group->firstWhere('day_of_week', $day)?->is_break ?? $rowPeriod?->is_break); @endphp
                                                     <div
+                                                        wire:key="preview-cell-{{ $shiftId }}-{{ $order }}-{{ $day }}"
                                                         @if (! $isBreak && $targetPeriod)
                                                             x-on:dragover.prevent
                                                             x-on:drop.prevent="$wire.movePreviewLesson(parseInt(event.dataTransfer.getData('lesson-id')), parseInt(event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod->id }})"
@@ -3171,6 +3172,7 @@
                                                         @if ($cellAssignments)
                                                             @foreach ($cellAssignments as $cell)
                                                                 <div
+                                                                    wire:key="preview-slot-{{ (int) $cell['lesson_id'] }}-{{ (int) $cell['period_id'] }}"
                                                                     draggable="true"
                                                                     x-on:dragstart="event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
                                                                     title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
