@@ -7222,8 +7222,10 @@ PROMPT;
             ]))
             ->values();
 
-        if ($conflicts->isNotEmpty()) {
-            $detail = $conflicts->map(function (array $conflict) use ($periods, $sectionLessons): string {
+        // Las colisiones NO bloquean el guardado: se informan como aviso y se
+        // persiste lo que la base de datos admita (insertOrIgnore).
+        $collisionDetail = $conflicts->isNotEmpty()
+            ? $conflicts->map(function (array $conflict) use ($periods, $sectionLessons): string {
                 $period = $periods->get($conflict['period_id']);
                 $periodLabel = $period?->period_label ?? "período {$conflict['period_id']}";
                 $candidate = $sectionLessons->get($conflict['candidate_lesson_id']);
@@ -7235,18 +7237,8 @@ PROMPT;
                     .'(docente '.$conflict['candidate_profesor_id'].' vs '
                     .$conflict['existing_profesor_id'].'; sección '
                     .$conflict['candidate_section_id'].' vs '.$conflict['existing_section_id'].')';
-            })->implode('; ');
-
-            $this->notification()->error(
-                'Asignaciones no guardadas',
-                "La previsualización colisiona con una asignación preservada del calendario. {$detail}. "
-                .'Para resolverlo, mueve la lesson indicada a otro período libre para el docente '
-                .'o mueve la lesson preservada a otro bloque; luego ejecuta nuevamente el dry-run. '
-                .'No uses «Guardar sección» hasta que desaparezca la colisión.',
-            );
-
-            return;
-        }
+            })->implode('; ')
+            : null;
 
         try {
             DB::transaction(function () use ($calendar, $sectionId, $lessonIds, $assignmentRows): void {
@@ -7290,10 +7282,19 @@ PROMPT;
             return;
         }
 
-        $this->notification()->success(
-            'Asignaciones guardadas',
-            'Los slots de la sección activa quedaron persistidos en la base de datos.',
-        );
+        if ($collisionDetail !== null) {
+            $this->notification()->warning(
+                'Asignaciones guardadas con colisiones',
+                'Se persistieron los slots de la sección, pero se detectaron colisiones con asignaciones '
+                ."preservadas del calendario: {$collisionDetail}. Revisa el horario y reubica las lessons indicadas.",
+            );
+        } else {
+            $this->notification()->success(
+                'Asignaciones guardadas',
+                'Los slots de la sección activa quedaron persistidos en la base de datos.',
+            );
+        }
+
         $this->loadPublishedPreview($calendar->fresh());
     }
 
