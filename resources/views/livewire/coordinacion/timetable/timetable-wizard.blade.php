@@ -3152,6 +3152,22 @@
                                                             x-on:drop.prevent="$wire.movePreviewLesson(parseInt(event.dataTransfer.getData('lesson-id')), parseInt(event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod->id }})"
                                                         @endif
                                                         class="relative flex min-h-[28px] flex-col items-stretch justify-center gap-px rounded p-px {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:bg-amber-400/5 dark:text-amber-300/70' : ($cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : 'border border-transparent') }} {{ ! $isBreak ? 'hover:bg-emerald-500/10 transition-colors' : '' }}">
+                                                        @php
+                                                            $cellCollisionPestudios = collect($cellAssignments)
+                                                                ->filter(fn ($assignment) => ! empty($assignment['collision']))
+                                                                ->flatMap(fn ($assignment) => $assignment['collision_pestudios'] ?? [])
+                                                                ->unique()
+                                                                ->values();
+                                                        @endphp
+                                                        @if ($cellCollisionPestudios->isNotEmpty())
+                                                            <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
+                                                                title="Colisión de horario del docente con: {{ $cellCollisionPestudios->implode(', ') }}"
+                                                                aria-label="Colisión de horario del docente con {{ $cellCollisionPestudios->implode(', ') }}">
+                                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                                                </svg>
+                                                            </span>
+                                                        @endif
                                                         @if ($cellAssignments)
                                                             @foreach ($cellAssignments as $cell)
                                                                 <div

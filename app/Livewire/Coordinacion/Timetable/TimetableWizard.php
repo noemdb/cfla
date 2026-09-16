@@ -4597,6 +4597,7 @@ class TimetableWizard extends Component
 
         $maxSubjectsPerPeriod = max(1, (int) (TimetableCalendar::find($this->calendarId)?->max_subjects_per_period ?? 2));
         $cellLoad = [];
+        $externalBusy = $this->teacherExternalBusyMap();
 
         $grid = [];
         foreach ($lessons as $lesson) {
@@ -4615,20 +4616,96 @@ class TimetableWizard extends Component
                     continue;
                 }
                 $pev = $lesson->pevaluacion;
+                $teacherId = (int) ($pev?->profesor_id ?? 0);
+
+                // Colisión del docente con otros P.Estudios activos del lapso:
+                // mismo día con solapamiento de horas.
+                $collisionPestudios = [];
+                if ($teacherId > 0) {
+                    $startMin = $this->minOfDay((string) $period->start_time);
+                    $endMin = $this->minOfDay((string) $period->end_time);
+
+                    foreach ($externalBusy[$teacherId] ?? [] as $busy) {
+                        if ($busy['day'] === (int) $period->day_of_week
+                            && $startMin < $busy['end']
+                            && $endMin > $busy['start']) {
+                            $collisionPestudios[$busy['pestudio']] = true;
+                        }
+                    }
+                }
+
                 $grid[$period->shift_id][$period->order_in_day][$period->day_of_week][] = [
                     'lesson_id' => (int) $lesson->id,
                     'period_id' => (int) $period->id,
                     'asignatura' => $pev?->pensum?->asignatura?->name ?? '—',
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
+                    'profesor_id' => $teacherId,
                     'grupo' => $pev?->grupoEstable?->name,
                     'is_half_group' => (bool) $lesson->is_half_group,
                     'locked' => (bool) ($slot['locked'] ?? false),
+                    'collision' => $collisionPestudios !== [],
+                    'collision_pestudios' => array_keys($collisionPestudios),
                 ];
                 $cellLoad[$cellKey] = ($cellLoad[$cellKey] ?? 0) + 1;
             }
         }
 
         return $grid;
+    }
+
+    /**
+     * Intervalos ocupados por cada docente en los demás P.Estudios activos del
+     * lapso (excluye el P.Estudio del calendario en edición). Permite detectar
+     * colisiones de horario del docente entre P.Estudios.
+     *
+     * @return array<int, list<array{pestudio:string, day:int, start:int, end:int}>>
+     */
+    private function teacherExternalBusyMap(): array
+    {
+        if (! $this->calendarId) {
+            return [];
+        }
+
+        $currentPestudioId = (int) (TimetableCalendar::query()
+            ->whereKey($this->calendarId)
+            ->value('pestudio_id') ?? 0);
+
+        $calendars = TimetableCalendar::query()
+            ->when($this->lapsoId, fn ($query) => $query->forLapso($this->lapsoId))
+            ->active()
+            ->when($currentPestudioId > 0, fn ($query) => $query->where('pestudio_id', '!=', $currentPestudioId))
+            ->with('pestudio:id,name')
+            ->get(['id', 'pestudio_id']);
+
+        if ($calendars->isEmpty()) {
+            return [];
+        }
+
+        $pestudioByCalendar = $calendars->mapWithKeys(fn (TimetableCalendar $calendar): array => [
+            (int) $calendar->id => (string) ($calendar->pestudio?->name ?? 'P.Estudio'),
+        ]);
+
+        $slots = TimetableSlot::query()
+            ->whereIn('calendar_id', $pestudioByCalendar->keys())
+            ->whereNotNull('profesor_id')
+            ->with('period:id,day_of_week,start_time,end_time')
+            ->get(['profesor_id', 'calendar_id', 'period_id']);
+
+        $map = [];
+        foreach ($slots as $slot) {
+            $period = $slot->period;
+            if (! $period) {
+                continue;
+            }
+            $map[(int) $slot->profesor_id][] = [
+                'pestudio' => $pestudioByCalendar->get((int) $slot->calendar_id, 'P.Estudio'),
+                'day' => (int) $period->day_of_week,
+                'start' => $this->minOfDay((string) $period->start_time),
+                'end' => $this->minOfDay((string) $period->end_time),
+            ];
+        }
+
+        return $map;
     }
 
     /**
