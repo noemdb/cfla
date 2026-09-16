@@ -1301,11 +1301,7 @@
                                     {{ $opt['name'] }}
                                     @if ($opt['id'] !== 'general' && $this->pestudioAllSectionsLocked($opt['id']))
                                         <svg class="inline-block h-3 w-3 ml-1 -mt-0.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" title="Todas las secciones activas de este pestudio están bloqueadas">
-                                            @if ($gradeTabLocked)
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                            @else
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 10.5V6.75a3.75 3.75 0 10-7.5 0M6.75 10.5h10.5A2.25 2.25 0 0119.5 12.75v6.75a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25z"/>
-                                            @endif
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                         </svg>
                                     @endif
                                 </button>

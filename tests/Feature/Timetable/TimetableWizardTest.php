@@ -2777,35 +2777,44 @@ class TimetableWizardTest extends TestCase
             'is_break' => false,
         ]);
 
-        $f1 = $this->pevaluacionFixture($lapso->id);
-        $f2 = $this->pevaluacionFixture($lapso->id);
-        $f3 = $this->pevaluacionFixture($lapso->id);
-        $f2['pev']->update(['seccion_id' => $f1['pev']->seccion_id]);
-        $f3['pev']->update(['seccion_id' => $f1['pev']->seccion_id]);
-
-        $lessons = [];
-        foreach ([$f1, $f2, $f3] as $f) {
-            $lessons[] = TimetableLesson::factory()->create([
+        // 3 lecciones de medio grupo en la misma sección y el mismo período:
+        // la grilla solo muestra 2 (max_subjects_per_period), así que el
+        // guardado tampoco debe persistir la tercera.
+        $fixtures = [];
+        foreach (range(1, 3) as $i) {
+            $fixture = $this->pevaluacionFixture($lapso->id);
+            if ($i > 1) {
+                $fixture['pev']->update(['seccion_id' => $fixtures[0]['pev']->seccion_id]);
+            }
+            $fixtures[] = $fixture;
+            TimetableLesson::factory()->create([
                 'calendar_id' => $calendar->id,
-                'pevaluacion_id' => $f['pev']->id,
+                'pevaluacion_id' => $fixture['pev']->id,
                 'shift_id' => $shift->id,
                 'weekly_blocks_t' => 1,
                 'weekly_blocks_p' => 0,
+                'is_half_group' => true,
             ]);
         }
+        $sectionLessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->get()
+            ->keyBy('id');
 
         $assignment = [];
-        foreach ($lessons as $lesson) {
+        foreach ($sectionLessons as $lesson) {
             $assignment[(string) $lesson->id] = [['period_id' => $period->id]];
         }
 
         Livewire::actingAs($user)
             ->test(TimetableWizard::class)
             ->set('calendarId', $calendar->id)
-            ->set('activeSeccionId', $f1['pev']->seccion_id)
+            ->set('activeSeccionId', $fixtures[0]['pev']->seccion_id)
             ->set('preview', ['assignment' => $assignment, 'unassigned' => []])
             ->call('persistCurrentSectionSlots');
 
+        // La grilla solo muestra 2 asignaturas por período; no se persisten
+        // más slots de los que la celda puede mostrar.
         $count = \App\Models\app\Timetable\TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->where('period_id', $period->id)

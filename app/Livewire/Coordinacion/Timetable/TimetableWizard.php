@@ -7218,6 +7218,18 @@ PROMPT;
             ->get()
             ->keyBy('id');
         $assignment = collect($this->preview['assignment'] ?? []);
+
+        // El mismo tope de la grilla (max_subjects_per_period): la sección solo
+        // admite esa cantidad de lecciones por celda. Persistir todas las del
+        // preview generaría registros que la grilla no muestra (p. ej. varias
+        // lecciones de medio grupo en un mismo bloque).
+        $periods = TimetablePeriod::query()
+            ->where('calendar_id', $calendar->id)
+            ->get()
+            ->keyBy('id');
+        $maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
+        $cellLoad = [];
+
         $assignmentRows = [];
         foreach ($sectionLessons as $lessonId => $lesson) {
             $slots = $assignment->get((string) $lessonId, $assignment->get($lessonId, []));
@@ -7226,6 +7238,16 @@ PROMPT;
                 if ($periodId <= 0 || ! $lesson->pevaluacion) {
                     continue;
                 }
+
+                $period = $periods->get($periodId);
+                if (! $period) {
+                    continue;
+                }
+                $cellKey = $period->shift_id.':'.$period->order_in_day.':'.$period->day_of_week;
+                if (($cellLoad[$cellKey] ?? 0) >= $maxSubjectsPerPeriod) {
+                    continue;
+                }
+                $cellLoad[$cellKey] = ($cellLoad[$cellKey] ?? 0) + 1;
 
                 $assignmentRows[] = [
                     'calendar_id' => $calendar->id,
