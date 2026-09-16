@@ -2405,6 +2405,57 @@ class TimetableWizardTest extends TestCase
         $this->assertNotContains($inactiveSection->id, array_keys($parity['subjects'][0]['sections']));
     }
 
+    public function test_slot_parity_respects_max_subjects_per_period_like_grid(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso->id,
+            'max_subjects_per_period' => 2,
+        ]);
+        $shift = $this->shift();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+            'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,
+        ]);
+
+        $sectionLessons = [];
+        foreach ([1, 2, 3] as $n) {
+            $fixture = $this->pevaluacionFixture($lapso->id);
+            if ($n > 1) {
+                $fixture['pev']->update(['seccion_id' => $sectionLessons[0]['pev']->seccion_id]);
+            }
+            $sectionLessons[] = $fixture;
+            TimetableLesson::factory()->create([
+                'calendar_id' => $calendar->id,
+                'pevaluacion_id' => $fixture['pev']->id,
+                'shift_id' => $shift->id,
+                'weekly_blocks_t' => 1,
+                'weekly_blocks_p' => 0,
+                'is_half_group' => true,
+            ]);
+        }
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->get();
+        $assignment = [];
+        foreach ($lessons as $lesson) {
+            $assignment[(string) $lesson->id] = [['period_id' => $period->id]];
+        }
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('activeSeccionId', $sectionLessons[0]['pev']->seccion_id)
+            ->set('preview', ['assignment' => $assignment, 'unassigned' => []]);
+
+        // La grilla solo muestra 2 asignaturas por celda; la paridad debe
+        // contar lo mismo (2) y no los 3 slots crudos del preview.
+        $parity = $component->instance()->sectionSlotParity();
+        $this->assertNotNull($parity);
+        $this->assertSame(2, $parity['sections'][0]['filled_slots']);
+    }
+
     public function test_step5_does_not_replace_section_slots_when_preserved_teacher_collides(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

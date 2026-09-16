@@ -219,7 +219,7 @@ class GenerateTimetableJobTest extends TestCase
         $this->assertArrayHasKey((string) $lessons[1]->id, $assignment);
     }
 
-    public function test_scoped_dry_run_does_not_preserve_partial_out_of_scope_assignment(): void
+    public function test_scoped_dry_run_preserves_partial_out_of_scope_assignment_verbatim(): void
     {
         $fixture = $this->smallFeasibleFixture();
         $calendar = $fixture['calendar'];
@@ -248,10 +248,12 @@ class GenerateTimetableJobTest extends TestCase
             pevaluacionIds: [$lessons[0]->pevaluacion_id],
         );
 
+        // La lección fuera del alcance (otra sección) se conserva verbatim, tal
+        // como estaba en el preview anterior: el draft acotado no la afecta.
         $payload = $calendar->fresh()->preview_payload;
-        $this->assertArrayNotHasKey((string) $lessons[1]->id, $payload['assignment']);
-        $this->assertContains($lessons[1]->id, $payload['unassigned']);
-        $this->assertSame(2, $payload['assignment_diagnostics'][0]['missing_blocks']);
+        $this->assertArrayHasKey((string) $lessons[1]->id, $payload['assignment']);
+        $this->assertSame($periods[1]->id, $payload['assignment'][(string) $lessons[1]->id][0]['period_id']);
+        $this->assertNotContains($lessons[1]->id, $payload['unassigned']);
     }
 
     public function test_legacy_strategy_does_not_exceed_subjects_per_period(): void

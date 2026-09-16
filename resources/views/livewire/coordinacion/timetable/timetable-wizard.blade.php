@@ -3062,7 +3062,8 @@
                                         wire:click="generateSectionDraft"
                                         wire:loading.attr="disabled"
                                         wire:target="generateSectionDraft"
-                                        title="Generar un draft de la sección activa con el solver (sin IA)"
+                                        @disabled($this->activeSectionTimetableLocked())
+                                        title="{{ $this->activeSectionTimetableLocked() ? 'La sección tiene el horario bloqueado' : 'Generar un draft de la sección activa con el solver (sin IA)' }}"
                                         aria-label="Generar draft de la sección actual con el solver"
                                         class="inline-flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-violet-300">
                                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -3204,9 +3205,10 @@
                                                                         <div class="flex justify-end">
                                                                             <button type="button"
                                                                                 wire:click.stop="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
+                                                                                @disabled(! $targetPeriod)
                                                                                 title="Agregar una lección a este período"
                                                                                 aria-label="Agregar una lección al período {{ $targetPeriod?->period_label }}"
-                                                                                class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold leading-none text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                                                                class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold leading-none text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-emerald-600">
                                                                                 <span aria-hidden="true">+</span>
                                                                                 <span class="sr-only">Agregar lección</span>
                                                                             </button>
@@ -3228,9 +3230,10 @@
                                                         @else
                                                             <button type="button"
                                                                 wire:click="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
+                                                                @disabled(! $targetPeriod)
                                                                 title="Agregar una lección a este período"
                                                                 aria-label="Agregar una lección al período {{ $targetPeriod?->period_label }}"
-                                                                class="absolute right-1 top-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                                                class="absolute right-1 top-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-emerald-600">
                                                                 <span aria-hidden="true" class="text-sm leading-none">+</span>
                                                                 <span class="sr-only">Agregar lección</span>
                                                             </button>

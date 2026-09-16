@@ -56,6 +56,7 @@ class GenerateTimetableJob implements ShouldQueue
         public ?array $previewPayload = null,
         public ?array $pevaluacionIds = null,
         public ?array $lessonIds = null,
+        public ?int $budgetSeconds = null,
     ) {}
 
     public function handle(): void
@@ -266,7 +267,7 @@ class GenerateTimetableJob implements ShouldQueue
             $availableByTeacher,
             $roomsByType,
             $periodMeta,
-            budgetSeconds: (int) config('timetable.solver.budget_seconds', 30),
+            budgetSeconds: (int) ($this->budgetSeconds ?? config('timetable.solver.budget_seconds', 30)),
             maxSubjectsPerPeriod: max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
             restarts: (int) config('timetable.solver.restarts', 6),
             attemptSeconds: (int) config('timetable.solver.attempt_seconds', 8),
@@ -622,34 +623,23 @@ class GenerateTimetableJob implements ShouldQueue
             $scopedLessonIds = $this->scopedLessonIds($calendar) ?? [];
             $previous = $calendar->preview_payload ?? [];
             $previousAssignment = $previous['assignment'] ?? [];
-            $lessonsById = $calendar->lessons()
-                ->get(['id', 'weekly_blocks_t', 'weekly_blocks_p'])
-                ->keyBy('id');
-            $partialUntouchedIds = [];
+
+            // Fuera del alcance: las lessons de otras secciones se preservan
+            // VERBATIM desde el preview anterior (asignación y estado), sin
+            // regenerarlas ni descartarlas. El draft acotado no debe afectar
+            // lessons ajenas a la sección activa.
             $untouchedAssignment = collect($previousAssignment)
-                ->filter(function ($slots, $lessonId) use ($scopedLessonIds, $lessonsById, &$partialUntouchedIds): bool {
-                    $lessonId = (int) $lessonId;
-                    if (in_array($lessonId, $scopedLessonIds, true)) {
-                        return false;
-                    }
-
-                    $lesson = $lessonsById->get($lessonId);
-                    $required = $lesson
-                        ? (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p
-                        : 0;
-                    $assigned = collect($slots)->pluck('period_id')->filter()->unique()->count();
-                    if ($required > 0 && $assigned !== $required) {
-                        $partialUntouchedIds[] = $lessonId;
-
-                        return false;
-                    }
-
-                    return true;
-                })
+                ->filter(fn ($slots, $lessonId) => ! in_array((int) $lessonId, $scopedLessonIds, true))
                 ->all();
-            // Preserve lesson IDs as array keys; merge() reindexes numeric keys
-            // and makes the preview grid unable to resolve lesson assignments.
-            $assignment = $assignment + $untouchedAssignment;
+
+            // Del resultado del solver solo se conservan las lessons del alcance,
+            // de modo que las demás salgan exclusivamente del preview anterior.
+            $scopedAssignment = collect($assignment)
+                ->filter(fn ($slots, $lessonId) => in_array((int) $lessonId, $scopedLessonIds, true))
+                ->all();
+
+            $assignment = $scopedAssignment + $untouchedAssignment;
+
             // Solo se preservan lecciones de secciones/grados ACTIVOS: los de
             // grados inactivos no deben inflar los motivos de no asignación.
             $activeLessonIds = $this->activeSectionLessons($calendar)
@@ -659,7 +649,6 @@ class GenerateTimetableJob implements ShouldQueue
             $unassigned = collect($previous['unassigned'] ?? [])
                 ->filter(fn ($lessonId) => ! in_array((int) $lessonId, $scopedLessonIds, true))
                 ->filter(fn ($lessonId) => in_array((int) $lessonId, $activeLessonIds, true))
-                ->merge(collect($partialUntouchedIds)->filter(fn ($lessonId) => in_array((int) $lessonId, $activeLessonIds, true)))
                 ->merge($unassigned)
                 ->map(fn ($lessonId) => (int) $lessonId)
                 ->unique()

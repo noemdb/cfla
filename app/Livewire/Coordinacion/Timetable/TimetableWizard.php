@@ -4876,22 +4876,48 @@ class TimetableWizard extends Component
         );
         $assignment = $this->preview['assignment'] ?? [];
 
-        $sections = $gradeSections
-            ->map(function ($section) use ($gradeLessons, $assignment): array {
-                $sectionLessons = $gradeLessons->filter(
-                    fn (TimetableLesson $lesson): bool => (int) ($lesson->pevaluacion?->seccion_id ?? 0) === (int) $section->id
-                );
-                $filledSlots = 0;
-                $assignedLessons = 0;
+        // La grilla limita a max_subjects_per_period por celda; la paridad debe
+        // contar lo que la grilla realmente muestra, no los slots crudos del
+        // preview (que pueden superar el tope en una misma celda).
+        $periods = TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->get()
+            ->keyBy('id');
+        $maxSubjectsPerPeriod = max(1, (int) (TimetableCalendar::find($this->calendarId)?->max_subjects_per_period ?? 2));
 
-                foreach ($sectionLessons as $lesson) {
-                    $slots = $assignment[(string) $lesson->id]
-                        ?? $assignment[(int) $lesson->id]
-                        ?? [];
-                    $slotCount = count($slots);
-                    $filledSlots += $slotCount;
-                    $assignedLessons += $slotCount > 0 ? 1 : 0;
+        // Por sección, slot count efectivo de cada lección (respetando el tope
+        // por celda, en el mismo orden en que la grilla renderiza).
+        $renderedBySection = [];
+        foreach ($gradeSections as $section) {
+            $sectionLessons = $gradeLessons->filter(
+                fn (TimetableLesson $lesson): bool => (int) ($lesson->pevaluacion?->seccion_id ?? 0) === (int) $section->id
+            );
+            $cellLoad = [];
+            $rendered = [];
+            foreach ($sectionLessons as $lesson) {
+                $count = 0;
+                foreach (($assignment[(string) $lesson->id] ?? $assignment[$lesson->id] ?? []) as $slot) {
+                    $period = $periods->get((int) ($slot['period_id'] ?? 0));
+                    if (! $period) {
+                        continue;
+                    }
+                    $cellKey = $period->shift_id.':'.$period->order_in_day.':'.$period->day_of_week;
+                    if (($cellLoad[$cellKey] ?? 0) >= $maxSubjectsPerPeriod) {
+                        continue;
+                    }
+                    $cellLoad[$cellKey] = ($cellLoad[$cellKey] ?? 0) + 1;
+                    $count++;
                 }
+                $rendered[(int) $lesson->id] = $count;
+            }
+            $renderedBySection[(int) $section->id] = $rendered;
+        }
+
+        $sections = $gradeSections
+            ->map(function ($section) use ($renderedBySection): array {
+                $rendered = $renderedBySection[(int) $section->id] ?? [];
+                $filledSlots = array_sum($rendered);
+                $assignedLessons = collect($rendered)->filter(fn (int $count): bool => $count > 0)->count();
 
                 return [
                     'id' => (int) $section->id,
@@ -4912,19 +4938,11 @@ class TimetableWizard extends Component
                 ?? 'subject-'.strtolower(trim((string) ($lesson->pevaluacion?->pensum?->asignatura?->name ?? 'sin-asignatura')))
             )
         );
-        $subjects = $subjectGroups->map(function ($subjectLessons, string $subjectKey) use ($sections, $assignment): array {
-            $sectionSlots = $sections->mapWithKeys(function (array $section) use ($subjectLessons, $assignment): array {
+        $subjects = $subjectGroups->map(function ($subjectLessons, string $subjectKey) use ($sections, $renderedBySection): array {
+            $sectionSlots = $sections->mapWithKeys(function (array $section) use ($subjectLessons, $renderedBySection): array {
                 $slots = 0;
                 foreach ($subjectLessons as $lesson) {
-                    if ((int) ($lesson->pevaluacion?->seccion_id ?? 0) !== $section['id']) {
-                        continue;
-                    }
-
-                    $slots += count(
-                        $assignment[(string) $lesson->id]
-                            ?? $assignment[(int) $lesson->id]
-                            ?? []
-                    );
+                    $slots += ($renderedBySection[(int) $section['id']] ?? [])[(int) $lesson->id] ?? 0;
                 }
 
                 return [$section['id'] => $slots];
@@ -6574,6 +6592,9 @@ PROMPT;
         $this->busy = true;
         $this->generationState = 'generating';
 
+        // El solver corre de forma síncrona; ver nota en generateSectionDraft().
+        @set_time_limit(0);
+
         try {
             GenerateTimetableJob::dispatchSync(
                 $this->calendarId,
@@ -6588,6 +6609,9 @@ PROMPT;
                 $this->preview['preview_history'] = [];
             }
             $this->generationState = 'preview_ready';
+            // El dry-run deja el calendario en 'draft'; se refresca la lista de
+            // calendarios para que el selector muestre el nuevo estado.
+            $this->loadCalendars();
         } finally {
             $this->busy = false;
         }
@@ -6639,26 +6663,66 @@ PROMPT;
             return;
         }
 
+        // Preview previo del componente y lessons del alcance: se usan para
+        // restaurar las lecciones de OTRAS secciones tras el dry-run acotado.
+        $previousPreview = $this->preview;
+        $scopedLessonIds = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereIn('pevaluacion_id', $pevIds)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $scopedLessonSet = array_flip($scopedLessonIds);
+
         $this->aiDryRunAnalysis = null;
         $this->aiDryRunAnalysisModel = null;
         $this->showAiAnalysisModal = false;
         $this->busy = true;
         $this->generationState = 'generating';
 
+        // El solver corre de forma síncrona y su presupuesto (budget_seconds,
+        // por defecto 30s) puede alcanzar el max_execution_time de PHP. Se sube
+        // el límite para que el solver respete SU presupuesto y devuelva el
+        // resultado en lugar de que PHP mate el proceso.
+        @set_time_limit(0);
+
         try {
             GenerateTimetableJob::dispatchSync(
                 $this->calendarId,
                 dryRun: true,
                 pevaluacionIds: $pevIds,
+                budgetSeconds: (int) config('timetable.solver.section_draft_budget_seconds', 120),
             );
             $calendar = TimetableCalendar::find($this->calendarId);
             $this->preview = $calendar?->preview_payload;
             if ($this->preview) {
+                // El draft acotado solo debe tocar la sección activa: se
+                // restauran las lecciones de OTRAS secciones desde el preview
+                // previo del componente (la grilla puede haberse construido
+                // desde los slots persistidos, con más datos que el payload).
+                $previousAssignment = $previousPreview['assignment'] ?? [];
+                $assignment = collect($this->preview['assignment'] ?? []);
+                $restoredIds = [];
+                foreach ($previousAssignment as $lessonId => $slots) {
+                    if (isset($scopedLessonSet[(int) $lessonId])) {
+                        continue;
+                    }
+                    $assignment[(string) $lessonId] = $slots;
+                    $restoredIds[(int) $lessonId] = true;
+                }
+                $this->preview['assignment'] = $assignment->all();
+                $this->preview['unassigned'] = collect($this->preview['unassigned'] ?? [])
+                    ->reject(fn ($id) => isset($restoredIds[(int) $id]))
+                    ->values()
+                    ->all();
                 $this->preview['generated_assignment'] = $this->preview['assignment'] ?? [];
                 $this->preview['generated_unassigned'] = $this->preview['unassigned'] ?? [];
                 $this->preview['preview_history'] = [];
             }
             $this->generationState = 'preview_ready';
+            // El dry-run deja el calendario en 'draft'; se refresca la lista de
+            // calendarios para que el selector muestre el nuevo estado.
+            $this->loadCalendars();
             $this->notification()->success(
                 'Draft de sección generado',
                 'El draft de la sección '.$sectionId.' se generó con el solver (sin IA).',
@@ -7871,6 +7935,7 @@ PROMPT;
                     'period_id' => (int) $slot->period_id,
                     'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                     'is_practical' => (bool) ($slot->is_practical ?? false),
+                    'locked' => (bool) ($slot->locked ?? false),
                 ];
             });
 

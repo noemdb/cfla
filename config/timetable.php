@@ -43,6 +43,7 @@ return [
         'half_group_bonus' => (int) env('TIMETABLE_SOLVER_HALF_GROUP_BONUS', 20),
         'shared_teacher_priority' => (bool) env('TIMETABLE_SOLVER_SHARED_TEACHER_PRIORITY', true),
         'shared_teacher_bonus' => (int) env('TIMETABLE_SOLVER_SHARED_TEACHER_BONUS', 15),
+        'section_draft_budget_seconds' => (int) env('TIMETABLE_SOLVER_SECTION_DRAFT_BUDGET_SECONDS', 120),
     ],
 
 ];
