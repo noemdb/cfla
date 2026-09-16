@@ -337,6 +337,7 @@ class TimetableWizard extends Component
                 $this->loadCalendar($selectedCalendar);
                 $this->loadLessons();
                 $this->loadPublishedPreview($selectedCalendar);
+                $this->syncPreviewSlotLocksFromDatabase();
 
                 // Mostrar la distribución persistida del calendario (publicada
                 // o draft con slots) sin exigir un nuevo dry-run.
@@ -403,6 +404,7 @@ class TimetableWizard extends Component
         $this->loadLessons(true);
         $this->loadAvailability();
         $this->loadPublishedPreview($selectedCalendar);
+        $this->syncPreviewSlotLocksFromDatabase();
 
         if (in_array($this->generationState, ['published', 'preview_ready'], true)) {
             $this->currentStep = 5;
@@ -585,6 +587,7 @@ class TimetableWizard extends Component
         $this->loadLessons($hydrateSavedSelection);
         $this->loadAvailability();
         $this->loadPublishedPreview($calendar);
+        $this->syncPreviewSlotLocksFromDatabase();
     }
 
     /**
@@ -613,6 +616,7 @@ class TimetableWizard extends Component
             // Rehidrata el horario publicado para que el Paso 5 lo muestre sin
             // necesidad de recargar la página.
             $this->loadPublishedPreview($calendar);
+            $this->syncPreviewSlotLocksFromDatabase();
         }
         $this->notification()->success(
             'Calendario activado',
@@ -4888,9 +4892,14 @@ class TimetableWizard extends Component
         // Por sección, slot count efectivo de cada lección (respetando el tope
         // por celda, en el mismo orden en que la grilla renderiza).
         $renderedBySection = [];
+        $requiredBySection = [];
         foreach ($gradeSections as $section) {
             $sectionLessons = $gradeLessons->filter(
                 fn (TimetableLesson $lesson): bool => (int) ($lesson->pevaluacion?->seccion_id ?? 0) === (int) $section->id
+            );
+            // Bloques configurados en el Paso 3 para la sección.
+            $requiredBySection[(int) $section->id] = (int) $sectionLessons->sum(
+                fn (TimetableLesson $lesson): int => (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p
             );
             $cellLoad = [];
             $rendered = [];
@@ -4914,7 +4923,7 @@ class TimetableWizard extends Component
         }
 
         $sections = $gradeSections
-            ->map(function ($section) use ($renderedBySection): array {
+            ->map(function ($section) use ($renderedBySection, $requiredBySection): array {
                 $rendered = $renderedBySection[(int) $section->id] ?? [];
                 $filledSlots = array_sum($rendered);
                 $assignedLessons = collect($rendered)->filter(fn (int $count): bool => $count > 0)->count();
@@ -4924,6 +4933,7 @@ class TimetableWizard extends Component
                     'name' => $section->name ?? 'Sección '.$section->id,
                     'filled_slots' => $filledSlots,
                     'assigned_lessons' => $assignedLessons,
+                    'required_slots' => (int) ($requiredBySection[(int) $section->id] ?? 0),
                 ];
             })
             ->values();
@@ -4955,6 +4965,17 @@ class TimetableWizard extends Component
                 'key' => $subjectKey,
                 'name' => $subjectLessons->first()?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre',
                 'sections' => $sectionSlots,
+                // Bloques configurados en el Paso 3 para la asignatura (total y
+                // por sección), para contrastar con los slots asignados.
+                'required' => (int) $subjectLessons->sum(
+                    fn (TimetableLesson $lesson): int => (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p
+                ),
+                'required_by_section' => $subjectLessons
+                    ->groupBy(fn (TimetableLesson $lesson): int => (int) ($lesson->pevaluacion?->seccion_id ?? 0))
+                    ->map(fn ($group): int => (int) $group->sum(
+                        fn (TimetableLesson $lesson): int => (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p
+                    ))
+                    ->all(),
                 'min' => $min,
                 'max' => $max,
                 'delta' => $max - $min,
@@ -5221,6 +5242,89 @@ class TimetableWizard extends Component
         );
     }
 
+    /**
+     * Bloquea/desbloquea TODOS los bloques de la sección activa a la vez
+     * (master checkbox del grid del Paso 5). Si ya estaban todos bloqueados,
+     * los desbloquea; en caso contrario, los bloquea todos.
+     */
+    public function toggleSectionPreviewSlotsLock(): void
+    {
+        $sectionId = is_numeric($this->activeSeccionId) ? (int) $this->activeSeccionId : 0;
+
+        if (! $this->calendarId || ! $this->preview || $sectionId <= 0) {
+            return;
+        }
+
+        $assignment = $this->preview['assignment'] ?? [];
+        $lessonIds = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion', fn ($query) => $query->where('seccion_id', $sectionId))
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        if ($lessonIds === []) {
+            return;
+        }
+
+        $allLocked = true;
+        $hasSlots = false;
+
+        foreach ($lessonIds as $lessonId) {
+            $key = array_key_exists((string) $lessonId, $assignment)
+                ? (string) $lessonId
+                : (array_key_exists($lessonId, $assignment) ? $lessonId : null);
+
+            if ($key === null) {
+                continue;
+            }
+
+            foreach ($assignment[$key] as $slot) {
+                $hasSlots = true;
+
+                if (empty($slot['locked'])) {
+                    $allLocked = false;
+                }
+            }
+        }
+
+        if (! $hasSlots) {
+            return;
+        }
+
+        $target = ! $allLocked;
+
+        foreach ($lessonIds as $lessonId) {
+            $key = array_key_exists((string) $lessonId, $assignment)
+                ? (string) $lessonId
+                : (array_key_exists($lessonId, $assignment) ? $lessonId : null);
+
+            if ($key === null) {
+                continue;
+            }
+
+            foreach ($assignment[$key] as $index => $slot) {
+                $assignment[$key][$index]['locked'] = $target;
+            }
+        }
+
+        $this->preview['assignment'] = $assignment;
+        $this->preview['manual_override'] = true;
+        $this->preview['assignment_source'] = 'manual_preview';
+
+        TimetableSlot::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereIn('lesson_id', $lessonIds)
+            ->update(['locked' => $target]);
+
+        $this->notification()->success(
+            $target ? 'Sección bloqueada' : 'Sección desbloqueada',
+            $target
+                ? 'Todos los bloques de la sección quedaron bloqueados.'
+                : 'Todos los bloques de la sección quedaron desbloqueados.',
+        );
+    }
+
     public function previewSlotLocked(int $lessonId, int $periodId): bool
     {
         $assignment = $this->preview['assignment'] ?? [];
@@ -5416,12 +5520,24 @@ class TimetableWizard extends Component
         }
 
         $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId);
+        $previousPreview = $this->preview;
 
         $slots[$slotIndex]['period_id'] = $newPeriodId;
         $assignment[$lessonKey] = array_values($slots);
         $this->preview['assignment'] = $assignment;
         $this->preview['manual_override'] = true;
         $this->preview['assignment_source'] = 'manual_preview';
+
+        // El traslado debe persistirse: actualizar solo el preview hace que el
+        // render lo muestre movido pero la BD conserve el período anterior (al
+        // recargar se ve distinto). Se guarda la lesson movida y se revierte el
+        // preview si la persistencia falla.
+        if (! $this->persistPreviewLessonSlotsToDatabase([$lessonId])) {
+            $this->preview = $previousPreview;
+
+            return;
+        }
+
         $this->recordPreviewChange('move_preview_lesson', $lessonId, $originalSlots, $slots);
         if ($collisionWarning !== null) {
             $this->notification()->warning('Posible colisión de docente', $collisionWarning);
@@ -6618,15 +6734,29 @@ PROMPT;
     }
 
     /**
-     * Genera un draft para la sección activa usando el solver (sin IA):
-     * ejecuta el dry-run acotado a las lessons de la sección actual.
+     * Reorganiza los bloques de la sección activa para minimizar colisiones de
+     * docente (entre P.Estudios y dentro del calendario) SIN agregar, quitar ni
+     * cambiar lecciones: solo permuta los períodos de los slots existentes.
+     *
+     * Flujo por etapas:
+     *  1. Snapshot del estado actual (preview o slots persistidos).
+     *  2. Motor híbrido (`SectionTimetableOptimizer`): grafo de conflictos +
+     *     coloreo (DSATUR/Welsh-Powell/Largest-Degree), CSP con propagación y
+     *     backtracking (restricciones duras) y función de penalizaciones tipo
+     *     MILP optimizada con búsqueda local (restricciones blandas).
+     *  3. Persistencia de los slots de la sección.
+     *  4. Refresco del preview.
+     *
+     * Respeta `timetable_lessons.is_half_group` y `timetable_lessons.locked`.
      */
     public function generateSectionDraft(): void
     {
-        if (! $this->calendarId || ! is_numeric($this->activeSeccionId) || (int) $this->activeSeccionId <= 0) {
+        $sectionId = is_numeric($this->activeSeccionId) ? (int) $this->activeSeccionId : 0;
+
+        if (! $this->calendarId || $sectionId <= 0) {
             $this->notification()->warning(
                 'Sección requerida',
-                'Selecciona una sección en el paso 5 antes de generar el draft.',
+                'Selecciona una sección en el paso 5 antes de reorganizar.',
             );
 
             return;
@@ -6635,101 +6765,159 @@ PROMPT;
         $calendar = TimetableCalendar::query()->find($this->calendarId);
 
         if (! $calendar) {
-            $this->notification()->error('Calendario no encontrado', 'No se pudo generar el draft.');
+            $this->notification()->error('Calendario no encontrado', 'No se pudo reorganizar el horario.');
 
             return;
         }
-
-        $sectionId = (int) $this->activeSeccionId;
 
         if ($this->blockIfSectionLocked($sectionId)) {
             return;
         }
 
-        $pevIds = Pevaluacion::query()
-            ->where('lapso_id', $calendar->lapso_id)
-            ->where('seccion_id', $sectionId)
-            ->whereHas('seccion.grado', fn ($q) => $q->where('pestudio_id', $calendar->pestudio_id))
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-
-        if ($pevIds === []) {
-            $this->notification()->warning(
-                'Sin lessons',
-                'La sección activa no tiene lessons en este calendario.',
-            );
-
-            return;
-        }
-
-        // Preview previo del componente y lessons del alcance: se usan para
-        // restaurar las lecciones de OTRAS secciones tras el dry-run acotado.
-        $previousPreview = $this->preview;
-        $scopedLessonIds = TimetableLesson::query()
-            ->where('calendar_id', $calendar->id)
-            ->whereIn('pevaluacion_id', $pevIds)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-        $scopedLessonSet = array_flip($scopedLessonIds);
-
-        $this->aiDryRunAnalysis = null;
-        $this->aiDryRunAnalysisModel = null;
-        $this->showAiAnalysisModal = false;
         $this->busy = true;
-        $this->generationState = 'generating';
-
-        // El solver corre de forma síncrona y su presupuesto (budget_seconds,
-        // por defecto 30s) puede alcanzar el max_execution_time de PHP. Se sube
-        // el límite para que el solver respete SU presupuesto y devuelva el
-        // resultado en lugar de que PHP mate el proceso.
-        @set_time_limit(0);
 
         try {
-            GenerateTimetableJob::dispatchSync(
-                $this->calendarId,
-                dryRun: true,
-                pevaluacionIds: $pevIds,
-                budgetSeconds: (int) config('timetable.solver.section_draft_budget_seconds', 120),
-            );
-            $calendar = TimetableCalendar::find($this->calendarId);
-            $this->preview = $calendar?->preview_payload;
-            if ($this->preview) {
-                // El draft acotado solo debe tocar la sección activa: se
-                // restauran las lecciones de OTRAS secciones desde el preview
-                // previo del componente (la grilla puede haberse construido
-                // desde los slots persistidos, con más datos que el payload).
-                $previousAssignment = $previousPreview['assignment'] ?? [];
-                $assignment = collect($this->preview['assignment'] ?? []);
-                $restoredIds = [];
-                foreach ($previousAssignment as $lessonId => $slots) {
-                    if (isset($scopedLessonSet[(int) $lessonId])) {
-                        continue;
-                    }
-                    $assignment[(string) $lessonId] = $slots;
-                    $restoredIds[(int) $lessonId] = true;
-                }
-                $this->preview['assignment'] = $assignment->all();
-                $this->preview['unassigned'] = collect($this->preview['unassigned'] ?? [])
-                    ->reject(fn ($id) => isset($restoredIds[(int) $id]))
-                    ->values()
-                    ->all();
-                $this->preview['generated_assignment'] = $this->preview['assignment'] ?? [];
-                $this->preview['generated_unassigned'] = $this->preview['unassigned'] ?? [];
-                $this->preview['preview_history'] = [];
+            // ── Etapa 1: snapshot (preview actual o slots persistidos) ──────
+            $sectionAssignment = $this->sectionReorderSnapshot($calendar, $sectionId);
+
+            if ($sectionAssignment === []) {
+                $this->notification()->warning(
+                    'Sin bloques',
+                    'La sección activa no tiene bloques para reorganizar.',
+                );
+
+                return;
+            }
+
+            // El preview refleja el estado actual de la sección.
+            $this->preview ??= ['assignment' => []];
+            foreach ($sectionAssignment as $lessonId => $slots) {
+                $this->preview['assignment'][(string) $lessonId] = $slots;
             }
             $this->generationState = 'preview_ready';
-            // El dry-run deja el calendario en 'draft'; se refresca la lista de
-            // calendarios para que el selector muestre el nuevo estado.
-            $this->loadCalendars();
+
+            // ── Etapas 2-6: motor híbrido (grafo + CSP + penalizaciones) ────
+            $optimizer = app(\App\Services\Timetable\SectionTimetableOptimizer::class);
+            $result = $optimizer->optimize($calendar, $sectionId, $sectionAssignment);
+
+            if (($result['moved'] ?? 0) === 0) {
+                $remaining = (int) ($result['collisions_before'] ?? 0);
+
+                $this->notification()->info(
+                    'Sin mejoras',
+                    $remaining === 0
+                        ? 'La sección no tiene colisiones de docente; el horario queda igual.'
+                        : 'No se encontró una distribución con menos colisiones ('
+                            .$remaining.' colisión(es) sin resolver); el horario queda igual.',
+                );
+
+                return;
+            }
+
+            // ── Etapa 7: persistir SOLO los slots de la sección ─────────────
+            DB::transaction(function () use ($calendar, $result): void {
+                $lessonIds = array_map('intval', array_keys($result['assignment']));
+
+                TimetableSlot::query()
+                    ->where('calendar_id', $calendar->id)
+                    ->whereIn('lesson_id', $lessonIds)
+                    ->delete();
+
+                $rows = [];
+                foreach ($result['assignment'] as $lessonId => $slots) {
+                    $lesson = TimetableLesson::query()->with('pevaluacion')->find((int) $lessonId);
+
+                    if (! $lesson?->pevaluacion) {
+                        continue;
+                    }
+
+                    foreach ($slots as $slot) {
+                        $rows[] = [
+                            'calendar_id' => $calendar->id,
+                            'lesson_id' => (int) $lessonId,
+                            'period_id' => (int) $slot['period_id'],
+                            'profesor_id' => (int) $lesson->pevaluacion->profesor_id,
+                            'seccion_id' => (int) $lesson->pevaluacion->seccion_id,
+                            'grupo_estable_id' => $lesson->pevaluacion->grupo_estable_id
+                                ? (int) $lesson->pevaluacion->grupo_estable_id
+                                : null,
+                            'is_half_group' => (bool) $lesson->is_half_group,
+                            'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
+                            'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
+                            'locked' => (bool) ($slot['locked'] ?? false),
+                            'is_manual_override' => true,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                if ($rows !== []) {
+                    TimetableSlot::query()->insertOrIgnore($rows);
+                }
+            });
+
+            // ── Etapa 8: refrescar el preview de la sección ─────────────────
+            $assignment = $this->preview['assignment'] ?? [];
+            foreach ($result['assignment'] as $lessonId => $slots) {
+                $assignment[(string) $lessonId] = $slots;
+            }
+            $this->preview['assignment'] = $assignment;
+            $this->preview['manual_override'] = true;
+            $this->preview['assignment_source'] = 'reordered_slots';
+
+            $hard = (int) ($result['hard_violations'] ?? 0);
+            $method = (string) ($result['method'] ?? 'local_search');
+
             $this->notification()->success(
-                'Draft de sección generado',
-                'El draft de la sección '.$sectionId.' se generó con el solver (sin IA).',
+                'Horario reorganizado',
+                'Se movieron '.$result['moved'].' bloque(s). Colisiones de docente: '
+                .$result['collisions_before'].' → '.$result['collisions_after'].'.'
+                .' Método: '.$method.'.'
+                .($hard > 0 ? ' Atención: '.$hard.' conflicto(s) duro(s) sin resolver.' : ''),
             );
         } finally {
             $this->busy = false;
         }
+    }
+
+    /**
+     * Snapshot de los bloques de la sección activa: usa el preview actual si
+     * contiene la lección y, si no, los slots persistidos. No inventa bloques.
+     *
+     * @return array<int, list<array{period_id:int, room_id:int|null, is_practical:bool, locked:bool}>>
+     */
+    private function sectionReorderSnapshot(TimetableCalendar $calendar, int $sectionId): array
+    {
+        $assignment = $this->preview['assignment'] ?? [];
+
+        $lessons = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereHas('pevaluacion', fn ($query) => $query->where('seccion_id', $sectionId))
+            ->with('slots')
+            ->get();
+
+        $snapshot = [];
+
+        foreach ($lessons as $lesson) {
+            $lessonId = (int) $lesson->id;
+            $previewSlots = $assignment[(string) $lessonId] ?? $assignment[$lessonId] ?? null;
+
+            $slots = is_array($previewSlots) && $previewSlots !== []
+                ? array_values($previewSlots)
+                : $lesson->slots->map(fn ($slot): array => [
+                    'period_id' => (int) $slot->period_id,
+                    'room_id' => $slot->room_id ? (int) $slot->room_id : null,
+                    'is_practical' => (bool) ($slot->is_practical ?? false),
+                    'locked' => (bool) $slot->locked,
+                ])->all();
+
+            if ($slots !== []) {
+                $snapshot[$lessonId] = $slots;
+            }
+        }
+
+        return $snapshot;
     }
 
     /**
@@ -7238,8 +7426,8 @@ PROMPT;
             report($exception);
 
             $this->notification()->error(
-                'Intercambio no guardado',
-                'No se pudo persistir el intercambio en la base de datos; no se modificó ninguna asignación.',
+                'Cambio no guardado',
+                'No se pudo persistir el cambio en la base de datos; no se modificó ninguna asignación.',
             );
 
             return false;
@@ -7982,6 +8170,64 @@ PROMPT;
         $this->generationState = $calendar->status === TimetableCalendar::STATUS_ACTIVE
             ? 'published'
             : 'preview_ready';
+    }
+
+    /**
+     * Reconcilia los flags `locked` del preview con `timetable_slots` de la BD.
+     *
+     * La grilla del Paso 5 (checkboxes de bloqueo) debe reflejar el estado real
+     * persistido incluso cuando el preview proviene de `preview_payload` (sin
+     * slots), de un snapshot o de una sesión previa. Se ejecuta en `mount` y al
+     * cambiar de calendario para que "por defecto" nunca aparezcan todos
+     * bloqueados si en la BD no lo están.
+     */
+    private function syncPreviewSlotLocksFromDatabase(): void
+    {
+        if (! $this->calendarId || ! is_array($this->preview['assignment'] ?? null)) {
+            return;
+        }
+
+        $locks = TimetableSlot::query()
+            ->where('calendar_id', $this->calendarId)
+            ->get(['lesson_id', 'period_id', 'locked'])
+            ->mapWithKeys(fn (TimetableSlot $slot): array => [
+                (int) $slot->lesson_id.':'.(int) $slot->period_id => (bool) $slot->locked,
+            ])
+            ->all();
+
+        if ($locks === []) {
+            return;
+        }
+
+        $assignment = $this->preview['assignment'];
+        $changed = false;
+
+        foreach ($assignment as $lessonId => $slots) {
+            if (! is_array($slots)) {
+                continue;
+            }
+
+            foreach ($slots as $index => $slot) {
+                if (! is_array($slot)) {
+                    continue;
+                }
+
+                $key = (int) $lessonId.':'.(int) ($slot['period_id'] ?? 0);
+                if (! array_key_exists($key, $locks)) {
+                    continue;
+                }
+
+                $locked = $locks[$key];
+                if ((bool) ($slot['locked'] ?? false) !== $locked) {
+                    $assignment[$lessonId][$index]['locked'] = $locked;
+                    $changed = true;
+                }
+            }
+        }
+
+        if ($changed) {
+            $this->preview['assignment'] = $assignment;
+        }
     }
 
     /**

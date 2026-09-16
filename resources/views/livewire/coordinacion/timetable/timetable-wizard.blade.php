@@ -2853,6 +2853,9 @@
                                                     <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
                                                         slot(s) llenos · {{ $paritySection['assigned_lessons'] }} asignatura(s) con horario
                                                     </div>
+                                                    <div class="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">
+                                                        Paso 3: {{ $paritySection['required_slots'] ?? 0 }} bloque(s) configurados
+                                                    </div>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -2867,6 +2870,7 @@
                                                 <thead class="bg-black/5 dark:bg-white/[0.03]">
                                                     <tr class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                                                         <th class="min-w-[15rem] px-3 py-2">Asignatura</th>
+                                                        <th class="min-w-[6rem] px-3 py-2 text-center">Bloques Paso 3</th>
                                                         @foreach ($sectionSlotParity['sections'] as $paritySection)
                                                             <th class="min-w-[7rem] px-3 py-2 text-center">Sección {{ $paritySection['name'] }}</th>
                                                         @endforeach
@@ -2881,6 +2885,11 @@
                                                                 <div class="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">
                                                                     Total del grupo: {{ array_sum($paritySubject['sections']) }} slot(s)
                                                                 </div>
+                                                            </td>
+                                                            <td class="px-3 py-2.5 text-center">
+                                                                <span class="inline-flex min-w-[2rem] items-center justify-center rounded-md bg-sky-500/10 px-2 py-1 font-extrabold text-sky-700 dark:text-sky-300">
+                                                                    {{ (int) ($paritySubject['required'] ?? 0) }}
+                                                                </span>
                                                             </td>
                                                             @foreach ($sectionSlotParity['sections'] as $paritySection)
                                                                 @php $subjectSlots = (int) ($paritySubject['sections'][$paritySection['id']] ?? 0); @endphp
@@ -2898,7 +2907,7 @@
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="{{ count($sectionSlotParity['sections']) + 2 }}" class="px-3 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                                                            <td colspan="{{ count($sectionSlotParity['sections']) + 3 }}" class="px-3 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
                                                                 No hay asignaturas configuradas para comparar.
                                                             </td>
                                                         </tr>
@@ -3088,7 +3097,13 @@
                                     <span wire:loading wire:target="downloadDryRunResult" class="sr-only">Preparando…</span>
                                 </button>
                                 @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
-                                    @php $sectionLocked = $activeSectionLocked; @endphp
+                                    @php
+                                        $sectionLocked = $activeSectionLocked;
+                                        $sectionSlotCells = collect($secGrid ?? [])
+                                            ->flatMap(fn ($orders) => collect($orders)->flatMap(fn ($days) => collect($days)->flatten(1)));
+                                        $sectionSlotsTotal = $sectionSlotCells->count();
+                                        $sectionSlotsAllLocked = $sectionSlotsTotal > 0 && $sectionSlotCells->every(fn ($cell) => ! empty($cell['locked']));
+                                    @endphp
                                     <button type="button"
                                         wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
                                         title="{{ $sectionLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
@@ -3102,6 +3117,23 @@
                                         </svg>
                                         <span class="sr-only">{{ $sectionLocked ? 'Bloqueado' : 'Bloquear' }}</span>
                                     </button>
+
+                                    {{-- Master: bloquea/desbloquea todos los bloques de la sección --}}
+                                    {{-- <label
+                                        title="{{ $sectionSlotsAllLocked ? 'Desbloquear todos los bloques de la sección' : 'Bloquear todos los bloques de la sección' }}"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-white/10 {{ $sectionSlotsTotal === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5' }}">
+                                        <input type="checkbox"
+                                            wire:click="toggleSectionPreviewSlotsLock"
+                                            wire:loading.attr="disabled"
+                                            wire:target="toggleSectionPreviewSlotsLock"
+                                            @checked($sectionSlotsAllLocked)
+                                            @disabled($sectionSlotsTotal === 0)
+                                            aria-label="Bloquear o desbloquear todos los bloques de la sección"
+                                            class="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-amber-600 focus:ring-amber-500">
+                                        <span class="text-[11px] {{ $sectionSlotsAllLocked ? 'text-red-600 dark:text-red-300' : 'text-amber-600 dark:text-amber-300' }}">
+                                            {{ $sectionSlotsAllLocked ? 'Desbloquear bloques' : 'Bloquear bloques' }}
+                                        </span>
+                                    </label> --}}
                                 @endif
 
                                 </div>
@@ -3177,8 +3209,10 @@
                                                                     <div class="flex min-h-3.5 items-center justify-between gap-px">
                                                                         <label class="flex shrink-0 items-center" title="{{ $cell['locked'] ? 'Desbloquear este bloque' : 'Bloquear este bloque' }}">
                                                                             <input type="checkbox"
+                                                                                wire:key="preview-slot-lock-{{ (int) $cell['lesson_id'] }}-{{ (int) $cell['period_id'] }}-{{ !empty($cell['locked']) ? 'l' : 'u' }}"
                                                                                 wire:change="togglePreviewSlotLock({{ (int) $cell['lesson_id'] }}, {{ (int) $cell['period_id'] }})"
                                                                                 @checked($cell['locked'])
+                                                                                autocomplete="off"
                                                                                 aria-label="Bloquear/desbloquear {{ $cell['asignatura'] }} en este período"
                                                                                 class="h-3 w-3 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
                                                                             <span class="sr-only">Bloquear/desbloquear {{ $cell['asignatura'] }}</span>

@@ -46,4 +46,40 @@ return [
         'section_draft_budget_seconds' => (int) env('TIMETABLE_SOLVER_SECTION_DRAFT_BUDGET_SECONDS', 120),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Optimizador de sección (Paso 5) — motor híbrido
+    |--------------------------------------------------------------------------
+    |
+    | Reorganiza los bloques de UNA sección combinando grafo/coloreo (soluciones
+    | iniciales), CSP (restricciones duras) y una función de penalizaciones tipo
+    | MILP (restricciones blandas) optimizada con búsqueda local.
+    |
+    | time_budget_seconds: presupuesto total de la optimización por sección.
+    | restarts: reinicios aleatorios de la búsqueda local.
+    | csp_node_budget: nodos máximos explorados por el backtracking.
+    | weights: pesos de la función objetivo (mayor = más prioritario).
+    |   hard: violaciones duras (docente/aula/sección).
+    |   external: solape con la carga del docente en otros P.Estudios.
+    |   gap: huecos entre clases del docente en el día.
+    |   distribution: bloques de una misma materia concentrados el mismo día.
+    |   room: bloques prácticos sin aula asignada.
+    |   off_shift: bloques fuera del turno natural de la lección.
+    |
+    */
+
+    'section_optimizer' => [
+        'time_budget_seconds' => (float) env('TIMETABLE_SECTION_OPTIMIZER_SECONDS', 8),
+        'restarts' => (int) env('TIMETABLE_SECTION_OPTIMIZER_RESTARTS', 10),
+        'csp_node_budget' => (int) env('TIMETABLE_SECTION_OPTIMIZER_CSP_NODES', 20000),
+        'weights' => [
+            'hard' => (int) env('TIMETABLE_SECTION_OPTIMIZER_W_HARD', 1000),
+            'external' => (int) env('TIMETABLE_SECTION_OPTIMIZER_W_EXTERNAL', 100),
+            'gap' => (int) env('TIMETABLE_SECTION_OPTIMIZER_W_GAP', 10),
+            'distribution' => (int) env('TIMETABLE_SECTION_OPTIMIZER_W_DISTRIBUTION', 25),
+            'room' => (int) env('TIMETABLE_SECTION_OPTIMIZER_W_ROOM', 15),
+            'off_shift' => (int) env('TIMETABLE_SECTION_OPTIMIZER_W_OFF_SHIFT', 30),
+        ],
+    ],
+
 ];

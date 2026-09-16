@@ -409,19 +409,35 @@ class GenerateTimetableJob implements ShouldQueue
                     ->values()
                     ->all();
             $periodsForShift = array_merge($preferredPeriods, $fallbackPeriods);
-            $result[$lesson->lessonId] = array_values(array_map(
-                fn ($p) => $p->id,
-                array_filter(
-                    $periodsForShift,
-                    fn ($p) => $availability->isAvailable(
-                        $calendar->id,
-                        $profesorId,
-                        $p,
-                    )
-                        && ! $this->periodOverlapsExternalBusy($p, $externalBusy[$profesorId] ?? [])
-                        && $this->periodIsFreeOfPreserved($p->id, $profesorId, $seccionId, $lesson->isHalfGroup, $preserved, $maxSubjectsPerPeriod),
-                ),
+            $available = array_values(array_filter(
+                $periodsForShift,
+                fn ($p) => $availability->isAvailable(
+                    $calendar->id,
+                    $profesorId,
+                    $p,
+                )
+                    && $this->periodIsFreeOfPreserved($p->id, $profesorId, $seccionId, $lesson->isHalfGroup, $preserved, $maxSubjectsPerPeriod),
             ));
+
+            // La ocupación externa del docente (otros P.Estudios) es una
+            // preferencia, no un bloqueo: los períodos con solape se colocan al
+            // final del dominio para que el solver los use solo como último
+            // recurso y no deje slots vacíos por colisión entre P.Estudios.
+            $external = $externalBusy[$profesorId] ?? [];
+            if ($external !== []) {
+                $free = [];
+                $overlap = [];
+                foreach ($available as $period) {
+                    if ($this->periodOverlapsExternalBusy($period, $external)) {
+                        $overlap[] = $period;
+                    } else {
+                        $free[] = $period;
+                    }
+                }
+                $available = array_merge($free, $overlap);
+            }
+
+            $result[$lesson->lessonId] = array_map(fn ($p) => $p->id, $available);
         }
 
         return $result;

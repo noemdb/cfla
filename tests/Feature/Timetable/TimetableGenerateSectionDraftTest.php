@@ -14,6 +14,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
+use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
@@ -21,14 +22,15 @@ use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
- * El botón "Draft sección (solver)" genera un draft acotado a la sección activa
- * usando el solver (sin IA).
+ * El botón "Draft sección (solver)" REORGANIZA los bloques existentes de la
+ * sección activa (sin agregar, quitar ni cambiar lecciones) para minimizar
+ * colisiones, respetando `is_half_group` y `locked`.
  */
 class TimetableGenerateSectionDraftTest extends TestCase
 {
     use DatabaseTransactions, TimetableShiftHelper;
 
-    public function test_generate_section_draft_runs_solver_for_active_section(): void
+    public function test_generate_section_draft_reorganizes_existing_slots(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
@@ -45,9 +47,10 @@ class TimetableGenerateSectionDraftTest extends TestCase
         ]);
         $shift = $this->makeShift();
 
+        $periods = [];
         for ($day = 1; $day <= 5; $day++) {
             for ($order = 1; $order <= 3; $order++) {
-                TimetablePeriod::factory()->create([
+                $periods[] = TimetablePeriod::factory()->create([
                     'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
                     'day_of_week' => $day, 'order_in_day' => $order, 'is_break' => false,
                 ]);
@@ -55,8 +58,8 @@ class TimetableGenerateSectionDraftTest extends TestCase
         }
 
         $lessonIds = [];
-        foreach ([1, 2] as $n) {
-            $asignatura = Asignatura::factory()->create(['hour_t_week' => 2, 'hour_p_week' => 0]);
+        foreach ([0, 1] as $n) {
+            $asignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
             $pensum = Pensum::factory()->create([
                 'pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignatura->id,
             ]);
@@ -64,11 +67,19 @@ class TimetableGenerateSectionDraftTest extends TestCase
                 'profesor_id' => $profesor->id, 'seccion_id' => $seccion->id,
                 'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id,
             ]);
-            $lessonIds[] = TimetableLesson::factory()->create([
+            $lesson = TimetableLesson::factory()->create([
                 'calendar_id' => $calendar->id, 'pevaluacion_id' => $pev->id,
-                'shift_id' => $shift->id, 'weekly_blocks_t' => 2, 'weekly_blocks_p' => 0,
-            ])->id;
+                'shift_id' => $shift->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+            ]);
+            TimetableSlot::factory()->create([
+                'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
+                'period_id' => $periods[$n]->id, 'profesor_id' => $profesor->id,
+                'seccion_id' => $seccion->id,
+            ]);
+            $lessonIds[] = $lesson->id;
         }
+
+        $originalStatus = $calendar->status;
 
         $component = Livewire::actingAs($user)
             ->test(TimetableWizard::class)
@@ -80,10 +91,12 @@ class TimetableGenerateSectionDraftTest extends TestCase
 
         $this->assertNotNull($preview);
         $this->assertSame('preview_ready', $component->get('generationState'));
-        $this->assertSame('draft', $calendar->fresh()->status);
         foreach ($lessonIds as $id) {
-            $this->assertArrayHasKey((string) $id, $preview['assignment'], "la lección {$id} debe quedar asignada en el draft");
+            $this->assertArrayHasKey((string) $id, $preview['assignment'], "la lección {$id} debe seguir en el horario");
+            $this->assertCount(1, $preview['assignment'][(string) $id], "la lección {$id} conserva su número de bloques");
         }
+        // Reorganizar no cambia el estado del calendario.
+        $this->assertSame($originalStatus, $calendar->fresh()->status);
     }
 
     public function test_generate_section_draft_preserves_other_sections_in_preview(): void

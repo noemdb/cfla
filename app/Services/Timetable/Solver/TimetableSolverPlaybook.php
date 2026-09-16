@@ -195,6 +195,7 @@ final class TimetableSolverPlaybook
             SolverAttemptConfig::ORDER_RANDOM => 'Barajado determinista por semilla (restarts).',
             SolverAttemptConfig::ORDER_REPAIR => 'Prioriza las lecciones que quedaron sin asignar.',
             SolverAttemptConfig::ORDER_HALF_GROUP_FIRST => "Medio-grupos primero (agrupados por sección asc), luego por grado de restricción. Intento 'S1h', solo si half_group_priority (HG-03).",
+            SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST => "Lecciones de docente compartido primero (agrupadas por docente), luego por grado de restricción. Intento 'S1s', solo si shared_teacher_priority (ST-01).",
         ];
 
         $ordering = [];
