@@ -307,57 +307,54 @@
             @endif
 
             @if (! empty($tabSeccionOptions))
-                <label class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sección</span>
-                    <select wire:change="selectStep5Section($event.target.value)"
-                        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500/50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
-                        @foreach ($tabSeccionOptions as $opt)
-                            <option value="{{ $opt['id'] }}" @selected((string) $activeSeccionId === (string) $opt['id'])>
-                                Sección {{ $opt['name'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+                    <div class="flex items-center gap-2">
+                        <select wire:change="selectStep5Section($event.target.value)"
+                            class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500/50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                            @foreach ($tabSeccionOptions as $opt)
+                                <option value="{{ $opt['id'] }}" @selected((string) $activeSeccionId === (string) $opt['id'])>
+                                    Sección {{ $opt['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        {{-- Bloquear / desbloquear la sección (junto al selector) --}}
+                        @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
+                            <button type="button"
+                                wire:key="light-section-lock-{{ (int) $activeSeccionId }}-{{ $sectionLockedGrid ? 'l' : 'u' }}"
+                                wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
+                                wire:loading.attr="disabled"
+                                wire:target="toggleSectionTimetableLock"
+                                title="{{ $sectionLockedGrid ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
+                                aria-label="{{ $sectionLockedGrid ? 'Desbloquear' : 'Bloquear' }} el horario de la sección"
+                                class="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $sectionLockedGrid ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    @if ($sectionLockedGrid)
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                    @else
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                    @endif
+                                </svg>
+                                <span wire:loading.remove wire:target="toggleSectionTimetableLock">
+                                    {{ $sectionLockedGrid ? 'Desbloquear sección' : 'Bloquear sección' }}
+                                </span>
+                                <span wire:loading wire:target="toggleSectionTimetableLock">Guardando…</span>
+                            </button>
+                        @endif
+                    </div>
+                </div>
             @endif
         </div>
 
-        {{-- Bloquear / desbloquear la sección --}}
+        {{-- PDF de la sección (usa los slots persistidos) --}}
         @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
-            <div class="mb-4 flex flex-wrap items-center gap-2">
-                <button type="button"
-                    wire:key="light-section-lock-{{ (int) $activeSeccionId }}-{{ $sectionLockedGrid ? 'l' : 'u' }}"
-                    wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
-                    wire:loading.attr="disabled"
-                    wire:target="toggleSectionTimetableLock"
-                    title="{{ $sectionLockedGrid ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
-                    aria-label="{{ $sectionLockedGrid ? 'Desbloquear' : 'Bloquear' }} el horario de la sección"
-                    class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $sectionLockedGrid ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
-                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        @if ($sectionLockedGrid)
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
-                        @else
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
-                        @endif
-                    </svg>
-                    <span wire:loading.remove wire:target="toggleSectionTimetableLock">
-                        {{ $sectionLockedGrid ? 'Desbloquear sección' : 'Bloquear sección' }}
-                    </span>
-                    <span wire:loading wire:target="toggleSectionTimetableLock">Guardando…</span>
-                </button>
-                <span class="text-[11px] text-gray-500 dark:text-gray-400">
-                    @if ($sectionLockedGrid)
-                        El horario de la sección está bloqueado: no se puede editar.
-                    @else
-                        Bloquea la sección para evitar cambios accidentales.
-                    @endif
-                </span>
-
-                {{-- PDF de la sección (usa los slots persistidos) --}}
+            <div class="mb-4 flex justify-end">
                 <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId, 'source' => 'persisted']) }}"
                     target="_blank" rel="noopener"
                     title="Generar el PDF del horario de esta sección"
                     aria-label="Generar PDF de la sección"
-                    class="ml-auto inline-flex items-center gap-2 rounded-lg bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
+                    class="inline-flex items-center gap-2 rounded-lg bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -374,28 +371,6 @@
                 </svg>
                 <span class="font-bold">{{ count($lightCollisions) }} colisión(es) de docente (no bloqueante).</span>
                 <span>Usa el panel «Colisiones» para saltar a cada celda o resaltar al docente.</span>
-            </div>
-        @endif
-
-        @if ($sectionLockedGrid)
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-500/30 bg-red-500/[0.06] px-4 py-2.5 text-xs font-bold text-red-700 dark:text-red-300">
-                <span>El horario de esta sección está bloqueado: desbloquéalo para editarlo.</span>
-                @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
-                    <button type="button"
-                        wire:key="light-unlock-section-{{ (int) $activeSeccionId }}"
-                        wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
-                        wire:loading.attr="disabled"
-                        wire:target="toggleSectionTimetableLock"
-                        title="Desbloquear el horario de esta sección"
-                        aria-label="Desbloquear el horario de la sección"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
-                        </svg>
-                        <span wire:loading.remove wire:target="toggleSectionTimetableLock">Desbloquear sección</span>
-                        <span wire:loading wire:target="toggleSectionTimetableLock">Desbloqueando…</span>
-                    </button>
-                @endif
             </div>
         @endif
 
