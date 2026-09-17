@@ -643,7 +643,11 @@ class TimetablePdfController extends Controller
             ->orderBy('pestudio_id')
             ->get();
 
-        $calendarsData = $calendars->map(function (TimetableCalendar $calendar): ?array {
+        // Agrupado por docente (luego por P.Estudio): cada profesor aparece una
+        // sola vez y todos sus horarios quedan consecutivos.
+        $teachers = [];
+
+        foreach ($calendars as $calendar) {
             $profesorIds = TimetableSlot::query()
                 ->where('calendar_id', $calendar->id)
                 ->whereNotNull('profesor_id')
@@ -654,42 +658,72 @@ class TimetablePdfController extends Controller
                 ->distinct()
                 ->pluck('profesor_id');
 
-            $profesores = Profesor::query()
-                ->whereIn('id', $profesorIds)
-                ->orderBy('lastname')
-                ->orderBy('name')
-                ->get();
-
-            $schedules = $profesores->map(fn (Profesor $profesor): array => [
-                'profesor' => $profesor,
-                'shifts' => $this->viewService->teacherShiftSchedules($calendar, (int) $profesor->id),
-            ])->values();
-
-            if ($schedules->isEmpty()) {
-                return null;
+            if ($profesorIds->isEmpty()) {
+                continue;
             }
 
-            return [
-                'calendar' => $calendar,
-                'pestudio' => $calendar->pestudio,
-                'schedules' => $schedules,
-            ];
-        })->filter()->values();
+            $profesores = Profesor::query()->whereIn('id', $profesorIds)->get();
 
-        if ($calendarsData->isEmpty()) {
+            foreach ($profesores as $profesor) {
+                $shifts = $this->viewService->teacherShiftSchedules($calendar, (int) $profesor->id);
+
+                if ($shifts === []) {
+                    continue;
+                }
+
+                $key = (int) $profesor->id;
+
+                if (! isset($teachers[$key])) {
+                    $teachers[$key] = [
+                        'profesor' => $profesor,
+                        'pestudios' => [],
+                    ];
+                }
+
+                $teachers[$key]['pestudios'][] = [
+                    'pestudio' => $calendar->pestudio,
+                    'calendar' => $calendar,
+                    'shifts' => $shifts,
+                ];
+            }
+        }
+
+        // Orden por CI del docente (natural). Los que no tienen CI van al final.
+        $teachersData = collect($teachers)
+            ->sortBy(
+                function (array $row): string {
+                    $ci = trim((string) ($row['profesor']->ci_profesor ?? ''));
+
+                    return $ci === '' ? '~' : mb_strtoupper($ci);
+                },
+                SORT_NATURAL,
+            )
+            ->values();
+
+        if ($teachersData->isEmpty()) {
             abort(404, 'No hay docentes con asignaciones en los calendarios activos del lapso vigente.');
         }
 
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
+
+        // Orientación del print: portrait (por defecto) o landscape.
+        $orientation = $request->query('orientation') === 'landscape' ? 'landscape' : 'portrait';
+
+        // Cantidad de horarios (docentes) por página impresa: 2 por defecto,
+        // acotado a 1..6 para evitar tarjetas ilegibles.
+        $perPage = (int) $request->query('per_page', 2);
+        $perPage = max(1, min(6, $perPage));
 
         // Se renderiza como HTML (no PDF): el consolidado de todos los docentes
         // del lapso genera un documento tan grande que dompdf agota la memoria
         // en el servidor. El navegador renderiza el HTML sin ese límite.
         return view('timetable.teachers-all', [
             'lapso' => $lapso,
-            'calendarsData' => $calendarsData,
+            'teachersData' => $teachersData,
             'institucion' => $institucion,
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'orientation' => $orientation,
+            'perPage' => $perPage,
         ]);
     }
 

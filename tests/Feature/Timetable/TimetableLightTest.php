@@ -97,6 +97,10 @@ class TimetableLightTest extends TestCase
         $this->assertSame((int) $seccion->id, (int) $component->get('activeSeccionId'));
         $component->assertSee('Cambiar calendario');
 
+        // Dropdown de formatos/reportes.
+        $component->assertSee('Formatos');
+        $component->assertSee('PDF todos P.Estudios');
+
         // La grilla debe ser arrastrable (drag & drop).
         $component->assertSee('x-on:drop.prevent', false);
         $component->assertSee('x-on:dragstart', false);

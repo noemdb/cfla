@@ -88,6 +88,91 @@ class TimetableGlobalPdfTest extends TestCase
             ->assertOk();
     }
 
+    /**
+     * assertSee volcaría todo el HTML (muy grande) al fallar; aquí sólo se
+     * compara el fragmento esperado para mantener el reporte legible.
+     */
+    private function assertHtmlContains(string $needle, \Illuminate\Testing\TestResponse $response): void
+    {
+        $this->assertStringContainsString($needle, $response->getContent(), "No se encontró «{$needle}» en el HTML generado.");
+    }
+
+    public function test_all_teachers_respects_orientation_parameter(): void
+    {
+        $fixture = $this->fixture();
+
+        // Sin parámetro: portrait por defecto.
+        $this->assertHtmlContains('size:letter portrait', $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers'))
+            ->assertOk());
+
+        $this->assertHtmlContains('size:letter landscape', $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['orientation' => 'landscape']))
+            ->assertOk());
+
+        // Valor inválido cae al default portrait.
+        $this->assertHtmlContains('size:letter portrait', $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['orientation' => 'diagonal']))
+            ->assertOk());
+    }
+
+    public function test_all_teachers_groups_sheets_by_per_page_and_orders_by_ci(): void
+    {
+        $fixture = $this->fixture();
+        $calendar = $fixture['calendar'];
+        $lesson = TimetableLesson::query()->where('calendar_id', $calendar->id)->firstOrFail();
+        $basePeriod = TimetablePeriod::query()->where('calendar_id', $calendar->id)->firstOrFail();
+
+        // Dos docentes adicionales con CI distinta; cada uno usa su propio
+        // período para respetar el único (calendar_id, period_id, lesson_id).
+        foreach ([['Beto', 'Zamora', '20'], ['Carlos', 'Ávila', '3']] as $i => [$name, $lastname, $ci]) {
+            $extra = Profesor::create([
+                'user_id' => User::factory()->create()->id,
+                'name' => $name, 'lastname' => $lastname,
+                'ci_profesor' => $ci, 'status_active' => 'true',
+            ]);
+
+            $period = TimetablePeriod::factory()->create([
+                'calendar_id' => $calendar->id, 'shift_id' => $basePeriod->shift_id,
+                'day_of_week' => 1, 'order_in_day' => $i + 2, 'is_break' => false,
+            ]);
+
+            TimetableSlot::factory()->create([
+                'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
+                'period_id' => $period->id, 'profesor_id' => $extra->id,
+                'seccion_id' => $fixture['seccion']->id,
+            ]);
+        }
+
+        $response = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['per_page' => 2]))
+            ->assertOk();
+
+        $html = $response->getContent();
+
+        // Orden por CI: 3 (Ávila), 20 (Zamora), 8801 (López).
+        $posCi3 = strpos($html, 'CI: 3</p>');
+        $posCi20 = strpos($html, 'CI: 20</p>');
+        $posCi8801 = strpos($html, 'CI: 8801</p>');
+        $this->assertNotFalse($posCi3);
+        $this->assertNotFalse($posCi20);
+        $this->assertNotFalse($posCi8801);
+        $this->assertTrue($posCi3 < $posCi20 && $posCi20 < $posCi8801, 'Los docentes deben ordenarse por CI.');
+
+        // Hojas = ceil(docentes / per_page) y hay salto de página entre hojas.
+        $teacherCount = substr_count($html, 'class="card"');
+        $this->assertGreaterThan(0, $teacherCount);
+        $this->assertSame((int) ceil($teacherCount / 2), substr_count($html, 'class="sheet"'));
+        $this->assertStringContainsString('break-after:page', $html);
+
+        // Con 1 docente por hoja el número de hojas coincide con los docentes.
+        $htmlPerOne = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['per_page' => 1]))
+            ->assertOk()
+            ->getContent();
+        $this->assertSame($teacherCount, substr_count($htmlPerOne, 'class="sheet"'));
+    }
+
     public function test_all_pestudios_returns_404_without_active_calendars(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

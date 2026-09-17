@@ -50,9 +50,109 @@
                     class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
                     Cambiar calendario
                 </button>
+
+                {{-- Dropdown: formatos y reportes PDF --}}
+                <x-dropdown position="bottom-end" width="3xl" height="auto">
+                    <x-slot name="trigger">
+                        <x-button
+                            label="Formatos"
+                            icon="document-text"
+                            right-icon="chevron-down"
+                            color="base"
+                            variant="outline"
+                            class="font-bold" />
+                    </x-slot>
+
+                    <x-dropdown.item
+                        href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
+                        target="_blank"
+                        rel="noopener"
+                        icon="folder"
+                        label="PDF todos P.Estudios" />
+
+                    <x-dropdown.item
+                        href="#"
+                        x-on:click.prevent="$dispatch('open-teachers-pdf')"
+                        icon="document-arrow-down"
+                        label="PDF profesores"
+                        separator />
+
+                    <x-dropdown.item
+                        href="{{ route($moduleRoutePrefix.'.timetable.pdf.teacher-block-totals') }}"
+                        target="_blank"
+                        rel="noopener"
+                        icon="table-cells"
+                        label="Totalización por docente" />
+                </x-dropdown>
             </div>
         @endif
     </header>
+
+    {{-- Diálogo: configuración del PDF consolidado de profesores. --}}
+    <div x-data="{ open: false, orientation: 'portrait', perPage: 2 }"
+        x-on:open-teachers-pdf.window="open = true"
+        x-on:keydown.escape.window="open = false"
+        x-cloak x-show="open"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
+        role="dialog" aria-modal="true" aria-label="PDF de profesores">
+        <div x-on:click.stop
+            class="w-full max-w-md overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
+            <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
+                <div>
+                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
+                        PDF de profesores
+                    </h3>
+                    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                        Orientación y horarios por página
+                    </p>
+                </div>
+                <button type="button" x-on:click="open = false"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:hover:bg-white/10 dark:hover:text-white"
+                    aria-label="Cerrar">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+
+            <div class="space-y-4 p-4">
+                <div>
+                    <label for="teachers-pdf-orientation"
+                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                        Orientación
+                    </label>
+                    <select id="teachers-pdf-orientation" x-model="orientation"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="portrait">Vertical</option>
+                        <option value="landscape">Horizontal</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="teachers-pdf-per-page"
+                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                        Horarios por página
+                    </label>
+                    <select id="teachers-pdf-per-page" x-model.number="perPage"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
+                        @foreach (range(1, 6) as $n)
+                            <option value="{{ $n }}">{{ $n }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-gray-200 px-4 py-3 dark:border-white/10">
+                <button type="button" x-on:click="open = false"
+                    class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
+                    Cancelar
+                </button>
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?orientation=' + orientation + '&per_page=' + perPage"
+                    target="_blank" rel="noopener" x-on:click="open = false"
+                    class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
+                    Generar PDF
+                </a>
+            </div>
+        </div>
+    </div>
 
     @if ($lightStep === 1)
         {{-- ── Paso 1: seleccionar calendario ───────────────────────────── --}}
