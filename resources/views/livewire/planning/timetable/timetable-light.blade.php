@@ -241,8 +241,24 @@
         @endif
 
         @if ($sectionLockedGrid)
-            <div class="mb-4 rounded-lg border border-red-500/30 bg-red-500/[0.06] px-4 py-2.5 text-xs font-bold text-red-700 dark:text-red-300">
-                El horario de esta sección está bloqueado: desbloquéalo en el asistente completo para editarlo.
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-500/30 bg-red-500/[0.06] px-4 py-2.5 text-xs font-bold text-red-700 dark:text-red-300">
+                <span>El horario de esta sección está bloqueado: desbloquéalo para editarlo.</span>
+                @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
+                    <button type="button"
+                        wire:key="light-unlock-section-{{ (int) $activeSeccionId }}"
+                        wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
+                        wire:loading.attr="disabled"
+                        wire:target="toggleSectionTimetableLock"
+                        title="Desbloquear el horario de esta sección"
+                        aria-label="Desbloquear el horario de la sección"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="toggleSectionTimetableLock">Desbloquear sección</span>
+                        <span wire:loading wire:target="toggleSectionTimetableLock">Desbloqueando…</span>
+                    </button>
+                @endif
             </div>
         @endif
 

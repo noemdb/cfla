@@ -270,6 +270,22 @@ class TimetableLightTest extends TestCase
         $component->assertSee('Guardado · '.$savedAt);
     }
 
+    public function test_light_locked_banner_offers_unlock_button(): void
+    {
+        [$user, $calendar, $seccion] = $this->makeContext();
+        $seccion->update(['timetable_locked' => true]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->assertSee('El horario de esta sección está bloqueado');
+        $component->assertSee('Desbloquear sección');
+
+        $component->call('toggleSectionTimetableLock', $seccion->id);
+
+        $this->assertFalse((bool) $seccion->fresh()->timetable_locked);
+    }
+
     public function test_change_calendar_returns_to_selection(): void
     {
         [$user, $calendar] = $this->makeContext();
