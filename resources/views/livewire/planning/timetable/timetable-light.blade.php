@@ -61,49 +61,86 @@
                 No hay calendarios de horario disponibles.
             </div>
         @else
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($lightCalendars as $calendar)
-                    @php
-                        $statusLabel = match ($calendar['status']) {
-                            'active' => 'Activo',
-                            'draft' => 'Borrador',
-                            'generating' => 'Generando',
-                            'archived' => 'Archivado',
-                            default => ucfirst($calendar['status']),
-                        };
-                        $statusClass = match ($calendar['status']) {
-                            'active' => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-                            'draft' => 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
-                            'generating' => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-                            default => 'bg-gray-500/10 text-gray-600 dark:text-gray-300',
-                        };
-                    @endphp
-                    <button type="button" wire:click="chooseCalendar({{ $calendar['id'] }})"
-                        wire:loading.attr="disabled" wire:target="chooseCalendar"
-                        class="group flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4 text-left transition-all hover:border-emerald-500/50 hover:bg-emerald-50/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-emerald-500/5">
-                        <div class="flex items-start justify-between gap-2">
-                            <span class="min-w-0 break-words text-sm font-extrabold leading-snug text-gray-900 dark:text-white">{{ $calendar['name'] }}</span>
-                            <span class="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $statusClass }}">
-                                {{ $statusLabel }}
-                            </span>
+            @php
+                $calendarGroups = [
+                    [
+                        'label' => 'Activos',
+                        'description' => 'Calendarios en uso o editables.',
+                        'calendars' => array_values(array_filter(
+                            $lightCalendars,
+                            fn (array $calendar): bool => $calendar['status'] !== 'archived',
+                        )),
+                    ],
+                    [
+                        'label' => 'Archivados',
+                        'description' => 'Calendarios retirados (solo consulta).',
+                        'calendars' => array_values(array_filter(
+                            $lightCalendars,
+                            fn (array $calendar): bool => $calendar['status'] === 'archived',
+                        )),
+                    ],
+                ];
+                $calendarGroupRendered = false;
+            @endphp
+
+            @foreach ($calendarGroups as $group)
+                @if ($group['calendars'] !== [])
+                    <section class="{{ $calendarGroupRendered ? 'mt-8 border-t-2 border-gray-300 pt-6 dark:border-white/20' : '' }}">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h2 class="text-[11px] font-extrabold uppercase tracking-widest {{ $group['label'] === 'Archivados' ? 'text-gray-400 dark:text-gray-500' : 'text-emerald-700 dark:text-emerald-300' }}">
+                                {{ $group['label'] }}
+                            </h2>
+                            <span class="rounded-full bg-gray-500/10 px-2 py-0.5 text-[10px] font-bold text-gray-500 dark:text-gray-400">{{ count($group['calendars']) }}</span>
+                            <span class="text-[10px] text-gray-400 dark:text-gray-500">{{ $group['description'] }}</span>
                         </div>
-                        <div class="text-[11px] text-gray-500 dark:text-gray-400">
-                            {{ $calendar['pestudio'] ?: 'Sin P.Estudio' }}
-                            @if ($calendar['lapso']) · {{ $calendar['lapso'] }} @endif
+
+                        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($group['calendars'] as $calendar)
+                                @php
+                                    $statusLabel = match ($calendar['status']) {
+                                        'active' => 'Activo',
+                                        'draft' => 'Borrador',
+                                        'generating' => 'Generando',
+                                        'archived' => 'Archivado',
+                                        default => ucfirst($calendar['status']),
+                                    };
+                                    $statusClass = match ($calendar['status']) {
+                                        'active' => 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+                                        'draft' => 'bg-sky-500/10 text-sky-700 dark:text-sky-300',
+                                        'generating' => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+                                        default => 'bg-gray-500/10 text-gray-600 dark:text-gray-300',
+                                    };
+                                @endphp
+                                <button type="button" wire:click="chooseCalendar({{ $calendar['id'] }})"
+                                    wire:loading.attr="disabled" wire:target="chooseCalendar"
+                                    class="group flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4 text-left transition-all hover:border-emerald-500/50 hover:bg-emerald-50/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-emerald-500/5">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <span class="min-w-0 break-words text-sm font-extrabold leading-snug text-gray-900 dark:text-white">{{ $calendar['name'] }}</span>
+                                        <span class="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $statusClass }}">
+                                            {{ $statusLabel }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[11px] text-gray-500 dark:text-gray-400">
+                                        {{ $calendar['pestudio'] ?: 'Sin P.Estudio' }}
+                                        @if ($calendar['lapso']) · {{ $calendar['lapso'] }} @endif
+                                    </div>
+                                    <div class="mt-1 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                        <span>{{ $calendar['lessons'] }} lesson(s)</span>
+                                        <span>{{ $calendar['slots'] }} slot(s)</span>
+                                    </div>
+                                    <span class="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-emerald-300">
+                                        Abrir grilla
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                            @endforeach
                         </div>
-                        <div class="mt-1 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                            <span>{{ $calendar['lessons'] }} lesson(s)</span>
-                            <span>{{ $calendar['slots'] }} slot(s)</span>
-                        </div>
-                        <span class="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-emerald-300">
-                            Abrir grilla
-                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </span>
-                    </button>
-                @endforeach
-            </div>
+                    </section>
+                    @php $calendarGroupRendered = true; @endphp
+                @endif
+            @endforeach
         @endif
     @else
         {{-- ── Paso 2: grilla (agregar / intercambiar + colisiones) ─────── --}}

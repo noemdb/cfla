@@ -65,6 +65,25 @@ class TimetableLightTest extends TestCase
         $component->assertSee($calendar->name);
     }
 
+    public function test_light_groups_calendars_active_and_archived(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $archived = TimetableCalendar::factory()->create([
+            'lapso_id' => $calendar->lapso_id,
+            'pestudio_id' => $calendar->pestudio_id,
+            'name' => 'Horario Archivado',
+            'status' => 'archived',
+        ]);
+
+        $component = Livewire::actingAs($user)->test(TimetableLight::class);
+
+        $component->assertSee('Activos');
+        $component->assertSee('Archivados');
+        $component->assertSee($calendar->name);
+        $component->assertSee('Horario Archivado');
+    }
+
     public function test_choose_calendar_opens_grid_and_persists_moves(): void
     {
         [$user, $calendar, $seccion, $lesson, $p1, $p2] = $this->makeContext();
