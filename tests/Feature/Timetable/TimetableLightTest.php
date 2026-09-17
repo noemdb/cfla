@@ -115,6 +115,9 @@ class TimetableLightTest extends TestCase
         $component = Livewire::actingAs($user)
             ->test(TimetableLight::class, ['calendar' => $calendar->id]);
 
+        // La celda vacía debe ofrecer el botón de agregar.
+        $component->assertSee('openAddPreviewLessonModal('.$p2->id.')', false);
+
         $component->call('openAddPreviewLessonModal', $p2->id);
 
         $this->assertTrue($component->get('showAddPreviewLessonModal'));

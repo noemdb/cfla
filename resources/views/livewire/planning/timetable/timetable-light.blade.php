@@ -369,30 +369,41 @@
                                                                 </button>
                                                             </div>
                                                         @endif
-                                                        @if (! empty($cell['collision']))
-                                                            <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
-                                                                title="Colisión de horario del docente con: {{ implode(', ', $cell['collision_pestudios']) }}"
-                                                                aria-label="Colisión de horario del docente con {{ implode(', ', $cell['collision_pestudios']) }}">
-                                                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-                                                                </svg>
-                                                            </span>
-                                                        @endif
                                                     </div>
                                                 @endforeach
+                                                @php
+                                                    $cellCollisionSources = [];
+                                                    foreach ($cellAssignments as $cellItem) {
+                                                        if (! empty($cellItem['collision'])) {
+                                                            foreach ($cellItem['collision_pestudios'] as $collisionSource) {
+                                                                $cellCollisionSources[$collisionSource] = true;
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @if ($cellCollisionSources !== [])
+                                                    <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
+                                                        title="Colisión de horario del docente con: {{ implode(', ', array_keys($cellCollisionSources)) }}"
+                                                        aria-label="Colisión de horario del docente con {{ implode(', ', array_keys($cellCollisionSources)) }}">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                                        </svg>
+                                                    </span>
+                                                @endif
                                             @elseif ($isBreak)
                                                 <div class="w-full text-center text-[9px] font-semibold uppercase tracking-wide opacity-75">Receso</div>
                                             @else
                                                 <button type="button"
                                                     wire:click="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="openAddPreviewLessonModal"
                                                     @disabled(! $targetPeriod)
                                                     title="Agregar una lección a este período"
                                                     aria-label="Agregar una lección al período {{ $targetPeriod?->period_label }}"
-                                                    class="absolute right-1 top-1 z-10 inline-flex h-5 w-5 items-center justify-center rounded bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40">
-                                                    <span aria-hidden="true" class="text-sm leading-none">+</span>
-                                                    <span class="sr-only">Agregar lección</span>
+                                                    class="absolute inset-0 z-10 flex w-full items-center justify-center gap-1 rounded text-[9px] font-semibold text-gray-400 transition-colors hover:bg-emerald-500/10 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40 dark:text-gray-500 dark:hover:text-emerald-300">
+                                                    <span aria-hidden="true" class="text-sm font-bold leading-none">+</span>
+                                                    <span>Agregar</span>
                                                 </button>
-                                                <span class="flex min-h-[28px] items-center justify-center text-[9px] text-gray-400 dark:text-gray-500">Vacío</span>
                                             @endif
                                         </div>
                                     @endfor
