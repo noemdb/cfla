@@ -4580,7 +4580,7 @@ class TimetableWizard extends Component
      *
      * @return array<int, array<int, array<int, list<array{lesson_id:int, period_id:int, asignatura:string, profesor:string, grupo:?string}>>>>
      */
-    private function previewSectionGrid(?int $seccionId): array
+    protected function previewSectionGrid(?int $seccionId): array
     {
         if (! $this->preview || ! $seccionId) {
             return [];
@@ -7948,7 +7948,7 @@ PROMPT;
         return $ids->unique()->values()->all();
     }
 
-    private function teacherScheduleOptions(): array
+    protected function teacherScheduleOptions(): array
     {
         $calendarIds = $this->teacherScheduleCalendarIds();
 
@@ -7981,7 +7981,7 @@ PROMPT;
      *
      * @return array<int, array{calendar_id:int, calendar:string, pestudio:string, pestudio_id:int, has_assignments:bool, rows:array}>
      */
-    private function teacherScheduleCalendarGrids(): array
+    protected function teacherScheduleCalendarGrids(): array
     {
         $calendarIds = $this->teacherScheduleCalendarIds();
 
@@ -8228,6 +8228,64 @@ PROMPT;
         if ($changed) {
             $this->preview['assignment'] = $assignment;
         }
+    }
+
+    /**
+     * Reconstruye `preview_payload` a partir de los slots persistidos del
+     * calendario. Lo usa el asistente «light» (que edita `timetable_slots`
+     * directamente) para que el wizard completo y los PDFs por defecto no
+     * muestren un payload obsoleto.
+     */
+    public function syncPreviewPayloadFromSlots(): void
+    {
+        if (! $this->calendarId) {
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+        if (! $calendar || ! $calendar->slots()->exists()) {
+            return;
+        }
+
+        $assignment = [];
+        $assignedLessonIds = [];
+
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->orderBy('lesson_id')
+            ->orderBy('period_id')
+            ->get()
+            ->each(function (TimetableSlot $slot) use (&$assignment, &$assignedLessonIds): void {
+                $lessonId = (int) $slot->lesson_id;
+                $assignedLessonIds[$lessonId] = true;
+                $assignment[$lessonId][] = [
+                    'period_id' => (int) $slot->period_id,
+                    'room_id' => $slot->room_id ? (int) $slot->room_id : null,
+                    'is_practical' => (bool) ($slot->is_practical ?? false),
+                    'locked' => (bool) ($slot->locked ?? false),
+                ];
+            });
+
+        $unassigned = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereNotIn('id', array_keys($assignedLessonIds))
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->values()
+            ->all();
+
+        $calendar->update([
+            'preview_payload' => [
+                'dry_run' => false,
+                'assignment' => $this->onlyActiveLessons($assignment, $calendar),
+                'unassigned' => array_values(array_unique($this->onlyActiveLessons($unassigned, $calendar))),
+                'assignment_source' => 'light_slots',
+                'strategy' => $calendar->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
+                'timed_out' => false,
+                'elapsed_seconds' => 0,
+                'assignment_diagnostics' => [],
+            ],
+        ]);
     }
 
     /**
@@ -9326,6 +9384,15 @@ PROMPT;
         return 'app.coordinacion';
     }
 
+    /**
+     * Vista Blade del wizard. Las subclases pueden sustituirla (p. ej. el
+     * asistente «light») reutilizando toda la lógica y los datos del render.
+     */
+    protected function wizardView(): string
+    {
+        return 'livewire.coordinacion.timetable.timetable-wizard';
+    }
+
     public function render(): \Illuminate\View\View
     {
         $lapsos = Lapso::orderBy('finicial', 'desc')->get();
@@ -9525,7 +9592,7 @@ PROMPT;
             $teacherScheduleHasAssignments = (bool) ($activeBlock['has_assignments'] ?? false);
         }
 
-        return view('livewire.coordinacion.timetable.timetable-wizard', [
+        return view($this->wizardView(), [
             'lapsos' => $lapsos,
             'pestudios' => \App\Models\app\Academy\Pestudio::query()->where('status_active', 'true')->orderBy('name')->get(),
             'shifts' => $shifts,

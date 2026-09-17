@@ -434,8 +434,15 @@ return [
                             'label' => 'Horario',
                             'route' => 'app.planning.timetable',
                             'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-                            'active' => 'app.planning.timetable*',
+                            'active' => 'app.planning.timetable* && !app.planning.timetable.light*',
                             'icon_color' => 'sky',
+                        ],
+                        [
+                            'label' => 'Horario rápido',
+                            'route' => 'app.planning.timetable.light',
+                            'icon' => 'M13 10V3L4 14h7v7l9-11h-7z',
+                            'active' => 'app.planning.timetable.light*',
+                            'icon_color' => 'emerald',
                         ],
                         [
                             'label' => 'Suplencias',

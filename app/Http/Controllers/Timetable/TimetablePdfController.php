@@ -156,9 +156,18 @@ class TimetablePdfController extends Controller
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $seccion = Seccion::query()->with('grado')->findOrFail($seccionId);
 
+        // El asistente «light» edita directamente `timetable_slots` (sin
+        // preview_payload): con `?source=persisted` el PDF refleja esos slots.
+        $forcePersisted = $request->query('source') === 'persisted';
+
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
-        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
-        if (! $calendar->preview_payload && ! $isPublishedSchedule) {
+        $usePersistedSlots = $forcePersisted || $this->shouldUsePersistedSlots($calendar);
+
+        if ($forcePersisted) {
+            if (! $calendar->slots()->exists()) {
+                abort(404, 'El calendario no tiene horario generado.');
+            }
+        } elseif (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
 

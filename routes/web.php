@@ -286,6 +286,10 @@ Route::prefix('app')->name('app.')->group(function () {
         // ─── Horario (ADR-TT-006: is_planner gestiona igual que coordinación) ──
         Route::get('/timetable', \App\Livewire\Planning\Timetable\TimetableWizard::class)
             ->name('timetable');
+        // Asistente «light»: solo elegir calendario + grilla (agregar/intercambiar
+        // lecciones y alertar colisiones sin bloquear).
+        Route::get('/timetable/light/{calendar?}', \App\Livewire\Planning\Timetable\TimetableLight::class)
+            ->name('timetable.light');
         Route::get('/timetable/editor/{calendar?}', \App\Livewire\Planning\Timetable\TimetableEditor::class)
             ->name('timetable.editor');
         Route::get('/timetable/substitutes/{calendar?}', \App\Livewire\Planning\Timetable\TimetableSubstitutes::class)
