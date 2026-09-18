@@ -5,6 +5,7 @@ namespace Tests\Feature\Timetable;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Peducativo;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pevaluacion;
@@ -120,11 +121,11 @@ class TimetableGlobalPdfTest extends TestCase
     {
         $fixture = $this->fixture();
         $calendar = $fixture['calendar'];
-        $lesson = TimetableLesson::query()->where('calendar_id', $calendar->id)->firstOrFail();
         $basePeriod = TimetablePeriod::query()->where('calendar_id', $calendar->id)->firstOrFail();
 
-        // Dos docentes adicionales con CI distinta; cada uno usa su propio
-        // período para respetar el único (calendar_id, period_id, lesson_id).
+        // Dos docentes adicionales con CI distinta. El reporte agrupa por el
+        // profesor de la Pevaluación, así que cada uno necesita su propia
+        // Pevaluación + lección + slot (no basta con cambiar profesor_id).
         foreach ([['Beto', 'Zamora', '20'], ['Carlos', 'Ávila', '3']] as $i => [$name, $lastname, $ci]) {
             $extra = Profesor::create([
                 'user_id' => User::factory()->create()->id,
@@ -132,15 +133,28 @@ class TimetableGlobalPdfTest extends TestCase
                 'ci_profesor' => $ci, 'status_active' => 'true',
             ]);
 
-            $period = TimetablePeriod::factory()->create([
-                'calendar_id' => $calendar->id, 'shift_id' => $basePeriod->shift_id,
-                'day_of_week' => 1, 'order_in_day' => $i + 2, 'is_break' => false,
+            $seccion = Seccion::factory()->create([
+                'grado_id' => $fixture['grado']->id, 'name' => 'X'.$i, 'status_active' => 'true',
+            ]);
+            $asignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+            $pensum = Pensum::factory()->create([
+                'pestudio_id' => $fixture['pestudio']->id,
+                'grado_id' => $fixture['grado']->id,
+                'asignatura_id' => $asignatura->id,
+            ]);
+            $pev = Pevaluacion::factory()->create([
+                'profesor_id' => $extra->id, 'seccion_id' => $seccion->id,
+                'pensum_id' => $pensum->id, 'lapso_id' => $fixture['lapso']->id,
+            ]);
+            $lesson = TimetableLesson::factory()->create([
+                'calendar_id' => $calendar->id, 'pevaluacion_id' => $pev->id,
+                'shift_id' => $basePeriod->shift_id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
             ]);
 
             TimetableSlot::factory()->create([
                 'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
-                'period_id' => $period->id, 'profesor_id' => $extra->id,
-                'seccion_id' => $fixture['seccion']->id,
+                'period_id' => $basePeriod->id, 'profesor_id' => $extra->id,
+                'seccion_id' => $seccion->id,
             ]);
         }
 
@@ -171,6 +185,69 @@ class TimetableGlobalPdfTest extends TestCase
             ->assertOk()
             ->getContent();
         $this->assertSame($teacherCount, substr_count($htmlPerOne, 'class="sheet"'));
+    }
+
+    public function test_all_teachers_groups_schedules_by_peducativo(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::current() ?? Lapso::factory()->create();
+        $peducativo = Peducativo::factory()->create([
+            'name' => 'PEDUCATIVO '.uniqid(),
+            'status_active' => 'true',
+        ]);
+
+        $profesor = Profesor::create([
+            'user_id' => User::factory()->create()->id,
+            'name' => 'Nestor', 'lastname' => 'Peducativo',
+            'ci_profesor' => '7700'.random_int(10, 99), 'status_active' => 'true',
+        ]);
+
+        // Dos P.Estudios del MISMO P.Educativo, ambos con horario del docente.
+        $asignaturas = [];
+        foreach ([0, 1] as $i) {
+            $pestudio = Pestudio::factory()->create(['peducativo_id' => $peducativo->id, 'status_active' => 'true']);
+            $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+            $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+            $asignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+            $asignaturas[] = $asignatura->name;
+            $pensum = Pensum::factory()->create(['pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignatura->id]);
+            $pev = Pevaluacion::factory()->create([
+                'profesor_id' => $profesor->id, 'seccion_id' => $seccion->id,
+                'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id,
+            ]);
+
+            $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'pestudio_id' => $pestudio->id, 'status' => 'active']);
+            $shift = $this->makeShift();
+            $period = TimetablePeriod::factory()->create([
+                'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+                'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,
+            ]);
+            $lesson = TimetableLesson::factory()->create([
+                'calendar_id' => $calendar->id, 'pevaluacion_id' => $pev->id,
+                'shift_id' => $shift->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+            ]);
+            TimetableSlot::factory()->create([
+                'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
+                'period_id' => $period->id, 'profesor_id' => $profesor->id,
+                'seccion_id' => $seccion->id,
+            ]);
+        }
+
+        $html = $this->actingAs($user)
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers'))
+            ->assertOk()
+            ->getContent();
+
+        // El P.Educativo agrupa ambos P.Estudios en un único horario: aparece
+        // una sola vez, sin subdivisiones por P.Estudio, y las asignaturas de
+        // ambos P.Estudios se fusionan en la misma grilla.
+        $this->assertSame(1, substr_count($html, $peducativo->name), 'el P.Educativo debe agrupar los horarios del docente');
+        $this->assertStringContainsString('class="peducativo-title"', $html);
+        $this->assertStringNotContainsString('pestudio-inline', $html, 'no debe subdividirse por P.Estudio');
+
+        foreach ($asignaturas as $asignaturaName) {
+            $this->assertStringContainsString($asignaturaName, $html, 'la asignatura fusionada debe aparecer en la grilla del P.Educativo');
+        }
     }
 
     public function test_all_pestudios_returns_404_without_active_calendars(): void

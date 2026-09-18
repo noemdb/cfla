@@ -47,13 +47,16 @@ class TimetableViewService
 
     public function gridForTeacher(TimetableCalendar $calendar, int $profesorId): Collection
     {
-        $slots = TimetableSlot::query()
+        $query = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
-            ->where('profesor_id', $profesorId)
             ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
                 $query->where('status_active', 'true')
                     ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
-            })
+            });
+
+        $this->applyEffectiveTeacherFilter($query, $profesorId);
+
+        $slots = $query
             ->with([
                 'period',
                 'room',
@@ -64,6 +67,51 @@ class TimetableViewService
             ->get();
 
         return $this->buildGrid($calendar, $slots);
+    }
+
+    /**
+     * IDs de docentes con slots en el calendario (secciones y grados activos).
+     *
+     * El docente se deriva de `pevaluacion.profesor_id` (fuente canónica que
+     * muestran la grilla y los reportes), no de la columna denormalizada
+     * `timetable_slots.profesor_id`, que puede quedar desfasada al reasignar
+     * una Pevaluación.
+     *
+     * @return Collection<int, int>
+     */
+    public function teacherIdsForCalendar(TimetableCalendar $calendar): Collection
+    {
+        return TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
+                $query->where('status_active', 'true')
+                    ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
+            })
+            ->with('lesson.pevaluacion:id,profesor_id')
+            ->get(['id', 'lesson_id', 'profesor_id'])
+            ->map(fn (TimetableSlot $slot): int => (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id))
+            ->filter(fn (int $id): bool => $id > 0)
+            ->unique()
+            ->values();
+    }
+
+    /**
+     * Restringe la consulta a los slots cuyo docente efectivo es $profesorId.
+     *
+     * El docente canónico es `pevaluacion.profesor_id`; `timetable_slots.profesor_id`
+     * solo se usa como respaldo cuando la lesson no tiene Pevaluación asociada.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<TimetableSlot>  $query
+     */
+    private function applyEffectiveTeacherFilter($query, int $profesorId): void
+    {
+        $query->where(function ($query) use ($profesorId): void {
+            $query->whereHas('lesson.pevaluacion', fn ($pev) => $pev->where('profesor_id', $profesorId))
+                ->orWhere(function ($query) use ($profesorId): void {
+                    $query->whereDoesntHave('lesson.pevaluacion')
+                        ->where('profesor_id', $profesorId);
+                });
+        });
     }
 
     public function gridForRoom(TimetableCalendar $calendar, int $roomId): Collection
@@ -88,13 +136,16 @@ class TimetableViewService
      */
     public function teacherShiftSchedules(TimetableCalendar $calendar, int $profesorId): array
     {
-        $slots = TimetableSlot::query()
+        $query = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
-            ->where('profesor_id', $profesorId)
             ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
                 $query->where('status_active', 'true')
                     ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
-            })
+            });
+
+        $this->applyEffectiveTeacherFilter($query, $profesorId);
+
+        $slots = $query
             ->with(['period', 'room', 'lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion.grado', 'lesson.pevaluacion.grupoEstable'])
             ->get();
 
@@ -140,6 +191,64 @@ class TimetableViewService
         }
 
         return $schedules;
+    }
+
+    /**
+     * Fusiona los horarios por turno de varios P.Estudios de un mismo
+     * P.Educativo en un único horario por turno (sin subdivisiones por
+     * P.Estudio), concatenando los slots que caen en el mismo bloque/día.
+     *
+     * @param  array<int, array{shift: \App\Models\app\Timetable\TimetableShift, periods: Collection, grid: Collection}>  ...$schedulesList
+     * @return list<array{shift: \App\Models\app\Timetable\TimetableShift, periods: Collection, grid: Collection}>
+     */
+    public function mergePeducativoSchedules(array ...$schedulesList): array
+    {
+        $merged = [];
+
+        foreach ($schedulesList as $schedules) {
+            foreach ($schedules as $schedule) {
+                $shiftId = (int) $schedule['shift']->id;
+
+                if (! isset($merged[$shiftId])) {
+                    $merged[$shiftId] = [
+                        'shift' => $schedule['shift'],
+                        'periods' => collect(),
+                        'grid' => collect(),
+                    ];
+                }
+
+                // Períodos: order => (día => período). Conserva el primero visto
+                // (define el horario mostrado en la columna "Bloque").
+                foreach ($schedule['periods'] as $order => $dayPeriods) {
+                    $existing = $merged[$shiftId]['periods']->get($order, collect());
+
+                    foreach ($dayPeriods as $day => $period) {
+                        if (! $existing->has($day)) {
+                            $existing->put($day, $period);
+                        }
+                    }
+
+                    $merged[$shiftId]['periods']->put($order, $existing);
+                }
+
+                // Grilla: order => (día => slots). Concatena los slots de todos
+                // los P.Estudios del P.Educativo.
+                foreach ($schedule['grid'] as $order => $dayCells) {
+                    $existing = $merged[$shiftId]['grid']->get($order, collect());
+
+                    foreach ($dayCells as $day => $cell) {
+                        $existing->put($day, $existing->get($day, collect())->merge($cell)->values());
+                    }
+
+                    $merged[$shiftId]['grid']->put($order, $existing);
+                }
+            }
+        }
+
+        return collect($merged)
+            ->sortBy(fn (array $schedule): string => (string) ($schedule['shift']->start_time ?? ''))
+            ->values()
+            ->all();
     }
 
     private function buildGrid(TimetableCalendar $calendar, Collection $slots): Collection

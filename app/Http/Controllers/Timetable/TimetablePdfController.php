@@ -93,15 +93,9 @@ class TimetablePdfController extends Controller
         // Este informe también se ofrece desde el selector de calendarios del
         // wizard, donde el calendario puede seguir siendo un draft.
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
-        $profesorIds = TimetableSlot::query()
-            ->where('calendar_id', $calendar->id)
-            ->whereNotNull('profesor_id')
-            ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
-                $query->where('status_active', 'true')
-                    ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
-            })
-            ->distinct()
-            ->pluck('profesor_id');
+        // Docentes derivados de la Pevaluación (fuente canónica), no de la
+        // columna denormalizada `timetable_slots.profesor_id`.
+        $profesorIds = $this->viewService->teacherIdsForCalendar($calendar);
         $profesores = Profesor::query()
             ->whereIn('id', $profesorIds)
             ->orderBy('lastname')
@@ -639,24 +633,20 @@ class TimetablePdfController extends Controller
         $calendars = TimetableCalendar::query()
             ->forLapso($lapso->id)
             ->active()
-            ->with('pestudio')
+            ->with('pestudio.peducativo')
             ->orderBy('pestudio_id')
             ->get();
 
-        // Agrupado por docente (luego por P.Estudio): cada profesor aparece una
-        // sola vez y todos sus horarios quedan consecutivos.
+        // Agrupado por docente y luego por P.Educativo, en un ÚNICO horario por
+        // P.Educativo (los P.Estudios que lo componen se fusionan, sin
+        // subdividir). Cada profesor aparece una sola vez y todos sus horarios
+        // quedan consecutivos. El docente se resuelve desde la Pevaluación
+        // (fuente canónica de la grilla), no desde la columna denormalizada
+        // `timetable_slots.profesor_id`.
         $teachers = [];
 
         foreach ($calendars as $calendar) {
-            $profesorIds = TimetableSlot::query()
-                ->where('calendar_id', $calendar->id)
-                ->whereNotNull('profesor_id')
-                ->whereHas('lesson.pevaluacion.seccion', function ($query): void {
-                    $query->where('status_active', 'true')
-                        ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true'));
-                })
-                ->distinct()
-                ->pluck('profesor_id');
+            $profesorIds = $this->viewService->teacherIdsForCalendar($calendar);
 
             if ($profesorIds->isEmpty()) {
                 continue;
@@ -676,17 +666,42 @@ class TimetablePdfController extends Controller
                 if (! isset($teachers[$key])) {
                     $teachers[$key] = [
                         'profesor' => $profesor,
-                        'pestudios' => [],
+                        'peducativos' => [],
                     ];
                 }
 
-                $teachers[$key]['pestudios'][] = [
-                    'pestudio' => $calendar->pestudio,
-                    'calendar' => $calendar,
-                    'shifts' => $shifts,
-                ];
+                $peducativo = $calendar->pestudio?->peducativo;
+                $peducativoKey = (int) ($peducativo?->id ?? 0);
+
+                if (! isset($teachers[$key]['peducativos'][$peducativoKey])) {
+                    $teachers[$key]['peducativos'][$peducativoKey] = [
+                        'peducativo' => $peducativo,
+                        'schedules' => [],
+                    ];
+                }
+
+                // Se acumulan los horarios de cada P.Estudio para fusionarlos.
+                $teachers[$key]['peducativos'][$peducativoKey]['schedules'][] = $shifts;
             }
         }
+
+        // Fusiona los horarios de todos los P.Estudios de cada P.Educativo y
+        // ordena los P.Educativos por `order` y nombre.
+        foreach ($teachers as &$teacher) {
+            foreach ($teacher['peducativos'] as &$peducativoData) {
+                $peducativoData['schedules'] = $this->viewService->mergePeducativoSchedules(...$peducativoData['schedules']);
+            }
+            unset($peducativoData);
+
+            uasort($teacher['peducativos'], function (array $a, array $b): int {
+                $orderA = (int) ($a['peducativo']?->order ?? 0);
+                $orderB = (int) ($b['peducativo']?->order ?? 0);
+
+                return $orderA <=> $orderB
+                    ?: strcasecmp((string) ($a['peducativo']?->name ?? ''), (string) ($b['peducativo']?->name ?? ''));
+            });
+        }
+        unset($teacher);
 
         // Orden por CI del docente (natural). Los que no tienen CI van al final.
         $teachersData = collect($teachers)
