@@ -76,19 +76,6 @@
                             </tbody>
                         </table>
                     @endforeach
-                    @if (!empty($schedule['teacherSummary']))
-                        <div class="summary">
-                            <div class="summary-title">Profesores asociados a la sección ({{ count($schedule['teacherSummary']) }})</div>
-                            <table>
-                                <thead><tr><th>Profesor</th><th>Bloques asignados</th></tr></thead>
-                                <tbody>
-                                    @foreach ($schedule['teacherSummary'] as $teacher)
-                                        <tr><td>{{ $teacher['name'] ?: 'Sin nombre' }}</td><td>{{ $teacher['blocks'] }}</td></tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
                 </div>
             @endforeach
         </div>
