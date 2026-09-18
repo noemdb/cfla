@@ -24,7 +24,7 @@
         .teacher{font-size:5.5pt;color:#4b5563;}
         tr.break-row td{background:#fffbeb;color:#a16207;}
         td.break-cell{text-align:center;font-size:6pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
-        .summary{margin:5px 0 6px;border:1px solid #cbd5e1;padding:4px 6px;}
+        .summary{margin:14px 0 6px;border:1px solid #cbd5e1;padding:4px 6px;}
         .summary-title{color:#374151;font-size:7pt;font-weight:800;margin-bottom:3px;}
         .summary table{width:100%;}
         .summary td,.summary th{font-size:6pt;padding:2px 4px;}
