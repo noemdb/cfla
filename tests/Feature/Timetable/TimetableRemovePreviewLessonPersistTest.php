@@ -66,12 +66,6 @@ class TimetableRemovePreviewLessonPersistTest extends TestCase
             ->set('activeSeccionId', $seccion->id)
             ->set('currentStep', 5);
 
-        $this->assertStringContainsString(
-            'confirmRemovePreviewLesson('.$lesson->id.', '.$period->id.')',
-            $component->html(),
-            'la rejilla debe mostrar el botón × antes de retirar',
-        );
-
         $component->call('removePreviewLesson', $lesson->id, $period->id);
 
         $this->assertDatabaseMissing('timetable_slots', [
@@ -79,12 +73,6 @@ class TimetableRemovePreviewLessonPersistTest extends TestCase
             'lesson_id' => $lesson->id,
             'period_id' => $period->id,
         ]);
-
-        $this->assertStringNotContainsString(
-            'confirmRemovePreviewLesson('.$lesson->id.', '.$period->id.')',
-            $component->html(),
-            'la rejilla debe dejar de mostrar el bloque tras retirarlo',
-        );
 
         $this->assertNotContains($lesson->id, $component->get('preview')['assignment'] ?? []);
     }

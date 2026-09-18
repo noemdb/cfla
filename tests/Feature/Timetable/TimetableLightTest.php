@@ -162,12 +162,12 @@ class TimetableLightTest extends TestCase
         $component = Livewire::actingAs($user)
             ->test(TimetableLight::class, ['calendar' => $calendar->id]);
 
-        $component->assertSee('Bloquear sección');
+        $component->assertSee('Bloquear el horario de esta sección');
 
         $component->call('toggleSectionTimetableLock', $seccion->id);
 
         $this->assertTrue((bool) $seccion->fresh()->timetable_locked);
-        $component->assertSee('Desbloquear sección');
+        $component->assertSee('Desbloquear el horario de esta sección');
     }
 
     public function test_light_shows_pdf_button_and_pdf_renders_persisted_slots(): void
@@ -305,7 +305,7 @@ class TimetableLightTest extends TestCase
             ->test(TimetableLight::class, ['calendar' => $calendar->id]);
 
         // El botón de desbloqueo vive junto al selector; ya no hay banner aparte.
-        $component->assertSee('Desbloquear sección');
+        $component->assertSee('Desbloquear el horario de esta sección');
         $component->assertDontSee('El horario de esta sección está bloqueado');
 
         $component->call('toggleSectionTimetableLock', $seccion->id);

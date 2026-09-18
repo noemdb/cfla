@@ -281,7 +281,7 @@
         @endphp
 
         {{-- Selectores de P.Estudio · Grado · Sección --}}
-        <div class="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div class="mb-4 grid grid-cols-1 items-end gap-2 sm:grid-cols-3">
             @if (! empty($tabPestudioOptions))
                 <label class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Estudio</span>
@@ -328,18 +328,14 @@
                                 wire:target="toggleSectionTimetableLock"
                                 title="{{ $sectionLockedGrid ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
                                 aria-label="{{ $sectionLockedGrid ? 'Desbloquear' : 'Bloquear' }} el horario de la sección"
-                                class="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $sectionLockedGrid ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
-                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $sectionLockedGrid ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     @if ($sectionLockedGrid)
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                                     @else
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                                     @endif
                                 </svg>
-                                <span wire:loading.remove wire:target="toggleSectionTimetableLock">
-                                    {{ $sectionLockedGrid ? 'Desbloquear sección' : 'Bloquear sección' }}
-                                </span>
-                                <span wire:loading wire:target="toggleSectionTimetableLock">Guardando…</span>
                             </button>
                         @endif
                     </div>

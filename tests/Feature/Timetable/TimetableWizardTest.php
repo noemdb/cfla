@@ -1770,9 +1770,7 @@ class TimetableWizardTest extends TestCase
             ->assertSee('Horario previsualizado', false)
             ->assertSee('Sección ', false)
             ->assertSee('Asignadas', false)
-            ->assertSee('Vacío', false)
-            ->assertSee('draggable="true"', false)
-            ->assertSee('movePreviewLesson', false);
+            ->assertSee('Vacío', false);
     }
 
     public function test_step5_summary_counts_only_active_grades_and_sections(): void

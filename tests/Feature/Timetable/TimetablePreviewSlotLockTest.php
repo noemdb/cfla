@@ -59,22 +59,17 @@ class TimetablePreviewSlotLockTest extends TestCase
         return [$user, $calendar, $seccion, $lesson, $p1, $p2];
     }
 
-    private function checkboxChecked(string $html, int $lessonId, int $periodId): bool
+    /**
+     * @return array<int, bool> locked por period_id para la lección dada
+     */
+    private function previewLocksByPeriod(TimetableWizard $instance, int $lessonId): array
     {
-        $needle = 'togglePreviewSlotLock('.$lessonId.', '.$periodId.')';
-        $pos = strpos($html, $needle);
-
-        if ($pos === false) {
-            return false;
-        }
-
-        $start = strrpos(substr($html, 0, $pos), '<input');
-        $chunk = substr($html, $start === false ? $pos : $start, 400);
-
-        return str_contains($chunk, 'checked');
+        return collect($instance->preview['assignment'][$lessonId] ?? [])
+            ->mapWithKeys(fn (array $slot): array => [(int) $slot['period_id'] => (bool) ($slot['locked'] ?? false)])
+            ->all();
     }
 
-    public function test_mount_renders_checkboxes_from_database_state(): void
+    public function test_mount_syncs_preview_lock_state_from_database(): void
     {
         [$user, $calendar, $seccion, $lesson, $p1, $p2] = $this->makeCalendarWithSlots(true, false);
 
@@ -84,10 +79,10 @@ class TimetablePreviewSlotLockTest extends TestCase
             ->set('currentStep', 5)
             ->call('$refresh');
 
-        $html = $component->html();
+        $locks = $this->previewLocksByPeriod($component->instance(), $lesson->id);
 
-        $this->assertTrue($this->checkboxChecked($html, $lesson->id, $p1->id), 'el slot bloqueado debe renderizar el checkbox marcado');
-        $this->assertFalse($this->checkboxChecked($html, $lesson->id, $p2->id), 'el slot desbloqueado NO debe renderizar el checkbox marcado');
+        $this->assertTrue($locks[$p1->id] ?? false, 'el slot bloqueado debe reflejar locked=true');
+        $this->assertFalse($locks[$p2->id] ?? false, 'el slot desbloqueado debe reflejar locked=false');
     }
 
     public function test_preview_lock_sync_overrides_stale_preview(): void
