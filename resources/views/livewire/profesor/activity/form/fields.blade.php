@@ -157,6 +157,13 @@
          x-transition:enter-end="opacity-100 translate-y-0">
         <div class="space-y-3">
 
+            {{-- Contador de caracteres de la enseñanza --}}
+            <div class="flex items-center justify-end">
+                <span class="text-[10px] tabular-nums font-medium {{ $this->teachingLength > 5000 ? 'text-red-400' : 'text-gray-500' }}">
+                    {{ $this->teachingLength }}/5000 caracteres
+                </span>
+            </div>
+
             {{-- INICIO --}}
             <div>
                 <label class="block text-[9px] font-bold uppercase tracking-widest text-cyan-400 mb-1.5">
@@ -167,7 +174,7 @@
                         INICIO
                     </span>
                 </label>
-                <textarea wire:model="activityForm.teachingStart" rows="6"
+                <textarea wire:model.live.debounce.500ms="activityForm.teachingStart" rows="6"
                     class="w-full bg-gray-800/50 border border-cyan-500/20 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all duration-200 resize-y"
                     placeholder="Motivación, exploración de saberes previos, problematización..."></textarea>
                 @error('activityForm.teachingStart') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
@@ -183,7 +190,7 @@
                         DESARROLLO
                     </span>
                 </label>
-                <textarea wire:model="activityForm.teachingContent" rows="6"
+                <textarea wire:model.live.debounce.500ms="activityForm.teachingContent" rows="6"
                     class="w-full bg-gray-800/50 border border-emerald-500/20 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
                     placeholder="Procesos didácticos, mediación, actividades de construcción del aprendizaje..."></textarea>
                 @error('activityForm.teachingContent') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
@@ -199,11 +206,13 @@
                         CIERRE
                     </span>
                 </label>
-                <textarea wire:model="activityForm.teachingEnd" rows="6"
+                <textarea wire:model.live.debounce.500ms="activityForm.teachingEnd" rows="6"
                     class="w-full bg-gray-800/50 border border-amber-500/20 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200 resize-y"
                     placeholder="Sistematización, conclusiones, metacognición, transferencia a la vida..."></textarea>
                 @error('activityForm.teachingEnd') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
             </div>
+
+            @error('activityForm.teaching') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
 
             {{-- Separador --}}
             <hr class="border-white/5 my-2">

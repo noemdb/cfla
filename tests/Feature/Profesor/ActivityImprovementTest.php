@@ -88,6 +88,31 @@ class ActivityImprovementTest extends TestCase
             ->assertSet('activityForm.teachingEnd', 'CIERRE mejorado');
     }
 
+    public function test_teaching_max_5000_and_counter_renders(): void
+    {
+        [$pevaluacionId, $profesorId] = $this->createEvaluacionChain();
+        $user = $this->createProfesorUser($profesorId);
+
+        Livewire::actingAs($user)
+            ->test(IndexComponent::class, ['id' => $pevaluacionId])
+            ->call('setCreate')
+            ->set('activityForm.teachingStart', 'Inicio')
+            ->set('activityForm.teachingContent', 'Desarrollo')
+            ->set('activityForm.teachingEnd', 'Cierre')
+            ->assertSee('/5000 caracteres')
+            ->call('save')
+            ->assertHasNoErrors('activityForm.teaching');
+
+        Livewire::actingAs($user)
+            ->test(IndexComponent::class, ['id' => $pevaluacionId])
+            ->call('setCreate')
+            ->set('activityForm.teachingStart', str_repeat('a', 2000))
+            ->set('activityForm.teachingContent', str_repeat('b', 2000))
+            ->set('activityForm.teachingEnd', str_repeat('c', 2000))
+            ->call('save')
+            ->assertHasErrors(['activityForm.teaching' => 'max']);
+    }
+
     // ─── Helpers (misma cadena FK que StudentResourceTest) ────────────
 
     private static int $chainCounter = 0;

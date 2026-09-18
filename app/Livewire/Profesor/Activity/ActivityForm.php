@@ -33,7 +33,7 @@ class ActivityForm extends Form
     /**
      * Concatena los tres segmentos en el campo teaching completo.
      */
-    public function buildTeaching(): void
+    public function composeTeaching(): ?string
     {
         $parts = [];
         if ($this->teachingStart !== null && trim($this->teachingStart) !== '') {
@@ -45,7 +45,13 @@ class ActivityForm extends Form
         if ($this->teachingEnd !== null && trim($this->teachingEnd) !== '') {
             $parts[] = 'CIERRE: ' . trim($this->teachingEnd);
         }
-        $this->teaching = !empty($parts) ? implode(' ', $parts) : null;
+
+        return !empty($parts) ? implode(' ', $parts) : null;
+    }
+
+    public function buildTeaching(): void
+    {
+        $this->teaching = $this->composeTeaching();
     }
 
     /**
@@ -92,9 +98,17 @@ class ActivityForm extends Form
             'teachingStart' => 'required|string',
             'teachingContent' => 'required|string',
             'teachingEnd' => 'required|string',
+            'teaching' => 'nullable|string|max:5000',
             'learning' => 'nullable|string',
             'observations' => 'required|string',
             'description' => 'nullable|string',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'teaching.max' => 'La enseñanza no debe superar los 5000 caracteres. Sintetiza el contenido (inicio, desarrollo y cierre).',
         ];
     }
 

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -504,8 +505,16 @@ class IndexComponent extends Component
 
     // ─── CRUD ──────────────────────────────────────────────
 
+    #[Computed]
+    public function teachingLength(): int
+    {
+        return mb_strlen($this->activityForm->composeTeaching() ?? '');
+    }
+
     public function save()
     {
+        $this->activityForm->buildTeaching();
+
         try {
             $this->activityForm->validate();
         } catch (\Illuminate\Validation\ValidationException $e) {

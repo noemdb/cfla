@@ -17,10 +17,12 @@
         .section.new-page{page-break-before:always;}
         .section-title{background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 6px;color:#047857;font-size:7pt;font-weight:800;}
         table{width:100%;border-collapse:collapse;}
-        td,th{border:1px solid #d1d5db;padding:2px 3px;vertical-align:top;font-size:6.5pt;line-height:1.2;}
+        td,th{border:1px solid #d1d5db;padding:2px 3px;vertical-align:middle;text-align:center;font-size:6.5pt;line-height:1.2;}
         th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:6pt;padding:3px;}
+        tbody tr{height:1.5cm;}
+        tbody td{height:1.5cm;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
-        .subject{font-weight:700;font-size:6.5pt;}
+        .subject{font-weight:700;font-size:6.5pt;text-align:center;}
         .teacher{font-size:5.5pt;color:#4b5563;}
         tr.break-row td{background:#fffbeb;color:#a16207;}
         td.break-cell{text-align:center;font-size:6pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
