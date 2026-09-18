@@ -758,29 +758,55 @@ class TimetablePdfController extends Controller
             abort(404, 'No hay lapso vigente.');
         }
 
-        $calendarIds = TimetableCalendar::query()
-            ->forLapso($lapso->id)
-            ->active()
-            ->pluck('id');
+        $calendarIds = $this->activeCalendarIdsForLapso($lapso->id, $request->query('peducativo'));
 
         if ($calendarIds->isEmpty()) {
             abort(404, 'No hay calendarios activos en el lapso vigente.');
         }
 
-        // El docente canónico es `pevaluacion.profesor_id` (igual que la grilla
-        // y `all-teachers`); `timetable_slots.profesor_id` solo se usa como
-        // respaldo cuando la lección no tiene Pevaluación asociada.
-        //
-        // Un bloque de docente compartido (`lesson.allow_shared_teacher = true`)
-        // representa al docente atendiendo VARIAS secciones en el MISMO período:
-        // cuenta como un solo bloque. Se colapsa por (calendario, período). Los
-        // bloques normales siguen contando uno por slot.
         $rows = $this->teacherBlockTotalsRows($calendarIds);
 
         if ($rows->isEmpty()) {
             abort(404, 'No hay docentes con bloques asignados en los calendarios activos del lapso vigente.');
         }
 
+        return match (strtolower((string) $request->query('format', 'pdf'))) {
+            'xls', 'csv' => $this->teacherBlockTotalsCsv($rows, $lapso),
+            'html' => $this->teacherBlockTotalsHtml($rows, $lapso),
+            default => $this->teacherBlockTotalsPdf($rows, $lapso),
+        };
+    }
+
+    /**
+     * Calendarios activos del lapso, opcionalmente acotados a los P.Estudios de
+     * un P.Educativo (filtro del modal de totalización).
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private function activeCalendarIdsForLapso(int $lapsoId, $peducativoId = null): \Illuminate\Support\Collection
+    {
+        $query = TimetableCalendar::query()->forLapso($lapsoId)->active();
+
+        if (filled($peducativoId)) {
+            $pestudioIds = Pestudio::query()
+                ->where('peducativo_id', (int) $peducativoId)
+                ->pluck('id');
+
+            if ($pestudioIds->isEmpty()) {
+                return collect();
+            }
+
+            $query->whereIn('pestudio_id', $pestudioIds);
+        }
+
+        return $query->pluck('id');
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>  $rows
+     */
+    private function teacherBlockTotalsPdf(\Illuminate\Support\Collection $rows, Lapso $lapso)
+    {
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
         $pdf = Pdf::loadView('pdfs.timetable.teacher-block-totals', [
             'rows' => $rows,
@@ -793,6 +819,70 @@ class TimetablePdfController extends Controller
         $pdf->setPaper('letter', 'portrait');
 
         return $pdf->stream('totalizacion-bloques-docentes.pdf');
+    }
+
+    /**
+     * XLS (CSV UTF-8 con BOM, abre en Excel). Incluye las columnas
+     * «Horas Administrativa» y «Horas Formativas» (vacías, para llenado manual).
+     *
+     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>  $rows
+     */
+    private function teacherBlockTotalsCsv(\Illuminate\Support\Collection $rows, Lapso $lapso)
+    {
+        $filename = 'totalizacion-bloques-docentes-'.now()->format('Ymd-His').'.xls';
+
+        return response()->streamDownload(function () use ($rows): void {
+            $out = fopen('php://output', 'w');
+
+            // BOM para Excel.
+            fwrite($out, "\xEF\xBB\xBF");
+
+            fputcsv($out, [
+                'Docente', 'C.I.', 'Bloques', 'Horas académicas',
+                'Horas Administrativa', 'Horas Formativas',
+            ]);
+
+            foreach ($rows as $row) {
+                fputcsv($out, [
+                    $row['name'],
+                    $row['ci'],
+                    $row['blocks'],
+                    $row['hours'],
+                    '',
+                    '',
+                ]);
+            }
+
+            fputcsv($out, [
+                'TOTAL ('.count($rows).' docentes)',
+                '',
+                $rows->sum('blocks'),
+                $rows->sum('hours'),
+                '',
+                '',
+            ]);
+
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>  $rows
+     */
+    private function teacherBlockTotalsHtml(\Illuminate\Support\Collection $rows, Lapso $lapso)
+    {
+        $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
+
+        return response()->view('pdfs.timetable.teacher-block-totals', [
+            'rows' => $rows,
+            'lapso' => $lapso,
+            'institucion' => $institucion,
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'totalBlocks' => $rows->sum('blocks'),
+            'totalHours' => $rows->sum('hours'),
+        ]);
     }
 
     /**
