@@ -99,7 +99,10 @@
         @media (prefers-reduced-motion: reduce) {
             .fade-in { animation: none; }
         }
-        ::-webkit-scrollbar { width: 6px; }
+        /* width = barra vertical · height = barra horizontal.
+           Sin `height` la barra horizontal conservaba el grosor por defecto
+           del navegador y rompía el patrón visual del scroll vertical. */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #10b981; }

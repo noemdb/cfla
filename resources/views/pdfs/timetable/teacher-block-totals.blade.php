@@ -55,7 +55,8 @@
 
     <div class="footer">
         {{ $institucion?->name ?? '' }} · Totalización de bloques por docente
-        · Horas académicas = 2 × bloques · Generado el {{ $fecha }}
+        · Horas académicas = 2 × bloques · Un docente atendiendo varios
+        grupos/sub-grupos en el mismo bloque cuenta como uno · Generado el {{ $fecha }}
     </div>
 </body>
 </html>

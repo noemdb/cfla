@@ -32,7 +32,10 @@
             <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-2">Horario Escolar</h1>
             <p class="text-emerald-600 dark:text-emerald-400 font-medium text-sm">Asistente de creación de horarios (Lun–Vie)</p>
         </div>
-        <div class="flex items-center gap-2">
+        {{-- flex-wrap: en móvil (<400px) los 3 controles no caben en una fila
+             y desbordaban la página (+75px a 320px). Al envolver, la barra
+             horizontal de la página desaparece. --}}
+        <div class="flex flex-wrap items-center gap-2">
             <span class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-white/5 text-sm font-bold">
                 Paso {{ $currentStep }} de 5
             </span>
@@ -127,7 +130,7 @@
                     href="#"
                     x-on:click.prevent="$dispatch('open-teachers-pdf')"
                     icon="document-arrow-down"
-                    label="PDF profesores" />
+                    label="Consolidado de docentes" />
 
                 <x-dropdown.item
                     href="{{ route($moduleRoutePrefix.'.timetable.pdf.teacher-block-totals') }}"
@@ -146,16 +149,16 @@
         x-on:keydown.escape.window="open = false"
         x-cloak x-show="open"
         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
-        role="dialog" aria-modal="true" aria-label="PDF de profesores">
+        role="dialog" aria-modal="true" aria-label="Consolidado de docentes">
         <div x-on:click.stop
             class="w-full max-w-md overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
             <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
                 <div>
                     <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
-                        PDF de profesores
+                        Consolidado de docentes
                     </h3>
                     <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        Orientación y horarios por página
+                        Vista imprimible · orientación y horarios por página
                     </p>
                 </div>
                 <button type="button" x-on:click="open = false"
@@ -200,7 +203,7 @@
                 <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?orientation=' + orientation + '&per_page=' + perPage"
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
-                    Generar PDF
+                    Generar
                 </a>
             </div>
         </div>
@@ -356,7 +359,7 @@
                         wire:target="toggleSectionTimetableLock"
                         title="{{ $activeSectionLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
                         aria-label="{{ $activeSectionLocked ? 'Desbloquear' : 'Bloquear' }} el horario de la sección"
-                        class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $activeSectionLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
+                        class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $activeSectionLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             @if ($activeSectionLocked)
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
@@ -364,7 +367,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                             @endif
                         </svg>
-                        <span>{{ $activeSectionLocked ? 'Desbloquear sección' : 'Bloquear sección' }}</span>
                     </button>
                 @endif
 
@@ -428,7 +430,9 @@
     {{-- Sin backdrop-blur-md: backdrop-filter en ancestro descoloca el dropdown
          nativo del <select> en Chromium (mismo bug documentado en el switcher). --}}
     <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-1.5 mb-6">
-        <div class="flex gap-1 overflow-x-auto" role="tablist" aria-label="Pasos del asistente de horarios">
+        {{-- 5 pestañas fijas: en móvil envuelven en 2 filas en vez de
+             desplazarse en horizontal (evita la barra de scroll). --}}
+        <div class="flex flex-wrap gap-1" role="tablist" aria-label="Pasos del asistente de horarios">
             @php
                 $calendarSelected = filled($calendarId);
             @endphp
@@ -519,28 +523,44 @@
                                 <span wire:loading.remove wire:target="duplicateCalendar">Duplicar</span>
                                 <span wire:loading wire:target="duplicateCalendar">Duplicando…</span>
                             </button>
-                            @if ($selectedCalendarDetail['status'] === 'archived')
-                                <button wire:click="unarchiveCalendar({{ $selectedCalendarDetail['id'] }})"
-                                    wire:loading.attr="disabled" wire:target="unarchiveCalendar"
-                                    title="Restaurar este calendario archivado como borrador"
-                                    class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10">
-                                    <span wire:loading.remove wire:target="unarchiveCalendar">Desarchivar</span>
-                                    <span wire:loading wire:target="unarchiveCalendar">Restaurando…</span>
-                                </button>
-                            @else
-                                <button wire:click="archiveCalendar({{ $selectedCalendarDetail['id'] }})"
-                                    wire:loading.attr="disabled" wire:target="archiveCalendar"
-                                    title="Archivar este calendario: deja de estar editable y no participa del activo del plan"
-                                    class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 text-xs font-bold border border-amber-500/20">
-                                    <span wire:loading.remove wire:target="archiveCalendar">Archivar</span>
-                                    <span wire:loading wire:target="archiveCalendar">Archivando…</span>
-                                </button>
-                            @endif
-                            @if ($selectedCalendarDetail['status'] === 'draft')
-                                <button wire:click="activateCalendar({{ $selectedCalendarDetail['id'] }})"
-                                    class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-200 text-xs font-bold border border-gray-200 dark:border-white/10">Activar</button>
-                                <button wire:click="deleteCalendar({{ $selectedCalendarDetail['id'] }})"
-                                    class="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
+                            @php
+                                $calendarStatus = $selectedCalendarDetail['status'];
+                                $calendarCanActivate = $calendarStatus === 'draft';
+                                $calendarCanArchive = in_array($calendarStatus, ['draft', 'active'], true);
+                                $calendarCanUnarchive = $calendarStatus === 'archived';
+                                $calendarCanDelete = $calendarStatus === 'draft';
+                                $calendarHasStateActions = $calendarCanActivate || $calendarCanArchive || $calendarCanUnarchive || $calendarCanDelete;
+                            @endphp
+                            @if ($calendarHasStateActions)
+                                <x-dropdown position="bottom-end" height="auto">
+                                    <x-slot name="trigger">
+                                        <button type="button"
+                                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold border border-gray-200 dark:border-white/10">
+                                            <span>Estado</span>
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </button>
+                                    </x-slot>
+
+                                    @if ($calendarCanActivate)
+                                        <x-dropdown.item wire:click="activateCalendar({{ $selectedCalendarDetail['id'] }})"
+                                            icon="check-circle" label="Activar" class="w-full" />
+                                    @endif
+                                    @if ($calendarCanArchive)
+                                        <x-dropdown.item wire:click="archiveCalendar({{ $selectedCalendarDetail['id'] }})"
+                                            icon="archive-box" label="Archivar" class="w-full" />
+                                    @endif
+                                    @if ($calendarCanUnarchive)
+                                        <x-dropdown.item wire:click="unarchiveCalendar({{ $selectedCalendarDetail['id'] }})"
+                                            icon="arrow-uturn-left" label="Desarchivar" class="w-full" />
+                                    @endif
+                                    @if ($calendarCanDelete)
+                                        <x-dropdown.item separator class="hidden" />
+                                        <x-dropdown.item wire:click="deleteCalendar({{ $selectedCalendarDetail['id'] }})"
+                                            icon="trash" label="Eliminar" class="w-full !text-red-500 dark:!text-red-400" />
+                                    @endif
+                                </x-dropdown>
                             @endif
                         </div>
                     </div>
