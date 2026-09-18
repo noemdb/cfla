@@ -65,7 +65,6 @@
                                                 @else
                                                     @forelse ($day['assignments'] as $cell)
                                                         <div class="subject">{{ $cell['asignatura'] }}</div>
-                                                        @if ($cell['profesor'])<div class="teacher">{{ $cell['profesor'] }}</div>@endif
                                                     @empty
                                                         <span class="teacher">&nbsp;</span>
                                                     @endforelse
