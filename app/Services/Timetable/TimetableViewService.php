@@ -251,6 +251,55 @@ class TimetableViewService
             ->all();
     }
 
+    /**
+     * Horarios del docente agrupados por P.Educativo (fusionados) para varios
+     * calendarios, p. ej. todos los de un lapso. Devuelve un único horario por
+     * P.Educativo.
+     *
+     * @param  iterable<TimetableCalendar>  $calendars
+     * @return list<array{peducativo: ?\App\Models\app\Academy\Peducativo, schedules: list<array{shift: \App\Models\app\Timetable\TimetableShift, periods: Collection, grid: Collection}>}>
+     */
+    public function teacherPeducativoSchedulesForCalendars(iterable $calendars, int $profesorId): array
+    {
+        $byPeducativo = [];
+
+        foreach ($calendars as $calendar) {
+            $shifts = $this->teacherShiftSchedules($calendar, $profesorId);
+
+            if ($shifts === []) {
+                continue;
+            }
+
+            $peducativo = $calendar->pestudio?->peducativo;
+            $key = (int) ($peducativo?->id ?? 0);
+
+            if (! isset($byPeducativo[$key])) {
+                $byPeducativo[$key] = ['peducativo' => $peducativo, 'schedules' => []];
+            }
+
+            $byPeducativo[$key]['schedules'][] = $shifts;
+        }
+
+        $result = [];
+
+        foreach ($byPeducativo as $data) {
+            $result[] = [
+                'peducativo' => $data['peducativo'],
+                'schedules' => $this->mergePeducativoSchedules(...$data['schedules']),
+            ];
+        }
+
+        usort($result, function (array $a, array $b): int {
+            $orderA = (int) ($a['peducativo']?->order ?? 0);
+            $orderB = (int) ($b['peducativo']?->order ?? 0);
+
+            return $orderA <=> $orderB
+                ?: strcasecmp((string) ($a['peducativo']?->name ?? ''), (string) ($b['peducativo']?->name ?? ''));
+        });
+
+        return $result;
+    }
+
     private function buildGrid(TimetableCalendar $calendar, Collection $slots): Collection
     {
         $periods = $calendar->periods()

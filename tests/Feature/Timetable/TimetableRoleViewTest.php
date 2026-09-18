@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Timetable;
 
+use App\Livewire\Profesor\Timetable\MyTimetable;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Inscripcion;
@@ -18,6 +19,7 @@ use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Livewire\Livewire;
 use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
@@ -79,7 +81,11 @@ class TimetableRoleViewTest extends TestCase
             ->get('/app/profesors/timetable')
             ->assertOk()
             ->assertSee('Mi horario')
-            ->assertSee($fixture['asignaturaA']->name);
+            ->assertSee($fixture['asignaturaA']->name)
+            // Footer de referencia del calendario (uno por P.Estudio asociado).
+            ->assertSee('Referencia del calendario')
+            ->assertSee($fixture['calendar']->name)
+            ->assertSee($fixture['calendar']->pestudio->name);
     }
 
     public function test_leadership_can_view_any_section_readonly(): void
@@ -178,7 +184,9 @@ class TimetableRoleViewTest extends TestCase
             'pensum_id' => $pensumA->id, 'lapso_id' => $lapso->id,
         ]);
 
-        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'status' => 'active']);
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso->id, 'pestudio_id' => $pestudio->id, 'status' => 'active',
+        ]);
         $shift = $this->makeShift();
 
         $period = TimetablePeriod::factory()->create([
@@ -200,6 +208,59 @@ class TimetableRoleViewTest extends TestCase
             'room_id' => null,
         ]);
 
-        return compact('calendar', 'shift', 'period', 'lesson', 'profesor', 'seccionA', 'seccionB', 'asignaturaA', 'teacherUser');
+        return compact('calendar', 'shift', 'period', 'lesson', 'profesor', 'seccionA', 'seccionB', 'asignaturaA', 'teacherUser', 'lapso');
+    }
+
+    public function test_teacher_timetable_has_tabs_per_lapso(): void
+    {
+        $fixture = $this->roleFixture();
+        $profesor = $fixture['profesor'];
+
+        // Segundo lapso con su propio calendario/asignatura para el mismo docente.
+        $lapsoB = Lapso::factory()->create([
+            'finicial' => now()->subYears(2),
+            'ffinal' => now()->subYear(),
+        ]);
+        $pestudioB = Pestudio::factory()->create(['status_active' => 'true']);
+        $gradoB = Grado::factory()->create(['pestudio_id' => $pestudioB->id, 'status_active' => 'true']);
+        $seccionB = Seccion::factory()->create(['grado_id' => $gradoB->id, 'status_active' => 'true']);
+        $asignaturaB = Asignatura::factory()->create(['hour_t_week' => 2, 'hour_p_week' => 0]);
+        $pensumB = Pensum::factory()->create([
+            'pestudio_id' => $pestudioB->id, 'grado_id' => $gradoB->id, 'asignatura_id' => $asignaturaB->id,
+        ]);
+        $pevB = Pevaluacion::factory()->create([
+            'profesor_id' => $profesor->id, 'seccion_id' => $seccionB->id,
+            'pensum_id' => $pensumB->id, 'lapso_id' => $lapsoB->id,
+        ]);
+
+        $calendarB = TimetableCalendar::factory()->create(['lapso_id' => $lapsoB->id, 'status' => 'active']);
+        $shiftB = $this->makeShift();
+        $periodB = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendarB->id, 'shift_id' => $shiftB->id,
+            'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,
+        ]);
+        $lessonB = TimetableLesson::factory()->create([
+            'calendar_id' => $calendarB->id, 'pevaluacion_id' => $pevB->id,
+            'shift_id' => $shiftB->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $calendarB->id, 'lesson_id' => $lessonB->id,
+            'period_id' => $periodB->id, 'profesor_id' => $profesor->id,
+            'seccion_id' => $seccionB->id,
+        ]);
+
+        $component = Livewire::actingAs($fixture['teacherUser'])->test(MyTimetable::class);
+
+        // El lapso más reciente queda activo por defecto.
+        $component->assertSet('activeLapsoId', (int) $lapsoB->id)
+            ->assertSee('lapso-tab-'.$lapsoB->id, false)
+            ->assertSee('lapso-tab-'.$fixture['lapso']->id, false)
+            ->assertSee($asignaturaB->name)
+            ->assertSee($fixture['lapso']->name);
+
+        // Cambiar de tab muestra el horario del otro lapso.
+        $component->call('selectLapso', (int) $fixture['lapso']->id)
+            ->assertSet('activeLapsoId', (int) $fixture['lapso']->id)
+            ->assertSee($fixture['asignaturaA']->name);
     }
 }
