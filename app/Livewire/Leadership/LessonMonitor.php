@@ -117,7 +117,7 @@ class LessonMonitor extends Component
 
         // Registered: solo actividades con secciones de lección registradas o
         // al menos un recurso asociado (mismo criterio que el listado).
-        $this->whereHasLmsContent($baseQuery);
+        $baseQuery->withLmsContent();
 
         $this->lessonTotal = $baseQuery->count();
 
@@ -144,21 +144,6 @@ class LessonMonitor extends Component
         $this->lessonScheduledPct = round(($this->lessonScheduled / $this->lessonTotal) * 100, 1);
     }
 
-    /**
-     * Restringe una query de Activity a aquellas con contenido LMS:
-     * secciones de lección registradas o al menos un recurso asociado
-     * (recurso descargable, enlace o embed HTML).
-     */
-    private function whereHasLmsContent(\Illuminate\Database\Eloquent\Builder $query): void
-    {
-        $query->where(function ($q) {
-            $q->has('lmsSections')
-                ->orHas('lmsResources')
-                ->orHas('lmsLinks')
-                ->orHas('lmsHtmlEmbeds');
-        });
-    }
-
     public function render()
     {
         $service = app(LeadershipService::class, ['user' => Auth::user()]);
@@ -176,7 +161,7 @@ class LessonMonitor extends Component
 
         // Solo se listan lecciones con secciones registradas o al menos un
         // recurso asociado (descargable, enlace o embed HTML).
-        $this->whereHasLmsContent($query);
+        $query->withLmsContent();
 
         if ($this->filter_published) {
             $query->whereHas('lmsPublication', fn ($q) => $q->where('status', 'PUBLISHED'));

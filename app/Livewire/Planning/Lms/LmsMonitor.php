@@ -714,6 +714,7 @@ class LmsMonitor extends Component
     protected function buildFilteredQuery()
     {
         return Activity::query()
+            ->withLmsContent()
             ->when($this->filterStatus, fn ($q) => $q->whereHas('lmsPublication', fn ($sq) => $sq->where('status', $this->filterStatus)))
             ->when($this->filterProfesor, fn ($q) => $q->whereHas('pevaluacion', fn ($sq) => $sq->where('profesor_id', $this->filterProfesor)))
             ->when($this->filterGrado, fn ($q) => $q->whereHas('pevaluacion.pensum', fn ($sq) => $sq->where('grado_id', $this->filterGrado)))
@@ -738,6 +739,7 @@ class LmsMonitor extends Component
             'lmsResources',
             'lmsLinks',
         ])
+            ->withLmsContent()
             ->when($this->filterStatus, fn ($q) => $q->whereHas('lmsPublication', fn ($sq) => $sq->where('status', $this->filterStatus)))
             ->when($this->filterProfesor, fn ($q) => $q->whereHas('pevaluacion', fn ($sq) => $sq->where('profesor_id', $this->filterProfesor)))
             ->when($this->filterGrado, fn ($q) => $q->whereHas('pevaluacion.pensum', fn ($sq) => $sq->where('grado_id', $this->filterGrado)))
