@@ -22,7 +22,8 @@
         tbody tr{height:1.5cm;}
         tbody td{height:1.5cm;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
-        .subject{font-weight:700;font-size:6.5pt;text-align:center;}
+        .subject{font-weight:700;font-size:8pt;text-align:center;}
+        .group{font-size:5.5pt;color:#047857;text-align:center;margin-top:1px;}
         .teacher{font-size:5.5pt;color:#4b5563;}
         tr.break-row td{background:#fffbeb;color:#a16207;}
         td.break-cell{text-align:center;font-size:6pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
@@ -67,6 +68,9 @@
                                                 @else
                                                     @forelse ($day['assignments'] as $cell)
                                                         <div class="subject">{{ $cell['asignatura'] }}</div>
+                                                        @if (!empty($cell['grupo']))
+                                                            <div class="group">{{ $cell['grupo'] }}</div>
+                                                        @endif
                                                     @empty
                                                         <span class="teacher">&nbsp;</span>
                                                     @endforelse

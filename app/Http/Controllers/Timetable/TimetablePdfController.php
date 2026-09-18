@@ -474,7 +474,7 @@ class TimetablePdfController extends Controller
             ->where('calendar_id', $calendar->id)
             ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('status_active', 'true'))
             ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('status_active', 'true'))
-            ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion.grado'])
+            ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion.grado', 'pevaluacion.grupoEstable'])
             ->get();
 
         $gradeSchedules = $grades->map(function (Grado $grado) use (
@@ -521,6 +521,7 @@ class TimetablePdfController extends Controller
                         $assignmentsByPeriod[$period->id][] = [
                             'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                             'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
+                            'grupo' => $pev?->grupo_estable_id ? $pev?->grupoEstable?->name : null,
                         ];
                     }
                 }
