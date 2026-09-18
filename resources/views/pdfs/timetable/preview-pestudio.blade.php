@@ -50,7 +50,7 @@
         <div class="section {{ $firstSection ? '' : 'new-page' }}">
             @php $firstSection = false; @endphp
                     <div class="grade-section-title">
-                        Grado: {{ $gradeSchedule['grado']->name }}
+                        Nivel {{ $gradeSchedule['grado']->name }}
                         <span class="section-label">Sección {{ $schedule['section']->name }}</span>
                     </div>
                     @foreach ($schedule['shiftGrids'] as $shiftGrid)
