@@ -96,10 +96,11 @@ class ActivityImprovementTest extends TestCase
         Livewire::actingAs($user)
             ->test(IndexComponent::class, ['id' => $pevaluacionId])
             ->call('setCreate')
+            ->assertSeeHtml('teachingLength')
+            ->assertSeeHtml('x-on:input="inicio = $el.value"')
             ->set('activityForm.teachingStart', 'Inicio')
             ->set('activityForm.teachingContent', 'Desarrollo')
             ->set('activityForm.teachingEnd', 'Cierre')
-            ->assertSee('/5000 caracteres')
             ->call('save')
             ->assertHasNoErrors('activityForm.teaching');
 
