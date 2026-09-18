@@ -163,6 +163,14 @@ class TimetableWizard extends Component
 
     public array $lessons = [];
 
+    /**
+     * Pevaluaciones retiradas del borrador en la edición actual. La eliminación
+     * se aplica en la base de datos recién al pulsar «Guardar clases».
+     *
+     * @var list<int>
+     */
+    public array $removedLessonPevIds = [];
+
     public bool $lessonsDirty = false;
 
     public ?string $lessonsSavedAt = null;
@@ -365,6 +373,7 @@ class TimetableWizard extends Component
         $this->periods = [];
         $this->lessons = [];
         $this->selectedPevs = [];
+        $this->removedLessonPevIds = [];
         $this->selectionResetToken++;
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = null;
@@ -423,6 +432,7 @@ class TimetableWizard extends Component
         $this->calendars = [];
         $this->calendarId = null;
         $this->lessons = [];
+        $this->removedLessonPevIds = [];
         $this->availability = [];
         $this->periods = [];
         $this->generationState = null;
@@ -579,6 +589,7 @@ class TimetableWizard extends Component
         $this->periods = [];
         $this->generationState = null;
         $this->preview = null;
+        $this->removedLessonPevIds = [];
 
         // Restaurar día seleccionado desde la sesión si existe (persistencia por calendario)
         $sessionKey = 'timetable.selected_schedule_day_'.($this->calendarId ?? '');
@@ -2224,6 +2235,7 @@ class TimetableWizard extends Component
 
         $this->selectedPevs = [];
         $this->lessons = [];
+        $this->removedLessonPevIds = [];
         $this->selectionResetToken++;
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = null;
@@ -2231,6 +2243,113 @@ class TimetableWizard extends Component
             'Selección reiniciada',
             'Se desmarcaron todas las lecciones del Paso 3. Las lessons guardadas no fueron eliminadas.',
         );
+    }
+
+    /**
+     * Paso 3 (CRUD) — Agrega una Pevaluación del lapso al borrador. El alta se
+     * aplica en la base de datos recién al pulsar «Guardar clases».
+     */
+    public function addLesson(int $pevaluacionId): void
+    {
+        if (! $this->calendarId || $pevaluacionId <= 0) {
+            return;
+        }
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+        $pev = $calendar
+            ? Pevaluacion::query()
+                ->with('pensum.asignatura')
+                ->where('lapso_id', $calendar->lapso_id)
+                ->find($pevaluacionId)
+            : null;
+
+        if (! $calendar || ! $pev) {
+            $this->notification()->error(
+                'Lección no válida',
+                'La asignatura no pertenece al lapso del calendario.',
+            );
+
+            return;
+        }
+
+        if ($this->blockIfSectionLocked((int) $pev->seccion_id)) {
+            return;
+        }
+
+        $this->selectedPevs[$pev->id] = true;
+
+        // Si había sido retirada en esta edición, se reincorpora.
+        $this->removedLessonPevIds = array_values(array_diff(
+            array_map('intval', $this->removedLessonPevIds),
+            [(int) $pev->id],
+        ));
+
+        $this->loadLessons(false, false);
+        $this->lessonsDirty = true;
+    }
+
+    /**
+     * Paso 3 (CRUD) — Retira una lección del borrador. La eliminación en la
+     * base de datos (lección + sus slots) se aplica al pulsar «Guardar clases».
+     */
+    public function deleteLesson(int $pevaluacionId): void
+    {
+        if (! $this->calendarId || $pevaluacionId <= 0) {
+            return;
+        }
+
+        $pev = Pevaluacion::query()->find($pevaluacionId);
+
+        if ($pev && $this->blockIfSectionLocked((int) $pev->seccion_id)) {
+            return;
+        }
+
+        unset($this->selectedPevs[$pevaluacionId], $this->lessons[$pevaluacionId]);
+
+        if (! in_array((int) $pevaluacionId, array_map('intval', $this->removedLessonPevIds), true)) {
+            $this->removedLessonPevIds[] = (int) $pevaluacionId;
+        }
+
+        $this->lessonsDirty = true;
+
+        $this->notification()->success(
+            'Lección retirada',
+            'Se retiró la lección del borrador; se eliminará al guardar los cambios.',
+        );
+    }
+
+    /**
+     * Elimina en la base de datos las lecciones retiradas del borrador junto
+     * con sus bloques (slots). Se ejecuta al guardar.
+     */
+    private function deleteRemovedLessons(): void
+    {
+        if (! $this->calendarId || $this->removedLessonPevIds === []) {
+            return;
+        }
+
+        $pevIds = collect($this->removedLessonPevIds)
+            ->map(fn ($id): int => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($pevIds === []) {
+            return;
+        }
+
+        DB::transaction(function () use ($pevIds): void {
+            $lessons = TimetableLesson::query()
+                ->where('calendar_id', $this->calendarId)
+                ->whereIn('pevaluacion_id', $pevIds)
+                ->get();
+
+            foreach ($lessons as $lesson) {
+                $lesson->slots()->delete();
+                $lesson->delete();
+            }
+        });
     }
 
     /**
@@ -2575,7 +2694,9 @@ class TimetableWizard extends Component
             return;
         }
 
+        $this->deleteRemovedLessons();
         $this->persistLessons();
+        $this->removedLessonPevIds = [];
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = now()->format('H:i:s');
         session()->flash('message', count($this->lessons).' lecciones registradas.');

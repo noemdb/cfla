@@ -347,6 +347,27 @@
                     </x-dropdown.item>
                 </x-dropdown>
 
+                {{-- Bloquear / desbloquear la sección activa (junto a Respaldo) --}}
+                @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
+                    <button type="button"
+                        wire:key="section-lock-switcher-{{ (int) $activeSeccionId }}-{{ $activeSectionLocked ? 'locked' : 'unlocked' }}"
+                        wire:click="toggleSectionTimetableLock({{ (int) $activeSeccionId }})"
+                        wire:loading.attr="disabled"
+                        wire:target="toggleSectionTimetableLock"
+                        title="{{ $activeSectionLocked ? 'Desbloquear el horario de esta sección' : 'Bloquear el horario de esta sección' }}"
+                        aria-label="{{ $activeSectionLocked ? 'Desbloquear' : 'Bloquear' }} el horario de la sección"
+                        class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 {{ $activeSectionLocked ? 'bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-300' : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300' }}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            @if ($activeSectionLocked)
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                            @endif
+                        </svg>
+                        <span>{{ $activeSectionLocked ? 'Desbloquear sección' : 'Bloquear sección' }}</span>
+                    </button>
+                @endif
+
                 @if ($snapshotPreview)
                     @php
                         $previewMode = ($snapshotPreview['mode'] ?? 'additive') === 'replace' ? 'replace' : 'additive';
@@ -1658,6 +1679,7 @@
                                 <th class="px-3 py-2 text-nowrap">Medio grupo</th>
                                 <th class="px-3 py-2 text-nowrap">Doc. compartido</th>
                                 <th class="px-3 py-2">Estado</th>
+                                <th class="px-3 py-2 text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1676,7 +1698,7 @@
                                     <td class="px-3 py-2">
                                         <input type="number"
                                             wire:key="lesson-blocks-t-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.weekly_blocks_t" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model.live="lessons.{{ $pev->id }}.weekly_blocks_t" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['weekly_blocks_t'] ?? $derivedT) : $derivedT }}"
                                             min="0" @disabled(! $selected || $rowLocked)
                                             class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1684,7 +1706,7 @@
                                     <td class="px-3 py-2">
                                         <input type="number"
                                             wire:key="lesson-blocks-p-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.weekly_blocks_p" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model.live="lessons.{{ $pev->id }}.weekly_blocks_p" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['weekly_blocks_p'] ?? $derivedP) : $derivedP }}"
                                             min="0" @disabled(! $selected || $rowLocked)
                                             class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1692,7 +1714,7 @@
                                     <td class="px-3 py-2">
                                         <input type="number"
                                             wire:key="lesson-prio-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.priority" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model.live="lessons.{{ $pev->id }}.priority" @endif
                                             value="{{ $selected ? ($lessons[$pev->id]['priority'] ?? 0) : 0 }}"
                                             min="0" @disabled(! $selected || $rowLocked)
                                             class="w-12 text-center bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded px-1 py-1 text-xs disabled:opacity-60 disabled:cursor-not-allowed">
@@ -1700,7 +1722,7 @@
                                     <td class="px-3 py-2">
                                         <select
                                             wire:key="lesson-shift-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.shift_id" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model.live="lessons.{{ $pev->id }}.shift_id" @endif
                                             @disabled(! $selected || $rowLocked)
                                             class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
                                             @if (! $selected)
@@ -1714,7 +1736,7 @@
                                     <td class="px-3 py-2">
                                         <select
                                             wire:key="lesson-room-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
-                                            @if ($selected && ! $rowLocked) wire:model="lessons.{{ $pev->id }}.room_type_required" wire:change="autosaveLessons" @endif
+                                            @if ($selected && ! $rowLocked) wire:model.live="lessons.{{ $pev->id }}.room_type_required" @endif
                                             @disabled(! $selected || $rowLocked)
                                             class="text-xs bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-2 py-1 disabled:opacity-60 disabled:cursor-not-allowed">
                                             <option value="">{{ $selected ? '—' : 'Selecciona' }}</option>
@@ -1728,7 +1750,7 @@
                                             wire:key="lesson-half-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected && ! $rowLocked)
                                                 wire:model.live="lessons.{{ $pev->id }}.is_half_group"
-                                                wire:change="autosaveLessons"
+                                               
                                             @endif
                                             @disabled(! $selected || $rowLocked)
                                             title="Comparte la celda con otra asignatura de medio grupo"
@@ -1739,7 +1761,7 @@
                                             wire:key="lesson-shared-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected && ! $rowLocked)
                                                 wire:model.live="lessons.{{ $pev->id }}.allow_shared_teacher"
-                                                wire:change="autosaveLessons"
+                                               
                                             @endif
                                             @disabled(! $selected || $rowLocked)
                                             title="Permite coincidir con otra lesson del mismo docente si ambas lessons tienen esta autorización"
@@ -1753,6 +1775,30 @@
                                             <span class="block mt-0.5 text-amber-500 font-bold" title="{{ implode(' · ', $step3Warnings[$pev->id]) }}">⚠</span>
                                         @endif
                                     </td>
+                                    {{-- CRUD: agregar (crear) o eliminar la lección del calendario --}}
+                                    <td class="px-3 py-2 text-right">
+                                        @if ($selected)
+                                            <button type="button"
+                                                wire:click="deleteLesson({{ (int) $pev->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="deleteLesson({{ (int) $pev->id }})"
+                                                @disabled($rowLocked)
+                                                title="Eliminar la lección y sus bloques del calendario"
+                                                class="inline-flex items-center gap-1 rounded-lg bg-red-500/10 px-2 py-1 text-[10px] font-bold text-red-600 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300">
+                                                Eliminar
+                                            </button>
+                                        @else
+                                            <button type="button"
+                                                wire:click="addLesson({{ (int) $pev->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="addLesson({{ (int) $pev->id }})"
+                                                @disabled($rowLocked)
+                                                title="Agregar la asignatura al horario"
+                                                class="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-700 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-emerald-300">
+                                                Agregar
+                                            </button>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -1761,82 +1807,6 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-
-                <div class="mb-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>{{ $rows->count() }} asignatura(s) · {{ $step3SelectedCount }} seleccionada(s)</span>
-                    <span class="flex items-center gap-2">
-                        @if ($lessonsDirty)
-                            <span class="text-amber-600 dark:text-amber-400 font-bold">● Cambios sin guardar</span>
-                        @elseif ($lessonsSavedAt)
-                            <span class="text-emerald-600 dark:text-emerald-400">Guardado {{ $lessonsSavedAt }}</span>
-                        @endif
-                        <span>Los bloques se derivan de <code>hour_t_week/hour_p_week</code></span>
-                        <button wire:click="syncAcademicLoad"
-                            wire:loading.attr="disabled"
-                            wire:loading.class="opacity-50 cursor-not-allowed"
-                            wire:target="syncAcademicLoad"
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-gray-500 dark:text-gray-300 font-bold">
-                            <span wire:loading.remove wire:target="syncAcademicLoad">Sincronizar carga académica</span>
-                            <span wire:loading wire:target="syncAcademicLoad" class="inline-flex items-center gap-1.5">
-                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                                Sincronizando…
-                            </span>
-                        </button>
-                        @if ($step3ViewMode === 'tabs' && is_numeric($activeSeccionId))
-                            <div class="inline-flex items-center gap-1.5">
-                                <select wire:model="replicateToSeccionId"
-                                    title="Sección destino para replicar las lecciones"
-                                    class="max-w-[16rem] rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-500 dark:text-gray-300">
-                                    <option value="">Replicar a sección…</option>
-                                    @foreach ($tabSeccionOptions as $sectionOption)
-                                        @if ((int) $sectionOption['id'] !== (int) $activeSeccionId)
-                                            <option value="{{ $sectionOption['id'] }}">{{ $sectionOption['label'] }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                <button wire:click="replicateLessonsToSection"
-                                    wire:loading.attr="disabled"
-                                    wire:loading.class="opacity-50 cursor-not-allowed"
-                                    wire:target="replicateLessonsToSection"
-                                    title="Copiar las lecciones configuradas a la sección seleccionada"
-                                    class="inline-flex items-center gap-1.5 rounded-md bg-indigo-500/10 px-2.5 py-1 text-[11px] font-bold text-indigo-700 transition-colors hover:bg-indigo-500/20 dark:text-indigo-300">
-                                    <span wire:loading.remove wire:target="replicateLessonsToSection">Replicar</span>
-                                    <span wire:loading wire:target="replicateLessonsToSection">Replicando…</span>
-                                </button>
-                            </div>
-                        @endif
-                        @if (is_numeric($activeSeccionId))
-                            <button type="button"
-                                wire:click="downloadLessonsBackup({{ (int) $activeSeccionId }})"
-                                wire:loading.attr="disabled"
-                                wire:loading.class="opacity-50 cursor-not-allowed"
-                                wire:target="downloadLessonsBackup"
-                                title="Descargar respaldo JSON de las lessons de la sección activa"
-                                class="inline-flex items-center gap-1.5 rounded-md bg-sky-500/10 px-2.5 py-1 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                                <span wire:loading.remove wire:target="downloadLessonsBackup">Backup JSON</span>
-                                <span wire:loading wire:target="downloadLessonsBackup">Preparando…</span>
-                            </button>
-                        @endif
-                        <label title="Seleccionar respaldo JSON de lessons por grado y sección"
-                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-bold text-gray-600 transition-colors hover:bg-white/10 dark:text-gray-300">
-                            <span>Elegir restore</span>
-                            <input type="file" wire:model="lessonsBackupFile" accept="application/json,.json" class="sr-only">
-                        </label>
-                        <button type="button"
-                            wire:click="restoreLessonsBackup"
-                            wire:loading.attr="disabled"
-                            wire:loading.class="opacity-50 cursor-not-allowed"
-                            wire:target="restoreLessonsBackup,lessonsBackupFile"
-                            title="Restaurar la configuración del grado y sección desde el JSON seleccionado"
-                            class="inline-flex items-center gap-1.5 rounded-md bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300">
-                            <span wire:loading.remove wire:target="restoreLessonsBackup">Restore</span>
-                            <span wire:loading wire:target="restoreLessonsBackup">Restaurando…</span>
-                        </button>
-                    </span>
                 </div>
 
                 {{-- <div class="mt-5 rounded-lg border border-dashed border-gray-300 dark:border-white/10 p-4">
@@ -1867,55 +1837,22 @@
                     @endif
                 </div> --}}
 
-                <div class="mt-4 flex items-center justify-between">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Los bloques se derivan de <code>hour_t_week/hour_p_week</code> y la duración del bloque.</span>
-                    <div class="flex items-center gap-2">
-                        <button wire:click="autosaveLessons"
-                            @disabled($step3SelectedCount === 0)
-                            wire:loading.attr="disabled"
-                            wire:loading.class="opacity-50 cursor-not-allowed"
-                            wire:target="autosaveLessons"
-                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
-                            <span wire:loading.remove wire:target="autosaveLessons">Guardar borrador</span>
-                            <span wire:loading wire:target="autosaveLessons" class="inline-flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                                Guardando…
-                            </span>
-                        </button>
-                        <button wire:click="recalculateLessonBlocks"
-                            wire:loading.attr="disabled"
-                            wire:loading.class="opacity-50 cursor-not-allowed"
-                            wire:target="recalculateLessonBlocks"
-                            title="Recalcular bloques desde las horas actuales de las asignaturas"
-                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
-                            <span wire:loading.remove wire:target="recalculateLessonBlocks">Recalcular bloques</span>
-                            <span wire:loading wire:target="recalculateLessonBlocks" class="inline-flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                                Recalculando…
-                            </span>
-                        </button>
-                        <button wire:click="saveLessons"
-                            @disabled($step3SelectedCount === 0)
-                            wire:loading.attr="disabled"
-                            wire:loading.class="opacity-50 cursor-not-allowed"
-                            wire:target="saveLessons"
-                            class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
-                            <span wire:loading.remove wire:target="saveLessons">Guardar clases y continuar</span>
-                            <span wire:loading wire:target="saveLessons" class="inline-flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                                Guardando…
-                            </span>
-                        </button>
-                    </div>
+                <div class="mt-4 flex items-center justify-end">
+                    <button wire:click="saveLessons"
+                        @disabled($step3SelectedCount === 0)
+                        wire:loading.attr="disabled"
+                        wire:loading.class="opacity-50 cursor-not-allowed"
+                        wire:target="saveLessons"
+                        class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
+                        <span wire:loading.remove wire:target="saveLessons">Guardar clases y continuar</span>
+                        <span wire:loading wire:target="saveLessons" class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Guardando…
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>

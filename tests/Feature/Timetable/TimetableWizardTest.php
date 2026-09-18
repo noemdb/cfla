@@ -1475,8 +1475,7 @@ class TimetableWizardTest extends TestCase
 
         $component
             ->call('syncAcademicLoad')
-            ->assertSet('lessons.'.$fixture['pev']->id.'.profesor_id', $replacement->id)
-            ->assertSee('Sincronizar carga académica');
+            ->assertSet('lessons.'.$fixture['pev']->id.'.profesor_id', $replacement->id);
     }
 
     public function test_step3_replicates_lesson_configuration_to_sibling_section(): void
