@@ -157,12 +157,12 @@ class TimetableLessonCrudTest extends TestCase
             ->set('activeSeccionId', $f['seccion']->id);
 
         $component->assertSee('section-lock-switcher-'.$f['seccion']->id, false)
-            ->assertSee('Bloquear sección');
+            ->assertSee('Bloquear el horario de esta sección');
 
         $component->call('toggleSectionTimetableLock', $f['seccion']->id);
 
         $this->assertTrue((bool) $f['seccion']->fresh()->timetable_locked);
-        $component->assertSee('Desbloquear sección');
+        $component->assertSee('Desbloquear el horario de esta sección');
     }
 
     public function test_locked_section_blocks_add_and_delete(): void

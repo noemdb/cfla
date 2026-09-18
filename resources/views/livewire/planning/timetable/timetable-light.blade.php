@@ -74,7 +74,7 @@
                         href="#"
                         x-on:click.prevent="$dispatch('open-teachers-pdf')"
                         icon="document-arrow-down"
-                        label="PDF profesores"
+                        label="Consolidado de docentes"
                         separator />
 
                     <x-dropdown.item
@@ -94,16 +94,16 @@
         x-on:keydown.escape.window="open = false"
         x-cloak x-show="open"
         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
-        role="dialog" aria-modal="true" aria-label="PDF de profesores">
+        role="dialog" aria-modal="true" aria-label="Consolidado de docentes">
         <div x-on:click.stop
             class="w-full max-w-md overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
             <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
                 <div>
                     <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
-                        PDF de profesores
+                        Consolidado de docentes
                     </h3>
                     <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        Orientación y horarios por página
+                        Vista imprimible · orientación y horarios por página
                     </p>
                 </div>
                 <button type="button" x-on:click="open = false"
@@ -148,7 +148,7 @@
                 <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?orientation=' + orientation + '&per_page=' + perPage"
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
-                    Generar PDF
+                    Generar
                 </a>
             </div>
         </div>

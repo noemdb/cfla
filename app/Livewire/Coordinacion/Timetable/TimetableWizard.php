@@ -192,6 +192,15 @@ class TimetableWizard extends Component
 
     public ?string $areaFormatId = null;
 
+    /** Modal «Totalización por docente» (toolbar): filtro por P.Educativo y formato. */
+    public bool $showTeacherTotalsModal = false;
+
+    /** P.Educativo seleccionado; null = Todos. */
+    public ?string $teacherTotalsPeducativoId = null;
+
+    /** Formato de salida: pdf | xls | html. */
+    public string $teacherTotalsFormat = 'pdf';
+
     // Pestañas pestudio → grado → sección (PLAN-ACTIVITIES-001)
     public $activePestudioId = null;
 

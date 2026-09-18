@@ -14,6 +14,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
+use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -259,5 +260,98 @@ class TimetableGlobalPdfTest extends TestCase
         $this->actingAs($user)
             ->get(route('app.coordinacion.timetable.pdf.all-pestudios'))
             ->assertNotFound();
+    }
+
+    /**
+     * Regla institucional: la totalización cuenta UN bloque por celda visual.
+     * Si un docente atiende varias secciones en el mismo turno/día/bloque
+     * (docente compartido) o dos sub-grupos en paralelo, cuenta 1.
+     */
+    public function test_teacher_block_totals_counts_one_per_visual_cell(): void
+    {
+        $fixture = $this->fixture();
+        $calendar = $fixture['calendar'];
+        $shift = TimetableShift::query()->value('id');
+        $period = TimetablePeriod::query()->where('calendar_id', $calendar->id)->firstOrFail();
+
+        // Dos secciones extra del MISMO grado y una lección compartida cada una,
+        // todas en el mismo período del calendario. El docente dicta 3 secciones
+        // en el mismo bloque: debe contar 1, no 3.
+        foreach ([0, 1] as $i) {
+            $seccion = Seccion::factory()->create([
+                'grado_id' => $fixture['grado']->id, 'name' => 'S'.$i, 'status_active' => 'true',
+            ]);
+            $asignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+            $pensum = Pensum::factory()->create([
+                'pestudio_id' => $fixture['pestudio']->id,
+                'grado_id' => $fixture['grado']->id,
+                'asignatura_id' => $asignatura->id,
+            ]);
+            $pev = Pevaluacion::factory()->create([
+                'profesor_id' => $fixture['profesor']->id, 'seccion_id' => $seccion->id,
+                'pensum_id' => $pensum->id, 'lapso_id' => $fixture['lapso']->id,
+            ]);
+            $lesson = TimetableLesson::factory()->create([
+                'calendar_id' => $calendar->id, 'pevaluacion_id' => $pev->id,
+                'shift_id' => $shift, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+                'allow_shared_teacher' => true,
+            ]);
+            TimetableSlot::factory()->create([
+                'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
+                'period_id' => $period->id, 'profesor_id' => $fixture['profesor']->id,
+                'seccion_id' => $seccion->id, 'allow_shared_teacher' => true,
+            ]);
+        }
+
+        $rows = app(\App\Http\Controllers\Timetable\TimetablePdfController::class)
+            ->teacherBlockTotalsRows(collect([$calendar->id]));
+
+        $profesor = $rows->firstWhere('name', trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name));
+
+        $this->assertNotNull($profesor, 'el docente debe aparecer en la totalización');
+        // 3 slots en la misma celda visual => 1 bloque; horas = 2.
+        $this->assertSame(1, $profesor['blocks']);
+        $this->assertSame(2, $profesor['hours']);
+    }
+
+    /**
+     * Dos períodos del mismo día (bloques distintos) sí suman 2.
+     */
+    public function test_teacher_block_totals_counts_separate_periods_as_two(): void
+    {
+        $fixture = $this->fixture();
+        $calendar = $fixture['calendar'];
+        $shift = TimetableShift::query()->value('id');
+        $firstPeriod = TimetablePeriod::query()->where('calendar_id', $calendar->id)->firstOrFail();
+
+        $secondPeriod = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id, 'shift_id' => $shift,
+            'day_of_week' => 1, 'order_in_day' => 2, 'is_break' => false,
+        ]);
+
+        $lesson = TimetableLesson::query()->where('calendar_id', $calendar->id)->firstOrFail();
+        TimetableSlot::factory()->create([
+            'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
+            'period_id' => $secondPeriod->id, 'profesor_id' => $fixture['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+        ]);
+
+        $rows = app(\App\Http\Controllers\Timetable\TimetablePdfController::class)
+            ->teacherBlockTotalsRows(collect([$calendar->id]));
+
+        $profesor = $rows->firstWhere('name', trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name));
+
+        $this->assertNotNull($profesor);
+        $this->assertSame(2, $profesor['blocks']);
+        $this->assertSame(4, $profesor['hours']);
+
+        // El recreo nunca cuenta.
+        TimetablePeriod::query()->whereKey($secondPeriod->id)->update(['is_break' => true]);
+
+        $rowsAfter = app(\App\Http\Controllers\Timetable\TimetablePdfController::class)
+            ->teacherBlockTotalsRows(collect([$calendar->id]));
+        $profesorAfter = $rowsAfter->firstWhere('name', trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name));
+
+        $this->assertSame(1, $profesorAfter['blocks'], 'un período de recreo no debe contar');
     }
 }

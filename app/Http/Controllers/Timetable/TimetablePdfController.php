@@ -439,12 +439,18 @@ class TimetablePdfController extends Controller
      *
      * @return array{isPublishedSchedule: bool, gradeSchedules: \Illuminate\Support\Collection<int, array>}
      */
-    private function buildPestudioSchedules(TimetableCalendar $calendar, Pestudio $pestudio): array
+    private function buildPestudioSchedules(TimetableCalendar $calendar, Pestudio $pestudio, bool $forcePersistedSlots = false): array
     {
         $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
-        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
+        $usePersistedSlots = $forcePersistedSlots || $this->shouldUsePersistedSlots($calendar);
 
-        if (! $calendar->preview_payload && ! $isPublishedSchedule) {
+        if ($forcePersistedSlots) {
+            // El consolidado de todos los P.Estudios solo incluye calendarios
+            // activos y debe leerse de una única fuente canónica (los slots
+            // persistidos) para no mezclar `preview_payload` de unos con
+            // slots de otros en el mismo documento. Un calendario sin slots
+            // produce un bloque vacío que el llamador filtra.
+        } elseif (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
 
@@ -584,11 +590,7 @@ class TimetablePdfController extends Controller
                 return null;
             }
 
-            if (! $calendar->preview_payload && $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
-                return null;
-            }
-
-            $schedules = $this->buildPestudioSchedules($calendar, $pestudio);
+            $schedules = $this->buildPestudioSchedules($calendar, $pestudio, forcePersistedSlots: true);
             if ($schedules['gradeSchedules']->isEmpty()) {
                 return null;
             }
@@ -749,6 +751,8 @@ class TimetablePdfController extends Controller
      */
     public function teacherBlockTotals(Request $request)
     {
+        $this->raisePdfMemoryLimit();
+
         $lapso = Lapso::current();
         if (! $lapso) {
             abort(404, 'No hay lapso vigente.');
@@ -763,29 +767,15 @@ class TimetablePdfController extends Controller
             abort(404, 'No hay calendarios activos en el lapso vigente.');
         }
 
-        $slots = TimetableSlot::query()
-            ->whereIn('calendar_id', $calendarIds)
-            ->whereNotNull('profesor_id')
-            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
-            ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
-            ->with('lesson.pevaluacion.profesor')
-            ->get(['profesor_id', 'lesson_id']);
-
-        $rows = $slots
-            ->groupBy('profesor_id')
-            ->map(function ($group): array {
-                $profesor = $group->first()->lesson?->pevaluacion?->profesor;
-                $blocks = $group->count();
-
-                return [
-                    'name' => trim(($profesor?->lastname ?? '').' '.($profesor?->name ?? '')) ?: 'Sin nombre',
-                    'ci' => (string) ($profesor?->ci_profesor ?? '—'),
-                    'blocks' => $blocks,
-                    'hours' => $blocks * 2,
-                ];
-            })
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values();
+        // El docente canónico es `pevaluacion.profesor_id` (igual que la grilla
+        // y `all-teachers`); `timetable_slots.profesor_id` solo se usa como
+        // respaldo cuando la lección no tiene Pevaluación asociada.
+        //
+        // Un bloque de docente compartido (`lesson.allow_shared_teacher = true`)
+        // representa al docente atendiendo VARIAS secciones en el MISMO período:
+        // cuenta como un solo bloque. Se colapsa por (calendario, período). Los
+        // bloques normales siguen contando uno por slot.
+        $rows = $this->teacherBlockTotalsRows($calendarIds);
 
         if ($rows->isEmpty()) {
             abort(404, 'No hay docentes con bloques asignados en los calendarios activos del lapso vigente.');
@@ -803,6 +793,91 @@ class TimetablePdfController extends Controller
         $pdf->setPaper('letter', 'portrait');
 
         return $pdf->stream('totalizacion-bloques-docentes.pdf');
+    }
+
+    /**
+     * Bloques por docente de los calendarios indicados.
+     *
+     * Regla institucional: **un bloque por celda visual ocupada**. La celda que
+     * ve el usuario es la de la grilla fusionada del P.Educativo:
+     * (P.Educativo, turno, día, orden de bloque). Un docente que en el mismo
+     * bloque atiende varias secciones (docente compartido), sub-grupos en
+     * paralelo (`is_half_group`) o el mismo bloque en varios P.Estudios del
+     * mismo P.Educativo cuenta **una sola vez**.
+     *
+     * - Docente canónico: `pevaluacion.profesor_id`, con respaldo en
+     *   `timetable_slots.profesor_id` cuando la lección no tiene Pevaluación.
+     * - Los recreos no cuentan.
+     * - Horas académicas = 2 × bloques (regla institucional).
+     *
+     * @param  \Illuminate\Support\Collection<int, int|string>  $calendarIds
+     * @return \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>
+     */
+    public function teacherBlockTotalsRows($calendarIds): \Illuminate\Support\Collection
+    {
+        $slots = TimetableSlot::query()
+            ->whereIn('calendar_id', $calendarIds)
+            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
+            ->with([
+                'lesson:id,allow_shared_teacher,pevaluacion_id',
+                'lesson.pevaluacion:id,profesor_id',
+                'lesson.pevaluacion.profesor',
+                'period:id,shift_id,day_of_week,order_in_day,is_break',
+                'calendar:id,pestudio_id',
+                'calendar.pestudio:id,peducativo_id',
+            ])
+            ->get(['id', 'calendar_id', 'period_id', 'profesor_id', 'lesson_id']);
+
+        $byTeacher = [];
+
+        foreach ($slots as $slot) {
+            // Los recreos nunca reciben clases; se excluyen por robustez.
+            if ((bool) $slot->period?->is_break) {
+                continue;
+            }
+
+            $pev = $slot->lesson?->pevaluacion;
+            $profesorId = (int) ($pev?->profesor_id ?? 0) ?: (int) $slot->profesor_id;
+
+            if ($profesorId <= 0) {
+                continue;
+            }
+
+            if (! isset($byTeacher[$profesorId])) {
+                $profesor = $pev?->profesor;
+
+                $byTeacher[$profesorId] = [
+                    'name' => trim(($profesor?->lastname ?? '').' '.($profesor?->name ?? '')) ?: 'Sin nombre',
+                    'ci' => (string) ($profesor?->ci_profesor ?? '—'),
+                    'cells' => [],
+                ];
+            }
+
+            // Celda visual = P.Educativo + turno + día + orden de bloque.
+            $key = implode('|', [
+                (int) ($slot->calendar?->pestudio?->peducativo_id ?? 0),
+                (int) ($slot->period?->shift_id ?? 0),
+                (int) ($slot->period?->day_of_week ?? 0),
+                (int) ($slot->period?->order_in_day ?? 0),
+            ]);
+
+            $byTeacher[$profesorId]['cells'][$key] = true;
+        }
+
+        return collect($byTeacher)
+            ->map(function (array $row): array {
+                $blocks = count($row['cells']);
+
+                return [
+                    'name' => $row['name'],
+                    'ci' => $row['ci'],
+                    'blocks' => $blocks,
+                    'hours' => $blocks * 2,
+                ];
+            })
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
     }
 
     /**
