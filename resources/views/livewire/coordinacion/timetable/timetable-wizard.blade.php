@@ -139,6 +139,28 @@
                     label="Totalización por docente"
                     separator />
             </x-dropdown>
+
+            {{-- Dropdown: exportaciones de datos para consumo externo / IA --}}
+            <x-dropdown position="bottom-end" width="3xl" height="auto">
+                <x-slot name="trigger">
+                    <x-button
+                        label="Datos"
+                        icon="circle-stack"
+                        right-icon="chevron-down"
+                        color="base"
+                        variant="outline"
+                        class="font-bold" />
+                </x-slot>
+
+                <x-dropdown.item
+                    wire:click="openTeacherJsonDialog"
+                    wire:loading.attr="disabled"
+                    wire:target="openTeacherJsonDialog"
+                    icon="arrow-down-tray">
+                    <span wire:loading.remove wire:target="openTeacherJsonDialog">Horario por profesor (JSON)</span>
+                    <span wire:loading wire:target="openTeacherJsonDialog">Abriendo…</span>
+                </x-dropdown.item>
+            </x-dropdown>
         </div>
     </div>
 
@@ -2150,6 +2172,74 @@
                             El profesor seleccionado no tiene lessons asignadas en este P.Estudio.
                         </div>
                     @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Diálogo: exportar el horario de un docente como JSON estructurado (IA). --}}
+    @if ($showTeacherJsonDialog)
+        <div class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/70 p-4"
+            role="dialog" aria-modal="true" aria-labelledby="teacher-json-title"
+            x-data x-on:keydown.escape.window="$wire.closeTeacherJsonDialog()">
+            <div x-on:click.stop class="flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
+                <div class="flex items-start justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-white/10">
+                    <div>
+                        <h2 id="teacher-json-title" class="text-sm font-extrabold text-gray-900 dark:text-white">Horario por profesor · JSON</h2>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Descarga la estructura organizada del horario de un docente, lista para un agente de IA.</p>
+                    </div>
+                    <button type="button" wire:click="closeTeacherJsonDialog"
+                        class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-sky-500/50 dark:hover:bg-white/10 dark:hover:text-white"
+                        aria-label="Cerrar exportación JSON">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+
+                <div class="space-y-4 overflow-auto p-5">
+                    <div>
+                        <label for="teacher-json-calendar" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Calendario</label>
+                        <select id="teacher-json-calendar" wire:model.live="teacherJsonCalendarId"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40 dark:border-white/10 dark:bg-gray-900 dark:text-white">
+                            @forelse ($teacherJsonCalendars as $calendar)
+                                <option value="{{ $calendar['id'] }}">{{ $calendar['name'] }} · {{ $calendar['pestudio'] }}</option>
+                            @empty
+                                <option value="">No hay calendarios con horario generado</option>
+                            @endforelse
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="teacher-json-profesor" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Profesor</label>
+                        <select id="teacher-json-profesor" wire:model="teacherJsonProfesorId"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40 dark:border-white/10 dark:bg-gray-900 dark:text-white">
+                            @forelse ($teacherJsonTeachers as $teacher)
+                                <option value="{{ $teacher['id'] }}">{{ $teacher['name'] }}</option>
+                            @empty
+                                <option value="">No hay profesores con horario en este calendario</option>
+                            @endforelse
+                        </select>
+                    </div>
+
+                    <div class="rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2.5 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
+                        El JSON identifica al docente, el calendario, el lapso y el P.Estudio, y organiza su semana por día y bloque (turno, horario, recreos y asignaciones con asignatura, sección, grado y aula), además de totales por asignatura y turno.
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 border-t border-gray-200 px-5 py-4 dark:border-white/10">
+                    <button type="button" wire:click="closeTeacherJsonDialog"
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
+                        Cancelar
+                    </button>
+                    <button type="button" wire:click="downloadTeacherScheduleJson"
+                        wire:loading.attr="disabled" wire:target="downloadTeacherScheduleJson"
+                        @disabled($teacherJsonProfesorId === null)
+                        class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                        </svg>
+                        <span wire:loading.remove wire:target="downloadTeacherScheduleJson">Descargar JSON</span>
+                        <span wire:loading wire:target="downloadTeacherScheduleJson">Generando…</span>
+                    </button>
                 </div>
             </div>
         </div>
