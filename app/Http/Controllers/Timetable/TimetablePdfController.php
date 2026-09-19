@@ -840,7 +840,7 @@ class TimetablePdfController extends Controller
 
             fputcsv($out, [
                 'Docente', 'C.I.', 'Bloques', 'Horas académicas',
-                'Horas Administrativa', 'Horas Formativas',
+                'Horas Administrativas', 'Horas Formación',
             ]);
 
             foreach ($rows as $row) {

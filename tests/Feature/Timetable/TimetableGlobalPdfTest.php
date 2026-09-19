@@ -354,4 +354,44 @@ class TimetableGlobalPdfTest extends TestCase
 
         $this->assertSame(1, $profesorAfter['blocks'], 'un período de recreo no debe contar');
     }
+
+    public function test_teacher_block_totals_pdf_streams(): void
+    {
+        $fixture = $this->fixture();
+
+        $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.teacher-block-totals'))
+            ->assertOk();
+    }
+
+    public function test_teacher_block_totals_html_streams(): void
+    {
+        $fixture = $this->fixture();
+
+        $this->assertHtmlContains('Totalización de bloques por docente', $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.teacher-block-totals', ['format' => 'html']))
+            ->assertOk());
+    }
+
+    /**
+     * El XLS agrega «Horas Administrativas» y «Horas Formación» vacías para
+     * llenado manual; el resto de columnas conserva los totales calculados.
+     */
+    public function test_teacher_block_totals_xls_includes_empty_manual_columns(): void
+    {
+        $fixture = $this->fixture();
+
+        $csv = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.teacher-block-totals', ['format' => 'xls']))
+            ->assertOk()
+            ->streamedContent();
+
+        $this->assertStringContainsString(
+            'Docente,C.I.,Bloques,"Horas académicas","Horas Administrativas","Horas Formación"',
+            $csv
+        );
+
+        // Fila del docente: ... ,8801,1,2,,  (las dos últimas columnas vacías).
+        $this->assertMatchesRegularExpression('/^.*,8801,1,2,,$/m', $csv);
+    }
 }
