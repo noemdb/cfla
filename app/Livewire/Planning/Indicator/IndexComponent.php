@@ -542,7 +542,7 @@ class IndexComponent extends Component
 
         // ── Series 1: Published lessons (status = 'PUBLISHED') ──
         $published = $this->applyLessonChartFilters(
-            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')->withLmsContent(),
             $lapsoId
         )
             ->where('lms_activity_publications.status', 'PUBLISHED')
@@ -554,7 +554,7 @@ class IndexComponent extends Component
 
         // ── Series 2: Scheduled lessons (status != 'PUBLISHED', publish_at IS NOT NULL) ──
         $scheduled = $this->applyLessonChartFilters(
-            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')->withLmsContent(),
             $lapsoId
         )
             ->whereNotNull('lms_activity_publications.publish_at')
@@ -567,7 +567,7 @@ class IndexComponent extends Component
 
         // ── Series 3: Drafts (publish_at IS NULL, status != 'PUBLISHED' OR null) ──
         $drafts = $this->applyLessonChartFilters(
-            Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')->withLmsContent(),
             $lapsoId
         )
             ->whereNull('lms_activity_publications.publish_at')
@@ -726,33 +726,41 @@ class IndexComponent extends Component
         ])->toArray();
 
         // ── Lessons flow (same logic as loadChartLessonsByDay — published/scheduled/drafts — global scope) ──
+        // Solo se cuentan lecciones con contenido LMS (al menos una sección o recurso
+        // asociado), igual que el KPI de "Total de Lecciones" (Activity::withLmsContent()).
         $merged = collect();
 
         // Published (by published_at)
-        $pubQuery = DB::table('lms_activity_publications')
-            ->where('status', 'PUBLISHED')
-            ->whereNotNull('published_at')
-            ->selectRaw('DATE(published_at) as date, COUNT(*) as total')
+        $pubQuery = Activity::query()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->withLmsContent()
+            ->where('lms_activity_publications.status', 'PUBLISHED')
+            ->whereNotNull('lms_activity_publications.published_at')
+            ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
             ->groupBy('date');
-        if ($since) $pubQuery->where('published_at', '>=', $since);
+        if ($since) $pubQuery->where('lms_activity_publications.published_at', '>=', $since);
         foreach ($pubQuery->get() as $r) {
             $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
         }
 
         // Scheduled (by publish_at, not published)
-        $schQuery = DB::table('lms_activity_publications')
-            ->whereNotNull('publish_at')
-            ->where('status', '!=', 'PUBLISHED')
-            ->selectRaw('DATE(publish_at) as date, COUNT(*) as total')
+        $schQuery = Activity::query()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->withLmsContent()
+            ->whereNotNull('lms_activity_publications.publish_at')
+            ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+            ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
             ->groupBy('date');
-        if ($since) $schQuery->where('publish_at', '>=', $since);
+        if ($since) $schQuery->where('lms_activity_publications.publish_at', '>=', $since);
         foreach ($schQuery->get() as $r) {
             $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
         }
 
         // Drafts — use Activity + LEFT JOIN (matching loadChartLessonsByDay's Borradores logic),
         // to catch activities WITHOUT any publication record that the DB::table approach misses.
-        $drfQuery = \App\Models\app\Academy\Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        $drfQuery = Activity::query()
+            ->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->withLmsContent()
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')
