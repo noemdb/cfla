@@ -156,16 +156,12 @@
          x-transition:enter-start="opacity-0 translate-y-1"
          x-transition:enter-end="opacity-100 translate-y-0">
         <div class="space-y-3"
-             wire:key="teaching-counter-{{ md5(($activityForm->teachingStart ?? '').($activityForm->teachingContent ?? '').($activityForm->teachingEnd ?? '')) }}"
              x-data="{
-                inicio: @js($activityForm->teachingStart ?? ''),
-                desarrollo: @js($activityForm->teachingContent ?? ''),
-                cierre: @js($activityForm->teachingEnd ?? ''),
                 get teachingLength() {
                     const parts = [];
-                    const s = (this.inicio || '').trim();
-                    const d = (this.desarrollo || '').trim();
-                    const e = (this.cierre || '').trim();
+                    const s = ($wire.activityForm.teachingStart || '').trim();
+                    const d = ($wire.activityForm.teachingContent || '').trim();
+                    const e = ($wire.activityForm.teachingEnd || '').trim();
                     if (s !== '') parts.push('INICIO: ' + s);
                     if (d !== '') parts.push('DESARROLLO: ' + d);
                     if (e !== '') parts.push('CIERRE: ' + e);
@@ -183,7 +179,7 @@
                         INICIO
                     </span>
                 </label>
-                <textarea x-on:input="inicio = $el.value" wire:model="activityForm.teachingStart" rows="6"
+                <textarea wire:model="activityForm.teachingStart" rows="6"
                     class="w-full bg-gray-800/50 border border-cyan-500/20 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all duration-200 resize-y"
                     placeholder="Motivación, exploración de saberes previos, problematización..."></textarea>
                 @error('activityForm.teachingStart') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
@@ -199,7 +195,7 @@
                         DESARROLLO
                     </span>
                 </label>
-                <textarea x-on:input="desarrollo = $el.value" wire:model="activityForm.teachingContent" rows="6"
+                <textarea wire:model="activityForm.teachingContent" rows="6"
                     class="w-full bg-gray-800/50 border border-emerald-500/20 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
                     placeholder="Procesos didácticos, mediación, actividades de construcción del aprendizaje..."></textarea>
                 @error('activityForm.teachingContent') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
@@ -215,7 +211,7 @@
                         CIERRE
                     </span>
                 </label>
-                <textarea x-on:input="cierre = $el.value" wire:model="activityForm.teachingEnd" rows="6"
+                <textarea wire:model="activityForm.teachingEnd" rows="6"
                     class="w-full bg-gray-800/50 border border-amber-500/20 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200 resize-y"
                     placeholder="Sistematización, conclusiones, metacognición, transferencia a la vida..."></textarea>
                 @error('activityForm.teachingEnd') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror

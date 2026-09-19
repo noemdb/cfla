@@ -88,7 +88,7 @@ class ActivityImprovementTest extends TestCase
             ->assertSet('activityForm.teachingEnd', 'CIERRE mejorado');
     }
 
-    public function test_teaching_max_5000_and_counter_renders(): void
+    public function test_teaching_max_30000_and_counter_renders(): void
     {
         [$pevaluacionId, $profesorId] = $this->createEvaluacionChain();
         $user = $this->createProfesorUser($profesorId);
@@ -97,7 +97,7 @@ class ActivityImprovementTest extends TestCase
             ->test(IndexComponent::class, ['id' => $pevaluacionId])
             ->call('setCreate')
             ->assertSeeHtml('teachingLength')
-            ->assertSeeHtml('x-on:input="inicio = $el.value"')
+            ->assertSeeHtml('$wire.activityForm.teachingEnd')
             ->set('activityForm.teachingStart', 'Inicio')
             ->set('activityForm.teachingContent', 'Desarrollo')
             ->set('activityForm.teachingEnd', 'Cierre')
@@ -107,11 +107,80 @@ class ActivityImprovementTest extends TestCase
         Livewire::actingAs($user)
             ->test(IndexComponent::class, ['id' => $pevaluacionId])
             ->call('setCreate')
-            ->set('activityForm.teachingStart', str_repeat('a', 2000))
-            ->set('activityForm.teachingContent', str_repeat('b', 2000))
-            ->set('activityForm.teachingEnd', str_repeat('c', 2000))
+            ->set('activityForm.teachingStart', str_repeat('a', 20000))
+            ->set('activityForm.teachingContent', str_repeat('b', 20000))
+            ->set('activityForm.teachingEnd', str_repeat('c', 20000))
             ->call('save')
             ->assertHasErrors(['activityForm.teaching' => 'max']);
+    }
+
+    public function test_save_persists_all_three_teaching_sections_complete(): void
+    {
+        [$pevaluacionId, $profesorId] = $this->createEvaluacionChain();
+        $user = $this->createProfesorUser($profesorId);
+
+        $start = 'INICIO completo '.str_repeat('a', 500);
+        $content = 'DESARROLLO completo '.str_repeat('b', 500);
+        $end = 'CIERRE completo '.str_repeat('c', 500);
+
+        Livewire::actingAs($user)
+            ->test(IndexComponent::class, ['id' => $pevaluacionId])
+            ->call('setCreate')
+            ->set('activityForm.topic', 'Tema')
+            ->set('activityForm.thematic', 'Tejido')
+            ->set('activityForm.references', 'Referentes')
+            ->set('activityForm.observations', 'Observaciones')
+            ->set('activityForm.finicial', now()->toDateString())
+            ->set('activityForm.ffinal', now()->addDay()->toDateString())
+            ->set('activityForm.teachingStart', $start)
+            ->set('activityForm.teachingContent', $content)
+            ->set('activityForm.teachingEnd', $end)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $activity = \App\Models\app\Academy\Activity::where('pevaluacion_id', $pevaluacionId)->latest('id')->first();
+
+        $this->assertNotNull($activity);
+        $this->assertStringContainsString($start, $activity->teaching);
+        $this->assertStringContainsString($content, $activity->teaching);
+        $this->assertStringContainsString($end, $activity->teaching);
+    }
+
+    public function test_edit_roundtrip_keeps_sections_when_content_mentions_markers(): void
+    {
+        [$pevaluacionId, $profesorId] = $this->createEvaluacionChain();
+        $user = $this->createProfesorUser($profesorId);
+
+        // Contenido con las palabras "inicio", "desarrollo" y "cierre" sueltas:
+        // antes corrompían el parseo y se perdía el contenido previo de cada
+        // sección (p. ej. el texto del CIERRE).
+        $start = 'Al inicio de la jornada se exploran saberes previos.';
+        $content = 'Durante el desarrollo se construyen los aprendizajes.';
+        $end = 'Como cierre, los estudiantes sistematizan y concluyen el tema.';
+
+        $activity = \App\Models\app\Academy\Activity::create([
+            'pevaluacion_id' => $pevaluacionId,
+            'finicial' => now()->toDateString(),
+            'ffinal' => now()->addDay()->toDateString(),
+            'topic' => 'Tema',
+            'thematic' => 'Tejido',
+            'references' => 'Referentes',
+            'teaching' => "INICIO: {$start} DESARROLLO: {$content} CIERRE: {$end}",
+            'observations' => 'Observaciones',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(IndexComponent::class, ['id' => $pevaluacionId])
+            ->call('setEditActivity', $activity->id)
+            ->assertSet('activityForm.teachingStart', $start)
+            ->assertSet('activityForm.teachingContent', $content)
+            ->assertSet('activityForm.teachingEnd', $end);
+
+        $sections = $activity->fresh()->getTeachingSections();
+
+        $this->assertSame($start, $sections['INICIO']);
+        $this->assertSame($content, $sections['DESARROLLO']);
+        $this->assertSame($end, $sections['CIERRE']);
     }
 
     // ─── Helpers (misma cadena FK que StudentResourceTest) ────────────

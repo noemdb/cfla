@@ -187,65 +187,66 @@ class Activity extends Model implements \App\Contracts\Auditable
     // ─── ESTRUCTURA INICIO · DESARROLLO · CIERRE ─────────────────
 
     /**
-     * Verifica si el campo `teaching` contiene las tres palabras clave:
-     * INICIO, DESARROLLO y CIERRE.
+     * Verifica si el campo `teaching` contiene los tres marcadores de sección
+     * ("INICIO:", "DESARROLLO:", "CIERRE:") en el orden esperado.
      */
     public function hasTeachingStructure(): bool
     {
-        if (empty($this->teaching)) {
-            return false;
-        }
-        foreach (['INICIO', 'DESARROLLO', 'CIERRE'] as $kw) {
-            if (! preg_match('/\b'.preg_quote($kw, '/').'\b/ui', $this->teaching)) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->getTeachingSections() !== [];
     }
 
     /**
      * Descompone el campo `teaching` en tres secciones (INICIO, DESARROLLO, CIERRE).
      *
+     * Solo reconoce los marcadores con dos puntos y en mayúsculas que produce
+     * el formulario. Así el contenido no se corrompe cuando el texto pedagógico
+     * menciona palabras sueltas como "el inicio de la jornada", "durante el
+     * desarrollo" o "como cierre".
+     *
      * @return array<string, string> Claves: 'INICIO', 'DESARROLLO', 'CIERRE'
-     *                               Vacío si no están las tres palabras.
+     *                               Vacío si no están las tres secciones.
      */
     public function getTeachingSections(): array
     {
-        if (! $this->hasTeachingStructure()) {
+        $text = (string) $this->teaching;
+        if (trim($text) === '') {
             return [];
         }
 
-        // Partir por las palabras clave, capturándolas como delimitadores
-        $pattern = '/\b(INICIO|DESARROLLO|CIERRE)\b\s*:?\s*/ui';
-        $parts = preg_split($pattern, $this->teaching, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $labels = ['INICIO', 'DESARROLLO', 'CIERRE'];
+        $found = [];
+        $cursor = 0;
 
-        $sections = [];
-        $currentLabel = null;
-        $preamble = '';
-
-        foreach ($parts as $part) {
-            $upper = mb_strtoupper($part);
-            if (in_array($upper, ['INICIO', 'DESARROLLO', 'CIERRE'])) {
-                if ($currentLabel !== null && ! isset($sections[$currentLabel])) {
-                    $sections[$currentLabel] = '';
-                }
-                $currentLabel = $upper;
-                $sections[$currentLabel] = '';
-            } else {
-                if ($currentLabel === null) {
-                    $preamble .= $part;
-                } else {
-                    $sections[$currentLabel] .= $part;
-                }
+        foreach ($labels as $label) {
+            $pattern = '/\b'.preg_quote($label, '/').'\b\s*:\s*/u';
+            if (preg_match($pattern, $text, $matches, PREG_OFFSET_CAPTURE, $cursor)) {
+                $found[$label] = [
+                    'marker_start' => $matches[0][1],
+                    'content_start' => $matches[0][1] + strlen($matches[0][0]),
+                ];
+                $cursor = $found[$label]['content_start'];
             }
         }
 
-        // Si hay texto antes del primer INICIO, anteponerlo a la sección INICIO
-        if (trim($preamble) !== '' && isset($sections['INICIO'])) {
-            $sections['INICIO'] = trim($preamble)."\n".trim($sections['INICIO']);
+        if (count($found) !== count($labels)) {
+            return [];
         }
 
-        return array_map('trim', $sections);
+        $sections = [];
+        foreach ($labels as $index => $label) {
+            $start = $found[$label]['content_start'];
+            $end = strlen($text);
+
+            foreach (array_slice($labels, $index + 1) as $nextLabel) {
+                if (isset($found[$nextLabel])) {
+                    $end = $found[$nextLabel]['marker_start'];
+                    break;
+                }
+            }
+
+            $sections[$label] = trim(substr($text, $start, $end - $start));
+        }
+
+        return $sections;
     }
 }
