@@ -224,8 +224,8 @@
             {{-- Contador de caracteres de la enseñanza --}}
             <div class="flex items-center justify-end">
                 <span class="text-[10px] tabular-nums font-medium"
-                      :class="teachingLength > 5000 ? 'text-red-400' : 'text-gray-500'"
-                      x-text="`${teachingLength}/5000 caracteres`"></span>
+                      :class="teachingLength > 30000 ? 'text-red-400' : 'text-gray-500'"
+                      x-text="`${teachingLength}/30000 caracteres`"></span>
             </div>
 
             @error('activityForm.teaching') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror

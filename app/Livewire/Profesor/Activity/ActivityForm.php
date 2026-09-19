@@ -98,7 +98,7 @@ class ActivityForm extends Form
             'teachingStart' => 'required|string',
             'teachingContent' => 'required|string',
             'teachingEnd' => 'required|string',
-            'teaching' => 'nullable|string|max:5000',
+            'teaching' => 'nullable|string|max:30000',
             'learning' => 'nullable|string',
             'observations' => 'required|string',
             'description' => 'nullable|string',
@@ -108,7 +108,7 @@ class ActivityForm extends Form
     public function messages()
     {
         return [
-            'teaching.max' => 'La enseñanza no debe superar los 5000 caracteres. Sintetiza el contenido (inicio, desarrollo y cierre).',
+            'teaching.max' => 'La enseñanza no debe superar los 30000 caracteres. Sintetiza el contenido (inicio, desarrollo y cierre).',
         ];
     }
 
