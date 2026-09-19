@@ -2196,16 +2196,69 @@
                 </div>
 
                 <div class="space-y-4 overflow-auto p-5">
+                    @php
+                        $jsonCalendars = collect($teacherJsonCalendars);
+                        $jsonActiveCalendars = $jsonCalendars->where('status', '!=', 'archived')->values();
+                        $jsonArchivedCalendars = $jsonCalendars->where('status', 'archived')->values();
+                        $jsonSelectedCalendar = $jsonCalendars->firstWhere('id', (int) $teacherJsonCalendarId);
+                        $jsonStatusMeta = function (string $status): array {
+                            return match ($status) {
+                                'active' => ['label' => 'Activo', 'class' => 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'],
+                                'archived' => ['label' => 'Archivado', 'class' => 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-gray-400'],
+                                'generating' => ['label' => 'Generando', 'class' => 'bg-amber-500/15 text-amber-700 dark:text-amber-300'],
+                                default => ['label' => 'Borrador', 'class' => 'bg-sky-500/15 text-sky-700 dark:text-sky-300'],
+                            };
+                        };
+                    @endphp
+
                     <div>
-                        <label for="teacher-json-calendar" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Calendario</label>
-                        <select id="teacher-json-calendar" wire:model.live="teacherJsonCalendarId"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40 dark:border-white/10 dark:bg-gray-900 dark:text-white">
-                            @forelse ($teacherJsonCalendars as $calendar)
-                                <option value="{{ $calendar['id'] }}">{{ $calendar['name'] }} · {{ $calendar['pestudio'] }}</option>
-                            @empty
-                                <option value="">No hay calendarios con horario generado</option>
-                            @endforelse
-                        </select>
+                        <label class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Calendario</label>
+                        <div class="flex-1 min-w-[200px] [&>div]:w-full">
+                            <x-dropdown
+                                wire:key="teacher-json-calendar-{{ collect($teacherJsonCalendars)->map(fn ($calendar) => $calendar['id'].'-'.$calendar['status'])->implode('|') }}"
+                                position="bottom-start"
+                                height="auto"
+                                class="!w-full">
+                                <x-slot name="trigger">
+                                    <x-button
+                                        :label="$jsonSelectedCalendar['name'] ?? 'Seleccionar'"
+                                        icon="calendar-days"
+                                        right-icon="chevron-down"
+                                        color="base"
+                                        variant="outline"
+                                        full
+                                        class="font-bold" />
+                                </x-slot>
+
+                                @foreach ($jsonActiveCalendars as $calendar)
+                                    @php $statusMeta = $jsonStatusMeta($calendar['status']); @endphp
+                                    <x-dropdown.item
+                                        wire:click="$set('teacherJsonCalendarId', {{ (int) $calendar['id'] }})"
+                                        class="w-full">
+                                        <span class="flex w-full items-center gap-2 min-w-0">
+                                            <span class="flex-1 break-words">{{ $calendar['name'] }}</span>
+                                            <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
+                                        </span>
+                                    </x-dropdown.item>
+                                @endforeach
+
+                                @if ($jsonArchivedCalendars->isNotEmpty())
+                                    <div class="mt-1 border-t border-gray-200 px-4 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-widest text-gray-400 dark:border-white/10 dark:text-gray-500">
+                                        Archivados
+                                    </div>
+                                    @foreach ($jsonArchivedCalendars as $calendar)
+                                        <x-dropdown.item
+                                            wire:click="$set('teacherJsonCalendarId', {{ (int) $calendar['id'] }})"
+                                            class="w-full opacity-60">
+                                            <span class="flex w-full items-center gap-2 min-w-0">
+                                                <span class="flex-1 break-words">{{ $calendar['name'] }}</span>
+                                                <span class="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-gray-400">Archivado</span>
+                                            </span>
+                                        </x-dropdown.item>
+                                    @endforeach
+                                @endif
+                            </x-dropdown>
+                        </div>
                     </div>
 
                     <div>

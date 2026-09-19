@@ -161,6 +161,27 @@ class TimetableTeacherJsonExportTest extends TestCase
             ->assertNoFileDownloaded();
     }
 
+    public function test_selecting_calendar_from_dropdown_resyncs_teacher(): void
+    {
+        $fixture = $this->fixture();
+
+        $component = Livewire::actingAs($fixture['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $fixture['calendar']->id)
+            ->call('openTeacherJsonDialog')
+            ->assertSet('teacherJsonProfesorId', $fixture['profesor']->id);
+
+        // Un calendario sin slots no tiene docentes: al seleccionarlo se limpia.
+        $empty = TimetableCalendar::factory()->create([
+            'lapso_id' => $fixture['lapso']->id,
+            'pestudio_id' => $fixture['pestudio']->id,
+        ]);
+
+        $component->set('teacherJsonCalendarId', $empty->id)
+            ->assertSet('teacherJsonCalendarId', $empty->id)
+            ->assertSet('teacherJsonProfesorId', null);
+    }
+
     public function test_planner_can_export_teacher_schedule_json(): void
     {
         $fixture = $this->fixture();
