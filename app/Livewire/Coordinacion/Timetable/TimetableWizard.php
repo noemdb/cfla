@@ -930,10 +930,13 @@ class TimetableWizard extends Component
         ]);
 
         $calendar = TimetableCalendar::find($this->calendarId);
-        if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_DRAFT) {
-            $this->notification()->error('Períodos no guardados', 'Solo puedes editar bloques de un calendario borrador.');
+        if (! $calendar) {
+            $this->notification()->error('Períodos no guardados', 'No se encontró el calendario seleccionado.');
 
             return;
+        }
+        if ($calendar->status !== TimetableCalendar::STATUS_DRAFT) {
+            $this->notification()->warning('Calendario no borrador', 'Estás editando bloques de un calendario que no está en borrador; los cambios se guardarán igualmente.');
         }
         if ($this->periods === []) {
             $this->notification()->warning('Períodos no guardados', 'Debes conservar al menos un bloque antes de guardar.');
