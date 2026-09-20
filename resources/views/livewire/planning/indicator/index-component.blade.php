@@ -210,67 +210,98 @@
         <div class="p-2 sm:p-4 lg:p-6">
 
             {{-- ═══════════════════════════════════════════════════════════════════
-                 TAB 1: Indicadores Principales — grouped by Peducativo
+                 TAB 1: Indicadores Principales — one tab per Peducativo
                  ═══════════════════════════════════════════════════════════════════ --}}
-            <div x-show="activeTab === 1" x-cloak>
-                <div class="space-y-8">
-                    @forelse($peducativoMainIndicators as $item)
-                        <div>
-                            <div class="flex items-start gap-3 mb-2">
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
-                                    @if($item->peducativo?->description)
-                                    <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">{{ $item->peducativo->description }}</p>
-                                    @endif
-                                </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->grados_count }} grado(s)</span>
-                                    <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->pensums_count }} pensum(s)</span>
-                                    <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->pestudios->count() }} plan(es)</span>
-                                </div>
+            <div x-show="activeTab === 1" x-cloak
+                 x-data="{ activePeducativo: {{ $peducativoMainIndicators->first()?->peducativo?->id ?? 0 }} }">
+
+                {{-- ═══ Indicadores por Programa Educativo (sección diferenciada de los gráficos) ═══ --}}
+                <div class="bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-white/5 rounded-lg p-3 sm:p-5 mb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
-                                <div class="col-span-1 sm:col-span-2">
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
-                                        label="Actividades Registradas"
-                                        value="{{ number_format($item->activities_count) }}"
-                                        color="purple"
-                                    />
-                                </div>
-                                <div class="col-span-1 sm:col-span-2">
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
-                                        label="Profesores con Carga"
-                                        value="{{ $item->profesores_count }}"
-                                        color="amber"
-                                    />
-                                </div>
-                                <div class="col-span-1 sm:col-span-2">
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>'
-                                        label="Lecciones Registradas"
-                                        value="{{ number_format($item->lessons_count) }}"
-                                        color="sky"
-                                    />
-                                </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Indicadores por Programa Educativo</h3>
+                                <p class="text-[10px] text-gray-500">Métricas del período seleccionado, por programa.</p>
                             </div>
                         </div>
-                        @if(!$loop->last)<hr class="border-white/5 my-6">@endif
-                    @empty
+                    </div>
+
+                    @if($peducativoMainIndicators->count() > 0)
+                        <!-- Peducativo nav-tabs (one tab per peducativoId) -->
+                        <div class="border-b border-white/5 mb-2">
+                            <nav class="flex overflow-x-auto gap-0.5 snap-x snap-mandatory -mb-px">
+                                @foreach($peducativoMainIndicators as $item)
+                                    <button @click="activePeducativo = {{ $item->peducativo->id }}"
+                                        :class="activePeducativo === {{ $item->peducativo->id }} ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
+                                        class="shrink-0 sm:flex-1 px-2 sm:px-4 py-2 min-h-[44px] text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                        {{ $item->peducativo?->name }}
+                                        <span class="block text-[9px] font-normal text-gray-500 normal-case">{{ $item->pestudios->count() }} plan(es)</span>
+                                    </button>
+                                @endforeach
+                            </nav>
+                        </div>
+
+                        <!-- Peducativo content panels -->
+                        @foreach($peducativoMainIndicators as $item)
+                            <div x-show="activePeducativo === {{ $item->peducativo->id }}" x-cloak>
+                                <div class="flex items-start gap-3 mb-2">
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
+                                        @if($item->peducativo?->description)
+                                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">{{ $item->peducativo->description }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center gap-3 shrink-0">
+                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->grados_count }} grado(s)</span>
+                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->pensums_count }} pensum(s)</span>
+                                        <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->pestudios->count() }} plan(es)</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                                    <div class="col-span-1 sm:col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
+                                            label="Actividades Registradas"
+                                            value="{{ number_format($item->activities_count) }}"
+                                            color="purple"
+                                        />
+                                    </div>
+                                    <div class="col-span-1 sm:col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
+                                            label="Profesores con Carga"
+                                            value="{{ $item->profesores_count }}"
+                                            color="amber"
+                                        />
+                                    </div>
+                                    <div class="col-span-1 sm:col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>'
+                                            label="Lecciones Registradas"
+                                            value="{{ number_format($item->lessons_count) }}"
+                                            color="sky"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
                         <div class="text-center py-16">
                             <svg class="w-16 h-16 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <p class="text-gray-500 font-medium">No hay programas educativos activos</p>
                             <p class="text-gray-600 text-sm mt-1">Activa un programa educativo con planificación para ver indicadores.</p>
                         </div>
-                    @endforelse
+                    @endif
                 </div>
 
                     {{-- ═══ Charts Bento Grid (4-col) ═══ --}}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-2" style="grid-auto-flow: dense;">
-                        {{-- ── Actividades por Día (2×1) ── --}}
-                        <div class="col-span-1 sm:col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                        {{-- ── Actividades por Día (fila completa) ── --}}
+                        <div class="col-span-1 sm:col-span-2 lg:col-span-4 w-full bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
                                         <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,18 +310,29 @@
                                     </div>
                                     <h3 class="text-sm font-bold text-gray-900 dark:text-white">Actividades Registradas por Día</h3>
                                 </div>
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                    {{ count($chartActivitiesByDay) }} día(s) con actividad
-                                </span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                        {{ count($chartActivitiesByDay) }} día(s) con actividad
+                                    </span>
+                                    <div class="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-0.5">
+                                        @foreach(['7d' => '7 días', '30d' => '30 días', '3m' => '3 meses', 'all' => 'Todo'] as $val => $label)
+                                            <button wire:click="$set('chartActivitiesRange', '{{ $val }}')"
+                                                class="px-2 sm:px-3 py-1.5 min-h-[36px] text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-200 whitespace-nowrap
+                                                       {{ $chartActivitiesRange === $val ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/5' }}">
+                                                {{ $label }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
                             <div wire:ignore>
                                 <div id="activities-per-day-chart" class="w-full" style="min-height: 250px;"></div>
                             </div>
                         </div>
 
-                        {{-- ── Lecciones por Día (2×1) ── --}}
-                        <div class="col-span-1 sm:col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-3">
+                        {{-- ── Lecciones por Día (fila completa) ── --}}
+                        <div class="col-span-1 sm:col-span-2 lg:col-span-4 w-full bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-sky-100 dark:bg-sky-500/20 rounded-lg flex items-center justify-center">
                                         <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,9 +341,20 @@
                                     </div>
                                     <h3 class="text-sm font-bold text-gray-900 dark:text-white">Lecciones Registradas por Día</h3>
                                 </div>
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                    {{ count($chartLessonsByDay['categories'] ?? []) }} día(s) con actividad
-                                </span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                        {{ count($chartLessonsByDay['categories'] ?? []) }} día(s) con actividad
+                                    </span>
+                                    <div class="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-0.5">
+                                        @foreach(['7d' => '7 días', '30d' => '30 días', '3m' => '3 meses', 'all' => 'Todo'] as $val => $label)
+                                            <button wire:click="$set('chartLessonsRange', '{{ $val }}')"
+                                                class="px-2 sm:px-3 py-1.5 min-h-[36px] text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-200 whitespace-nowrap
+                                                       {{ $chartLessonsRange === $val ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/5' }}">
+                                                {{ $label }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
                             <div wire:ignore>
                                 <div id="lessons-per-day-chart" class="w-full" style="min-height: 250px;"></div>
@@ -310,7 +363,7 @@
 
                         {{-- ── Publicaciones Programadas por Día (4×1) ── --}}
                         <div class="col-span-1 sm:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center">
                                         <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,9 +372,20 @@
                                     </div>
                                     <h3 class="text-sm font-bold text-gray-900 dark:text-white">Publicaciones Programadas por Día</h3>
                                 </div>
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                    {{ count($chartScheduledByDay) }} día(s) con programación
-                                </span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                        {{ count($chartScheduledByDay) }} día(s) con programación
+                                    </span>
+                                    <div class="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-0.5">
+                                        @foreach(['7d' => '7 días', '30d' => '30 días', '3m' => '3 meses', 'all' => 'Todo'] as $val => $label)
+                                            <button wire:click="$set('chartScheduledRange', '{{ $val }}')"
+                                                class="px-2 sm:px-3 py-1.5 min-h-[36px] text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-200 whitespace-nowrap
+                                                       {{ $chartScheduledRange === $val ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/5' }}">
+                                                {{ $label }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
                             <div wire:ignore>
                                 <div id="scheduled-per-day-chart" class="w-full" style="min-height: 250px;"></div>

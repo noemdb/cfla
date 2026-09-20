@@ -56,6 +56,11 @@ class IndexComponent extends Component
     public $chartLessonsByDay = [];
     public $chartScheduledByDay = [];
 
+    // ─── Date range per chart (scoped by selected lapso) ───────────────
+    public $chartActivitiesRange = '7d';
+    public $chartLessonsRange = '7d';
+    public $chartScheduledRange = '7d';
+
     // ─── Lesson stats (scoped by selected lapso) ───────────────────────
     public $lessonTotal = 0;
     public $lessonScheduled = 0;
@@ -210,30 +215,32 @@ class IndexComponent extends Component
         $filteredPeducativos = $this->getFilteredPeducativos();
 
         // ══ TAB 1: Main indicators per peducativo (selected lapso) ══
-        $this->peducativoMainIndicators = $filteredPeducativos->map(function ($peducativo) use ($lapsoId) {
+        $this->peducativoMainIndicators = collect();
+
+        foreach ($filteredPeducativos as $peducativo) {
             $pestudios = $this->getPestudiosForPeducativo($peducativo->id);
+            $pestudioIds = $pestudios->pluck('id');
 
             $totalActivities = 0;
             $totalProfesores = collect();
-
             foreach ($pestudios as $pestudio) {
                 $totalActivities += $pestudio->getActivitiesCount($lapsoId);
-                $totalProfesores = $totalProfesores->merge(
-                    $pestudio->getProfesors($lapsoId)
-                );
+                $totalProfesores = $totalProfesores->merge($pestudio->getProfesors($lapsoId));
             }
 
-            $pestudioIds = $pestudios->pluck('id');
-
-            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            // Solo lecciones con contenido LMS (al menos una sección o recurso),
+            // misma lógica que el KPI global y el monitor LMS.
+            $lessonsQuery = Activity::withLmsContent()
                 ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
                 ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
                 ->whereIn('pensums.pestudio_id', $pestudioIds)
-                ->where('pevaluacions.lapso_id', $lapsoId)
-                ->whereNull('pevaluacions.deleted_at')
-                ->count(DB::raw('DISTINCT activities.id'));
+                ->whereNull('pevaluacions.deleted_at');
+            if ($lapsoId) {
+                $lessonsQuery->where('pevaluacions.lapso_id', $lapsoId);
+            }
+            $lessonsCount = $lessonsQuery->distinct()->count('activities.id');
 
-            return (object) [
+            $this->peducativoMainIndicators->push((object) [
                 'peducativo' => $peducativo,
                 'pestudios' => $pestudios,
                 'activities_count' => $totalActivities,
@@ -247,8 +254,8 @@ class IndexComponent extends Component
                     ->whereIn('pestudio_id', $pestudioIds)
                     ->whereNull('deleted_at')
                     ->count(),
-            ];
-        });
+            ]);
+        }
 
         // ══ Global KPI boxes (no dependen del lapso ni de los filtros) ══
         $this->loadGlobalKpis();
@@ -367,8 +374,9 @@ class IndexComponent extends Component
 
                 $totalPevCount = $pevIds->count();
 
-                // All lessons (activities) scoped to these pevIds
-                $lessons = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                // Lessons (activities with LMS content) scoped to these pevIds
+                $lessons = Activity::withLmsContent()
+                    ->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
                     ->whereIn('activities.pevaluacion_id', $pevIds)
                     ->select(
                         'activities.*',
@@ -445,6 +453,20 @@ class IndexComponent extends Component
     }
 
     /**
+     * Resolve a range key ('7d' | '30d' | '3m' | 'all') into a start date.
+     * Returns null for 'all' (no lower bound).
+     */
+    private function rangeStart(?string $range)
+    {
+        return match ($range) {
+            '7d'  => now()->subDays(7)->startOfDay(),
+            '30d' => now()->subDays(30)->startOfDay(),
+            '3m'  => now()->subMonths(3)->startOfDay(),
+            default => null,
+        };
+    }
+
+    /**
      * Query activities grouped by finicial date, applying all current filters.
      * Returns array of {date: string, total: int} for the ApexCharts bar chart.
      */
@@ -483,6 +505,11 @@ class IndexComponent extends Component
         if ($this->selectedGradoId) {
             $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
                   ->where('seccions.grado_id', $this->selectedGradoId);
+        }
+
+        // Filter by date range
+        if ($since = $this->rangeStart($this->chartActivitiesRange)) {
+            $query->where('activities.finicial', '>=', $since->toDateString());
         }
 
         $this->chartActivitiesByDay = $query->get()->map(function ($row) {
@@ -540,12 +567,15 @@ class IndexComponent extends Component
             return;
         }
 
+        $since = $this->rangeStart($this->chartLessonsRange);
+
         // ── Series 1: Published lessons (status = 'PUBLISHED') ──
         $published = $this->applyLessonChartFilters(
             Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')->withLmsContent(),
             $lapsoId
         )
             ->where('lms_activity_publications.status', 'PUBLISHED')
+            ->when($since, fn ($q) => $q->where('lms_activity_publications.published_at', '>=', $since))
             ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
             ->groupByRaw('DATE(lms_activity_publications.published_at)')
             ->orderBy('date')
@@ -559,6 +589,7 @@ class IndexComponent extends Component
         )
             ->whereNotNull('lms_activity_publications.publish_at')
             ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+            ->when($since, fn ($q) => $q->where('lms_activity_publications.publish_at', '>=', $since))
             ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
             ->groupByRaw('DATE(lms_activity_publications.publish_at)')
             ->orderBy('date')
@@ -575,6 +606,7 @@ class IndexComponent extends Component
                 $q->whereNull('lms_activity_publications.status')
                   ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
             })
+            ->when($since, fn ($q) => $q->whereRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) >= ?', [$since->toDateString()]))
             ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
             ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
             ->orderBy('date')
@@ -648,6 +680,11 @@ class IndexComponent extends Component
                   ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
+        // Filter by date range
+        if ($since = $this->rangeStart($this->chartScheduledRange)) {
+            $query->where('lms_activity_publications.publish_at', '>=', $since);
+        }
+
         $this->chartScheduledByDay = $query->get()->map(function ($row) {
             return [
                 'x' => $row->pub_date,
@@ -692,6 +729,24 @@ class IndexComponent extends Component
 
         $this->lessonPublishedPct = $this->lessonTotal > 0 ? round(($this->lessonPublished / $this->lessonTotal) * 100, 1) : 0;
         $this->lessonScheduledPct = $this->lessonTotal > 0 ? round(($this->lessonScheduled / $this->lessonTotal) * 100, 1) : 0;
+    }
+
+    /**
+     * Date-range handlers for the per-chart filters (Tab 1 bento charts).
+     */
+    public function updatedChartActivitiesRange()
+    {
+        $this->loadChartActivitiesByDay();
+    }
+
+    public function updatedChartLessonsRange()
+    {
+        $this->loadChartLessonsByDay();
+    }
+
+    public function updatedChartScheduledRange()
+    {
+        $this->loadChartScheduledByDay();
     }
 
     /**
