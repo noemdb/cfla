@@ -256,9 +256,11 @@ class BinnacleExpansionTest extends TestCase
 
         $profesors = BinnacleEntry::where('event_type', 'sql_select')
             ->where('metadata->table', 'profesors')
+            ->orderByDesc('id')
             ->firstOrFail();
         $pensums = BinnacleEntry::where('event_type', 'sql_select')
             ->where('metadata->table', 'pensums')
+            ->orderByDesc('id')
             ->firstOrFail();
 
         $this->assertSame(2, $profesors->metadata['count'] ?? null);

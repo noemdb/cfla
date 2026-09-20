@@ -2196,40 +2196,6 @@
                 </div>
 
                 <div class="space-y-4 overflow-auto p-5">
-                    @php
-                        $jsonCalendars = collect($teacherJsonCalendars);
-                        $jsonActiveCalendars = $jsonCalendars->where('status', '!=', 'archived')->values();
-                        $jsonArchivedCalendars = $jsonCalendars->where('status', 'archived')->values();
-                        $jsonStatusLabels = [
-                            'active' => 'Activo',
-                            'draft' => 'Borrador',
-                            'generating' => 'Generando',
-                            'archived' => 'Archivado',
-                        ];
-                    @endphp
-
-                    <div>
-                        <label for="teacher-json-calendar" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Calendario</label>
-                        <select id="teacher-json-calendar" wire:model.live="teacherJsonCalendarId"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40 dark:border-white/10 dark:bg-gray-900 dark:text-white">
-                            @forelse ($jsonActiveCalendars as $calendar)
-                                <option value="{{ $calendar['id'] }}">{{ $calendar['name'] }} · {{ $jsonStatusLabels[$calendar['status']] ?? $calendar['status'] }}</option>
-                            @empty
-                                @if ($jsonArchivedCalendars->isEmpty())
-                                    <option value="">No hay calendarios con horario generado</option>
-                                @endif
-                            @endforelse
-
-                            @if ($jsonArchivedCalendars->isNotEmpty())
-                                <optgroup label="Archivados">
-                                    @foreach ($jsonArchivedCalendars as $calendar)
-                                        <option value="{{ $calendar['id'] }}">{{ $calendar['name'] }} · Archivado</option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
-                        </select>
-                    </div>
-
                     <div>
                         <label for="teacher-json-profesor" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Profesor</label>
                         <select id="teacher-json-profesor" wire:model="teacherJsonProfesorId"
@@ -2237,13 +2203,13 @@
                             @forelse ($teacherJsonTeachers as $teacher)
                                 <option value="{{ $teacher['id'] }}">{{ $teacher['name'] }}</option>
                             @empty
-                                <option value="">No hay profesores con horario en este calendario</option>
+                                <option value="">No hay profesores con horario en los calendarios activos</option>
                             @endforelse
                         </select>
                     </div>
 
                     <div class="rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2.5 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300">
-                        El JSON identifica al docente, el calendario, el lapso y el P.Estudio, y organiza su semana por día y bloque (turno, horario, recreos y asignaciones con asignatura, sección, grado y aula), además de totales por asignatura y turno.
+                        El JSON agrega la carga del docente en <strong>todos los calendarios activos</strong>: identifica al docente y, por cada calendario, su lapso y P.Estudio, y organiza la semana por día y bloque (turno, horario, recreos y asignaciones con asignatura, sección, grado y aula), además de totales por asignatura y turno.
                     </div>
                 </div>
 

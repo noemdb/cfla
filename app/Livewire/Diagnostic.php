@@ -3,15 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\app\Academy\Pensum;
-use Livewire\Component;
+use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagSession;
-use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Learner\Estudiant;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Exception;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Renderless;
+use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
 class Diagnostic extends Component
@@ -19,36 +18,69 @@ class Diagnostic extends Component
     use WireUiActions;
 
     public $currentView = 'student-identification'; // student-identification, dashboard, wizard, summary, guide
+
     public $studentCi = '';
-    public $currentStudent = null;
+
+    public $currentStudentId = null;
+
     public $isStudentVerified = false;
 
     // Estados principales
-    public $selectedPensum = null;
-    public $currentSession = null;
+    public $selectedPensumId = null;
+
+    public $currentSessionId = null;
 
     // Wizard
     public $currentQuestionIndex = 0;
-    public $currentQuestion = null;
+
+    public $currentQuestionId = null;
+
     public $selectedAnswer = null;
+
     public $answers = [];
+
     public $progress = 0;
 
     public $isReviewMode = false;
-    public $showAnsweredQuestions = false; // Added property to toggle between answered/unanswered questions
-    public $unansweredQuestions;
-    public $answeredQuestions;
-    public $showAnsweredModal = false; // Added property for modal state
+
+    public $showAnsweredQuestions = false;
+
+    public $questionIds = [];
+
+    public $unansweredQuestionIds = [];
+
+    public $answeredQuestionIds = [];
+
+    public $showAnsweredModal = false;
 
     // Guide
     public $activeTab = 'overview'; // overview, process, questions, tips
 
     // Datos
     public $pensums = [];
-    public $questions;
+
     public $sessionStats = [];
 
+    public $results = [];
+
     public $isProcessing = false;
+
+    // Cachés por request (no se serializan entre peticiones Livewire).
+    private ?Estudiant $studentModel = null;
+
+    private bool $studentLoaded = false;
+
+    private ?Pensum $pensumModel = null;
+
+    private bool $pensumLoaded = false;
+
+    private ?DiagSession $sessionModel = null;
+
+    private bool $sessionLoaded = false;
+
+    private ?DiagQuestion $questionModel = null;
+
+    private bool $questionLoaded = false;
 
     protected $listeners = [
         'startDiagnostic',
@@ -57,8 +89,8 @@ class Diagnostic extends Component
         'finishDiagnostic',
         'reviewAnswers',
         'toggleQuestionView',
-        'openAnsweredQuestionsModal', // Added new listener for modal
-        'closeAnsweredQuestionsModal'  // Added new listener for modal
+        'openAnsweredQuestionsModal',
+        'closeAnsweredQuestionsModal',
     ];
 
     protected function rules()
@@ -69,10 +101,6 @@ class Diagnostic extends Component
             $rules['studentCi'] = 'required|string|min:6|max:15';
         }
 
-        if ($this->currentView === 'wizard') {
-            $rules['selectedAnswer'] = 'required';
-        }
-
         return $rules;
     }
 
@@ -80,7 +108,6 @@ class Diagnostic extends Component
         'studentCi.required' => 'La cédula es obligatoria.',
         'studentCi.min' => 'La cédula debe tener al menos 6 caracteres.',
         'studentCi.max' => 'La cédula no puede tener más de 15 caracteres.',
-        'selectedAnswer.required' => 'Debes seleccionar una respuesta antes de continuar.',
     ];
 
     public function mount()
@@ -89,49 +116,115 @@ class Diagnostic extends Component
         $this->activeTab = 'overview';
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Hidratación de modelos bajo demanda (evita serializar
+    // colecciones Eloquent en propiedades públicas).
+    // ─────────────────────────────────────────────────────────────
+
+    private function student(): ?Estudiant
+    {
+        if (! $this->studentLoaded) {
+            $this->studentModel = $this->currentStudentId ? Estudiant::find($this->currentStudentId) : null;
+            $this->studentLoaded = true;
+        }
+
+        return $this->studentModel;
+    }
+
+    private function pensum(): ?Pensum
+    {
+        if (! $this->pensumLoaded) {
+            $this->pensumModel = $this->selectedPensumId
+                ? Pensum::with('asignatura')->find($this->selectedPensumId)
+                : null;
+            $this->pensumLoaded = true;
+        }
+
+        return $this->pensumModel;
+    }
+
+    private function session(): ?DiagSession
+    {
+        if (! $this->sessionLoaded) {
+            $this->sessionModel = $this->currentSessionId ? DiagSession::find($this->currentSessionId) : null;
+            $this->sessionLoaded = true;
+        }
+
+        return $this->sessionModel;
+    }
+
+    private function question(): ?DiagQuestion
+    {
+        if (! $this->questionLoaded) {
+            $this->questionModel = $this->currentQuestionId
+                ? DiagQuestion::with('options')->find($this->currentQuestionId)
+                : null;
+            $this->questionLoaded = true;
+        }
+
+        return $this->questionModel;
+    }
+
+    private function forgetPensum(): void
+    {
+        $this->pensumModel = null;
+        $this->pensumLoaded = false;
+    }
+
+    private function forgetSession(): void
+    {
+        $this->sessionModel = null;
+        $this->sessionLoaded = false;
+    }
+
+    private function forgetQuestion(): void
+    {
+        $this->questionModel = null;
+        $this->questionLoaded = false;
+    }
+
     public function verifyStudent()
     {
         $this->validate([
-            'studentCi' => 'required|string|min:6|max:15'
+            'studentCi' => 'required|string|min:6|max:15',
         ]);
 
         try {
-            // Search for student by CI
-            $student = Estudiant::where('ci_estudiant', $this->studentCi)
-                ->first();
+            $student = Estudiant::where('ci_estudiant', $this->studentCi)->first();
 
-            if (!$student) {
+            if (! $student) {
                 $this->addError('studentCi', 'No se encontró un estudiante con esta cédula.');
+
                 return;
             }
 
-            // Verify student is active
-            if (!$student->status_active == 'true') {
+            if ($student->status_active != 'true') {
                 $this->addError('studentCi', 'El estudiante no está activo en el sistema.');
+
                 return;
             }
 
-            $this->currentStudent = $student;
+            $this->currentStudentId = $student->id;
+            $this->studentModel = $student;
+            $this->studentLoaded = true;
             $this->isStudentVerified = true;
 
-            // Load student's data
             $this->loadStudentData();
 
-            // Move to dashboard
             $this->currentView = 'dashboard';
 
             $this->notification()->success(
                 'Bienvenido/a',
-                'Hola ' . $student->user->name . '. Puedes comenzar tu diagnóstico.'
+                'Hola '.($student->user?->name ?? $student->full_name).'. Puedes comenzar tu diagnóstico.'
             );
         } catch (Exception $e) {
-            session()->flash('error', 'Error al verificar estudiante: ' . $e->getMessage());
+            session()->flash('error', 'Error al verificar estudiante: '.$e->getMessage());
         }
     }
 
     private function loadStudentData()
     {
-        if (!$this->currentStudent) {
+        if (! $this->currentStudentId) {
             return;
         }
 
@@ -139,28 +232,61 @@ class Diagnostic extends Component
             $this->loadAvailablePensums();
             $this->loadSessionStats();
         } catch (Exception $e) {
-            session()->flash('error', 'Error al cargar datos del estudiante: ' . $e->getMessage());
+            session()->flash('error', 'Error al cargar datos del estudiante: '.$e->getMessage());
         }
     }
 
     public function loadAvailablePensums()
     {
-        if (!$this->currentStudent) {
+        $student = $this->student();
+
+        if (! $student) {
             $this->pensums = [];
+
             return;
         }
 
-        $studentPensums = $this->currentStudent->pensums->where('status_active_diagnostic', true);
-        //filtramos por pensum.status_active_diagnostic = true para garantizar que solo se muestren los pensums activos
+        // Filtramos por status_active_diagnostic = true para garantizar que
+        // solo se muestren los pensums activos para diagnóstico.
+        $studentPensums = $student->pensums
+            ->where('status_active_diagnostic', true)
+            ->load('asignatura');
+
+        $pensumIds = $studentPensums->pluck('id')->all();
+
+        if (empty($pensumIds)) {
+            $this->pensums = [];
+
+            return;
+        }
+
+        // Una sola query por agregado en vez de N+1 por pensum.
+        $activeCounts = DiagQuestion::whereIn('pensum_id', $pensumIds)
+            ->where('activo', true)
+            ->selectRaw('pensum_id, COUNT(*) as total')
+            ->groupBy('pensum_id')
+            ->pluck('total', 'pensum_id');
+
+        $completedCounts = DiagAnswer::join('diag_questions', 'diag_questions.id', '=', 'diag_answers.question_id')
+            ->where('diag_answers.estudiant_id', $student->id)
+            ->whereIn('diag_questions.pensum_id', $pensumIds)
+            ->selectRaw('diag_questions.pensum_id, COUNT(*) as total')
+            ->groupBy('diag_questions.pensum_id')
+            ->pluck('total', 'pensum_id');
+
+        $difficultyDistribution = DiagQuestion::whereIn('pensum_id', $pensumIds)
+            ->where('activo', true)
+            ->selectRaw('pensum_id, difficulty, COUNT(*) as total')
+            ->groupBy('pensum_id', 'difficulty')
+            ->get()
+            ->groupBy('pensum_id')
+            ->map(fn ($rows) => $rows->pluck('total', 'difficulty')->toArray());
 
         $this->pensums = $studentPensums
-            ->filter(function ($pensum) {
-                // Only include questions active and that have active diagnostic questions
-                return $pensum->diagQuestions()->where('activo', true)->exists();
-            })
-            ->map(function ($pensum) {
-                $totalQuestions = $pensum->diagQuestions()->where('activo', true)->count();
-                $completedQuestions = $this->getCompletedQuestionsCount($pensum->id);
+            ->filter(fn ($pensum) => ($activeCounts[$pensum->id] ?? 0) > 0)
+            ->map(function ($pensum) use ($activeCounts, $completedCounts, $difficultyDistribution) {
+                $totalQuestions = (int) ($activeCounts[$pensum->id] ?? 0);
+                $completedQuestions = (int) ($completedCounts[$pensum->id] ?? 0);
 
                 return [
                     'id' => $pensum->id,
@@ -168,9 +294,9 @@ class Diagnostic extends Component
                     'description' => $pensum->asignatura->description ?? 'Sin descripción',
                     'total_questions' => $totalQuestions,
                     'completed_questions' => $completedQuestions,
-                    'progress_percentage' => $totalQuestions > 0 ? round(($completedQuestions / $totalQuestions) * 100) : 0,
+                    'progress_percentage' => $totalQuestions > 0 ? min(100, round(($completedQuestions / $totalQuestions) * 100)) : 0,
                     'is_completed' => $completedQuestions >= $totalQuestions,
-                    'difficulty_distribution' => $this->getDifficultyDistribution($pensum->id)
+                    'difficulty_distribution' => $difficultyDistribution[$pensum->id] ?? [],
                 ];
             })
             ->values()
@@ -179,18 +305,19 @@ class Diagnostic extends Component
 
     public function loadSessionStats()
     {
-        if (!$this->currentStudent) {
+        if (! $this->currentStudentId) {
             $this->sessionStats = [];
+
             return;
         }
 
         $this->sessionStats = [
-            'total_sessions' => DiagSession::where('estudiant_id', $this->currentStudent->id)->count(),
-            'completed_sessions' => DiagSession::where('estudiant_id', $this->currentStudent->id)
+            'total_sessions' => DiagSession::where('estudiant_id', $this->currentStudentId)->count(),
+            'completed_sessions' => DiagSession::where('estudiant_id', $this->currentStudentId)
                 ->whereNotNull('completado_at')->count(),
-            'total_answers' => DiagAnswer::where('estudiant_id', $this->currentStudent->id)->count(),
-            'average_progress' => DiagSession::where('estudiant_id', $this->currentStudent->id)
-                ->avg('progreso') ?? 0
+            'total_answers' => DiagAnswer::where('estudiant_id', $this->currentStudentId)->count(),
+            'average_progress' => DiagSession::where('estudiant_id', $this->currentStudentId)
+                ->avg('progreso') ?? 0,
         ];
     }
 
@@ -199,111 +326,130 @@ class Diagnostic extends Component
         try {
             DB::beginTransaction();
 
-            $this->selectedPensum = Pensum::with('asignatura')->findOrFail($pensumId);
-            $allQuestions = DiagQuestion::with('options')
-                ->where('pensum_id', $pensumId)
-                ->where('activo', true)
-                ->orderBy('orden')
-                ->get();
+            $pensum = Pensum::with('asignatura')->find($pensumId);
 
-            if ($allQuestions->isEmpty()) {
+            if (! $pensum) {
+                throw new Exception('Área no encontrada.');
+            }
+
+            $this->selectedPensumId = $pensumId;
+            $this->pensumModel = $pensum;
+            $this->pensumLoaded = true;
+
+            $totalQuestions = DiagQuestion::where('pensum_id', $pensumId)
+                ->where('activo', true)
+                ->count();
+
+            if ($totalQuestions === 0) {
                 throw new Exception('No hay preguntas disponibles para esta área.');
             }
 
             $this->isReviewMode = false;
-            $this->showAnsweredQuestions = false; // Reset to show unanswered questions by default
+            $this->showAnsweredQuestions = false;
 
-            // Crear o recuperar sesión activa
-            $estudiantId = $this->currentStudent->id;
-            $this->currentSession = DiagSession::firstOrCreate([
-                'estudiant_id' => $estudiantId,
+            // Crear o recuperar sesión activa.
+            $session = DiagSession::firstOrCreate([
+                'estudiant_id' => $this->currentStudentId,
                 'pensum_id' => $pensumId,
                 'activo' => true,
-                'completado_at' => null
+                'completado_at' => null,
             ], [
                 'iniciado_at' => now(),
-                'total_preguntas' => $allQuestions->count(),
-                'progreso' => 0
+                'total_preguntas' => $totalQuestions,
+                'progreso' => 0,
             ]);
 
-            $this->filterQuestionsByAnsweredStatus($allQuestions);
+            $this->currentSessionId = $session->id;
+            $this->sessionModel = $session;
+            $this->sessionLoaded = true;
 
-            if ($this->questions->isEmpty()) {
+            $this->refreshQuestionIds();
+
+            if (empty($this->questionIds)) {
+                DB::rollBack();
                 session()->flash('success', 'Has completado todas las preguntas de esta área.');
                 $this->backToDashboard();
+
                 return;
             }
 
             $this->currentQuestionIndex = 0;
             $this->setCurrentQuestion();
+            $this->loadExistingAnswers();
             $this->currentView = 'wizard';
 
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Error al iniciar diagnóstico: ' . $e->getMessage());
+            session()->flash('error', 'Error al iniciar diagnóstico: '.$e->getMessage());
         }
     }
 
-    private function filterQuestionsByAnsweredStatus($allQuestions)
+    /**
+     * Recalcula los IDs de preguntas (pendientes/contestadas) sin cargar
+     * modelos ni opciones: solo pluck de IDs.
+     */
+    private function refreshQuestionIds(): void
     {
-        $answeredQuestionIds = DiagAnswer::where('estudiant_id', $this->currentStudent->id)
-            ->whereHas('question', function ($query) {
-                $query->where('pensum_id', $this->selectedPensum->id);
-            })
+        if (! $this->selectedPensumId) {
+            $this->questionIds = [];
+            $this->unansweredQuestionIds = [];
+            $this->answeredQuestionIds = [];
+
+            return;
+        }
+
+        $allIds = DiagQuestion::where('pensum_id', $this->selectedPensumId)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->pluck('id')
+            ->all();
+
+        $answeredIds = DiagAnswer::where('estudiant_id', $this->currentStudentId)
+            ->whereHas('question', fn ($query) => $query->where('pensum_id', $this->selectedPensumId))
             ->pluck('question_id')
-            ->toArray();
+            ->all();
 
-        $this->unansweredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
-            return !in_array($question->id, $answeredQuestionIds);
-        });
+        $unanswered = array_values(array_diff($allIds, $answeredIds));
+        shuffle($unanswered);
 
-        $this->unansweredQuestions = $this->unansweredQuestions->shuffle();
-
-        $this->answeredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
-            return in_array($question->id, $answeredQuestionIds);
-        });
-
-        $this->questions = $this->showAnsweredQuestions ?
-            $this->answeredQuestions->values() :
-            $this->unansweredQuestions->values();
-
-        // Load existing answers for current questions
-        $this->loadExistingAnswers();
+        $this->answeredQuestionIds = array_values(array_intersect($allIds, $answeredIds));
+        $this->unansweredQuestionIds = $unanswered;
+        $this->questionIds = $this->showAnsweredQuestions
+            ? $this->answeredQuestionIds
+            : $this->unansweredQuestionIds;
     }
 
     public function toggleQuestionView()
     {
-        $this->showAnsweredQuestions = !$this->showAnsweredQuestions;
+        $this->showAnsweredQuestions = ! $this->showAnsweredQuestions;
 
-        $this->questions = $this->showAnsweredQuestions ?
-            $this->answeredQuestions->values() :
-            $this->unansweredQuestions->values();
+        $this->questionIds = $this->showAnsweredQuestions
+            ? $this->answeredQuestionIds
+            : $this->unansweredQuestionIds;
 
-        // Reset to first question
         $this->currentQuestionIndex = 0;
         $this->setCurrentQuestion();
-
-        // Load answers for current question set
         $this->loadExistingAnswers();
     }
 
     public function loadExistingAnswers()
     {
-        if (!$this->currentSession || !$this->questions) {
+        if (! $this->currentSessionId || empty($this->questionIds)) {
             $this->answers = [];
+            $this->updateProgress();
+
             return;
         }
 
-        $existingAnswers = DiagAnswer::where('estudiant_id', $this->currentStudent->id)
-            ->where('session_id', $this->currentSession->id)
+        $existingAnswers = DiagAnswer::where('session_id', $this->currentSessionId)
             ->get()
             ->keyBy('question_id');
 
         $this->answers = [];
-        foreach ($this->questions as $index => $question) {
-            if (isset($existingAnswers[$question->id])) {
-                $this->answers[$index] = $existingAnswers[$question->id]->respuesta;
+        foreach ($this->questionIds as $index => $questionId) {
+            if (isset($existingAnswers[$questionId])) {
+                $this->answers[$index] = $existingAnswers[$questionId]->respuesta;
             }
         }
 
@@ -312,71 +458,91 @@ class Diagnostic extends Component
 
     public function setCurrentQuestion()
     {
-        if (isset($this->questions[$this->currentQuestionIndex])) {
-            $this->currentQuestion = $this->questions[$this->currentQuestionIndex];
-            $this->selectedAnswer = $this->answers[$this->currentQuestionIndex] ?? null;
-        }
+        $this->currentQuestionId = $this->questionIds[$this->currentQuestionIndex] ?? null;
+        $this->selectedAnswer = $this->answers[$this->currentQuestionIndex] ?? null;
+        $this->forgetQuestion();
     }
 
-    public function saveAnswer()
+    #[Renderless]
+    public function saveAnswer(): bool
     {
-        if (!$this->selectedAnswer || !$this->currentQuestion) {
-            return;
+        $question = $this->question();
+
+        if (! $this->selectedAnswer || ! $question || ! $this->currentSessionId) {
+            return false;
         }
 
-        if ($this->currentQuestion->tipo_pregunta === 'open') {
-            if (strlen(trim($this->selectedAnswer)) < 3) {
-                $this->notification()->error(
-                    'Respuesta muy corta',
-                    'Para preguntas abiertas, la respuesta debe tener al menos 3 caracteres.'
-                );
-                return;
-            }
+        if ($question->tipo_pregunta === 'open'
+            && mb_strlen(trim((string) $this->selectedAnswer)) < 2) {
+            $this->notification()->error(
+                'Respuesta muy corta',
+                'Para preguntas abiertas, la respuesta debe tener al menos 2 caracteres.'
+            );
+
+            return false;
         }
 
         try {
             DB::beginTransaction();
 
-            $estudiantId = $this->currentStudent->id;
-
-            // 🔹 Inicializamos option_id en null
             $optionId = null;
 
-            // Obtener valor numérico y option_id si corresponde
-            if ($this->currentQuestion->tipo_pregunta === 'multiple') {
-                $option = $this->currentQuestion->options
+            if ($question->tipo_pregunta === 'multiple') {
+                $option = $question->options
                     ->where('opcion', $this->selectedAnswer)
                     ->first();
 
                 $valorNumerico = $option ? $option->valor : 0;
                 $optionId = $option ? $option->id : null;
-            } elseif ($this->currentQuestion->tipo_pregunta === 'scale') {
+            } elseif ($question->tipo_pregunta === 'scale') {
                 $valorNumerico = (int) $this->selectedAnswer;
             } else {
                 $valorNumerico = 0;
             }
 
-            // 🔹 Guardar respuesta con option_id
             DiagAnswer::updateOrCreate([
-                'estudiant_id' => $estudiantId,
-                'question_id' => $this->currentQuestion->id,
-                'session_id' => $this->currentSession->id
+                'estudiant_id' => $this->currentStudentId,
+                'question_id' => $question->id,
+                'session_id' => $this->currentSessionId,
             ], [
                 'respuesta' => $this->selectedAnswer,
                 'valor_numerico' => $valorNumerico,
                 'option_id' => $optionId,
-                'completado_at' => now()
+                'completado_at' => now(),
             ]);
 
             $this->answers[$this->currentQuestionIndex] = $this->selectedAnswer;
+            $this->markCurrentAsAnswered();
             $this->updateProgress();
-            $this->refreshAnsweredQuestions();
 
             DB::commit();
+
+            return true;
         } catch (Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Error al guardar respuesta: ' . $e->getMessage());
+            session()->flash('error', 'Error al guardar respuesta: '.$e->getMessage());
+
+            return false;
         }
+    }
+
+    /**
+     * Actualiza los contadores locales sin volver a consultar todas las
+     * preguntas (antes: refreshAnsweredQuestions hacía 2 queries pesadas).
+     */
+    private function markCurrentAsAnswered(): void
+    {
+        $id = $this->currentQuestionId;
+
+        if (! $id) {
+            return;
+        }
+
+        if (! in_array($id, $this->answeredQuestionIds, true)) {
+            $this->answeredQuestionIds[] = $id;
+        }
+
+        $this->unansweredQuestionIds = array_values(array_diff($this->unansweredQuestionIds, [$id]));
     }
 
     public function nextQuestion()
@@ -385,42 +551,53 @@ class Diagnostic extends Component
             return;
         }
 
-        if (!$this->showAnsweredQuestions && $this->selectedAnswer) {
-            $this->isProcessing = true;
-
-            try {
-                $this->saveAnswer();
-
-                if ($this->currentQuestionIndex < count($this->questions) - 1) {
-                    $this->currentQuestionIndex++;
-                    $this->setCurrentQuestion();
-                } else {
-                    // Check if there are more unanswered questions
-                    $this->filterQuestionsByAnsweredStatus(
-                        DiagQuestion::with('options')
-                            ->where('pensum_id', $this->selectedPensum->id)
-                            ->where('activo', true)
-                            ->orderBy('orden')
-                            ->get()
-                    );
-
-                    if ($this->unansweredQuestions->isEmpty()) {
-                        $this->finishDiagnostic();
-                    } else {
-                        $this->questions = $this->unansweredQuestions;
-                        $this->currentQuestionIndex = 0;
-                        $this->setCurrentQuestion();
-                    }
-                }
-            } finally {
-                $this->isProcessing = false;
-            }
-        } else {
-            // Just navigate for answered questions view
-            if ($this->currentQuestionIndex < count($this->questions) - 1) {
+        // Vista de contestadas: solo navegar.
+        if ($this->showAnsweredQuestions) {
+            if ($this->currentQuestionIndex < count($this->questionIds) - 1) {
                 $this->currentQuestionIndex++;
                 $this->setCurrentQuestion();
             }
+
+            return;
+        }
+
+        if (! $this->selectedAnswer) {
+            $this->notification()->error(
+                'Respuesta requerida',
+                'Selecciona o escribe una respuesta antes de continuar.'
+            );
+
+            return;
+        }
+
+        $this->isProcessing = true;
+
+        try {
+            if (! $this->saveAnswer()) {
+                return;
+            }
+
+            if ($this->currentQuestionIndex < count($this->questionIds) - 1) {
+                $this->currentQuestionIndex++;
+                $this->setCurrentQuestion();
+
+                return;
+            }
+
+            // Fin del set: recalcular pendientes solo con IDs.
+            $this->refreshQuestionIds();
+
+            if (empty($this->questionIds)) {
+                $this->finishDiagnostic();
+
+                return;
+            }
+
+            $this->currentQuestionIndex = 0;
+            $this->setCurrentQuestion();
+            $this->loadExistingAnswers();
+        } finally {
+            $this->isProcessing = false;
         }
     }
 
@@ -436,38 +613,50 @@ class Diagnostic extends Component
         }
     }
 
-    public function getCanProceedProperty()
+    public function confirmFinish()
     {
-        Log::info("[v0] Checking canProceed - selectedAnswer: " . json_encode($this->selectedAnswer));
-        Log::info("[v0] isProcessing: " . json_encode($this->isProcessing));
+        if (! $this->selectedAnswer) {
+            $this->notification()->error(
+                'Respuesta requerida',
+                'Selecciona o escribe una respuesta antes de continuar.'
+            );
 
-        if ($this->isProcessing) {
-            return false;
+            return;
         }
 
-        // More robust validation for different question types
-        if ($this->currentQuestion) {
-            switch ($this->currentQuestion->tipo_pregunta) {
-                case 'multiple':
-                    return !empty($this->selectedAnswer) && trim($this->selectedAnswer) !== '';
-                case 'scale':
-                    return !empty($this->selectedAnswer) && is_numeric($this->selectedAnswer) &&
-                        $this->selectedAnswer >= 1 && $this->selectedAnswer <= 10;
-                case 'open':
-                    return !empty($this->selectedAnswer) && trim($this->selectedAnswer) !== '';
-                default:
-                    return !empty($this->selectedAnswer);
-            }
-        }
-
-        return false;
+        $this->dialog()->confirm([
+            'title' => '¿Finalizar el diagnóstico?',
+            'description' => 'Revisa que hayas respondido todas las preguntas. Una vez finalizado no podrás modificar tus respuestas.',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Sí, finalizar',
+                'method' => 'finalizeDiagnostic',
+                'color' => 'positive',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+                'color' => 'secondary',
+            ],
+        ]);
     }
 
-    public function updatedSelectedAnswer($value)
+    public function finalizeDiagnostic()
     {
-        Log::info("[v0] Answer updated to: " . json_encode($value));
-        // Force re-render to update button state
-        $this->dispatch('answer-updated');
+        if ($this->isProcessing) {
+            return;
+        }
+
+        $this->isProcessing = true;
+
+        try {
+            if (! $this->saveAnswer()) {
+                return;
+            }
+
+            $this->finishDiagnostic();
+        } finally {
+            $this->isProcessing = false;
+        }
     }
 
     public function finishDiagnostic()
@@ -475,11 +664,17 @@ class Diagnostic extends Component
         try {
             DB::beginTransaction();
 
-            $this->currentSession->update([
-                'completado_at' => now(),
-                'progreso' => 100,
-                'activo' => false
-            ]);
+            $session = $this->session();
+
+            if ($session) {
+                $session->update([
+                    'completado_at' => now(),
+                    'progreso' => 100,
+                    'activo' => false,
+                ]);
+            }
+
+            $this->results = $this->buildResults();
 
             $this->currentView = 'summary';
             $this->loadSessionStats();
@@ -487,19 +682,60 @@ class Diagnostic extends Component
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Error al finalizar diagnóstico: ' . $e->getMessage());
+            session()->flash('error', 'Error al finalizar diagnóstico: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Resultados del diagnóstico: precisión en preguntas de selección
+     * y desglose de aciertos por nivel de dificultad.
+     */
+    private function buildResults(): array
+    {
+        if (! $this->currentStudentId || ! $this->selectedPensumId) {
+            return [];
+        }
+
+        $precision = DiagAnswer::calculateStudentPrecision($this->currentStudentId, $this->selectedPensumId);
+
+        $byDifficulty = DiagAnswer::with(['question', 'selectedOption'])
+            ->where('estudiant_id', $this->currentStudentId)
+            ->whereNotNull('completado_at')
+            ->whereHas('question', function ($query) {
+                $query->where('pensum_id', $this->selectedPensumId)->where('activo', true);
+            })
+            ->get()
+            ->groupBy(fn ($answer) => $answer->question->difficulty ?? 'sin')
+            ->map(fn ($group) => [
+                'total' => $group->count(),
+                'correct' => $group->filter(fn ($answer) => $answer->isCorrect())->count(),
+            ])
+            ->toArray();
+
+        return [
+            'precision' => $precision['precision'],
+            'correct_answers' => $precision['correct_answers'],
+            'total_answered' => $precision['total_answered'],
+            'by_difficulty' => $byDifficulty,
+        ];
     }
 
     public function backToDashboard()
     {
         $this->currentView = 'dashboard';
-        $this->selectedPensum = null;
-        $this->currentSession = null;
-        $this->currentQuestion = null;
+        $this->selectedPensumId = null;
+        $this->currentSessionId = null;
+        $this->currentQuestionId = null;
         $this->selectedAnswer = null;
         $this->currentQuestionIndex = 0;
         $this->isReviewMode = false;
+        $this->results = [];
+        $this->questionIds = [];
+        $this->unansweredQuestionIds = [];
+        $this->answeredQuestionIds = [];
+        $this->forgetPensum();
+        $this->forgetSession();
+        $this->forgetQuestion();
         $this->loadAvailablePensums();
     }
 
@@ -507,89 +743,86 @@ class Diagnostic extends Component
     {
         $this->currentView = 'student-identification';
         $this->studentCi = '';
-        $this->currentStudent = null;
+        $this->currentStudentId = null;
         $this->isStudentVerified = false;
-        $this->selectedPensum = null;
-        $this->currentSession = null;
-        $this->currentQuestion = null;
+        $this->selectedPensumId = null;
+        $this->currentSessionId = null;
+        $this->currentQuestionId = null;
         $this->selectedAnswer = null;
         $this->currentQuestionIndex = 0;
         $this->pensums = [];
         $this->sessionStats = [];
-    }
-
-    private function getCompletedQuestionsCount($pensumId)
-    {
-        if (!$this->currentStudent) return 0;
-
-        return DiagAnswer::where('estudiant_id', $this->currentStudent->id)
-            ->whereHas('question', function ($query) use ($pensumId) {
-                $query->where('pensum_id', $pensumId);
-            })
-            ->count();
-    }
-
-    private function getDifficultyDistribution($pensumId)
-    {
-        return DiagQuestion::where('pensum_id', $pensumId)
-            ->where('activo', true)
-            ->selectRaw('difficulty, COUNT(*) as count')
-            ->groupBy('difficulty')
-            ->pluck('count', 'difficulty')
-            ->toArray();
-    }
-
-    private function findNextUnansweredQuestion()
-    {
-        foreach ($this->questions as $index => $question) {
-            if (!isset($this->answers[$index])) {
-                return $index;
-            }
-        }
-        return 0;
-    }
-
-    private function calculateNumericValue()
-    {
-        if ($this->currentQuestion->tipo_pregunta === 'multiple') {
-            $option = $this->currentQuestion->options
-                ->where('opcion', $this->selectedAnswer)
-                ->first();
-            return $option ? $option->valor : 0;
-        } elseif ($this->currentQuestion->tipo_pregunta === 'scale') {
-            return (int) $this->selectedAnswer;
-        }
-        return 0;
+        $this->results = [];
+        $this->questionIds = [];
+        $this->unansweredQuestionIds = [];
+        $this->answeredQuestionIds = [];
+        $this->studentModel = null;
+        $this->studentLoaded = false;
+        $this->forgetPensum();
+        $this->forgetSession();
+        $this->forgetQuestion();
     }
 
     private function updateProgress()
     {
-        $answeredQuestions = count(array_filter($this->answers));
-        $totalQuestions = count($this->questions);
-        $this->progress = $totalQuestions > 0 ? round(($answeredQuestions / $totalQuestions) * 100) : 0;
+        $session = $this->session();
 
-        if ($this->currentSession) {
-            $this->currentSession->update(['progreso' => $this->progress]);
+        // Denominador: total de preguntas del área (no el set pendiente actual).
+        $totalQuestions = (int) ($session->total_preguntas ?? 0);
+
+        if ($totalQuestions <= 0 && $this->selectedPensumId) {
+            $totalQuestions = DiagQuestion::where('pensum_id', $this->selectedPensumId)
+                ->where('activo', true)
+                ->count();
+        }
+
+        if ($totalQuestions <= 0) {
+            $totalQuestions = count($this->questionIds);
+        }
+
+        $answeredQuestions = $session
+            ? DiagAnswer::where('session_id', $session->id)->count()
+            : 0;
+
+        $this->progress = $totalQuestions > 0
+            ? (int) min(100, round(($answeredQuestions / $totalQuestions) * 100))
+            : 0;
+
+        if ($session) {
+            $session->update(['progreso' => $this->progress]);
         }
     }
 
     public function getAnsweredQuestionsWithAnswers()
     {
-        if (!$this->currentStudent || !$this->selectedPensum) {
+        if (! $this->currentStudentId || ! $this->selectedPensumId) {
             return collect();
         }
 
-        return DiagAnswer::where('estudiant_id', $this->currentStudent->id)
+        // Acotar a una sola sesión: la activa o, si se revisa desde el
+        // dashboard, la última sesión de esta área. Evita mezclar intentos.
+        $sessionId = $this->currentSessionId;
+
+        if (! $sessionId) {
+            $sessionId = DiagSession::where('estudiant_id', $this->currentStudentId)
+                ->where('pensum_id', $this->selectedPensumId)
+                ->orderByDesc('completado_at')
+                ->orderByDesc('id')
+                ->value('id');
+        }
+
+        return DiagAnswer::where('estudiant_id', $this->currentStudentId)
             ->whereHas('question', function ($query) {
-                $query->where('pensum_id', $this->selectedPensum->id);
+                $query->where('pensum_id', $this->selectedPensumId);
             })
+            ->when($sessionId, fn ($query) => $query->where('session_id', $sessionId))
             ->with(['question.options'])
             ->get()
             ->map(function ($answer) {
                 return [
                     'question' => $answer->question,
                     'answer' => $answer->respuesta,
-                    'completed_at' => $answer->completado_at
+                    'completed_at' => $answer->completado_at,
                 ];
             });
     }
@@ -597,10 +830,13 @@ class Diagnostic extends Component
     public function reviewAnswers($pensumId)
     {
         try {
-            $this->selectedPensum = Pensum::with('asignatura')->findOrFail($pensumId);
+            $pensum = Pensum::with('asignatura')->findOrFail($pensumId);
+            $this->selectedPensumId = $pensum->id;
+            $this->pensumModel = $pensum;
+            $this->pensumLoaded = true;
             $this->showAnsweredModal = true;
         } catch (Exception $e) {
-            session()->flash('error', 'Error al cargar respuestas: ' . $e->getMessage());
+            session()->flash('error', 'Error al cargar respuestas: '.$e->getMessage());
         }
     }
 
@@ -614,36 +850,6 @@ class Diagnostic extends Component
         $this->showAnsweredModal = false;
     }
 
-    private function refreshAnsweredQuestions()
-    {
-        if (!$this->selectedPensum) {
-            return;
-        }
-
-        $allQuestions = DiagQuestion::with('options')
-            ->where('pensum_id', $this->selectedPensum->id)
-            ->where('activo', true)
-            ->orderBy('orden')
-            ->get();
-
-        $answeredQuestionIds = DiagAnswer::where('estudiant_id', $this->currentStudent->id)
-            ->whereHas('question', function ($query) {
-                $query->where('pensum_id', $this->selectedPensum->id);
-            })
-            ->pluck('question_id')
-            ->toArray();
-
-        $this->answeredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
-            return in_array($question->id, $answeredQuestionIds);
-        });
-
-        $this->unansweredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
-            return !in_array($question->id, $answeredQuestionIds);
-        });
-
-        $this->unansweredQuestions = $this->unansweredQuestions->shuffle();
-    }
-
     public function showGuide()
     {
         $this->currentView = 'guide';
@@ -652,6 +858,10 @@ class Diagnostic extends Component
 
     public function render()
     {
-        return view('livewire.diagnostic');
+        return view('livewire.diagnostic', [
+            'currentStudent' => $this->student(),
+            'selectedPensum' => $this->pensum(),
+            'currentQuestion' => $this->question(),
+        ]);
     }
 }

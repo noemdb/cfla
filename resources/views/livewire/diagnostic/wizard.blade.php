@@ -27,25 +27,25 @@
                         <!-- Fixed question count display logic to show correct counts -->
                         <p class="text-gray-400 mt-1">
                             @if ($showAnsweredQuestions)
-                                Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($answeredQuestions) }}
-                                ({{ count($answeredQuestions) }} contestadas)
+                                Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($answeredQuestionIds) }}
+                                ({{ count($answeredQuestionIds) }} contestadas)
                             @else
-                                Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($unansweredQuestions) }}
-                                ({{ count($unansweredQuestions) }} pendientes)
+                                Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($unansweredQuestionIds) }}
+                                ({{ count($unansweredQuestionIds) }} pendientes)
                             @endif
                         </p>
                     </div>
 
                     <div class="flex space-x-3">
                         <!-- Fixed modal button to use correct Livewire method -->
-                        @if (!$isReviewMode && count($answeredQuestions) > 0)
+                        @if (!$isReviewMode && count($answeredQuestionIds) > 0)
                             <button wire:click="openAnsweredQuestionsModal"
                                 class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                <span>Ver Contestadas ({{ count($answeredQuestions) }})</span>
+                                <span>Ver Contestadas ({{ count($answeredQuestionIds) }})</span>
                             </button>
                         @endif
 
@@ -72,7 +72,9 @@
     <!-- Contenido de la pregunta -->
     <div class="flex-1 container mx-auto px-4 py-2">
         @if ($currentQuestion)
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-4xl mx-auto" wire:key="question-block-{{ $currentQuestionId }}"
+                x-data="{ answered: {{ $selectedAnswer ? 'true' : 'false' }} }"
+                @input="answered = true" @change="answered = true">
                 <!-- Pregunta -->
                 <div
                     class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-8 mb-8 shadow-2xl relative overflow-hidden">
@@ -108,7 +110,8 @@
                                 <label
                                     class="flex items-center p-4 bg-gray-800/50 border border-white/5 rounded-lg transition-all duration-200
                                     {{ $isReviewMode || $showAnsweredQuestions ? 'cursor-default' : 'hover:bg-gray-700/50 hover:border-emerald-500/30 cursor-pointer' }}">
-                                    <input type="radio" wire:model.live="selectedAnswer" wire:change="$refresh"
+                                    <input type="radio" wire:model="selectedAnswer"
+                                        name="question-{{ $currentQuestion->id }}"
                                         value="{{ $option->opcion }}"
                                         {{ $isReviewMode || $showAnsweredQuestions ? 'disabled' : '' }}
                                         class="w-4 h-4 text-green-600 bg-gray-600 border-gray-500 focus:ring-green-500
@@ -120,14 +123,16 @@
                                 </label>
                             @endforeach
                         @elseif($currentQuestion->tipo_pregunta === 'scale')
-                            <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
-                                <span class="text-gray-400">1 (Muy bajo)</span>
+                            <fieldset class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                                <legend class="sr-only">Selecciona un valor de 1 a 10 para tu respuesta</legend>
+                                <span class="text-gray-400" aria-hidden="true">1 (Muy bajo)</span>
                                 <div class="flex space-x-2">
                                     @for ($i = 1; $i <= 10; $i++)
                                         <label
                                             class="{{ $isReviewMode || $showAnsweredQuestions ? 'cursor-default' : 'cursor-pointer' }}">
-                                            <input type="radio" wire:model.live="selectedAnswer"
-                                                wire:change="$refresh" value="{{ $i }}"
+                                            <input type="radio" wire:model="selectedAnswer"
+                                                name="question-{{ $currentQuestion->id }}"
+                                                value="{{ $i }}" aria-label="{{ $i }} de 10"
                                                 {{ $isReviewMode || $showAnsweredQuestions ? 'disabled' : '' }}
                                                 class="sr-only">
                                             <div
@@ -138,10 +143,10 @@
                                         </label>
                                     @endfor
                                 </div>
-                                <span class="text-gray-400">10 (Muy alto)</span>
-                            </div>
+                                <span class="text-gray-400" aria-hidden="true">10 (Muy alto)</span>
+                            </fieldset>
                         @elseif($currentQuestion->tipo_pregunta === 'open')
-                            <textarea wire:model.live="selectedAnswer" wire:change="$refresh" rows="4"
+                            <textarea wire:model="selectedAnswer" rows="4"
                                 placeholder="{{ $isReviewMode || $showAnsweredQuestions ? '' : 'Escribe tu respuesta aquí...' }}"
                                 {{ $isReviewMode || $showAnsweredQuestions ? 'readonly' : '' }}
                                 class="w-full p-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent
@@ -174,7 +179,7 @@
                     </button>
 
                     <div class="text-center text-gray-400">
-                        <div class="text-sm">Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($questions) }}</div>
+                        <div class="text-sm">Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($questionIds) }}</div>
                         @if ($isReviewMode)
                             <div class="text-xs text-blue-400 mt-1">Solo lectura</div>
                         @elseif($showAnsweredQuestions)
@@ -183,7 +188,7 @@
                     </div>
 
                     @if ($isReviewMode || $showAnsweredQuestions)
-                        @if ($currentQuestionIndex < count($questions) - 1)
+                        @if ($currentQuestionIndex < count($questionIds) - 1)
                             <button wire:click="nextQuestion"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                                 <span>Siguiente</span>
@@ -203,10 +208,10 @@
                             </button>
                         @endif
                     @else
-                        <button wire:click="nextQuestion" @if (!$this->canProceed) disabled @endif
+                        <button wire:click="{{ $currentQuestionIndex === count($questionIds) - 1 ? 'confirmFinish' : 'nextQuestion' }}" :disabled="!answered"
                             class="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                             <span>
-                                @if ($currentQuestionIndex === count($questions) - 1)
+                                @if ($currentQuestionIndex === count($questionIds) - 1)
                                     @if ($isProcessing)
                                         Finalizando...
                                     @else
@@ -375,10 +380,31 @@
         </div>
     @endif
 
-    <!-- Debug info for development -->
-    @if (config('app.debug'))
-        <div class="mt-4 p-2 bg-gray-900 rounded text-xs text-gray-400">
-            Debug: selectedAnswer = "{{ $selectedAnswer }}" | canProceed = {{ $this->canProceed ? 'true' : 'false' }}
+    @if ($currentQuestion)
+        <div class="fixed bottom-4 inset-x-0 z-40 pointer-events-none">
+            <div class="max-w-4xl mx-auto px-4 flex justify-start">
+                <div wire:ignore
+                    x-data="{
+                        seconds: 0,
+                        timer: null,
+                        get label() {
+                            const p = (n) => String(n).padStart(2, '0');
+                            return p(Math.floor(this.seconds / 3600)) + ':' + p(Math.floor((this.seconds % 3600) / 60)) + ':' + p(this.seconds % 60);
+                        },
+                        init() { this.timer = setInterval(() => this.seconds++, 1000); },
+                        destroy() { clearInterval(this.timer); }
+                    }"
+                    class="pointer-events-auto w-16 h-16 rounded-full flex flex-col items-center justify-center bg-gray-900/80 backdrop-blur-md border border-white/10 shadow-lg"
+                    title="Tiempo transcurrido">
+                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-[10px] font-mono text-gray-300 leading-none mt-0.5"
+                        x-text="label">00:00:00</span>
+                </div>
+            </div>
         </div>
     @endif
 </div>

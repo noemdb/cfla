@@ -24,6 +24,18 @@
         </a>
     </div>
 
+    <div class="mb-6">
+        <div class="relative max-w-md">
+            <svg class="w-4 h-4 text-gray-500 absolute left-3 top-3" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar área, código o grado..."
+                class="w-full pl-10 pr-4 py-2 bg-gray-900/40 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+        </div>
+    </div>
+
     @foreach ($pestudios as $pestudio)
         <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
             wire:key="pestudio-{{ $pestudio->id }}" x-data="{ open: false }">
@@ -59,6 +71,10 @@
                             ->flatten(1)
                             ->where('status_active_diagnostic', true)
                             ->count();
+                        $eligibleCount = collect($groupedPensums[$pestudio->id] ?? [])
+                            ->flatten(1)
+                            ->where('active_questions_count', '>', 0)
+                            ->count();
                     @endphp
 
                     <div class="hidden md:flex items-center gap-3">
@@ -67,9 +83,22 @@
                                 label="Desactivar Todo" icon="stop" secondary outline xs rounded="xl"
                                 class="!border-slate-500/30 hover:!bg-slate-500/5 shadow-lg transition-all duration-300" />
                         @endif
-                        <x-button wire:click.stop="toggleAllPestudio({{ $pestudio->id }}, true)" label="Activar Todo"
-                            icon="play" emerald outline xs rounded="xl"
-                            class="!border-emerald-500/50 hover:!shadow-[0_0_20px_rgba(16,185,129,0.4)] shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all duration-300" />
+                        @if ($eligibleCount > 0)
+                            <x-button wire:click.stop="toggleAllPestudio({{ $pestudio->id }}, true)" label="Activar Todo"
+                                icon="play" emerald outline xs rounded="xl"
+                                title="Se omiten áreas sin preguntas activas"
+                                class="!border-emerald-500/50 hover:!shadow-[0_0_20px_rgba(16,185,129,0.4)] shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all duration-300" />
+                        @else
+                            <button type="button" disabled title="Ninguna área tiene preguntas activas"
+                                class="inline-flex justify-center items-center gap-x-2 rounded-xl text-xs px-5 py-2 border border-slate-500/20 text-slate-500 opacity-60 cursor-not-allowed">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M5.25 5.65273C5.25 4.79705 6.1674 4.25462 6.91716 4.66698L18.4577 11.0143C19.2349 11.4417 19.2349 12.5584 18.4577 12.9858L6.91716 19.3331C6.1674 19.7455 5.25 19.203 5.25 18.3474V5.65273Z">
+                                    </path>
+                                </svg>
+                                Activar Todo
+                            </button>
+                        @endif
                     </div>
 
                     @if ($activeCount > 0)
@@ -109,14 +138,15 @@
                         Grados/Años Con malla curricular cargada
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        @foreach ($pestudio->getGradosActiveWithPensum() as $grado)
+                        @forelse ($groupedPensums[$pestudio->id] ?? [] as $gradoId => $pensums)
                             @php
-                                $pensums = $groupedPensums[$pestudio->id][$grado->id] ?? collect();
+                                $grado = $pensums->first()->grado;
                                 $gradeActiveCount = $pensums->where('status_active_diagnostic', true)->count();
+                                $gradeEligibleCount = $pensums->where('active_questions_count', '>', 0)->count();
                             @endphp
 
                             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/20"
-                                wire:key="grado-{{ $pestudio->id }}-{{ $grado->id }}">
+                                wire:key="grado-{{ $pestudio->id }}-{{ $gradoId }}">
                                 <div class="flex items-center justify-between mb-2 pb-4 border-b border-white/5">
                                     <h3 class="font-bold text-emerald-100">{{ $grado->name }}</h3>
                                     <div class="flex flex-col items-end gap-2">
@@ -127,27 +157,48 @@
                                                     {{ $gradeActiveCount }} Activos
                                                 </span>
                                             @endif
+                                            @if ($gradeEligibleCount === 0)
+                                                <span
+                                                    class="px-2 py-0.5 bg-amber-500/20 text-[9px] text-amber-400 font-bold rounded-full border border-amber-500/20"
+                                                    title="Ninguna área de este grado tiene preguntas activas">
+                                                    Sin preguntas
+                                                </span>
+                                            @endif
                                         </div>
                                         <div class="flex items-center gap-2">
                                             @if ($gradeActiveCount > 0)
                                                 <x-button
-                                                    wire:click="toggleAllGrado({{ $pestudio->id }}, {{ $grado->id }}, false)"
+                                                    wire:click="toggleAllGrado({{ $pestudio->id }}, {{ $gradoId }}, false)"
                                                     icon="stop" secondary outline 2xs rounded="lg"
                                                     title="Desactivar Todo el Grado"
                                                     class="!border-slate-500/20 hover:!bg-slate-500/5 transition-all duration-300" />
                                             @endif
-                                            <x-button
-                                                wire:click="toggleAllGrado({{ $pestudio->id }}, {{ $grado->id }}, true)"
-                                                icon="play" emerald outline 2xs rounded="lg"
-                                                title="Activar Todo el Grado"
-                                                class="!border-emerald-500/40 hover:!shadow-[0_0_15px_rgba(16,185,129,0.3)] shadow-[0_0_10px_rgba(16,185,129,0.1)] transition-all duration-300" />
+                                            @if ($gradeEligibleCount > 0)
+                                                <x-button
+                                                    wire:click="toggleAllGrado({{ $pestudio->id }}, {{ $gradoId }}, true)"
+                                                    icon="play" emerald outline 2xs rounded="lg"
+                                                    title="Activar Todo el Grado (se omiten áreas sin preguntas)"
+                                                    class="!border-emerald-500/40 hover:!shadow-[0_0_15px_rgba(16,185,129,0.3)] shadow-[0_0_10px_rgba(16,185,129,0.1)] transition-all duration-300" />
+                                            @else
+                                                <button type="button" disabled
+                                                    title="Ninguna área tiene preguntas activas"
+                                                    class="inline-flex justify-center items-center rounded-lg gap-x-0.5 text-2xs px-2 py-0.5 border border-slate-500/20 text-slate-500 opacity-60 cursor-not-allowed">
+                                                    <svg class="w-2 h-2 shrink-0" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="1.5"
+                                                            d="M5.25 5.65273C5.25 4.79705 6.1674 4.25462 6.91716 4.66698L18.4577 11.0143C19.2349 11.4417 19.2349 12.5584 18.4577 12.9858L6.91716 19.3331C6.1674 19.7455 5.25 19.203 5.25 18.3474V5.65273Z">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="space-y-3">
-                                    <div class="text-[10px] text-gray-500 py-1 font-medium italic" title="">Áreas
-                                        de Formación con Asignación de Carga Académica</div>
+                                    <div class="text-[10px] text-gray-500 py-1 font-medium italic" title="">Áreas de
+                                        Formación (carga académica o con preguntas)</div>
                                     @forelse($pensums as $pensum)
                                         <div class="flex items-center justify-between group/item p-1 rounded-lg transition-all duration-300 {{ $pensum->status_active_diagnostic ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-transparent border border-transparent' }}"
                                             wire:key="pensum-{{ $pensum->id }}">
@@ -168,8 +219,8 @@
                                                     <span
                                                         class="text-[10px] text-gray-500 italic">{{ $pensum->asignatura->code }}</span>
                                                     <span
-                                                        class="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 text-[9px] font-bold text-gray-400 border border-white/5"
-                                                        title="Cantidad de Preguntas">
+                                                        class="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 text-[9px] font-bold {{ $pensum->active_questions_count > 0 ? 'text-gray-400 border border-white/5' : 'text-amber-400 border border-amber-500/20' }}"
+                                                        title="{{ $pensum->active_questions_count }} preguntas activas de {{ $pensum->diag_questions_count }} totales">
                                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -177,29 +228,52 @@
                                                                 d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                                                             </path>
                                                         </svg>
-                                                        {{ $pensum->diag_questions_count }}
+                                                        {{ $pensum->active_questions_count }}
                                                     </span>
+                                                    @if ($pensum->active_questions_count === 0)
+                                                        <span
+                                                            class="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-[9px] font-bold text-amber-400 border border-amber-500/20">
+                                                            Sin preguntas
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </div>
 
-                                            <x-button wire:click="toggleStatus({{ $pensum->id }})" :icon="$pensum->status_active_diagnostic ? 'play' : 'stop'"
-                                                :emerald="$pensum->status_active_diagnostic" :secondary="!$pensum->status_active_diagnostic" outline xs rounded="lg"
-                                                wire:loading.attr="disabled"
-                                                class="{{ $pensum->status_active_diagnostic
-                                                    ? '!border-emerald-500/50 hover:!shadow-[0_0_15px_rgba(16,185,129,0.3)] shadow-[0_0_10px_rgba(16,185,129,0.1)]'
-                                                    : '!border-slate-500/30 hover:!bg-slate-500/5' }} 
-                                                    transition-all duration-300 hover:scale-105" />
+                                            @if (! $pensum->status_active_diagnostic && $pensum->active_questions_count === 0)
+                                                <button type="button" disabled
+                                                    title="Agrega preguntas activas antes de activar"
+                                                    class="inline-flex justify-center items-center rounded-lg gap-x-0.5 text-2xs px-2 py-0.5 border border-slate-500/20 text-slate-500 opacity-60 cursor-not-allowed">
+                                                    <svg class="w-2 h-2 shrink-0" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="1.5"
+                                                            d="M5.25 5.65273C5.25 4.79705 6.1674 4.25462 6.91716 4.66698L18.4577 11.0143C19.2349 11.4417 19.2349 12.5584 18.4577 12.9858L6.91716 19.3331C6.1674 19.7455 5.25 19.203 5.25 18.3474V5.65273Z">
+                                                        </path>
+                                                    </svg>
+                                                </button>
+                                            @else
+                                                <x-button wire:click="toggleStatus({{ $pensum->id }})" :icon="$pensum->status_active_diagnostic ? 'play' : 'stop'"
+                                                    :emerald="$pensum->status_active_diagnostic" :secondary="!$pensum->status_active_diagnostic" outline xs rounded="lg"
+                                                    wire:loading.attr="disabled"
+                                                    class="{{ $pensum->status_active_diagnostic
+                                                        ? '!border-emerald-500/50 hover:!shadow-[0_0_15px_rgba(16,185,129,0.3)] shadow-[0_0_10px_rgba(16,185,129,0.1)]'
+                                                        : '!border-slate-500/30 hover:!bg-slate-500/5' }} 
+                                                        transition-all duration-300 hover:scale-105" />
+                                            @endif
                                         </div>
                                     @empty
-                                        <div
-                                            class="flex items-center justify-center p-4 bg-white/2 inset-0 text-center">
+                                        <div class="flex items-center justify-center p-4 bg-white/2 inset-0 text-center">
                                             <p class="text-xs text-gray-600 italic">No hay asignaturas vinculadas al
                                                 pensum</p>
                                         </div>
                                     @endforelse
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="col-span-full flex items-center justify-center p-6 bg-white/2 rounded-lg">
+                                <p class="text-sm text-gray-500 italic">No hay áreas que coincidan con la búsqueda.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>

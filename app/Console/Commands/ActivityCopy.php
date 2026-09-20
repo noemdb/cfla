@@ -9,25 +9,29 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Copia las activities y sus achievements de una Pevaluación origen (base de
- * datos S2526) a una Pevaluación destino (base de datos actual).
+ * Copia las activities y sus achievements de una Pevaluación origen a una
+ * Pevaluación destino. La fuente de datos es seleccionable:
+ *   1 = DB_CONNECTION (base actual)
+ *   2 = DB_CONNECTION_S2526 (base del período anterior) — por defecto
  *
  * Uso:
  *   php8.2 artisan activity:copy --from=1920 --to=215268 --dry-run
- *   php8.2 artisan activity:copy --from=1920 --to=215268 --force
- *   php8.2 artisan activity:copy --from=1920 --to=215268 --force
+ *   php8.2 artisan activity:copy --from=1920 --to=215268 --source=2 --force
+ *   Fuente: DB_CONNECTION (base actual)
+ *   php8.2 artisan activity:copy --from=1927 --to=1896 --source=1 --dry-run
+ *   php8.2 artisan activity:copy --from=215176 --to=1893 --source=1 --dry-run
  */
 class ActivityCopy extends Command
 {
     protected $signature = 'activity:copy
                           {--from= : ID de la Pevaluación origen (en la conexión fuente)}
                           {--to= : ID de la Pevaluación destino (en la conexión destino)}
-                          {--source-connection=s2526 : Conexión de la Pevaluación origen}
-                          {--target-connection= : Conexión de la Pevaluación destino (por defecto, la default)}
+                          {--source=2 : Fuente de datos (1=DB_CONNECTION, 2=DB_CONNECTION_S2526)}
+                          {--target-connection= : Conexión destino (por defecto, DB_CONNECTION)}
                           {--dry-run : Mostrar cambios sin persistir}
                           {--force : Ejecutar sin confirmación}';
 
-    protected $description = 'Copia las actividades (y sus indicadores) desde la Pevaluación origen (S2526) a la Pevaluación destino';
+    protected $description = 'Copia las actividades (y sus indicadores) entre Pevaluaciones, eligiendo la fuente de datos (DB_CONNECTION o S2526)';
 
     private int $copiedActivities = 0;
 
@@ -41,7 +45,13 @@ class ActivityCopy extends Command
         $toId = (int) $this->option('to');
         $dryRun = (bool) $this->option('dry-run');
 
-        $sourceConnection = (string) $this->option('source-connection');
+        $sourceConnection = $this->resolveSourceConnection((string) $this->option('source'));
+        if ($sourceConnection === null) {
+            $this->error('Fuente de datos inválida. Usa --source=1 (DB_CONNECTION) o --source=2 (DB_CONNECTION_S2526).');
+
+            return self::FAILURE;
+        }
+
         $targetConnection = (string) ($this->option('target-connection') ?: config('database.default'));
 
         if (! $fromId || ! $toId) {
@@ -78,7 +88,7 @@ class ActivityCopy extends Command
             ->get();
 
         $this->info('=== Origen ===');
-        $this->line("Conexión: {$sourceConnection}");
+        $this->line("Fuente: {$this->option('source')} (conexión: {$sourceConnection})");
         $this->line("Pevaluación {$from->id}: {$from->full_name}");
         $this->line("Actividades: {$sourceActivities->count()} | Indicadores: {$sourceActivities->sum(fn ($a) => $a->achievements->count())}");
         $this->newLine();
@@ -177,6 +187,19 @@ class ActivityCopy extends Command
     }
 
     /**
+     * Resuelve la conexión de origen a partir de la opción --source.
+     * 1 = DB_CONNECTION, 2 = DB_CONNECTION_S2526.
+     */
+    private function resolveSourceConnection(string $source): ?string
+    {
+        return match ($source) {
+            '1' => (string) config('database.default'),
+            '2' => 's2526',
+            default => null,
+        };
+    }
+
+    /**
      * Huella de una actividad para detectar copias ya existentes en el destino.
      */
     private function fingerprint(Activity $activity): string
@@ -189,3 +212,85 @@ class ActivityCopy extends Command
         ]);
     }
 }
+
+/*
+============================================================================
+ INSTRUCTIVO PASO A PASO — activity:copy
+============================================================================
+
+OBJETIVO
+  Copiar las actividades (tabla `activities`) y sus indicadores (tabla
+  `achievements`) desde una Pevaluación ORIGEN hacia una Pevaluación DESTINO,
+  pudiendo elegir la base de datos de la que se lee.
+
+FUENTES DE DATOS (opción --source)
+  1 = DB_CONNECTION        (base actual, p. ej. s2627)
+  2 = DB_CONNECTION_S2526  (base del período anterior)  <-- POR DEFECTO
+
+  El DESTINO siempre es la conexión por defecto (DB_CONNECTION). Se puede
+  sobrescribir con --target-connection=NOMBRE.
+
+OPCIONES
+  --from=ID                ID de la Pevaluación origen (obligatorio).
+  --to=ID                  ID de la Pevaluación destino (obligatorio).
+  --source=1|2             Fuente de datos (por defecto 2 = S2526).
+  --target-connection=     Conexión destino (por defecto la default).
+  --dry-run                Simula sin escribir nada en la base.
+  --force                  Ejecuta sin pedir confirmación.
+  --help                   Muestra la ayuda del comando.
+
+PASO 0 — IDENTIFICAR LOS IDs DE PEVALUACIÓN
+  Localiza en el sistema (o en la BD) los IDs de la Pevaluación origen y
+  destino. La Pevaluación es el "Plan de Evaluación" (materia + sección +
+  momento). Puedes verificarlos con:
+    php8.2 artisan tinker
+    >>> \App\Models\app\Academy\Pevaluacion::on('s2526')->find(1920);
+    >>> \App\Models\app\Academy\Pevaluacion::on('mysql')->find(215268);
+
+PASO 1 — SIMULAR (DRY-RUN) SIEMPRE PRIMERO
+  No escribe nada; muestra qué actividades se copiarían y cuáles se omiten.
+    php8.2 artisan activity:copy --from=1920 --to=215268 --dry-run
+    php8.2 artisan activity:copy --from=1920 --to=215268 --source=1 --dry-run
+  Revisa el resumen final:
+    - "Actividades copiadas": cuántas se insertarían.
+    - "Actividades omitidas (ya existían)": ya presentes en el destino.
+
+PASO 2 — EJECUTAR LA COPIA REAL
+  Sin --dry-run. Si no usas --force, el comando pide confirmación interactiva.
+    php8.2 artisan activity:copy --from=1920 --to=215268 --force
+  Todo ocurre dentro de una transacción en el destino: si algo falla, se
+  revierte por completo.
+
+PASO 3 — VERIFICAR EL RESULTADO
+  Comprueba que las actividades e indicadores quedaron en el destino:
+    php8.2 artisan tinker
+    >>> $p = \App\Models\app\Academy\Pevaluacion::on('mysql')->find(215268);
+    >>> $p->activities()->withCount('achievements')->get();
+
+NOTAS IMPORTANTES
+  - Idempotente: se ejecute las veces que se ejecute, omite una actividad si
+    en el destino ya existe otra con la misma huella
+    (topic + thematic + finicial + ffinal). No genera duplicados.
+  - El campo `comments` de cada actividad copiada se guarda en NULL (los
+    comentarios de aprobación pertenecen a la sección de origen).
+  - Solo copia `activities` y `achievements`; NO copia relaciones LMS
+    (secciones, recursos, enlaces, publicaciones, logs).
+  - NO existe rollback automático. Si necesitas deshacer, elimina en el
+    destino las actividades con `pevaluacion_id` = --to creadas en la corrida.
+  - La base ORIGEN nunca se modifica.
+
+EJEMPLOS
+  # Copiar de S2526 (por defecto) hacia la base actual, simulando:
+  php8.2 artisan activity:copy --from=1920 --to=215268 --dry-run
+
+  # Copiar de S2526 hacia la base actual, confirmando:
+  php8.2 artisan activity:copy --from=1920 --to=215268 --force
+
+  # Copiar desde la propia base actual (mismo DB, otra Pevaluación):
+  php8.2 artisan activity:copy --from=1920 --to=215268 --source=1 --force
+
+  # Ver la ayuda y las opciones disponibles:
+  php8.2 artisan activity:copy --help
+
+============================================================================
+*/

@@ -170,4 +170,20 @@ return [
     | admin/director/leadership consulta el panel de bitácora.
     */
     'meta_audit' => env('BINNACLE_META_AUDIT', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Modelos excluidos de la auditoría automática (alto volumen)
+    |--------------------------------------------------------------------------
+    | El observer AuditableModelObserver no registra eventos para estos modelos.
+    | DiagAnswer se excluye por defecto: cada respuesta del diagnóstico se
+    | guarda en diag_answers y auditar cada fila duplica escrituras (1 job + 1
+    | fila de bitácora por respuesta) durante la aplicación del examen.
+    | Sobreescribible con BINNACLE_AUDIT_DISABLED_MODELS (lista separada por
+    | comas; vacío = auditar todo).
+    */
+    'audit_disabled_models' => array_values(array_filter(array_map('trim', explode(',', (string) env(
+        'BINNACLE_AUDIT_DISABLED_MODELS',
+        \App\Models\app\Instrument\DiagAnswer::class
+    ))))),
 ];

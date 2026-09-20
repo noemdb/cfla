@@ -24,14 +24,16 @@ use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
- * Exportación JSON del horario de un docente (dropdown «Datos» del wizard).
+ * Exportación JSON del horario de un docente (dropdown «Datos» del wizard):
+ * agrega la carga del docente en todos los calendarios activos.
  */
 class TimetableTeacherJsonExportTest extends TestCase
 {
     use DatabaseTransactions, TimetableShiftHelper;
 
     /**
-     * Escenario mínimo: un docente, una asignatura, un bloque el lunes con aula.
+     * Escenario mínimo: un docente, una asignatura, un bloque el lunes con aula,
+     * en un calendario activo.
      *
      * @return array<string, mixed>
      */
@@ -48,7 +50,7 @@ class TimetableTeacherJsonExportTest extends TestCase
             'ci_profesor' => '9201', 'status_active' => 'true',
         ]);
 
-        $calendar = TimetableCalendar::factory()->create([
+        $calendar = TimetableCalendar::factory()->active()->create([
             'lapso_id' => $lapso->id,
             'pestudio_id' => $pestudio->id,
             'name' => 'Horario Test',
@@ -106,27 +108,25 @@ class TimetableTeacherJsonExportTest extends TestCase
         );
     }
 
-    public function test_open_dialog_preselects_current_calendar_and_first_teacher(): void
+    public function test_open_dialog_selects_a_teacher(): void
     {
         $fixture = $this->fixture();
 
         Livewire::actingAs($fixture['user'])
             ->test(TimetableWizard::class)
-            ->set('calendarId', $fixture['calendar']->id)
             ->call('openTeacherJsonDialog')
             ->assertSet('showTeacherJsonDialog', true)
-            ->assertSet('teacherJsonCalendarId', $fixture['calendar']->id)
-            ->assertSet('teacherJsonProfesorId', $fixture['profesor']->id);
+            ->assertSet('teacherJsonProfesorId', fn ($id) => $id !== null);
     }
 
-    public function test_download_teacher_schedule_json_returns_identified_structure(): void
+    public function test_download_teacher_schedule_json_aggregates_active_calendars(): void
     {
         $fixture = $this->fixture();
 
         $component = Livewire::actingAs($fixture['user'])
             ->test(TimetableWizard::class)
-            ->set('calendarId', $fixture['calendar']->id)
             ->call('openTeacherJsonDialog')
+            ->set('teacherJsonProfesorId', $fixture['profesor']->id)
             ->call('downloadTeacherScheduleJson');
 
         $component->assertFileDownloaded(null, null, 'application/json; charset=UTF-8');
@@ -137,16 +137,22 @@ class TimetableTeacherJsonExportTest extends TestCase
         $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertSame('cfla-timetable-teacher-schedule', $payload['format']);
+        $this->assertSame(2, $payload['version']);
         $this->assertSame('López Ana', $payload['teacher']['full_name']);
         $this->assertSame('9201', $payload['teacher']['ci']);
-        $this->assertSame('Horario Test', $payload['calendar']['name']);
-        $this->assertSame('Lunes', $payload['schedule'][0]['day']);
+        $this->assertSame(1, $payload['totals']['calendars']);
+        $this->assertSame(1, $payload['totals']['weekly_blocks']);
 
-        $assignment = $payload['schedule'][0]['blocks'][0]['assignments'][0];
+        $calendar = $payload['calendars'][0];
+        $this->assertSame($fixture['calendar']->id, $calendar['calendar']['id']);
+        $this->assertSame('Horario Test', $calendar['calendar']['name']);
+        $this->assertSame('Lunes', $calendar['schedule'][0]['day']);
+
+        $assignment = $calendar['schedule'][0]['blocks'][0]['assignments'][0];
         $this->assertSame('Matemática', $assignment['subject']['name']);
         $this->assertSame('A', $assignment['section']['name']);
         $this->assertSame('A1', $assignment['room']['code']);
-        $this->assertSame(1, $payload['totals']['weekly_blocks']);
+        $this->assertSame(1, $calendar['totals']['weekly_blocks']);
     }
 
     public function test_download_without_selection_does_not_emit_file(): void
@@ -155,31 +161,9 @@ class TimetableTeacherJsonExportTest extends TestCase
 
         Livewire::actingAs($fixture['user'])
             ->test(TimetableWizard::class)
-            ->set('teacherJsonCalendarId', null)
             ->set('teacherJsonProfesorId', null)
             ->call('downloadTeacherScheduleJson')
             ->assertNoFileDownloaded();
-    }
-
-    public function test_selecting_calendar_from_dropdown_resyncs_teacher(): void
-    {
-        $fixture = $this->fixture();
-
-        $component = Livewire::actingAs($fixture['user'])
-            ->test(TimetableWizard::class)
-            ->set('calendarId', $fixture['calendar']->id)
-            ->call('openTeacherJsonDialog')
-            ->assertSet('teacherJsonProfesorId', $fixture['profesor']->id);
-
-        // Un calendario sin slots no tiene docentes: al seleccionarlo se limpia.
-        $empty = TimetableCalendar::factory()->create([
-            'lapso_id' => $fixture['lapso']->id,
-            'pestudio_id' => $fixture['pestudio']->id,
-        ]);
-
-        $component->set('teacherJsonCalendarId', $empty->id)
-            ->assertSet('teacherJsonCalendarId', $empty->id)
-            ->assertSet('teacherJsonProfesorId', null);
     }
 
     public function test_planner_can_export_teacher_schedule_json(): void
@@ -190,7 +174,6 @@ class TimetableTeacherJsonExportTest extends TestCase
         Livewire::actingAs($planner)
             ->test(PlanningTimetableWizard::class)
             ->call('openTeacherJsonDialog')
-            ->set('teacherJsonCalendarId', $fixture['calendar']->id)
             ->set('teacherJsonProfesorId', $fixture['profesor']->id)
             ->call('downloadTeacherScheduleJson')
             ->assertFileDownloaded();

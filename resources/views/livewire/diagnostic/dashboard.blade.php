@@ -41,6 +41,39 @@
         </div>
     </div>
 
+    <!-- Información académica del estudiante -->
+    @php
+        $grado = $currentStudent->grado;
+        $seccion = $currentStudent->seccion;
+        $pestudio = $currentStudent->pestudio;
+    @endphp
+    <div class="max-w-5xl mx-auto mb-12">
+        <div class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-6 shadow-2xl">
+            <div class="flex items-center space-x-3 mb-4">
+                <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222">
+                    </path>
+                </svg>
+                <h2 class="text-lg font-semibold text-white">Información Académica</h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4">
+                    <div class="text-xs uppercase tracking-wide text-gray-400 mb-1">Nivel educativo</div>
+                    <div class="text-white font-semibold">{{ $pestudio->full_name ?? 'No asignado' }}</div>
+                </div>
+                <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4">
+                    <div class="text-xs uppercase tracking-wide text-gray-400 mb-1">Curso</div>
+                    <div class="text-white font-semibold">{{ $grado->name ?? 'No asignado' }}</div>
+                </div>
+                <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4">
+                    <div class="text-xs uppercase tracking-wide text-gray-400 mb-1">Sección</div>
+                    <div class="text-white font-semibold">{{ $seccion->name ?? 'No asignada' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     @if (!empty($sessionStats))
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
@@ -192,9 +225,19 @@
             </div>
         @empty
             <div class="col-span-full text-center py-12">
-                <div class="text-gray-400 text-lg">
-                    No hay áreas de diagnóstico disponibles en este momento.
+                <svg class="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
+                </svg>
+                <div class="text-gray-300 text-lg font-medium mb-2">
+                    No hay áreas de diagnóstico disponibles
                 </div>
+                <p class="text-gray-500 text-sm max-w-md mx-auto">
+                    Verifica que tengas una inscripción activa en el año escolar y que tu grado tenga áreas
+                    activadas para diagnóstico. Si el problema persiste, contacta a tu docente.
+                </p>
             </div>
         @endforelse
     </div>
@@ -203,7 +246,7 @@
     @if ($showAnsweredModal && $selectedPensum)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             wire:click="closeAnsweredQuestionsModal">
-            <div class="bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" wire:click.stop>
+            <div class="bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" @click.stop>
                 <!-- Modal Header -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-lg font-bold text-white">

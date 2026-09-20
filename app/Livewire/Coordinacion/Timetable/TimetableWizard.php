@@ -346,9 +346,6 @@ class TimetableWizard extends Component
     /** Modal «Horario por profesor (JSON)» del dropdown de datos. */
     public bool $showTeacherJsonDialog = false;
 
-    /** Calendario seleccionado en el modal de exportación JSON. */
-    public ?int $teacherJsonCalendarId = null;
-
     /** Profesor seleccionado en el modal de exportación JSON. */
     public ?int $teacherJsonProfesorId = null;
 
@@ -8064,17 +8061,11 @@ PROMPT;
     // ─── Exportación JSON · Horario por profesor ───────────────
 
     /**
-     * Abre el modal de exportación JSON. Preselecciona el calendario en edición
-     * (si tiene horario generado) y el primer docente disponible.
+     * Abre el modal de exportación JSON y preselecciona el primer docente con
+     * carga en los calendarios activos.
      */
     public function openTeacherJsonDialog(): void
     {
-        $calendars = $this->teacherJsonCalendars();
-        $currentId = (int) ($this->calendarId ?? 0);
-
-        $this->teacherJsonCalendarId = collect($calendars)->contains('id', $currentId)
-            ? $currentId
-            : ($calendars[0]['id'] ?? null);
         $this->teacherJsonProfesorId = null;
         $this->syncTeacherJsonDefaultTeacher();
         $this->showTeacherJsonDialog = true;
@@ -8083,13 +8074,6 @@ PROMPT;
     public function closeTeacherJsonDialog(): void
     {
         $this->showTeacherJsonDialog = false;
-    }
-
-    /** Al cambiar de calendario se reinicia el docente al primero de ese calendario. */
-    public function updatedTeacherJsonCalendarId(): void
-    {
-        $this->teacherJsonProfesorId = null;
-        $this->syncTeacherJsonDefaultTeacher();
     }
 
     private function syncTeacherJsonDefaultTeacher(): void
@@ -8103,42 +8087,43 @@ PROMPT;
     }
 
     /**
-     * Calendarios con horario generado (slots persistidos) ofrecidos en el
-     * modal de exportación JSON.
+     * Calendarios activos con horario generado. El JSON del docente agrega su
+     * carga en TODOS ellos: no se elige calendario.
      *
-     * @return array<int, array{id:int, name:string, status:string, pestudio:string}>
+     * @return \Illuminate\Support\Collection<int, TimetableCalendar>
      */
-    protected function teacherJsonCalendars(): array
+    protected function teacherJsonCalendarModels()
     {
         return TimetableCalendar::query()
-            ->with('pestudio:id,name,code')
-            ->whereHas('slots')
-            ->orderByRaw("FIELD(status, 'active', 'draft', 'generating', 'archived'), id DESC")
-            ->get()
-            ->map(fn (TimetableCalendar $calendar): array => [
-                'id' => (int) $calendar->id,
-                'name' => (string) $calendar->name,
-                'status' => (string) $calendar->status,
-                'pestudio' => (string) ($calendar->pestudio?->name ?? 'P.Estudio'),
+            ->with([
+                'lapso:id,name,code',
+                'pestudio:id,code,name,peducativo_id',
+                'pestudio.peducativo:id,name',
+                'pescolar:id,name',
             ])
-            ->all();
+            ->where('status', TimetableCalendar::STATUS_ACTIVE)
+            ->whereHas('slots')
+            ->orderBy('pestudio_id')
+            ->orderBy('id')
+            ->get();
     }
 
     /**
-     * Docentes con slots en el calendario seleccionado (secciones y grados
-     * activos), ordenados por apellido.
+     * Docentes con slots en cualquiera de los calendarios activos (secciones y
+     * grados activos), ordenados por apellido.
      *
      * @return array<int, array{id:int, name:string}>
      */
     protected function teacherJsonTeachers(): array
     {
-        $calendarId = (int) ($this->teacherJsonCalendarId ?? 0);
-        if ($calendarId <= 0) {
+        $calendarIds = $this->teacherJsonCalendarModels()->pluck('id')->all();
+
+        if ($calendarIds === []) {
             return [];
         }
 
         $profesorIds = TimetableSlot::query()
-            ->where('calendar_id', $calendarId)
+            ->whereIn('calendar_id', $calendarIds)
             ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query
                 ->where('status_active', 'true')
                 ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true')))
@@ -8166,47 +8151,36 @@ PROMPT;
     }
 
     /**
-     * Descarga el horario semanal del docente seleccionado como JSON
-     * estructurado y auto-descriptivo, pensado para ser consumido por un
-     * agente de IA (identificación del docente, calendario, días, bloques,
-     * turnos y asignaciones).
+     * Descarga el horario del docente seleccionado como JSON estructurado y
+     * auto-descriptivo, agregando su carga en TODOS los calendarios activos.
      */
     public function downloadTeacherScheduleJson()
     {
-        $calendarId = (int) ($this->teacherJsonCalendarId ?? 0);
         $profesorId = (int) ($this->teacherJsonProfesorId ?? 0);
 
-        if ($calendarId <= 0 || $profesorId <= 0) {
+        if ($profesorId <= 0) {
             $this->notification()->warning(
                 'Selección incompleta',
-                'Elige un calendario y un profesor para exportar el horario en JSON.',
+                'Elige un profesor para exportar el horario en JSON.',
             );
 
             return null;
         }
 
-        $calendar = TimetableCalendar::query()
-            ->with([
-                'lapso:id,name,code',
-                'pestudio:id,code,name,peducativo_id',
-                'pestudio.peducativo:id,name',
-                'pescolar:id,name',
-            ])
-            ->find($calendarId);
         $profesor = \App\Models\app\Academy\Profesor::query()->find($profesorId);
 
-        if (! $calendar || ! $profesor) {
+        if (! $profesor) {
             $this->notification()->error(
                 'No se pudo exportar',
-                'El calendario o el profesor seleccionado ya no está disponible.',
+                'El profesor seleccionado ya no está disponible.',
             );
 
             return null;
         }
 
-        $payload = $this->buildTeacherScheduleJson($calendar, $profesor);
+        $payload = $this->buildTeacherScheduleJson($profesor);
         $slug = Str::slug(trim(($profesor->lastname ?? '').' '.($profesor->name ?? ''))) ?: 'profesor';
-        $filename = 'horario-'.$slug.'-'.$calendar->id.'-'.now()->format('Ymd_His').'.json';
+        $filename = 'horario-'.$slug.'-'.now()->format('Ymd_His').'.json';
 
         return response()->streamDownload(function () use ($payload): void {
             echo json_encode(
@@ -8217,14 +8191,72 @@ PROMPT;
     }
 
     /**
-     * Construye el payload JSON del horario semanal de un docente.
+     * Construye el payload JSON del horario de un docente agregando su carga en
+     * todos los calendarios activos (uno por P.Estudio/lapso).
      *
      * @return array<string, mixed>
      */
-    protected function buildTeacherScheduleJson(TimetableCalendar $calendar, $profesor): array
+    protected function buildTeacherScheduleJson($profesor): array
     {
         $profesorId = (int) $profesor->id;
 
+        $calendars = [];
+        $allAssignments = collect();
+        $allClassBlocks = collect();
+
+        foreach ($this->teacherJsonCalendarModels() as $calendar) {
+            $built = $this->buildCalendarScheduleForTeacher($calendar, $profesorId);
+
+            if ($built['assignments']->isEmpty()) {
+                continue;
+            }
+
+            $calendars[] = $this->calendarIdentityPayload($calendar) + [
+                'schedule' => $built['schedule'],
+                'totals' => [
+                    'weekly_blocks' => $built['assignments']->count(),
+                    'by_subject' => $this->groupAssignmentsBySubject($built['assignments']),
+                    'by_shift' => $this->groupClassBlocksByShift($built['class_blocks']),
+                ],
+            ];
+
+            $allAssignments = $allAssignments->concat($built['assignments']);
+            $allClassBlocks = $allClassBlocks->concat($built['class_blocks']);
+        }
+
+        return [
+            'format' => 'cfla-timetable-teacher-schedule',
+            'version' => 2,
+            'generated_at' => now()->toIso8601String(),
+            'timezone' => (string) config('app.timezone'),
+            'description' => 'Horario del docente agregado por TODOS los calendarios activos: calendario/lapso/P.Estudio, días, bloques, turnos y asignaciones (asignatura, sección, aula). Estructura auto-descriptiva pensada para ser consumida por un agente de IA.',
+            'teacher' => [
+                'id' => $profesorId,
+                'ci' => (string) ($profesor->ci_profesor ?? ''),
+                'first_name' => (string) ($profesor->name ?? ''),
+                'last_name' => (string) ($profesor->lastname ?? ''),
+                'full_name' => (string) ($profesor->full_name ?? trim(($profesor->lastname ?? '').' '.($profesor->name ?? ''))),
+                'email' => (string) ($profesor->email ?? ''),
+                'status_active' => (bool) ($profesor->status_active ?? false),
+            ],
+            'totals' => [
+                'calendars' => count($calendars),
+                'weekly_blocks' => $allAssignments->count(),
+                'by_subject' => $this->groupAssignmentsBySubject($allAssignments),
+                'by_shift' => $this->groupClassBlocksByShift($allClassBlocks),
+            ],
+            'calendars' => $calendars,
+        ];
+    }
+
+    /**
+     * Horario semanal de un docente dentro de un calendario: días, bloques y
+     * asignaciones, más las colecciones planas usadas para las totalizaciones.
+     *
+     * @return array{schedule: list<array<string,mixed>>, assignments: \Illuminate\Support\Collection, class_blocks: \Illuminate\Support\Collection}
+     */
+    protected function buildCalendarScheduleForTeacher(TimetableCalendar $calendar, int $profesorId): array
+    {
         $slots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query
@@ -8324,9 +8356,59 @@ PROMPT;
             ->reject(fn (array $block): bool => (bool) $block['is_break'])
             ->values();
 
-        $assignments = $classBlocks->flatMap(fn (array $block) => $block['assignments']);
+        $assignments = $classBlocks->flatMap(fn (array $block) => $block['assignments'])->values();
 
-        $bySubject = $assignments
+        return [
+            'schedule' => $days,
+            'assignments' => $assignments,
+            'class_blocks' => $classBlocks,
+        ];
+    }
+
+    /**
+     * Identidad del calendario (calendario, lapso, P.Estudio/P.Educativo y
+     * período escolar) usada como cabecera de cada bloque del JSON.
+     *
+     * @return array<string, mixed>
+     */
+    protected function calendarIdentityPayload(TimetableCalendar $calendar): array
+    {
+        return [
+            'calendar' => [
+                'id' => (int) $calendar->id,
+                'name' => (string) $calendar->name,
+                'status' => (string) $calendar->status,
+                'version' => (int) $calendar->version,
+                'period_minutes' => (int) $calendar->period_minutes,
+            ],
+            'lapso' => $calendar->lapso ? [
+                'id' => (int) $calendar->lapso->id,
+                'code' => (string) ($calendar->lapso->code ?? ''),
+                'name' => (string) $calendar->lapso->name,
+            ] : null,
+            'pestudio' => $calendar->pestudio ? [
+                'id' => (int) $calendar->pestudio->id,
+                'code' => (string) ($calendar->pestudio->code ?? ''),
+                'name' => (string) $calendar->pestudio->name,
+                'peducativo' => $calendar->pestudio->peducativo ? [
+                    'id' => (int) $calendar->pestudio->peducativo->id,
+                    'name' => (string) $calendar->pestudio->peducativo->name,
+                ] : null,
+            ] : null,
+            'pescolar' => $calendar->pescolar ? [
+                'id' => (int) $calendar->pescolar->id,
+                'name' => (string) $calendar->pescolar->name,
+            ] : null,
+        ];
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, array<string,mixed>>  $assignments
+     * @return list<array{subject:string, blocks:int}>
+     */
+    protected function groupAssignmentsBySubject($assignments): array
+    {
+        return $assignments
             ->groupBy(fn (array $assignment): string => (string) $assignment['subject']['name'])
             ->map(fn ($items, $name): array => [
                 'subject' => (string) $name,
@@ -8335,8 +8417,15 @@ PROMPT;
             ->sortByDesc('blocks')
             ->values()
             ->all();
+    }
 
-        $byShift = $classBlocks
+    /**
+     * @param  \Illuminate\Support\Collection<int, array<string,mixed>>  $classBlocks
+     * @return list<array{shift:string, blocks:int}>
+     */
+    protected function groupClassBlocksByShift($classBlocks): array
+    {
+        return $classBlocks
             ->flatMap(fn (array $block) => collect($block['assignments'])
                 ->map(fn () => (string) $block['shift']['name']))
             ->filter()
@@ -8347,54 +8436,6 @@ PROMPT;
             ])
             ->values()
             ->all();
-
-        return [
-            'format' => 'cfla-timetable-teacher-schedule',
-            'version' => 1,
-            'generated_at' => now()->toIso8601String(),
-            'timezone' => (string) config('app.timezone'),
-            'description' => 'Horario semanal organizado de un docente: calendario, días, bloques, turnos y asignaciones (asignatura, sección, aula). Estructura auto-descriptiva pensada para ser consumida por un agente de IA.',
-            'calendar' => [
-                'id' => (int) $calendar->id,
-                'name' => (string) $calendar->name,
-                'status' => (string) $calendar->status,
-                'version' => (int) $calendar->version,
-                'period_minutes' => (int) $calendar->period_minutes,
-                'lapso' => $calendar->lapso ? [
-                    'id' => (int) $calendar->lapso->id,
-                    'code' => (string) ($calendar->lapso->code ?? ''),
-                    'name' => (string) $calendar->lapso->name,
-                ] : null,
-                'pestudio' => $calendar->pestudio ? [
-                    'id' => (int) $calendar->pestudio->id,
-                    'code' => (string) ($calendar->pestudio->code ?? ''),
-                    'name' => (string) $calendar->pestudio->name,
-                    'peducativo' => $calendar->pestudio->peducativo ? [
-                        'id' => (int) $calendar->pestudio->peducativo->id,
-                        'name' => (string) $calendar->pestudio->peducativo->name,
-                    ] : null,
-                ] : null,
-                'pescolar' => $calendar->pescolar ? [
-                    'id' => (int) $calendar->pescolar->id,
-                    'name' => (string) $calendar->pescolar->name,
-                ] : null,
-            ],
-            'teacher' => [
-                'id' => $profesorId,
-                'ci' => (string) ($profesor->ci_profesor ?? ''),
-                'first_name' => (string) ($profesor->name ?? ''),
-                'last_name' => (string) ($profesor->lastname ?? ''),
-                'full_name' => (string) ($profesor->full_name ?? trim(($profesor->lastname ?? '').' '.($profesor->name ?? ''))),
-                'email' => (string) ($profesor->email ?? ''),
-                'status_active' => (bool) ($profesor->status_active ?? false),
-            ],
-            'totals' => [
-                'weekly_blocks' => $assignments->count(),
-                'by_subject' => $bySubject,
-                'by_shift' => $byShift,
-            ],
-            'schedule' => $days,
-        ];
     }
 
     /**
@@ -10071,11 +10112,9 @@ PROMPT;
             $teacherScheduleHasAssignments = (bool) ($activeBlock['has_assignments'] ?? false);
         }
 
-        // Exportación JSON · Horario por profesor.
-        $teacherJsonCalendars = [];
+        // Exportación JSON · Horario por profesor (agrega todos los calendarios activos).
         $teacherJsonTeachers = [];
         if ($this->showTeacherJsonDialog) {
-            $teacherJsonCalendars = $this->teacherJsonCalendars();
             $teacherJsonTeachers = $this->teacherJsonTeachers();
         }
 
@@ -10117,7 +10156,6 @@ PROMPT;
             'teacherScheduleCalendars' => $teacherScheduleCalendars,
             'teacherScheduleGrid' => $teacherScheduleGrid,
             'teacherScheduleHasAssignments' => $teacherScheduleHasAssignments,
-            'teacherJsonCalendars' => $teacherJsonCalendars,
             'teacherJsonTeachers' => $teacherJsonTeachers,
         ])->layout($this->getLayout());
     }

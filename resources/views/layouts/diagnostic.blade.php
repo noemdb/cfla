@@ -31,6 +31,7 @@
 
     <div class="relative z-[100]">
         <x-notifications />
+        <x-dialog />
     </div>
 
 

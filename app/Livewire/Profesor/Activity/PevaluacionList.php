@@ -219,15 +219,31 @@ class PevaluacionList extends Component
             ->orderBy('name')
             ->pluck('name', 'id');
 
-        $grados = Grado::whereHas('pensums.pevaluacions', function ($q) use ($profesor) {
-            $q->where('profesor_id', $profesor->id);
-        })->when($this->pestudio_id, function ($q) {
-            $q->where('pestudio_id', $this->pestudio_id);
-        })->get();
-        $list_grado = $grados->pluck('name', 'id');
+        $grados = Grado::where('status_active', 'true')
+            ->whereHas('pestudio', function ($q) use ($profesor) {
+                $q->where('planning_module', true)
+                    ->where('status_active', 'true')
+                    ->whereHas('pensums.pevaluacions', function ($q2) use ($profesor) {
+                        $q2->where('profesor_id', $profesor->id);
+                    });
+            })
+            ->when($this->pestudio_id, function ($q) {
+                $q->where('pestudio_id', $this->pestudio_id);
+            })
+            ->with('pestudio')
+            ->orderBy('name')
+            ->get();
+        $list_grado = $grados->mapWithKeys(function ($grado) {
+            $pestudioName = $grado->pestudio->name ?? '';
+
+            return [$grado->id => $pestudioName ? "{$grado->name} — {$pestudioName}" : $grado->name];
+        });
 
         $list_seccion = $this->grado_id
-            ? Seccion::where('grado_id', $this->grado_id)->pluck('name', 'id')
+            ? Seccion::where('grado_id', $this->grado_id)
+                ->where('status_active', 'true')
+                ->orderBy('name')
+                ->pluck('name', 'id')
             : collect();
 
         $lapsos = Lapso::orderBy('name', 'asc')->get();

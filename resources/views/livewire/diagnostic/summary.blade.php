@@ -30,6 +30,47 @@
             </div>
         </div>
 
+        <!-- Results -->
+        @if (!empty($results) && ($results['total_answered'] ?? 0) > 0)
+            <div class="bg-gray-800 rounded-lg p-6 mb-8">
+                <h2 class="text-lg font-semibold text-white mb-4">Resultados</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-emerald-400">
+                            {{ number_format($results['precision'], 1) }}%</div>
+                        <div class="text-gray-400 text-sm mt-1">Precisión (selección múltiple)</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-400">
+                            {{ $results['correct_answers'] }}/{{ $results['total_answered'] }}</div>
+                        <div class="text-gray-400 text-sm mt-1">Respuestas correctas</div>
+                    </div>
+                </div>
+
+                @if (!empty($results['by_difficulty']))
+                    <div class="mt-6 space-y-3">
+                        @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $key => $label)
+                            @if (isset($results['by_difficulty'][$key]))
+                                @php
+                                    $diff = $results['by_difficulty'][$key];
+                                    $pct = $diff['total'] > 0 ? round(($diff['correct'] / $diff['total']) * 100) : 0;
+                                @endphp
+                                <div>
+                                    <div class="flex justify-between text-sm text-gray-300 mb-1">
+                                        <span>{{ $label }}</span>
+                                        <span>{{ $diff['correct'] }}/{{ $diff['total'] }} ({{ $pct }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ $pct }}%"></div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <!-- Completion Message -->
         <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
             <div class="flex items-center mb-2">

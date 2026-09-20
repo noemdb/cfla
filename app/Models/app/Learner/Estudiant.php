@@ -272,7 +272,6 @@ class Estudiant extends Model implements \App\Contracts\Auditable
             ->join('seccions', 'grados.id', '=', 'seccions.grado_id')
             ->join('inscripcions', 'seccions.id', '=', 'inscripcions.seccion_id')
             ->join('estudiants', 'estudiants.id', '=', 'inscripcions.estudiant_id')
-            ->join('administrativas', 'estudiants.id', '=', 'administrativas.estudiant_id')
             ->join('asignaturas', 'asignaturas.id', '=', 'pensums.asignatura_id')
             ->Where('estudiants.id', $this->id)
             ->wherenull('pensums.deleted_at')

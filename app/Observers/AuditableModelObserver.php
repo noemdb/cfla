@@ -35,6 +35,11 @@ class AuditableModelObserver
 
     private function log(Model $model, string $event, string $verb, string $severity): void
     {
+        // Modelos de alto volumen (p. ej. DiagAnswer) se excluyen por config.
+        if (in_array($model::class, config('binnacle.audit_disabled_models', []), true)) {
+            return;
+        }
+
         Binnacle::logModelEvent($model, $event, [
             'title' => $this->label($model).' '.$verb,
             'category' => 'user_action',
