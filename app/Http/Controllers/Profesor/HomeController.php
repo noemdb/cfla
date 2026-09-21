@@ -15,7 +15,6 @@ use App\Models\app\Instrument\DiagSession;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -328,10 +327,12 @@ class HomeController extends Controller
             // ── Lessons (merged: published + scheduled + drafts) ──
             $merged = collect();
 
-            // Published lessons (published_at)
-            $pubQuery = DB::table('lms_activity_publications')
-                ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+            // Published lessons (published_at) — solo lecciones con contenido LMS
+            // (al menos una sección o recurso), igual que el monitor y planning.
+            $pubQuery = Activity::query()
+                ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
                 ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->withLmsContent()
                 ->where('pevaluacions.profesor_id', $profesorId)
                 ->where('lms_activity_publications.status', 'PUBLISHED')
                 ->whereNotNull('lms_activity_publications.published_at')
@@ -343,9 +344,10 @@ class HomeController extends Controller
             }
 
             // Scheduled lessons (publish_at, not yet published)
-            $schQuery = DB::table('lms_activity_publications')
-                ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+            $schQuery = Activity::query()
+                ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
                 ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->withLmsContent()
                 ->where('pevaluacions.profesor_id', $profesorId)
                 ->whereNotNull('lms_activity_publications.publish_at')
                 ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
@@ -359,6 +361,7 @@ class HomeController extends Controller
             // Draft lessons (no publication record → use activity created_at)
             $drfQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
                 ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->withLmsContent()
                 ->where('pevaluacions.profesor_id', $profesorId)
                 ->whereNull('lms_activity_publications.publish_at')
                 ->where(function ($q) {

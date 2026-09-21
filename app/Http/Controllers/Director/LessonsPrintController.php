@@ -63,9 +63,13 @@ class LessonsPrintController extends Controller
             default => (new DirectorScopeService($request->user()))->queryActivities(),
         };
 
-        // Mismo criterio que Coordinacion\LessonList (render): solo actividades
-        // con publicación LMS. El monitor de Liderazgo NO lo aplica (muestra
-        // todas las del scope, con o sin publicación).
+        // Solo lecciones con contenido LMS (al menos una sección o recurso),
+        // mismo criterio que los monitores LmsMonitor / LessonMonitor.
+        $query->withLmsContent();
+
+        // Coordinación además exige publicación LMS (mismo criterio que
+        // Coordinacion\LessonList). El resto de módulos muestra las lecciones
+        // del scope con o sin publicación, pero siempre con contenido.
         if ($module === 'coordinacion') {
             $query->whereHas('lmsPublication');
         }

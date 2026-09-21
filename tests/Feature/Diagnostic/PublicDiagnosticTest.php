@@ -291,6 +291,25 @@ class PublicDiagnosticTest extends TestCase
         $this->assertSame('Opción A', $answered->first()['answer']);
     }
 
+    public function test_modal_ver_respuestas_muestra_contenido(): void
+    {
+        $scenario = $this->createScenario();
+
+        $component = Livewire::test(Diagnostic::class)
+            ->set('studentCi', $scenario['estudiant']->ci_estudiant)
+            ->call('verifyStudent')
+            ->call('startDiagnostic', $scenario['pensum']->id);
+
+        $component->set('selectedAnswer', 'Opción A')->call('saveAnswer');
+        $component->call('backToDashboard');
+
+        $component->call('reviewAnswers', $scenario['pensum']->id)
+            ->assertSet('showAnsweredModal', true)
+            ->assertSee('Test Asignatura')
+            ->assertSee('Opción A')
+            ->assertSee('pregunta respondida');
+    }
+
     public function test_guia_de_participacion_se_renderiza_y_cambia_de_tab(): void
     {
         $scenario = $this->createScenario();

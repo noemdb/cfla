@@ -65,15 +65,17 @@ class IndicatorDashboard extends Component
 
         $this->totalPensums = $service->queryPensums()->count();
 
-        // Lecciones registradas (actividades) del lapso seleccionado, en toda
-        // la institución. Mismo criterio que los dashboards de coordinación y
-        // liderazgo: cada actividad cuenta una vez aunque tenga publicación LMS.
-        $this->totalLessons = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        // Lecciones registradas: solo actividades con contenido LMS (al menos
+        // una sección o recurso asociado), del lapso seleccionado y toda la
+        // institución. Mismo criterio que los dashboards de coordinación y
+        // liderazgo.
+        $this->totalLessons = Activity::withLmsContent()
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->when($this->selectedLapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $this->selectedLapsoId))
             ->whereNull('pevaluacions.deleted_at')
-            ->count(DB::raw('DISTINCT activities.id'));
+            ->distinct()
+            ->count('activities.id');
         $this->totalActivities = $service->queryActivities()->count();
         $this->totalProfesoresActivos = $service->queryProfesores()->count();
         $this->totalResources = $service->queryResources()->count();
@@ -155,7 +157,7 @@ class IndicatorDashboard extends Component
 
         // Serie 1: Publicadas (status = 'PUBLISHED', por published_at)
         $published = $scope(
-            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            Activity::query()->withLmsContent()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
         )
             ->where('lms_activity_publications.status', 'PUBLISHED')
             ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
@@ -166,7 +168,7 @@ class IndicatorDashboard extends Component
 
         // Serie 2: Programadas (publish_at NOT NULL, status != 'PUBLISHED')
         $scheduled = $scope(
-            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            Activity::query()->withLmsContent()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
         )
             ->whereNotNull('lms_activity_publications.publish_at')
             ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
@@ -178,7 +180,7 @@ class IndicatorDashboard extends Component
 
         // Serie 3: Borradores (publish_at NULL, status != 'PUBLISHED' O null)
         $drafts = $scope(
-            Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            Activity::query()->withLmsContent()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
         )
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
@@ -219,9 +221,9 @@ class IndicatorDashboard extends Component
             return;
         }
 
-        $this->chartScheduledByDay = DB::query()
-            ->from('lms_activity_publications')
-            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+        $this->chartScheduledByDay = Activity::query()
+            ->withLmsContent()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->where('pevaluacions.lapso_id', $lapsoId)
@@ -273,30 +275,35 @@ class IndicatorDashboard extends Component
         // ── Lecciones (publicadas / programadas / borradores, por fecha) ──
         $merged = collect();
 
-        // Publicadas (por published_at)
-        $pubQuery = DB::table('lms_activity_publications')
-            ->where('status', 'PUBLISHED')
-            ->whereNotNull('published_at')
-            ->selectRaw('DATE(published_at) as date, COUNT(*) as total')
+        // Publicadas (por published_at) — solo lecciones con contenido LMS.
+        $pubQuery = Activity::query()
+            ->withLmsContent()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->where('lms_activity_publications.status', 'PUBLISHED')
+            ->whereNotNull('lms_activity_publications.published_at')
+            ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
             ->groupBy('date');
-        if ($since) $pubQuery->where('published_at', '>=', $since);
+        if ($since) $pubQuery->where('lms_activity_publications.published_at', '>=', $since);
         foreach ($pubQuery->get() as $r) {
             $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
         }
 
         // Programadas (por publish_at, no publicadas)
-        $schQuery = DB::table('lms_activity_publications')
-            ->whereNotNull('publish_at')
-            ->where('status', '!=', 'PUBLISHED')
-            ->selectRaw('DATE(publish_at) as date, COUNT(*) as total')
+        $schQuery = Activity::query()
+            ->withLmsContent()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->whereNotNull('lms_activity_publications.publish_at')
+            ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+            ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
             ->groupBy('date');
-        if ($since) $schQuery->where('publish_at', '>=', $since);
+        if ($since) $schQuery->where('lms_activity_publications.publish_at', '>=', $since);
         foreach ($schQuery->get() as $r) {
             $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
         }
 
         // Borradores (actividades sin registro de publicación, por fecha de creación)
-        $drfQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        $drfQuery = Activity::withLmsContent()
+            ->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')

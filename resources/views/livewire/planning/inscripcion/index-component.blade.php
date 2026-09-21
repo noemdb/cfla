@@ -25,6 +25,13 @@
                 </svg>
                 Nueva Inscripción
             </button>
+            <button type="button" wire:click="openImportModal"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/20 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                </svg>
+                Importar CSV
+            </button>
             <button wire:click="$refresh"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -712,6 +719,242 @@
             <x-button flat label="Cerrar" wire:click="closeViewStudent" />
         </div>
     </x-modal>
+
+    {{-- ===== DIALOG: Importar Inscripciones desde CSV ===== --}}
+    <x-dialog id="csv-import" title="Importar Inscripciones desde CSV" width="4xl" blur="lg">
+        <div class="text-left space-y-5">
+
+            {{-- Formato esperado --}}
+            <div class="rounded-lg bg-white/5 border border-white/10 px-4 py-3">
+                <p class="text-[11px] text-gray-400 leading-relaxed">
+                    El archivo debe ser <span class="text-gray-200 font-semibold">.csv</span> con las columnas
+                    <span class="font-mono text-amber-400">ci_estudiant, lastname, name, grado, seccion</span>.
+                    La primera fila puede ser encabezado. Si el CI no existe, el estudiante se crea con datos estándar;
+                    si ya tiene inscripción, se actualiza su sección.
+                </p>
+            </div>
+
+            {{-- Archivo --}}
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Archivo CSV</label>
+                <div @click="$refs.csvInput.click()"
+                     class="relative cursor-pointer rounded-lg border-2 border-dashed border-white/10 hover:border-amber-500/40 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-200 px-4 py-5">
+                    <input type="file" wire:model="importCsvFile" accept=".csv,text/csv" x-ref="csvInput" class="hidden">
+
+                    <div wire:loading wire:target="importCsvFile" class="flex flex-col items-center gap-2">
+                        <svg class="w-7 h-7 animate-spin text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span class="text-[11px] text-gray-400 font-medium">Analizando archivo...</span>
+                    </div>
+
+                    <div wire:loading.remove wire:target="importCsvFile" class="flex flex-col items-center gap-2">
+                        @if($importCsvFile && method_exists($importCsvFile, 'getClientOriginalName'))
+                            <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs font-bold text-amber-400">{{ $importCsvFile->getClientOriginalName() }}</p>
+                                <p class="text-[10px] text-gray-500 mt-0.5">Clic para reemplazar</p>
+                            </div>
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-gray-800/80 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs font-bold text-gray-400">Seleccionar archivo CSV</p>
+                                <p class="text-[10px] text-gray-600 mt-0.5">Máximo 5 MB</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                @error('importCsvFile') <p class="text-[10px] text-red-400 mt-2">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- Opciones --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan de Estudio</label>
+                    <select wire:model.live="importPestudioId"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
+                        <option value="">Todos (según nombre)</option>
+                        @foreach($pestudiosForm as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-[10px] text-gray-600 mt-1">Ayuda a desambiguar grados con el mismo nombre.</p>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Tipo de Inscripción <span class="text-red-400">*</span></label>
+                    <select wire:model="importTipoId"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
+                        @foreach($tiposForm as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    @error('importTipoId') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Escolaridad <span class="text-red-400">*</span></label>
+                    <select wire:model="importEscolaridadId"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
+                        @foreach($escolaridadsForm as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    @error('importEscolaridadId') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Programación <span class="text-red-400">*</span></label>
+                    <select wire:model="importProgramacionId"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
+                        @foreach($programacionsForm as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    @error('importProgramacionId') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Grupo Estable (opcional)</label>
+                    <select wire:model="importGrupoEstableId"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
+                        <option value="">Ninguno</option>
+                        @foreach($grupoEstablesForm as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    @error('importGrupoEstableId') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan de Pago (estudiantes nuevos)</label>
+                    <select wire:model="importPlanPagoId"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
+                        <option value="">Automático (crear plan estándar)</option>
+                        @foreach($importPlanPagos as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    @error('importPlanPagoId') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">CI del Representante (opcional)</label>
+                    <input type="text" wire:model="importRepresentantCi" placeholder="Ej: 12345678"
+                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all placeholder:text-gray-600">
+                    <p class="text-[10px] text-gray-600 mt-1">Si se deja vacío se usa "SIN REPRESENTANTE".</p>
+                </div>
+                <div class="sm:col-span-2 rounded-lg bg-white/5 border border-white/10 px-4 py-3 space-y-2">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" wire:model.live="importUpdateAcademicData"
+                            class="mt-0.5 rounded border-white/20 bg-white/5 text-amber-500 focus:ring-amber-500/50">
+                        <span class="text-xs text-gray-300">
+                            Actualizar <span class="font-semibold">tipo, escolaridad, programación y grupo</span> en inscripciones existentes.
+                        </span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" wire:model.live="importUpdateStudentNames"
+                            class="mt-0.5 rounded border-white/20 bg-white/5 text-amber-500 focus:ring-amber-500/50">
+                        <span class="text-xs text-gray-300">
+                            Actualizar <span class="font-semibold">nombre y apellido</span> del estudiante si difieren del CSV.
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            {{-- Estado --}}
+            @if($importStatus)
+                <div class="px-4 py-2 rounded-lg text-xs font-medium
+                    {{ $importStatusType === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
+                    {{ $importStatusType === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
+                    {{ $importStatus }}
+                </div>
+            @endif
+
+            {{-- Vista previa --}}
+            @if(!empty($importPreview))
+                <div class="border-t border-white/10 pt-3">
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">
+                        Vista previa <span class="text-gray-500 font-normal normal-case">({{ count($importPreview) }} filas)</span>
+                    </h4>
+                    <div class="max-h-64 overflow-y-auto rounded-lg border border-white/5 divide-y divide-white/5">
+                        @foreach($importPreview as $row)
+                            <div class="flex items-center gap-3 px-3 py-2 text-xs">
+                                <span class="font-mono text-gray-600 w-7 shrink-0">{{ $row['line'] }}</span>
+                                <span class="font-mono text-gray-300 w-24 shrink-0 truncate" title="{{ $row['ci'] }}">{{ $row['ci'] }}</span>
+                                <span class="text-gray-200 flex-1 min-w-0 truncate">{{ trim($row['lastname'].' '.$row['name']) }}</span>
+                                <span class="text-gray-500 hidden sm:block flex-1 min-w-0 truncate" title="{{ $row['seccion_label'] ?? '' }}">
+                                    {{ $row['seccion_label'] ?? ($row['grado'].' · '.$row['seccion']) }}
+                                </span>
+                                @if(!empty($row['duplicate']))
+                                    <span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-orange-500/12 text-orange-400 border border-orange-500/20"
+                                          title="CI repetido en el archivo">
+                                        DUP
+                                    </span>
+                                @endif
+                                @if($row['status'] === 'ok')
+                                    @php
+                                        $actionStyles = [
+                                            'crear' => 'bg-purple-500/12 text-purple-400 border-purple-500/20',
+                                            'inscribir' => 'bg-emerald-500/12 text-emerald-400 border-emerald-500/20',
+                                            'actualizar' => 'bg-amber-500/12 text-amber-400 border-amber-500/20',
+                                            'sin_cambios' => 'bg-gray-500/12 text-gray-400 border-gray-500/20',
+                                        ];
+                                        $actionLabels = [
+                                            'crear' => 'Crear',
+                                            'inscribir' => 'Inscribir',
+                                            'actualizar' => 'Actualizar',
+                                            'sin_cambios' => 'Sin cambios',
+                                        ];
+                                    @endphp
+                                    <span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border {{ $actionStyles[$row['action']] ?? 'bg-gray-500/12 text-gray-400 border-gray-500/20' }}"
+                                          title="{{ $row['message'] }}">
+                                        {{ $actionLabels[$row['action']] ?? $row['action'] }}
+                                    </span>
+                                @else
+                                    <span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/12 text-red-400 border border-red-500/20"
+                                          title="{{ $row['message'] }}">
+                                        Error
+                                    </span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if(!empty($importReport))
+                        <div class="mt-3 space-y-1">
+                            @foreach($importReport as $report)
+                                <p class="text-[10px] text-red-400">
+                                    Línea {{ $report['line'] }} (CI {{ $report['ci'] }}): {{ $report['message'] }}
+                                </p>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            {{-- Acciones --}}
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <button type="button" x-on:click="close()"
+                    class="px-5 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-gray-300 bg-white/5 hover:bg-white/10 border border-white/5 transition-all duration-200">
+                    Cerrar
+                </button>
+                <button type="button" wire:click="importInscriptions" wire:loading.attr="disabled"
+                    @disabled(empty($importPreview))
+                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-amber-600 hover:bg-amber-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span wire:loading.remove wire:target="importInscriptions">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                        </svg>
+                    </span>
+                    <span wire:loading wire:target="importInscriptions">Importando...</span>
+                    <span wire:loading.remove wire:target="importInscriptions">Importar inscripciones</span>
+                </button>
+            </div>
+        </div>
+    </x-dialog>
 
     {{-- ================================================================ --}}
     {{-- MODE: FORMULARIO (Crear/Editar)                                  --}}

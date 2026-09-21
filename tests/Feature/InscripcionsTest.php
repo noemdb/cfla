@@ -2,18 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Models\app\Academy\Escolaridad;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Programacion;
-use App\Models\app\Academy\Escolaridad;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Academy\Tinscripcion;
 use App\Models\app\Learner\Estudiant;
 use App\Models\app\Learner\Representant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -47,20 +48,20 @@ class InscripcionsTest extends TestCase
         ]);
 
         return Estudiant::create(array_merge([
-            'ci_estudiant'    => fake()->unique()->numerify('########'),
-            'name'            => $extra['name'] ?? fake()->firstName(),
-            'lastname'        => fake()->lastName(),
+            'ci_estudiant' => fake()->unique()->numerify('########'),
+            'name' => $extra['name'] ?? fake()->firstName(),
+            'lastname' => fake()->lastName(),
             'representant_id' => $representant->id,
-            'planpago_id'     => $planpagoId,
-            'type_ci_id'      => 1,
-            'gender'          => 'Masculino',
-            'date_birth'      => '2010-01-15',
-            'city_birth'      => 'Ciudad de Prueba',
-            'state_birth'     => 'Estado de Prueba',
-            'country_birth'   => 'VENEZUELA',
-            'status_active'   => 'true',
-            'cellphone'       => '0412-1234567',
-            'email'           => fake()->unique()->safeEmail(),
+            'planpago_id' => $planpagoId,
+            'type_ci_id' => 1,
+            'gender' => 'Masculino',
+            'date_birth' => '2010-01-15',
+            'city_birth' => 'Ciudad de Prueba',
+            'state_birth' => 'Estado de Prueba',
+            'country_birth' => 'VENEZUELA',
+            'status_active' => 'true',
+            'cellphone' => '0412-1234567',
+            'email' => fake()->unique()->safeEmail(),
         ], $extra));
     }
 
@@ -109,11 +110,11 @@ class InscripcionsTest extends TestCase
         $grupo = GrupoEstable::factory()->create();
 
         Inscripcion::factory()->create([
-            'estudiant_id'     => $estudiant->id,
-            'seccion_id'       => $seccion->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
@@ -151,8 +152,8 @@ class InscripcionsTest extends TestCase
 
         $this->assertDatabaseHas('inscripcions', [
             'estudiant_id' => $estudiant->id,
-            'seccion_id'   => $seccion->id,
-            'tipo_id'      => $tipo->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
         ]);
     }
 
@@ -169,11 +170,11 @@ class InscripcionsTest extends TestCase
         $grupo = GrupoEstable::factory()->create();
 
         $inscripcion = Inscripcion::factory()->create([
-            'estudiant_id'     => $estudiant->id,
-            'seccion_id'       => $seccion->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
@@ -187,7 +188,7 @@ class InscripcionsTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('inscripcions', [
-            'id'           => $inscripcion->id,
+            'id' => $inscripcion->id,
             'observations' => $newObservations,
         ]);
     }
@@ -205,11 +206,11 @@ class InscripcionsTest extends TestCase
         $grupo = GrupoEstable::factory()->create();
 
         $inscripcion = Inscripcion::factory()->create([
-            'estudiant_id'     => $estudiant->id,
-            'seccion_id'       => $seccion->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
@@ -238,11 +239,11 @@ class InscripcionsTest extends TestCase
         $estudiant = $this->createMinimalEstudiant();
 
         Inscripcion::factory()->create([
-            'estudiant_id'     => $estudiant->id,
-            'seccion_id'       => $seccion->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
@@ -276,20 +277,20 @@ class InscripcionsTest extends TestCase
         $maria = $this->createMinimalEstudiant(['name' => 'María', 'lastname' => 'García']);
 
         Inscripcion::factory()->create([
-            'estudiant_id'     => $juan->id,
-            'seccion_id'       => $seccion->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $juan->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
         Inscripcion::factory()->create([
-            'estudiant_id'     => $maria->id,
-            'seccion_id'       => $seccion->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $maria->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
@@ -318,19 +319,19 @@ class InscripcionsTest extends TestCase
         $estB = $this->createMinimalEstudiant(['name' => 'AlumnoB']);
 
         Inscripcion::factory()->create([
-            'estudiant_id'     => $estA->id,
-            'seccion_id'       => $seccionA->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $estA->id,
+            'seccion_id' => $seccionA->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
         Inscripcion::factory()->create([
-            'estudiant_id'     => $estB->id,
-            'seccion_id'       => $seccionB->id,
-            'tipo_id'          => $tipo->id,
-            'escolaridad_id'   => $escolaridad->id,
-            'programacion_id'  => $programacion->id,
+            'estudiant_id' => $estB->id,
+            'seccion_id' => $seccionB->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
             'grupo_estable_id' => $grupo->id,
         ]);
 
@@ -339,5 +340,180 @@ class InscripcionsTest extends TestCase
             ->set('filterPestudio', $pestudioA->id)
             ->assertSee('AlumnoA')
             ->assertDontSee('AlumnoB');
+    }
+
+    // ─── CSV import Tests ───────────────────────────────────────
+
+    /** @test */
+    public function it_opens_the_csv_import_dialog(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->assertSee('Plan de Pago (estudiantes nuevos)')
+            ->assertSee('CI del Representante (opcional)')
+            ->call('openImportModal')
+            ->assertDispatched('wireui:dialog:csv-import');
+    }
+
+    /** @test */
+    public function it_imports_inscriptions_from_csv_creating_missing_students(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'name' => 'GRADO CSV',
+            'status_active' => 'true',
+        ]);
+        $seccion = Seccion::factory()->create([
+            'grado_id' => $grado->id,
+            'name' => 'X',
+            'status_active' => 'true',
+        ]);
+        $tipo = Tinscripcion::factory()->create();
+        $escolaridad = Escolaridad::factory()->create();
+        $programacion = Programacion::factory()->create();
+
+        $existing = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500001',
+            'name' => 'EXISTENTE',
+            'lastname' => 'CSV',
+        ]);
+
+        $csv = "ci_estudiant,lastname,name,grado,seccion\n"
+            ."55500001,CSV,EXISTENTE,GRADO CSV,X\n"
+            ."55500002,CSV,NUEVO,GRADO CSV,X\n";
+
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->call('openImportModal')
+            ->set('importCsvFile', UploadedFile::fake()->createWithContent('inscripciones.csv', $csv))
+            ->set('importTipoId', $tipo->id)
+            ->set('importEscolaridadId', $escolaridad->id)
+            ->set('importProgramacionId', $programacion->id)
+            ->call('importInscriptions')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('inscripcions', [
+            'estudiant_id' => $existing->id,
+            'seccion_id' => $seccion->id,
+        ]);
+
+        $newStudent = Estudiant::where('ci_estudiant', '55500002')->first();
+        $this->assertNotNull($newStudent);
+        $this->assertDatabaseHas('inscripcions', [
+            'estudiant_id' => $newStudent->id,
+            'seccion_id' => $seccion->id,
+        ]);
+    }
+
+    /** @test */
+    public function it_updates_the_section_when_student_is_already_inscribed(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'name' => 'GRADO CSV',
+            'status_active' => 'true',
+        ]);
+        $seccionA = Seccion::factory()->create([
+            'grado_id' => $grado->id,
+            'name' => 'X',
+            'status_active' => 'true',
+        ]);
+        $seccionB = Seccion::factory()->create([
+            'grado_id' => $grado->id,
+            'name' => 'Y',
+            'status_active' => 'true',
+        ]);
+        $tipo = Tinscripcion::factory()->create();
+        $escolaridad = Escolaridad::factory()->create();
+        $programacion = Programacion::factory()->create();
+
+        $estudiant = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500003',
+            'name' => 'INSCRITO',
+            'lastname' => 'CSV',
+        ]);
+
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionA->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
+        ]);
+
+        $csv = "ci_estudiant,lastname,name,grado,seccion\n"
+            ."55500003,CSV,INSCRITO,GRADO CSV,Y\n";
+
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->call('openImportModal')
+            ->set('importCsvFile', UploadedFile::fake()->createWithContent('inscripciones.csv', $csv))
+            ->set('importTipoId', $tipo->id)
+            ->set('importEscolaridadId', $escolaridad->id)
+            ->set('importProgramacionId', $programacion->id)
+            ->call('importInscriptions')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('inscripcions', [
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionB->id,
+        ]);
+        $this->assertDatabaseMissing('inscripcions', [
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionA->id,
+        ]);
+    }
+
+    /** @test */
+    public function it_updates_academic_data_through_the_dialog_option(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'name' => 'GRADO CSV',
+            'status_active' => 'true',
+        ]);
+        $seccionA = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'X', 'status_active' => 'true']);
+        $seccionB = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'Y', 'status_active' => 'true']);
+
+        $tipoOld = Tinscripcion::factory()->create();
+        $tipoNew = Tinscripcion::factory()->create();
+        $escolaridadOld = Escolaridad::factory()->create();
+        $escolaridadNew = Escolaridad::factory()->create();
+        $programacionOld = Programacion::factory()->create();
+        $programacionNew = Programacion::factory()->create();
+
+        $estudiant = $this->createMinimalEstudiant(['ci_estudiant' => '55500004']);
+        $inscripcion = Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionA->id,
+            'tipo_id' => $tipoOld->id,
+            'escolaridad_id' => $escolaridadOld->id,
+            'programacion_id' => $programacionOld->id,
+        ]);
+
+        $csv = "ci_estudiant,lastname,name,grado,seccion\n"
+            ."55500004,CSV,NOMBRE,GRADO CSV,Y\n";
+
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->call('openImportModal')
+            ->set('importCsvFile', UploadedFile::fake()->createWithContent('inscripciones.csv', $csv))
+            ->set('importUpdateAcademicData', true)
+            ->set('importTipoId', $tipoNew->id)
+            ->set('importEscolaridadId', $escolaridadNew->id)
+            ->set('importProgramacionId', $programacionNew->id)
+            ->call('importInscriptions')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('inscripcions', [
+            'id' => $inscripcion->id,
+            'seccion_id' => $seccionB->id,
+            'tipo_id' => $tipoNew->id,
+            'escolaridad_id' => $escolaridadNew->id,
+            'programacion_id' => $programacionNew->id,
+        ]);
     }
 }

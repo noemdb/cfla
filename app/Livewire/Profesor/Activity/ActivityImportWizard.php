@@ -47,7 +47,7 @@ class ActivityImportWizard extends Component
     public function open($pevaluacionId): void
     {
         $pevaluacion = Pevaluacion::query()
-            ->with(['pensum.asignatura', 'pensum.grado', 'seccion', 'lapso'])
+            ->with(['pensum.asignatura', 'pensum.grado', 'seccion', 'lapso', 'grupoEstable'])
             ->find((int) $pevaluacionId);
 
         if (! $pevaluacion) {
@@ -223,13 +223,16 @@ class ActivityImportWizard extends Component
         }
 
         return Pevaluacion::query()
-            ->with(['pensum.asignatura', 'pensum.grado', 'seccion', 'lapso'])
+            ->with(['pensum.asignatura', 'pensum.grado', 'seccion', 'lapso', 'grupoEstable'])
             ->find($this->targetPevaluacionId);
     }
 
     /**
      * Pevaluación origen: misma asignatura (pensum), mismo lapso y misma
-     * sección hermana; conserva el grupo estable del destino si lo tiene.
+     * sección hermana. El grupo estable (componente de formación) forma parte
+     * de la clave de la Pevaluación: si el destino es un componente se importa
+     * del MISMO componente en la sección hermana; si el destino es de sección
+     * completa (sin componente) solo se consideran Pevaluaciones sin grupo.
      */
     private function sourcePevaluacion(int $seccionId): ?Pevaluacion
     {
@@ -246,6 +249,7 @@ class ActivityImportWizard extends Component
             ->when(
                 $target->grupo_estable_id,
                 fn ($query) => $query->where('grupo_estable_id', $target->grupo_estable_id),
+                fn ($query) => $query->whereNull('grupo_estable_id'),
             )
             ->withCount('activities')
             ->orderByDesc('activities_count')
@@ -292,6 +296,7 @@ class ActivityImportWizard extends Component
                 'grado' => $target->pensum?->grado?->name ?? '—',
                 'seccion' => $target->seccion?->name ?? '—',
                 'lapso' => $target->lapso?->name ?? '—',
+                'grupo_estable' => $target->grupoEstable?->name,
             ] : null,
         ]);
     }

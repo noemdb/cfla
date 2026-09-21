@@ -6,6 +6,7 @@ use App\Livewire\Profesor\Activity\ActivityImportWizard;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
@@ -177,5 +178,99 @@ class ActivityImportWizardTest extends TestCase
         $sections = collect($component->get('sections'))->keyBy('id');
         $this->assertSame(0, $sections[$seccionC->id]['activities_count']);
         $this->assertSame(2, $sections[$f['seccionB']->id]['activities_count']);
+    }
+
+    public function test_destino_sin_grupo_estable_no_importa_desde_un_componente(): void
+    {
+        $f = $this->fixture();
+
+        // En la sección hermana existe también un componente de formación con
+        // la misma asignatura y más actividades. El destino es de sección
+        // completa (grupo_estable_id = null), por lo que NO debe considerarlo.
+        $grupo = GrupoEstable::factory()->create();
+        $componente = Pevaluacion::factory()->create([
+            'profesor_id' => $f['pevSource']->profesor_id,
+            'seccion_id' => $f['seccionB']->id,
+            'pensum_id' => $f['pevSource']->pensum_id,
+            'lapso_id' => $f['pevSource']->lapso_id,
+            'grupo_estable_id' => $grupo->id,
+        ]);
+        $this->createActivities($componente, 5);
+
+        $sections = collect(
+            Livewire::actingAs($f['user'])->test(ActivityImportWizard::class)
+                ->call('open', $f['pevTarget']->id)
+                ->get('sections')
+        )->keyBy('id');
+
+        // Solo cuenta la Pevaluación de sección completa (2), no el componente (5).
+        $this->assertSame(2, $sections[$f['seccionB']->id]['activities_count']);
+    }
+
+    public function test_destino_con_grupo_estable_importa_desde_el_mismo_componente(): void
+    {
+        $f = $this->fixture();
+
+        $grupo = GrupoEstable::factory()->create(['name' => 'Robótica']);
+
+        // Destino: componente de formación en la sección A.
+        $target = Pevaluacion::factory()->create([
+            'profesor_id' => $f['pevTarget']->profesor_id,
+            'seccion_id' => $f['seccionA']->id,
+            'pensum_id' => $f['pevTarget']->pensum_id,
+            'lapso_id' => $f['pevTarget']->lapso_id,
+            'grupo_estable_id' => $grupo->id,
+        ]);
+
+        // Origen: el MISMO componente en la sección B (3 actividades).
+        $sourceComponente = Pevaluacion::factory()->create([
+            'profesor_id' => $f['pevSource']->profesor_id,
+            'seccion_id' => $f['seccionB']->id,
+            'pensum_id' => $f['pevSource']->pensum_id,
+            'lapso_id' => $f['pevSource']->lapso_id,
+            'grupo_estable_id' => $grupo->id,
+        ]);
+        $this->createActivities($sourceComponente, 3, 'Componente');
+
+        // La Pevaluación de sección completa (2 actividades) no debe contarse.
+        $component = Livewire::actingAs($f['user'])->test(ActivityImportWizard::class)
+            ->call('open', $target->id)
+            ->assertSet('step', 1);
+
+        $sections = collect($component->get('sections'))->keyBy('id');
+        $this->assertSame(3, $sections[$f['seccionB']->id]['activities_count']);
+
+        $component->call('selectSection', $f['seccionB']->id)
+            ->assertSet('step', 2);
+
+        $this->assertCount(3, $component->get('sourceActivities'));
+        $this->assertSame('Componente 1', $component->get('sourceActivities')[0]['topic']);
+
+        $component->call('goToPreview')
+            ->assertSet('step', 3)
+            ->call('save')
+            ->assertSet('showModal', false)
+            ->assertDispatched('activity-imported');
+
+        $this->assertSame(3, $target->fresh()->activities()->count());
+        // El componente origen conserva sus actividades.
+        $this->assertSame(3, $sourceComponente->fresh()->activities()->count());
+    }
+
+    private function createActivities(Pevaluacion $pevaluacion, int $count, string $prefix = 'Actividad'): void
+    {
+        for ($i = 1; $i <= $count; $i++) {
+            $activity = Activity::create([
+                'pevaluacion_id' => $pevaluacion->id,
+                'finicial' => now(),
+                'ffinal' => now()->addDays(7),
+                'topic' => "{$prefix} {$i}",
+                'thematic' => "Temática {$i}",
+                'description' => "Descripción {$i}",
+                'teaching' => 'INICIO DESARROLLO CIERRE',
+                'learning' => "Aprendizaje {$i}",
+            ]);
+            $activity->achievements()->create(['name' => "Indicador {$i}", 'weighting' => 50]);
+        }
     }
 }

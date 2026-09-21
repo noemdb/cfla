@@ -13,6 +13,11 @@
                             · {{ $target['grado'] }} · Sección {{ $target['seccion'] }} · {{ $target['lapso'] }}
                         </span>
                     </div>
+                    @if ($target['grupo_estable'])
+                        <div class="mt-1 inline-flex items-center gap-1.5 rounded bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-400">
+                            Comp. Formación: {{ $target['grupo_estable'] }}
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -39,7 +44,14 @@
             @if ($step === 1)
                 <div class="space-y-2">
                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Secciones del mismo grado con la misma asignatura. Elige la sección de la que quieres importar.
+                        @if ($target['grupo_estable'] ?? null)
+                            Secciones del mismo grado/año que dictan el mismo componente de formación
+                            <span class="font-semibold text-violet-600 dark:text-violet-400">({{ $target['grupo_estable'] }})</span>.
+                            Elige la sección de la que quieres importar.
+                        @else
+                            Secciones del mismo grado con la misma asignatura de sección completa (sin componente de formación).
+                            Elige la sección de la que quieres importar.
+                        @endif
                     </p>
 
                     @forelse ($sections as $section)

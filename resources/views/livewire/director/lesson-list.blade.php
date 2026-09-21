@@ -229,6 +229,7 @@
                                 <th class="px-5 py-3">Lapso</th>
                                 <th class="px-5 py-3">Estado</th>
                                 <th class="px-5 py-3">Contenido</th>
+                                <th class="px-5 py-3 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -237,9 +238,13 @@
                                     <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $lesson->topic }}</td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $lesson->pevaluacion?->pensum?->asignatura?->name }}</td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-300">
-                                        {{ $lesson->pevaluacion?->seccion?->name }}
                                         @if($lesson->pevaluacion?->seccion?->grado?->name)
-                                            <span class="text-gray-400 dark:text-gray-500">·</span> {{ $lesson->pevaluacion->seccion->grado->name }}
+                                            {{ $lesson->pevaluacion->seccion->grado->name }}
+                                            @if($lesson->pevaluacion?->seccion?->name)
+                                                <span class="text-gray-400 dark:text-gray-500">·</span> {{ $lesson->pevaluacion->seccion->name }}
+                                            @endif
+                                        @else
+                                            {{ $lesson->pevaluacion?->seccion?->name }}
                                         @endif
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $lesson->pevaluacion?->profesor?->lastname }}, {{ $lesson->pevaluacion?->profesor?->name }}</td>
@@ -281,10 +286,22 @@
                                         {{ $lesson->lmsSections->count() }} secciones
                                         @if($lesson->lmsPublication?->published_at)· {{ $lesson->lmsPublication->published_at->format('d/m/Y') }} @endif
                                     </td>
+                                    <td class="px-5 py-3">
+                                        <div class="flex items-center justify-center">
+                                            <button wire:click="openPreview({{ $lesson->id }})"
+                                                    class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 hover:border-slate-500/50 transition-all"
+                                                    title="Vista previa de lección">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-5 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Sin lecciones para los filtros seleccionados.</td>
+                                    <td colspan="8" class="px-5 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Sin lecciones para los filtros seleccionados.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -297,6 +314,13 @@
             @endif
         </div>
     </div>
+
+    {{-- ============================================================ --}}
+    {{-- MODAL: Vista previa de lección (student-preview component)   --}}
+    {{-- ============================================================ --}}
+    @if(($showPreviewModal ?? false) && ($previewData ?? null))
+        <x-lms.student-preview :preview="$previewData" closeMethod="closePreview" wire:key="student-preview" />
+    @endif
 
     {{-- ============================================================ --}}
     {{-- HELP BUTTON: Guía de estados de lecciones (contexto director) --}}

@@ -75,6 +75,13 @@ class IndicatorDashboard extends Component
 
     public $chartScheduledByDay = [];
 
+    // Date range per chart (scoped by selected lapso)
+    public $chartActivitiesRange = '7d';
+
+    public $chartLessonsRange = '7d';
+
+    public $chartScheduledRange = '7d';
+
     // Lesson stats (scoped by selected lapso)
     public $lessonTotal = 0;
 
@@ -363,14 +370,17 @@ class IndicatorDashboard extends Component
 
             $pestudioIds = $pestudios->pluck('id');
 
-            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            // Solo lecciones con contenido LMS (al menos una sección o recurso),
+            // misma lógica que el monitor LMS y el dashboard de planificación.
+            $lessonsCount = Activity::withLmsContent()
                 ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
                 ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
                 ->whereIn('pensums.pestudio_id', $pestudioIds)
                 ->where('pevaluacions.lapso_id', $lapsoId)
                 ->whereNull('pevaluacions.deleted_at')
                 ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
-                ->count(DB::raw('DISTINCT activities.id'));
+                ->distinct()
+                ->count('activities.id');
 
             $gradosCount = DB::table('grados')
                 ->whereIn('pestudio_id', $pestudioIds)
@@ -500,7 +510,8 @@ class IndicatorDashboard extends Component
 
                 $totalPevCount = $pevIds->count();
 
-                $lessons = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                $lessons = Activity::withLmsContent()
+                    ->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
                     ->whereIn('activities.pevaluacion_id', $pevIds)
                     ->select(
                         'activities.*',
@@ -654,9 +665,10 @@ class IndicatorDashboard extends Component
                 ->count();
             $approvalRate = $activitiesCount > 0 ? round(($approvedActivities / $activitiesCount) * 100, 1) : 0;
 
-            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            $lessonsCount = Activity::withLmsContent()
                 ->whereIn('activities.pevaluacion_id', $pevIds)
-                ->count(DB::raw('DISTINCT activities.id'));
+                ->distinct()
+                ->count('activities.id');
 
             return (object) [
                 'id' => $profesor->id,
@@ -743,6 +755,20 @@ class IndicatorDashboard extends Component
         return $query;
     }
 
+    /**
+     * Resolve a range key ('7d' | '30d' | '3m' | 'all') into a start date.
+     * Returns null for 'all' (no lower bound).
+     */
+    private function rangeStart(?string $range)
+    {
+        return match ($range) {
+            '7d' => now()->subDays(7)->startOfDay(),
+            '30d' => now()->subDays(30)->startOfDay(),
+            '3m' => now()->subMonths(3)->startOfDay(),
+            default => null,
+        };
+    }
+
     private function loadChartActivitiesByDay()
     {
         $lapsoId = $this->selectedLapsoId;
@@ -777,6 +803,11 @@ class IndicatorDashboard extends Component
                 ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
+        // Filter by date range
+        if ($since = $this->rangeStart($this->chartActivitiesRange)) {
+            $query->where('activities.finicial', '>=', $since->toDateString());
+        }
+
         $this->chartActivitiesByDay = $query->get()->map(fn ($r) => [
             'x' => $r->finicial,
             'y' => (int) $r->total,
@@ -792,11 +823,14 @@ class IndicatorDashboard extends Component
             return;
         }
 
+        $since = $this->rangeStart($this->chartLessonsRange);
+
         $published = $this->applyLessonChartFilters(
-            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            Activity::query()->withLmsContent()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
             $lapsoId
         )
             ->where('lms_activity_publications.status', 'PUBLISHED')
+            ->when($since, fn ($q) => $q->where('lms_activity_publications.published_at', '>=', $since))
             ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
             ->groupByRaw('DATE(lms_activity_publications.published_at)')
             ->orderBy('date')
@@ -804,11 +838,12 @@ class IndicatorDashboard extends Component
             ->keyBy('date');
 
         $scheduled = $this->applyLessonChartFilters(
-            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            Activity::query()->withLmsContent()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
             $lapsoId
         )
             ->whereNotNull('lms_activity_publications.publish_at')
             ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+            ->when($since, fn ($q) => $q->where('lms_activity_publications.publish_at', '>=', $since))
             ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
             ->groupByRaw('DATE(lms_activity_publications.publish_at)')
             ->orderBy('date')
@@ -816,7 +851,7 @@ class IndicatorDashboard extends Component
             ->keyBy('date');
 
         $drafts = $this->applyLessonChartFilters(
-            Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            Activity::query()->withLmsContent()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
             $lapsoId
         )
             ->whereNull('lms_activity_publications.publish_at')
@@ -824,6 +859,7 @@ class IndicatorDashboard extends Component
                 $q->whereNull('lms_activity_publications.status')
                     ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
             })
+            ->when($since, fn ($q) => $q->whereRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) >= ?', [$since->toDateString()]))
             ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
             ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
             ->orderBy('date')
@@ -855,9 +891,9 @@ class IndicatorDashboard extends Component
             return;
         }
 
-        $query = DB::query()
-            ->from('lms_activity_publications')
-            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+        $query = Activity::query()
+            ->withLmsContent()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->where('pevaluacions.lapso_id', $lapsoId)
@@ -882,6 +918,11 @@ class IndicatorDashboard extends Component
                 ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
+        // Filter by date range
+        if ($since = $this->rangeStart($this->chartScheduledRange)) {
+            $query->where('lms_activity_publications.publish_at', '>=', $since);
+        }
+
         $this->chartScheduledByDay = $query->get()->map(fn ($r) => [
             'x' => $r->pub_date,
             'y' => (int) $r->total,
@@ -901,16 +942,19 @@ class IndicatorDashboard extends Component
         $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')
             ->whereNotNull('published_at')
             ->tap($lapsoScope)
+            ->whereHas('activity', fn ($q) => $q->withLmsContent())
             ->whereHas('activity.pevaluacion.pensum', fn ($q) => $q->whereIn('asignatura_id', $asignaturaIds))
             ->count();
 
         $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')
             ->where('status', '!=', 'PUBLISHED')
             ->tap($lapsoScope)
+            ->whereHas('activity', fn ($q) => $q->withLmsContent())
             ->whereHas('activity.pevaluacion.pensum', fn ($q) => $q->whereIn('asignatura_id', $asignaturaIds))
             ->count();
 
-        $draftsQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        $draftsQuery = Activity::withLmsContent()
+            ->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->whereNull('lms_activity_publications.publish_at')
@@ -930,6 +974,24 @@ class IndicatorDashboard extends Component
         $this->lessonTotal = $this->lessonPublished + $this->lessonScheduled + $draftsCount;
         $this->lessonPublishedPct = $this->lessonTotal > 0 ? round(($this->lessonPublished / $this->lessonTotal) * 100, 1) : 0;
         $this->lessonScheduledPct = $this->lessonTotal > 0 ? round(($this->lessonScheduled / $this->lessonTotal) * 100, 1) : 0;
+    }
+
+    /**
+     * Date-range handlers for the per-chart filters (Tab 1 bento charts).
+     */
+    public function updatedChartActivitiesRange()
+    {
+        $this->loadChartActivitiesByDay();
+    }
+
+    public function updatedChartLessonsRange()
+    {
+        $this->loadChartLessonsByDay();
+    }
+
+    public function updatedChartScheduledRange()
+    {
+        $this->loadChartScheduledByDay();
     }
 
     public function updatedRegistrationRange()
@@ -967,8 +1029,9 @@ class IndicatorDashboard extends Component
         // Lessons flow
         $merged = collect();
 
-        $pubQuery = DB::table('lms_activity_publications')
-            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+        $pubQuery = Activity::query()
+            ->withLmsContent()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->where('lms_activity_publications.status', 'PUBLISHED')
@@ -984,8 +1047,9 @@ class IndicatorDashboard extends Component
             $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
         }
 
-        $schQuery = DB::table('lms_activity_publications')
-            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+        $schQuery = Activity::query()
+            ->withLmsContent()
+            ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->whereNotNull('lms_activity_publications.publish_at')
@@ -1001,7 +1065,8 @@ class IndicatorDashboard extends Component
             $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
         }
 
-        $drfQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        $drfQuery = Activity::withLmsContent()
+            ->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->whereNull('lms_activity_publications.publish_at')
