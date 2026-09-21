@@ -53,6 +53,13 @@ class IndexComponent extends Component
     public $wizardSearch = '';
     public $selectedSubjects = [];
 
+    // Paso 2 — vista y listado
+    public $viewMode = 'available';   // 'available' | 'assigned'  (Disponibles / Adscritas)
+    public $groupBy = 'materia';      // 'materia' | 'none'
+    public $visibleCount = 24;        // "cargar más"
+
+    const MATERIA_ORDER = ['sky', 'emerald', 'amber', 'indigo', 'orange', 'purple', 'rose', 'teal', 'slate'];
+
     // Search & filters
     public $search = '';
     public $filter_pestudio = '';
@@ -283,6 +290,9 @@ class IndexComponent extends Component
         $this->wizardFilterGrado = '';
         $this->wizardSearch = '';
         $this->selectedSubjects = [];
+        $this->viewMode = 'available';
+        $this->groupBy = 'materia';
+        $this->visibleCount = 24;
         // Restore full grados list
         $this->gradosList = Grado::where('status_active', 'true')
             ->orderBy('code_sm')
@@ -297,6 +307,7 @@ class IndexComponent extends Component
     public function updatedWizardFilterPestudio($value)
     {
         $this->wizardFilterGrado = ''; // reset grado selection
+        $this->visibleCount = 24;
         $query = Grado::where('status_active', 'true');
         if ($value) {
             $query->where('pestudio_id', $value);
@@ -305,6 +316,16 @@ class IndexComponent extends Component
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
+    }
+
+    public function updatedWizardFilterGrado($value)
+    {
+        $this->visibleCount = 24;
+    }
+
+    public function updatedWizardSearch($value)
+    {
+        $this->visibleCount = 24;
     }
 
     public function nextStepWizard()
@@ -388,6 +409,84 @@ class IndexComponent extends Component
     }
 
     /**
+     * Computed: asignaturas disponibles agrupadas por materia (color) y
+     * limitadas por visibleCount ("cargar más"). Si groupBy === 'none',
+     * devuelve un único grupo sin encabezado.
+     */
+    public function getAvailableGroupsProperty()
+    {
+        $subjects = $this->availableSubjects->take($this->visibleCount);
+
+        if ($this->groupBy === 'none') {
+            return collect([[
+                'key'   => null,
+                'label' => null,
+                'items' => $subjects,
+            ]]);
+        }
+
+        return $subjects
+            ->groupBy(fn ($a) => Asignatura::colorKey($a->name))
+            ->map(fn ($items, $key) => [
+                'key'   => $key,
+                'label' => $this->materiaLabel($key),
+                'items' => $items,
+            ])
+            ->sortBy(fn ($group) => $this->materiaOrderIndex($group['key']))
+            ->values();
+    }
+
+    /**
+     * Restantes sin mostrar (para el botón "cargar más").
+     */
+    public function getRemainingSubjectsCountProperty(): int
+    {
+        return max(0, $this->availableSubjects->count() - $this->visibleCount);
+    }
+
+    public function loadMore()
+    {
+        $this->visibleCount += 24;
+    }
+
+    protected function materiaOrderIndex(?string $key): int
+    {
+        $index = array_search($key, self::MATERIA_ORDER, true);
+        return $index === false ? 99 : $index;
+    }
+
+    protected function materiaLabel(string $key): string
+    {
+        return match ($key) {
+            'sky'     => 'Matemáticas',
+            'emerald' => 'Lengua y Castellano',
+            'amber'   => 'Ciencias Naturales',
+            'indigo'  => 'Inglés / Idiomas',
+            'orange'  => 'Física / Deporte',
+            'purple'  => 'Arte / Música',
+            'rose'    => 'Formación / Religión',
+            'teal'    => 'Tecnología',
+            'slate'   => 'Otras',
+            default   => 'Otras',
+        };
+    }
+
+    public function materiaColorClass(?string $key): string
+    {
+        return match ($key) {
+            'sky'     => 'bg-sky-400',
+            'emerald' => 'bg-emerald-400',
+            'amber'   => 'bg-amber-400',
+            'indigo'  => 'bg-indigo-400',
+            'purple'  => 'bg-purple-400',
+            'orange'  => 'bg-orange-400',
+            'rose'    => 'bg-rose-400',
+            'teal'    => 'bg-teal-400',
+            default   => 'bg-slate-400',
+        };
+    }
+
+    /**
      * Toggle a subject in the multi-select array.
      */
     public function toggleSubject($id)
@@ -437,10 +536,15 @@ class IndexComponent extends Component
         $newIds = array_diff($this->selectedSubjects, $assignedIds);
         $count = 0;
 
+        // Orden inicial: continúa después del último registro del área.
+        $nextOrder = (int) CampoConocimiento::where('area_conocimiento_id', $this->campoAreaId)
+            ->max('order');
+
         foreach ($newIds as $asignaturaId) {
             CampoConocimiento::create([
                 'area_conocimiento_id' => $this->campoAreaId,
                 'asignatura_id'        => $asignaturaId,
+                'order'                => ++$nextOrder,
             ]);
             $count++;
         }
@@ -541,8 +645,21 @@ class IndexComponent extends Component
         if (! $this->campoAreaId) return collect();
         return CampoConocimiento::with('asignatura')
             ->where('area_conocimiento_id', $this->campoAreaId)
-            ->orderBy('id', 'desc')
+            ->orderBy('order')
+            ->orderBy('id')
             ->get();
+    }
+
+    /**
+     * Persiste el nuevo orden de las adscripciones (drag & drop).
+     */
+    public function reorderCampo($orderedIds)
+    {
+        foreach (array_values($orderedIds) as $index => $id) {
+            CampoConocimiento::where('id', (int) $id)
+                ->where('area_conocimiento_id', $this->campoAreaId)
+                ->update(['order' => $index + 1]);
+        }
     }
 
     #[Layout('planning.layouts.app')]

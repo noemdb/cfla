@@ -10,7 +10,7 @@ class CampoConocimiento extends Model
     use HasFactory;
 
     protected $fillable = [
-        'area_conocimiento_id', 'asignatura_id', 'observations',
+        'area_conocimiento_id', 'asignatura_id', 'observations', 'order',
     ];
 
     protected $table = 'campo_conocimientos';

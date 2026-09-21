@@ -429,6 +429,19 @@
 
                     {{-- WIZARD 2-STEP: Adscribir Asignaturas --}}
                     @if(!$campoEditingId)
+                        {{-- Segmented: Disponibles | Adscritas --}}
+                        <div class="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-lg w-fit mb-4">
+                            <button type="button" wire:click="$set('viewMode', 'available')"
+                                class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all duration-200 {{ $viewMode === 'available' ? 'bg-emerald-500/20 text-emerald-400' : 'text-gray-400 hover:text-white' }}">
+                                Disponibles
+                            </button>
+                            <button type="button" wire:click="$set('viewMode', 'assigned')"
+                                class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all duration-200 {{ $viewMode === 'assigned' ? 'bg-emerald-500/20 text-emerald-400' : 'text-gray-400 hover:text-white' }}">
+                                Adscritas ({{ $this->campo_conocimientos->count() }})
+                            </button>
+                        </div>
+
+                        @if($viewMode === 'available')
                         {{-- Step indicator --}}
                         <div class="flex items-center gap-2 mb-4">
                             <div class="flex items-center gap-1.5">
@@ -516,6 +529,14 @@
                                         Seleccionar Asignaturas
                                     </h4>
                                     <div class="flex items-center gap-1.5">
+                                        <button type="button" wire:click="$set('groupBy', 'materia')"
+                                            class="px-2 py-1 text-[10px] font-bold rounded-lg transition-all duration-200 {{ $groupBy === 'materia' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-gray-400 hover:text-white border border-white/5' }}">
+                                            Por materia
+                                        </button>
+                                        <button type="button" wire:click="$set('groupBy', 'none')"
+                                            class="px-2 py-1 text-[10px] font-bold rounded-lg transition-all duration-200 {{ $groupBy === 'none' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-gray-400 hover:text-white border border-white/5' }}">
+                                            Sin agrupar
+                                        </button>
                                         <button type="button" wire:click="selectAllAvailable"
                                             class="px-2 py-1 text-[10px] font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-all duration-200">
                                             Seleccionar Todas
@@ -549,80 +570,118 @@
                                     </div>
                                 </div>
 
-                                {{-- Grid estilo bento de asignaturas disponibles (cards de altura uniforme) --}}
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 max-h-[340px] overflow-y-auto pr-1">
-                                    @forelse($this->availableSubjects as $asignatura)
-                                        @php($isSelected = in_array($asignatura->id, $selectedSubjects))
-                                        @php($colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name))
-                                        @php
-                                            // Pensums activos de la asignatura, priorizando el plan seleccionado.
-                                            $pensums = $asignatura->pensums->where('status_active', true);
-                                            if ($wizardFilterPestudio) {
-                                                $filtered = $pensums->where('pestudio_id', (int) $wizardFilterPestudio);
-                                                if ($filtered->isNotEmpty()) { $pensums = $filtered; }
-                                            }
-                                            $pensums = $pensums->values();
-                                            $hiddenCount = max(0, $pensums->count() - 2);
-                                        @endphp
-                                        <button type="button"
-                                            wire:click="toggleSubject({{ $asignatura->id }})"
-                                            class="relative h-40 flex flex-col items-start text-left rounded-xl border p-3 transition-all duration-200 group
-                                                {{ $isSelected
-                                                    ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
-                                                    : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
-                                            <span class="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200
-                                                {{ $isSelected ? 'bg-emerald-500 text-white' : 'bg-white/5 text-transparent border border-white/10' }}">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                            </span>
-                                            <span class="inline-flex items-center gap-1.5">
-                                                <span class="w-2 h-2 rounded-full {{ match($colorKey) {
-                                                    'sky' => 'bg-sky-400', 'emerald' => 'bg-emerald-400',
-                                                    'amber' => 'bg-amber-400', 'indigo' => 'bg-indigo-400',
-                                                    'purple' => 'bg-purple-400', 'orange' => 'bg-orange-400',
-                                                    'rose' => 'bg-rose-400', 'teal' => 'bg-teal-400',
-                                                    default => 'bg-slate-400'
-                                                } }}"></span>
-                                                <span class="text-[10px] font-mono text-gray-400">{{ $asignatura->code }}</span>
-                                            </span>
-                                            <span class="text-[13px] font-semibold leading-snug line-clamp-2 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
-                                                {{ $asignatura->name }}
-                                            </span>
-
-                                            {{-- Asociación plan de estudio · grado · sección (según pensum activo) --}}
-                                            <span class="mt-auto pt-1.5 border-t border-white/5 space-y-0.5">
-                                                @forelse($pensums->take(2) as $pensum)
+                                {{-- Grid estilo bento de asignaturas disponibles (agrupado por materia) --}}
+                                <div class="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+                                    @forelse($this->availableGroups as $group)
+                                        <div>
+                                            @if($group['label'])
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <span class="w-2 h-2 rounded-full {{ $this->materiaColorClass($group['key']) }}"></span>
+                                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">{{ $group['label'] }}</span>
+                                                    <span class="text-[10px] text-gray-600">{{ $group['items']->count() }}</span>
+                                                </div>
+                                            @endif
+                                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
+                                                @foreach($group['items'] as $asignatura)
                                                     @php
-                                                        $grado = $pensum->grado;
-                                                        $pestudio = $pensum->pestudio ?? $grado?->pestudio;
-                                                        $psName = $pestudio?->name ?? '?';
-                                                        $psShort = match (true) {
-                                                            str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
-                                                            str_contains($psName, 'MEDIA GENERAL') => 'MG',
-                                                            str_contains($psName, 'PRIMARIA') => 'PRI',
-                                                            str_contains($psName, 'INICIAL') => 'INI',
-                                                            default => \Illuminate\Support\Str::limit($psName, 10),
-                                                        };
-                                                        $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
+                                                        $isSelected = in_array($asignatura->id, $selectedSubjects);
+                                                        $colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name);
+                                                        // Pensums activos, priorizando el plan seleccionado.
+                                                        $pensums = $asignatura->pensums->where('status_active', true);
+                                                        if ($wizardFilterPestudio) {
+                                                            $filtered = $pensums->where('pestudio_id', (int) $wizardFilterPestudio);
+                                                            if ($filtered->isNotEmpty()) { $pensums = $filtered; }
+                                                        }
+                                                        $pensums = $pensums->values();
+                                                        $hiddenCount = max(0, $pensums->count() - 2);
+                                                        $tipLines = $pensums->map(function ($pensum) {
+                                                            $grado = $pensum->grado;
+                                                            $pestudio = $pensum->pestudio ?? $grado?->pestudio;
+                                                            $psName = $pestudio?->name ?? '?';
+                                                            $psShort = match (true) {
+                                                                str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
+                                                                str_contains($psName, 'MEDIA GENERAL') => 'MG',
+                                                                str_contains($psName, 'PRIMARIA') => 'PRI',
+                                                                str_contains($psName, 'INICIAL') => 'INI',
+                                                                default => \Illuminate\Support\Str::limit($psName, 10),
+                                                            };
+                                                            $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
+                                                            return "{$psShort} · ".($grado?->code ?? $grado?->name ?? '—')." · Secc {$secciones}";
+                                                        });
                                                     @endphp
-                                                    <span class="block text-[9px] leading-tight text-gray-500 truncate">
-                                                        <span class="font-bold text-gray-400">{{ $psShort }}</span>
-                                                        <span class="text-gray-600"> · </span>
-                                                        <span>{{ $grado?->code ?? $grado?->name ?? '—' }}</span>
-                                                        <span class="text-gray-600"> · </span>
-                                                        <span>Secc {{ $secciones }}</span>
-                                                    </span>
-                                                @empty
-                                                    <span class="block text-[9px] text-gray-600">Sin pensum activo</span>
-                                                @endforelse
-                                                @if($hiddenCount > 0)
-                                                    <span class="block text-[9px] text-gray-600">+{{ $hiddenCount }} más</span>
-                                                @endif
-                                            </span>
-                                        </button>
+                                                    <div x-data="{ showTip: false, top: 0, left: 0 }"
+                                                         @mouseenter="showTip = true; const r = $el.getBoundingClientRect(); top = r.top; left = r.left + r.width/2"
+                                                         @mouseleave="showTip = false"
+                                                         class="relative">
+                                                        <button type="button"
+                                                            wire:click="toggleSubject({{ $asignatura->id }})"
+                                                            class="relative h-40 w-full flex flex-col items-start text-left rounded-xl border p-3 transition-all duration-200 group
+                                                                {{ $isSelected
+                                                                    ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
+                                                                    : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
+                                                            <span class="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200
+                                                                {{ $isSelected ? 'bg-emerald-500 text-white' : 'bg-white/5 text-transparent border border-white/10' }}">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                                </svg>
+                                                            </span>
+                                                            <span class="inline-flex items-center gap-1.5">
+                                                                <span class="w-2 h-2 rounded-full {{ $this->materiaColorClass($colorKey) }}"></span>
+                                                                <span class="text-[10px] font-mono text-gray-400">{{ $asignatura->code }}</span>
+                                                            </span>
+                                                            <span class="text-[13px] font-semibold leading-snug line-clamp-2 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
+                                                                {{ $asignatura->name }}
+                                                            </span>
+
+                                                            {{-- Asociación plan de estudio · grado · sección (según pensum activo) --}}
+                                                            <span class="mt-auto pt-1.5 border-t border-white/5 space-y-0.5">
+                                                                @forelse($pensums->take(2) as $pensum)
+                                                                    @php
+                                                                        $grado = $pensum->grado;
+                                                                        $pestudio = $pensum->pestudio ?? $grado?->pestudio;
+                                                                        $psName = $pestudio?->name ?? '?';
+                                                                        $psShort = match (true) {
+                                                                            str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
+                                                                            str_contains($psName, 'MEDIA GENERAL') => 'MG',
+                                                                            str_contains($psName, 'PRIMARIA') => 'PRI',
+                                                                            str_contains($psName, 'INICIAL') => 'INI',
+                                                                            default => \Illuminate\Support\Str::limit($psName, 10),
+                                                                        };
+                                                                        $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
+                                                                    @endphp
+                                                                    <span class="block text-[9px] leading-tight text-gray-500 truncate">
+                                                                        <span class="font-bold text-gray-400">{{ $psShort }}</span>
+                                                                        <span class="text-gray-600"> · </span>
+                                                                        <span>{{ $grado?->code ?? $grado?->name ?? '—' }}</span>
+                                                                        <span class="text-gray-600"> · </span>
+                                                                        <span>Secc {{ $secciones }}</span>
+                                                                    </span>
+                                                                @empty
+                                                                    <span class="block text-[9px] text-gray-600">Sin pensum activo</span>
+                                                                @endforelse
+                                                                @if($hiddenCount > 0)
+                                                                    <span class="block text-[9px] text-gray-600">+{{ $hiddenCount }} más</span>
+                                                                @endif
+                                                            </span>
+                                                        </button>
+
+                                                        {{-- Tooltip: detalle completo de la asociación (#8) --}}
+                                                        <div x-show="showTip" x-cloak
+                                                             class="fixed z-[80] w-72 bg-gray-800 border border-white/15 rounded-xl shadow-2xl p-3 pointer-events-none"
+                                                             :style="`top:${top}px; left:${left}px; transform: translate(-50%, calc(-100% - 8px));`">
+                                                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $asignatura->name }}</p>
+                                                            @forelse($tipLines as $line)
+                                                                <p class="text-[11px] text-gray-300 leading-relaxed truncate">{{ $line }}</p>
+                                                            @empty
+                                                                <p class="text-[11px] text-gray-500">Sin pensum activo</p>
+                                                            @endforelse
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     @empty
-                                        <div class="col-span-full py-10 text-center">
+                                        <div class="py-10 text-center">
                                             <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                             </svg>
@@ -634,6 +693,19 @@
                                         </div>
                                     @endforelse
                                 </div>
+
+                                {{-- Cargar más (#4) --}}
+                                @if($this->remainingSubjectsCount > 0)
+                                    <div class="flex justify-center mt-3">
+                                        <button type="button" wire:click="loadMore"
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/10 transition-all duration-200">
+                                            Cargar más ({{ $this->remainingSubjectsCount }} restantes)
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @endif
 
                                 {{-- Acciones paso 2 --}}
                                 <div class="flex items-center justify-between mt-3">
@@ -656,6 +728,116 @@
                                             Adscribir Seleccionadas ({{ count($selectedSubjects) }})
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        @endif
+                        @else
+                            {{-- Vista: Adscritas (gestión + reordenar por arrastre) --}}
+                            <div class="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden"
+                                 x-data="{
+                                     draggedId: null,
+                                     onDragStart(ev, id) {
+                                         this.draggedId = id;
+                                         ev.dataTransfer.effectAllowed = 'move';
+                                         ev.dataTransfer.setData('text/plain', id);
+                                     },
+                                     onDrop(ev, targetId) {
+                                         ev.preventDefault();
+                                         if (this.draggedId === null) return;
+                                         const tbody = this.$refs.tbody;
+                                         const rows = Array.from(tbody.querySelectorAll('tr[data-campo-id]'));
+                                         const dragged = rows.find(r => r.dataset.campoId == this.draggedId);
+                                         const target = rows.find(r => r.dataset.campoId == targetId);
+                                         if (!dragged || !target || dragged === target) return;
+                                         const rect = target.getBoundingClientRect();
+                                         const before = ev.clientY < rect.top + rect.height / 2;
+                                         tbody.insertBefore(dragged, before ? target : target.nextSibling);
+                                         const ids = Array.from(tbody.querySelectorAll('tr[data-campo-id]')).map(r => r.dataset.campoId);
+                                         this.draggedId = null;
+                                         $wire.reorderCampo(ids);
+                                     }
+                                 }">
+                                <div class="flex items-center justify-between px-4 py-2 border-b border-white/5">
+                                    <h4 class="text-xs font-bold text-gray-300 flex items-center gap-2">
+                                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                        </svg>
+                                        Asignaturas Adscritas
+                                    </h4>
+                                    <span class="text-[10px] text-gray-500 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8m-8 6h8M5 5v14M19 5v14"></path>
+                                        </svg>
+                                        Arrastra para reordenar
+                                    </span>
+                                </div>
+                                <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+                                    <table class="w-full text-sm">
+                                        <thead class="sticky top-0 bg-gray-900 z-10">
+                                            <tr class="border-b border-white/5">
+                                                <th class="px-2 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-8"></th>
+                                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
+                                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Asignatura</th>
+                                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden sm:table-cell">Código</th>
+                                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Observaciones</th>
+                                                <th class="text-right px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody x-ref="tbody" class="divide-y divide-white/5">
+                                            @forelse($this->campo_conocimientos as $campo)
+                                                <tr draggable="true"
+                                                    data-campo-id="{{ $campo->id }}"
+                                                    @dragstart="onDragStart($event, {{ $campo->id }})"
+                                                    @dragover.prevent
+                                                    @drop="onDrop($event, {{ $campo->id }})"
+                                                    class="hover:bg-white/[0.02] transition-colors group cursor-grab active:cursor-grabbing">
+                                                    <td class="px-2 py-2 text-gray-600">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8m-8 6h8M5 5v14M19 5v14"></path>
+                                                        </svg>
+                                                    </td>
+                                                    <td class="px-4 py-2 text-xs text-gray-500 font-mono">{{ $loop->iteration }}</td>
+                                                    <td class="px-4 py-2">
+                                                        <span class="text-sm text-gray-200 font-medium">{{ $campo->asignatura?->full_name ?? '—' }}</span>
+                                                    </td>
+                                                    <td class="px-4 py-2 hidden sm:table-cell">
+                                                        <span class="text-xs font-mono bg-white/5 text-gray-400 px-1.5 py-0.5 rounded-md">{{ $campo->asignatura?->code ?? '—' }}</span>
+                                                    </td>
+                                                    <td class="px-4 py-2 hidden md:table-cell">
+                                                        <span class="text-xs text-gray-500">{{ $campo->observations ? \Illuminate\Support\Str::limit($campo->observations, 30) : '—' }}</span>
+                                                    </td>
+                                                    <td class="px-4 py-2 text-right">
+                                                        <div class="flex items-center justify-end gap-1">
+                                                            <button draggable="false" wire:click="editCampo({{ $campo->id }})"
+                                                                class="p-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-200"
+                                                                title="Editar">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                                </svg>
+                                                            </button>
+                                                            <button draggable="false" wire:click="confirmDeleteCampo({{ $campo->id }})"
+                                                                class="p-1.5 bg-white/5 hover:bg-red-500/10 rounded-lg border border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200"
+                                                                title="Desadscribir">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="px-4 py-10 text-center">
+                                                        <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                                        </svg>
+                                                        <p class="text-gray-500 text-sm">No hay asignaturas adscritas a esta área.</p>
+                                                        <p class="text-gray-600 text-xs mt-1">Usa la pestaña "Disponibles" para adscribir asignaturas.</p>
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         @endif
@@ -702,67 +884,6 @@
                             </div>
                         </div>
                     @endif
-
-                    {{-- Tabla de adscripciones --}}
-                    <div class="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden">
-                        <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
-                            <table class="w-full text-sm">
-                                <thead class="sticky top-0 bg-gray-900 z-10">
-                                    <tr class="border-b border-white/5">
-                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
-                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Asignatura</th>
-                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden sm:table-cell">Código</th>
-                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Observaciones</th>
-                                        <th class="text-right px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    @forelse($this->campo_conocimientos as $campo)
-                                        <tr class="hover:bg-white/[0.02] transition-colors group">
-                                            <td class="px-4 py-2 text-xs text-gray-500 font-mono">{{ $loop->iteration }}</td>
-                                            <td class="px-4 py-2">
-                                                <span class="text-sm text-gray-200 font-medium">{{ $campo->asignatura?->full_name ?? '—' }}</span>
-                                            </td>
-                                            <td class="px-4 py-2 hidden sm:table-cell">
-                                                <span class="text-xs font-mono bg-white/5 text-gray-400 px-1.5 py-0.5 rounded-md">{{ $campo->asignatura?->code ?? '—' }}</span>
-                                            </td>
-                                            <td class="px-4 py-2 hidden md:table-cell">
-                                                <span class="text-xs text-gray-500">{{ $campo->observations ? \Illuminate\Support\Str::limit($campo->observations, 30) : '—' }}</span>
-                                            </td>
-                                            <td class="px-4 py-2 text-right">
-                                                <div class="flex items-center justify-end gap-1">
-                                                    <button wire:click="editCampo({{ $campo->id }})"
-                                                        class="p-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-200"
-                                                        title="Editar">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                        </svg>
-                                                    </button>
-                                                    <button wire:click="confirmDeleteCampo({{ $campo->id }})"
-                                                        class="p-1.5 bg-white/5 hover:bg-red-500/10 rounded-lg border border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200"
-                                                        title="Desadscribir">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="px-4 py-10 text-center">
-                                                <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                                </svg>
-                                                <p class="text-gray-500 text-sm">No hay asignaturas adscritas a esta área.</p>
-                                                <p class="text-gray-600 text-xs mt-1">Usa el formulario de arriba para adscribir asignaturas.</p>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
                     {{-- Delete campo confirmation --}}
                     @if($confirmDeleteCampoId)
