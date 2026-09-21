@@ -90,6 +90,7 @@ class NotificationBell extends Component
         if ($notification && is_null($notification->read_at)) {
             $notification->markAsRead();
             app(NotificationService::class)->invalidateUnreadCount($user->id);
+            $this->dispatch('notification-read');
         }
 
         $this->reconcile();
@@ -102,6 +103,7 @@ class NotificationBell extends Component
         if ($user->unreadNotifications()->exists()) {
             $user->unreadNotifications()->getQuery()->update(['read_at' => now()]);
             app(NotificationService::class)->invalidateUnreadCount($user->id);
+            $this->dispatch('notification-read');
         }
 
         $this->reconcile();

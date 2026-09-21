@@ -52,6 +52,8 @@ class NotificationsIndex extends Component
         if ($notification && is_null($notification->read_at)) {
             $notification->markAsRead();
             app(NotificationService::class)->invalidateUnreadCount($user->id);
+            // Notifica a la campana del navbar para que reconcilie (listener 'notification-read').
+            $this->dispatch('notification-read');
         }
     }
 
@@ -62,6 +64,8 @@ class NotificationsIndex extends Component
         if ($user->unreadNotifications()->exists()) {
             $user->unreadNotifications()->getQuery()->update(['read_at' => now()]);
             app(NotificationService::class)->invalidateUnreadCount($user->id);
+            // Notifica a la campana del navbar para que reconcilie (listener 'notification-read').
+            $this->dispatch('notification-read');
         }
     }
 
