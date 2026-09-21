@@ -527,45 +527,45 @@
                                     </div>
                                 </div>
 
-                                {{-- Tabla de asignaturas disponibles --}}
-                                <div class="overflow-x-auto max-h-[260px] overflow-y-auto rounded-lg border border-white/5">
-                                    <table class="w-full text-sm">
-                                        <thead class="sticky top-0 bg-gray-800 z-10">
-                                            <tr class="border-b border-white/5">
-                                                <th class="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-10"></th>
-                                                <th class="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
-                                                <th class="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Asignatura</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-white/5">
-                                            @forelse($this->availableSubjects as $asignatura)
-                                                <tr class="hover:bg-white/[0.02] transition-colors cursor-pointer" wire:click="toggleSubject({{ $asignatura->id }})">
-                                                    <td class="px-3 py-1.5">
-                                                        <input type="checkbox"
-                                                               value="{{ $asignatura->id }}"
-                                                               wire:model.live="selectedSubjects"
-                                                               class="rounded border-gray-600 text-emerald-500 bg-white/5 focus:ring-emerald-500/50"
-                                                               onclick="event.stopPropagation()">
-                                                    </td>
-                                                    <td class="px-3 py-1.5">
-                                                        <span class="text-xs font-mono bg-white/5 text-gray-400 px-1.5 py-0.5 rounded-md">{{ $asignatura->code }}</span>
-                                                    </td>
-                                                    <td class="px-3 py-1.5">
-                                                        <span class="text-sm text-gray-200">{{ $asignatura->name }}</span>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="px-3 py-8 text-center">
-                                                        <svg class="w-8 h-8 text-gray-700 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                                        </svg>
-                                                        <p class="text-gray-500 text-xs">No hay asignaturas disponibles para adscribir.</p>
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
+                                {{-- Grid estilo bento de asignaturas disponibles (cards de altura uniforme) --}}
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 max-h-[340px] overflow-y-auto pr-1">
+                                    @forelse($this->availableSubjects as $asignatura)
+                                        @php($isSelected = in_array($asignatura->id, $selectedSubjects))
+                                        @php($colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name))
+                                        <button type="button"
+                                            wire:click="toggleSubject({{ $asignatura->id }})"
+                                            class="relative h-28 flex flex-col items-start justify-between text-left rounded-xl border p-3 transition-all duration-200 group
+                                                {{ $isSelected
+                                                    ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
+                                                    : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
+                                            <span class="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200
+                                                {{ $isSelected ? 'bg-emerald-500 text-white' : 'bg-white/5 text-transparent border border-white/10' }}">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </span>
+                                            <span class="inline-flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full {{ match($colorKey) {
+                                                    'sky' => 'bg-sky-400', 'emerald' => 'bg-emerald-400',
+                                                    'amber' => 'bg-amber-400', 'indigo' => 'bg-indigo-400',
+                                                    'purple' => 'bg-purple-400', 'orange' => 'bg-orange-400',
+                                                    'rose' => 'bg-rose-400', 'teal' => 'bg-teal-400',
+                                                    default => 'bg-slate-400'
+                                                } }}"></span>
+                                                <span class="text-[10px] font-mono text-gray-400">{{ $asignatura->code }}</span>
+                                            </span>
+                                            <span class="text-[13px] font-semibold leading-snug line-clamp-2 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
+                                                {{ $asignatura->name }}
+                                            </span>
+                                        </button>
+                                    @empty
+                                        <div class="col-span-full py-10 text-center">
+                                            <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                            </svg>
+                                            <p class="text-gray-500 text-xs">No hay asignaturas disponibles para adscribir.</p>
+                                        </div>
+                                    @endforelse
                                 </div>
 
                                 {{-- Acciones paso 2 --}}

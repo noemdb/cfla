@@ -331,6 +331,22 @@ class ReverbTest extends Command
         $this->info('  Notificación enviada. Debería aparecer en la campana del navbar de "'.$user->username.'".');
         $this->line('  Si Reverb está activo, el broadcast la muestra al instante; si no, wire:poll.30s la trae en ≤30s.');
 
+        // Auto-verificación: relee la fila desde la MISMA conexión que usa la
+        // campana ($user->notifications()), y reporta la conexión activa. Así se
+        // detecta si la notificación quedó en otra BD o en otra conexión.
+        $connection = $user->getConnectionName() ?? config('database.default');
+        $unread = (int) $user->unreadNotifications()->count();
+        $total = (int) $user->notifications()->count();
+        $last = $user->notifications()->orderByDesc('created_at')->first();
+
+        $this->line('  Verificación: conexión='.$connection.' no-leídas='.$unread.' total='.$total);
+        if ($last) {
+            $data = (array) $last->data;
+            $this->line('  Última: '.($data['message'] ?? '?').' ('.optional($last->created_at)->toDateTimeString().')');
+        } else {
+            $this->warn('  ¡La fila NO está visible para el usuario! (total=0). Revisar conexión de BD entre CLI y web.');
+        }
+
         return true;
     }
 
