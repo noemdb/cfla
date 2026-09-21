@@ -50,8 +50,9 @@ return [
             'app_id' => env('REVERB_APP_ID'),
             'options' => [
                 // El host/puerto/scheme aquí es para que PHP (backend) alcance Reverb internamente.
-                // SIEMPRE debe apuntar al servidor interno (localhost:8090 con http).
-                'host' => env('REVERB_HOST', '127.0.0.1'),
+                // SIEMPRE debe apuntar al servidor interno (localhost:8090 con http),
+                // NO al host público que ve el navegador (ese pasa por el proxy Apache).
+                'host' => env('REVERB_SERVER_HOST', '127.0.0.1'),
                 'port' => env('REVERB_SERVER_PORT', 8090),
                 'scheme' => 'http',
                 'useTLS' => false,

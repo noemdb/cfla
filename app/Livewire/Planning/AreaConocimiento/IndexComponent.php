@@ -257,6 +257,11 @@ class IndexComponent extends Component
         $this->campoAreaName = $area->name;
         $this->resetCampoForm();
         $this->resetWizard();
+        // Pre-filtrar por el plan de estudio del área para facilitar la selección.
+        if ($area->pestudio_id) {
+            $this->wizardFilterPestudio = $area->pestudio_id;
+            $this->updatedWizardFilterPestudio($area->pestudio_id);
+        }
         $this->modeCampo = true;
     }
 
@@ -331,9 +336,15 @@ class IndexComponent extends Component
 
         $query = Asignatura::whereNotIn('id', $assignedIds);
 
-        // Filter by plan de estudio
+        // Filter by plan de estudio (directo o vía pensum, que es la asociación
+        // real asignatura ↔ pestudio en este modelo de datos).
         if ($this->wizardFilterPestudio) {
-            $query->where('pestudio_id', $this->wizardFilterPestudio);
+            $query->where(function ($q) {
+                $q->where('pestudio_id', $this->wizardFilterPestudio)
+                  ->orWhereHas('pensums', function ($p) {
+                      $p->where('pestudio_id', $this->wizardFilterPestudio);
+                  });
+            });
         }
 
         // Filter by grado via pensum relationship
