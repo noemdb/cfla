@@ -362,6 +362,27 @@ class IndexComponent extends Component
             });
         }
 
+        // Precarga de pensums activos (con grado, pestudio y secciones) para
+        // mostrar la asociación plan/grado/sección en cada card sin N+1.
+        $query->with([
+            'pensums' => function ($q) {
+                $q->where('pensums.status_active', true)
+                  ->orderBy('pensums.grado_id')
+                  ->with([
+                      'pestudio',
+                      'grado' => function ($g) {
+                          $g->with([
+                              'pestudio',
+                              'seccions' => function ($s) {
+                                  $s->where('seccions.status_active', 'true')
+                                    ->orderBy('seccions.name');
+                              },
+                          ]);
+                      },
+                  ]);
+            },
+        ]);
+
         return $query->orderBy('name')
             ->get();
     }

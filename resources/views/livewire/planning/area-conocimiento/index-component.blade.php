@@ -554,9 +554,19 @@
                                     @forelse($this->availableSubjects as $asignatura)
                                         @php($isSelected = in_array($asignatura->id, $selectedSubjects))
                                         @php($colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name))
+                                        @php
+                                            // Pensums activos de la asignatura, priorizando el plan seleccionado.
+                                            $pensums = $asignatura->pensums->where('status_active', true);
+                                            if ($wizardFilterPestudio) {
+                                                $filtered = $pensums->where('pestudio_id', (int) $wizardFilterPestudio);
+                                                if ($filtered->isNotEmpty()) { $pensums = $filtered; }
+                                            }
+                                            $pensums = $pensums->values();
+                                            $hiddenCount = max(0, $pensums->count() - 2);
+                                        @endphp
                                         <button type="button"
                                             wire:click="toggleSubject({{ $asignatura->id }})"
-                                            class="relative h-28 flex flex-col items-start justify-between text-left rounded-xl border p-3 transition-all duration-200 group
+                                            class="relative h-40 flex flex-col items-start text-left rounded-xl border p-3 transition-all duration-200 group
                                                 {{ $isSelected
                                                     ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
                                                     : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
@@ -578,6 +588,37 @@
                                             </span>
                                             <span class="text-[13px] font-semibold leading-snug line-clamp-2 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
                                                 {{ $asignatura->name }}
+                                            </span>
+
+                                            {{-- Asociación plan de estudio · grado · sección (según pensum activo) --}}
+                                            <span class="mt-auto pt-1.5 border-t border-white/5 space-y-0.5">
+                                                @forelse($pensums->take(2) as $pensum)
+                                                    @php
+                                                        $grado = $pensum->grado;
+                                                        $pestudio = $pensum->pestudio ?? $grado?->pestudio;
+                                                        $psName = $pestudio?->name ?? '?';
+                                                        $psShort = match (true) {
+                                                            str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
+                                                            str_contains($psName, 'MEDIA GENERAL') => 'MG',
+                                                            str_contains($psName, 'PRIMARIA') => 'PRI',
+                                                            str_contains($psName, 'INICIAL') => 'INI',
+                                                            default => \Illuminate\Support\Str::limit($psName, 10),
+                                                        };
+                                                        $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
+                                                    @endphp
+                                                    <span class="block text-[9px] leading-tight text-gray-500 truncate">
+                                                        <span class="font-bold text-gray-400">{{ $psShort }}</span>
+                                                        <span class="text-gray-600"> · </span>
+                                                        <span>{{ $grado?->code ?? $grado?->name ?? '—' }}</span>
+                                                        <span class="text-gray-600"> · </span>
+                                                        <span>Secc {{ $secciones }}</span>
+                                                    </span>
+                                                @empty
+                                                    <span class="block text-[9px] text-gray-600">Sin pensum activo</span>
+                                                @endforelse
+                                                @if($hiddenCount > 0)
+                                                    <span class="block text-[9px] text-gray-600">+{{ $hiddenCount }} más</span>
+                                                @endif
                                             </span>
                                         </button>
                                     @empty
