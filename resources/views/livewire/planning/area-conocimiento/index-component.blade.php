@@ -527,6 +527,28 @@
                                     </div>
                                 </div>
 
+                                {{-- Búsqueda en el listado --}}
+                                <div class="mb-3">
+                                    <div class="relative">
+                                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        <input type="text"
+                                            wire:model.live.debounce.300ms="wizardSearch"
+                                            placeholder="Buscar por nombre o código..."
+                                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                                        @if($wizardSearch)
+                                            <button type="button" wire:click="wizardSearch = ''"
+                                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors duration-200"
+                                                title="Limpiar búsqueda">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+
                                 {{-- Grid estilo bento de asignaturas disponibles (cards de altura uniforme) --}}
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3 max-h-[340px] overflow-y-auto pr-1">
                                     @forelse($this->availableSubjects as $asignatura)
@@ -563,7 +585,11 @@
                                             <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                             </svg>
-                                            <p class="text-gray-500 text-xs">No hay asignaturas disponibles para adscribir.</p>
+                                            <p class="text-gray-500 text-xs">
+                                                {{ $wizardSearch
+                                                    ? 'No hay asignaturas que coincidan con la búsqueda "' . $wizardSearch . '".'
+                                                    : 'No hay asignaturas disponibles para adscribir.' }}
+                                            </p>
                                         </div>
                                     @endforelse
                                 </div>
