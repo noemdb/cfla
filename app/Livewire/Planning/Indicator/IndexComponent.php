@@ -51,6 +51,19 @@ class IndexComponent extends Component
     public $totalProfesoresActivos = 0;
     public $totalDiagActive = 0;
 
+    // ─── Diagnósticos sub-metrics (global KPI box) ─────────────────────
+    public $diagSessions = 0;
+    public $diagAnswers = 0;
+    public $diagPrecision = 0;
+
+    // ─── Actividades sub-metrics (global KPI box) ──────────────────────
+    public $activityApproved = 0;
+    public $activityWithComment = 0;
+
+    // ─── Profesores sub-metrics (global KPI box) ───────────────────────
+    public $profesorPevaluacions = 0;
+    public $profesorDiagnostics = 0;
+
     // ─── Charts ────────────────────────────────────────────────────────
     public $chartActivitiesByDay = [];
     public $chartLessonsByDay = [];
@@ -704,7 +717,45 @@ class IndexComponent extends Component
             ->count();
         $this->totalDiagActive = DiagMain::where('active', true)->count();
 
+        $this->loadDiagMetrics();
+        $this->loadActivityMetrics();
+        $this->loadProfesorMetrics();
         $this->loadLessonStats();
+    }
+
+    /**
+     * Métricas globales de Actividades (sin filtro de lapso):
+     * aprobadas = activity.status = true, con comentario = has(comments).
+     * @see Activity.php:40-42 casts: 'status' => 'boolean'
+     * @see Activity.php:125 comments() HasMany ActivityComment
+     */
+    private function loadActivityMetrics(): void
+    {
+        $this->activityApproved = Activity::where('status', true)->count();
+        $this->activityWithComment = Activity::has('comments')->count();
+    }
+
+    /**
+     * Métricas globales de Profesores (sin filtro de lapso):
+     * pevaluaciones = cargas académicas registradas; diagnósticos = instrumentos activos.
+     */
+    private function loadProfesorMetrics(): void
+    {
+        $this->profesorPevaluacions = \App\Models\app\Academy\Pevaluacion::count();
+        $this->profesorDiagnostics = DiagMain::where('active', true)->count();
+    }
+
+    /**
+     * Métricas globales de los Diagnósticos (sin filtro de lapso):
+     * sesiones creadas, respuestas registradas y precisión media global.
+     */
+    private function loadDiagMetrics(): void
+    {
+        $this->diagSessions = DiagSession::count();
+        $this->diagAnswers = \App\Models\app\Instrument\DiagAnswer::count();
+
+        $precision = \App\Models\app\Instrument\DiagAnswer::getOverallPrecisionStats();
+        $this->diagPrecision = $precision['precision'];
     }
 
     /**
@@ -716,7 +767,6 @@ class IndexComponent extends Component
      */
     private function loadLessonStats(): void
     {
-        $this->lessonTotal = Activity::withLmsContent()->count();
 
         $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
             ->where('status', 'PUBLISHED')

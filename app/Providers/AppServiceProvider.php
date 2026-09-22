@@ -79,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         // Mejora propuesta #7: ampliar cobertura de auditoría a los modelos
         // académicos del módulo de planificación (Academy + LMS).
         \App\Models\app\Academy\Activity::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Activity::observe(\App\Observers\ActivityObserver::class); // Notificación al profesor al aprobar actividad
         \App\Models\app\Academy\Achievement::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Pevaluacion::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Profesor::observe(\App\Observers\AuditableModelObserver::class);

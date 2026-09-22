@@ -35,6 +35,11 @@
         @livewire('admin.diagnostic.index-component')
     </div>
 
+    {{-- Módulo: Preguntas por Pensum agrupadas por Grupo Estable --}}
+    <div class="mb-8">
+        @livewire('planning.diagnostic.question-by-pensum')
+    </div>
+
     {{-- Navegación Rápida --}}
     <div class="mt-12 pt-8 border-t border-white/5">
         <h2 class="text-lg font-bold text-white mb-6">Navegación Rápida</h2>

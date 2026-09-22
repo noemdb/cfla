@@ -29,15 +29,73 @@
 
     <!-- Global KPI Boxes -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <x-indicator-box
-            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
-            label="Actividades" value="{{ number_format($totalActivities) }}" color="purple" />
-        <x-indicator-box
-            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-            label="Diagnósticos" value="{{ number_format($totalDiagActive) }}" color="emerald" />
-        <x-indicator-box
-            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
-            label="Profesores Activos" value="{{ number_format($totalProfesoresActivos) }}" color="amber" />
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5">
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-base sm:text-lg font-bold text-white mb-1">{{ number_format($totalActivities) }}</p>
+            <p class="text-[11px] font-medium text-purple-400 uppercase tracking-wider">Actividades</p>
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] text-gray-500 flex-wrap">
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Aprobadas: <strong class="text-purple-400 font-bold">{{ number_format($activityApproved) }}</strong>
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                    Con comentario: <strong class="text-sky-400 font-bold">{{ number_format($activityWithComment) }}</strong>
+                </span>
+            </div>
+        </div>
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/5">
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-base sm:text-lg font-bold text-white mb-1">{{ number_format($totalDiagActive) }}</p>
+            <p class="text-[11px] font-medium text-emerald-400 uppercase tracking-wider">Diagnósticos</p>
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] text-gray-500 flex-wrap">
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Sesiones: <strong class="text-emerald-400 font-bold">{{ number_format($diagSessions) }}</strong>
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                    Respuestas: <strong class="text-emerald-400 font-bold">{{ number_format($diagAnswers) }}</strong>
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Precisión: <strong class="text-emerald-400 font-bold">{{ number_format($diagPrecision, 1) }}%</strong>
+                </span>
+            </div>
+        </div>
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5">
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-base sm:text-lg font-bold text-white mb-1">{{ number_format($totalProfesoresActivos) }}</p>
+            <p class="text-[11px] font-medium text-amber-400 uppercase tracking-wider">Profesores Activos</p>
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] text-gray-500 flex-wrap">
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Pevaluación: <strong class="text-amber-400 font-bold">{{ number_format($profesorPevaluacions) }}</strong>
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Diagnóstico: <strong class="text-emerald-400 font-bold">{{ number_format($profesorDiagnostics) }}</strong>
+                </span>
+            </div>
+        </div>
 
         {{-- Lessons Card (global, not affected by lapso) --}}
         <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/5">
