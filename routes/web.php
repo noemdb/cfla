@@ -443,6 +443,16 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/profesores', \App\Livewire\Leadership\ProfesorIndicators::class)
                 ->name('profesores');
 
+            // Diagnóstico: Revisión y seguimiento de preguntas por área (AreaConocimiento.leader_id → campo_conocimientos.pensum_id → pensum_id)
+            Route::get('/diagnosticos', \App\Livewire\Leadership\DiagnosticQuestionReview::class)
+                ->name('diagnosticos')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
+
+            // Debates: Revisión y seguimiento de preguntas por área (AreaConocimiento.leader_id → pensum_id)
+            Route::get('/debates', \App\Livewire\Leadership\DebateQuestionReview::class)
+                ->name('debates')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
+
             // Horario (SOLO lectura, cualquier sección) — ADR-TT-013
             Route::get('/timetable/{seccion?}', \App\Livewire\Leadership\Timetable\SectionGrid::class)
                 ->name('timetable.view');

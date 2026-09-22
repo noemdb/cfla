@@ -2,14 +2,14 @@
 
 namespace App\Services\Leadership;
 
-use App\Models\User;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\CampoConocimiento;
-use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Pensum;
+use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -27,7 +27,9 @@ class LeadershipService
 
     /** Memoización en memoria: evita recalcular 2 veces en el mismo request. */
     private ?Collection $memoizedAreaIds = null;
+
     private ?Collection $memoizedAsignaturaIds = null;
+
     private ?Collection $memoizedPensumIds = null;
 
     public function __construct(
@@ -130,7 +132,7 @@ class LeadershipService
      * futuro rol con el mismo privilegio (p.ej. "coordinador general")
      * solo requiera tocar este método.
      */
-    private function isUnrestricted(): bool
+    public function isUnrestricted(): bool
     {
         return (bool) $this->user->is_admin;
     }
@@ -162,14 +164,52 @@ class LeadershipService
     }
 
     /**
+     * Aplica scope de liderazgo a DebateQuestions.
+     * Cadena: DebateQuestion → Pensum (pensum_id) o vía asignación campo_conocimientos.
+     * Usa pensum_id directo; si es null, cae a scope vacío controlado por getAssignedPensumIds().
+     */
+    public function scopeDebateQuestions(Builder $query): Builder
+    {
+        if ($this->isUnrestricted()) {
+            return $query;
+        }
+
+        $pensumIds = $this->getAssignedPensumIds();
+
+        if ($pensumIds->isEmpty()) {
+            return $query->whereRaw('1=0');
+        }
+
+        return $query->whereIn('pensum_id', $pensumIds);
+    }
+
+    /**
+     * Aplica scope de liderazgo a DiagQuestions (diagnóstico).
+     * Cadena: DiagQuestion → Pensum (pensum_id) → campo_conocimientos.pensum_id → AreaConocimiento.leader_id
+     */
+    public function scopeDiagQuestions(Builder $query): Builder
+    {
+        if ($this->isUnrestricted()) {
+            return $query;
+        }
+
+        $pensumIds = $this->getAssignedPensumIds();
+
+        if ($pensumIds->isEmpty()) {
+            return $query->whereRaw('1=0');
+        }
+
+        return $query->whereIn('pensum_id', $pensumIds);
+    }
+
+    /**
      * Helper DRY compartido por los 3 métodos `scope*()` de arriba. El único
      * eje de variación entre ellos es cuántos saltos de relación hay que dar
      * hasta llegar al modelo `pensum_id` (Pensum) — todo lo demás (bypass admin,
      * manejo de colección vacía, nombre de columna) es idéntico.
      *
-     * @param  Builder  $query
      * @param  string|null  $relationPath  Ruta dot-notation hasta el modelo
-     *         `Pensum` (null = la propia query ya es ese modelo).
+     *                                     `Pensum` (null = la propia query ya es ese modelo).
      */
     private function applyPensumScope(Builder $query, ?string $relationPath): Builder
     {
@@ -203,7 +243,9 @@ class LeadershipService
         }
 
         $pensumIds = $this->getAssignedPensumIds();
-        if ($pensumIds->isEmpty()) return collect();
+        if ($pensumIds->isEmpty()) {
+            return collect();
+        }
 
         return Profesor::whereHas('pevaluacions', function ($q) use ($pensumIds) {
             $q->whereIn('pensum_id', $pensumIds);
@@ -228,7 +270,7 @@ class LeadershipService
             return;
         }
 
-        if (!$this->getAssignedAsignaturaIds()->contains($asignaturaId)) {
+        if (! $this->getAssignedAsignaturaIds()->contains($asignaturaId)) {
             abort(403, 'No tienes permiso para operar sobre actividades fuera de tus áreas asignadas.');
         }
     }
@@ -245,7 +287,7 @@ class LeadershipService
             return;
         }
 
-        if (!$this->getAssignedPensumIds()->contains($pensumId)) {
+        if (! $this->getAssignedPensumIds()->contains($pensumId)) {
             abort(403, 'No tienes permiso para operar sobre actividades fuera de tus áreas asignadas.');
         }
     }
@@ -269,7 +311,7 @@ class LeadershipService
         $activityQuery = Activity::query();
         $profesorQuery = Profesor::query();
 
-        if (!$this->isUnrestricted()) {
+        if (! $this->isUnrestricted()) {
             $pevaQuery = $this->scopePevaluacions($pevaQuery);
             $activityQuery = $this->scopeActivities($activityQuery);
             $profesorQuery = $profesorQuery->whereHas('pevaluacions', function ($q) {
@@ -288,7 +330,7 @@ class LeadershipService
             'areas' => AreaConocimiento::whereIn('id', $areaIds)
                 ->withCount('campo_conocimientos')
                 ->get()
-                ->map(fn($area) => [
+                ->map(fn ($area) => [
                     'id' => $area['id'] ?? $area->id,
                     'name' => $area->name,
                     'code' => $area->code,

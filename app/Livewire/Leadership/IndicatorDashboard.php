@@ -12,6 +12,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Instrument\DiagMain;
+use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Instrument\DiagSession;
 use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,13 @@ class IndicatorDashboard extends Component
     public $totalProfesoresActivos = 0;
 
     public $totalDiagActive = 0;
+
+    // Diagnósticos sub-métricas (scoped a las áreas del jefe)
+    public $diagStudents = 0;
+
+    public $diagAnswers = 0;
+
+    public $diagPrecision = 0;
 
     // Charts
     public $chartActivitiesByDay = [];
@@ -571,10 +579,33 @@ class IndicatorDashboard extends Component
 
         // ══ Global: Diagnósticos activos (scoped to leader's pestudios) ══
         $pestudioIds = $this->getBasePestudios()->pluck('id');
-        $this->totalDiagActive = DiagMain::where('active', true)
+        $diagMainIds = DiagMain::where('active', true)
             ->where('lapso_id', $this->selectedLapsoId)
             ->whereHas('pestudio', fn ($q) => $q->whereIn('id', $pestudioIds))
+            ->pluck('id');
+
+        $this->totalDiagActive = $diagMainIds->count();
+
+        // Sub-métricas del mismo scope (pestudios del jefe → diag_mains activos del lapso)
+        $this->diagStudents = DiagSession::whereIn('diag_main_id', $diagMainIds)
+            ->whereNotNull('estudiant_id')
+            ->distinct('estudiant_id')
+            ->count('estudiant_id');
+
+        $this->diagAnswers = DiagAnswer::whereHas('session', fn ($q) => $q->whereIn('diag_main_id', $diagMainIds))
             ->count();
+
+        $answeredMultiple = DiagAnswer::whereHas('session', fn ($q) => $q->whereIn('diag_main_id', $diagMainIds))
+            ->whereNotNull('completado_at')
+            ->whereNotNull('option_id')
+            ->whereHas('question', fn ($q) => $q->where('activo', 1)->where('tipo_pregunta', 'multiple'));
+
+        $totalAnswered = (clone $answeredMultiple)->count();
+        $correctAnswered = (clone $answeredMultiple)
+            ->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))
+            ->count();
+
+        $this->diagPrecision = $totalAnswered > 0 ? round((100 * $correctAnswered) / $totalAnswered, 1) : 0;
 
         // ══ Charts y lesson stats ══
         $this->loadChartActivitiesByDay();

@@ -43,7 +43,19 @@
                 @endforeach
             </select>
 
-            {{-- Pensum al final de la misma línea --}}
+            {{-- Pevaluacion (grupo_estable) anidada: pestudio→grado→seccion→pevaluacion --}}
+            <select wire:model.live="pevaluacionId"
+                class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 min-h-[40px] focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 outline-none w-full sm:w-64 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                @if(!$seccionId && !$gradoId && !$pestudioId) disabled @endif>
+                <option value="">Pevaluación: Todas (grupo)</option>
+                @foreach($pevaluacionsOptions as $pev)
+                    <option value="{{ $pev->id }}">
+                        [#{{ $pev->id }}] {{ $pev->grupoEstable?->code ?? 'SIN-GRUPO' }} — {{ $pev->pensum?->asignatura?->name ?? '?' }} · {{ $pev->seccion?->name ?? '?' }} · {{ $pev->profesor?->lastname ?? '?' }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- Pensum al final de la misma línea — anidado después de seccionId y pevaluacionId --}}
             <select wire:model.live="pensumId"
                 class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 min-h-[40px] focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none w-full sm:w-80 shrink-0">
                 <option value="">— Seleccionar pensum ({{ $pensumOptions->count() }} con preguntas) —</option>
@@ -57,7 +69,7 @@
                 @endforeach
             </select>
 
-            @if($pensumId || $pestudioId || $gradoId || $seccionId)
+            @if($pensumId || $pestudioId || $gradoId || $seccionId || $pevaluacionId)
                 <button wire:click="clearFilters"
                     class="px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 text-xs font-bold uppercase tracking-widest transition-all shrink-0">
                     Limpiar

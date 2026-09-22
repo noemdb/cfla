@@ -1,0 +1,495 @@
+<?php
+
+namespace App\Livewire\Leadership;
+
+use App\Models\app\Academy\AreaConocimiento;
+use App\Models\app\Academy\CampoConocimiento;
+use App\Models\app\Academy\Pensum;
+use App\Models\app\Instrument\DiagMain;
+use App\Models\app\Instrument\DiagOption;
+use App\Models\app\Instrument\DiagQuestion;
+use App\Services\Leadership\LeadershipService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
+use Livewire\WithPagination;
+use WireUi\Traits\WireUiActions;
+
+class DiagnosticQuestionReview extends Component
+{
+    use WireUiActions, WithPagination;
+
+    public string $search = '';
+
+    public string $filterAreaId = '';
+
+    public string $filterPensumId = '';
+
+    public string $filterActive = '';
+
+    public string $filterTipo = '';
+
+    public string $filterDiagMain = '';
+
+    public ?int $selectedId = null;
+
+    public bool $showDetail = false;
+
+    // ─── Wizard de edición de pregunta ─────────────────────────────
+    public bool $showQuestionModal = false;
+
+    public int $wizardStep = 1;
+
+    public ?DiagQuestion $editingQuestion = null;
+
+    public string $pregunta = '';
+
+    public string $tipo_pregunta = 'multiple';
+
+    public $orden = 1;
+
+    public bool $activo = true;
+
+    public array $options = [];
+
+    public int $correct_option_index = 0;
+
+    public $min_value = 1;
+
+    public $max_value = 5;
+
+    public $weighing = 1;
+
+    public $difficulty = 'medium';
+
+    public $pensum_id = null;
+
+    public $diag_main_id = null;
+
+    public string $expected_answer = '';
+
+    public int $paginate = 15;
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filterAreaId' => ['except' => ''],
+        'filterPensumId' => ['except' => ''],
+        'filterActive' => ['except' => ''],
+        'filterTipo' => ['except' => ''],
+        'filterDiagMain' => ['except' => ''],
+    ];
+
+    public function updatingPaginate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterAreaId(): void
+    {
+        $this->filterPensumId = '';
+        $this->resetPage();
+    }
+
+    public function updatingFilterPensumId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterAreaId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterActive(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterTipo(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterDiagMain(): void
+    {
+        $this->resetPage();
+    }
+
+    public function toggleActivo(int $id): void
+    {
+        $q = $this->scopedQuery()->findOrFail($id);
+        $this->assertCanReview($q);
+        $q->activo = ! (bool) $q->activo;
+        $q->save();
+        $this->notification()->success(
+            $q->activo ? 'Pregunta activada' : 'Pregunta desactivada',
+            $q->activo ? 'La pregunta quedó activa para diagnóstico.' : 'La pregunta quedó inactiva.'
+        );
+    }
+
+    public function openDetail(int $id): void
+    {
+        $this->selectedId = $id;
+        $this->showDetail = true;
+    }
+
+    public function closeDetail(): void
+    {
+        $this->showDetail = false;
+        $this->selectedId = null;
+    }
+
+    // ─── Wizard: edición de pregunta (sin crear) ───────────────────
+
+    public function openQuestionModal(int $id): void
+    {
+        $this->resetForm();
+        $this->wizardStep = 1;
+
+        $question = $this->scopedQuery()->with('options')->find($id);
+
+        if (! $question) {
+            $this->notification()->error('Pregunta no disponible', 'La pregunta no pertenece a tus áreas asignadas.');
+
+            return;
+        }
+
+        $this->assertCanReview($question);
+        $this->editingQuestion = $question;
+
+        $this->pregunta = (string) $question->pregunta;
+        $this->tipo_pregunta = $question->tipo_pregunta ?: 'multiple';
+        $this->orden = $question->orden ?? 1;
+        $this->activo = (bool) ($question->activo ?? true);
+        $this->weighing = $question->weighing ?? 1;
+        $this->difficulty = $question->difficulty ?? 'medium';
+        $this->pensum_id = $question->pensum_id;
+        $this->diag_main_id = $question->diag_main_id;
+
+        if ($this->tipo_pregunta === 'multiple') {
+            $this->options = $question->options->sortBy('orden')->map(function ($option, $index) {
+                return [
+                    'opcion' => $option->opcion,
+                    'valor' => (int) ($option->valor ?? 0),
+                    'orden' => $option->orden ?? $index + 1,
+                ];
+            })->values()->toArray();
+
+            if (empty($this->options)) {
+                $this->resetOptions();
+            }
+
+            $correctIndex = $question->options->search(fn ($option) => (int) ($option->valor ?? 0) > 0);
+            $this->correct_option_index = $correctIndex !== false ? $correctIndex : 0;
+        }
+
+        $this->showQuestionModal = true;
+    }
+
+    public function nextStep(): void
+    {
+        $this->validateStep();
+        if ($this->wizardStep < 3) {
+            $this->wizardStep++;
+        }
+    }
+
+    public function prevStep(): void
+    {
+        if ($this->wizardStep > 1) {
+            $this->wizardStep--;
+        }
+    }
+
+    public function goToStep($step): void
+    {
+        if ($step >= 1 && $step <= 3) {
+            $this->wizardStep = $step;
+        }
+    }
+
+    public function addOption(): void
+    {
+        if (count($this->options) < 6) {
+            $this->options[] = ['opcion' => '', 'valor' => 0, 'orden' => count($this->options) + 1];
+        }
+    }
+
+    public function removeOption($index): void
+    {
+        if (count($this->options) > 2) {
+            unset($this->options[$index]);
+            $this->options = array_values($this->options);
+        }
+    }
+
+    public function validateStep(): void
+    {
+        if ($this->wizardStep === 1) {
+            $this->validate([
+                'pensum_id' => ['required', 'exists:pensums,id'],
+                'tipo_pregunta' => 'required|in:multiple,open,scale',
+            ], [
+                'pensum_id.required' => 'Debe seleccionar un área de formación.',
+                'pensum_id.exists' => 'El área de formación seleccionada no es válida.',
+                'tipo_pregunta.required' => 'Debe seleccionar un tipo de pregunta.',
+                'tipo_pregunta.in' => 'El tipo de pregunta seleccionado no es válido.',
+            ]);
+        } elseif ($this->wizardStep === 2) {
+            $rules = ['pregunta' => 'required|string|min:10|max:500'];
+            $messages = [
+                'pregunta.required' => 'El texto de la pregunta es obligatorio.',
+                'pregunta.min' => 'La pregunta debe tener al menos 10 caracteres.',
+                'pregunta.max' => 'La pregunta no puede exceder 500 caracteres.',
+            ];
+
+            if ($this->tipo_pregunta === 'multiple') {
+                $rules['options'] = 'required|array|min:2|max:6';
+                $rules['options.*.opcion'] = 'required|string|max:200';
+                $rules['correct_option_index'] = 'required|integer|min:0|max:'.(count($this->options) - 1);
+                $messages['options.required'] = 'Debe agregar al menos 2 opciones.';
+                $messages['options.min'] = 'Debe tener al menos 2 opciones.';
+                $messages['options.*.opcion.required'] = 'Todas las opciones deben tener texto.';
+                $messages['correct_option_index.required'] = 'Debe seleccionar la opción correcta.';
+            } elseif ($this->tipo_pregunta === 'scale') {
+                $rules['min_value'] = 'required|integer|min:1|max:10';
+                $rules['max_value'] = 'required|integer|min:2|max:10|gt:min_value';
+                $messages['min_value.required'] = 'El valor mínimo es obligatorio.';
+                $messages['max_value.required'] = 'El valor máximo es obligatorio.';
+                $messages['max_value.gt'] = 'El valor máximo debe ser mayor al mínimo.';
+            }
+
+            $this->validate($rules, $messages);
+        } elseif ($this->wizardStep === 3) {
+            $this->validate([
+                'orden' => 'nullable|integer|min:1',
+                'weighing' => 'required|integer|min:1|max:5',
+                'difficulty' => 'required|string|in:easy,medium,hard',
+            ], [
+                'weighing.required' => 'La ponderación es obligatoria.',
+                'weighing.min' => 'La ponderación debe ser al menos 1.',
+                'weighing.max' => 'La ponderación no puede ser mayor a 5.',
+                'difficulty.required' => 'Debe seleccionar la dificultad.',
+                'difficulty.in' => 'La dificultad seleccionada no es válida.',
+            ]);
+        }
+    }
+
+    public function saveQuestion(): void
+    {
+        if (! $this->editingQuestion) {
+            $this->notification()->error('Sin pregunta', 'No hay una pregunta en edición.');
+
+            return;
+        }
+
+        $this->validateStep();
+
+        // Autorización: el área (pensum) debe pertenecer al scope del líder.
+        $service = new LeadershipService(Auth::user());
+        if (! Auth::user()->is_admin) {
+            $service->assertCanAccessPensum((int) $this->pensum_id);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $question = $this->editingQuestion;
+            $question->update([
+                'pregunta' => $this->pregunta,
+                'tipo_pregunta' => $this->tipo_pregunta,
+                'pensum_id' => $this->pensum_id,
+                'diag_main_id' => $this->diag_main_id ?: null,
+                'orden' => $this->orden,
+                'weighing' => $this->weighing,
+                'difficulty' => $this->difficulty,
+                'activo' => $this->activo,
+            ]);
+
+            if ($this->tipo_pregunta === 'multiple') {
+                $question->options()->delete();
+
+                $optionsData = [];
+                foreach ($this->options as $index => $option) {
+                    if (! empty($option['opcion'])) {
+                        $optionsData[] = [
+                            'question_id' => $question->id,
+                            'opcion' => $option['opcion'],
+                            'valor' => $index == $this->correct_option_index ? 1 : 0,
+                            'orden' => $option['orden'] ?? ($index + 1),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                if (! empty($optionsData)) {
+                    DiagOption::insert($optionsData);
+                }
+            }
+
+            DB::commit();
+
+            $this->closeQuestionModal();
+            $this->notification()->success('Pregunta actualizada', 'La pregunta se ha guardado correctamente.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $this->notification()->error('Error', 'Ocurrió un error al guardar la pregunta: '.$e->getMessage());
+        }
+    }
+
+    public function closeQuestionModal(): void
+    {
+        $this->showQuestionModal = false;
+        $this->wizardStep = 1;
+        $this->resetForm();
+    }
+
+    private function resetOptions(): void
+    {
+        $this->options = [
+            ['opcion' => '', 'valor' => 0, 'orden' => 1],
+            ['opcion' => '', 'valor' => 0, 'orden' => 2],
+        ];
+    }
+
+    private function resetForm(): void
+    {
+        $this->editingQuestion = null;
+        $this->pregunta = '';
+        $this->tipo_pregunta = 'multiple';
+        $this->orden = 1;
+        $this->activo = true;
+        $this->weighing = 1;
+        $this->difficulty = 'medium';
+        $this->pensum_id = null;
+        $this->diag_main_id = null;
+        $this->expected_answer = '';
+        $this->min_value = 1;
+        $this->max_value = 5;
+        $this->correct_option_index = 0;
+        $this->resetOptions();
+    }
+
+    private function scopedQuery()
+    {
+        $service = new LeadershipService(Auth::user());
+        $query = DiagQuestion::query()->with(['pensum.asignatura', 'pensum.grado.pestudio', 'diagMain', 'competency', 'indicator', 'options']);
+
+        return $service->scopeDiagQuestions($query);
+    }
+
+    private function assertCanReview(DiagQuestion $q): void
+    {
+        if (Auth::user()->is_admin) {
+            return;
+        }
+        $service = new LeadershipService(Auth::user());
+        if ($q->pensum_id) {
+            $service->assertCanAccessPensum((int) $q->pensum_id);
+        } else {
+            abort(403, 'Pregunta sin pensum asociado.');
+        }
+    }
+
+    #[Layout('leadership.layouts.app')]
+    public function render()
+    {
+        $user = Auth::user();
+        $service = new LeadershipService($user);
+
+        $areas = $service->isUnrestricted()
+            ? AreaConocimiento::orderBy('name')->get()
+            : AreaConocimiento::where('leader_id', $user->id)->orderBy('name')->get();
+
+        // Pensums anidados a la selección de área (solo los adscritos a esa área)
+        $pensumsOptions = collect();
+        if ($this->filterAreaId !== '') {
+            $areaPensumIds = CampoConocimiento::where('area_conocimiento_id', (int) $this->filterAreaId)
+                ->whereNotNull('pensum_id')->pluck('pensum_id')->unique();
+            $pensumsOptions = Pensum::with(['asignatura', 'grado'])
+                ->whereIn('id', $areaPensumIds)
+                ->whereIn('id', (clone $this->scopedQuery())->distinct()->pluck('pensum_id'))
+                ->orderBy('pestudio_id')->orderBy('grado_id')->get();
+        }
+
+        $query = $this->scopedQuery();
+
+        if ($this->filterAreaId !== '') {
+            $area = AreaConocimiento::find((int) $this->filterAreaId);
+            if ($area) {
+                $pensumIds = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id')->unique();
+                $query->whereIn('pensum_id', $pensumIds);
+            }
+        }
+        if ($this->filterPensumId !== '') {
+            $query->where('pensum_id', (int) $this->filterPensumId);
+        }
+        if ($this->search !== '') {
+            $s = $this->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('pregunta', 'like', "%{$s}%")
+                    ->orWhere('tipo_pregunta', 'like', "%{$s}%");
+            });
+        }
+        if ($this->filterActive !== '') {
+            $query->where('activo', (bool) $this->filterActive);
+        }
+        if ($this->filterTipo !== '') {
+            $query->where('tipo_pregunta', $this->filterTipo);
+        }
+        if ($this->filterDiagMain !== '') {
+            $query->where('diag_main_id', (int) $this->filterDiagMain);
+        }
+
+        $questions = $query->orderBy('pensum_id')->orderBy('orden')->orderBy('id')->paginate($this->paginate);
+
+        $baseScoped = $this->scopedQuery();
+        if ($this->filterAreaId !== '') {
+            $area = AreaConocimiento::find((int) $this->filterAreaId);
+            if ($area) {
+                $pensumIds = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
+                $baseScoped->whereIn('pensum_id', $pensumIds);
+            }
+        }
+        if ($this->filterPensumId !== '') {
+            $baseScoped->where('pensum_id', (int) $this->filterPensumId);
+        }
+        $metrics = [
+            'total' => (clone $baseScoped)->count(),
+            'activas' => (clone $baseScoped)->where('activo', true)->count(),
+            'inactivas' => (clone $baseScoped)->where('activo', false)->count(),
+            'multiples' => (clone $baseScoped)->where('tipo_pregunta', 'multiple')->count(),
+        ];
+
+        $tipos = (clone $this->scopedQuery())->distinct()->pluck('tipo_pregunta')->filter()->sort()->values();
+        $diagMains = DiagMain::whereIn('id', (clone $this->scopedQuery())->distinct()->pluck('diag_main_id')->filter())->orderBy('name')->get(['id', 'name']);
+
+        // Pensums con preguntas en el scope — para el wizard de edición.
+        $wizardPensums = Pensum::with(['asignatura', 'grado'])
+            ->whereIn('id', (clone $this->scopedQuery())->distinct()->pluck('pensum_id'))
+            ->orderBy('pestudio_id')->orderBy('grado_id')->get();
+
+        $selected = null;
+        if ($this->showDetail && $this->selectedId) {
+            $selected = $this->scopedQuery()->with(['pensum.asignatura', 'pensum.grado', 'pensum.pestudio', 'competency', 'indicator', 'options', 'diagMain'])->find($this->selectedId);
+        }
+
+        return view('livewire.leadership.diagnostic-question-review', [
+            'questions' => $questions,
+            'areas' => $areas,
+            'pensumsOptions' => $pensumsOptions,
+            'wizardPensums' => $wizardPensums,
+            'metrics' => $metrics,
+            'tipos' => $tipos,
+            'diagMains' => $diagMains,
+            'selected' => $selected,
+        ]);
+    }
+}
