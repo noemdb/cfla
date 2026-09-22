@@ -577,25 +577,28 @@ class IndicatorDashboard extends Component
             }
         }
 
-        // ══ Global: Diagnósticos activos (scoped to leader's pestudios) ══
-        $pestudioIds = $this->getBasePestudios()->pluck('id');
+        // ══ Global: Diagnósticos (scoped a las áreas del jefe vía pensum) ══
+        // El scope del jefe es AreaConocimiento → campo_conocimientos.pensum_id.
+        // Los diagnósticos se ligan por las preguntas/sesiones de esos pensums.
+        $pensumIds = $this->pensumIds;
+
         $diagMainIds = DiagMain::where('active', true)
-            ->where('lapso_id', $this->selectedLapsoId)
-            ->whereHas('pestudio', fn ($q) => $q->whereIn('id', $pestudioIds))
+            ->whereHas('questions', fn ($q) => $q->whereIn('pensum_id', $pensumIds))
             ->pluck('id');
 
         $this->totalDiagActive = $diagMainIds->count();
 
-        // Sub-métricas del mismo scope (pestudios del jefe → diag_mains activos del lapso)
-        $this->diagStudents = DiagSession::whereIn('diag_main_id', $diagMainIds)
+        $scopedSessions = DiagSession::whereIn('pensum_id', $pensumIds);
+
+        $this->diagStudents = (clone $scopedSessions)
             ->whereNotNull('estudiant_id')
             ->distinct('estudiant_id')
             ->count('estudiant_id');
 
-        $this->diagAnswers = DiagAnswer::whereHas('session', fn ($q) => $q->whereIn('diag_main_id', $diagMainIds))
+        $this->diagAnswers = DiagAnswer::whereHas('session', fn ($q) => $q->whereIn('pensum_id', $pensumIds))
             ->count();
 
-        $answeredMultiple = DiagAnswer::whereHas('session', fn ($q) => $q->whereIn('diag_main_id', $diagMainIds))
+        $answeredMultiple = DiagAnswer::whereHas('session', fn ($q) => $q->whereIn('pensum_id', $pensumIds))
             ->whereNotNull('completado_at')
             ->whereNotNull('option_id')
             ->whereHas('question', fn ($q) => $q->where('activo', 1)->where('tipo_pregunta', 'multiple'));
