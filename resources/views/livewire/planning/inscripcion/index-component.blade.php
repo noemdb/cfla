@@ -32,6 +32,28 @@
                 </svg>
                 Importar CSV
             </button>
+            @if($filterGrado && $filterSeccion)
+                <a href="{{ route('app.planning.inscripcions.export-pdf', ['grado_id' => $filterGrado, 'seccion_id' => $filterSeccion]) }}"
+                    target="_blank" rel="noopener"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/20 transition-all duration-300 text-sm font-bold"
+                    title="Exportar el listado de la sección seleccionada a PDF">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-6 4h6m-6-8h2"/>
+                    </svg>
+                    Exportar PDF
+                </a>
+            @else
+                <button type="button" wire:click="exportPdfRequiresFilters"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-500/10 text-rose-400/60 rounded-lg border border-rose-500/20 transition-all duration-300 text-sm font-bold"
+                    title="Selecciona Grado y Sección para exportar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-6 4h6m-6-8h2"/>
+                    </svg>
+                    Exportar PDF
+                </button>
+            @endif
             <button wire:click="$refresh"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -746,8 +768,6 @@
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Archivo CSV</label>
                 <label
                     x-data="{ dragging: false }"
-                    x-init="console.log('[csv] dropzone listo · input=', !!$refs.csvInput, '· livewire=', !!window.Livewire)"
-                    x-on:click="console.log('[csv] click en dropzone')"
                     x-on:dragover.prevent="dragging = true"
                     x-on:dragleave.prevent="dragging = false"
                     x-on:drop.prevent="
@@ -762,8 +782,7 @@
                         ? 'border-amber-500/60 bg-amber-500/5'
                         : 'border-white/10 hover:border-amber-500/40 bg-gray-800/30 hover:bg-gray-800/50'"
                     class="relative block cursor-pointer rounded-lg border-2 border-dashed transition-all duration-200 px-4 py-5">
-                    <input type="file" wire:model="importCsvFile" accept=".csv,text/csv" x-ref="csvInput" class="sr-only"
-                        x-on:change="console.log('[csv] input change · files=', $event.target.files.length)">
+                    <input type="file" wire:model="importCsvFile" accept=".csv,text/csv" x-ref="csvInput" class="sr-only">
 
                     <div wire:loading wire:target="importCsvFile" class="flex flex-col items-center gap-2">
                         <svg class="w-7 h-7 animate-spin text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

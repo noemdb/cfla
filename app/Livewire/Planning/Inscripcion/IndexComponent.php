@@ -395,6 +395,14 @@ class IndexComponent extends Component
         $this->resetImportForm();
     }
 
+    public function exportPdfRequiresFilters(): void
+    {
+        $this->notification()->warning(
+            title: 'Filtros requeridos',
+            description: 'Selecciona un Grado y una Sección para exportar el listado en PDF.'
+        );
+    }
+
     protected function importer(): InscripcionCsvImporter
     {
         return app(InscripcionCsvImporter::class);

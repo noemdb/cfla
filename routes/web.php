@@ -266,6 +266,7 @@ Route::prefix('app')->name('app.')->group(function () {
         // Módulo de Inscripciones
         Route::prefix('inscripcions')->name('inscripcions.')->group(function () {
             Route::get('/', \App\Livewire\Planning\Inscripcion\IndexComponent::class)->name('index');
+            Route::get('/export-pdf', \App\Http\Controllers\Planning\InscripcionPdfController::class)->name('export-pdf');
         });
 
         // ─── LMS: Monitor y Auditoría para Coordinadores ──────────────

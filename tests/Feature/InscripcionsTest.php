@@ -516,4 +516,60 @@ class InscripcionsTest extends TestCase
             'programacion_id' => $programacionNew->id,
         ]);
     }
+
+    // ─── PDF export Tests ───────────────────────────────────────
+
+    /** @test */
+    public function it_exports_the_section_listing_to_pdf(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'name' => 'GRADO PDF',
+            'status_active' => 'true',
+        ]);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'X', 'status_active' => 'true']);
+        $estudiant = $this->createMinimalEstudiant(['ci_estudiant' => '55500099']);
+
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => Tinscripcion::factory()->create()->id,
+            'escolaridad_id' => Escolaridad::factory()->create()->id,
+            'programacion_id' => Programacion::factory()->create()->id,
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('app.planning.inscripcions.export-pdf', [
+            'grado_id' => $grado->id,
+            'seccion_id' => $seccion->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+    }
+
+    /** @test */
+    public function it_rejects_pdf_export_when_section_does_not_belong_to_grado(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $otroGrado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'X', 'status_active' => 'true']);
+
+        $response = $this->actingAs($this->user)->get(route('app.planning.inscripcions.export-pdf', [
+            'grado_id' => $otroGrado->id,
+            'seccion_id' => $seccion->id,
+        ]));
+
+        $response->assertStatus(422);
+    }
+
+    /** @test */
+    public function it_shows_the_export_pdf_button(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->assertSee('Exportar PDF');
+    }
 }
