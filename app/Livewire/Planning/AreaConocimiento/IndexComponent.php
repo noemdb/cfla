@@ -51,6 +51,8 @@ class IndexComponent extends Component
     public $wizardFilterPestudio = '';
     public $wizardFilterGrado = '';
     public $wizardSearch = '';
+    // Selección del wizard: mapa [asignatura_id => pensum_id] para poder elegir
+    // el pensum (grado/plan) a adscribir cuando una asignatura tiene varios.
     public $selectedSubjects = [];
 
     // Paso 2 — vista y listado
@@ -487,24 +489,67 @@ class IndexComponent extends Component
     }
 
     /**
-     * Toggle a subject in the multi-select array.
+     * Toggle a subject in the selection map. Al seleccionar se guarda un
+     * pensum por defecto (resuelto o el primero de la lista); el usuario
+     * puede cambiarlo con selectPensum().
      */
     public function toggleSubject($id)
     {
         $id = (int) $id;
-        if (in_array($id, $this->selectedSubjects)) {
-            $this->selectedSubjects = array_values(array_diff($this->selectedSubjects, [$id]));
-        } else {
-            $this->selectedSubjects[] = $id;
+
+        if (array_key_exists($id, $this->selectedSubjects)) {
+            unset($this->selectedSubjects[$id]);
+            return;
         }
+
+        $this->selectedSubjects[$id] = $this->defaultPensumId($id);
     }
 
     /**
-     * Select all currently available subjects.
+     * Cambia el pensum adscrito de una asignatura ya seleccionada.
+     */
+    public function selectPensum($asignaturaId, $pensumId)
+    {
+        $asignaturaId = (int) $asignaturaId;
+        $pensumId = $pensumId ? (int) $pensumId : null;
+
+        if (! array_key_exists($asignaturaId, $this->selectedSubjects)) {
+            return;
+        }
+
+        $this->selectedSubjects[$asignaturaId] = $pensumId;
+    }
+
+    /**
+     * Pensum por defecto para una asignatura: el resuelto por la cadena
+     * pevaluacion → pensum → asignatura; si no, el primer pensum activo
+     * (priorizando el pestudio del área).
+     */
+    protected function defaultPensumId(int $asignaturaId): ?int
+    {
+        $areaPestudioId = AreaConocimiento::where('id', $this->campoAreaId)->value('pestudio_id');
+
+        $resolved = CampoConocimiento::resolvePensumId($asignaturaId, $areaPestudioId);
+        if ($resolved !== null) {
+            return $resolved;
+        }
+
+        $pensums = \App\Models\app\Academy\Pensum::where('asignatura_id', $asignaturaId);
+        if ($areaPestudioId) {
+            $pensums->where('pestudio_id', $areaPestudioId);
+        }
+
+        return $pensums->orderBy('grado_id')->value('id') ?: null;
+    }
+
+    /**
+     * Select all currently available subjects (con su pensum por defecto).
      */
     public function selectAllAvailable()
     {
-        $this->selectedSubjects = $this->availableSubjects->pluck('id')->toArray();
+        $this->selectedSubjects = $this->availableSubjects->mapWithKeys(function ($asig) {
+            return [(int) $asig->id => $this->defaultPensumId((int) $asig->id)];
+        })->toArray();
     }
 
     /**
@@ -516,7 +561,8 @@ class IndexComponent extends Component
     }
 
     /**
-     * Batch-assign selected subjects as CampoConocimiento records.
+     * Batch-assign selected subjects as CampoConocimiento records, guardando
+     * en cada una el pensum elegido.
      */
     public function assignSelectedSubjects()
     {
@@ -528,22 +574,28 @@ class IndexComponent extends Component
             return;
         }
 
-        // Validate that all IDs exist and aren't already assigned
+        // Asignaturas ya adscritas al área (para evitar duplicados).
         $assignedIds = CampoConocimiento::where('area_conocimiento_id', $this->campoAreaId)
             ->pluck('asignatura_id')
             ->toArray();
 
-        $newIds = array_diff($this->selectedSubjects, $assignedIds);
         $count = 0;
 
         // Orden inicial: continúa después del último registro del área.
         $nextOrder = (int) CampoConocimiento::where('area_conocimiento_id', $this->campoAreaId)
             ->max('order');
 
-        foreach ($newIds as $asignaturaId) {
+        foreach ($this->selectedSubjects as $asignaturaId => $pensumId) {
+            $asignaturaId = (int) $asignaturaId;
+
+            if (in_array($asignaturaId, $assignedIds, true)) {
+                continue;
+            }
+
             CampoConocimiento::create([
                 'area_conocimiento_id' => $this->campoAreaId,
                 'asignatura_id'        => $asignaturaId,
+                'pensum_id'            => $pensumId ?: null,
                 'order'                => ++$nextOrder,
             ]);
             $count++;
@@ -586,6 +638,10 @@ class IndexComponent extends Component
         $data = [
             'area_conocimiento_id' => $this->campoAreaId,
             'asignatura_id'        => $this->campo_asignatura_id,
+            'pensum_id'            => CampoConocimiento::resolvePensumId(
+                (int) $this->campo_asignatura_id,
+                AreaConocimiento::where('id', $this->campoAreaId)->value('pestudio_id'),
+            ),
             'observations'         => $this->campo_observations,
         ];
 

@@ -529,14 +529,6 @@
                                         Seleccionar Asignaturas
                                     </h4>
                                     <div class="flex items-center gap-1.5">
-                                        <button type="button" wire:click="$set('groupBy', 'materia')"
-                                            class="px-2 py-1 text-[10px] font-bold rounded-lg transition-all duration-200 {{ $groupBy === 'materia' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-gray-400 hover:text-white border border-white/5' }}">
-                                            Por materia
-                                        </button>
-                                        <button type="button" wire:click="$set('groupBy', 'none')"
-                                            class="px-2 py-1 text-[10px] font-bold rounded-lg transition-all duration-200 {{ $groupBy === 'none' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-gray-400 hover:text-white border border-white/5' }}">
-                                            Sin agrupar
-                                        </button>
                                         <button type="button" wire:click="selectAllAvailable"
                                             class="px-2 py-1 text-[10px] font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-all duration-200">
                                             Seleccionar Todas
@@ -570,21 +562,13 @@
                                     </div>
                                 </div>
 
-                                {{-- Grid estilo bento de asignaturas disponibles (agrupado por materia) --}}
-                                <div class="space-y-4 max-h-[360px] overflow-y-auto pr-1">
-                                    @forelse($this->availableGroups as $group)
-                                        <div>
-                                            @if($group['label'])
-                                                <div class="flex items-center gap-2 mb-2">
-                                                    <span class="w-2 h-2 rounded-full {{ $this->materiaColorClass($group['key']) }}"></span>
-                                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">{{ $group['label'] }}</span>
-                                                    <span class="text-[10px] text-gray-600">{{ $group['items']->count() }}</span>
-                                                </div>
-                                            @endif
-                                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
-                                                @foreach($group['items'] as $asignatura)
+                                {{-- Grid de asignaturas disponibles (sin agrupar) --}}
+                                <div class="max-h-[360px] overflow-y-auto pr-1">
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                                        @forelse($this->availableSubjects->take($this->visibleCount) as $asignatura)
                                                     @php
-                                                        $isSelected = in_array($asignatura->id, $selectedSubjects);
+                                                        $isSelected = array_key_exists($asignatura->id, $selectedSubjects);
+                                                        $selectedPensumId = $selectedSubjects[$asignatura->id] ?? null;
                                                         $colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name);
                                                         // Pensums activos, priorizando el plan seleccionado.
                                                         $pensums = $asignatura->pensums->where('status_active', true);
@@ -593,6 +577,14 @@
                                                             if ($filtered->isNotEmpty()) { $pensums = $filtered; }
                                                         }
                                                         $pensums = $pensums->values();
+
+                                                        // Resumen agregado: grados y secciones únicos a partir de los pensums.
+                                                        $gradosUnicos = $pensums->pluck('grado')->filter()->unique('id');
+                                                        $seccionesUnicas = $gradosUnicos->flatMap(fn ($g) => $g->seccions ?? collect())->unique('id');
+                                                        $pensumCount = $pensums->count();
+                                                        $pensumSummary = $gradosUnicos->pluck('code')->filter()->join(', ') ?: $gradosUnicos->pluck('name')->filter()->join(', ');
+                                                        $seccionSummary = $seccionesUnicas->pluck('name')->join(', ') ?: '—';
+
                                                         $hiddenCount = max(0, $pensums->count() - 2);
                                                         $tipLines = $pensums->map(function ($pensum) {
                                                             $grado = $pensum->grado;
@@ -608,6 +600,12 @@
                                                             $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
                                                             return "{$psShort} · ".($grado?->code ?? $grado?->name ?? '—')." · Secc {$secciones}";
                                                         });
+
+                                                        // Metadatos académicos.
+                                                        $horasT = $asignatura->hour_t_week;
+                                                        $horasP = $asignatura->hour_p_week;
+                                                        $creditos = $asignatura->unid_credit;
+                                                        $escala = $asignatura->tescala;
                                                     @endphp
                                                     <div x-data="{ showTip: false, top: 0, left: 0 }"
                                                          @mouseenter="showTip = true; const r = $el.getBoundingClientRect(); top = r.top; left = r.left + r.width/2"
@@ -615,7 +613,7 @@
                                                          class="relative">
                                                         <button type="button"
                                                             wire:click="toggleSubject({{ $asignatura->id }})"
-                                                            class="relative h-40 w-full flex flex-col items-start text-left rounded-xl border p-3 transition-all duration-200 group
+                                                            class="relative h-56 w-full flex flex-col items-start text-left rounded-xl border p-3 transition-all duration-200 group
                                                                 {{ $isSelected
                                                                     ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
                                                                     : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
@@ -625,16 +623,70 @@
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                                                 </svg>
                                                             </span>
-                                                            <span class="inline-flex items-center gap-1.5">
+
+                                                            <span class="inline-flex items-center gap-1.5 pr-6">
                                                                 <span class="w-2 h-2 rounded-full {{ $this->materiaColorClass($colorKey) }}"></span>
                                                                 <span class="text-[10px] font-mono text-gray-400">{{ $asignatura->code }}</span>
+                                                                @if($escala)
+                                                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/5">Escala {{ $escala }}</span>
+                                                                @endif
                                                             </span>
-                                                            <span class="text-[13px] font-semibold leading-snug line-clamp-2 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
+
+                                                            <span class="text-[13px] font-semibold leading-snug line-clamp-2 mt-0.5 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
                                                                 {{ $asignatura->name }}
                                                             </span>
 
+                                                            @if($isSelected && $pensums->count() > 1)
+                                                                <label class="mt-2 block w-full">
+                                                                    <span class="block text-[8px] font-bold uppercase tracking-wider text-gray-600 mb-0.5">Pensum / Grado</span>
+                                                                    <select
+                                                                        wire:change="selectPensum({{ $asignatura->id }}, $event.target.value)"
+                                                                        class="w-full bg-white/5 border border-emerald-500/30 text-gray-200 rounded-md px-1.5 py-1 text-[10px] focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all">
+                                                                        @foreach($pensums as $pensum)
+                                                                            @php
+                                                                                $grado = $pensum->grado;
+                                                                                $pestudio = $pensum->pestudio ?? $grado?->pestudio;
+                                                                                $psName = $pestudio?->name ?? '?';
+                                                                                $psShort = match (true) {
+                                                                                    str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
+                                                                                    str_contains($psName, 'MEDIA GENERAL') => 'MG',
+                                                                                    str_contains($psName, 'PRIMARIA') => 'PRI',
+                                                                                    str_contains($psName, 'INICIAL') => 'INI',
+                                                                                    default => \Illuminate\Support\Str::limit($psName, 10),
+                                                                                };
+                                                                            @endphp
+                                                                            <option value="{{ $pensum->id }}" {{ (int) $selectedPensumId === (int) $pensum->id ? 'selected' : '' }}>
+                                                                                {{ $psShort }} · {{ $grado?->code ?? $grado?->name ?? '—' }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </label>
+                                                            @endif
+
+                                                            {{-- Metadatos académicos: créditos · horas T/P --}}
+                                                            <span class="mt-2 grid grid-cols-3 gap-1 text-center">
+                                                                @if($creditos !== null)
+                                                                    <span class="flex flex-col rounded-md bg-white/[0.03] border border-white/5 px-1 py-1">
+                                                                        <span class="text-[8px] uppercase tracking-wider text-gray-600">Créditos</span>
+                                                                        <span class="text-[10px] font-bold text-gray-300">{{ $creditos }}</span>
+                                                                    </span>
+                                                                @endif
+                                                                @if($horasT !== null)
+                                                                    <span class="flex flex-col rounded-md bg-white/[0.03] border border-white/5 px-1 py-1">
+                                                                        <span class="text-[8px] uppercase tracking-wider text-gray-600">H Teóricas</span>
+                                                                        <span class="text-[10px] font-bold text-gray-300">{{ $horasT }}</span>
+                                                                    </span>
+                                                                @endif
+                                                                @if($horasP !== null)
+                                                                    <span class="flex flex-col rounded-md bg-white/[0.03] border border-white/5 px-1 py-1">
+                                                                        <span class="text-[8px] uppercase tracking-wider text-gray-600">H Prácticas</span>
+                                                                        <span class="text-[10px] font-bold text-gray-300">{{ $horasP }}</span>
+                                                                    </span>
+                                                                @endif
+                                                            </span>
+
                                                             {{-- Asociación plan de estudio · grado · sección (según pensum activo) --}}
-                                                            <span class="mt-auto pt-1.5 border-t border-white/5 space-y-0.5">
+                                                            <span class="mt-auto pt-1.5 border-t border-white/5 w-full space-y-0.5">
                                                                 @forelse($pensums->take(2) as $pensum)
                                                                     @php
                                                                         $grado = $pensum->grado;
@@ -662,6 +714,11 @@
                                                                 @if($hiddenCount > 0)
                                                                     <span class="block text-[9px] text-gray-600">+{{ $hiddenCount }} más</span>
                                                                 @endif
+                                                                @if($pensumCount > 0 && $pensumSummary)
+                                                                    <span class="block text-[9px] text-gray-600 truncate">
+                                                                        Grados: <span class="text-gray-400">{{ $pensumSummary }}</span> · Secc: <span class="text-gray-400">{{ $seccionSummary }}</span>
+                                                                    </span>
+                                                                @endif
                                                             </span>
                                                         </button>
 
@@ -677,10 +734,7 @@
                                                             @endforelse
                                                         </div>
                                                     </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @empty
+                                        @empty
                                         <div class="py-10 text-center">
                                             <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -692,6 +746,7 @@
                                             </p>
                                         </div>
                                     @endforelse
+                                    </div>
                                 </div>
 
                                 {{-- Cargar más (#4) --}}

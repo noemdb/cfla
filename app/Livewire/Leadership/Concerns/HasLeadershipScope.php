@@ -26,4 +26,9 @@ trait HasLeadershipScope
     {
         return $this->leadershipService->getAssignedAsignaturaIds();
     }
+
+    protected function getAssignedPensumIds(): Collection
+    {
+        return $this->leadershipService->getAssignedPensumIds();
+    }
 }

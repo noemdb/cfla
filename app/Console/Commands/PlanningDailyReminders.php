@@ -33,7 +33,7 @@ use Illuminate\Support\Collection;
  *     actualizada (updated_at) en sus áreas.
  *
  * Cadena de asociación con el Jefe de Área:
- *   Activity → Pevaluacion → Pensum → Asignatura → CampoConocimiento →
+ *   Activity → Pevaluacion → Pensum → (campo_conocimientos.pensum_id) →
  *   AreaConocimiento.leader_id.
  *
  * Toda notificación sale por NotificationService (regla de oro del blueprint/
@@ -92,19 +92,17 @@ class PlanningDailyReminders extends Command
     {
         $activities = $this->unapproved()
             ->whereDate('finicial', $target->toDateString())
-            ->with(['pevaluacion.pensum.asignatura.areasConocimiento'])
+            ->with(['pevaluacion.pensum'])
             ->get();
 
         // leader_id => [activity_id => Activity] (dedupe si el líder tiene dos
-        // áreas que incluyen la misma asignatura).
+        // áreas que incluyen el mismo pensum).
         $byLeader = [];
         foreach ($activities as $activity) {
-            $asignatura = $activity->pevaluacion?->pensum?->asignatura;
+            $pensum = $activity->pevaluacion?->pensum;
 
-            foreach (($asignatura?->areasConocimiento ?? collect()) as $area) {
-                if ($area->leader_id) {
-                    $byLeader[$area->leader_id][$activity->id] = $activity;
-                }
+            foreach ($pensum?->areaLeaderIds() ?? [] as $leaderId) {
+                $byLeader[$leaderId][$activity->id] = $activity;
             }
         }
 
@@ -239,17 +237,15 @@ class PlanningDailyReminders extends Command
             ->whereHas('lmsPublication', fn ($q) => $q
                 ->where('status', 'SCHEDULED')
                 ->whereDate('publish_at', $target->toDateString()))
-            ->with(['pevaluacion.pensum.asignatura.areasConocimiento'])
+            ->with(['pevaluacion.pensum'])
             ->get();
 
         $byLeader = [];
         foreach ($activities as $activity) {
-            $asignatura = $activity->pevaluacion?->pensum?->asignatura;
+            $pensum = $activity->pevaluacion?->pensum;
 
-            foreach (($asignatura?->areasConocimiento ?? collect()) as $area) {
-                if ($area->leader_id) {
-                    $byLeader[$area->leader_id][$activity->id] = $activity;
-                }
+            foreach ($pensum?->areaLeaderIds() ?? [] as $leaderId) {
+                $byLeader[$leaderId][$activity->id] = $activity;
             }
         }
 
@@ -303,7 +299,7 @@ class PlanningDailyReminders extends Command
             }
 
             $last = Activity::query()
-                ->whereHas('pevaluacion.pensum.asignatura.areasConocimiento', function ($q) use ($areaIds) {
+                ->whereHas('pevaluacion.pensum.areasConocimiento', function ($q) use ($areaIds) {
                     $q->whereIn('area_conocimientos.id', $areaIds);
                 })
                 ->max('updated_at');

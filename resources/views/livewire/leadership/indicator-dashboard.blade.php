@@ -7,7 +7,7 @@
             <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-2">Panel de Seguimiento · Indicadores</h1>
             <p class="text-amber-600 dark:text-amber-400 font-medium text-sm">
                 {{ \Illuminate\Support\Facades\Auth::user()->username }} ·
-                {{ count($asignaturaIds) }} asignatura(s) bajo tu supervisión
+                {{ count($pensumIds) }} pensum(s) bajo tu supervisión
             </p>
         </div>
         <div class="flex items-center gap-2">
@@ -127,7 +127,7 @@
         </div>
     </div>
 
-    @if(count($asignaturaIds) > 0 || $isAdmin)
+    @if(count($pensumIds) > 0 || $isAdmin)
     {{-- Lapso NavTabs + Filters --}}
     <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden mb-4">
         <nav class="flex overflow-x-auto gap-0.5 snap-x snap-mandatory border-b border-white/5">
@@ -652,12 +652,19 @@
                     : this.areas;
                 scope.forEach(a => {
                     (a.campo_conocimientos || []).forEach(cc => {
-                        (cc.asignatura?.pensums || []).forEach(p => {
-                            if (p.pestudio && !seen.has(p.pestudio.id)) {
-                                seen.add(p.pestudio.id);
-                                list.push(p.pestudio);
-                            }
-                        });
+                        const p = cc.pensum || null;
+                        if (p?.pestudio && !seen.has(p.pestudio.id)) {
+                            seen.add(p.pestudio.id);
+                            list.push(p.pestudio);
+                        }
+                        if (!p) {
+                            (cc.asignatura?.pensums || []).forEach(pp => {
+                                if (pp.pestudio && !seen.has(pp.pestudio.id)) {
+                                    seen.add(pp.pestudio.id);
+                                    list.push(pp.pestudio);
+                                }
+                            });
+                        }
                     });
                 });
                 return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -670,13 +677,22 @@
                     : this.areas;
                 scope.forEach(a => {
                     (a.campo_conocimientos || []).forEach(cc => {
-                        (cc.asignatura?.pensums || []).forEach(p => {
+                        const p = cc.pensum || null;
+                        if (p) {
                             if (this.filterPestudio && p.pestudio?.id != this.filterPestudio) return;
                             if (p.grado && !seen.has(p.grado.id)) {
                                 seen.add(p.grado.id);
                                 list.push(p.grado);
                             }
-                        });
+                        } else {
+                            (cc.asignatura?.pensums || []).forEach(pp => {
+                                if (this.filterPestudio && pp.pestudio?.id != this.filterPestudio) return;
+                                if (pp.grado && !seen.has(pp.grado.id)) {
+                                    seen.add(pp.grado.id);
+                                    list.push(pp.grado);
+                                }
+                            });
+                        }
                     });
                 });
                 return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -688,16 +704,18 @@
                 }
                 if (this.filterPestudio) {
                     result = result.filter(a =>
-                        (a.campo_conocimientos || []).some(cc =>
-                            (cc.asignatura?.pensums || []).some(p => p.pestudio?.id == this.filterPestudio)
-                        )
+                        (a.campo_conocimientos || []).some(cc => {
+                            if (cc.pensum) return cc.pensum.pestudio?.id == this.filterPestudio;
+                            return (cc.asignatura?.pensums || []).some(p => p.pestudio?.id == this.filterPestudio);
+                        })
                     );
                 }
                 if (this.filterGrado) {
                     result = result.filter(a =>
-                        (a.campo_conocimientos || []).some(cc =>
-                            (cc.asignatura?.pensums || []).some(p => p.grado?.id == this.filterGrado)
-                        )
+                        (a.campo_conocimientos || []).some(cc => {
+                            if (cc.pensum) return cc.pensum.grado?.id == this.filterGrado;
+                            return (cc.asignatura?.pensums || []).some(p => p.grado?.id == this.filterGrado);
+                        })
                     );
                 }
                 if (this.search.trim()) {
@@ -810,23 +828,34 @@
                             <div class="px-3 py-2 space-y-1.5">
                                 <template x-if="area.campo_conocimientos && area.campo_conocimientos.length > 0">
                                     <template x-for="cc in area.campo_conocimientos" :key="cc.id">
-                                        <div x-show="cc.asignatura && (!filterPestudio || (cc.asignatura.pensums || []).some(p => p.pestudio?.id == filterPestudio))" class="group">
+                                        <div x-show="cc.asignatura && (!filterPestudio || (cc.pensum ? cc.pensum.pestudio?.id == filterPestudio : (cc.asignatura.pensums || []).some(p => p.pestudio?.id == filterPestudio)))" class="group">
                                             <div class="flex items-center gap-1.5">
                                                 <svg class="w-3 h-3 text-indigo-400/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                                 </svg>
                                                 <span class="text-[11px] font-medium text-gray-300 truncate" x-text="cc.asignatura.name"></span>
                                             </div>
-                                            <template x-if="cc.asignatura.pensums && cc.asignatura.pensums.length > 0">
+                                            <template x-if="cc.pensum || (cc.asignatura.pensums && cc.asignatura.pensums.length > 0)">
                                                 <div class="ml-4 mt-0.5 flex flex-wrap gap-1">
-                                                    <template x-for="pensum in cc.asignatura.pensums" :key="pensum.id">
-                                                        <span x-show="(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)"
+                                                    <template x-if="cc.pensum">
+                                                        <span x-show="(!filterPestudio || cc.pensum.pestudio?.id == filterPestudio) && (!filterGrado || cc.pensum.grado?.id == filterGrado)"
                                                             class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-white/5 text-gray-400 border border-white/5">
                                                             <svg class="w-2.5 h-2.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                                             </svg>
-                                                            <span x-text="pensum.grado?.name || '?'"></span>
+                                                            <span x-text="cc.pensum.grado?.name || '?'"></span>
                                                         </span>
+                                                    </template>
+                                                    <template x-if="!cc.pensum">
+                                                        <template x-for="pensum in cc.asignatura.pensums" :key="pensum.id">
+                                                            <span x-show="(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)"
+                                                                class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-white/5 text-gray-400 border border-white/5">
+                                                                <svg class="w-2.5 h-2.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                                </svg>
+                                                                <span x-text="pensum.grado?.name || '?'"></span>
+                                                            </span>
+                                                        </template>
                                                     </template>
                                                 </div>
                                             </template>
@@ -885,7 +914,7 @@
                         <template x-if="area.campo_conocimientos && area.campo_conocimientos.length > 0">
                             <div class="divide-y divide-white/5">
                                 <template x-for="cc in area.campo_conocimientos" :key="cc.id">
-                                    <div x-show="cc.asignatura && (!filterPestudio || (cc.asignatura.pensums || []).some(p => p.pestudio?.id == filterPestudio))" class="px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
+                                    <div x-show="cc.asignatura && (!filterPestudio || (cc.pensum ? cc.pensum.pestudio?.id == filterPestudio : (cc.asignatura.pensums || []).some(p => p.pestudio?.id == filterPestudio)))" class="px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
                                         <div class="flex items-center gap-2 mb-1">
                                             <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -897,22 +926,35 @@
                                         </div>
 
                                         {{-- Pensums --}}
-                                        <template x-if="cc.asignatura.pensums && cc.asignatura.pensums.length > 0">
+                                        <template x-if="cc.pensum || (cc.asignatura.pensums && cc.asignatura.pensums.length > 0)">
                                             <div class="ml-5 mt-1.5 flex flex-wrap gap-1.5">
-                                                <template x-for="pensum in cc.asignatura.pensums" :key="pensum.id">
-                                                    <span x-show="(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)"
+                                                <template x-if="cc.pensum">
+                                                    <span x-show="(!filterPestudio || cc.pensum.pestudio?.id == filterPestudio) && (!filterGrado || cc.pensum.grado?.id == filterGrado)"
                                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-gray-300 border border-white/5">
                                                         <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                                         </svg>
-                                                        <span x-text="pensum.grado?.name || '?'"></span>
+                                                        <span x-text="cc.pensum.grado?.name || '?'"></span>
                                                         <span class="text-gray-600">·</span>
-                                                        <span x-text="pensum.pestudio?.name || '?'"></span>
+                                                        <span x-text="cc.pensum.pestudio?.name || '?'"></span>
                                                     </span>
+                                                </template>
+                                                <template x-if="!cc.pensum">
+                                                    <template x-for="pensum in cc.asignatura.pensums" :key="pensum.id">
+                                                        <span x-show="(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)"
+                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-gray-300 border border-white/5">
+                                                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                            </svg>
+                                                            <span x-text="pensum.grado?.name || '?'"></span>
+                                                            <span class="text-gray-600">·</span>
+                                                            <span x-text="pensum.pestudio?.name || '?'"></span>
+                                                        </span>
+                                                    </template>
                                                 </template>
                                             </div>
                                         </template>
-                                        <template x-if="!cc.asignatura.pensums || cc.asignatura.pensums.length === 0">
+                                        <template x-if="!cc.pensum && (!cc.asignatura.pensums || cc.asignatura.pensums.length === 0)">
                                             <p class="ml-5 text-[10px] text-gray-600 mt-1">Sin pensums asociados</p>
                                         </template>
                                     </div>

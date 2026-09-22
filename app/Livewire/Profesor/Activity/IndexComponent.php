@@ -522,6 +522,7 @@ class IndexComponent extends Component
         $this->activityForm->pevaluacion_id = $this->pevaluacion->id;
         $this->activityForm->applyToModel($this->activity);
 
+        $isNew = ! $this->activity->exists;
         $this->activity->save();
 
         // Crear achievements pendientes (copiados desde s2526)
@@ -533,6 +534,10 @@ class IndexComponent extends Component
             $this->s2526PendingAchievements = [];
         }
 
+        if ($isNew) {
+            $this->notifyAreaLeaderActivityCreated();
+        }
+
         $this->notification()->success(
             '¡Excelente, buen trabajo!',
             'Registro realizado exitosamente'
@@ -541,6 +546,45 @@ class IndexComponent extends Component
         $this->resetModel();
         $this->activity_id = null;
         $this->close();
+    }
+
+    /**
+     * Notifica al jefe de área (leader_id del AreaConocimiento asociado al
+     * pensum de la pevaluacion) cuando se registra una actividad nueva.
+     * La notificación sale por el punto central (DB + broadcast Reverb).
+     */
+    private function notifyAreaLeaderActivityCreated(): void
+    {
+        $leaderIds = $this->activity->areaLeaderIds();
+        if ($leaderIds === []) {
+            return;
+        }
+
+        $users = User::whereIn('id', $leaderIds)->get();
+        if ($users->isEmpty()) {
+            return;
+        }
+
+        $asignatura = $this->pevaluacion->pensum?->asignatura;
+        $grado = $this->pevaluacion->pensum?->grado;
+        $seccion = $this->pevaluacion->seccion;
+
+        $message = 'Se registró una nueva actividad en '.($asignatura?->name ?? 'la asignatura')
+            .($grado?->name ? ' · '.$grado->name : '')
+            .($seccion?->name ? ' · '.$seccion->name : '').'.';
+
+        app(\App\Services\NotificationService::class)->notifyUsers(
+            $users,
+            new \App\Notifications\ActivityCreatedNotification(
+                type: 'activity_created',
+                message: $message,
+                url: route('app.leadership.activities'),
+                activityId: (int) $this->activity->id,
+                asignaturaName: $asignatura?->name,
+                gradoName: $grado?->name,
+                seccionName: $seccion?->name,
+            ),
+        );
     }
 
     public function saveAchievement()

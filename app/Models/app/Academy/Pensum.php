@@ -76,6 +76,40 @@ class Pensum extends Model implements \App\Contracts\Auditable
         return $this->hasMany(Pevaluacion::class, 'pensum_id');
     }
 
+    /**
+     * Adscripciones a áreas de conocimiento que referencian directamente este
+     * pensum (pensum_id en campo_conocimientos).
+     */
+    public function campoConocimientos()
+    {
+        return $this->hasMany(CampoConocimiento::class, 'pensum_id');
+    }
+
+    /**
+     * Áreas de conocimiento que adscriben este pensum (via campo_conocimientos).
+     */
+    public function areasConocimiento()
+    {
+        return $this->belongsToMany(
+            AreaConocimiento::class,
+            'campo_conocimientos',
+            'pensum_id',
+            'area_conocimiento_id'
+        );
+    }
+
+    /**
+     * leader_id de las áreas que adscriben este pensum (para notificaciones).
+     */
+    public function areaLeaderIds(): array
+    {
+        return $this->areasConocimiento()
+            ->whereNotNull('leader_id')
+            ->pluck('leader_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
     public function diagCompetencies()
     {
         return $this->hasMany(DiagCompetency::class, 'pensum_id');

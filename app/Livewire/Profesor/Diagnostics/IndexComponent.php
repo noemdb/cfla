@@ -1302,7 +1302,7 @@ PROMPT;
 
         $questions = $this->getQuestionsPaginationView();
 
-        $sessionsQuery = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers'])
+        $sessionsQuery = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.inscripcion.seccion.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers'])
             ->select(['id', 'estudiant_id', 'pensum_id', 'diag_main_id', 'iniciado_at', 'completado_at', 'progreso', 'total_preguntas', 'activo']);
 
         $this->scopeToCarga($sessionsQuery);

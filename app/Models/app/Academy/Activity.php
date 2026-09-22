@@ -71,6 +71,16 @@ class Activity extends Model implements \App\Contracts\Auditable
         return $this->belongsTo(Pevaluacion::class, 'pevaluacion_id');
     }
 
+    /**
+     * leader_id de las áreas de conocimiento que adscriben el pensum de esta
+     * actividad (via pevaluacion → pensum → campo_conocimientos.pensum_id →
+     * area_conocimientos.leader_id). Para notificaciones al jefe de área.
+     */
+    public function areaLeaderIds(): array
+    {
+        return $this->pevaluacion?->pensum?->areaLeaderIds() ?? [];
+    }
+
     // ─── RELACIONES LMS ────────────────────────────────────────
 
     public function lmsPublication()
