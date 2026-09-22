@@ -2286,46 +2286,6 @@
             <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
                 <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">5 · Generar horario</h2>
 
-                <div class="flex flex-wrap items-center gap-3">
-                    @if (($selectedCalendarDetail['status'] ?? null) === 'active')
-                    <a href="{{ route('app.planning.timetable.pdf.teachers', ['calendar' => $calendarId]) }}"
-                        target="_blank"
-                        rel="noopener"
-                        title="Generar un PDF con los horarios de todos los docentes del calendario"
-                        wire:loading.attr="disabled"
-                        class=" inline-flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-sm font-bold text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-300">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 2h9l3 3v17H6z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6M9 17h6M15 2v4h4"/>
-                        </svg>
-                        PDF docentes
-                    </a>
-                    @endif
-
-                    @if ($generationState === 'preview_ready' && $preview)
-                        {{-- <button wire:click="updateDraftPreview" wire:loading.attr="disabled" wire:target="updateDraftPreview"
-                            class="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
-                            <span wire:loading.remove wire:target="updateDraftPreview">Actualizar borrador</span>
-                            <span wire:loading wire:target="updateDraftPreview">Actualizando…</span>
-                        </button> --}}
-                        <button wire:click="confirmAndPublish" wire:loading.attr="disabled" wire:target="confirmAndPublish"
-                            class="px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold">
-                            Confirmar y publicar secciones válidas
-                        </button>
-                        <button wire:click="undoLastPreviewChange" wire:loading.attr="disabled"
-                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
-                            Deshacer último cambio
-                        </button>
-                        <button wire:click="restoreGeneratedPreview" wire:loading.attr="disabled"
-                            class="px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
-                            Restaurar dry-run
-                        </button>
-                    @endif
-
-                    @if ($generationState === 'published')
-                        <span class="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-bold">Horario publicado.</span>
-                    @endif
-                </div>
                 @if ($generationState === 'preview_ready' && $preview)
                     @php $publicationReadiness = $this->publicationReadiness(); @endphp
                     @php $displayHardConflicts = $publicationReadiness['display_hard_conflicts'] ?? []; @endphp

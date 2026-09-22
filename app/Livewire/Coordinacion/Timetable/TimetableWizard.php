@@ -21,6 +21,9 @@ use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\app\Timetable\TimetableSubstituteAssignment;
 use App\Models\app\Timetable\TimetableTeacherAvailability;
+use App\Models\User;
+use App\Notifications\TimetableCalendarActivatedNotification;
+use App\Services\NotificationService;
 use App\Services\Timetable\TimetableAiDraftService;
 use App\Services\Timetable\TimetableCalendarSnapshotService;
 use App\Services\Timetable\TimetableCapacityAuditService;
@@ -638,6 +641,11 @@ class TimetableWizard extends Component
         }
 
         $calendar->activate();
+
+        // Avisa a Planificación (is_planner) que hay un nuevo horario activo.
+        // Aplica tanto desde /app/coordinacion/timetable como /app/planning/timetable.
+        $this->notifyPlannersOfActivation($calendar);
+
         $this->loadCalendars();
         if ($this->calendarId === $calendar->id) {
             // Rehidrata el horario publicado para que el Paso 5 lo muestre sin
@@ -648,6 +656,33 @@ class TimetableWizard extends Component
         $this->notification()->success(
             'Calendario activado',
             'Calendario «'.$calendar->name.'» activado. El activo anterior quedó archivado.',
+        );
+    }
+
+    /**
+     * Notifica a los usuarios de Planificación (is_planner) que un calendario
+     * fue activado. Se emite por NotificationService (DB + broadcast Reverb);
+     * la campana del navbar la muestra al instante.
+     */
+    protected function notifyPlannersOfActivation(TimetableCalendar $calendar): void
+    {
+        $planners = User::query()
+            ->where('is_planner', true)
+            ->where('is_active', 'enable')
+            ->get();
+
+        if ($planners->isEmpty()) {
+            return;
+        }
+
+        app(NotificationService::class)->notifyUsers(
+            $planners,
+            new TimetableCalendarActivatedNotification(
+                calendarId: $calendar->id,
+                calendarName: $calendar->name,
+                lapsoName: $calendar->lapso?->name,
+                pestudioName: $calendar->pestudio?->name,
+            ),
         );
     }
 
