@@ -849,6 +849,27 @@ class TimetableWizard extends Component
         session()->flash('message', 'Calendario «'.$calendar->name.'» restaurado como borrador.');
     }
 
+    /**
+     * PLAN-TIMETABLE-002 — Deja un calendario activo como borrador para volver a
+     * editarlo (p. ej. corregir colisiones antes de re-activarlo). Al pasar a
+     * borrador, el plan de estudio queda sin calendario activo hasta que se
+     * re-active otro. Solo se permite desde el estado activo.
+     */
+    public function markDraftCalendar($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar || $calendar->status !== TimetableCalendar::STATUS_ACTIVE) {
+            session()->flash('error', 'El calendario seleccionado no está activo.');
+
+            return;
+        }
+
+        $calendar->update(['status' => TimetableCalendar::STATUS_DRAFT]);
+
+        $this->loadCalendars();
+        session()->flash('message', 'Calendario «'.$calendar->name.'» pasado a borrador. El plan de estudio quedó sin calendario activo.');
+    }
+
     public function createShift(): void
     {
         $this->validate([
@@ -5988,6 +6009,18 @@ class TimetableWizard extends Component
     {
         $this->areaFormatId = null;
         $this->showAreaFormatModal = true;
+    }
+
+    /**
+     * Abre el diálogo de exportación de los horarios de todos los P.Estudios
+     * (PDF / HTML / XLS). El cuerpo del <x-dialog> vive en la vista.
+     */
+    public function openPestudiosExport(): void
+    {
+        $this->dialog()->id('pestudios-export')->show([
+            'icon' => '',
+            'close' => false,
+        ]);
     }
 
     public function closeAreaFormatModal(): void

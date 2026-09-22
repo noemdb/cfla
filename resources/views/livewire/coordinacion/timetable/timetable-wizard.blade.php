@@ -98,7 +98,7 @@
             </x-dropdown>
 
             {{-- Dropdown: formatos y exportaciones --}}
-            <x-dropdown position="bottom-end" width="3xl" height="auto">
+            <x-dropdown position="bottom-end" width="7xl" height="auto">
                 <x-slot name="trigger">
                     <x-button
                         label="Formatos"
@@ -119,11 +119,13 @@
                 </x-dropdown.item>
 
                 <x-dropdown.item
-                    href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
-                    target="_blank"
-                    rel="noopener"
-                    icon="folder"
-                    label="PDF todos P.Estudios"
+                    href="#"
+                    wire:click="openPestudiosExport"
+                    wire:loading.attr="disabled"
+                    wire:target="openPestudiosExport"
+                    icon="arrow-down-tray"
+                    label="Exportar P.Estudios (PDF / HTML / XLS)"
+                    class="w-full !whitespace-nowrap"
                     separator />
 
                 <x-dropdown.item
@@ -288,6 +290,46 @@
             </div>
         </div>
     </div>
+
+    {{-- Diálogo WireUI: exportación de los horarios de todos los P.Estudios. --}}
+    <x-dialog id="pestudios-export" title="Exportar P.Estudios" width="lg" blur="lg" z-index="z-[2000]">
+        <div x-data="{ format: 'pdf' }" class="space-y-4 text-left">
+            <div>
+                <label for="pestudios-export-format"
+                    class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                    Formato
+                </label>
+                <select id="pestudios-export-format" x-model="format"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
+                    <option value="pdf">PDF</option>
+                    <option value="html">HTML</option>
+                    <option value="xls">XLS (Excel)</option>
+                </select>
+            </div>
+
+            <p x-cloak x-show="format === 'xls'"
+                class="rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                El XLS conserva la misma estructura y paleta de colores del PDF (teal, azul y ámbar), con una hoja por
+                cada P.Estudio del lapso.
+            </p>
+            <p x-cloak x-show="format === 'html'"
+                class="rounded-lg bg-sky-500/10 px-3 py-2 text-[11px] font-medium text-sky-700 dark:text-sky-300">
+                El HTML abre la misma vista del PDF directamente en el navegador, apta para imprimir.
+            </p>
+
+            <div class="flex items-center justify-end gap-2 border-t border-gray-200 pt-3 dark:border-white/10">
+                <button type="button" x-on:click="close()"
+                    class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
+                    Cancelar
+                </button>
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}?format=' + format"
+                    target="_blank" rel="noopener" x-on:click="close()"
+                    class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
+                    Generar
+                </a>
+            </div>
+        </div>
+    </x-dialog>
 
     {{-- Switcher global: alternativas (calendarios) del lapso en edición --}}
     {{-- Sin backdrop-blur-md: backdrop-filter en un ancestro descoloca el
@@ -606,10 +648,11 @@
                             @php
                                 $calendarStatus = $selectedCalendarDetail['status'];
                                 $calendarCanActivate = $calendarStatus === 'draft';
+                                $calendarCanDraft = $calendarStatus === 'active';
                                 $calendarCanArchive = in_array($calendarStatus, ['draft', 'active'], true);
                                 $calendarCanUnarchive = $calendarStatus === 'archived';
                                 $calendarCanDelete = $calendarStatus === 'draft';
-                                $calendarHasStateActions = $calendarCanActivate || $calendarCanArchive || $calendarCanUnarchive || $calendarCanDelete;
+                                $calendarHasStateActions = $calendarCanActivate || $calendarCanDraft || $calendarCanArchive || $calendarCanUnarchive || $calendarCanDelete;
                             @endphp
                             @if ($calendarHasStateActions)
                                 <x-dropdown position="bottom-end" height="auto">
@@ -626,6 +669,10 @@
                                     @if ($calendarCanActivate)
                                         <x-dropdown.item wire:click="activateCalendar({{ $selectedCalendarDetail['id'] }})"
                                             icon="check-circle" label="Activar" class="w-full" />
+                                    @endif
+                                    @if ($calendarCanDraft)
+                                        <x-dropdown.item wire:click="markDraftCalendar({{ $selectedCalendarDetail['id'] }})"
+                                            icon="pencil-square" label="Pasar a borrador" class="w-full" />
                                     @endif
                                     @if ($calendarCanArchive)
                                         <x-dropdown.item wire:click="archiveCalendar({{ $selectedCalendarDetail['id'] }})"
