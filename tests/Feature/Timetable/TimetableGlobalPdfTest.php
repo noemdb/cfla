@@ -90,6 +90,79 @@ class TimetableGlobalPdfTest extends TestCase
             ->assertOk();
     }
 
+    public function test_all_teachers_format_pdf_triggers_browser_print_and_html_does_not(): void
+    {
+        $fixture = $this->fixture();
+
+        $html = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['format' => 'html']))
+            ->assertOk()
+            ->getContent();
+        $this->assertStringNotContainsString('window.print()', $html);
+
+        $pdf = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['format' => 'pdf']))
+            ->assertOk()
+            ->getContent();
+        $this->assertStringContainsString('window.print()', $pdf);
+    }
+
+    public function test_all_teachers_xls_has_one_sheet_per_teacher(): void
+    {
+        $fixture = $this->fixture();
+
+        $html = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers'))
+            ->assertOk()
+            ->getContent();
+        $teacherCount = substr_count($html, 'class="card"');
+        $this->assertGreaterThan(0, $teacherCount);
+
+        $response = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['format' => 'xls']))
+            ->assertOk();
+
+        $this->assertStringContainsString(
+            'spreadsheetml',
+            (string) $response->headers->get('content-type'),
+        );
+
+        $tmp = tempnam(sys_get_temp_dir(), 'ttxls').'.xlsx';
+        file_put_contents($tmp, $response->streamedContent());
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+
+            // Una hoja por docente, igual que una tarjeta por docente en el HTML.
+            $this->assertSame($teacherCount, $spreadsheet->getSheetCount());
+
+            // La hoja conserva el patrón visual: encabezado + grilla Bloque × días.
+            $flat = collect($spreadsheet->getSheet(0)->rangeToArray('A1:F400'))
+                ->flatten()
+                ->filter()
+                ->implode(' | ');
+
+            $this->assertStringContainsString('HORARIOS DE DOCENTES', $flat);
+            $this->assertStringContainsString('Bloque', $flat);
+            $this->assertStringContainsString('Lunes', $flat);
+
+            // Encabezado con la metadata del/los calendario(s) activo(s).
+            $this->assertStringContainsString('Calendario:', $flat);
+            $this->assertStringContainsString('Estado: Activo', $flat);
+            $this->assertStringContainsString('Versión: v', $flat);
+            $this->assertStringContainsString('Registrado:', $flat);
+            $this->assertStringContainsString('Actualizado:', $flat);
+
+            // La info del calendario vive en la 3ª fila de la hoja.
+            $this->assertStringContainsString(
+                'Calendario:',
+                (string) $spreadsheet->getSheet(0)->getCell('A3')->getValue(),
+            );
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
     /**
      * assertSee volcaría todo el HTML (muy grande) al fallar; aquí sólo se
      * compara el fragmento esperado para mantener el reporte legible.

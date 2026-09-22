@@ -89,8 +89,8 @@
         @endif
     </header>
 
-    {{-- Diálogo: configuración del PDF consolidado de profesores. --}}
-    <div x-data="{ open: false, orientation: 'portrait', perPage: 2 }"
+    {{-- Diálogo: configuración del consolidado de docentes (PDF / HTML / XLS). --}}
+    <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2 }"
         x-on:open-teachers-pdf.window="open = true"
         x-on:keydown.escape.window="open = false"
         x-cloak x-show="open"
@@ -104,7 +104,7 @@
                         Consolidado de docentes
                     </h3>
                     <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        Vista imprimible · orientación y horarios por página
+                        Elige el formato de salida · PDF, HTML o XLS
                     </p>
                 </div>
                 <button type="button" x-on:click="open = false"
@@ -116,6 +116,19 @@
 
             <div class="space-y-4 p-4">
                 <div>
+                    <label for="teachers-pdf-format"
+                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                        Formato
+                    </label>
+                    <select id="teachers-pdf-format" x-model="format"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="pdf">PDF</option>
+                        <option value="html">HTML</option>
+                        <option value="xls">XLS</option>
+                    </select>
+                </div>
+
+                <div x-cloak x-show="format !== 'xls'">
                     <label for="teachers-pdf-orientation"
                         class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
                         Orientación
@@ -127,7 +140,7 @@
                     </select>
                 </div>
 
-                <div>
+                <div x-cloak x-show="format !== 'xls'">
                     <label for="teachers-pdf-per-page"
                         class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
                         Horarios por página
@@ -139,6 +152,15 @@
                         @endforeach
                     </select>
                 </div>
+
+                <p x-cloak x-show="format === 'xls'"
+                    class="rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                    El XLS conserva el mismo patrón visual del PDF, con una hoja por cada docente.
+                </p>
+                <p x-cloak x-show="format === 'pdf'"
+                    class="rounded-lg bg-sky-500/10 px-3 py-2 text-[11px] font-medium text-sky-700 dark:text-sky-300">
+                    El PDF abre la vista imprimible y lanza el diálogo de impresión del navegador (guardar como PDF).
+                </p>
             </div>
 
             <div class="flex justify-end gap-2 border-t border-gray-200 px-4 py-3 dark:border-white/10">
@@ -146,7 +168,7 @@
                     class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
                     Cancelar
                 </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?orientation=' + orientation + '&per_page=' + perPage"
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage"
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
                     Generar

@@ -650,7 +650,7 @@ class TimetablePdfController extends Controller
      */
     private function allPestudiosXls(Lapso $lapso, \Illuminate\Support\Collection $pestudiosData, \App\Models\app\Entity\Institucion $institucion, string $fecha)
     {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
 
         // Una hoja por P.Estudio (calendario), cada una con su encabezado para
         // que resulte independiente, igual que cada bloque del PDF. La primera
@@ -860,6 +860,7 @@ class TimetablePdfController extends Controller
                                     'alignment' => ['horizontal' => 'center', 'vertical' => 'top'],
                                     'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
                                 ]);
+
                                 continue;
                             }
 
@@ -976,8 +977,13 @@ class TimetablePdfController extends Controller
                     $teachers[$key] = [
                         'profesor' => $profesor,
                         'peducativos' => [],
+                        'calendars' => [],
                     ];
                 }
+
+                // Calendarios activos que aportan horarios a este docente (para
+                // el encabezado del XLS: estado, versión, registro/actualización).
+                $teachers[$key]['calendars'][$calendar->id] = $calendar;
 
                 $peducativo = $calendar->pestudio?->peducativo;
                 $peducativoKey = (int) ($peducativo?->id ?? 0);
@@ -1038,17 +1044,277 @@ class TimetablePdfController extends Controller
         $perPage = (int) $request->query('per_page', 2);
         $perPage = max(1, min(6, $perPage));
 
-        // Se renderiza como HTML (no PDF): el consolidado de todos los docentes
-        // del lapso genera un documento tan grande que dompdf agota la memoria
-        // en el servidor. El navegador renderiza el HTML sin ese límite.
+        $fecha = now()->isoFormat('DD [de] MMMM [de] YYYY');
+
+        // Formatos:
+        //  - html (por defecto): vista imprimible en el navegador.
+        //  - pdf: la misma vista imprimible con window.print() automático; el
+        //    navegador genera el PDF (dompdf agota memoria con el consolidado
+        //    completo, por eso no se renderiza en servidor).
+        //  - xls: Excel con una hoja por docente, replicando el patrón visual.
+        $format = strtolower((string) $request->query('format', 'html'));
+
+        if (in_array($format, ['xls', 'csv'], true)) {
+            return $this->allTeachersXls($lapso, $teachersData, $institucion, $fecha);
+        }
+
         return view('timetable.teachers-all', [
             'lapso' => $lapso,
             'teachersData' => $teachersData,
             'institucion' => $institucion,
-            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'fecha' => $fecha,
             'orientation' => $orientation,
             'perPage' => $perPage,
+            'autoPrint' => $format === 'pdf',
         ]);
+    }
+
+    /**
+     * XLSX del consolidado de docentes: una hoja por docente, replicando el
+     * patrón visual de la vista imprimible (encabezado teal, bloques por
+     * P.Educativo, turno y grilla Bloque × días con recreos resaltados).
+     *
+     * @param  \Illuminate\Support\Collection<int, array{profesor:\App\Models\app\Academy\Profesor, peducativos:array}>  $teachersData
+     */
+    private function allTeachersXls(Lapso $lapso, \Illuminate\Support\Collection $teachersData, \App\Models\app\Entity\Institucion $institucion, string $fecha)
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+
+        // Una hoja por docente; la primera reutiliza la hoja activa.
+        $usedTitles = [];
+        $first = true;
+
+        foreach ($teachersData as $teacherData) {
+            $sheet = $first ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet();
+            $first = false;
+
+            $profesor = $teacherData['profesor'];
+            $name = trim((string) ($profesor->lastname ?? '').' '.(string) ($profesor->name ?? ''));
+
+            $sheet->setTitle($this->uniqueSheetTitle($name !== '' ? $name : 'Docente', $usedTitles));
+
+            $this->writeTeacherSheet($sheet, $teacherData, $lapso, $institucion, $fecha);
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $filename = 'consolidado-docentes-'.now()->format('Ymd-His').'.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet): void {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * Escribe una hoja con el horario de un docente, espejo de
+     * resources/views/timetable/teachers-all.blade.php.
+     *
+     * @param  array{profesor:\App\Models\app\Academy\Profesor, peducativos:array}  $teacherData
+     */
+    private function writeTeacherSheet(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, array $teacherData, Lapso $lapso, \App\Models\app\Entity\Institucion $institucion, string $fecha): void
+    {
+        // Paleta espejo de la vista imprimible.
+        $teal = 'FF0D9488';
+        $tealDark = 'FF0F766E';
+        $ink = 'FF1F2937';
+        $grayText = 'FF6B7280';
+        $grayStrong = 'FF374151';
+        $white = 'FFFFFFFF';
+        $timeBg = 'FFF0FDF4';
+        $headBg = 'FFF9FAFB';
+        $breakBg = 'FFFEF3C7';
+        $breakText = 'FFB45309';
+        $gridBorder = 'FF94A3B8';
+
+        $cols = 6;
+        $col = 1;
+        $row = 1;
+
+        $sheet->getColumnDimension('A')->setWidth(16);
+        foreach (['B', 'C', 'D', 'E', 'F'] as $letter) {
+            $sheet->getColumnDimension($letter)->setWidth(30);
+        }
+
+        // Encabezado institución (teal a sangre completa).
+        $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+        $sheet->setCellValue([$col, $row], mb_strtoupper((string) ($institucion?->name ?? 'INSTITUCIÓN EDUCATIVA')));
+        $sheet->getStyle([$col, $row])->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['argb' => $white], 'size' => 14],
+            'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $teal]],
+            'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+        ]);
+        $sheet->getRowDimension($row)->setRowHeight(24);
+        $row++;
+
+        // Subtítulo: lapso + fecha.
+        $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+        $sheet->setCellValue([$col, $row], 'HORARIOS DE DOCENTES · '.($lapso->name ?? '').' · '.$fecha);
+        $sheet->getStyle([$col, $row])->getFont()->setSize(9)->getColor()->setARGB($grayText);
+        $sheet->getStyle([$col, $row])->getAlignment()->setHorizontal('center');
+        $row++;
+
+        // 3ª fila: info de los calendarios activos que aportan horarios a este
+        // docente (estado, versión, calidad, estrategia, bloques y registro/
+        // actualización). Una línea por calendario.
+        $calendars = $teacherData['calendars'] ?? [];
+        if ($calendars !== []) {
+            $lines = [];
+            foreach ($calendars as $calendar) {
+                $statusLabel = match ($calendar->status) {
+                    'active' => 'Activo',
+                    'draft' => 'Borrador',
+                    'generating' => 'Generando',
+                    'archived' => 'Archivado',
+                    default => ucfirst((string) $calendar->status),
+                };
+                $quality = $calendar->quality_score !== null
+                    ? trim(rtrim(rtrim((string) $calendar->quality_score, '0'), '.'), ' ').'%'
+                    : '—';
+                $strategyLabel = ($calendar->strategy ?? 'optimized') === 'legacy' ? 'Legacy' : 'Optimizado';
+
+                $lines[] = 'Calendario: '.$calendar->name
+                    .'   ·   Estado: '.$statusLabel
+                    .'   ·   Versión: v'.$calendar->version
+                    .'   ·   Calidad: '.$quality
+                    .'   ·   Estrategia: '.$strategyLabel
+                    .'   ·   Bloques: '.$calendar->period_minutes.' min'
+                    .'   ·   Registrado: '.$calendar->created_at?->isoFormat('DD/MM/YYYY HH:mm')
+                    .'   ·   Actualizado: '.$calendar->updated_at?->isoFormat('DD/MM/YYYY HH:mm');
+            }
+
+            $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+            $sheet->setCellValue([$col, $row], implode("\n", $lines));
+            $sheet->getStyle([$col, $row])->getFont()->setSize(8)->getColor()->setARGB($grayStrong);
+            $sheet->getStyle([$col, $row])->getAlignment()->setWrapText(true)->setVertical('center');
+            $sheet->getRowDimension($row)->setRowHeight(max(16, count($lines) * 24));
+        }
+        $row++;
+
+        // Docente.
+        $profesor = $teacherData['profesor'];
+        $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+        $sheet->setCellValue([$col, $row], trim((string) ($profesor->lastname ?? '').', '.(string) ($profesor->name ?? '')));
+        $sheet->getStyle([$col, $row])->getFont()->setBold(true)->setSize(12)->getColor()->setARGB($ink);
+        $row++;
+
+        $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+        $sheet->setCellValue([$col, $row], 'CI: '.($profesor->ci_profesor ?? '—'));
+        $sheet->getStyle([$col, $row])->getFont()->setSize(9)->getColor()->setARGB($grayText);
+        $row++;
+
+        $row++;
+
+        $days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+        foreach ($teacherData['peducativos'] as $peducativoData) {
+            // Bloque P.Educativo (teal oscuro).
+            $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+            $sheet->setCellValue([$col, $row], mb_strtoupper((string) ($peducativoData['peducativo']?->name ?? 'P.EDUCATIVO')));
+            $sheet->getStyle([$col, $row])->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['argb' => $white], 'size' => 10],
+                'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $tealDark]],
+                'alignment' => ['horizontal' => 'left', 'vertical' => 'center'],
+            ]);
+            $sheet->getRowDimension($row)->setRowHeight(18);
+            $row++;
+
+            foreach ($peducativoData['schedules'] as $shiftSchedule) {
+                $shift = $shiftSchedule['shift'];
+                $shiftLabel = 'Turno: '.($shift->name ?? ('Turno '.$shift->id));
+                if ($shift->start_time) {
+                    $shiftLabel .= ' ('.substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5).')';
+                }
+
+                $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+                $sheet->setCellValue([$col, $row], $shiftLabel);
+                $sheet->getStyle([$col, $row])->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['argb' => $teal], 'size' => 9],
+                    'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $timeBg]],
+                    'alignment' => ['horizontal' => 'left', 'vertical' => 'center'],
+                ]);
+                $row++;
+
+                // Cabecera de días.
+                $sheet->setCellValue([$col, $row], 'Bloque');
+                foreach ($days as $i => $day) {
+                    $sheet->setCellValue([$col + 1 + $i, $row], $day);
+                }
+                $sheet->getStyle([$col, $row, $col + $cols - 1, $row])->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['argb' => $grayStrong], 'size' => 8],
+                    'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $headBg]],
+                    'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+                    'borders' => ['bottom' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
+                ]);
+                $row++;
+
+                foreach ($shiftSchedule['periods'] as $order => $dayPeriods) {
+                    $firstPeriod = $dayPeriods->first();
+
+                    $sheet->setCellValue([$col, $row], $order.'º '.substr((string) $firstPeriod->start_time, 0, 5).'–'.substr((string) $firstPeriod->end_time, 0, 5));
+                    $sheet->getStyle([$col, $row])->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['argb' => $grayStrong], 'size' => 8],
+                        'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $timeBg]],
+                        'alignment' => ['horizontal' => 'center', 'vertical' => 'top', 'wrapText' => true],
+                        'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
+                    ]);
+
+                    foreach (range(1, 5) as $day) {
+                        $cellCol = $col + $day;
+                        $period = $dayPeriods->get($day);
+
+                        if ($period?->is_break) {
+                            $sheet->setCellValue([$cellCol, $row], 'Receso');
+                            $sheet->getStyle([$cellCol, $row])->applyFromArray([
+                                'font' => ['bold' => true, 'color' => ['argb' => $breakText], 'size' => 8],
+                                'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $breakBg]],
+                                'alignment' => ['horizontal' => 'left', 'vertical' => 'top'],
+                                'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
+                            ]);
+
+                            continue;
+                        }
+
+                        $lines = [];
+                        foreach ($shiftSchedule['grid']->get($order, collect())->get($day, collect()) as $slot) {
+                            $subject = $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?';
+                            $metaParts = array_filter([
+                                $slot->lesson?->pevaluacion?->seccion?->grado?->name,
+                                $slot->lesson?->pevaluacion?->seccion?->name,
+                                $slot->grupo_estable_id
+                                    ? ($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id)
+                                    : null,
+                                $slot->room?->code ? 'Aula '.$slot->room->code : null,
+                            ]);
+
+                            $lines[] = $subject.($metaParts !== [] ? "\n".implode(' · ', $metaParts) : '');
+                        }
+
+                        $sheet->setCellValue([$cellCol, $row], implode("\n", $lines) ?: null);
+                        $sheet->getStyle([$cellCol, $row])->applyFromArray([
+                            'font' => ['size' => 8, 'color' => ['argb' => $ink]],
+                            'alignment' => ['horizontal' => 'left', 'vertical' => 'top', 'wrapText' => true],
+                            'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
+                        ]);
+                    }
+
+                    $sheet->getRowDimension($row)->setRowHeight(30);
+                    $row++;
+                }
+
+                $row++; // separación entre turnos.
+            }
+
+            $row++; // separación entre P.Educativos.
+        }
+
+        // Pie.
+        $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
+        $sheet->setCellValue([$col, $row], 'Horarios de docentes · '.($institucion?->name ?? '').' · Generado el '.$fecha);
+        $sheet->getStyle([$col, $row])->getFont()->setSize(8)->getColor()->setARGB($grayText);
+        $sheet->getStyle([$col, $row])->getAlignment()->setHorizontal('center');
     }
 
     /**
