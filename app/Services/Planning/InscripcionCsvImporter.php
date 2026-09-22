@@ -51,14 +51,19 @@ class InscripcionCsvImporter
      */
     public function parse(string $path): array
     {
-        $handle = fopen($path, 'r');
-        if ($handle === false) {
+        $content = file_get_contents($path);
+        if ($content === false) {
             throw new \RuntimeException('No se pudo abrir el archivo.');
         }
 
-        $firstLine = fgets($handle);
+        $content = $this->normalizeFileEncoding($content);
+
+        $firstLine = strtok($content, "\r\n");
+        $delimiter = $this->detectDelimiter($firstLine === false ? false : $firstLine);
+
+        $handle = fopen('php://memory', 'r+');
+        fwrite($handle, $content);
         rewind($handle);
-        $delimiter = $this->detectDelimiter($firstLine);
 
         $rows = [];
         $header = null;
@@ -95,6 +100,33 @@ class InscripcionCsvImporter
         fclose($handle);
 
         return $rows;
+    }
+
+    /**
+     * Normaliza el contenido del archivo a UTF-8. Soporta:
+     *  - UTF-16 LE/BE con BOM (export "Unicode Text" de Excel).
+     *  - UTF-8 con BOM.
+     *  - Windows-1252 / ISO-8859-1.
+     */
+    public function normalizeFileEncoding(string $content): string
+    {
+        if (str_starts_with($content, "\xFF\xFE")) {
+            return mb_convert_encoding(substr($content, 2), 'UTF-8', 'UTF-16LE');
+        }
+
+        if (str_starts_with($content, "\xFE\xFF")) {
+            return mb_convert_encoding(substr($content, 2), 'UTF-8', 'UTF-16BE');
+        }
+
+        if (str_starts_with($content, "\xEF\xBB\xBF")) {
+            return substr($content, 3);
+        }
+
+        if (! mb_check_encoding($content, 'UTF-8')) {
+            return mb_convert_encoding($content, 'UTF-8', 'Windows-1252');
+        }
+
+        return $content;
     }
 
     protected function detectDelimiter(string|false $firstLine): string
@@ -167,7 +199,12 @@ class InscripcionCsvImporter
 
         foreach ($rows as $row) {
             $ciOriginal = trim((string) ($row['ci_estudiant'] ?? ''));
-            $ci = $this->normalizeCi($ciOriginal);
+            // Los CI marcados como generados (filas sin cédula) conservan su
+            // formato alfanumérico; el resto se normaliza a dígitos.
+            $ciGenerated = ! empty($row['ci_generated']);
+            $ci = $ciGenerated
+                ? $this->normalizeGeneratedCi($ciOriginal)
+                : $this->normalizeCi($ciOriginal);
             $lastname = trim((string) ($row['lastname'] ?? ''));
             $name = trim((string) ($row['name'] ?? ''));
             $gradoName = trim((string) ($row['grado'] ?? ''));
@@ -177,6 +214,7 @@ class InscripcionCsvImporter
                 'line' => $row['_line'] ?? null,
                 'ci' => $ci,
                 'ci_original' => $ciOriginal,
+                'ci_generated' => $ciGenerated,
                 'lastname' => $lastname,
                 'name' => $name,
                 'grado' => $gradoName,
@@ -313,9 +351,14 @@ class InscripcionCsvImporter
 
             try {
                 DB::transaction(function () use ($item, $options, $planPagoId, $representantId, $updateAcademic, $updateNames, $note, &$report) {
-                    $estudiant = $item['estudiant_id']
-                        ? Estudiant::find($item['estudiant_id'])
-                        : $this->findEstudiantByCi((string) $item['ci']);
+                    if ($item['estudiant_id']) {
+                        $estudiant = Estudiant::find($item['estudiant_id']);
+                    } elseif (! empty($item['ci_generated'])) {
+                        // Los CI generados se conservan tal cual: búsqueda exacta.
+                        $estudiant = Estudiant::where('ci_estudiant', (string) $item['ci'])->first();
+                    } else {
+                        $estudiant = $this->findEstudiantByCi((string) $item['ci']);
+                    }
 
                     if (! $estudiant) {
                         $estudiant = Estudiant::create([
@@ -590,6 +633,18 @@ class InscripcionCsvImporter
         $digits = preg_replace('/\D+/', '', $ci);
 
         return $digits !== '' ? $digits : mb_strtoupper($ci);
+    }
+
+    /**
+     * Normaliza un CI generado (fila sin cédula real): conserva caracteres
+     * alfanuméricos en mayúsculas y descarta separadores/espacios.
+     */
+    public function normalizeGeneratedCi(string $ci): string
+    {
+        $ci = mb_strtoupper(trim($ci));
+        $ci = preg_replace('/[^A-Z0-9]+/', '', $ci);
+
+        return $ci ?? '';
     }
 
     public function normalizeText(string $value): string

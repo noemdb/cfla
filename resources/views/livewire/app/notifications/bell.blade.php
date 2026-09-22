@@ -1,4 +1,4 @@
-<div x-data="{ open: false }" wire:poll.30s="reconcile" class="relative">
+<div x-data="{ open: false }" @click.outside="open = false" wire:poll.30s="reconcile" class="relative">
     {{-- Botón campana --}}
     <button type="button"
             @click="open = !open; $wire.reconcile()"

@@ -162,6 +162,39 @@ class InscripcionCsvImporterTest extends TestCase
     }
 
     /** @test */
+    public function it_converts_utf16_le_with_bom(): void
+    {
+        $content = "\xFF\xFE".mb_convert_encoding(
+            "ci_estudiant,lastname,name,grado,seccion\n123,PER,ANA,GRADO,A\n",
+            'UTF-16LE',
+            'UTF-8'
+        );
+        $path = $this->writeCsv($content);
+
+        $rows = $this->importer->parse($path);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('123', $rows[0]['ci_estudiant']);
+        $this->assertSame('A', $rows[0]['seccion']);
+    }
+
+    /** @test */
+    public function it_converts_utf16_be_with_bom(): void
+    {
+        $content = "\xFE\xFF".mb_convert_encoding(
+            "ci_estudiant,lastname,name,grado,seccion\n123,PER,ANA,GRADO,A\n",
+            'UTF-16BE',
+            'UTF-8'
+        );
+        $path = $this->writeCsv($content);
+
+        $rows = $this->importer->parse($path);
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('123', $rows[0]['ci_estudiant']);
+    }
+
+    /** @test */
     public function it_maps_spanish_header(): void
     {
         $path = $this->writeCsv("cédula,apellido,nombre,grado,sección\n123,PER,ANA,GRADO,A\n");

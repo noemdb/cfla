@@ -722,7 +722,14 @@
 
     {{-- ===== DIALOG: Importar Inscripciones desde CSV ===== --}}
     <x-dialog id="csv-import" title="Importar Inscripciones desde CSV" width="4xl" blur="lg">
-        <div class="text-left space-y-5">
+        <div class="text-left">
+            {{-- El cuerpo se limita a la altura del viewport con scroll propio para que
+                 el estado y la vista previa (debajo de las opciones) siempre queden
+                 accesibles; los botones de acción permanecen visibles fuera del scroll. --}}
+            <div class="space-y-5 overflow-y-auto custom-scrollbar pr-1"
+                 style="max-height: 62vh"
+                 x-ref="csvImportBody"
+                 x-on:inscripcion-import-preview-ready.window="$nextTick(() => { const el = $refs.csvImportBody && $refs.csvImportBody.querySelector('[data-import-result]'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); })">
 
             {{-- Formato esperado --}}
             <div class="rounded-lg bg-white/5 border border-white/10 px-4 py-3">
@@ -737,9 +744,26 @@
             {{-- Archivo --}}
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Archivo CSV</label>
-                <div @click="$refs.csvInput.click()"
-                     class="relative cursor-pointer rounded-lg border-2 border-dashed border-white/10 hover:border-amber-500/40 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-200 px-4 py-5">
-                    <input type="file" wire:model="importCsvFile" accept=".csv,text/csv" x-ref="csvInput" class="hidden">
+                <label
+                    x-data="{ dragging: false }"
+                    x-init="console.log('[csv] dropzone listo · input=', !!$refs.csvInput, '· livewire=', !!window.Livewire)"
+                    x-on:click="console.log('[csv] click en dropzone')"
+                    x-on:dragover.prevent="dragging = true"
+                    x-on:dragleave.prevent="dragging = false"
+                    x-on:drop.prevent="
+                        dragging = false;
+                        const input = $refs.csvInput;
+                        if ($event.dataTransfer && $event.dataTransfer.files.length) {
+                            input.files = $event.dataTransfer.files;
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    "
+                    :class="dragging
+                        ? 'border-amber-500/60 bg-amber-500/5'
+                        : 'border-white/10 hover:border-amber-500/40 bg-gray-800/30 hover:bg-gray-800/50'"
+                    class="relative block cursor-pointer rounded-lg border-2 border-dashed transition-all duration-200 px-4 py-5">
+                    <input type="file" wire:model="importCsvFile" accept=".csv,text/csv" x-ref="csvInput" class="sr-only"
+                        x-on:change="console.log('[csv] input change · files=', $event.target.files.length)">
 
                     <div wire:loading wire:target="importCsvFile" class="flex flex-col items-center gap-2">
                         <svg class="w-7 h-7 animate-spin text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -771,7 +795,7 @@
                             </div>
                         @endif
                     </div>
-                </div>
+                </label>
                 @error('importCsvFile') <p class="text-[10px] text-red-400 mt-2">{{ $message }}</p> @enderror
             </div>
 
@@ -865,6 +889,10 @@
             </div>
 
             {{-- Estado --}}
+            @if($importStatus || !empty($importPreview))
+                <div data-import-result class="space-y-5">
+            @endif
+
             @if($importStatus)
                 <div class="px-4 py-2 rounded-lg text-xs font-medium
                     {{ $importStatusType === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
@@ -934,9 +962,14 @@
                     @endif
                 </div>
             @endif
+            @if($importStatus || !empty($importPreview))
+                </div>{{-- /data-import-result --}}
+            @endif
+
+            </div>{{-- /csvImportBody --}}
 
             {{-- Acciones --}}
-            <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+            <div class="flex items-center justify-end gap-3 pt-3 mt-4 border-t border-white/10">
                 <button type="button" x-on:click="close()"
                     class="px-5 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-gray-300 bg-white/5 hover:bg-white/10 border border-white/5 transition-all duration-200">
                     Cerrar

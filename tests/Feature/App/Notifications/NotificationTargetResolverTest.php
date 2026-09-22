@@ -14,7 +14,7 @@ class NotificationTargetResolverTest extends TestCase
     public function test_resuelve_url_segun_rol(): void
     {
         $resolver = app(NotificationTargetResolver::class);
-        $data = ['url' => 'https://fallback.test/monitor'];
+        $data = ['type' => 'lesson_scheduled', 'url' => 'https://fallback.test/monitor'];
 
         $cases = [
             'admin' => [
@@ -58,5 +58,46 @@ class NotificationTargetResolverTest extends TestCase
             route('app.notifications.index'),
             $resolver->resolveFor($user, [])
         );
+    }
+
+    /**
+     * Las notificaciones que no son `lesson_scheduled` conservan su URL
+     * almacenada aunque el destinatario tenga rol responsable: antes el
+     * resolver las redirigía al listado de lecciones del rol (enlace erróneo).
+     */
+    public function test_notificaciones_no_leccion_respetan_su_url_para_cualquier_rol(): void
+    {
+        $resolver = app(NotificationTargetResolver::class);
+
+        $roles = [
+            'admin' => ['is_admin' => true],
+            'planner' => ['is_planner' => true],
+            'coordinacion' => ['is_coordinacion' => true],
+            'leadership' => ['is_leadership' => true],
+            'director' => ['is_director' => true],
+        ];
+
+        foreach ($roles as $name => $state) {
+            $user = User::factory()->create($state);
+
+            $this->assertSame(
+                'https://destino.test/actividades',
+                $resolver->resolveFor($user, [
+                    'type' => 'pending_approval_leadership',
+                    'url' => 'https://destino.test/actividades',
+                ]),
+                "falló para {$name} (url)"
+            );
+
+            // Compatibilidad con notificaciones históricas que usan action_url.
+            $this->assertSame(
+                'https://destino.test/suplencias',
+                $resolver->resolveFor($user, [
+                    'event_type' => 'substitute_assigned',
+                    'action_url' => 'https://destino.test/suplencias',
+                ]),
+                "falló para {$name} (action_url)"
+            );
+        }
     }
 }

@@ -46,6 +46,13 @@ class Kernel extends ConsoleKernel
         // crecimiento proyectado de binnacle_entries justifica particionar por
         // fecha. Solo alerta; el procedimiento está documentado.
         $schedule->command('binnacle:check-growth')->weeklyOn(1, '06:15')->withoutOverlapping();
+
+        // Recordatorios diarios de planificación (06:00): aprobaciones de
+        // actividades cuya fecha inicial cae en 3 días (Jefe de Área,
+        // Coordinación y Planificación), lecciones programadas por Jefe de Área
+        // y áreas sin actividad reciente. Cada regla se agrupa como un resumen
+        // por usuario. Sin overlap para no solapar con el arranque de jornada.
+        $schedule->command('planning:daily-reminders')->dailyAt('06:00')->withoutOverlapping();
     }
 
     protected $commands = [

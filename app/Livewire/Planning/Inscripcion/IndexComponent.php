@@ -452,7 +452,7 @@ class IndexComponent extends Component
 
         if (empty($this->importRows)) {
             $this->importStatusType = 'error';
-            $this->importStatus = 'El archivo no contiene filas de datos.';
+            $this->importStatus = 'No se detectaron filas. Verifica el separador (coma, punto y coma o tabulación) y la codificación del archivo.';
             $this->reopenImportDialog();
 
             return;
@@ -504,6 +504,8 @@ class IndexComponent extends Component
             $this->importStatusType = 'error';
             $this->importStatus = 'Este archivo ya fue importado recientemente. '.$this->importStatus;
         }
+
+        $this->dispatch('inscripcion-import-preview-ready');
     }
 
     protected function importCacheKey(): string
