@@ -7,7 +7,6 @@ use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pevaluacion;
-use App\Models\app\Academy\Seccion;
 use App\Models\app\Instrument\DiagQuestion;
 use Livewire\Component;
 
@@ -16,8 +15,8 @@ class QuestionByPensum extends Component
     public ?int $pensumId = null;
     public ?int $pestudioId = null;
     public ?int $gradoId = null;
-    public ?int $seccionId = null;
     public ?int $pevaluacionId = null;
+    public ?int $grupoEstableId = null;
     public string $search = '';
     public bool $showInactive = false;
 
@@ -36,35 +35,17 @@ class QuestionByPensum extends Component
     public function updatedPestudioId(): void
     {
         $this->gradoId = null;
-        $this->seccionId = null;
         $this->pevaluacionId = null;
-        // si el pensum actual ya no pertenece al pestudio, limpiarlo
-        if ($this->pensumId && Pensum::find($this->pensumId)?->pestudio_id !== $this->pestudioId) {
-            $this->pensumId = null;
-        }
+        $this->grupoEstableId = null;
+        $this->pensumId = null;
         $this->expandedGroups = [];
     }
 
     public function updatedGradoId(): void
     {
-        $this->seccionId = null;
         $this->pevaluacionId = null;
-        if ($this->pensumId && Pensum::find($this->pensumId)?->grado_id !== $this->gradoId) {
-            $this->pensumId = null;
-        }
-        $this->expandedGroups = [];
-    }
-
-    public function updatedSeccionId(): void
-    {
-        $this->pevaluacionId = null;
-        // seccion filtra vía pevaluacion; si el pensum no tiene pevaluacion en esa sección, limpiar selección
-        if ($this->pensumId && $this->seccionId) {
-            $has = Pevaluacion::where('pensum_id', $this->pensumId)->where('seccion_id', $this->seccionId)->exists();
-            if (! $has) {
-                $this->pensumId = null;
-            }
-        }
+        $this->grupoEstableId = null;
+        $this->pensumId = null;
         $this->expandedGroups = [];
     }
 
@@ -77,7 +58,23 @@ class QuestionByPensum extends Component
                 $this->pensumId = $pev->pensum_id;
                 $this->pestudioId = $pev->pensum?->pestudio_id ?? $this->pestudioId;
                 $this->gradoId = $pev->pensum?->grado_id ?? $this->gradoId;
-                $this->seccionId = $pev->seccion_id;
+                $this->grupoEstableId = $pev->grupo_estable_id;
+            }
+        }
+        $this->expandedGroups = [];
+    }
+
+    public function updatedGrupoEstableId(): void
+    {
+        $this->pevaluacionId = null;
+        if ($this->grupoEstableId) {
+            $pev = Pevaluacion::where('grupo_estable_id', $this->grupoEstableId)
+                ->whereIn('pensum_id', \App\Models\app\Instrument\DiagQuestion::query()->select('pensum_id')->distinct()->pluck('pensum_id'))
+                ->first();
+            if ($pev) {
+                $this->pensumId = $pev->pensum_id;
+                $this->pestudioId = $pev->pensum?->pestudio_id ?? $this->pestudioId;
+                $this->gradoId = $pev->pensum?->grado_id ?? $this->gradoId;
             }
         }
         $this->expandedGroups = [];
@@ -91,16 +88,16 @@ class QuestionByPensum extends Component
         if ($this->pevaluacionId && Pevaluacion::find($this->pevaluacionId)?->pensum_id !== $this->pensumId) {
             $this->pevaluacionId = null;
         }
+        // si el grupo seleccionado ya no tiene pevaluacion en este pensum, limpiarlo
+        if ($this->grupoEstableId && ! Pevaluacion::where('pensum_id', $this->pensumId)->where('grupo_estable_id', $this->grupoEstableId)->exists()) {
+            $this->grupoEstableId = null;
+        }
         // sincroniza pestudio/grado desde el pensum elegido
         if ($this->pensumId) {
             $p = Pensum::find($this->pensumId);
             if ($p) {
                 $this->pestudioId = $p->pestudio_id;
                 $this->gradoId = $p->grado_id;
-                // seccion se mantiene si ya estaba y pertenece al grado, si no se limpia
-                if ($this->seccionId && Seccion::find($this->seccionId)?->grado_id !== $this->gradoId) {
-                    $this->seccionId = null;
-                }
             }
         }
     }
@@ -115,9 +112,64 @@ class QuestionByPensum extends Component
         $this->pensumId = null;
         $this->pestudioId = null;
         $this->gradoId = null;
-        $this->seccionId = null;
         $this->pevaluacionId = null;
+        $this->grupoEstableId = null;
         $this->expandedGroups = [];
+    }
+
+    public function deactivateFiltered(): void
+    {
+        $grupoId = $this->grupoEstableId ?? Pevaluacion::find($this->pevaluacionId)?->grupo_estable_id;
+        if (! $grupoId || ! $this->pensumId) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Seleccione un grupo estable y un pensum.']);
+            return;
+        }
+
+        $query = DiagQuestion::where('pensum_id', $this->pensumId)
+            ->when(!$this->showInactive, fn ($qq) => $qq->where('activo', true))
+            ->when($this->search !== '', fn ($qq) => $qq->where('pregunta', 'like', '%' . $this->search . '%'));
+
+        $count = (clone $query)->count();
+        if ($count === 0) {
+            $this->dispatch('notify', ['type' => 'info', 'message' => 'No hay preguntas filtradas para desactivar.']);
+            return;
+        }
+
+        $query->update(['activo' => false]);
+        $this->dispatch('notify', ['type' => 'success', 'message' => "Desactivadas {$count} pregunta(s) filtradas."]);
+    }
+
+    public function activateFiltered(): void
+    {
+        $grupoId = $this->grupoEstableId ?? Pevaluacion::find($this->pevaluacionId)?->grupo_estable_id;
+        if (! $grupoId || ! $this->pensumId) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Seleccione un grupo estable y un pensum.']);
+            return;
+        }
+
+        $query = DiagQuestion::where('pensum_id', $this->pensumId)
+            ->when($this->search !== '', fn ($qq) => $qq->where('pregunta', 'like', '%' . $this->search . '%'));
+
+        $count = (clone $query)->where('activo', false)->count();
+        if ($count === 0) {
+            $this->dispatch('notify', ['type' => 'info', 'message' => 'No hay preguntas desactivadas filtradas para activar.']);
+            return;
+        }
+
+        $query->where('activo', false)->update(['activo' => true]);
+        $this->dispatch('notify', ['type' => 'success', 'message' => "Activadas {$count} pregunta(s) filtradas."]);
+    }
+
+    public function toggleQuestion(int $questionId): void
+    {
+        $question = DiagQuestion::find($questionId);
+        if (! $question) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Pregunta no encontrada.']);
+            return;
+        }
+        $question->activo = ! (bool) $question->activo;
+        $question->save();
+        $this->dispatch('notify', ['type' => 'success', 'message' => $question->activo ? 'Pregunta activada.' : 'Pregunta desactivada.']);
     }
 
     public function toggleGroup(int $grupoKey): void
@@ -156,40 +208,18 @@ class QuestionByPensum extends Component
                 ->orderBy('pestudio_id')->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
         }
 
-        // Secciones anidadas a grado (grado->seccions) — pestudio->grados->seccions — solo activas status_active='true'
-        $seccionsOptions = collect();
-        if ($this->gradoId) {
-            $seccionsOptions = Seccion::where('grado_id', $this->gradoId)
-                ->where('status_active', 'true')
-                ->orderBy('name')->get(['id', 'name', 'grado_id']);
-        } elseif ($this->pestudioId) {
-            $gradoIds = Grado::where('pestudio_id', $this->pestudioId)->where('status_active', 'true')->pluck('id');
-            $seccionsOptions = Seccion::whereIn('grado_id', $gradoIds)->where('status_active', 'true')->orderBy('name')->get(['id', 'name', 'grado_id']);
-        } else {
-            $gradoIds = Pensum::whereIn('id', $pensumIdsWithQuestions)->pluck('grado_id')->unique();
-            $gradoIds = Grado::whereIn('id', $gradoIds)->where('status_active', 'true')->pluck('id');
-            $seccionsOptions = Seccion::whereIn('grado_id', $gradoIds)->where('status_active', 'true')->orderBy('name')->get(['id', 'name', 'grado_id']);
-        }
-
-        // Pevaluaciones (grupo_estable) anidadas: pestudio→grado→seccion→pevaluacion — solo de pensums con preguntas
+        // Pevaluaciones (grupo_estable) anidadas: pestudio→grado→pevaluacion — solo de pensums con preguntas
         $pevaluacionsOptions = Pevaluacion::with(['grupoEstable', 'pensum.asignatura', 'seccion.grado', 'profesor', 'lapso'])
             ->whereIn('pensum_id', $pensumIdsWithQuestions);
         if ($this->pestudioId) {
             $pevaluacionsOptions->whereIn('pensum_id', Pensum::where('pestudio_id', $this->pestudioId)->pluck('id'));
         }
         if ($this->gradoId) {
-            $pensumIdsGrado = Pensum::where('grado_id', $this->gradoId)->pluck('id');
-            $seccionIdsGrado = Seccion::where('grado_id', $this->gradoId)->where('status_active', 'true')->pluck('id');
-            $pevaluacionsOptions->where(function ($q) use ($pensumIdsGrado, $seccionIdsGrado) {
-                $q->whereIn('pensum_id', $pensumIdsGrado)->orWhereIn('seccion_id', $seccionIdsGrado);
-            });
-        }
-        if ($this->seccionId) {
-            $pevaluacionsOptions->where('seccion_id', $this->seccionId);
+            $pevaluacionsOptions->whereIn('pensum_id', Pensum::where('grado_id', $this->gradoId)->pluck('id'));
         }
         $pevaluacionsOptions = $pevaluacionsOptions->orderBy('grupo_estable_id')->orderBy('seccion_id')->get();
 
-        // Pensums filtrados por pestudio→grado→seccion→pevaluacion (anidados, va después de seccionId y pevaluacionId)
+        // Pensums filtrados por pestudio→grado→pevaluacion (anidados, pensum deshabilitado por defecto hasta elegir grado)
         $pensumQuery = Pensum::with(['asignatura', 'grado', 'pestudio'])
             ->whereIn('id', $pensumIdsWithQuestions);
 
@@ -198,10 +228,6 @@ class QuestionByPensum extends Component
         }
         if ($this->gradoId) {
             $pensumQuery->where('grado_id', $this->gradoId);
-        }
-        if ($this->seccionId) {
-            $pensumIdsBySeccion = Pevaluacion::where('seccion_id', $this->seccionId)->pluck('pensum_id')->unique();
-            $pensumQuery->whereIn('id', $pensumIdsBySeccion);
         }
         if ($this->pevaluacionId) {
             $pensumIdFromPev = Pevaluacion::find($this->pevaluacionId)?->pensum_id;
@@ -234,12 +260,9 @@ class QuestionByPensum extends Component
             $questions = $q->get();
             $totalQuestions = $questions->count();
 
-            // Pevaluaciones de ese pensum → agrupar por grupo_estable_id (respetando filtros anidados)
+            // Pevaluaciones de ese pensum → agrupar por grupo_estable_id (respetando pevaluacion seleccionada)
             $pevsQuery = Pevaluacion::with(['grupoEstable', 'seccion.grado', 'profesor', 'lapso'])
                 ->where('pensum_id', $this->pensumId);
-            if ($this->seccionId) {
-                $pevsQuery->where('seccion_id', $this->seccionId);
-            }
             if ($this->pevaluacionId) {
                 $pevsQuery->where('id', $this->pevaluacionId);
             }
@@ -284,7 +307,7 @@ class QuestionByPensum extends Component
                 ]);
             }
         } else {
-            // Sin filtro de pensum pero respetando pestudio→grado→seccion para el resumen
+            // Sin filtro de pensum pero respetando pestudio→grado para el resumen
             $pensumIdsFiltered = $pensumOptions->pluck('id');
             $summary = DiagQuestion::selectRaw('pensum_id, COUNT(*) as total_q, SUM(CASE WHEN activo=1 THEN 1 ELSE 0 END) as activas')
                 ->whereIn('pensum_id', $pensumIdsFiltered)
@@ -310,6 +333,9 @@ class QuestionByPensum extends Component
                 ->filter(fn ($r) => $r->pensum !== null)
                 ->values();
         }
+
+        // compatibilidad: seccionsOptions ya no se usa (eliminada), se mantiene vacía
+        $seccionsOptions = collect();
 
         return view('livewire.planning.diagnostic.question-by-pensum', [
             'pestudiosOptions' => $pestudiosOptions,

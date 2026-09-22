@@ -52,7 +52,7 @@ class IndexComponent extends Component
     public $totalDiagActive = 0;
 
     // ─── Diagnósticos sub-metrics (global KPI box) ─────────────────────
-    public $diagSessions = 0;
+    public $diagStudents = 0;
     public $diagAnswers = 0;
     public $diagPrecision = 0;
 
@@ -747,11 +747,11 @@ class IndexComponent extends Component
 
     /**
      * Métricas globales de los Diagnósticos (sin filtro de lapso):
-     * sesiones creadas, respuestas registradas y precisión media global.
+     * estudiantes únicos evaluados, respuestas registradas y precisión media global.
      */
     private function loadDiagMetrics(): void
     {
-        $this->diagSessions = DiagSession::count();
+        $this->diagStudents = DiagSession::whereNotNull('estudiant_id')->distinct('estudiant_id')->count('estudiant_id');
         $this->diagAnswers = \App\Models\app\Instrument\DiagAnswer::count();
 
         $precision = \App\Models\app\Instrument\DiagAnswer::getOverallPrecisionStats();
