@@ -49,28 +49,34 @@
                     @endforeach
                 </select>
 
-                @if($pensumId || $pestudioId || $gradoId || $pevaluacionId)
-                    <button wire:click="clearFilters"
-                        class="px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 text-xs font-bold uppercase tracking-widest transition-all shrink-0">
-                        Limpiar
-                    </button>
-                @endif
+            @if($pensumId || $pestudioId || $gradoId || $pevaluacionId || $grupoEstableId)
+                <button wire:click="clearFilters"
+                    class="px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 text-xs font-bold uppercase tracking-widest transition-all shrink-0">
+                    Limpiar
+                </button>
+            @endif
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
                 {{-- Fila 2: pevaluación + Desactivar --}}
-                <select wire:model.live="pevaluacionId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 min-h-[40px] focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 outline-none w-full sm:w-64 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                    @if(!$gradoId && !$pestudioId && !$pensumId) disabled @endif>
-                    <option value="">Pevaluación: Todas (grupo)</option>
-                    @foreach($pevaluacionsOptions as $pev)
-                        <option value="{{ $pev->id }}">
-                            [#{{ $pev->id }}] {{ $pev->grupoEstable?->code ?? 'SIN-GRUPO' }} — {{ $pev->pensum?->asignatura?->name ?? '?' }} · {{ $pev->seccion?->name ?? '?' }} · {{ $pev->profesor?->lastname ?? '?' }}
-                        </option>
+            {{-- Grupo estable — dropdown wireUI w-full con descripción por opción --}}
+            <div class="w-full shrink-0">
+                <x-select placeholder="Grupo: Todos" wire:model.live="grupoEstableId" searchable :disabled="!$gradoId && !$pestudioId && !$pensumId">
+                    @foreach($grupoEstablesOptions as $g)
+                        @php
+                            $pevDesc = $pevaluacionsOptions->firstWhere('grupo_estable_id', $g->id);
+                            $asigDesc = $pevDesc?->pensum?->asignatura?->name ?? '?';
+                            $gradoSecDesc = $pevDesc?->seccion ? (($pevDesc->seccion->grado?->name ?? '?').'/'.$pevDesc->seccion->name) : ($pevDesc?->pensum?->grado?->name ?? '?');
+                            $profDesc = $pevDesc?->profesor ? ($pevDesc->profesor->lastname.' '.$pevDesc->profesor->name) : '?';
+                            $desc = $asigDesc.' · '.$gradoSecDesc.' · '.$profDesc;
+                        @endphp
+                        <x-select.option :label="$g->code.' — '.$g->name" :value="$g->id" :description="$desc" />
                     @endforeach
-                </select>
+                </x-select>
+            </div>
 
-                @php $selectedPev = $pevaluacionId ? $pevaluacionsOptions->firstWhere('id', $pevaluacionId) : null; $hasGrupo = $selectedPev && $selectedPev->grupo_estable_id; @endphp
+            {{-- Desactivar filtradas — deshabilitado por defecto, solo habilita con grupo estable --}}
+            @php $hasGrupo = $grupoEstableId !== null; $selectedGrupo = $grupoEstableId ? $grupoEstablesOptions->firstWhere('id', $grupoEstableId) : null; @endphp
                 <div x-data="{ open: false }" class="shrink-0">
                     <button type="button" @click="if ({{ $hasGrupo ? 'true' : 'false' }}) open = true"
                         @if(!$hasGrupo) disabled @endif
@@ -78,19 +84,21 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 18M5.636 5.636L6 6"/></svg>
                         Desactivar
                     </button>
-                    <div x-show="open" x-cloak x-transition.opacity class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div @click="open = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-                        <div class="relative bg-gray-900 border border-white/10 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
-                            <div class="px-5 py-4 border-b border-white/5">
-                                <h3 class="text-sm font-bold text-white">¿Desactivar preguntas filtradas?</h3>
-                                <p class="text-xs text-gray-400 mt-1">Se desactivarán todas las preguntas de <span class="text-white font-medium">{{ $selectedPev?->grupoEstable?->code ?? '—' }}</span> para el pensum seleccionado. Esta acción puede revertirse activándolas de nuevo.</p>
-                            </div>
-                            <div class="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-end gap-2">
-                                <button @click="open = false" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all">Cancelar</button>
-                                <button @click="open = false; $wire.deactivateFiltered()" class="px-4 py-2 rounded-lg text-xs font-bold bg-red-500 hover:bg-red-600 text-white transition-all">Sí, desactivar</button>
+                    <template x-teleport="body">
+                        <div x-show="open" x-cloak x-transition.opacity class="fixed inset-0 z-[999] flex items-center justify-center p-4">
+                            <div @click="open = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                            <div class="relative bg-gray-900 border border-white/10 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+                                <div class="px-5 py-4 border-b border-white/5">
+                                    <h3 class="text-sm font-bold text-white">¿Desactivar preguntas filtradas?</h3>
+                                    <p class="text-xs text-gray-400 mt-1">Se desactivarán todas las preguntas de <span class="text-white font-medium">{{ $selectedGrupo?->code ?? '—' }}</span> para el pensum seleccionado. Esta acción puede revertirse activándolas de nuevo.</p>
+                                </div>
+                                <div class="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-end gap-2">
+                                    <button @click="open = false" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all">Cancelar</button>
+                                    <button @click="open = false; $wire.deactivateFiltered()" class="px-4 py-2 rounded-lg text-xs font-bold bg-red-500 hover:bg-red-600 text-white transition-all">Sí, desactivar</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
 
                 <div x-data="{ openAct: false }" class="shrink-0">
@@ -100,19 +108,21 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Activar
                     </button>
-                    <div x-show="openAct" x-cloak x-transition.opacity class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div @click="openAct = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-                        <div class="relative bg-gray-900 border border-white/10 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
-                            <div class="px-5 py-4 border-b border-white/5">
-                                <h3 class="text-sm font-bold text-white">¿Activar preguntas filtradas?</h3>
-                                <p class="text-xs text-gray-400 mt-1">Se activarán todas las preguntas de <span class="text-white font-medium">{{ $selectedPev?->grupoEstable?->code ?? '—' }}</span> para el pensum seleccionado.</p>
-                            </div>
-                            <div class="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-end gap-2">
-                                <button @click="openAct = false" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all">Cancelar</button>
-                                <button @click="openAct = false; $wire.activateFiltered()" class="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-all">Sí, activar</button>
+                    <template x-teleport="body">
+                        <div x-show="openAct" x-cloak x-transition.opacity class="fixed inset-0 z-[999] flex items-center justify-center p-4">
+                            <div @click="openAct = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                            <div class="relative bg-gray-900 border border-white/10 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+                                <div class="px-5 py-4 border-b border-white/5">
+                                    <h3 class="text-sm font-bold text-white">¿Activar preguntas filtradas?</h3>
+                                    <p class="text-xs text-gray-400 mt-1">Se activarán todas las preguntas de <span class="text-white font-medium">{{ $selectedGrupo?->code ?? '—' }}</span> para el pensum seleccionado.</p>
+                                </div>
+                                <div class="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-end gap-2">
+                                    <button @click="openAct = false" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all">Cancelar</button>
+                                    <button @click="openAct = false; $wire.activateFiltered()" class="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-all">Sí, activar</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -228,8 +238,7 @@
                                             @if($grupo)
                                                 {{ $grupo->code }} — {{ $grupo->name }}
                                             @else
-                                                Sin grupo estable
-                                                <span class="text-gray-500 font-normal">(pevaluacion.grupo_estable_id IS NULL)</span>
+                                                Sin grupo asignado
                                             @endif
                                         </p>
                                         <p class="text-[11px] text-gray-400">
@@ -251,8 +260,8 @@
                             @if($g->isExpanded)
                                 {{-- Pevaluaciones del grupo --}}
                                 @if($g->pevs->isNotEmpty())
-                                    <div class="px-4 pb-2">
-                                        <div class="flex flex-wrap gap-1.5">
+                                    <div class="px-4 pb-2 flex flex-wrap items-center gap-2">
+                                        <div class="flex flex-wrap gap-1.5 flex-1">
                                             @foreach($g->pevs as $pev)
                                                 <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/5 rounded-full text-[11px] text-gray-300">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -263,6 +272,42 @@
                                                     <span class="text-gray-400">{{ $pev->lapso?->name ?? '—' }}</span>
                                                 </span>
                                             @endforeach
+                                        </div>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <div x-data="{ openActG: false }">
+                                                <button type="button" @click="openActG = true" title="Activar preguntas de este grupo" class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-colors">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                </button>
+                                                <template x-teleport="body">
+                                                    <div x-show="openActG" x-cloak x-transition.opacity class="fixed inset-0 z-[999] flex items-center justify-center p-4">
+                                                        <div @click="openActG = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                                                        <div class="relative bg-gray-900 border border-white/10 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+                                                            <div class="px-5 py-4 border-b border-white/5"><h3 class="text-sm font-bold text-white">¿Activar preguntas de este grupo?</h3><p class="text-xs text-gray-400 mt-1">Se activarán las preguntas asociadas a <span class="text-white font-medium">{{ $grupo?->code ?? 'Sin grupo' }}</span>.</p></div>
+                                                            <div class="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-end gap-2">
+                                                                <button @click="openActG = false" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Cancelar</button>
+                                                                <button @click="openActG = false; $wire.activateGroup({{ $g->key }})" class="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white">Sí, activar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div x-data="{ openDesG: false }">
+                                                <button type="button" @click="openDesG = true" title="Desactivar preguntas de este grupo" class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 18M5.636 5.636L6 6"/></svg>
+                                                </button>
+                                                <template x-teleport="body">
+                                                    <div x-show="openDesG" x-cloak x-transition.opacity class="fixed inset-0 z-[999] flex items-center justify-center p-4">
+                                                        <div @click="openDesG = false" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                                                        <div class="relative bg-gray-900 border border-white/10 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+                                                            <div class="px-5 py-4 border-b border-white/5"><h3 class="text-sm font-bold text-white">¿Desactivar preguntas de este grupo?</h3><p class="text-xs text-gray-400 mt-1">Se desactivarán las preguntas asociadas a <span class="text-white font-medium">{{ $grupo?->code ?? 'Sin grupo' }}</span>.</p></div>
+                                                            <div class="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-end gap-2">
+                                                                <button @click="openDesG = false" class="px-4 py-2 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Cancelar</button>
+                                                                <button @click="openDesG = false; $wire.deactivateGroup({{ $g->key }})" class="px-4 py-2 rounded-lg text-xs font-bold bg-red-500 hover:bg-red-600 text-white">Sí, desactivar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
                                 @else
@@ -295,15 +340,24 @@
                                                 </thead>
                                                 <tbody class="divide-y divide-white/5">
                                                     @foreach($g->questions as $q)
-                                                        <tr class="hover:bg-white/[0.02] transition-colors">
-                                                            <td class="px-3 py-2 text-xs font-mono text-gray-400">{{ $q->orden ?? $loop->iteration }}</td>
+                                                        <tr class="hover:bg-white/[0.02] transition-colors {{ $q->activo ? 'bg-emerald-500/[0.03] border-l-2 border-l-emerald-500/40' : 'opacity-60 bg-white/[0.01]' }}">
+                                                            <td class="px-3 py-2 text-xs font-mono {{ $q->activo ? 'text-emerald-400' : 'text-gray-500' }}">{{ $q->orden ?? $loop->iteration }}</td>
                                                             <td class="px-3 py-2">
-                                                                <p class="text-xs text-white leading-relaxed line-clamp-2" title="{{ $q->pregunta }}">{{ $q->pregunta }}</p>
-                                                                <span class="text-[10px] text-gray-500">
-                                                                    @if($q->competency) {{ $q->competency->name }} @endif
-                                                                    @if($q->indicator) · {{ $q->indicator->name }} @endif
-                                                                    @if($q->diagMain) · <span class="text-cyan-400">{{ $q->diagMain->name }}</span> @endif
-                                                                </span>
+                                                                <div class="flex items-start gap-1.5">
+                                                                    @if($q->activo)
+                                                                        <span class="mt-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)] shrink-0" title="Activa"></span>
+                                                                    @else
+                                                                        <span class="mt-0.5 w-1.5 h-1.5 rounded-full bg-gray-600 shrink-0" title="Inactiva"></span>
+                                                                    @endif
+                                                                    <div class="min-w-0">
+                                                                        <p class="text-xs {{ $q->activo ? 'text-white' : 'text-gray-400' }} leading-relaxed line-clamp-2" title="{{ $q->pregunta }}">{{ $q->pregunta }}</p>
+                                                                        <span class="text-[10px] {{ $q->activo ? 'text-gray-400' : 'text-gray-600' }}">
+                                                                            @if($q->competency) {{ $q->competency->name }} @endif
+                                                                            @if($q->indicator) · {{ $q->indicator->name }} @endif
+                                                                            @if($q->diagMain) · <span class="{{ $q->activo ? 'text-cyan-400' : 'text-gray-500' }}">{{ $q->diagMain->name }}</span> @endif
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                             <td class="px-3 py-2 text-center">
                                                                 <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border

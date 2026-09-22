@@ -18,7 +18,7 @@ class QuestionByPensum extends Component
     public ?int $pevaluacionId = null;
     public ?int $grupoEstableId = null;
     public string $search = '';
-    public bool $showInactive = false;
+    public bool $showInactive = true;
 
     /** @var array<int,bool> grupos expandidos key = grupo_estable_id (0=sin grupo) */
     public array $expandedGroups = [];
@@ -160,6 +160,41 @@ class QuestionByPensum extends Component
         $this->dispatch('notify', ['type' => 'success', 'message' => "Activadas {$count} pregunta(s) filtradas."]);
     }
 
+    public function deactivateGroup(int $grupoKey): void
+    {
+        if (! $this->pensumId) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Seleccione un pensum.']);
+            return;
+        }
+        $query = DiagQuestion::where('pensum_id', $this->pensumId)
+            ->when(!$this->showInactive, fn ($qq) => $qq->where('activo', true))
+            ->when($this->search !== '', fn ($qq) => $qq->where('pregunta', 'like', '%' . $this->search . '%'));
+        $count = (clone $query)->count();
+        if ($count === 0) {
+            $this->dispatch('notify', ['type' => 'info', 'message' => 'No hay preguntas para desactivar en este grupo.']);
+            return;
+        }
+        $query->update(['activo' => false]);
+        $this->dispatch('notify', ['type' => 'success', 'message' => "Desactivadas {$count} pregunta(s) del grupo."]);
+    }
+
+    public function activateGroup(int $grupoKey): void
+    {
+        if (! $this->pensumId) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Seleccione un pensum.']);
+            return;
+        }
+        $query = DiagQuestion::where('pensum_id', $this->pensumId)
+            ->when($this->search !== '', fn ($qq) => $qq->where('pregunta', 'like', '%' . $this->search . '%'));
+        $count = (clone $query)->where('activo', false)->count();
+        if ($count === 0) {
+            $this->dispatch('notify', ['type' => 'info', 'message' => 'No hay preguntas desactivadas para activar en este grupo.']);
+            return;
+        }
+        $query->where('activo', false)->update(['activo' => true]);
+        $this->dispatch('notify', ['type' => 'success', 'message' => "Activadas {$count} pregunta(s) del grupo."]);
+    }
+
     public function toggleQuestion(int $questionId): void
     {
         $question = DiagQuestion::find($questionId);
@@ -208,9 +243,10 @@ class QuestionByPensum extends Component
                 ->orderBy('pestudio_id')->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
         }
 
-        // Pevaluaciones (grupo_estable) anidadas: pestudio→grado→pevaluacion — solo de pensums con preguntas
+        // Pevaluaciones (grupo_estable) anidadas: pestudio→grado→pevaluacion — solo de pensums con preguntas y solo con grupo NOT NULL
         $pevaluacionsOptions = Pevaluacion::with(['grupoEstable', 'pensum.asignatura', 'seccion.grado', 'profesor', 'lapso'])
-            ->whereIn('pensum_id', $pensumIdsWithQuestions);
+            ->whereIn('pensum_id', $pensumIdsWithQuestions)
+            ->whereNotNull('grupo_estable_id');
         if ($this->pestudioId) {
             $pevaluacionsOptions->whereIn('pensum_id', Pensum::where('pestudio_id', $this->pestudioId)->pluck('id'));
         }
@@ -219,7 +255,19 @@ class QuestionByPensum extends Component
         }
         $pevaluacionsOptions = $pevaluacionsOptions->orderBy('grupo_estable_id')->orderBy('seccion_id')->get();
 
-        // Pensums filtrados por pestudio→grado→pevaluacion (anidados, pensum deshabilitado por defecto hasta elegir grado)
+        // Grupos estables distintos para el dropdown wireUI — con profesor, asignatura y grado/sección del primer pevaluación del grupo
+        $grupoEstablesOptions = GrupoEstable::whereIn('id', $pevaluacionsOptions->pluck('grupo_estable_id')->unique()->filter())
+            ->orderBy('code')->get(['id', 'code', 'name']);
+        $grupoSelectOptions = $grupoEstablesOptions->mapWithKeys(function ($g) use ($pevaluacionsOptions) {
+            $pev = $pevaluacionsOptions->firstWhere('grupo_estable_id', $g->id);
+            $asig = $pev?->pensum?->asignatura?->name ?? '?';
+            $gradoSec = $pev?->seccion ? (($pev->seccion->grado?->name ?? '?').'/'.$pev->seccion->name) : ($pev?->pensum?->grado?->name ?? '?');
+            $prof = $pev?->profesor ? ($pev->profesor->lastname.' '.$pev->profesor->name) : '?';
+            $label = $g->code.' — '.$g->name.' · '.$asig.' · '.$gradoSec.' · '.$prof;
+            return [$g->id => $label];
+        })->toArray();
+
+        // Pensums filtrados por pestudio→grado→pevaluacion/grupo (anidados, pensum deshabilitado por defecto hasta elegir grado)
         $pensumQuery = Pensum::with(['asignatura', 'grado', 'pestudio'])
             ->whereIn('id', $pensumIdsWithQuestions);
 
@@ -234,6 +282,10 @@ class QuestionByPensum extends Component
             if ($pensumIdFromPev) {
                 $pensumQuery->where('id', $pensumIdFromPev);
             }
+        }
+        if ($this->grupoEstableId) {
+            $pensumIdsByGrupo = Pevaluacion::where('grupo_estable_id', $this->grupoEstableId)->pluck('pensum_id')->unique();
+            $pensumQuery->whereIn('id', $pensumIdsByGrupo);
         }
 
         $pensumOptions = $pensumQuery->orderBy('pestudio_id')->orderBy('grado_id')->get()
@@ -260,11 +312,14 @@ class QuestionByPensum extends Component
             $questions = $q->get();
             $totalQuestions = $questions->count();
 
-            // Pevaluaciones de ese pensum → agrupar por grupo_estable_id (respetando pevaluacion seleccionada)
+            // Pevaluaciones de ese pensum → agrupar por grupo_estable_id (respetando pevaluacion/grupo seleccionados)
             $pevsQuery = Pevaluacion::with(['grupoEstable', 'seccion.grado', 'profesor', 'lapso'])
                 ->where('pensum_id', $this->pensumId);
             if ($this->pevaluacionId) {
                 $pevsQuery->where('id', $this->pevaluacionId);
+            }
+            if ($this->grupoEstableId) {
+                $pevsQuery->where('grupo_estable_id', $this->grupoEstableId);
             }
             $pevs = $pevsQuery->orderBy('lapso_id')->orderBy('seccion_id')->get();
 
@@ -342,6 +397,8 @@ class QuestionByPensum extends Component
             'gradosOptions' => $gradosOptions,
             'seccionsOptions' => $seccionsOptions,
             'pevaluacionsOptions' => $pevaluacionsOptions,
+            'grupoEstablesOptions' => $grupoEstablesOptions,
+            'grupoSelectOptions' => $grupoSelectOptions,
             'pensumOptions' => $pensumOptions,
             'selectedPensum' => $selectedPensum,
             'questions' => $questions,

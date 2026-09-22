@@ -146,6 +146,7 @@ Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', '
     Route::middleware(['isAdmin'])->group(function () {
         Route::get('logs', \App\Livewire\Admin\Logs\IndexComponent::class)->name('logs');
         Route::get('database/backup', [\App\Http\Controllers\Admin\DatabaseController::class, 'downloadBackup'])->name('database.backup');
+        Route::get('notifications', \App\Livewire\Admin\Notifications\Index::class)->name('notifications.index');
     });
 
     // Matriz RBAC BINNACLE-001 §6:
