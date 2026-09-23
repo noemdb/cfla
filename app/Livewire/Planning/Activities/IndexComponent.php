@@ -65,7 +65,8 @@ class IndexComponent extends Component
             ->orderBy('order')
             ->get();
         $this->list_pestudio = $this->pestudios->pluck('name', 'id');
-        $this->list_grado = Grado::active('true')->pluck('name', 'id');
+        // Estado anidado: sin pestudio seleccionado grado y sección desactivados
+        $this->list_grado = collect();
         $this->list_seccion = collect();
         $this->list_pensum = collect();
         $this->setProfesorLists();
@@ -119,14 +120,17 @@ class IndexComponent extends Component
         if ($value) {
             $this->list_grado = Grado::where('pestudio_id', $value)
                 ->where('status_active', 'true')
+                ->orderBy('order')
                 ->pluck('name', 'id');
             $this->list_profesors = Profesor::list_profesors_pestudio($value);
         } else {
-            $this->list_grado = Grado::active('true')->pluck('name', 'id');
+            $this->list_grado = collect();
+            $this->setProfesorLists();
         }
         $this->grado_id = null;
         $this->seccion_id = null;
         $this->list_seccion = collect();
+        $this->list_pensum = collect();
     }
 
     public function updatedGradoId($value)

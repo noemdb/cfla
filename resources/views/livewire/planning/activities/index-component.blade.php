@@ -36,24 +36,44 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Grado/Año</label>
-                <select wire:model.live="grado_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($list_grado as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$pestudio_id ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500 dark:text-gray-500' }}">
+                    Grado/Año
+                    @if(!$pestudio_id)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Plan</span>
+                    @endif
+                </label>
+                <select wire:model.live="grado_id" @disabled(!$pestudio_id)
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed {{ !$pestudio_id ? 'opacity-60 cursor-not-allowed' : '' }}">
+                    @if(!$pestudio_id)
+                        <option value="">Seleccione Plan Estudio primero</option>
+                    @else
+                        <option value="">Todos</option>
+                        @foreach($list_grado as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Sección</label>
-                <select wire:model.live="seccion_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todas</option>
-                    @foreach($list_seccion as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$grado_id ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500 dark:text-gray-500' }}">
+                    Sección
+                    @if(!$pestudio_id)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— requiere Plan</span>
+                    @elseif(!$grado_id)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Grado</span>
+                    @endif
+                </label>
+                <select wire:model.live="seccion_id" @disabled(!$grado_id)
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed {{ !$grado_id ? 'opacity-60 cursor-not-allowed' : '' }}">
+                    @if(!$grado_id)
+                        <option value="">{{ !$pestudio_id ? 'Seleccione Plan Estudio' : 'Seleccione Grado primero' }}</option>
+                    @else
+                        <option value="">Todas</option>
+                        @foreach($list_seccion as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
@@ -1144,4 +1164,14 @@
         :publish-publish-at="$publishPublishAt" />
 
     @include('leadership.help-activities')
+
+    <!-- Floating Loading State — anidado filters (transparencia backdrop-blur) -->
+    <div wire:loading.delay
+         class="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 px-5 py-3 bg-white/75 dark:bg-gray-900/55 backdrop-blur-md border border-gray-200/60 dark:border-white/10 rounded-full shadow-xl shadow-black/10 dark:shadow-black/30">
+        <svg class="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-widest text-gray-700 dark:text-gray-200">Cargando ...</span>
+    </div>
 </div>

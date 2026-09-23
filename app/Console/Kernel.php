@@ -53,6 +53,11 @@ class Kernel extends ConsoleKernel
         // y áreas sin actividad reciente. Cada regla se agrupa como un resumen
         // por usuario. Sin overlap para no solapar con el arranque de jornada.
         $schedule->command('planning:daily-reminders')->dailyAt('06:00')->withoutOverlapping();
+
+        // Recordatorio semanal a profesores sin actividades: todos los lunes
+        // a las 06:00 se notifica a los profesores (is_profesor) activos que no
+        // tienen al menos una actividad en sus pevaluaciones del lapso vigente.
+        $schedule->command('professors:notify-missing-activities')->weeklyOn(1, '06:00')->withoutOverlapping();
     }
 
     protected $commands = [

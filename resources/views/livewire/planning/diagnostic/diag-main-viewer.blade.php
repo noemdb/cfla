@@ -64,22 +64,48 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
                         <p class="text-lg font-extrabold text-cyan-400">{{ $questionsCount ?? $selected->questions_count ?? 0 }}</p>
                         <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preguntas</p>
                     </div>
                     <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
-                        <p class="text-lg font-extrabold text-emerald-400">{{ $sessionsCount ?? $selected->sessions_count ?? 0 }}</p>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Sesiones</p>
+                        <p class="text-lg font-extrabold text-sky-400">{{ $pensumsWithAnswersCount ?? 0 }}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">A.Formación c/ resp.</p>
                     </div>
                     <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
-                        <p class="text-lg font-extrabold text-amber-400">{{ $completedSessions ?? 0 }}</p>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Completadas</p>
+                        <p class="text-lg font-extrabold text-indigo-400">{{ $questionsWithAnswersCount ?? 0 }}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preg. c/ resp.</p>
+                    </div>
+                    <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                        <p class="text-lg font-extrabold text-amber-400">{{ $totalAnswersCount ?? 0 }}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Respuestas</p>
                     </div>
                     <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
                         <p class="text-lg font-extrabold text-purple-400">{{ $studentsEvaluated ?? 0 }}</p>
                         <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Estudiantes</p>
+                    </div>
+                    <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                        @if($completionRate !== null)
+                            <p class="text-lg font-extrabold {{ $completionRate >= 80 ? 'text-emerald-400' : ($completionRate >= 50 ? 'text-amber-400' : 'text-red-400') }}">{{ $completionRate }}%</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">% Completitud</p>
+                            <p class="text-[10px] text-gray-500">{{ $completedSessions ?? 0 }} / {{ $sessionsCount ?? 0 }}</p>
+                        @else
+                            <p class="text-lg font-extrabold text-gray-500">—</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">% Completitud</p>
+                            <p class="text-[10px] text-gray-600">Sin datos</p>
+                        @endif
+                    </div>
+                    <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                        @if($abandonRate !== null)
+                            <p class="text-lg font-extrabold {{ $abandonRate <= 20 ? 'text-emerald-400' : ($abandonRate <= 40 ? 'text-amber-400' : 'text-red-400') }}">{{ $abandonRate }}%</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Tasa Abandono</p>
+                            <p class="text-[10px] text-gray-500">{{ ($sessionsCount ?? 0) - ($completedSessions ?? 0) }} / {{ $sessionsCount ?? 0 }}</p>
+                        @else
+                            <p class="text-lg font-extrabold text-gray-500">—</p>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Tasa Abandono</p>
+                            <p class="text-[10px] text-gray-600">Sin datos</p>
+                        @endif
                     </div>
                     <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
                         @if($precision !== null)
@@ -249,4 +275,15 @@
             <p class="text-xs text-gray-500">Selecciona un instrumento para ver su información asociada.</p>
         </div>
     @endif
+
+    {{-- State loading — btn flotante abajo a la derecha con transparencia --}}
+    <div wire:loading class="fixed bottom-6 right-6 z-50">
+        <div class="flex items-center gap-2 rounded-full bg-gray-900/70 px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-white backdrop-blur-md border border-white/10 shadow-xl shadow-black/30">
+            <svg class="h-4 w-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span>Cargando ...</span>
+        </div>
+    </div>
 </div>

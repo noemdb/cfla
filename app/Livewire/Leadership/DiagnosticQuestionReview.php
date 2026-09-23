@@ -394,10 +394,31 @@ class DiagnosticQuestionReview extends Component
 
     private function scopedQuery()
     {
-        $service = new LeadershipService(Auth::user());
+        $user = Auth::user();
         $query = DiagQuestion::query()->with(['pensum.asignatura', 'pensum.grado.pestudio', 'diagMain', 'competency', 'indicator', 'options']);
 
-        return $service->scopeDiagQuestions($query);
+        // Strict is_leadership (raw, sin bypass admin) — cifras asociadas a pensumId vía AreaConocimiento.leader_id = userId
+        $strictPensumIds = $this->getStrictLeadershipPensumIds($user);
+        if ($strictPensumIds->isEmpty()) {
+            return $query->whereRaw('1=0');
+        }
+
+        return $query->whereIn('pensum_id', $strictPensumIds);
+    }
+
+    private function getStrictLeadershipPensumIds($user): \Illuminate\Support\Collection
+    {
+        $areaIds = AreaConocimiento::where('leader_id', $user->id)->pluck('id');
+        if ($areaIds->isEmpty()) {
+            return collect();
+        }
+
+        return CampoConocimiento::whereIn('area_conocimiento_id', $areaIds)
+            ->whereNotNull('pensum_id')
+            ->pluck('pensum_id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
     }
 
     private function assertCanReview(DiagQuestion $q): void
@@ -419,10 +440,11 @@ class DiagnosticQuestionReview extends Component
         $user = Auth::user();
         $service = new LeadershipService($user);
 
+        // Strict is_leadership: solo áreas donde leader_id = userId (sin fallback admin)
         $areas = AreaConocimiento::where('leader_id', $user->id)->orderBy('name')->get();
-        if ($areas->isEmpty() && $service->isUnrestricted()) {
-            $areas = AreaConocimiento::orderBy('name')->get();
-        }
+
+        // Pensums estrictos vía AreaConocimiento.leader_id = userId
+        $strictPensumIds = $this->getStrictLeadershipPensumIds($user);
 
         // Inicialización para evitar undefined en la vista si hay excepción temprana
         $recentSessions = collect();
@@ -472,11 +494,7 @@ class DiagnosticQuestionReview extends Component
         $questions = $query->orderBy('pensum_id')->orderBy('orden')->orderBy('id')->paginate($this->paginate);
 
         $baseScoped = $this->scopedQuery();
-        // Fuerza el ámbito is_leadership incluso para admin con áreas asignadas
-        $assignedForBase = $service->getAssignedPensumIds();
-        if ($assignedForBase->isNotEmpty()) {
-            $baseScoped->whereIn('pensum_id', $assignedForBase);
-        }
+        // Strict is_leadership: baseScoped ya filtra por strictPensumIds vía scopedQuery(); si es vacío, ya es whereRaw 1=0
         if ($this->filterAreaId !== '') {
             $area = AreaConocimiento::find((int) $this->filterAreaId);
             if ($area) {
@@ -497,9 +515,10 @@ class DiagnosticQuestionReview extends Component
             'multiples' => (clone $baseScoped)->where('tipo_pregunta', 'multiple')->count(),
         ];
 
-        // Estudiantes y precisión en el mismo ámbito is_leadership
+        // Estudiantes y precisión en el mismo ámbito is_leadership (strict)
         $sessionScopeForMetrics = DiagSession::query()
-            ->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForBase))
+            ->when($strictPensumIds->isEmpty(), fn ($q) => $q->whereRaw('1=0'))
+            ->when($strictPensumIds->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $strictPensumIds))
             ->when($this->filterAreaId !== '', function ($q) {
                 $area = AreaConocimiento::find((int) $this->filterAreaId);
                 if ($area) {
@@ -511,9 +530,10 @@ class DiagnosticQuestionReview extends Component
             ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain));
         $metrics['estudiantes'] = (clone $sessionScopeForMetrics)->whereNotNull('estudiant_id')->distinct('estudiant_id')->count('estudiant_id');
 
-        $precisionBaseForMetrics = DiagAnswer::whereHas('question', function ($q) use ($assignedForBase) {
+        $precisionBaseForMetrics = DiagAnswer::whereHas('question', function ($q) use ($strictPensumIds) {
             $q->where('tipo_pregunta', 'multiple')->where('activo', 1)
-                ->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $assignedForBase))
+                ->when($strictPensumIds->isEmpty(), fn ($qq) => $qq->whereRaw('1=0'))
+                ->when($strictPensumIds->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $strictPensumIds))
                 ->when($this->filterAreaId !== '', function ($qq) {
                     $area = AreaConocimiento::find((int) $this->filterAreaId);
                     if ($area) {
@@ -529,17 +549,105 @@ class DiagnosticQuestionReview extends Component
         $metrics['precision'] = $metrics['precisionTotal'] > 0 ? round((100 * $metrics['precisionCorrect']) / $metrics['precisionTotal'], 1) : null;
         $metrics['estudiantes'] = $metrics['estudiantes'] ?? 0;
 
+        // ── Réplica planning: header Lapso/Pestudio/Referente + 8-grid (s2526 completitud/abandono) ──
+        $questionsCount = $metrics['total'];
+        // totalAnswers / preguntas con resp / pensums con resp (scoped + filtros)
+        $answerScopedForGrid = DiagAnswer::whereHas('question', function ($q) use ($strictPensumIds) {
+            $q->when($strictPensumIds->isEmpty(), fn ($qq) => $qq->whereRaw('1=0'))
+                ->when($strictPensumIds->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $strictPensumIds))
+                ->when($this->filterAreaId !== '', function ($qq) {
+                    $area = AreaConocimiento::find((int) $this->filterAreaId);
+                    if ($area) {
+                        $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
+                        $qq->whereIn('pensum_id', $pids);
+                    }
+                })
+                ->when($this->filterPensumId !== '', fn ($qq) => $qq->where('pensum_id', (int) $this->filterPensumId))
+                ->when($this->filterDiagMain !== '', fn ($qq) => $qq->where('diag_main_id', (int) $this->filterDiagMain));
+        })->whereNotNull('completado_at');
+        $totalAnswersCount = (clone $answerScopedForGrid)->count();
+        $answerQuestionIds = (clone $answerScopedForGrid)->pluck('question_id')->unique()->filter()->values();
+        $questionsWithAnswersCount = $answerQuestionIds->count();
+        $pensumsWithAnswersCount = $answerQuestionIds->isNotEmpty()
+            ? DiagQuestion::whereIn('id', $answerQuestionIds)->pluck('pensum_id')->unique()->filter()->count()
+            : 0;
+
+        // % Completitud / Tasa Abandono desde sesiones del scope
+        $sessionsCount = (clone $sessionScopeForMetrics)->count();
+        $completedSessions = (clone $sessionScopeForMetrics)->whereNotNull('completado_at')->count();
+        $completionRate = $sessionsCount > 0 ? round((100 * $completedSessions) / $sessionsCount, 1) : null;
+        $abandonRate = $sessionsCount > 0 ? round(100 - $completionRate, 1) : null;
+
+        // Header 3 cols: Lapso / Pestudio / Referente (derivado de filterDiagMain, paridad planning DiagMainViewer)
+        $displayLapso = null;
+        $displayPestudio = null;
+        $displayReferent = null;
+        if ($this->filterDiagMain !== '') {
+            $dmForHeader = DiagMain::with(['lapso', 'pestudio', 'referent'])->find((int) $this->filterDiagMain);
+            if ($dmForHeader) {
+                $displayLapso = $dmForHeader->lapso;
+                $displayPestudio = $dmForHeader->pestudio;
+                $displayReferent = $dmForHeader->referent;
+            }
+        }
+        if (! $displayPestudio) {
+            // Si no hay diagMain seleccionado, derivar pestudio del scope (múltiples → null)
+            $scopePensumIds = (clone $baseScoped)->distinct()->pluck('pensum_id')->filter()->values();
+            if ($scopePensumIds->isNotEmpty()) {
+                $pestudioIds = Pensum::whereIn('id', $scopePensumIds)->pluck('pestudio_id')->unique()->filter()->values();
+                if ($pestudioIds->count() === 1) {
+                    $displayPestudio = \App\Models\app\Academy\Pestudio::find($pestudioIds->first());
+                }
+            }
+        }
+
+        // Pensum progress para Resumen por área (paridad planning, scoped)
+        $pensumProgress = collect();
+        $progressPestudios = collect();
+        $progressGrados = collect();
+        $progressPensums = collect();
+        $scopePensumIdsForProgress = (clone $baseScoped)->distinct()->pluck('pensum_id')->filter()->values()->unique();
+        if ($scopePensumIdsForProgress->isNotEmpty()) {
+            $pensumProgress = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura', 'grado'])->get()->map(function (Pensum $pensum) use ($strictPensumIds) {
+                $pid = $pensum->id;
+                // totalQ ya está en este pensum, no necesita filtro extra si strict ya garantiza pertenencia; pero mantenemos guard para vacío
+                $totalQ = DiagQuestion::where('pensum_id', $pid)->when($strictPensumIds->isEmpty(), fn ($q) => $q->whereRaw('1=0'))->count();
+                // sesiones del pensum (respeta scope)
+                $totalS = DiagSession::where('pensum_id', $pid)->when($strictPensumIds->isEmpty(), fn ($q) => $q->whereRaw('1=0'))->count();
+                $completedS = DiagSession::where('pensum_id', $pid)->whereNotNull('completado_at')->when($strictPensumIds->isEmpty(), fn ($q) => $q->whereRaw('1=0'))->count();
+                $completion = $totalS > 0 ? round((100 * $completedS) / $totalS, 1) : 0;
+                $ansBase = DiagAnswer::whereHas('question', fn ($q) => $q->where('pensum_id', $pid)->where('tipo_pregunta', 'multiple'))->whereNotNull('completado_at')->whereNotNull('option_id');
+                $totalAns = (clone $ansBase)->count();
+                $correctAns = (clone $ansBase)->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))->count();
+                $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+                return (object) [
+                    'pensum' => $pensum,
+                    'fullname' => $pensum->full_name ?? ($pensum->grado?->name.' - '.$pensum->asignatura?->name),
+                    'total_questions' => $totalQ,
+                    'total_sessions' => $totalS,
+                    'completed_sessions' => $completedS,
+                    'completion_percentage' => $completion,
+                    'precision' => $prec,
+                    'total_answered' => $totalAns,
+                    'correct_answers' => $correctAns,
+                ];
+            })->sortByDesc('completion_percentage')->values();
+            // Para filtros del resumen (simplificado: pestudio/grado del scope)
+            $progressPestudios = \App\Models\app\Academy\Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
+            $progressGrados = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active','true')->orderBy('order')->get(['id','name','code','pestudio_id']);
+            $progressPensums = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura','grado'])->orderBy('grado_id')->get(['id','grado_id','pestudio_id','asignatura_id']);
+        }
+
         // Sección enriquecida — diferida (wire:init) y respeta is_leadership (AreaConocimiento→Pensum) y filtros de área/diagMain (incluso para admin con áreas)
         $recentSessions = collect();
         $questionsByType = collect();
         $questionsByDifficulty = collect();
         if ($this->enrichedLoaded) {
-            $assignedForEnriched = $service->getAssignedPensumIds();
-            if ($assignedForEnriched->isEmpty() && $service->isUnrestricted()) {
-                $assignedForEnriched = null;
-            }
+            // Strict: solo pensums del líder
+            $assignedForEnriched = $strictPensumIds;
             $recentSessions = DiagSession::with(['estudiant', 'pensum'])
-            ->when($assignedForEnriched && $assignedForEnriched->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForEnriched))
+            ->when($assignedForEnriched->isEmpty(), fn ($q) => $q->whereRaw('1=0'))
+            ->when($assignedForEnriched->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForEnriched))
             ->when($this->filterAreaId !== '', function ($q) {
                 $area = AreaConocimiento::find((int) $this->filterAreaId);
                 if ($area) {
@@ -596,6 +704,26 @@ class DiagnosticQuestionReview extends Component
             'questionsByType' => $questionsByType,
             'questionsByDifficulty' => $questionsByDifficulty,
             'enrichedLoaded' => $this->enrichedLoaded,
+            // Réplica planning grid
+            'questionsCount' => $questionsCount ?? $metrics['total'] ?? 0,
+            'pensumsWithAnswersCount' => $pensumsWithAnswersCount ?? 0,
+            'questionsWithAnswersCount' => $questionsWithAnswersCount ?? 0,
+            'totalAnswersCount' => $totalAnswersCount ?? 0,
+            'studentsEvaluated' => $metrics['estudiantes'] ?? 0,
+            'sessionsCount' => $sessionsCount ?? 0,
+            'completedSessions' => $completedSessions ?? 0,
+            'completionRate' => $completionRate ?? null,
+            'abandonRate' => $abandonRate ?? null,
+            'displayLapso' => $displayLapso ?? null,
+            'displayPestudio' => $displayPestudio ?? null,
+            'displayReferent' => $displayReferent ?? null,
+            'pensumProgress' => $pensumProgress ?? collect(),
+            'progressPestudios' => $progressPestudios ?? collect(),
+            'progressGrados' => $progressGrados ?? collect(),
+            'progressPensums' => $progressPensums ?? collect(),
+            'precision' => $metrics['precision'] ?? null,
+            'precisionCorrect' => $metrics['precisionCorrect'] ?? 0,
+            'precisionTotal' => $metrics['precisionTotal'] ?? 0,
         ]);
     }
 }

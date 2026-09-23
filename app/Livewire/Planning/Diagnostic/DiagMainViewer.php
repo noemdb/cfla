@@ -114,11 +114,27 @@ class DiagMainViewer extends Component
         $progressGrados = collect();
         $progressPensums = collect();
 
+        // Nuevos indicadores solicitados (pensums/respuestas) + completitud/abandono s2526
+        $pensumsWithAnswersCount = null;
+        $questionsWithAnswersCount = null;
+        $totalAnswersCount = null;
+        $completionRate = null;
+        $abandonRate = null;
+
         if ($selected) {
             $questionsCount = $selected->questions_count;
 
             // Pensums vinculados a las preguntas de este diagnóstico
             $questionPensumIds = DiagQuestion::where('diag_main_id', $selected->id)->pluck('pensum_id')->unique()->filter()->values();
+
+            // Cálculo de pensums con al menos un answer / preguntas con respuestas / total answers
+            $answerScoped = DiagAnswer::whereHas('question', fn ($q) => $q->where('diag_main_id', $selected->id))->whereNotNull('completado_at');
+            $totalAnswersCount = (clone $answerScoped)->count();
+            $answerQuestionIds = (clone $answerScoped)->pluck('question_id')->unique()->filter()->values();
+            $questionsWithAnswersCount = $answerQuestionIds->count();
+            $pensumsWithAnswersCount = $answerQuestionIds->isNotEmpty()
+                ? DiagQuestion::whereIn('id', $answerQuestionIds)->pluck('pensum_id')->unique()->filter()->count()
+                : 0;
 
             // Sesiones: primero por diag_main_id, si da 0 usar pensum de las preguntas (datos reales)
             $sessionsCount = DiagSession::where('diag_main_id', $selected->id)->count();
@@ -141,6 +157,10 @@ class DiagMainViewer extends Component
             $precisionTotal = (clone $answersBase)->count();
             $precisionCorrect = (clone $answersBase)->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))->count();
             $precision = $precisionTotal > 0 ? round((100 * $precisionCorrect) / $precisionTotal, 1) : null;
+
+            // % Completitud y Tasa Abandono (s2526: getGeneralStats / analytics.blade.php:70)
+            $completionRate = $sessionsCount > 0 ? round((100 * $completedSessions) / $sessionsCount, 1) : null;
+            $abandonRate = $sessionsCount > 0 ? round(100 - $completionRate, 1) : null;
 
             // Pensum progress — inspirado en s2526 getPensumProgress (con precisión por área)
             if ($questionPensumIds->isNotEmpty()) {
@@ -245,6 +265,11 @@ class DiagMainViewer extends Component
             'displayReferent' => $displayReferent ?? null,
             'questionsCount' => $questionsCount,
             'sessionsCount' => $sessionsCount,
+            'pensumsWithAnswersCount' => $pensumsWithAnswersCount,
+            'questionsWithAnswersCount' => $questionsWithAnswersCount,
+            'totalAnswersCount' => $totalAnswersCount,
+            'completionRate' => $completionRate,
+            'abandonRate' => $abandonRate,
             'precision' => $precision,
             'precisionCorrect' => $precisionCorrect,
             'precisionTotal' => $precisionTotal,

@@ -534,6 +534,86 @@ class DiagnosticQuestionReview extends Component
         $metrics['precision'] = $metrics['precisionTotal'] > 0 ? round((100 * $metrics['precisionCorrect']) / $metrics['precisionTotal'], 1) : null;
         $metrics['estudiantes'] = $metrics['estudiantes'] ?? 0;
 
+        // ── Réplica planning: header Lapso/Pestudio/Referente + 8-grid (s2526 completitud/abandono) ──
+        $questionsCount = $metrics['total'];
+        $answerScopedForGrid = DiagAnswer::whereHas('question', function ($q) use ($assignedForBase) {
+            $q->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $assignedForBase))
+                ->when($this->filterAreaId !== '', function ($qq) {
+                    $area = AreaConocimiento::find((int) $this->filterAreaId);
+                    if ($area) {
+                        $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
+                        $qq->whereIn('pensum_id', $pids);
+                    }
+                })
+                ->when($this->filterPensumId !== '', fn ($qq) => $qq->where('pensum_id', (int) $this->filterPensumId))
+                ->when($this->filterDiagMain !== '', fn ($qq) => $qq->where('diag_main_id', (int) $this->filterDiagMain));
+        })->whereNotNull('completado_at');
+        $totalAnswersCount = (clone $answerScopedForGrid)->count();
+        $answerQuestionIds = (clone $answerScopedForGrid)->pluck('question_id')->unique()->filter()->values();
+        $questionsWithAnswersCount = $answerQuestionIds->count();
+        $pensumsWithAnswersCount = $answerQuestionIds->isNotEmpty()
+            ? DiagQuestion::whereIn('id', $answerQuestionIds)->pluck('pensum_id')->unique()->filter()->count()
+            : 0;
+
+        $sessionsCount = (clone $sessionScopeForMetrics)->count();
+        $completedSessions = (clone $sessionScopeForMetrics)->whereNotNull('completado_at')->count();
+        $completionRate = $sessionsCount > 0 ? round((100 * $completedSessions) / $sessionsCount, 1) : null;
+        $abandonRate = $sessionsCount > 0 ? round(100 - $completionRate, 1) : null;
+
+        $displayLapso = null;
+        $displayPestudio = null;
+        $displayReferent = null;
+        if ($this->filterDiagMain !== '') {
+            $dmForHeader = DiagMain::with(['lapso', 'pestudio', 'referent'])->find((int) $this->filterDiagMain);
+            if ($dmForHeader) {
+                $displayLapso = $dmForHeader->lapso;
+                $displayPestudio = $dmForHeader->pestudio;
+                $displayReferent = $dmForHeader->referent;
+            }
+        }
+        if (! $displayPestudio) {
+            $scopePensumIds = (clone $baseScoped)->distinct()->pluck('pensum_id')->filter()->values();
+            if ($scopePensumIds->isNotEmpty()) {
+                $pestudioIds = Pensum::whereIn('id', $scopePensumIds)->pluck('pestudio_id')->unique()->filter()->values();
+                if ($pestudioIds->count() === 1) {
+                    $displayPestudio = \App\Models\app\Academy\Pestudio::find($pestudioIds->first());
+                }
+            }
+        }
+
+        $pensumProgress = collect();
+        $progressPestudios = collect();
+        $progressGrados = collect();
+        $progressPensums = collect();
+        $scopePensumIdsForProgress = (clone $baseScoped)->distinct()->pluck('pensum_id')->filter()->values()->unique();
+        if ($scopePensumIdsForProgress->isNotEmpty()) {
+            $pensumProgress = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura', 'grado'])->get()->map(function (Pensum $pensum) use ($assignedForBase) {
+                $pid = $pensum->id;
+                $totalQ = DiagQuestion::where('pensum_id', $pid)->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForBase))->count();
+                $totalS = DiagSession::where('pensum_id', $pid)->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForBase))->count();
+                $completedS = DiagSession::where('pensum_id', $pid)->whereNotNull('completado_at')->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForBase))->count();
+                $completion = $totalS > 0 ? round((100 * $completedS) / $totalS, 1) : 0;
+                $ansBase = DiagAnswer::whereHas('question', fn ($q) => $q->where('pensum_id', $pid)->where('tipo_pregunta', 'multiple'))->whereNotNull('completado_at')->whereNotNull('option_id');
+                $totalAns = (clone $ansBase)->count();
+                $correctAns = (clone $ansBase)->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))->count();
+                $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+                return (object) [
+                    'pensum' => $pensum,
+                    'fullname' => $pensum->full_name ?? ($pensum->grado?->name.' - '.$pensum->asignatura?->name),
+                    'total_questions' => $totalQ,
+                    'total_sessions' => $totalS,
+                    'completed_sessions' => $completedS,
+                    'completion_percentage' => $completion,
+                    'precision' => $prec,
+                    'total_answered' => $totalAns,
+                    'correct_answers' => $correctAns,
+                ];
+            })->sortByDesc('completion_percentage')->values();
+            $progressPestudios = \App\Models\app\Academy\Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
+            $progressGrados = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active','true')->orderBy('order')->get(['id','name','code','pestudio_id']);
+            $progressPensums = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura','grado'])->orderBy('grado_id')->get(['id','grado_id','pestudio_id','asignatura_id']);
+        }
+
         // Sección enriquecida — diferida (wire:init) y respeta coordinacion (Pestudio→Pensum) y filtros de área/diagMain
         $recentSessions = collect();
         $questionsByType = collect();
@@ -602,6 +682,26 @@ class DiagnosticQuestionReview extends Component
             'questionsByType' => $questionsByType,
             'questionsByDifficulty' => $questionsByDifficulty,
             'enrichedLoaded' => $this->enrichedLoaded,
+            // Réplica planning grid
+            'questionsCount' => $questionsCount ?? $metrics['total'] ?? 0,
+            'pensumsWithAnswersCount' => $pensumsWithAnswersCount ?? 0,
+            'questionsWithAnswersCount' => $questionsWithAnswersCount ?? 0,
+            'totalAnswersCount' => $totalAnswersCount ?? 0,
+            'studentsEvaluated' => $metrics['estudiantes'] ?? 0,
+            'sessionsCount' => $sessionsCount ?? 0,
+            'completedSessions' => $completedSessions ?? 0,
+            'completionRate' => $completionRate ?? null,
+            'abandonRate' => $abandonRate ?? null,
+            'displayLapso' => $displayLapso ?? null,
+            'displayPestudio' => $displayPestudio ?? null,
+            'displayReferent' => $displayReferent ?? null,
+            'pensumProgress' => $pensumProgress ?? collect(),
+            'progressPestudios' => $progressPestudios ?? collect(),
+            'progressGrados' => $progressGrados ?? collect(),
+            'progressPensums' => $progressPensums ?? collect(),
+            'precision' => $metrics['precision'] ?? null,
+            'precisionCorrect' => $metrics['precisionCorrect'] ?? 0,
+            'precisionTotal' => $metrics['precisionTotal'] ?? 0,
         ]);
     }
 }

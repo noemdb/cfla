@@ -396,13 +396,62 @@ class IndexComponent extends Component
                 });
             }
 
+            $totalQuestions = $questionQuery->count();
+            $totalSessions = DiagSession::where($sessionScope)->count();
+            $completedSessions = DiagSession::whereNotNull('completado_at')->where($sessionScope)->count();
+            $totalSessionsForRate = $totalSessions;
+            $completionRate = $totalSessionsForRate > 0 ? round((100 * $completedSessions) / $totalSessionsForRate, 1) : null;
+            $abandonRate = $totalSessionsForRate > 0 ? round(100 - $completionRate, 1) : null;
+
+            // Respuestas y cobertura vía profesor->pevaluacion->pensum->diag_question (solo su carga)
+            $answerScope = function ($q) use ($pensumIds) {
+                $q->whereIn('pensum_id', $pensumIds ?: [0])
+                    ->when($this->filterDiagMainId, fn ($qq) => $qq->where('diag_main_id', $this->filterDiagMainId))
+                    ->when($this->filterGradoId, fn ($qq) => $qq->whereHas('pensum', fn ($p) => $p->where('grado_id', $this->filterGradoId)));
+            };
+            $answerBase = DiagAnswer::whereHas('question', $answerScope)
+                ->whereHas('session', function ($q) use ($sessionScope) {
+                    $q->where($sessionScope);
+                })
+                ->whereNotNull('completado_at');
+            $totalAnswersCount = (clone $answerBase)->count();
+            $answerQuestionIds = (clone $answerBase)->pluck('question_id')->unique()->filter()->values();
+            $questionsWithAnswersCount = $answerQuestionIds->count();
+            $pensumsWithAnswersCount = $answerQuestionIds->isNotEmpty()
+                ? DiagQuestion::whereIn('id', $answerQuestionIds)->pluck('pensum_id')->unique()->filter()->count()
+                : 0;
+
+            // Header Lapso / Plan / Referente (paridad planning)
+            $displayLapso = $this->currentLapso();
+            $displayPestudio = null;
+            $displayReferent = null;
+            if ($this->filterDiagMainId) {
+                $dm = DiagMain::with(['pestudio', 'referent'])->find($this->filterDiagMainId);
+                if ($dm) {
+                    $displayPestudio = $dm->pestudio;
+                    $displayReferent = $dm->referent;
+                }
+            }
+            if (! $displayPestudio) {
+                if (! empty($pensumIds) && count($pensumIds) === 1) {
+                    $singlePensum = Pensum::with('pestudio')->find($pensumIds[0]);
+                    $displayPestudio = $singlePensum?->pestudio;
+                } elseif ($this->selectedPensumId) {
+                    $sp = Pensum::with('pestudio')->find($this->selectedPensumId);
+                    $displayPestudio = $sp?->pestudio;
+                }
+            }
+            if (! $displayReferent && $this->filterDiagMainId) {
+                $dm = DiagMain::with('referent')->find($this->filterDiagMainId);
+                $displayReferent = $dm?->referent;
+            }
+
             return [
-                'total_questions' => $questionQuery->count(),
+                'total_questions' => $totalQuestions,
 
-                'total_sessions' => DiagSession::where($sessionScope)->count(),
+                'total_sessions' => $totalSessions,
 
-                'completed_sessions' => DiagSession::whereNotNull('completado_at')
-                    ->where($sessionScope)->count(),
+                'completed_sessions' => $completedSessions,
 
                 'active_sessions' => DiagSession::where('activo', true)
                     ->whereNull('completado_at')
@@ -417,6 +466,16 @@ class IndexComponent extends Component
 
                 'total_students' => empty($seccionIds) ? 0 : (int) Inscripcion::whereIn('seccion_id', $seccionIds)
                     ->distinct()->count('estudiant_id'),
+
+                // Réplica planning grid (profesor scope)
+                'pensums_with_answers' => $pensumsWithAnswersCount,
+                'questions_with_answers' => $questionsWithAnswersCount,
+                'total_answers' => $totalAnswersCount,
+                'completion_rate' => $completionRate,
+                'abandon_rate' => $abandonRate,
+                'display_lapso' => $displayLapso,
+                'display_pestudio' => $displayPestudio,
+                'display_referent' => $displayReferent,
             ];
         });
     }

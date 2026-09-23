@@ -1,62 +1,81 @@
 {{-- Dashboard Tab --}}
 <div class="space-y-6">
-    {{-- KPI Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Preguntas</span>
-                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-lg font-bold text-white">{{ number_format($stats['total_questions']) }}</p>
+    {{-- Header 3 cols: Lapso / Plan / Referente — réplica planning, scope profesor->pevaluacion->pensum --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Lapso</p>
+            <p class="text-sm text-white font-medium">{{ ($stats['display_lapso'] ?? null)?->name ?? '—' }}</p>
         </div>
-
-        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Sesiones</span>
-                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-lg font-bold text-white">{{ number_format($stats['total_sessions']) }}</p>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Plan de Estudio</p>
+            <p class="text-sm text-white font-medium">
+                @if($stats['display_pestudio'] ?? null)
+                    {{ $stats['display_pestudio']->code }} — {{ $stats['display_pestudio']->name }}
+                @else
+                    <span class="text-gray-400">Múltiples planes</span>
+                @endif
+            </p>
         </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Referente</p>
+            <p class="text-sm text-white font-medium">{{ ($stats['display_referent'] ?? null) ? $stats['display_referent']->code.' — '.$stats['display_referent']->name : '—' }}</p>
+        </div>
+    </div>
 
-        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Completadas</span>
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-lg font-bold text-white">{{ number_format($stats['completed_sessions']) }}</p>
-            @if($stats['total_sessions'] > 0)
-                <div class="mt-1">
-                    <div class="w-full bg-gray-700/50 rounded-full h-1.5">
-                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ round(($stats['completed_sessions'] / max($stats['total_sessions'], 1)) * 100) }}%"></div>
-                    </div>
-                    <span class="text-[10px] text-gray-500 mt-0.5 block">{{ round(($stats['completed_sessions'] / max($stats['total_sessions'], 1)) * 100) }}% del total</span>
-                </div>
+    {{-- KPI 8 cols — réplica planning, solo cifras asociadas al profesor --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            <p class="text-lg font-extrabold text-cyan-400">{{ number_format($stats['total_questions']) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preguntas</p>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            <p class="text-lg font-extrabold text-sky-400">{{ number_format($stats['pensums_with_answers'] ?? 0) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">A.Formación c/ resp.</p>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            <p class="text-lg font-extrabold text-indigo-400">{{ number_format($stats['questions_with_answers'] ?? 0) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preg. c/ resp.</p>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            <p class="text-lg font-extrabold text-amber-400">{{ number_format($stats['total_answers'] ?? 0) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Respuestas</p>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            <p class="text-lg font-extrabold text-purple-400">{{ number_format($stats['students_with_sessions'] ?? 0) }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Estudiantes</p>
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            @if($stats['completion_rate'] !== null)
+                <p class="text-lg font-extrabold {{ $stats['completion_rate'] >= 80 ? 'text-emerald-400' : ($stats['completion_rate'] >= 50 ? 'text-amber-400' : 'text-red-400') }}">{{ $stats['completion_rate'] }}%</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">% Completitud</p>
+                <p class="text-[10px] text-gray-500">{{ $stats['completed_sessions'] }} / {{ $stats['total_sessions'] }}</p>
+            @else
+                <p class="text-lg font-extrabold text-gray-500">—</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">% Completitud</p>
+                <p class="text-[10px] text-gray-600">Sin datos</p>
             @endif
         </div>
-
-        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Precisión</span>
-                <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-lg font-bold text-white">{{ $stats['student_accuracy'] }}%</p>
-            <span class="text-[10px] text-gray-500">{{ $stats['correct_answers'] }}/{{ $stats['total_answered'] }} respuestas correctas</span>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            @if($stats['abandon_rate'] !== null)
+                <p class="text-lg font-extrabold {{ $stats['abandon_rate'] <= 20 ? 'text-emerald-400' : ($stats['abandon_rate'] <= 40 ? 'text-amber-400' : 'text-red-400') }}">{{ $stats['abandon_rate'] }}%</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Tasa Abandono</p>
+                <p class="text-[10px] text-gray-500">{{ ($stats['total_sessions'] - $stats['completed_sessions']) }} / {{ $stats['total_sessions'] }}</p>
+            @else
+                <p class="text-lg font-extrabold text-gray-500">—</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Tasa Abandono</p>
+                <p class="text-[10px] text-gray-600">Sin datos</p>
+            @endif
+        </div>
+        <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+            @if($stats['total_answered'] > 0)
+                <p class="text-lg font-extrabold {{ $stats['student_accuracy'] >= 80 ? 'text-emerald-400' : ($stats['student_accuracy'] >= 60 ? 'text-amber-400' : 'text-red-400') }}">{{ $stats['student_accuracy'] }}%</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Precisión</p>
+                <p class="text-[10px] text-gray-500">{{ $stats['correct_answers'] }} / {{ $stats['total_answered'] }}</p>
+            @else
+                <p class="text-lg font-extrabold text-gray-500">—</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Precisión</p>
+                <p class="text-[10px] text-gray-600">Sin datos</p>
+            @endif
         </div>
     </div>
 

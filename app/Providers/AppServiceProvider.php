@@ -109,6 +109,7 @@ class AppServiceProvider extends ServiceProvider
 
         \App\Models\app\Instrument\DiagMain::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Instrument\DiagQuestion::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagQuestion::observe(\App\Observers\DiagQuestionObserver::class); // Notificación a is_planner + is_leadership (acotado) al crear/actualizar/eliminar
         \App\Models\app\Instrument\DiagOption::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Instrument\DiagSession::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Instrument\DiagAnswer::observe(\App\Observers\AuditableModelObserver::class);

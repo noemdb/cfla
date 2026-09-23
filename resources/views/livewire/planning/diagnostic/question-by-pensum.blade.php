@@ -394,4 +394,15 @@
             @endif
         @endif
     </div>
+
+    {{-- State loading — btn flotante abajo a la derecha con transparencia --}}
+    <div wire:loading class="fixed bottom-6 right-6 z-50">
+        <div class="flex items-center gap-2 rounded-full bg-gray-900/70 px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-white backdrop-blur-md border border-white/10 shadow-xl shadow-black/30">
+            <svg class="h-4 w-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span>Cargando ...</span>
+        </div>
+    </div>
 </div>

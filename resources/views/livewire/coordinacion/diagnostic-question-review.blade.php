@@ -11,21 +11,85 @@
         </span>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 space-y-2"><div class="text-[10px] font-bold uppercase tracking-widest text-amber-400/60">Total (tu scope)</div><div class="text-3xl font-black text-white">{{ $metrics['total'] }}</div></div>
-        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 space-y-2"><div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60">Activas</div><div class="text-3xl font-black text-emerald-400">{{ $metrics['activas'] }}</div></div>
-        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 space-y-2"><div class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Inactivas</div><div class="text-3xl font-black text-gray-400">{{ $metrics['inactivas'] }}</div></div>
-        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 space-y-2"><div class="text-[10px] font-bold uppercase tracking-widest text-amber-400/60">Múltiple opción</div><div class="text-3xl font-black text-white">{{ $metrics['multiples'] }}</div></div>
-        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 space-y-2"><div class="text-[10px] font-bold uppercase tracking-widest text-cyan-400/60">Estudiantes</div><div class="text-3xl font-black text-white">{{ $metrics['estudiantes'] ?? 0 }}</div><div class="text-[10px] text-gray-500">participantes</div></div>
-        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 space-y-2">
-            <div class="text-[10px] font-bold uppercase tracking-widest {{ ($metrics['precision'] ?? null) !== null && $metrics['precision'] >= 80 ? 'text-emerald-400/60' : (($metrics['precision'] ?? 0) >= 60 ? 'text-amber-400/60' : 'text-red-400/60') }}">Precisión</div>
-            @if(isset($metrics['precision']) && $metrics['precision'] !== null)
-                <div class="text-3xl font-black {{ $metrics['precision'] >= 80 ? 'text-emerald-400' : ($metrics['precision'] >= 60 ? 'text-amber-400' : 'text-red-400') }}">{{ $metrics['precision'] }}%</div>
-                <div class="text-[10px] text-gray-500">{{ $metrics['precisionCorrect'] ?? 0 }} / {{ $metrics['precisionTotal'] ?? 0 }} correctas</div>
-            @else
-                <div class="text-3xl font-black text-gray-500">—</div>
-                <div class="text-[10px] text-gray-600">Sin datos</div>
-            @endif
+    {{-- Réplica planning: header Lapso/Pestudio/Referente + grid 8 (respeta is_coordinacion) --}}
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Lapso</p>
+                    <p class="text-sm text-white font-medium">{{ $displayLapso?->name ?? '—' }}</p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Plan de Estudio</p>
+                    <p class="text-sm text-white font-medium">
+                        @if($displayPestudio)
+                            {{ $displayPestudio->code }} — {{ $displayPestudio->name }}
+                        @else
+                            <span class="text-gray-400">Múltiples planes</span>
+                        @endif
+                    </p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Referente</p>
+                    <p class="text-sm text-white font-medium">{{ $displayReferent ? $displayReferent->code.' — '.$displayReferent->name : '—' }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    <p class="text-lg font-extrabold text-cyan-400">{{ $questionsCount ?? 0 }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preguntas</p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    <p class="text-lg font-extrabold text-sky-400">{{ $pensumsWithAnswersCount ?? 0 }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">A.Formación c/ resp.</p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    <p class="text-lg font-extrabold text-indigo-400">{{ $questionsWithAnswersCount ?? 0 }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preg. c/ resp.</p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    <p class="text-lg font-extrabold text-amber-400">{{ $totalAnswersCount ?? 0 }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Respuestas</p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    <p class="text-lg font-extrabold text-purple-400">{{ $studentsEvaluated ?? 0 }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Estudiantes</p>
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    @if($completionRate !== null)
+                        <p class="text-lg font-extrabold {{ $completionRate >= 80 ? 'text-emerald-400' : ($completionRate >= 50 ? 'text-amber-400' : 'text-red-400') }}">{{ $completionRate }}%</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">% Completitud</p>
+                        <p class="text-[10px] text-gray-500">{{ $completedSessions ?? 0 }} / {{ $sessionsCount ?? 0 }}</p>
+                    @else
+                        <p class="text-lg font-extrabold text-gray-500">—</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">% Completitud</p>
+                        <p class="text-[10px] text-gray-600">Sin datos</p>
+                    @endif
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    @if($abandonRate !== null)
+                        <p class="text-lg font-extrabold {{ $abandonRate <= 20 ? 'text-emerald-400' : ($abandonRate <= 40 ? 'text-amber-400' : 'text-red-400') }}">{{ $abandonRate }}%</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Tasa Abandono</p>
+                        <p class="text-[10px] text-gray-500">{{ ($sessionsCount ?? 0) - ($completedSessions ?? 0) }} / {{ $sessionsCount ?? 0 }}</p>
+                    @else
+                        <p class="text-lg font-extrabold text-gray-500">—</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Tasa Abandono</p>
+                        <p class="text-[10px] text-gray-600">Sin datos</p>
+                    @endif
+                </div>
+                <div class="bg-gray-800/40 rounded-lg p-3 border border-white/5 text-center">
+                    @if($precision !== null)
+                        <p class="text-lg font-extrabold {{ $precision >= 80 ? 'text-emerald-400' : ($precision >= 60 ? 'text-amber-400' : 'text-red-400') }}">{{ $precision }}%</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Precisión</p>
+                        <p class="text-[10px] text-gray-500">{{ $precisionCorrect }} / {{ $precisionTotal }}</p>
+                    @else
+                        <p class="text-lg font-extrabold text-gray-500">—</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Precisión</p>
+                        <p class="text-[10px] text-gray-600">Sin datos</p>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
@@ -122,6 +186,53 @@
         </div>
         @endif
     </div>
+
+    {{-- Resumen por área de formación — réplica planning (scoped is_leadership) --}}
+    @if($pensumProgress && $pensumProgress->isNotEmpty())
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
+            <div class="px-3 py-2 border-b border-white/5 flex items-center justify-between">
+                <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Resumen por área de formación</h4>
+                <span class="text-[10px] text-gray-500">{{ $pensumProgress->count() }} área(s) en tu scope</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead class="bg-white/[0.02] border-b border-white/5">
+                        <tr class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                            <th class="text-left px-3 py-1.5">Área</th>
+                            <th class="text-center px-3 py-1.5">Preg.</th>
+                            <th class="text-center px-3 py-1.5">Ses.</th>
+                            <th class="text-center px-3 py-1.5">Compl.</th>
+                            <th class="text-center px-3 py-1.5">% Finalización</th>
+                            <th class="text-center px-3 py-1.5">Precisión</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        @foreach($pensumProgress as $pp)
+                            <tr class="hover:bg-white/[0.02]">
+                                <td class="px-3 py-1.5 text-white font-medium">{{ $pp->fullname }}</td>
+                                <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px]">{{ $pp->total_questions }}</span></td>
+                                <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-gray-300 text-[10px]">{{ $pp->total_sessions }}</span></td>
+                                <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px]">{{ $pp->completed_sessions }}</span></td>
+                                <td class="px-3 py-1.5">
+                                    <div class="flex items-center gap-1.5 justify-center">
+                                        <div class="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full rounded-full {{ $pp->completion_percentage >= 80 ? 'bg-emerald-500' : ($pp->completion_percentage >= 50 ? 'bg-amber-500' : 'bg-red-500') }}" style="width: {{ $pp->completion_percentage }}%"></div></div>
+                                        <span class="text-[10px] text-gray-400">{{ number_format($pp->completion_percentage, 1) }}%</span>
+                                    </div>
+                                </td>
+                                <td class="px-3 py-1.5 text-center">
+                                    @if($pp->precision !== null)
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold border {{ $pp->precision >= 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : ($pp->precision >= 60 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-red-500/10 border-red-500/20 text-red-400') }}">{{ $pp->precision }}%</span>
+                                    @else
+                                        <span class="text-[10px] text-gray-600">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
