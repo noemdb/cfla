@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\DB;
  * 
  *   CASTELLANO
  *   php8.2 artisan diag:copy-questions --from=140 --to=69 --diag-main=1
- *   php8.2 artisan diag:copy-questions --from=91 --to=140 --diag-main=1
+ *   php8.2 artisan diag:copy-questions --from=91 --to=233 --diag-main=1
  *  ----------------------------------------------------------------------------------------------------------------------------------
 *   EDUCACION FÍSICA
 *   PRIMER ANO
@@ -60,13 +60,13 @@ use Illuminate\Support\Facades\DB;
 *   PRIMER ANO
 *   php8.2 artisan diag:copy-questions --from=136 --to=67 --diag-main=1
 *   CUARTO ANO
-*   php8.2 artisan diag:copy-questions --from=92 --to=235 --diag-main=1
+*   php8.2 artisan diag:copy-questions --from=93 --to=235 --diag-main=1
 * 
 *   BIOLOGÍA, AMBIENTE Y TECNOLOGÍA
 *   PRIMER ANO
 *   php8.2 artisan diag:copy-questions --from=131 --to=65 --diag-main=1
 *   CUARTO ANO
-*   php8.2 artisan diag:copy-questions --from=97 --to=200 --diag-main=1
+*   php8.2 artisan diag:copy-questions --from=97 --to=239 --diag-main=1
 * 
 *   QUÍMICA
 *   CUARTO ANO

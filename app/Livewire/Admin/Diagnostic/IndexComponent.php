@@ -18,7 +18,7 @@ class IndexComponent extends Component
     public function toggleAllPestudio($pestudioId, $activate)
     {
         $this->applyBulkActivation(
-            Pensum::where('pestudio_id', $pestudioId),
+            Pensum::where('pestudio_id', $pestudioId)->where('status_active', true),
             (bool) $activate,
             ['scope' => 'pestudio', 'pestudio_id' => (int) $pestudioId]
         );
@@ -27,7 +27,7 @@ class IndexComponent extends Component
     public function toggleAllGrado($pestudioId, $gradoId, $activate)
     {
         $this->applyBulkActivation(
-            Pensum::where('pestudio_id', $pestudioId)->where('grado_id', $gradoId),
+            Pensum::where('pestudio_id', $pestudioId)->where('grado_id', $gradoId)->where('status_active', true),
             (bool) $activate,
             ['scope' => 'grado', 'pestudio_id' => (int) $pestudioId, 'grado_id' => (int) $gradoId]
         );
@@ -112,6 +112,7 @@ class IndexComponent extends Component
         $search = trim($this->search);
 
         $pensums = Pensum::query()
+            ->where('pensums.status_active', true)
             ->where(function ($q) {
                 $q->whereHas('pevaluacions')->orWhereHas('diagQuestions');
             })
