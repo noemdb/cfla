@@ -11,6 +11,7 @@ use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagSession;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,6 +19,7 @@ class DiagMainViewer extends Component
 {
     use WithPagination;
 
+    #[Url]
     public ?int $selectedId = null;
 
     // Filtros + paginación para "Resumen por área de formación" — anidados pestudio→grado→pensum
@@ -35,8 +37,11 @@ class DiagMainViewer extends Component
 
     public function mount(): void
     {
-        // Por defecto no hay ninguno seleccionado (antes se preseleccionaba el activo)
-        $this->selectedId = null;
+        // #[Url] hidrata selectedId desde la query string antes del mount:
+        // no forzar null para no borrar el parámetro de la URL.
+        if ($this->selectedId) {
+            $this->dispatch('diag-main-selected', id: $this->selectedId);
+        }
     }
 
     public function updatedSelectedId(): void

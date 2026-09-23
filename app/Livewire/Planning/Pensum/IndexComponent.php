@@ -32,6 +32,7 @@ class IndexComponent extends Component
     public $search = '';
     public $filter_pestudio = '';
     public $filter_grado = '';
+    public $filter_status_active = '';
     public $paginate = 15;
     public $listGrados = [];
 
@@ -91,6 +92,7 @@ class IndexComponent extends Component
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterPestudio() { $this->resetPage(); }
     public function updatingFilterGrado() { $this->resetPage(); }
+    public function updatingFilterStatusActive() { $this->resetPage(); }
     public function updatingPaginate() { $this->resetPage(); }
 
     // ─── RENDER ───────────────────────────────────────────────────
@@ -115,6 +117,10 @@ class IndexComponent extends Component
 
         if ($this->filter_grado) {
             $query->where('grado_id', $this->filter_grado);
+        }
+
+        if ($this->filter_status_active !== '' && $this->filter_status_active !== null) {
+            $query->where('status_active', (bool) $this->filter_status_active);
         }
 
         // Aplicar ordenamiento

@@ -167,7 +167,7 @@
     </div>
 
     {{-- Diálogo: configuración del consolidado de docentes (PDF / HTML / XLS). --}}
-    <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2 }"
+    <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2, profesorId: $wire.entangle('teachersPdfProfesorId') }"
         x-on:open-teachers-pdf.window="open = true"
         x-on:keydown.escape.window="open = false"
         x-cloak x-show="open"
@@ -192,6 +192,18 @@
             </div>
 
             <div class="space-y-4 p-4">
+                <div>
+                    <x-select label="Profesor" placeholder="Todos los docentes"
+                        wire:model.live="teachersPdfProfesorId" searchable>
+                        @foreach ($teachersPdfTeachers as $teacher)
+                            <x-select.option :label="$teacher['name']" :value="$teacher['id']" :description="$teacher['description']" />
+                        @endforeach
+                    </x-select>
+                    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                        Vacío = consolida todos los docentes con asignaciones.
+                    </p>
+                </div>
+
                 <div>
                     <label for="teachers-pdf-format"
                         class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
@@ -245,7 +257,7 @@
                     class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
                     Cancelar
                 </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage"
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage + (profesorId ? '&profesor_id=' + profesorId : '')"
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
                     Generar

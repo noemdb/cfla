@@ -198,6 +198,9 @@ class TimetableWizard extends Component
     /** Modal «Totalización por docente» (toolbar): filtro por P.Educativo y formato. */
     public bool $showTeacherTotalsModal = false;
 
+    /** Docente seleccionado en el diálogo «Consolidado de docentes»; null = todos. */
+    public ?int $teachersPdfProfesorId = null;
+
     /** P.Educativo seleccionado; null = Todos. */
     public ?string $teacherTotalsPeducativoId = null;
 
@@ -8219,6 +8222,62 @@ PROMPT;
     }
 
     /**
+     * Opciones del selector de docente del diálogo «Consolidado de docentes»:
+     * docentes con bloques en cualquiera de los calendarios activos, con
+     * descripción (CI · calendarios · bloques) para el `x-select` con búsqueda.
+     *
+     * @return array<int, array{id:int, name:string, description:string}>
+     */
+    protected function teachersPdfOptions(): array
+    {
+        $calendarIds = $this->teacherJsonCalendarModels()->pluck('id')->all();
+
+        if ($calendarIds === []) {
+            return [];
+        }
+
+        $stats = TimetableSlot::query()
+            ->whereIn('calendar_id', $calendarIds)
+            ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query
+                ->where('status_active', 'true')
+                ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true')))
+            ->with('lesson.pevaluacion:id,profesor_id')
+            ->get(['id', 'calendar_id', 'lesson_id', 'profesor_id'])
+            ->map(fn (TimetableSlot $slot): array => [
+                'profesor_id' => (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id),
+                'calendar_id' => (int) $slot->calendar_id,
+            ])
+            ->filter(fn (array $row): bool => $row['profesor_id'] > 0)
+            ->groupBy('profesor_id');
+
+        if ($stats->isEmpty()) {
+            return [];
+        }
+
+        return \App\Models\app\Academy\Profesor::query()
+            ->whereIn('id', $stats->keys()->all())
+            ->orderBy('lastname')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($profesor) use ($stats): array {
+                $rows = $stats->get((int) $profesor->id, collect());
+                $calendars = $rows->pluck('calendar_id')->unique()->count();
+                $blocks = $rows->count();
+                $ci = trim((string) ($profesor->ci_profesor ?? ''));
+
+                $description = ($ci !== '' ? 'CI '.$ci.' · ' : '')
+                    .$calendars.' calendario(s) · '.$blocks.' bloque(s)';
+
+                return [
+                    'id' => (int) $profesor->id,
+                    'name' => (string) ($profesor->full_name ?? trim(($profesor->lastname ?? '').' '.($profesor->name ?? ''))),
+                    'description' => $description,
+                ];
+            })
+            ->all();
+    }
+
+    /**
      * Descarga el horario del docente seleccionado como JSON estructurado y
      * auto-descriptivo, agregando su carga en TODOS los calendarios activos.
      */
@@ -10225,6 +10284,7 @@ PROMPT;
             'teacherScheduleGrid' => $teacherScheduleGrid,
             'teacherScheduleHasAssignments' => $teacherScheduleHasAssignments,
             'teacherJsonTeachers' => $teacherJsonTeachers,
+            'teachersPdfTeachers' => $this->teachersPdfOptions(),
         ])->layout($this->getLayout());
     }
 

@@ -32,7 +32,7 @@
 
     <!-- Filters -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Plan, grado, asignatura..."
@@ -56,6 +56,15 @@
                     @foreach($listGrados as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Estado</label>
+                <select wire:model.live="filter_status_active"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Todos</option>
+                    <option value="1">Activos</option>
+                    <option value="0">Inactivos</option>
                 </select>
             </div>
             <div class="flex items-end">

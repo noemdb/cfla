@@ -23,10 +23,59 @@ use Illuminate\Support\Facades\DB;
  *   php8.2 artisan diag:copy-questions --from=225 --to=244 --diag-main=1
  * 
  *   CASTELLANO
- *   php8.2 artisan diag:copy-questions --from=140 --to=69 --diag-main=1
- *   php8.2 artisan diag:copy-questions --from=91 --to=140 --diag-main=1
- * 
- * 
+ *   php8.2 artisan diag:copy-questions --from=140 --to=62 --diag-main=1
+ *   php8.2 artisan diag:copy-questions --from=91 --to=233 --diag-main=1
+ *  ----------------------------------------------------------------------------------------------------------------------------------
+*   EDUCACION FÍSICA
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=130 --to=64 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=94 --to=236 --diag-main=1
+*
+*   ORIENTACIÓN VOCACIONAL
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=143 --to=79 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=100 --to=208 --diag-main=1
+* 
+*   INNOVACION TECNOLÓGICA Y PRODUCTIVA
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=142 --to=80 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=101 --to=207 --diag-main=1
+* 
+*   GEOGRAFÍA HISTORIA Y SOBERANÍA NACIONAL
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=141 --to=66 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=98 --to=240 --diag-main=1
+* 
+*   IDIOMAS
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=138 --to=68 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=92 --to=234 --diag-main=1
+* 
+*   MATEMÁTICAS
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=136 --to=67 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=93 --to=235 --diag-main=1
+* 
+*   BIOLOGÍA, AMBIENTE Y TECNOLOGÍA
+*   PRIMER ANO
+*   php8.2 artisan diag:copy-questions --from=131 --to=65 --diag-main=1
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=97 --to=239 --diag-main=1
+* 
+*   QUÍMICA
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=96 --to=238 --diag-main=1
+* 
+*   FÍSICA
+*   CUARTO ANO
+*   php8.2 artisan diag:copy-questions --from=95 --to=237 --diag-main=1
+* 
  */
 class DiagQuestionCopy extends Command
 {
