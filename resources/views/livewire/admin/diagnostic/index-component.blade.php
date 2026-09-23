@@ -83,6 +83,9 @@
                                 Activar Todo
                             </button>
                         @endif
+                        <x-button wire:click.stop="$refresh" icon="arrow-path" secondary outline xs rounded="xl"
+                            title="Refrescar pensums"
+                            class="!border-white/10 hover:!bg-white/5 transition-all duration-300" />
                     </div>
 
                     @if ($activeCount > 0)

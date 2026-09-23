@@ -48,7 +48,7 @@ use Illuminate\Support\Facades\DB;
 *   PRIMER ANO
 *   php8.2 artisan diag:copy-questions --from=141 --to=66 --diag-main=1
 *   CUARTO ANO
-*   php8.2 artisan diag:copy-questions --from=98 --to=206 --diag-main=1
+*   php8.2 artisan diag:copy-questions --from=98 --to=240 --diag-main=1
 * 
 *   IDIOMAS
 *   PRIMER ANO
@@ -70,7 +70,7 @@ use Illuminate\Support\Facades\DB;
 * 
 *   QUÍMICA
 *   CUARTO ANO
-*   php8.2 artisan diag:copy-questions --from=96 --to=202 --diag-main=1
+*   php8.2 artisan diag:copy-questions --from=96 --to=238 --diag-main=1
 * 
 *   FÍSICA
 *   CUARTO ANO
