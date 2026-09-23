@@ -4,6 +4,26 @@
     commentStatus: @entangle('status'),
     showLessonPreview: @entangle('showLessonPreview')
 }">
+    {{-- Overlay de carga (patrón TimetableWizard: timetable/timetable-light) — cubre filtros, lapsos y paginación --}}
+    <div wire:loading.flex
+         wire:target="pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
+         class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-gray-900/90 backdrop-blur-md">
+        <div class="flex flex-col items-center gap-4">
+            <div class="relative w-14 h-14">
+                <svg class="absolute inset-0 w-full h-full animate-spin text-emerald-500/40" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="3" stroke-dasharray="44 132" stroke-linecap="round" class="opacity-80"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-sm font-bold text-gray-700 dark:text-gray-200">Cargando actividades…</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Aplicando filtros</p>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
@@ -11,23 +31,30 @@
             <p class="text-emerald-600 dark:text-emerald-400 font-medium">Supervisión y calidad pedagógica de los planes de evaluación.</p>
         </div>
         <div class="flex items-center gap-2">
-            <button wire:click="$refresh"
-                class="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/5 transition-all duration-300 text-sm font-bold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button wire:click="$refresh" wire:loading.attr="disabled" wire:target="$refresh"
+                class="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/5 transition-all duration-300 text-sm font-bold disabled:opacity-60 disabled:cursor-not-allowed">
+                <svg wire:loading.remove wire:target="$refresh" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
-                Actualizar
+                <svg wire:loading wire:target="$refresh" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span wire:loading.remove wire:target="$refresh">Actualizar</span>
+                <span wire:loading wire:target="$refresh">Actualizando…</span>
             </button>
         </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-8">
+    <!-- Filter Bar — se atenúa durante wire:loading (patrón timetable-light) -->
+    <div wire:loading.class="opacity-60 pointer-events-none"
+         wire:target="pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
+         class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan Estudio</label>
-                <select wire:model.live="pestudio_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                <select wire:model.live="pestudio_id" wire:loading.attr="disabled"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todos</option>
                     @foreach($list_pestudio as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -37,8 +64,8 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Grado/Año</label>
-                <select wire:model.live="grado_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                <select wire:model.live="grado_id" wire:loading.attr="disabled"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todos</option>
                     @foreach($list_grado as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -48,8 +75,8 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Sección</label>
-                <select wire:model.live="seccion_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                <select wire:model.live="seccion_id" wire:loading.attr="disabled"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todas</option>
                     @foreach($list_seccion as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -59,8 +86,8 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
-                <select wire:model.live="profesor_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                <select wire:model.live="profesor_id" wire:loading.attr="disabled"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todos</option>
                     @foreach($list_profesors as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -70,8 +97,8 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades/Lecciones</label>
-                <select wire:model.live="status_activities"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                <select wire:model.live="status_activities" wire:loading.attr="disabled"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todas</option>
                     <option value="SI">Con actividades</option>
                     <option value="NO">Sin actividades</option>
@@ -82,8 +109,8 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
-                <select wire:model.live="filter_status"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                <select wire:model.live="filter_status" wire:loading.attr="disabled"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todas</option>
                     <option value="approved">Aprobada</option>
                     <option value="pending">En revisión</option>
@@ -93,7 +120,7 @@
             <div class="flex items-end gap-4 col-span-1 sm:col-span-2 lg:col-span-4 xl:col-span-6">
                 {{-- Toggle Observaciones --}}
                 <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
-                    <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer">
+                    <input type="checkbox" wire:model.live="filter_observations" wire:loading.attr="disabled" class="sr-only peer">
                     <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
                     <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
                         <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,8 +209,10 @@
         </button>
     </div>
 
-    <!-- ===== CONTENT: View container ===== -->
-    <div x-cloak
+    <!-- ===== CONTENT: View container — atenuado durante carga (patrón timetable) ===== -->
+    <div wire:loading.class="opacity-40 pointer-events-none"
+         wire:target="pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
+         x-cloak
          x-data="{ mode: localStorage.getItem('leadership-activities-view-mode') || 'table' }"
          x-init="() => { if (!localStorage.getItem('leadership-activities-view-mode')) localStorage.setItem('leadership-activities-view-mode', 'table') }"
          x-on:leadership-activities-view-mode-changed.window="mode = $event.detail.mode">
@@ -395,9 +424,9 @@
             <nav class="flex overflow-x-auto [&::-webkit-scrollbar]:h-1" style="scrollbar-width: thin;">
                 @foreach($tabsLapsos as $index => $lapsoItem)
                     @php $isActive = $lapsoItem->id == $lapso_id; @endphp
-                    <button wire:click="selectLapso({{ $lapsoItem->id }})"
+                    <button wire:click="selectLapso({{ $lapsoItem->id }})" wire:loading.attr="disabled" wire:target="selectLapso"
                         title="{{ $lapsoItem->name }}"
-                        class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
+                        class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed
                                {{ $isActive ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-50 dark:bg-emerald-500/5' : 'text-gray-500 dark:text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}"
                     >
                         <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
