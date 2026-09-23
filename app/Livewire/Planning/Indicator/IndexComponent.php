@@ -891,8 +891,8 @@ class IndexComponent extends Component
             ->values()
             ->toArray();
 
-        // ── Diagnostics flow ──
-        $query = \App\Models\app\Instrument\DiagSession::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+        // ── Diagnostics flow ── cantidad de diagAnswer (no sesiones)
+        $query = \App\Models\app\Instrument\DiagAnswer::selectRaw('DATE(created_at) as date, COUNT(*) as total')
             ->groupBy('date')
             ->orderBy('date');
         if ($since) {

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Elimina actividades repetidas con campos idénticos:
- *   pevaluacion_id + topic + thematic + references + learning
+ *   pevaluacion_id + topic + thematic + references + learning + finicial + ffinal
  *
  * Conserva 1 registro por grupo (por defecto el más antiguo = ID menor)
  * y elimina los duplicados junto con sus dependencias RESTRICT.
@@ -19,12 +19,12 @@ use Illuminate\Support\Facades\DB;
  *   php8.2 artisan activity:deduplicate --pevaluacion=215225 --dry-run
  *   php8.2 artisan activity:deduplicate --pevaluacion=215223 --dry-run
  *   php8.2 artisan activity:deduplicate --pevaluacion=215222 --dry-run
- * 
+ *
  *   php8.2 artisan activity:deduplicate --pevaluacion=215231 --dry-run
  *   php8.2 artisan activity:deduplicate --pevaluacion=215230 --dry-run
  *   php8.2 artisan activity:deduplicate --pevaluacion=215228 --dry-run
  *   php8.2 artisan activity:deduplicate --pevaluacion=215227 --dry-run
- * 
+ *
  *   php8.2 artisan activity:deduplicate --force
  *   php8.2 artisan activity:deduplicate --keep=last --force
  */
@@ -36,7 +36,7 @@ class ActivityDeduplicate extends Command
                             {--force : Ejecutar sin confirmación}
                             {--keep=first : Qué registro conservar: first (ID menor) o last (ID mayor)}';
 
-    protected $description = 'Elimina activities duplicadas con campos idénticos (pevaluacion_id, topic, thematic, references, learning), conservando una por grupo';
+    protected $description = 'Elimina activities duplicadas con campos idénticos (pevaluacion_id, topic, thematic, references, learning, finicial, ffinal), conservando una por grupo';
 
     public function handle(): int
     {
@@ -54,7 +54,7 @@ class ActivityDeduplicate extends Command
         $keepAgg = $keep === 'last' ? 'MAX(id)' : 'MIN(id)';
 
         $this->info('=== Activity Deduplicate ===');
-        $this->line('Campos clave: pevaluacion_id, topic, thematic, references, learning');
+        $this->line('Campos clave: pevaluacion_id, topic, thematic, references, learning, finicial, ffinal');
         $this->line('Estrategia keep: ' . $keep . ' (' . $keepAgg . ')');
         if ($pevaluacionFilter) {
             $this->line("Filtro pevaluacion_id = {$pevaluacionFilter}");
@@ -75,9 +75,9 @@ class ActivityDeduplicate extends Command
         $this->line('Buscando grupos duplicados...');
 
         $groupsQuery = DB::table('activities')
-            ->selectRaw("pevaluacion_id, `topic`, `thematic`, `references`, `learning`, COUNT(*) as cnt, {$keepAgg} as keep_id, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') as all_ids")
+            ->selectRaw("pevaluacion_id, `topic`, `thematic`, `references`, `learning`, `finicial`, `ffinal`, COUNT(*) as cnt, {$keepAgg} as keep_id, GROUP_CONCAT(id ORDER BY id SEPARATOR ',') as all_ids")
             ->when($pevaluacionFilter, fn ($q) => $q->where('pevaluacion_id', $pevaluacionFilter))
-            ->groupByRaw('pevaluacion_id, `topic`, `thematic`, `references`, `learning`')
+            ->groupByRaw('pevaluacion_id, `topic`, `thematic`, `references`, `learning`, `finicial`, `ffinal`')
             ->havingRaw('COUNT(*) > 1')
             ->orderByRaw('cnt DESC');
 
