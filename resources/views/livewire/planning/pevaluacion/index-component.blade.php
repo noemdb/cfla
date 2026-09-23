@@ -46,13 +46,6 @@
             <p class="text-emerald-400 font-medium">Asignación de profesores a áreas de formación, secciones y lapsos.</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('app.planning.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Planificación
-            </a>
             <button type="button" wire:click="create"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,30 +78,47 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Grado</label>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$filter_pestudio ? 'text-gray-600' : 'text-gray-500' }}">
+                    Grado
+                    @if(!$filter_pestudio)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Plan</span>
+                    @endif
+                </label>
                 <select wire:model.live="filter_grado" @disabled(!$filter_pestudio)
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                    <option value="">{{ $filter_pestudio ? 'Todos' : 'Elija un plan' }}</option>
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ !$filter_pestudio ? 'opacity-60' : '' }}">
+                    <option value="">{{ $filter_pestudio ? 'Todos' : 'Seleccione Plan primero' }}</option>
                     @foreach($filter_grados as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Sección</label>
-                <select wire:model.live="filter_seccion" @disabled(!$filter_grado)
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                    <option value="">{{ $filter_grado ? 'Todos' : 'Elija un grado' }}</option>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ (!$filter_pestudio || !$filter_grado) ? 'text-gray-600' : 'text-gray-500' }}">
+                    Sección
+                    @if(!$filter_pestudio)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— requiere Plan</span>
+                    @elseif(!$filter_grado)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Grado</span>
+                    @endif
+                </label>
+                <select wire:model.live="filter_seccion" @disabled(!$filter_pestudio || !$filter_grado)
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ (!$filter_pestudio || !$filter_grado) ? 'opacity-60' : '' }}">
+                    <option value="">{{ !$filter_pestudio ? 'Elija un plan' : ($filter_grado ? 'Todos' : 'Elija un grado') }}</option>
                     @foreach($filter_secciones as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Asignatura</label>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$filter_pestudio ? 'text-gray-600' : 'text-gray-500' }}">
+                    Asignatura
+                    @if(!$filter_pestudio)
+                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Plan</span>
+                    @endif
+                </label>
                 <select wire:model.live="filter_asignatura" @disabled(!$filter_pestudio)
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                    <option value="">{{ $filter_pestudio ? 'Todas' : 'Elija un plan' }}</option>
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ !$filter_pestudio ? 'opacity-60' : '' }}">
+                    <option value="">{{ $filter_pestudio ? 'Todas' : 'Seleccione Plan primero' }}</option>
                     @foreach($filter_asignaturas as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
@@ -979,4 +989,14 @@
             </div>
         </x-slot>
     </x-modal-card>
+
+    <!-- Floating Loading State — pevaluacions (transparencia backdrop-blur) -->
+    <div wire:loading.flex
+         class="fixed bottom-6 right-6 z-[80] hidden items-center gap-2.5 px-5 py-3 bg-white/65 dark:bg-gray-900/40 backdrop-blur-xl border border-gray-200/40 dark:border-white/10 rounded-full shadow-2xl shadow-black/20 dark:shadow-black/40 opacity-95">
+        <svg class="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-widest text-gray-700 dark:text-gray-200">Cargando ...</span>
+    </div>
 </div>

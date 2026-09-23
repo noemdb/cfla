@@ -1166,8 +1166,8 @@
     @include('leadership.help-activities')
 
     <!-- Floating Loading State — anidado filters (transparencia backdrop-blur) -->
-    <div wire:loading.delay
-         class="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 px-5 py-3 bg-white/75 dark:bg-gray-900/55 backdrop-blur-md border border-gray-200/60 dark:border-white/10 rounded-full shadow-xl shadow-black/10 dark:shadow-black/30">
+    <div wire:loading.flex
+         class="fixed bottom-6 right-6 z-[80] hidden items-center gap-2.5 px-5 py-3 bg-white/65 dark:bg-gray-900/40 backdrop-blur-xl border border-gray-200/40 dark:border-white/10 rounded-full shadow-2xl shadow-black/20 dark:shadow-black/40 opacity-95">
         <svg class="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
