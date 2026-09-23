@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
  *   php8.2 artisan diag:copy-questions --from=225 --to=244 --diag-main=1
  * 
  *   CASTELLANO
- *   php8.2 artisan diag:copy-questions --from=140 --to=69 --diag-main=1
+ *   php8.2 artisan diag:copy-questions --from=140 --to=62 --diag-main=1
  *   php8.2 artisan diag:copy-questions --from=91 --to=233 --diag-main=1
  *  ----------------------------------------------------------------------------------------------------------------------------------
 *   EDUCACION FÍSICA

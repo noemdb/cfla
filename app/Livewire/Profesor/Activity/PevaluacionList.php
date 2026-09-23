@@ -54,6 +54,22 @@ class PevaluacionList extends Component
         if (!$this->lapsoId) {
             $this->lapsoId = Lapso::current()?->id;
         }
+
+        // Normalizar params anidados inconsistentes que puedan venir por URL:
+        // Plan -> Grado -> Sección. Sin plan no hay grado ni sección;
+        // sin grado no hay sección.
+        if (!$this->pestudio_id) {
+            $this->grado_id = null;
+            $this->seccion_id = null;
+        } elseif ($this->grado_id && ! Grado::where('id', $this->grado_id)->where('pestudio_id', $this->pestudio_id)->exists()) {
+            $this->grado_id = null;
+            $this->seccion_id = null;
+        }
+        if (!$this->grado_id) {
+            $this->seccion_id = null;
+        } elseif ($this->seccion_id && ! Seccion::where('id', $this->seccion_id)->where('grado_id', $this->grado_id)->exists()) {
+            $this->seccion_id = null;
+        }
     }
 
     public function updatingLapsoId()
@@ -219,20 +235,20 @@ class PevaluacionList extends Component
             ->orderBy('name')
             ->pluck('name', 'id');
 
-        $grados = Grado::where('status_active', 'true')
-            ->whereHas('pestudio', function ($q) use ($profesor) {
-                $q->where('planning_module', true)
-                    ->where('status_active', 'true')
-                    ->whereHas('pensums.pevaluacions', function ($q2) use ($profesor) {
-                        $q2->where('profesor_id', $profesor->id);
-                    });
-            })
-            ->when($this->pestudio_id, function ($q) {
-                $q->where('pestudio_id', $this->pestudio_id);
-            })
-            ->with('pestudio')
-            ->orderBy('name')
-            ->get();
+        $grados = $this->pestudio_id
+            ? Grado::where('status_active', 'true')
+                ->whereHas('pestudio', function ($q) use ($profesor) {
+                    $q->where('planning_module', true)
+                        ->where('status_active', 'true')
+                        ->whereHas('pensums.pevaluacions', function ($q2) use ($profesor) {
+                            $q2->where('profesor_id', $profesor->id);
+                        });
+                })
+                ->where('pestudio_id', $this->pestudio_id)
+                ->with('pestudio')
+                ->orderBy('name')
+                ->get()
+            : collect();
         $list_grado = $grados->mapWithKeys(function ($grado) {
             $pestudioName = $grado->pestudio->name ?? '';
 
