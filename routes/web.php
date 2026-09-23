@@ -372,6 +372,11 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('resources');
             Route::get('/profesores', \App\Livewire\Coordinacion\ProfesorList::class)
                 ->name('profesores');
+
+            // Diagnósticos: Revisión y seguimiento de preguntas por área (equivalente a leadership, scope Peducativo→Pestudio)
+            Route::get('/diagnosticos', \App\Livewire\Coordinacion\DiagnosticQuestionReview::class)
+                ->name('diagnosticos')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/timetable', \App\Livewire\Coordinacion\Timetable\TimetableWizard::class)
                 ->name('timetable');
             Route::get('/timetable/editor/{calendar?}', \App\Livewire\Coordinacion\Timetable\TimetableEditor::class)

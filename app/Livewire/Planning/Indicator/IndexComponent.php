@@ -767,14 +767,17 @@ class IndexComponent extends Component
      */
     private function loadLessonStats(): void
     {
+        $this->lessonTotal = Activity::withLmsContent()->count();
 
         $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
             ->where('status', 'PUBLISHED')
             ->whereNotNull('published_at')
+            ->whereHas('activity', fn ($q) => $q->withLmsContent())
             ->count();
         $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
             ->whereNotNull('publish_at')
             ->where('status', '!=', 'PUBLISHED')
+            ->whereHas('activity', fn ($q) => $q->withLmsContent())
             ->count();
 
         $this->lessonPublishedPct = $this->lessonTotal > 0 ? round(($this->lessonPublished / $this->lessonTotal) * 100, 1) : 0;

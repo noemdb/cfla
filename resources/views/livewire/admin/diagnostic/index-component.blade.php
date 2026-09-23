@@ -1,27 +1,11 @@
 <div class="fade-in">
-    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div class="mb-10">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Gestión Operativa de la ejecución de los Diagnósticos</h1>
             <p class="text-emerald-400 font-medium">Gestiona la activación de áreas de formación para la aplicación del
                 diagnóstico académico.
             </p>
         </div>
-        <a href="{{ route('app.planning.index') }}"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-                </path>
-            </svg>
-            Planificación
-        </a>
-        <a href="{{ route('admin.index') }}"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
-                </path>
-            </svg>
-            Administración
-        </a>
     </div>
 
     <div class="mb-6">

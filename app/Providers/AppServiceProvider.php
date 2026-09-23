@@ -51,6 +51,10 @@ class AppServiceProvider extends ServiceProvider
             return 'Database\\Factories\\'.Str::after($modelFqn, 'App\\Models\\').'Factory';
         });
 
+        // Observer de notificaciones para Programas Educativos (Peducativo).
+        // Notifica a Planificación (is_planner) al crear/actualizar/eliminar.
+        \App\Models\app\Academy\Peducativo::observe(\App\Observers\PeducativoObserver::class);
+
         // Observer de invalidación de caché para el scope de liderazgo (ADR-007).
         // Invalida las claves "leadership:{userId}:{areas|asignaturas}" cuando se
         // reasigna un leader_id en AreaConocimiento, evitando que un líder saliente

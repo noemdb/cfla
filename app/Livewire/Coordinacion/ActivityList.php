@@ -10,6 +10,9 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
+use App\Models\User;
+use App\Notifications\PevaluacionObservationNotification;
+use App\Services\NotificationService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -248,7 +251,18 @@ class ActivityList extends Component
             abort(403);
         }
 
-        $pev->update(['observations' => $this->observations ?: null]);
+        $originalObservations = $pev->observations;
+        $newValue = $this->observations ?: null;
+        $isNew = filled(trim((string) $newValue));
+        $wasChanged = trim((string) $originalObservations) !== trim((string) $newValue);
+
+        $pev->update(['observations' => $newValue]);
+        $action = filled(trim((string) $originalObservations)) ? 'actualizó' : 'registró';
+
+        if ($wasChanged && $isNew) {
+            $this->notifyPlanners($pev->fresh(), $action);
+        }
+
         $this->editingPevId = null;
         $this->observations = '';
 
@@ -256,6 +270,47 @@ class ActivityList extends Component
         $this->notification()->success(
             title: 'Observaciones guardadas',
             description: 'Las observaciones se han actualizado correctamente.'
+        );
+    }
+
+    private function notifyPlanners(Pevaluacion $pev, string $action): void
+    {
+        $planners = User::where('is_planner', true)->where('is_active', 'enable')->get();
+        if ($planners->isEmpty()) {
+            return;
+        }
+
+        $pev->loadMissing(['pensum.pestudio', 'pensum.asignatura', 'profesor', 'seccion.grado', 'lapso']);
+
+        $pestudioName = $pev->pensum?->pestudio?->name;
+        $asignaturaName = $pev->pensum?->asignatura?->name;
+        $seccionName = $pev->seccion?->name;
+        $gradoName = $pev->seccion?->grado?->name;
+        $profesorName = trim(($pev->profesor?->lastname ?? '').' '.($pev->profesor?->name ?? ''));
+        $lapsoName = $pev->lapso?->name;
+        $preview = \Illuminate\Support\Str::limit(trim((string) $pev->observations), 80);
+
+        $context = collect([$pestudioName, $asignaturaName, $gradoName ? $gradoName.' · '.$seccionName : $seccionName, $profesorName])->filter()->implode(' · ');
+        $message = 'Coordinación '.$action.' la observación'.($context ? ' en '.$context : '').($preview ? ': "'.$preview.'"' : '.');
+        if ($lapsoName) {
+            $message .= ' ('.$lapsoName.')';
+        }
+
+        app(NotificationService::class)->notifyUsers(
+            $planners,
+            new PevaluacionObservationNotification(
+                type: 'pevaluacion_observation_updated',
+                message: $message,
+                url: route('app.planning.pevaluacions.index'),
+                pevaluacionId: (int) $pev->id,
+                pestudioName: $pestudioName,
+                asignaturaName: $asignaturaName,
+                seccionName: $seccionName,
+                profesorName: $profesorName ?: null,
+                lapsoName: $lapsoName,
+                observationPreview: $preview ?: null,
+                action: $action,
+            ),
         );
     }
 

@@ -8,6 +8,7 @@ use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagSession;
 use App\Models\app\Instrument\DiagReferent;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
@@ -49,6 +50,7 @@ class DiagMainCrud extends Component
 
     // ─── CRUD actions ──────────────────────────────────────────────
 
+    #[On('open-diag-create')]
     public function create()
     {
         $this->resetForm();

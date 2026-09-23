@@ -3,7 +3,7 @@
         <div>
             <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-1">Diagnóstico · Revisión de Preguntas</h1>
             <p class="text-amber-600 dark:text-amber-400 font-medium text-sm">
-                Revisa y da seguimiento a las preguntas de diagnóstico de las áreas de conocimiento que tienes asignadas.
+                Revisa y da seguimiento a las preguntas de diagnóstico de tus programas educativos (Peducativo → Pestudio → Pensum).
             </p>
         </div>
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">

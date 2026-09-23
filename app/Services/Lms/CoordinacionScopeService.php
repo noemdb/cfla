@@ -35,7 +35,7 @@ class CoordinacionScopeService
      * True si el usuario no debe tener restricción de scope
      * (actualmente: solo admins).
      */
-    private function isUnrestricted(): bool
+    public function isUnrestricted(): bool
     {
         return (bool) $this->user->is_admin;
     }
@@ -237,5 +237,29 @@ class CoordinacionScopeService
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->whereIn('pensums.pestudio_id', $this->getPestudioIds())
             ->exists();
+    }
+
+    public function getAssignedPensumIds(): Collection
+    {
+        $pestudioIds = $this->getPestudioIds();
+        if ($pestudioIds->isEmpty()) return collect();
+        return Pensum::whereIn('pestudio_id', $pestudioIds)->pluck('id');
+    }
+
+    public function scopeDiagQuestions(Builder $query): Builder
+    {
+        if ($this->isUnrestricted()) return $query;
+        $pensumIds = $this->getAssignedPensumIds();
+        if ($pensumIds->isEmpty()) return $query->whereRaw('1=0');
+        return $query->whereIn('pensum_id', $pensumIds);
+    }
+
+    public function assertCanAccessPensum(int $pensumId): void
+    {
+        if ($this->isUnrestricted()) return;
+        $pensum = Pensum::find($pensumId);
+        if (! $pensum || ! $this->getPestudioIds()->contains($pensum->pestudio_id)) {
+            abort(403, 'Pensum fuera de tu ámbito de coordinación.');
+        }
     }
 }

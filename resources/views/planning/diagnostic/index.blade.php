@@ -27,17 +27,23 @@
         <p class="text-emerald-400 font-medium">Gestión Operativa, activación de áreas de formación y configuración del diagnóstico académico.</p>
     </div>
 
-    {{-- Módulo: Cabeceras de Diagnóstico (DiagMain CRUD) --}}
-    @livewire('planning.diagnostic.diag-main-crud')
+    {{-- Selector de instrumento diagnóstico (w-full, sin selección por defecto) --}}
+    @livewire('planning.diagnostic.diag-main-viewer')
 
-    {{-- Módulo: Activación de Áreas de Formación --}}
-    <div class="mb-8">
-        @livewire('admin.diagnostic.index-component')
-    </div>
+    {{-- Secciones dependientes de un DiagMain seleccionado — ocultas por defecto (active null) --}}
+    <div x-data="{ diagMainId: null }" x-on:diag-main-selected.window="diagMainId = $event.detail.id" x-show="diagMainId" x-cloak x-transition.opacity>
+        {{-- Módulo: Cabeceras de Diagnóstico (DiagMain CRUD) --}}
+        @livewire('planning.diagnostic.diag-main-crud')
 
-    {{-- Módulo: Preguntas por Pensum agrupadas por Grupo Estable --}}
-    <div class="mb-8">
-        @livewire('planning.diagnostic.question-by-pensum')
+        {{-- Módulo: Activación de Áreas de Formación --}}
+        <div class="mb-8">
+            @livewire('admin.diagnostic.index-component')
+        </div>
+
+        {{-- Módulo: Preguntas por Pensum agrupadas por Grupo Estable --}}
+        <div class="mb-8">
+            @livewire('planning.diagnostic.question-by-pensum')
+        </div>
     </div>
 
     {{-- Navegación Rápida --}}

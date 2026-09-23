@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Leadership;
+namespace App\Livewire\Coordinacion;
 
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\CampoConocimiento;
@@ -10,7 +10,7 @@ use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagOption;
 use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagSession;
-use App\Services\Leadership\LeadershipService;
+use App\Services\Lms\CoordinacionScopeService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -307,7 +307,7 @@ class DiagnosticQuestionReview extends Component
         $this->validateStep();
 
         // Autorización: el área (pensum) debe pertenecer al scope del líder.
-        $service = new LeadershipService(Auth::user());
+        $service = new CoordinacionScopeService(Auth::user());
         if (! Auth::user()->is_admin) {
             $service->assertCanAccessPensum((int) $this->pensum_id);
         }
@@ -394,7 +394,7 @@ class DiagnosticQuestionReview extends Component
 
     private function scopedQuery()
     {
-        $service = new LeadershipService(Auth::user());
+        $service = new CoordinacionScopeService(Auth::user());
         $query = DiagQuestion::query()->with(['pensum.asignatura', 'pensum.grado.pestudio', 'diagMain', 'competency', 'indicator', 'options']);
 
         return $service->scopeDiagQuestions($query);
@@ -405,7 +405,7 @@ class DiagnosticQuestionReview extends Component
         if (Auth::user()->is_admin) {
             return;
         }
-        $service = new LeadershipService(Auth::user());
+        $service = new CoordinacionScopeService(Auth::user());
         if ($q->pensum_id) {
             $service->assertCanAccessPensum((int) $q->pensum_id);
         } else {
@@ -413,15 +413,19 @@ class DiagnosticQuestionReview extends Component
         }
     }
 
-    #[Layout('leadership.layouts.app')]
+    #[Layout('coordinacion.layouts.app')]
     public function render()
     {
         $user = Auth::user();
-        $service = new LeadershipService($user);
+        $service = new CoordinacionScopeService($user);
 
-        $areas = AreaConocimiento::where('leader_id', $user->id)->orderBy('name')->get();
-        if ($areas->isEmpty() && $service->isUnrestricted()) {
+        $pestudioIdsForAreas = $service->getPestudioIds();
+        if ($pestudioIdsForAreas->isNotEmpty()) {
+            $areas = AreaConocimiento::whereIn('pestudio_id', $pestudioIdsForAreas)->orderBy('name')->get();
+        } elseif ($service->isUnrestricted()) {
             $areas = AreaConocimiento::orderBy('name')->get();
+        } else {
+            $areas = collect();
         }
 
         // Inicialización para evitar undefined en la vista si hay excepción temprana
@@ -473,7 +477,8 @@ class DiagnosticQuestionReview extends Component
 
         $baseScoped = $this->scopedQuery();
         // Fuerza el ámbito is_leadership incluso para admin con áreas asignadas
-        $assignedForBase = $service->getAssignedPensumIds();
+        $coordPestIdsForBase = $service->getPestudioIds();
+        $assignedForBase = $coordPestIdsForBase->isNotEmpty() ? \App\Models\app\Academy\Pensum::whereIn('pestudio_id', $coordPestIdsForBase)->pluck('id') : collect();
         if ($assignedForBase->isNotEmpty()) {
             $baseScoped->whereIn('pensum_id', $assignedForBase);
         }
@@ -529,12 +534,13 @@ class DiagnosticQuestionReview extends Component
         $metrics['precision'] = $metrics['precisionTotal'] > 0 ? round((100 * $metrics['precisionCorrect']) / $metrics['precisionTotal'], 1) : null;
         $metrics['estudiantes'] = $metrics['estudiantes'] ?? 0;
 
-        // Sección enriquecida — diferida (wire:init) y respeta is_leadership (AreaConocimiento→Pensum) y filtros de área/diagMain (incluso para admin con áreas)
+        // Sección enriquecida — diferida (wire:init) y respeta coordinacion (Pestudio→Pensum) y filtros de área/diagMain
         $recentSessions = collect();
         $questionsByType = collect();
         $questionsByDifficulty = collect();
         if ($this->enrichedLoaded) {
-            $assignedForEnriched = $service->getAssignedPensumIds();
+            $coordPestIdsEnriched2 = $service->getPestudioIds();
+            $assignedForEnriched = $coordPestIdsEnriched2->isNotEmpty() ? \App\Models\app\Academy\Pensum::whereIn('pestudio_id', $coordPestIdsEnriched2)->pluck('id') : collect();
             if ($assignedForEnriched->isEmpty() && $service->isUnrestricted()) {
                 $assignedForEnriched = null;
             }
@@ -583,7 +589,7 @@ class DiagnosticQuestionReview extends Component
             $selected = $this->scopedQuery()->with(['pensum.asignatura', 'pensum.grado', 'pensum.pestudio', 'competency', 'indicator', 'options', 'diagMain'])->find($this->selectedId);
         }
 
-        return view('livewire.leadership.diagnostic-question-review', [
+        return view('livewire.coordinacion.diagnostic-question-review', [
             'questions' => $questions,
             'areas' => $areas,
             'pensumsOptions' => $pensumsOptions,
