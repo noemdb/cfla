@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AreaConocimiento extends Model
 {
     use HasFactory, SoftDeletes;
+    //comment
 
     protected $fillable = [
         'peducativo_id', 'pestudio_id', 'leader_id',
