@@ -17,6 +17,16 @@ use Illuminate\Support\Facades\DB;
  *   php8.2 artisan diag:copy-questions 1 112 113 --dry-run
  *   php8.2 artisan diag:copy-questions 1 112 113 --force
  *   php8.2 artisan diag:copy-questions --from=112 --to=113 --diag-main=1 --dry-run
+ *
+ *   FHC 
+ *   php8.2 artisan diag:copy-questions --from=222 --to=80 --diag-main=1
+ *   php8.2 artisan diag:copy-questions --from=225 --to=244 --diag-main=1
+ * 
+ *   CASTELLANO
+ *   php8.2 artisan diag:copy-questions --from=140 --to=69 --diag-main=1
+ *   php8.2 artisan diag:copy-questions --from=91 --to=140 --diag-main=1
+ * 
+ * 
  */
 class DiagQuestionCopy extends Command
 {
