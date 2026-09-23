@@ -29,6 +29,8 @@ class DiagMainViewer extends Component
 
     public ?int $progressPensumId = null;
 
+    public int $paginate = 10;
+
     protected $paginationTheme = 'tailwind';
 
     public function mount(): void
@@ -70,6 +72,11 @@ class DiagMainViewer extends Component
     }
 
     public function updatedProgressPensumId(): void
+    {
+        $this->resetPage('pensumProgressPage');
+    }
+
+    public function updatedPaginate(): void
     {
         $this->resetPage('pensumProgressPage');
     }
@@ -202,7 +209,7 @@ class DiagMainViewer extends Component
                 if ($this->progressPensumId) {
                     $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->id === (int) $this->progressPensumId);
                 }
-            $perPage = 10;
+            $perPage = max(1, (int) $this->paginate);
             $currentPage = LengthAwarePaginator::resolveCurrentPage('pensumProgressPage');
             $total = $filteredProgress->count();
             $items = $filteredProgress->forPage($currentPage, $perPage)->values();

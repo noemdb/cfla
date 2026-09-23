@@ -7,6 +7,7 @@
                 <div class="relative">
                     <select wire:model.live="paginate"
                         class="appearance-none bg-gray-800/50 border border-white/10 text-gray-300 rounded-lg pl-3 pr-8 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all cursor-pointer">
+                        <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="30">30</option>
                         <option value="50">50</option>
