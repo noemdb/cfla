@@ -1034,6 +1034,18 @@ class TimetablePdfController extends Controller
             abort(404, 'No hay docentes con asignaciones en los calendarios activos del lapso vigente.');
         }
 
+        // Filtro opcional por docente (diálogo «Consolidado de docentes»).
+        $profesorId = (int) $request->query('profesor_id', 0);
+        if ($profesorId > 0) {
+            $teachersData = $teachersData
+                ->filter(fn (array $row): bool => (int) $row['profesor']->id === $profesorId)
+                ->values();
+
+            if ($teachersData->isEmpty()) {
+                abort(404, 'El docente seleccionado no tiene asignaciones en los calendarios activos del lapso vigente.');
+            }
+        }
+
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
 
         // Orientación del print: portrait (por defecto) o landscape.
