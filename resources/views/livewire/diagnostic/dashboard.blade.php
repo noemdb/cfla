@@ -20,16 +20,16 @@
                 <span>Guía de Participación</span>
             </button>
 
-            <button wire:click="loadAvailablePensums" wire:loading.attr="disabled"
+            <button wire:click="loadAvailablePensums" wire:loading.attr="disabled" wire:target="loadAvailablePensums"
                 class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                <div wire:loading.remove wire:target="loadAvailablePensums">
+                <div wire:loading.remove.delay wire:target="loadAvailablePensums">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                         </path>
                     </svg>
                 </div>
-                <div wire:loading wire:target="loadAvailablePensums">
+                <div wire:loading.delay wire:target="loadAvailablePensums">
                     <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -96,11 +96,23 @@
         </div>
     @endif
 
-    <!-- Areas de Formación -->
-    <p class="text-gray-300 text-lg">
+    <!-- Areas de Formación — skeleton per target -->
+    <div wire:loading.delay wire:target="loadAvailablePensums" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+        @for($i=0;$i<3;$i++)
+            <div class="diagnostic-card rounded-lg p-6 border border-gray-700 animate-pulse">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="h-5 bg-gray-700 rounded w-3/4"></div>
+                    <div class="w-16 h-16 bg-gray-700 rounded-full"></div>
+                </div>
+                <div class="h-3 bg-gray-700 rounded w-1/2 mb-2"></div>
+                <div class="h-10 bg-gray-700 rounded w-full mt-4"></div>
+            </div>
+        @endfor
+    </div>
+    <p class="text-gray-300 text-lg" wire:loading.remove wire:target="loadAvailablePensums">
         Bienvenido/a <strong>{{ $currentStudent->full_name }}</strong> . Puedes realizar tu diagnóstico.
     </p>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div wire:loading.remove wire:target="loadAvailablePensums" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($pensums as $pensum)
             <div class="diagnostic-card rounded-lg p-6 border @if ($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
                 wire:click="startDiagnostic({{ $pensum['id'] }})">

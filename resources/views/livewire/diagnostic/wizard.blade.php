@@ -1,4 +1,11 @@
-<div class="min-h-screen flex flex-col">
+<div class="min-h-screen flex flex-col" x-data="{ init() {
+        const key = 'diag-progress-' + @js($currentSessionId ?? 'none');
+        const saved = localStorage.getItem(key);
+        if (saved) { try { const p = JSON.parse(saved); if (p.progress) $wire.set('progress', p.progress); } catch(e){} }
+        $wire.on('diag-progress-persist', ({progress, sessionId}) => {
+            localStorage.setItem('diag-progress-' + sessionId, JSON.stringify({progress, at: Date.now()}));
+        });
+    } }">
     <!-- Header con progreso -->
     <!-- Updated header to use rounded card styling consistent with other sections -->
     <div class="container mx-auto px-4 py-8">
@@ -12,9 +19,9 @@
                     @if ($isReviewMode)
                         <span class="text-sm bg-blue-600 px-3 py-1 rounded-lg">Modo Revisión</span>
                     @elseif($showAnsweredQuestions)
-                        <span class="text-sm bg-green-600 px-3 py-1 rounded-lg">Preguntas Contestadas</span>
+                        <button type="button" wire:click="toggleQuestionView" wire:loading.attr="disabled" class="text-sm bg-green-600 hover:bg-green-700 px-3 py-1 rounded-lg transition-colors">Preguntas Contestadas</button>
                     @else
-                        <span class="text-sm bg-orange-600 px-3 py-1 rounded-lg">Preguntas Pendientes</span>
+                        <button type="button" wire:click="toggleQuestionView" wire:loading.attr="disabled" wire:target="toggleQuestionView" class="text-sm bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded-lg transition-colors">Preguntas Pendientes</button>
                     @endif
                 </div>
 
@@ -158,7 +165,7 @@
 
                 <!-- Navegación -->
                 <div class="flex justify-between items-center">
-                    <button wire:click="previousQuestion" @if ($currentQuestionIndex === 0 || $isProcessing) disabled @endif
+                    <button wire:click="previousQuestion" wire:loading.attr="disabled" wire:target="previousQuestion,nextQuestion,saveAnswer" @if ($currentQuestionIndex === 0 || $isProcessing) disabled @endif
                         class="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                         @if ($isProcessing)
                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
@@ -208,7 +215,7 @@
                             </button>
                         @endif
                     @else
-                        <button wire:click="{{ $currentQuestionIndex === count($questionIds) - 1 ? 'confirmFinish' : 'nextQuestion' }}" :disabled="!answered"
+                        <button wire:click="{{ $currentQuestionIndex === count($questionIds) - 1 ? 'confirmFinish' : 'nextQuestion' }}" wire:loading.attr="disabled" wire:target="nextQuestion,confirmFinish,saveAnswer" :disabled="!answered"
                             class="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                             <span>
                                 @if ($currentQuestionIndex === count($questionIds) - 1)

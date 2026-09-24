@@ -9,6 +9,7 @@ use App\Models\app\Instrument\DiagSession;
 use App\Models\app\Learner\Estudiant;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
@@ -21,13 +22,16 @@ class Diagnostic extends Component
 
     public $studentCi = '';
 
+    #[Locked]
     public $currentStudentId = null;
 
     public $isStudentVerified = false;
 
     // Estados principales
+    #[Locked]
     public $selectedPensumId = null;
 
+    #[Locked]
     public $currentSessionId = null;
 
     // Wizard
@@ -246,61 +250,68 @@ class Diagnostic extends Component
             return;
         }
 
-        // Filtramos por status_active_diagnostic = true para garantizar que
-        // solo se muestren los pensums activos para diagnóstico.
-        $studentPensums = $student->pensums
-            ->where('status_active_diagnostic', true)
-            ->load('asignatura');
+        $cacheKey = "diag:{$student->id}:pensums:v1";
 
-        $pensumIds = $studentPensums->pluck('id')->all();
+        $this->pensums = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($student) {
+            $studentPensums = $student->pensums
+                ->where('status_active', true)
+                ->load('asignatura');
 
-        if (empty($pensumIds)) {
-            $this->pensums = [];
+            $pensumIds = $studentPensums->pluck('id')->all();
 
-            return;
+            if (empty($pensumIds)) {
+                return [];
+            }
+
+            $activeCounts = DiagQuestion::whereIn('pensum_id', $pensumIds)
+                ->where('activo', true)
+                ->selectRaw('pensum_id, COUNT(*) as total')
+                ->groupBy('pensum_id')
+                ->pluck('total', 'pensum_id');
+
+            $completedCounts = DiagAnswer::join('diag_questions', 'diag_questions.id', '=', 'diag_answers.question_id')
+                ->where('diag_answers.estudiant_id', $student->id)
+                ->whereIn('diag_questions.pensum_id', $pensumIds)
+                ->selectRaw('diag_questions.pensum_id, COUNT(*) as total')
+                ->groupBy('diag_questions.pensum_id')
+                ->pluck('total', 'pensum_id');
+
+            $difficultyDistribution = DiagQuestion::whereIn('pensum_id', $pensumIds)
+                ->where('activo', true)
+                ->selectRaw('pensum_id, difficulty, COUNT(*) as total')
+                ->groupBy('pensum_id', 'difficulty')
+                ->get()
+                ->groupBy('pensum_id')
+                ->map(fn ($rows) => $rows->pluck('total', 'difficulty')->toArray());
+
+            return $studentPensums
+                ->filter(fn ($pensum) => ($activeCounts[$pensum->id] ?? 0) > 0)
+                ->map(function ($pensum) use ($activeCounts, $completedCounts, $difficultyDistribution) {
+                    $totalQuestions = (int) ($activeCounts[$pensum->id] ?? 0);
+                    $completedQuestions = (int) ($completedCounts[$pensum->id] ?? 0);
+
+                    return [
+                        'id' => $pensum->id,
+                        'name' => $pensum->asignatura->full_name ?? 'Área sin nombre',
+                        'description' => $pensum->asignatura->description ?? 'Sin descripción',
+                        'total_questions' => $totalQuestions,
+                        'completed_questions' => $completedQuestions,
+                        'progress_percentage' => $totalQuestions > 0 ? min(100, round(($completedQuestions / $totalQuestions) * 100)) : 0,
+                        'is_completed' => $completedQuestions >= $totalQuestions,
+                        'difficulty_distribution' => $difficultyDistribution[$pensum->id] ?? [],
+                    ];
+                })
+                ->values()
+                ->toArray();
+        });
+    }
+
+    private function forgetPensumsCache(): void
+    {
+        if ($this->currentStudentId) {
+            \Illuminate\Support\Facades\Cache::forget("diag:{$this->currentStudentId}:pensums:v1");
+            \Illuminate\Support\Facades\Cache::forget("diag:{$this->currentStudentId}:stats:v1");
         }
-
-        // Una sola query por agregado en vez de N+1 por pensum.
-        $activeCounts = DiagQuestion::whereIn('pensum_id', $pensumIds)
-            ->where('activo', true)
-            ->selectRaw('pensum_id, COUNT(*) as total')
-            ->groupBy('pensum_id')
-            ->pluck('total', 'pensum_id');
-
-        $completedCounts = DiagAnswer::join('diag_questions', 'diag_questions.id', '=', 'diag_answers.question_id')
-            ->where('diag_answers.estudiant_id', $student->id)
-            ->whereIn('diag_questions.pensum_id', $pensumIds)
-            ->selectRaw('diag_questions.pensum_id, COUNT(*) as total')
-            ->groupBy('diag_questions.pensum_id')
-            ->pluck('total', 'pensum_id');
-
-        $difficultyDistribution = DiagQuestion::whereIn('pensum_id', $pensumIds)
-            ->where('activo', true)
-            ->selectRaw('pensum_id, difficulty, COUNT(*) as total')
-            ->groupBy('pensum_id', 'difficulty')
-            ->get()
-            ->groupBy('pensum_id')
-            ->map(fn ($rows) => $rows->pluck('total', 'difficulty')->toArray());
-
-        $this->pensums = $studentPensums
-            ->filter(fn ($pensum) => ($activeCounts[$pensum->id] ?? 0) > 0)
-            ->map(function ($pensum) use ($activeCounts, $completedCounts, $difficultyDistribution) {
-                $totalQuestions = (int) ($activeCounts[$pensum->id] ?? 0);
-                $completedQuestions = (int) ($completedCounts[$pensum->id] ?? 0);
-
-                return [
-                    'id' => $pensum->id,
-                    'name' => $pensum->asignatura->full_name ?? 'Área sin nombre',
-                    'description' => $pensum->asignatura->description ?? 'Sin descripción',
-                    'total_questions' => $totalQuestions,
-                    'completed_questions' => $completedQuestions,
-                    'progress_percentage' => $totalQuestions > 0 ? min(100, round(($completedQuestions / $totalQuestions) * 100)) : 0,
-                    'is_completed' => $completedQuestions >= $totalQuestions,
-                    'difficulty_distribution' => $difficultyDistribution[$pensum->id] ?? [],
-                ];
-            })
-            ->values()
-            ->toArray();
     }
 
     public function loadSessionStats()
@@ -311,14 +322,14 @@ class Diagnostic extends Component
             return;
         }
 
-        $this->sessionStats = [
+        $this->sessionStats = \Illuminate\Support\Facades\Cache::remember("diag:{$this->currentStudentId}:stats:v1", 300, fn () => [
             'total_sessions' => DiagSession::where('estudiant_id', $this->currentStudentId)->count(),
             'completed_sessions' => DiagSession::where('estudiant_id', $this->currentStudentId)
                 ->whereNotNull('completado_at')->count(),
             'total_answers' => DiagAnswer::where('estudiant_id', $this->currentStudentId)->count(),
             'average_progress' => DiagSession::where('estudiant_id', $this->currentStudentId)
                 ->avg('progreso') ?? 0,
-        ];
+        ]);
     }
 
     public function startDiagnostic($pensumId)
@@ -516,6 +527,7 @@ class Diagnostic extends Component
             $this->updateProgress();
 
             DB::commit();
+            $this->forgetPensumsCache();
 
             return true;
         } catch (Exception $e) {
@@ -791,6 +803,9 @@ class Diagnostic extends Component
         if ($session) {
             $session->update(['progreso' => $this->progress]);
         }
+
+        // Persistencia local para retomar tras latencia/reconexión
+        $this->dispatch('diag-progress-persist', progress: $this->progress, sessionId: $this->currentSessionId);
     }
 
     public function getAnsweredQuestionsWithAnswers()

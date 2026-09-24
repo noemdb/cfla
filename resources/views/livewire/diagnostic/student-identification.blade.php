@@ -25,9 +25,9 @@
                         Número de Cédula
                     </label>
                     <div class="relative">
-                        <input type="text" id="studentCi" wire:model.defer="studentCi" placeholder="Ej: 12345678"
+                        <input type="text" id="studentCi" wire:model.live.debounce.500ms="studentCi" placeholder="Ej: 12345678"
                             class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
-                            autocomplete="off">
+                            autocomplete="off" wire:loading.attr="disabled" wire:target="verifyStudent">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -42,10 +42,10 @@
                 </div>
 
                 <!-- Botón de verificación -->
-                <button type="submit" wire:loading.attr="disabled"
+                <button type="submit" wire:loading.attr="disabled" wire:target="verifyStudent"
                     class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                    <span wire:loading.remove>Verificar Identidad</span>
-                    <span wire:loading class="flex items-center space-x-2">
+                    <span wire:loading.remove.delay wire:target="verifyStudent">Verificar Identidad</span>
+                    <span wire:loading.delay wire:target="verifyStudent" class="flex items-center space-x-2">
                         <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                 stroke-width="4"></circle>

@@ -49,16 +49,23 @@
 
 </div>
 
-{{-- State loading — fallback global para cualquier Livewire en esta página --}}
+{{-- State loading — fallback global más visible pero sutil --}}
 <div id="diagnostico-global-loading" class="hidden fixed bottom-6 right-6 z-[60]">
-    <div class="flex items-center gap-2 rounded-full bg-gray-900/70 px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-white backdrop-blur-md border border-white/10 shadow-xl shadow-black/30">
-        <svg class="h-4 w-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
-        <span>Cargando ...</span>
+    <div class="flex items-center gap-3 rounded-full bg-gray-900/90 backdrop-blur-xl pl-3 pr-5 py-3 text-xs font-bold tracking-widest uppercase text-white shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 ring-1 ring-white/5">
+        <span class="relative flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/20">
+            <svg class="h-4 w-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span class="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500"></span>
+        </span>
+        <span>Cargando</span>
+        <span class="h-3 w-px bg-white/10"></span>
+        <span class="text-[10px] font-normal normal-case tracking-normal text-white/60">Sincronizando…</span>
     </div>
 </div>
+<div id="diagnostico-global-bar" class="hidden fixed top-0 inset-x-0 z-[61] h-0.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 animate-pulse pointer-events-none"></div>
 @endsection
 
 @section('styles')
@@ -84,13 +91,15 @@
 <script>
 document.addEventListener('livewire:init', () => {
     const el = document.getElementById('diagnostico-global-loading');
+    const bar = document.getElementById('diagnostico-global-bar');
     if (!el) return;
     Livewire.hook('request', ({ fail }) => {
         el.classList.remove('hidden');
-        fail(() => el.classList.add('hidden'));
+        if (bar) bar.classList.remove('hidden');
+        fail(() => { el.classList.add('hidden'); if (bar) bar.classList.add('hidden'); });
     });
     Livewire.hook('commit', ({ succeed }) => {
-        succeed(() => el.classList.add('hidden'));
+        succeed(() => { el.classList.add('hidden'); if (bar) bar.classList.add('hidden'); });
     });
 });
 </script>
