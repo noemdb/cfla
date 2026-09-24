@@ -201,6 +201,9 @@ class TimetableWizard extends Component
     /** Docente seleccionado en el diálogo «Consolidado de docentes»; null = todos. */
     public ?int $teachersPdfProfesorId = null;
 
+    /** Área de conocimiento para filtrar el «Consolidado de docentes»; null = todas. */
+    public ?string $teachersPdfAreaId = null;
+
     /** P.Educativo seleccionado; null = Todos. */
     public ?string $teacherTotalsPeducativoId = null;
 
@@ -8225,6 +8228,8 @@ PROMPT;
      * Opciones del selector de docente del diálogo «Consolidado de docentes»:
      * docentes con bloques en cualquiera de los calendarios activos, con
      * descripción (CI · calendarios · bloques) para el `x-select` con búsqueda.
+     * Si hay un área seleccionada, se filtra por la cadena
+     * AreaConocimiento → CampoConocimiento → Pensum → Pevaluacion → Profesor.
      *
      * @return array<int, array{id:int, name:string, description:string}>
      */
@@ -8236,11 +8241,28 @@ PROMPT;
             return [];
         }
 
-        $stats = TimetableSlot::query()
+        $query = TimetableSlot::query()
             ->whereIn('calendar_id', $calendarIds)
             ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query
                 ->where('status_active', 'true')
-                ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true')))
+                ->whereHas('grado', fn ($grado) => $grado->where('status_active', 'true')));
+
+        if ($this->teachersPdfAreaId) {
+            $pensumIds = \App\Models\app\Academy\CampoConocimiento::query()
+                ->where('area_conocimiento_id', (int) $this->teachersPdfAreaId)
+                ->pluck('pensum_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($pensumIds->isEmpty()) {
+                return [];
+            }
+
+            $query->whereHas('lesson.pevaluacion', fn ($q) => $q->whereIn('pensum_id', $pensumIds));
+        }
+
+        $stats = $query
             ->with('lesson.pevaluacion:id,profesor_id')
             ->get(['id', 'calendar_id', 'lesson_id', 'profesor_id'])
             ->map(fn (TimetableSlot $slot): array => [
@@ -8275,6 +8297,19 @@ PROMPT;
                 ];
             })
             ->all();
+    }
+
+    public function updatedTeachersPdfAreaId(): void
+    {
+        if ($this->teachersPdfProfesorId === null) {
+            return;
+        }
+
+        $allowed = collect($this->teachersPdfOptions())->pluck('id')->all();
+
+        if (! in_array($this->teachersPdfProfesorId, $allowed, true)) {
+            $this->teachersPdfProfesorId = null;
+        }
     }
 
     /**

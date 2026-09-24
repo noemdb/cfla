@@ -1046,6 +1046,41 @@ class TimetablePdfController extends Controller
             }
         }
 
+        // Filtro opcional por área de conocimiento (Area → Campo → Pensum → Pevaluacion → Profesor).
+        $areaId = (int) $request->query('area_id', 0);
+        $area = null;
+        if ($areaId > 0) {
+            $area = AreaConocimiento::with(['pestudio', 'peducativo'])->findOrFail($areaId);
+            $pensumIds = \App\Models\app\Academy\CampoConocimiento::query()
+                ->where('area_conocimiento_id', $areaId)
+                ->pluck('pensum_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($pensumIds->isEmpty()) {
+                abort(404, 'El área seleccionada no tiene asignaturas asociadas.');
+            }
+
+            $areaProfesorIds = TimetableSlot::query()
+                ->whereIn('calendar_id', $calendars->pluck('id'))
+                ->whereHas('lesson.pevaluacion', fn ($q) => $q->whereIn('pensum_id', $pensumIds))
+                ->with('lesson.pevaluacion:id,profesor_id')
+                ->get(['lesson_id', 'profesor_id'])
+                ->map(fn (TimetableSlot $slot) => (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id))
+                ->filter(fn (int $id) => $id > 0)
+                ->unique()
+                ->values();
+
+            $teachersData = $teachersData
+                ->filter(fn (array $row): bool => $areaProfesorIds->contains((int) $row['profesor']->id))
+                ->values();
+
+            if ($teachersData->isEmpty()) {
+                abort(404, 'No hay docentes con asignaciones en los calendarios activos del lapso vigente para el área seleccionada.');
+            }
+        }
+
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
 
         // Orientación del print: portrait (por defecto) o landscape.
@@ -1067,7 +1102,7 @@ class TimetablePdfController extends Controller
         $format = strtolower((string) $request->query('format', 'html'));
 
         if (in_array($format, ['xls', 'csv'], true)) {
-            return $this->allTeachersXls($lapso, $teachersData, $institucion, $fecha);
+            return $this->allTeachersXls($lapso, $teachersData, $institucion, $fecha, $area);
         }
 
         return view('timetable.teachers-all', [
@@ -1078,6 +1113,7 @@ class TimetablePdfController extends Controller
             'orientation' => $orientation,
             'perPage' => $perPage,
             'autoPrint' => $format === 'pdf',
+            'area' => $area,
         ]);
     }
 
@@ -1088,7 +1124,7 @@ class TimetablePdfController extends Controller
      *
      * @param  \Illuminate\Support\Collection<int, array{profesor:\App\Models\app\Academy\Profesor, peducativos:array}>  $teachersData
      */
-    private function allTeachersXls(Lapso $lapso, \Illuminate\Support\Collection $teachersData, \App\Models\app\Entity\Institucion $institucion, string $fecha)
+    private function allTeachersXls(Lapso $lapso, \Illuminate\Support\Collection $teachersData, \App\Models\app\Entity\Institucion $institucion, string $fecha, ?AreaConocimiento $area = null)
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
 

@@ -81,6 +81,9 @@
         <header>
             <h1>Horarios de docentes</h1>
             <p>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · {{ $lapso?->name ?? '' }} · {{ $fecha }}</p>
+            @if (! empty($area ?? null))
+                <p style="margin-top:6px;font-size:0.8rem;opacity:0.9;">Área: {{ $area->name }} @if($area->code)[{{ $area->code }}]@endif · {{ $area->pestudio?->name ?? 'Sin P.Estudio' }} @if($area->peducativo?->name)· {{ $area->peducativo->name }}@endif</p>
+            @endif
         </header>
 
         @forelse ($sheets as $sheet)
