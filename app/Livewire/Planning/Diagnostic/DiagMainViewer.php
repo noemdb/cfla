@@ -31,6 +31,10 @@ class DiagMainViewer extends Component
 
     public ?int $progressPensumId = null;
 
+    public ?int $resumenGradoId = null;
+
+    public ?int $resumenPestudioId = null;
+
     public int $paginate = 10;
 
     protected $paginationTheme = 'tailwind';
@@ -81,6 +85,17 @@ class DiagMainViewer extends Component
         $this->resetPage('pensumProgressPage');
     }
 
+    public function updatedResumenGradoId(): void
+    {
+        $this->resetPage('pensumProgressPage');
+    }
+
+    public function updatedResumenPestudioId(): void
+    {
+        $this->resumenGradoId = null;
+        $this->resetPage('pensumProgressPage');
+    }
+
     public function updatedPaginate(): void
     {
         $this->resetPage('pensumProgressPage');
@@ -118,6 +133,9 @@ class DiagMainViewer extends Component
         $progressPestudios = collect();
         $progressGrados = collect();
         $progressPensums = collect();
+        $pestudiosForGradoResumen = collect();
+        $gradosForResumen = collect();
+        $gradoProgress = collect();
 
         // Nuevos indicadores solicitados (pensums/respuestas) + completitud/abandono s2526
         $pensumsWithAnswersCount = null;
@@ -240,6 +258,51 @@ class DiagMainViewer extends Component
             $items = $filteredProgress->forPage($currentPage, $perPage)->values();
             $pensumProgress = new LengthAwarePaginator($items, $total, $perPage, $currentPage, ['path' => request()->url(), 'pageName' => 'pensumProgressPage']);
 
+            // Grado resumen — agregado por gradoId con select pestudio+grado específico
+            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
+            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('grado_id'))->where('status_active','true');
+            if ($this->resumenPestudioId) {
+                $gradosForResumenQuery->where('pestudio_id', (int) $this->resumenPestudioId);
+            }
+            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id','name','code','pestudio_id']);
+            $gradoProgress = collect();
+            if ($questionPensumIds->isNotEmpty()) {
+                $baseForGrado = $filteredProgress;
+                $gradoProgress = $baseForGrado->groupBy(fn ($pp) => $pp->pensum->grado_id)->map(function ($items) {
+                    $grado = $items->first()->pensum->grado;
+                    $totalQ = $items->sum('total_questions');
+                    $totalS = $items->sum('total_sessions');
+                    $completedS = $items->sum('completed_sessions');
+                    $completion = $totalS > 0 ? round((100 * $completedS) / $totalS, 1) : 0;
+                    $totalAns = $items->sum('total_answered');
+                    $correctAns = $items->sum('correct_answers');
+                    $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+                    return (object) [
+                        'grado' => $grado,
+                        'fullname' => $grado?->name ?? '—',
+                        'total_questions' => $totalQ,
+                        'total_sessions' => $totalS,
+                        'completed_sessions' => $completedS,
+                        'completion_percentage' => $completion,
+                        'precision' => $prec,
+                        'total_answered' => $totalAns,
+                        'correct_answers' => $correctAns,
+                    ];
+                })->values()->sortBy('fullname')->values();
+                if ($this->resumenPestudioId) {
+                    $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && (int) $gp->grado->pestudio_id === (int) $this->resumenPestudioId)->values();
+                }
+                if ($this->resumenGradoId) {
+                    $gradoProgress = $gradoProgress->where('grado.id', (int) $this->resumenGradoId)->values();
+                }
+                // Paginación por defecto 10 filas por página para Resumen por Grado
+                $gradoPerPage = 10;
+                $gradoCurrentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage('gradoProgressPage');
+                $gradoTotal = $gradoProgress->count();
+                $gradoItems = $gradoProgress->forPage($gradoCurrentPage, $gradoPerPage)->values();
+                $gradoProgress = new \Illuminate\Pagination\LengthAwarePaginator($gradoItems, $gradoTotal, $gradoPerPage, $gradoCurrentPage, ['path' => request()->url(), 'pageName' => 'gradoProgressPage']);
+            }
+
             // Sesiones recientes y distribución por tipo/dificultad (como en s2526 dashboard)
             $recentSessions = (clone $sessionQuery)->with(['estudiant', 'pensum'])->orderByDesc('iniciado_at')->limit(5)->get();
             $questionsByType = DiagQuestion::where('diag_main_id', $selected->id)->select('tipo_pregunta as type', DB::raw('count(*) as count'))->groupBy('tipo_pregunta')->get();
@@ -279,6 +342,9 @@ class DiagMainViewer extends Component
             'precisionCorrect' => $precisionCorrect,
             'precisionTotal' => $precisionTotal,
             'pensumProgress' => $pensumProgress,
+            'gradoProgress' => $gradoProgress ?? collect(),
+            'gradosForResumen' => $gradosForResumen ?? collect(),
+            'pestudiosForGradoResumen' => $pestudiosForGradoResumen ?? collect(),
             'recentSessions' => $recentSessions,
             'questionsByType' => $questionsByType,
             'questionsByDifficulty' => $questionsByDifficulty,

@@ -4,7 +4,9 @@ namespace App\Livewire\Leadership;
 
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\CampoConocimiento;
+use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pensum;
+use App\Models\app\Academy\Pestudio;
 use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagOption;
@@ -39,6 +41,10 @@ class DiagnosticQuestionReview extends Component
     public bool $showDetail = false;
 
     public bool $enrichedLoaded = false;
+
+    public ?int $resumenGradoId = null;
+
+    public ?int $resumenPestudioId = null;
 
     // ─── Wizard de edición de pregunta ─────────────────────────────
     public bool $showQuestionModal = false;
@@ -117,6 +123,17 @@ class DiagnosticQuestionReview extends Component
 
     public function updatingFilterDiagMain(): void
     {
+        $this->resetPage();
+    }
+
+    public function updatedResumenGradoId(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedResumenPestudioId(): void
+    {
+        $this->resumenGradoId = null;
         $this->resetPage();
     }
 
@@ -632,10 +649,59 @@ class DiagnosticQuestionReview extends Component
                     'correct_answers' => $correctAns,
                 ];
             })->sortByDesc('completion_percentage')->values();
+            // Paginación Resumen por área — 10 por página
+            $perPage = 10;
+            $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage('pensumProgressPage');
+            $total = $pensumProgress->count();
+            $items = $pensumProgress->forPage($currentPage, $perPage)->values();
+            $pensumProgress = new \Illuminate\Pagination\LengthAwarePaginator($items, $total, $perPage, $currentPage, ['path' => request()->url(), 'pageName' => 'pensumProgressPage']);
             // Para filtros del resumen (simplificado: pestudio/grado del scope)
             $progressPestudios = \App\Models\app\Academy\Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
             $progressGrados = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active','true')->orderBy('order')->get(['id','name','code','pestudio_id']);
             $progressPensums = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura','grado'])->orderBy('grado_id')->get(['id','grado_id','pestudio_id','asignatura_id']);
+            // Grado resumen — agregado por grado con filtro pestudio
+            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
+            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active','true');
+            if ($this->resumenPestudioId) {
+                $gradosForResumenQuery->where('pestudio_id', (int) $this->resumenPestudioId);
+            }
+            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id','name','code','pestudio_id']);
+            $gradoProgress = $pensumProgress->groupBy(fn ($pp) => $pp->pensum->grado_id)->map(function ($items) {
+                $grado = $items->first()->pensum->grado;
+                $totalQ = $items->sum('total_questions');
+                $totalS = $items->sum('total_sessions');
+                $completedS = $items->sum('completed_sessions');
+                $completion = $totalS > 0 ? round((100 * $completedS) / $totalS, 1) : 0;
+                $totalAns = $items->sum('total_answered');
+                $correctAns = $items->sum('correct_answers');
+                $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+                return (object) [
+                    'grado' => $grado,
+                    'fullname' => $grado?->name ?? '—',
+                    'total_questions' => $totalQ,
+                    'total_sessions' => $totalS,
+                    'completed_sessions' => $completedS,
+                    'completion_percentage' => $completion,
+                    'precision' => $prec,
+                    'total_answered' => $totalAns,
+                    'correct_answers' => $correctAns,
+                ];
+            })->values()->sortBy('fullname')->values();
+            if ($this->resumenPestudioId) {
+                $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && (int) $gp->grado->pestudio_id === (int) $this->resumenPestudioId)->values();
+            }
+            if ($this->resumenGradoId) {
+                $gradoProgress = $gradoProgress->where('grado.id', (int) $this->resumenGradoId)->values();
+            }
+            // Paginación por defecto 10 filas por página para Resumen por Grado
+            $gradoPerPage = 10;
+            $gradoCurrentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage('gradoProgressPage');
+            $gradoTotal = $gradoProgress->count();
+            $gradoItems = $gradoProgress->forPage($gradoCurrentPage, $gradoPerPage)->values();
+            $gradoProgress = new \Illuminate\Pagination\LengthAwarePaginator($gradoItems, $gradoTotal, $gradoPerPage, $gradoCurrentPage, ['path' => request()->url(), 'pageName' => 'gradoProgressPage']);
+        } else {
+            $gradosForResumen = collect();
+            $gradoProgress = collect();
         }
 
         // Sección enriquecida — diferida (wire:init) y respeta is_leadership (AreaConocimiento→Pensum) y filtros de área/diagMain (incluso para admin con áreas)
@@ -721,6 +787,9 @@ class DiagnosticQuestionReview extends Component
             'progressPestudios' => $progressPestudios ?? collect(),
             'progressGrados' => $progressGrados ?? collect(),
             'progressPensums' => $progressPensums ?? collect(),
+            'gradosForResumen' => $gradosForResumen ?? collect(),
+            'gradoProgress' => $gradoProgress ?? collect(),
+            'pestudiosForGradoResumen' => $pestudiosForGradoResumen ?? collect(),
             'precision' => $metrics['precision'] ?? null,
             'precisionCorrect' => $metrics['precisionCorrect'] ?? 0,
             'precisionTotal' => $metrics['precisionTotal'] ?? 0,

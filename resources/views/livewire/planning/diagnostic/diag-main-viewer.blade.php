@@ -267,6 +267,78 @@
                     </div>
                 @endif
 
+                {{-- Resumen por Grado — similar a Resumen por área, con select gradoId específico --}}
+                @if($selected && $gradosForResumen && $gradosForResumen->isNotEmpty())
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
+                        <div class="px-3 py-2 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Resumen por Grado</h4>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-gray-500">{{ $gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $gradoProgress->total() : $gradoProgress->count() }} grado(s)</span>
+                                <select wire:model.live="resumenPestudioId" class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[140px]">
+                                    <option value="">Pestudio: Todos</option>
+                                    @foreach($pestudiosForGradoResumen as $pe)
+                                        <option value="{{ $pe->id }}">{{ $pe->code }} — {{ $pe->name }}</option>
+                                    @endforeach
+                                </select>
+                                <select wire:model.live="resumenGradoId" class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[160px]">
+                                    <option value="">Grado: Todos</option>
+                                    @foreach($gradosForResumen as $g)
+                                        <option value="{{ $g->id }}">{{ $g->code ?? $g->name }} — {{ $g->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead class="bg-white/[0.02] border-b border-white/5">
+                                    <tr class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                        <th class="text-left px-3 py-1.5">Grado</th>
+                                        <th class="text-center px-3 py-1.5">Preg.</th>
+                                        <th class="text-center px-3 py-1.5">Ses.</th>
+                                        <th class="text-center px-3 py-1.5">Compl.</th>
+                                        <th class="text-center px-3 py-1.5">% Finalización</th>
+                                        <th class="text-center px-3 py-1.5">Precisión</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    @forelse($gradoProgress as $gp)
+                                        <tr class="hover:bg-white/[0.02]">
+                                            <td class="px-3 py-1.5 text-white font-medium">{{ $gp->fullname }}</td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px]">{{ $gp->total_questions }}</span></td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-gray-300 text-[10px]">{{ $gp->total_sessions }}</span></td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px]">{{ $gp->completed_sessions }}</span></td>
+                                            <td class="px-3 py-1.5">
+                                                <div class="flex items-center gap-1.5 justify-center">
+                                                    <div class="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full rounded-full {{ $gp->completion_percentage >= 80 ? 'bg-emerald-500' : ($gp->completion_percentage >= 50 ? 'bg-amber-500' : 'bg-red-500') }}" style="width: {{ $gp->completion_percentage }}%"></div></div>
+                                                    <span class="text-[10px] text-gray-400">{{ number_format($gp->completion_percentage, 1) }}%</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-3 py-1.5 text-center">
+                                                @if($gp->precision !== null)
+                                                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold border {{ $gp->precision >= 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : ($gp->precision >= 60 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-red-500/10 border-red-500/20 text-red-400') }}">{{ $gp->precision }}%</span>
+                                                @else
+                                                    <span class="text-[10px] text-gray-600">—</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="6" class="px-3 py-6 text-center text-xs text-gray-500">Sin datos para el grado seleccionado.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                        @if($gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator && $gradoProgress->hasPages())
+                            <x-pagination-wrapper :paginator="$gradoProgress" />
+                        @elseif($gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                            <div class="px-3 py-2 border-t border-white/5 flex items-center justify-between">
+                                <span class="text-[11px] text-gray-500">Mostrando {{ $gradoProgress->firstItem() ?? 0 }} a {{ $gradoProgress->lastItem() ?? 0 }} de {{ $gradoProgress->total() }}</span>
+                                <span class="text-[11px] text-gray-600">{{ $gradoProgress->total() }} grado(s) en total</span>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <p class="text-[10px] text-gray-600">ID #{{ $selected->id }} @if($selected->created_at) · Creado {{ $selected->created_at->format('d/m/Y') }} @endif</p>
             </div>
         </div>
