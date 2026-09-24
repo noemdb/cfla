@@ -365,15 +365,19 @@ class IndexComponent extends Component
             $query->where(function ($q) {
                 $q->where('pestudio_id', $this->wizardFilterPestudio)
                   ->orWhereHas('pensums', function ($p) {
-                      $p->where('pestudio_id', $this->wizardFilterPestudio);
+                      $p->where('pestudio_id', $this->wizardFilterPestudio)
+                        ->where('pensums.status_active', true)
+                        ->whereHas('grado', fn ($g) => $g->where('grados.status_active', 'true'));
                   });
             });
         }
 
-        // Filter by grado via pensum relationship
+        // Filter by grado via pensum relationship (solo pensums activos con grado activo)
         if ($this->wizardFilterGrado) {
             $query->whereHas('pensums', function ($q) {
-                $q->where('grado_id', $this->wizardFilterGrado);
+                $q->where('grado_id', $this->wizardFilterGrado)
+                  ->where('pensums.status_active', true)
+                  ->whereHas('grado', fn ($g) => $g->where('grados.status_active', 'true'));
             });
         }
 
@@ -385,11 +389,17 @@ class IndexComponent extends Component
             });
         }
 
-        // Precarga de pensums activos (con grado, pestudio y secciones) para
-        // mostrar la asociación plan/grado/sección en cada card sin N+1.
+        // Solo asignaturas con al menos un pensum activo cuyo grado esté activo
+        $query->whereHas('pensums', function ($q) {
+            $q->where('pensums.status_active', true)
+              ->whereHas('grado', fn ($g) => $g->where('grados.status_active', 'true'));
+        });
+
+        // Precarga de pensums activos con grado activo (con grado, pestudio y secciones)
         $query->with([
             'pensums' => function ($q) {
                 $q->where('pensums.status_active', true)
+                  ->whereHas('grado', fn ($g) => $g->where('grados.status_active', 'true'))
                   ->orderBy('pensums.grado_id')
                   ->with([
                       'pestudio',
@@ -534,7 +544,9 @@ class IndexComponent extends Component
             return $resolved;
         }
 
-        $pensums = \App\Models\app\Academy\Pensum::where('asignatura_id', $asignaturaId);
+        $pensums = \App\Models\app\Academy\Pensum::where('asignatura_id', $asignaturaId)
+            ->where('status_active', true)
+            ->whereHas('grado', fn ($q) => $q->where('status_active', 'true'));
         if ($areaPestudioId) {
             $pensums->where('pestudio_id', $areaPestudioId);
         }

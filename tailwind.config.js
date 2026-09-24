@@ -14,7 +14,11 @@ export default {
 
     './vendor/wireui/wireui/resources/**/*.blade.php',
     './vendor/wireui/wireui/ts/**/*.ts',
-    './vendor/wireui/wireui/src/View/**/*.php'
+    './vendor/wireui/wireui/src/View/**/*.php',
+
+    // Grado::getColorAttribute / getTailwindClassesAttribute — clases Tailwind literales
+    './app/Models/**/*.php',
+    './app/Livewire/**/*.php',
   ],
   theme: {
     extend: {
@@ -137,6 +141,22 @@ export default {
     {
       pattern: /ring-(emerald|blue|green|teal|cyan|purple|amber|sky|rose|indigo|orange|yellow|pink|lime|fuchsia|violet)-400\/40/,
       variants: ['focus-visible'],
+    },
+    // Grado::getTailwindClassesAttribute — distinción sutil en cards de asignaturas
+    {
+      pattern: /bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500/,
+    },
+    {
+      pattern: /bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/10/,
+    },
+    {
+      pattern: /bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/,
+    },
+    {
+      pattern: /text-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-300/,
+    },
+    {
+      pattern: /border-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/(20|30)/,
     },
   ]
 }

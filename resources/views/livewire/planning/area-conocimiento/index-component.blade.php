@@ -570,8 +570,10 @@
                                                         $isSelected = array_key_exists($asignatura->id, $selectedSubjects);
                                                         $selectedPensumId = $selectedSubjects[$asignatura->id] ?? null;
                                                         $colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name);
-                                                        // Pensums activos, priorizando el plan seleccionado.
-                                                        $pensums = $asignatura->pensums->where('status_active', true);
+                                                        // Pensums activos con grado activo, priorizando el plan seleccionado.
+                                                        $pensums = $asignatura->pensums
+                                                            ->where('status_active', true)
+                                                            ->filter(fn ($p) => $p->grado?->status_active === 'true');
                                                         if ($wizardFilterPestudio) {
                                                             $filtered = $pensums->where('pestudio_id', (int) $wizardFilterPestudio);
                                                             if ($filtered->isNotEmpty()) { $pensums = $filtered; }
@@ -606,6 +608,17 @@
                                                         $horasP = $asignatura->hour_p_week;
                                                         $creditos = $asignatura->unid_credit;
                                                         $escala = $asignatura->tescala;
+
+                                                        // Distinción sutil por Grado (color Tailwind-compatible)
+                                                        $primaryGrado = $pensums->first()?->grado;
+                                                        $gradoClasses = $primaryGrado?->tailwind_classes ?? [
+                                                            'bar' => 'bg-slate-500',
+                                                            'badge' => 'bg-slate-500/10 text-slate-300 border border-slate-500/20',
+                                                            'dot' => 'bg-slate-500',
+                                                            'border' => 'border-slate-500/30',
+                                                            'ring' => 'ring-slate-500/20',
+                                                            'subtleBg' => 'bg-slate-500/[0.04]',
+                                                        ];
                                                     @endphp
                                                     <div x-data="{ showTip: false, top: 0, left: 0 }"
                                                          @mouseenter="showTip = true; const r = $el.getBoundingClientRect(); top = r.top; left = r.left + r.width/2"
@@ -613,10 +626,14 @@
                                                          class="relative">
                                                         <button type="button"
                                                             wire:click="toggleSubject({{ $asignatura->id }})"
-                                                            class="relative h-56 w-full flex flex-col items-start text-left rounded-xl border p-3 transition-all duration-200 group
+                                                            class="relative h-56 w-full flex flex-col items-start text-left rounded-xl border p-3 overflow-hidden transition-all duration-200 group
                                                                 {{ $isSelected
                                                                     ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
                                                                     : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
+                                                            @if($primaryGrado)
+                                                                <span class="absolute top-0 inset-x-0 h-0.5 {{ $gradoClasses['bar'] }} opacity-60 pointer-events-none"></span>
+                                                                <span class="absolute inset-0 rounded-xl {{ $gradoClasses['subtleBg'] }} pointer-events-none"></span>
+                                                            @endif
                                                             <span class="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200
                                                                 {{ $isSelected ? 'bg-emerald-500 text-white' : 'bg-white/5 text-transparent border border-white/10' }}">
                                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -624,11 +641,14 @@
                                                                 </svg>
                                                             </span>
 
-                                                            <span class="inline-flex items-center gap-1.5 pr-6">
+                                                            <span class="inline-flex items-center gap-1.5 pr-6 flex-wrap">
                                                                 <span class="w-2 h-2 rounded-full {{ $this->materiaColorClass($colorKey) }}"></span>
                                                                 <span class="text-[10px] font-mono text-gray-400">{{ $asignatura->code }}</span>
+                                                                @if($primaryGrado)
+                                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold leading-none {{ $gradoClasses['badge'] }}" title="{{ $primaryGrado->full_name }}">{{ $primaryGrado->code_sm }}</span>
+                                                                @endif
                                                                 @if($escala)
-                                                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/5">Escala {{ $escala }}</span>
+                                                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/5">Esc {{ $escala }}</span>
                                                                 @endif
                                                             </span>
 

@@ -43,7 +43,10 @@ class CampoConocimiento extends Model
      */
     public static function resolvePensumId(int $asignaturaId, ?int $areaPestudioId): ?int
     {
-        $pensums = Pensum::where('asignatura_id', $asignaturaId)->get();
+        $pensums = Pensum::where('asignatura_id', $asignaturaId)
+            ->where('status_active', true)
+            ->whereHas('grado', fn ($q) => $q->where('status_active', 'true'))
+            ->get();
 
         if ($pensums->isEmpty()) {
             return null;
