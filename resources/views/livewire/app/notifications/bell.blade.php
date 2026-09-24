@@ -1,4 +1,4 @@
-<div x-data="{ open: false }" @click.outside="open = false" wire:poll.30s="reconcile" class="relative">
+<div x-data="{ open: false }" @click.outside="open = false" wire:poll.visible.30s="reconcile" class="relative">
     {{-- Botón campana --}}
     <button type="button"
             @click="open = !open; $wire.reconcile()"
@@ -29,7 +29,7 @@
                 @endif
             </h3>
             @if($unreadCount > 0)
-                <button type="button" wire:click="markAllAsRead" wire:loading.attr="disabled"
+                <button type="button" wire:click="markAllAsRead" wire:loading.attr="disabled" wire:target="markAllAsRead"
                     class="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline disabled:opacity-50">
                     Marcar todas como leídas
                 </button>

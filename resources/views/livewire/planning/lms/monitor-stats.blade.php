@@ -1,4 +1,4 @@
-<div wire:poll.{{ config('broadcasting.poll_interval', 5000) }}ms="refreshStats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+<div wire:poll.visible.{{ config('broadcasting.poll_interval', 5000) }}ms="refreshStats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
     <div class="bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/50 rounded-lg p-3">
         <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $total }}</p>
         <p class="text-xs text-gray-500 dark:text-slate-400">Total de Lecciones</p>

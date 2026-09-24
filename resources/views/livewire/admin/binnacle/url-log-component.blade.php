@@ -53,7 +53,7 @@
 
     <!-- Chart -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-4"
-         @if($live) wire:poll.5000ms @endif>
+         @if($live) wire:poll.visible.5000ms @endif>
         <div class="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center lg:justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">

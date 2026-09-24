@@ -276,19 +276,4 @@
         </div>
     @endif
 
-    {{-- State loading — más visible pero sutil: barra superior + píldora con anillo --}}
-    <div wire:loading.delay class="fixed top-0 inset-x-0 z-40 h-0.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 animate-pulse pointer-events-none"></div>
-    <div wire:loading.delay class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-full bg-gray-900/90 backdrop-blur-xl pl-3 pr-5 py-3 text-xs font-bold tracking-widest uppercase text-white shadow-2xl shadow-emerald-500/10 border border-emerald-500/20 ring-1 ring-white/5">
-        <span class="relative flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/20">
-            <svg class="h-4 w-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-            </svg>
-            <span class="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-            <span class="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500"></span>
-        </span>
-        <span>Cargando</span>
-        <span class="h-3 w-px bg-white/10"></span>
-        <span class="text-[10px] font-normal normal-case tracking-normal text-white/60">Sincronizando…</span>
-    </div>
 </div>

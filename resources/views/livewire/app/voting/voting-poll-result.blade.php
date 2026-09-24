@@ -1,4 +1,4 @@
-<div wire:poll.3s="loadResults" class="space-y-8 fade-in">
+<div wire:poll.visible.3s="loadResults" class="space-y-8 fade-in">
     @if ($showTitle)
         <!-- Poll Title -->
         <div class="text-center mb-10">

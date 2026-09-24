@@ -1,6 +1,6 @@
 <div
     x-data
-    wire:poll.{{ config('broadcasting.poll_interval', 5000) }}ms="refreshCount"
+    wire:poll.visible.{{ config('broadcasting.poll_interval', 5000) }}ms="refreshCount"
     class="inline-flex items-center gap-1"
     title="Lecciones programadas pendientes de aprobación"
 >

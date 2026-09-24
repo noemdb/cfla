@@ -82,7 +82,7 @@
     </div>
 
     <!-- Chart: actividad registrada en la bitácora (tiempo real) -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-4" wire:poll.5000ms="refreshChart">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-4" wire:poll.visible.5000ms="refreshChart">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">

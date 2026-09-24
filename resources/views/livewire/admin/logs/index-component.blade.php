@@ -1,4 +1,4 @@
-<div class="fade-in" x-data="{ confirmAction: @entangle('confirmAction'), drawerOpen: false }" {!! $autoRefresh ? 'wire:poll.3s' : '' !!}
+<div class="fade-in" x-data="{ confirmAction: @entangle('confirmAction'), drawerOpen: false }" {!! $autoRefresh ? 'wire:poll.visible.3s' : '' !!}
     @keydown.window="
         const el = document.activeElement;
         const tag = el ? el.tagName : '';
