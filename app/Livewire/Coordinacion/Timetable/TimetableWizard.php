@@ -198,8 +198,8 @@ class TimetableWizard extends Component
     /** Modal «Totalización por docente» (toolbar): filtro por P.Educativo y formato. */
     public bool $showTeacherTotalsModal = false;
 
-    /** Docente seleccionado en el diálogo «Consolidado de docentes»; null = todos. */
-    public ?int $teachersPdfProfesorId = null;
+    /** Docentes seleccionados en el diálogo «Consolidado de docentes»; vacío = todos. */
+    public array $teachersPdfProfesorIds = [];
 
     /** Área de conocimiento para filtrar el «Consolidado de docentes»; null = todas. */
     public ?string $teachersPdfAreaId = null;
@@ -8301,15 +8301,27 @@ PROMPT;
 
     public function updatedTeachersPdfAreaId(): void
     {
-        if ($this->teachersPdfProfesorId === null) {
+        if ($this->teachersPdfProfesorIds === []) {
             return;
         }
 
         $allowed = collect($this->teachersPdfOptions())->pluck('id')->all();
 
-        if (! in_array($this->teachersPdfProfesorId, $allowed, true)) {
-            $this->teachersPdfProfesorId = null;
+        $filtered = array_values(array_intersect($this->teachersPdfProfesorIds, $allowed));
+
+        if (count($filtered) !== count($this->teachersPdfProfesorIds)) {
+            $this->teachersPdfProfesorIds = $filtered;
         }
+    }
+
+    public function updatedTeachersPdfProfesorIds(): void
+    {
+        $this->teachersPdfProfesorIds = collect($this->teachersPdfProfesorIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**

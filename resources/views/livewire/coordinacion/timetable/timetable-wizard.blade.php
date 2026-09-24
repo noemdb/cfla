@@ -167,7 +167,7 @@
     </div>
 
     {{-- Diálogo: configuración del consolidado de docentes (PDF / HTML / XLS). --}}
-    <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2, profesorId: $wire.entangle('teachersPdfProfesorId'), areaId: $wire.entangle('teachersPdfAreaId') }"
+    <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2, profesorIds: $wire.entangle('teachersPdfProfesorIds'), areaId: $wire.entangle('teachersPdfAreaId') }"
         x-on:open-teachers-pdf.window="open = true"
         x-on:keydown.escape.window="open = false"
         x-cloak x-show="open"
@@ -202,8 +202,9 @@
                     <label class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Área de conocimiento</label>
 
                     {{-- Trigger --}}
-                    <button type="button" x-on:click="open = !open"
-                        class="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/50 dark:border-white/10 dark:bg-white/5">
+                    <button type="button" disabled
+                        class="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-left outline-none transition-colors dark:border-white/10 dark:bg-white/5 opacity-60 cursor-not-allowed"
+                        title="Filtro por área temporalmente deshabilitado">
                         @if ($selectedAreaForTeachers)
                             <span class="min-w-0">
                                 <span class="flex items-center gap-1.5">
@@ -321,7 +322,7 @@
 
                 <div>
                     <x-select label="Profesor" placeholder="Todos los docentes"
-                        wire:model.live="teachersPdfProfesorId" searchable>
+                        wire:model.live="teachersPdfProfesorIds" searchable multiselect>
                         @foreach ($teachersPdfTeachers as $teacher)
                             <x-select.option :label="$teacher['name']" :value="$teacher['id']" :description="$teacher['description']" />
                         @endforeach
@@ -384,7 +385,7 @@
                     class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
                     Cancelar
                 </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage + (profesorId ? '&profesor_id=' + profesorId : '') + (areaId ? '&area_id=' + areaId : '')"
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage + (profesorIds.length ? '&profesor_ids=' + profesorIds.join(',') : '') + (areaId ? '&area_id=' + areaId : '')"
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
                     Generar

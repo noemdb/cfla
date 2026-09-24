@@ -279,7 +279,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Actividades Registradas por Día</h3>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Actividades por Fecha de Inicio</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 normal-case">Agrupadas por <code class="px-1 py-0.5 bg-gray-100 dark:bg-white/10 rounded text-[10px]">activities.finicial</code> — no por <code class="px-1 py-0.5 bg-gray-100 dark:bg-white/10 rounded text-[10px]">created_at</code></p>
+                                </div>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">{{ count($chartActivitiesByDay) }} día(s)</span>

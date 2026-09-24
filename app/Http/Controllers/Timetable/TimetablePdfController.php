@@ -1034,11 +1034,22 @@ class TimetablePdfController extends Controller
             abort(404, 'No hay docentes con asignaciones en los calendarios activos del lapso vigente.');
         }
 
-        // Filtro opcional por docente (diálogo «Consolidado de docentes»).
-        $profesorId = (int) $request->query('profesor_id', 0);
-        if ($profesorId > 0) {
+        // Filtro opcional por docentes (multiselección).
+        $profesorIds = [];
+        if ($request->filled('profesor_ids')) {
+            $raw = $request->query('profesor_ids');
+            $profesorIds = is_array($raw) ? $raw : explode(',', (string) $raw);
+            $profesorIds = collect($profesorIds)->map(fn ($id) => (int) $id)->filter(fn (int $id) => $id > 0)->unique()->values()->all();
+        } elseif ($request->filled('profesor_id')) {
+            $single = (int) $request->query('profesor_id', 0);
+            if ($single > 0) {
+                $profesorIds = [$single];
+            }
+        }
+
+        if ($profesorIds !== []) {
             $teachersData = $teachersData
-                ->filter(fn (array $row): bool => (int) $row['profesor']->id === $profesorId)
+                ->filter(fn (array $row): bool => in_array((int) $row['profesor']->id, $profesorIds, true))
                 ->values();
 
             if ($teachersData->isEmpty()) {

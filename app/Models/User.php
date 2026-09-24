@@ -150,38 +150,36 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         return $this->role_label;
     }
 
-    public function getRoleLabelAttribute()
+    public function getRoleLabelAttribute(): string
     {
-        if ($this->is_admin) {
+        // Prioridad cuando el usuario tiene varios roles (requerimiento navbar):
+        // 'is_admin', 'is_planner','is_coordinacion', 'is_leadership', 'is_profesor', 'is_director', 'is_student', 'is_diagnostic'
+        // Se lee el atributo crudo para no heredar el fallback de is_planner/is_leadership/is_director que incluyen is_admin.
+        $a = $this->attributes;
+
+        if (!empty($a['is_admin'])) {
             return 'Administrador';
         }
-
-        if ($this->is_director) {
-            return 'Dirección';
-        }
-
-        if ($this->is_leadership) {
-            return 'Jefe de Área';
-        }
-
-        if ($this->is_diagnostic) {
-            return 'Personal de Diagnóstico';
-        }
-
-        if ($this->isCoordinacion()) {
-            return 'Coordinación';
-        }
-
-        if ($this->is_planner) {
+        if (!empty($a['is_planner'])) {
             return 'Planificación';
         }
-
-        if ($this->isProfesor()) {
+        if (!empty($a['is_coordinacion'])) {
+            return 'Coordinación';
+        }
+        if (!empty($a['is_leadership'])) {
+            return 'Jefe de Área';
+        }
+        if (!empty($a['is_profesor'])) {
             return 'Profesor';
         }
-
-        if ($this->is_student) {
+        if (!empty($a['is_director'])) {
+            return 'Dirección';
+        }
+        if (!empty($a['is_student'])) {
             return 'Estudiante';
+        }
+        if (!empty($a['is_diagnostic'])) {
+            return 'Personal de Diagnóstico';
         }
 
         return 'Usuario Estándar';
