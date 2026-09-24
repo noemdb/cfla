@@ -250,10 +250,11 @@ class Diagnostic extends Component
             return;
         }
 
-        $cacheKey = "diag:{$student->id}:pensums:v1";
+        $cacheKey = "diag:{$student->id}:pensums:v2";
 
         $this->pensums = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($student) {
             $studentPensums = $student->pensums
+                ->where('status_active_diagnostic', true)
                 ->where('status_active', true)
                 ->load('asignatura');
 
@@ -310,6 +311,7 @@ class Diagnostic extends Component
     {
         if ($this->currentStudentId) {
             \Illuminate\Support\Facades\Cache::forget("diag:{$this->currentStudentId}:pensums:v1");
+            \Illuminate\Support\Facades\Cache::forget("diag:{$this->currentStudentId}:pensums:v2");
             \Illuminate\Support\Facades\Cache::forget("diag:{$this->currentStudentId}:stats:v1");
         }
     }
