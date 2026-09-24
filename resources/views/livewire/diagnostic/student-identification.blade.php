@@ -25,7 +25,7 @@
                         Número de Cédula
                     </label>
                     <div class="relative">
-                        <input type="text" id="studentCi" wire:model.live.debounce.500ms="studentCi" placeholder="Ej: 12345678"
+                        <input type="text" id="studentCi" wire:model.defer="studentCi" placeholder="Ej: 12345678"
                             class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
                             autocomplete="off" wire:loading.attr="disabled" wire:target="verifyStudent">
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
