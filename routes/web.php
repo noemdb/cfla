@@ -171,7 +171,10 @@ Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', '
 // ===================================================
 // MÓDULOS /app (Planificación, Profesor, etc.)
 // ===================================================
-Route::prefix('app')->name('app.')->group(function () {
+// `notifications.auto-read` marca como leídas las notificaciones cuyo destino
+// es la ruta visitada (config/notifications.php#auto_read). Va en el grupo
+// raíz para que aplique a todos los módulos sin repetirlo en cada subgrupo.
+Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->group(function () {
 
     // ───────────────────────────────────────────────
     // NOTIFICACIONES (todos los roles autenticados)

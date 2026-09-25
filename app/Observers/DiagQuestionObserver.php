@@ -53,6 +53,21 @@ class DiagQuestionObserver
             // --- Planificación (is_planner) — global
             $plannerQuery = User::where('is_planner', true)->where('is_active', 'enable')->where('id', '!=', Auth::id());
             $planners = $plannerQuery->get();
+
+            // Anti-spam: omitir si ya hay un aviso del mismo tipo sobre esta
+            // pregunta sin leer dentro de la ventana.
+            $dedupeHours = ($action === 'actualizada' || $action === 'actualizado') ? 1 : 24;
+            $subject = ['diag_question_id' => (int) $question->id];
+            // Huella de idempotencia: la pregunta concreta + la acción. Un
+            // guardado reintentado no se duplica; editar OTRA pregunta sí avisa.
+            $event = ['diag_question_id' => (int) $question->id, 'action' => $action];
+            $planners = app(NotificationService::class)->filterByDedupe(
+                $planners,
+                $type,
+                $subject,
+                $dedupeHours
+            );
+
             if ($planners->isNotEmpty()) {
                 $urlPlanner = route('app.planning.diagnostico.index');
                 $messagePlanner = 'Pregunta diagnóstica '.$action.' en '.($asignaturaName ?? 'pensum #'.$pensumId).'.';
@@ -74,7 +89,7 @@ class DiagQuestionObserver
                     action: $action,
                 );
 
-                app(NotificationService::class)->notifyUsers($planners, $notificationPlanner);
+                app(NotificationService::class)->notifyUsers($planners, $notificationPlanner, $event);
             }
 
             // --- Jefatura (is_leadership) — acotado al área de conocimiento del Pensum
@@ -93,6 +108,13 @@ class DiagQuestionObserver
                 ->where('is_leadership', true)
                 ->where('is_active', 'enable')
                 ->get();
+
+            $leaders = app(NotificationService::class)->filterByDedupe(
+                $leaders,
+                $type,
+                $subject,
+                $dedupeHours
+            );
 
             if ($leaders->isEmpty()) {
                 return;
@@ -122,7 +144,7 @@ class DiagQuestionObserver
                 action: $action,
             );
 
-            app(NotificationService::class)->notifyUsers($leaders, $notificationLeadership);
+            app(NotificationService::class)->notifyUsers($leaders, $notificationLeadership, $event);
         } catch (\Throwable $e) {
             Log::warning('DiagQuestionObserver: fallo al notificar', [
                 'diag_question_id' => $question->id ?? null,

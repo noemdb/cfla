@@ -35,6 +35,12 @@ class IndexComponent extends Component
 
     public $activity_id;
 
+    /** @var int|null Actividad pendiente de confirmar en el diálogo de borrado */
+    public $activityToDelete = null;
+
+    /** @var string|null Tema de la actividad pendiente de confirmar */
+    public $activityToDeleteTopic = null;
+
     public $pevaluacion;
 
     public $pevaluacion_id;
@@ -576,18 +582,66 @@ class IndexComponent extends Component
 
     public function delActivity($id)
     {
-        $activity = Activity::findOrFail($id);
+        // Acotado a la pevaluacion del componente: sin este where un id
+        // manipulado desde el navegador borraria actividades de otra pevaluacion.
+        $activity = Activity::where('pevaluacion_id', $this->pevaluacion_id)->findOrFail($id);
         if ($activity) {
             $activity->delete();
             $this->close();
             $this->resetModel();
             $this->activity_id = null;
+            $this->forgetDeleteConfirmation();
 
             $this->notification()->success(
                 '¡Excelente, buen trabajo!',
                 'Registro eliminado exitosamente'
             );
         }
+    }
+
+    // ─── CONFIRMACIÓN DE ELIMINACIÓN (x-dialog) ───────────
+
+    /**
+     * Abre el diálogo de confirmación. Replica en el servidor los mismos
+     * bloqueos que el botón deshabilita en la vista: si la actividad tiene
+     * logros asociados no se puede eliminar, así que no se pide confirmación.
+     */
+    public function askDelete($id): void
+    {
+        $activity = Activity::where('pevaluacion_id', $this->pevaluacion_id)->findOrFail($id);
+
+        if ($activity->achievements()->exists()) {
+            $this->notification()->warning(
+                'No se puede eliminar',
+                'La actividad tiene indicadores (logros) asociados. Elimínalos primero.'
+            );
+
+            return;
+        }
+
+        $this->activityToDelete = (int) $activity->id;
+        $this->activityToDeleteTopic = (string) $activity->topic;
+
+        $this->dialog()->id('activity-delete')->show([
+            'icon' => 'warning',
+            'close' => false,
+        ]);
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->forgetDeleteConfirmation();
+    }
+
+    /**
+     * Limpia el estado de la confirmación. El cierre visual del `x-dialog` lo
+     * hace el navegador con `close()` (Alpine): la API de diálogo de WireUI 2
+     * solo expone `show()`/`confirm()` desde PHP, no `dismiss()`.
+     */
+    private function forgetDeleteConfirmation(): void
+    {
+        $this->activityToDelete = null;
+        $this->activityToDeleteTopic = null;
     }
 
     public function deleteAchievement($id)

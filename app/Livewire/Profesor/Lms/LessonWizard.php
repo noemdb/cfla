@@ -96,9 +96,9 @@ class LessonWizard extends Component
 
     public string $allLessonsDateTo = '';
 
-    public string $allLessonsSortField = 'created_at';
+    public string $allLessonsSortField = 'finicial';
 
-    public string $allLessonsSortDirection = 'desc';
+    public string $allLessonsSortDirection = 'asc';
 
     public int $paginate = 15;
 
@@ -467,11 +467,11 @@ class LessonWizard extends Component
         }
 
         if ($this->allLessonsDateFrom) {
-            $query->whereDate('created_at', '>=', $this->allLessonsDateFrom);
+            $query->whereDate('finicial', '>=', $this->allLessonsDateFrom);
         }
 
         if ($this->allLessonsDateTo) {
-            $query->whereDate('created_at', '<=', $this->allLessonsDateTo);
+            $query->whereDate('finicial', '<=', $this->allLessonsDateTo);
         }
 
         if ($this->allLessonsPeducativoId) {
@@ -489,7 +489,9 @@ class LessonWizard extends Component
             );
         }
 
-        $query->orderBy($this->allLessonsSortField, $this->allLessonsSortDirection);
+        $query->orderByRaw('activities.finicial IS NULL ASC')
+            ->orderBy('activities.finicial', $this->allLessonsSortDirection)
+            ->orderBy('activities.id', 'asc');
 
         return $query->paginate($this->paginate, ['*'], 'allLessonsPage');
     }

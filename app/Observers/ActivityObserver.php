@@ -6,8 +6,8 @@ use App\Models\app\Academy\Activity;
 use App\Models\User;
 use App\Notifications\ActivityApprovedNotification;
 use App\Notifications\ActivityCreatedNotification;
+use App\Services\ActivityAudienceResolver;
 use App\Services\Lms\BroadcastAudit;
-use App\Services\Lms\CoordinacionScopeService;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,17 +17,21 @@ class ActivityObserver
     /**
      * Ventana anti-spam (ítem 7): si el destinatario ya tiene una
      * `activity_created` sin leer para la misma pevaluacion dentro de esta
-     * ventana, se omite la nueva (un aviso por pevaluacion/día basta en
+     * ventana, se omite la nueva (un aviso por pevaluacion/ventana basta en
      * picos de registro).
      */
-    public const DEDUPE_HOURS = 24;
+    public const DEDUPE_HOURS = NotificationService::DEDUPE_HOURS;
 
     /**
      * Notifica al registrar una actividad nueva, sea cual sea la vía de
      * creación (wizard del profesor, clonado, módulo planning, etc.):
-     * jefe de área (leader_id activo y con rol), planners puros y
-     * coordinación en cuyo ámbito cae la pevaluacion. Sin duplicados, sin
-     * auto-notificación al creador y sin emisión en contextos sin usuario
+     * jefatura del área (leader_id activo y con rol), administración y
+     * planificación (alcance global) y coordinación en cuyo ámbito cae la
+     * pevaluacion. Los conjuntos se unen sin exigir rol "puro" para que los
+     * usuarios multi-rol también reciban el aviso, y sin duplicados. El
+     * creador queda fuera salvo que tenga un rol de supervisión: si registra
+     * la actividad como profesor pero además es planificador, necesita el
+     * aviso en esa capacidad. Sin emisión en contextos sin usuario
      * autenticado (seeders, consola, factories).
      */
     public function created(Activity $activity): void
@@ -55,58 +59,35 @@ class ActivityObserver
 
         $pevaluacion = $activity->pevaluacion;
 
-        // Jefatura: leader_id activos y con rol (los rancios no reciben).
-        $leaderIds = $activity->areaLeaderIds();
-        $users = $leaderIds === []
-            ? collect()
-            : User::whereIn('id', $leaderIds)
-                ->where('is_active', 'enable')
-                ->where(fn ($q) => $q->where('is_leadership', true)->orWhere('is_admin', true))
-                ->get();
-
-        // Planificación pura: sin jefatura ni coordinación (atributos crudos).
-        $planners = User::where('is_planner', true)
-            ->where('is_active', 'enable')
-            ->get()
-            ->reject(fn (User $u) => ! empty($u->getAttributes()['is_leadership'])
-                || ! empty($u->getAttributes()['is_coordinacion']));
-
-        // Coordinación en ámbito (patrón LmsPublicationService::getRecipients).
-        $coordinacion = collect();
-        if ($pevaluacion) {
-            $coordinacion = User::query()
-                ->where('is_coordinacion', true)
-                ->where('is_active', 'enable')
-                ->where('is_admin', false)
-                ->where('is_planner', false)
-                ->where('is_director', false)
-                ->get()
-                ->filter(fn (User $u) => app(CoordinacionScopeService::class, ['user' => $u])
-                    ->pevaluacionIsInScope($pevaluacion->id));
-        }
-
-        $users = $users->concat($planners)->concat($coordinacion)->unique('id')->values();
-
-        // El creador nunca se auto-notifica.
-        $users = $users->reject(fn (User $u) => (int) $u->id === (int) $creatorId)->values();
+        // Destinatarios: jefatura del área, administración y planificación
+        // (alcance global) y coordinación en cuyo ámbito cae la pevaluacion.
+        //
+        // La resolución vive en `ActivityAudienceResolver` porque la comparten
+        // los observers de `Activity` y de `LmsActivityPublication`. Los
+        // conjuntos se unen sin exigir rol "puro" (para que los usuarios
+        // multi-rol también reciban el aviso) y el autor queda fuera salvo que
+        // tenga un rol de supervisión.
+        //
+        // Aquí NO se avisa al profesor: es el autor del registro.
+        $users = app(ActivityAudienceResolver::class)->forActivity(
+            $activity,
+            actor: Auth::user(),
+            includeProfessor: false
+        );
 
         if ($users->isEmpty()) {
             return;
         }
 
-        // Anti-spam: un aviso no leído por pevaluacion dentro de la ventana
-        // cubre el lote; los siguientes se omiten por destinatario.
-        if ($pevaluacion) {
-            $cutoff = now()->subHours(self::DEDUPE_HOURS);
-            $users = $users->reject(fn (User $u) => $u->unreadNotifications()
-                ->where('data->type', 'activity_created')
-                ->where('data->pevaluacion_id', $pevaluacion->id)
-                ->where('created_at', '>=', $cutoff)
-                ->exists())->values();
+        // Anti-spam: si el destinatario ya tiene un `activity_created` sin leer
+        // para la misma pevaluacion dentro de la ventana, se omite el nuevo
+        // (un aviso por pevaluacion/ventana basta en picos de registro).
+        $subject = $pevaluacion ? ['pevaluacion_id' => (int) $pevaluacion->id] : [];
+        $users = app(NotificationService::class)
+            ->filterByDedupe($users, 'activity_created', $subject, self::DEDUPE_HOURS);
 
-            if ($users->isEmpty()) {
-                return;
-            }
+        if ($users->isEmpty()) {
+            return;
         }
 
         $asignatura = $pevaluacion?->pensum?->asignatura;
@@ -120,6 +101,11 @@ class ActivityObserver
         try {
             // URL neutra (ítem 8): el destino por rol lo decide
             // NotificationTargetResolver al hacer clic.
+            //
+            // La huella de idempotencia es la ACTIVIDAD concreta, no la
+            // pevaluacion: así un job reintentado no duplica este aviso, pero
+            // registrar otra actividad en la misma pevaluacion sí avisa (eso
+            // lo gobierna el anti-spam de no leídas, de ventana 24h).
             app(NotificationService::class)->notifyUsers(
                 $users,
                 new ActivityCreatedNotification(
@@ -132,6 +118,7 @@ class ActivityObserver
                     gradoName: $grado?->name,
                     seccionName: $seccion?->name,
                 ),
+                ['activity_id' => (int) $activity->id]
             );
         } catch (\Throwable $e) {
             Log::warning('ActivityObserver: fallo al notificar creación de actividad', [

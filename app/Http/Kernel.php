@@ -109,5 +109,8 @@ class Kernel extends HttpKernel
         'binnacle.sql' => \App\Http\Middleware\TrackBinnacleSql::class,
         'binnacle.view' => \App\Http\Middleware\CanViewBinnacle::class,
         'binnacle.export' => \App\Http\Middleware\CanExportBinnacle::class,
+        // Marca como leídas las notificaciones cuyo destino es la ruta visitada
+        // (config/notifications.php#auto_read).
+        'notifications.auto-read' => \App\Http\Middleware\MarkNotificationsAsRead::class,
     ];
 }

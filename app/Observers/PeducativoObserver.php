@@ -11,6 +11,19 @@ use Illuminate\Support\Facades\Log;
 
 class PeducativoObserver
 {
+    /**
+     * Ventanas anti-spam por acción. Un "creado" o "eliminado" es un evento de
+     * vida del programa educativo: 24h bastan para no repetirlo. Las
+     * actualizaciones son más frecuentes (edición de un campo cada vez), así
+     * que la ventana es corta: interesa ver el último cambio, no cinco
+     * avisos del mismo guardado.
+     */
+    private const DEDUPE_HOURS = [
+        'creado' => 24,
+        'actualizado' => 1,
+        'eliminado' => 24,
+    ];
+
     public function created(Peducativo $peducativo): void
     {
         $this->notify($peducativo, 'creado', 'peducativo_created');
@@ -47,6 +60,22 @@ class PeducativoObserver
                 return;
             }
 
+            // Anti-spam: si ya hay un aviso del mismo tipo sobre este
+            // peducativo sin leer dentro de la ventana, se omite.
+            $subject = ['peducativo_id' => (int) $peducativo->id];
+            $window = self::DEDUPE_HOURS[$action] ?? 24;
+
+            $planners = app(NotificationService::class)->filterByDedupe(
+                $planners,
+                $type,
+                // Huella de idempotencia: este peducativo + esta acción.
+                ['peducativo_id' => (int) $peducativo->id, 'action' => $action]
+            );
+
+            if ($planners->isEmpty()) {
+                return;
+            }
+
             $name = $peducativo->name ?? 'Programa Educativo';
             $message = 'Programa Educativo "'.$name.'" '.$action.' por '.($this->actorLabel() ?? 'Planificación').'.';
             $url = route('app.planning.peducativos.index');
@@ -61,6 +90,8 @@ class PeducativoObserver
                     peducativoName: $name,
                     action: $action,
                 ),
+                // Huella de idempotencia: este peducativo + esta acción.
+                ['peducativo_id' => (int) $peducativo->id, 'action' => $action]
             );
         } catch (\Throwable $e) {
             Log::warning('PeducativoObserver: fallo al notificar', [

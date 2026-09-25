@@ -44,7 +44,7 @@
             </svg>
         </button>
         @php $disabled = ($achievements->count() > 0 || !$enable_edit); @endphp
-        <button wire:click="delActivity({{ $item->id }})"
+        <button wire:click="askDelete({{ $item->id }})"
             title="Eliminar actividad"
             {{ $disabled ? 'disabled' : '' }}
             class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg text-xs font-bold {{ $disabled ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' }} transition-all duration-200">
@@ -134,8 +134,7 @@
             {{-- Eliminar --}}
             @php $disabled = ($achievements->count() > 0 || !$enable_edit); @endphp
             @if(!$disabled)
-                <button wire:click="delActivity({{ $item->id }})"
-                        wire:confirm="¿Eliminar esta actividad? Se eliminarán todos los indicadores asociados."
+                <button wire:click="askDelete({{ $item->id }})"
                         class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
                     <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

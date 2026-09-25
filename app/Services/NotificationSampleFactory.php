@@ -9,6 +9,7 @@ use App\Notifications\BinnacleDailyReportNotification;
 use App\Notifications\CompetitionUpdateNotification;
 use App\Notifications\DiagQuestionNotification;
 use App\Notifications\LessonScheduledForApproval;
+use App\Notifications\LmsActivityPublicationNotification;
 use App\Notifications\PeducativoNotification;
 use App\Notifications\PendingApprovalReminderNotification;
 use App\Notifications\PevaluacionObservationNotification;
@@ -48,6 +49,8 @@ class NotificationSampleFactory
         'activity_created' => ActivityCreatedNotification::class,
         'activity_approved' => ActivityApprovedNotification::class,
         'lesson_scheduled' => LessonScheduledForApproval::class,
+        'lms_activity_published' => LmsActivityPublicationNotification::class,
+        'lms_publication_deleted' => LmsActivityPublicationNotification::class,
         'pending_approval_reminder' => PendingApprovalReminderNotification::class,
         'scheduled_lessons_reminder' => ScheduledLessonsReminderNotification::class,
         'stale_activities_reminder' => StaleActivitiesReminderNotification::class,
@@ -75,11 +78,38 @@ class NotificationSampleFactory
         foreach (self::CATALOG as $alias => $class) {
             $out[$alias] = [
                 'class' => $class,
-                'channel' => self::channelOf($class),
+                'channel' => self::channelOf($class, $alias),
             ];
         }
 
         return $out;
+    }
+
+    /**
+     * Alias del catálogo al que corresponde una entrada (mismo criterio de
+     * búsqueda que `resolveClass`).
+     *
+     * @throws InvalidArgumentException si no hay muestra para esa entrada
+     */
+    public static function resolveAlias(string $input): string
+    {
+        $needle = self::normalize($input);
+
+        foreach (self::CATALOG as $alias => $class) {
+            if (self::normalize($alias) === $needle
+                || self::normalize(class_basename($class)) === $needle
+                || str_ends_with($needle, self::normalize(class_basename($class)))
+            ) {
+                return $alias;
+            }
+        }
+
+        throw new InvalidArgumentException(sprintf(
+            'No hay muestra para "%s". Usa --list-notifications para ver los tipos disponibles. '
+            .'Si pasaste una FQCN, entrecomíllala para que el shell no se coma los backslashes: '
+            .'--notification=\'App\\Notifications\\DiagQuestionNotification\'.',
+            $input
+        ));
     }
 
     /**
@@ -131,7 +161,7 @@ class NotificationSampleFactory
     public static function make(string $input, string $recipientLabel = 'usuario'): BaseNotification
     {
         $class = self::resolveClass($input);
-        $notification = self::build($class, $recipientLabel);
+        $notification = self::build($class, $recipientLabel, self::resolveAlias($input));
         $channels = self::channelsOf($notification);
 
         if (! in_array('database', $channels, true)) {
@@ -147,10 +177,34 @@ class NotificationSampleFactory
 
     /**
      * @param  class-string<BaseNotification>  $class
+     * @param  string|null  $alias  dos alias pueden compartir clase (p. ej. los
+     *                              dos estados del ciclo de publicación), así
+     *                              que la muestra se decide por alias
      */
-    private static function build(string $class, string $recipientLabel): BaseNotification
+    private static function build(string $class, string $recipientLabel, ?string $alias = null): BaseNotification
     {
         $now = now();
+
+        // Muestras que dependen del alias y no solo de la clase.
+        if ($alias === 'lms_activity_published' || $alias === 'lms_publication_deleted') {
+            $published = $alias === 'lms_activity_published';
+
+            return new LmsActivityPublicationNotification(
+                type: $alias,
+                message: $published
+                    ? 'Se publicó la lección «Ecuaciones de primer grado» en MATEMÁTICAS · QUINTO AÑO · A por Planificación (muestra de prueba).'
+                    : 'Se eliminó la publicación de la lección «Ecuaciones de primer grado» en MATEMÁTICAS · QUINTO AÑO · A por Planificación (muestra de prueba).',
+                url: route('app.notifications.index'),
+                publicationId: 0,
+                activityId: 0,
+                asignaturaName: 'MATEMÁTICAS',
+                gradoName: 'QUINTO AÑO',
+                seccionName: 'A',
+                actorName: 'planificacion',
+                actorRole: 'Planificación',
+                action: $published ? 'publicó' : 'eliminó la publicación de',
+            );
+        }
 
         return match ($class) {
             ReverbTestNotification::class => new ReverbTestNotification(
@@ -300,10 +354,10 @@ class NotificationSampleFactory
      *
      * @param  class-string<BaseNotification>  $class
      */
-    private static function channelOf(string $class): string
+    private static function channelOf(string $class, ?string $alias = null): string
     {
         try {
-            $channels = self::channelsOf(self::build($class, 'muestra'));
+            $channels = self::channelsOf(self::build($class, 'muestra', $alias));
         } catch (\Throwable $e) {
             return '? ('.$e->getMessage().')';
         }

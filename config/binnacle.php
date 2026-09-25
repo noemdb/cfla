@@ -36,6 +36,10 @@ return [
     | Ej: user_login y access son los que la institución considera críticos.
     | queue_backlog DEBE ser síncrono: una alerta de cola caída no puede depender
     | de la propia cola para persistirse.
+    | Las métricas de notificaciones también: son pocas (una por emisión, no
+    | por destinatario) y su valor es justamente diagnosticar cuando el
+    | sistema de notificaciones va mal, que es cuando el worker puede estar
+    | caído. `notifications:stats` las lee.
     */
     'sync_event_types' => [
         'user_login',
@@ -45,6 +49,9 @@ return [
         'sql_insert',
         'sql_update',
         'sql_delete',
+        'notification.dispatched',
+        'notification.broadcast_failed',
+        'notification.read',
     ],
 
     /*

@@ -58,6 +58,16 @@ class Kernel extends ConsoleKernel
         // a las 06:00 se notifica a los profesores (is_profesor) activos que no
         // tienen al menos una actividad en sus pevaluaciones del lapso vigente.
         $schedule->command('professors:notify-missing-activities')->weeklyOn(1, '06:00')->withoutOverlapping();
+
+        // Higiene de la idempotencia de notificaciones: las reclamaciones
+        // caducadas de `notification_dedupe` ya no bloquean nada (la clave
+        // incluye el bucket temporal) y solo ocupan espacio.
+        $schedule->command('notifications:prune-dedupe')->weeklyOn(0, '04:30')->withoutOverlapping();
+
+        // Retención: la tabla `notifications` solo crece. Se podan las LEÍDAS
+        // más antiguas que notifications.retention_days (180 por defecto); las
+        // no leídas nunca, salvo que se pase --purge-unread-days a mano.
+        $schedule->command('notifications:prune')->weeklyOn(0, '05:00')->withoutOverlapping();
     }
 
     protected $commands = [

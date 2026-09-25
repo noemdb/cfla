@@ -148,12 +148,29 @@ class NotificationTargetResolverTest extends TestCase
                 $data
             ), "coordinacion+leadership con stored={$stored}");
 
-            // El alumnado no gestiona actividades: cae a la URL almacenada.
-            $this->assertSame($stored, $resolver->resolveFor(
-                User::factory()->create(['is_student' => true]),
-                $data
-            ), "student con stored={$stored}");
         }
+
+        // El alumnado no gestiona actividades: si la URL almacenada es
+        // accesible (p. ej. el índice) se respeta…
+        $this->assertSame(
+            route('app.notifications.index'),
+            $resolver->resolveFor(
+                User::factory()->create(['is_student' => true]),
+                ['type' => 'activity_created', 'url' => route('app.notifications.index')]
+            ),
+            'una URL accesible del propio usuario se respeta'
+        );
+
+        // …pero si es de otro módulo al que no puede entrar, cae al índice en
+        // lugar de dejarle un enlace que acabe en 403.
+        $this->assertSame(
+            route('app.notifications.index'),
+            $resolver->resolveFor(
+                User::factory()->create(['is_student' => true]),
+                ['type' => 'activity_created', 'url' => route('app.leadership.activities')]
+            ),
+            'un enlace a jefatura no puede entregarse al alumnado'
+        );
     }
 
     /**
@@ -211,6 +228,72 @@ class NotificationTargetResolverTest extends TestCase
                 ['event_type' => 'substitute_assigned', 'action_url' => 'https://destino.test/suplencias']
             ),
             'un type sin destino por rol debe respetar la URL almacenada'
+        );
+    }
+
+    /**
+     * Un enlace solo se entrega si el usuario puede abrirlo: se cruzan los
+     * middlewares de rol de la ruta destino. Si el usuario perdió el rol
+     * entre la emisión y el clic (el aviso se guardó con la URL de jefatura y
+     * luego dejó de serlo), el enlace caería en un 403, así que se resuelve al
+     * siguiente rol de la lista o al índice de notificaciones.
+     */
+    public function test_no_entrega_un_enlace_que_el_usuario_no_puede_abrir(): void
+    {
+        $resolver = app(NotificationTargetResolver::class);
+        $index = route('app.notifications.index');
+
+        // Sin ningún rol: la URL almacenada de jefatura es inaccesible.
+        $sinRol = User::factory()->create();
+        $this->assertSame($index, $resolver->resolveFor($sinRol, [
+            'type' => 'pending_approval_leadership',
+            'url' => route('app.leadership.activities'),
+        ]), 'una URL de jefatura no puede entregarse a quien no es jefatura');
+
+        // URL accesible (propia del rol) → se respeta.
+        $coordinacion = User::factory()->create(['is_coordinacion' => true]);
+        $this->assertSame(
+            route('app.coordinacion.activities'),
+            $resolver->resolveFor($coordinacion, [
+                'type' => 'otra_cosa',
+                'url' => route('app.coordinacion.activities'),
+            ]),
+            'una URL del propio rol sí se respeta'
+        );
+
+        // Ruta inexistente (URL antigua de otra instalación): no se puede
+        // evaluar, así que se entrega tal cual en vez de perder el aviso.
+        $this->assertSame(
+            'https://otro-sitio.test/legacy',
+            $resolver->resolveFor($sinRol, [
+                'type' => 'otra_cosa',
+                'url' => 'https://otro-sitio.test/legacy',
+            ])
+        );
+
+        // Con un rol que sí accede, el destino por rol gana sobre el respaldo.
+        $planner = User::factory()->create(['is_planner' => true]);
+        $this->assertSame(
+            route('app.planning.activities.index'),
+            $resolver->resolveFor($planner, [
+                'type' => 'activity_created',
+                'url' => route('app.leadership.activities'),
+            ])
+        );
+    }
+
+    /**
+     * El índice de notificaciones es el último recurso y es accesible para
+     * cualquiera autenticado, así que nunca se descarta a sí mismo.
+     */
+    public function test_el_indice_siempre_es_un_destino_valido(): void
+    {
+        $resolver = app(NotificationTargetResolver::class);
+        $usuario = User::factory()->create();
+
+        $this->assertSame(
+            route('app.notifications.index'),
+            $resolver->resolveFor($usuario, ['type' => 'sin_url', 'url' => ''])
         );
     }
 }

@@ -113,14 +113,20 @@ class LmsPublicationService
      * - Admin / Planner / Director: visión global (sin restricción de scope).
      * - Leadership: solo si la asignatura de la lección está en sus áreas asignadas.
      * - Coordinación: solo si el pestudio de la lección está en su scope de peducativos.
+     *
+     * Los conjuntos se unen SIN filtros cruzados: exigir un rol "puro"
+     * descartaba a los usuarios multi-rol (p. ej. quien es planner y
+     * coordinación a la vez no entraba en ninguno y nunca recibía el aviso).
+     * `unique('id')` evita el duplicado cuando alguien califica en varios.
      */
     protected function getRecipients(Activity $activity): Collection
     {
         // Roles globales: ven todas las SCHEDULED sin restricción de scope.
         $global = User::query()
-            ->where('is_admin', true)
-            ->orWhere('is_planner', true)
-            ->orWhere('is_director', true)
+            ->where('is_active', 'enable')
+            ->where(fn ($q) => $q->where('is_admin', true)
+                ->orWhere('is_planner', true)
+                ->orWhere('is_director', true))
             ->get();
 
         $asignaturaId = $activity->pevaluacion?->pensum?->asignatura_id;
@@ -128,9 +134,7 @@ class LmsPublicationService
         // Leadership: solo si la asignatura de la lección está en sus áreas.
         $leadership = User::query()
             ->where('is_leadership', true)
-            ->where('is_admin', false)
-            ->where('is_planner', false)
-            ->where('is_director', false)
+            ->where('is_active', 'enable')
             ->get()
             ->filter(function (User $u) use ($asignaturaId) {
                 if (! $asignaturaId) {
@@ -143,17 +147,20 @@ class LmsPublicationService
             });
 
         // Coordinación: solo si el pestudio de la lección está en su scope.
-        $coordinacion = User::query()
-            ->where('is_coordinacion', true)
-            ->where('is_admin', false)
-            ->where('is_planner', false)
-            ->where('is_director', false)
-            ->get()
-            ->filter(function (User $u) use ($activity) {
-                return app(CoordinacionScopeService::class, ['user' => $u])
-                    ->pevaluacionIsInScope($activity->pevaluacion_id);
-            });
+        $coordinacion = collect();
+        if ($activity->pevaluacion_id) {
+            $coordinacion = User::query()
+                ->where('is_coordinacion', true)
+                ->where('is_active', 'enable')
+                ->get()
+                ->filter(function (User $u) use ($activity) {
+                    return app(CoordinacionScopeService::class, ['user' => $u])
+                        ->pevaluacionIsInScope($activity->pevaluacion_id);
+                });
+        }
 
+        // Aquí no se incluye al profesor: es quien acaba de programar la lección
+        // (`notifyScheduled` la emite desde su propia acción).
         return $global
             ->concat($leadership)
             ->concat($coordinacion)

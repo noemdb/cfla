@@ -66,6 +66,13 @@ class AppServiceProvider extends ServiceProvider
         // (crear/editar/ocultar/eliminar) recalcula el tipo de su sección.
         LmsActivityContent::observe(LmsActivityContentObserver::class);
 
+        // Observer de notificaciones del ciclo de publicación de una lección:
+        // avisa cuando `lms_activity_publications.status` pasa a PUBLISHED y
+        // cuando se elimina el registro, con el mismo destinatario que el
+        // observer de Activity (jefatura del área, administración y
+        // planificación, coordinación en ámbito y el profesor).
+        \App\Models\app\Academy\Lms\LmsActivityPublication::observe(\App\Observers\LmsActivityPublicationObserver::class);
+
         // Observers de la bitácora de auditoría (Spec BINNACLE-001, Fase 1).
         // Registrar siempre al final: no deben colisionar con otros observers.
         \App\Models\User::observe(\App\Observers\UserObserver::class);

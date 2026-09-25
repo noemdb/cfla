@@ -40,7 +40,7 @@
         <div class="max-h-96 overflow-y-auto">
             @forelse($notifications as $item)
                 <a href="{{ $item['url'] }}"
-                   @click="open = false; $wire.markAsRead('{{ $item['id'] }}')"
+                   @click="open = false; $wire.markAsRead(@js($item['ids']))"
                    class="flex items-start gap-3 px-4 py-3 border-b border-gray-100 dark:border-white/5 last:border-b-0 transition-colors
                           {{ $item['read_at'] ? 'hover:bg-gray-50 dark:hover:bg-white/5' : 'bg-emerald-50/40 dark:bg-emerald-500/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' }}">
                     <span class="mt-1.5 shrink-0 w-2 h-2 rounded-full
@@ -50,6 +50,9 @@
                             {{ $item['message'] }}
                         </p>
                         <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                            @if($item['grouped'])
+                                {{ count($item['ids']) }} avisos ·
+                            @endif
                             {{ \Carbon\Carbon::parse($item['created_at'])->diffForHumans() }}
                         </p>
                     </div>

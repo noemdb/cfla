@@ -67,12 +67,6 @@ class ActivityList extends Component
         $this->initializeHasCoordinacionScope();
         $service = $this->getCoordinacionService();
 
-        // Al visitar el listado, las `activity_created` pendientes se dan
-        // por vistas (el badge baja sin clics manuales).
-        if (auth()->id()) {
-            app(\App\Services\NotificationService::class)->markTypeAsRead(auth()->id(), 'activity_created');
-        }
-
         $this->listPestudio = Pestudio::whereIn('id', $service->getPestudioIds())
             ->where('status_active', 'true')
             ->orderBy('order')
@@ -282,6 +276,22 @@ class ActivityList extends Component
     private function notifyPlanners(Pevaluacion $pev, string $action): void
     {
         $planners = User::where('is_planner', true)->where('is_active', 'enable')->get();
+
+        // Anti-spam: si planificación ya tiene sin leer un aviso de esta
+        // pevaluacion (registro o actualización) no se repite al guardar
+        // varias veces seguidas la misma observación.
+        $type = $action === 'registró'
+            ? 'pevaluacion_observation_registered'
+            : 'pevaluacion_observation_updated';
+
+        $subject = ['pevaluacion_id' => (int) $pev->id];
+
+        $planners = app(NotificationService::class)->filterByDedupe(
+            $planners,
+            $type,
+            $subject
+        );
+
         if ($planners->isEmpty()) {
             return;
         }
@@ -305,7 +315,7 @@ class ActivityList extends Component
         app(NotificationService::class)->notifyUsers(
             $planners,
             new PevaluacionObservationNotification(
-                type: 'pevaluacion_observation_updated',
+                type: $type,
                 message: $message,
                 url: route('app.planning.pevaluacions.index'),
                 pevaluacionId: (int) $pev->id,
@@ -317,6 +327,10 @@ class ActivityList extends Component
                 observationPreview: $preview ?: null,
                 action: $action,
             ),
+            // Huella de idempotencia: esta observación + esta acción. Dos
+            // guardados seguidos del mismo tipo los cubre el anti-spam; un
+            // reintento del mismo guardado, la BD.
+            ['pevaluacion_id' => (int) $pev->id, 'action' => $action]
         );
     }
 

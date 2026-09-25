@@ -692,10 +692,10 @@
                                 </th>
                                 <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">Asignatura / Sección</th>
                                 <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 cursor-pointer select-none hover:text-white transition-colors"
-                                    wire:click="sortByAllLessons('created_at')">
+                                    wire:click="sortByAllLessons('finicial')">
                                     <span class="inline-flex items-center gap-1">
-                                        Creado
-                                        @if($allLessonsSortField === 'created_at')
+                                        Inicio
+                                        @if($allLessonsSortField === 'finicial')
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $allLessonsSortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/>
                                             </svg>
@@ -748,8 +748,8 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="text-xs font-mono text-gray-500">
-                                            {{ $item->created_at->format('d/m/Y') }}
+                                        <span class="text-xs font-mono {{ $item->finicial ? 'text-gray-300' : 'text-gray-600' }}">
+                                            {{ $item->finicial?->format('d/m/Y') ?? '—' }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-center">

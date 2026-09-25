@@ -1761,4 +1761,46 @@
     @if($modeCreator)
         @include('livewire.profesor.activity.partials.create')
     @endif
+
+    {{-- Confirmación de eliminación (una sola instancia para toda la lista) --}}
+    <x-dialog id="activity-delete" title="Eliminar actividad" width="md" blur="lg">
+        <div class="text-left">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-sm text-gray-700 dark:text-slate-200">
+                        ¿Eliminar la actividad
+                        @if($activityToDeleteTopic)
+                            <span class="font-bold text-gray-900 dark:text-white">"{{ $activityToDeleteTopic }}"</span>
+                        @endif
+                        ?
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                        Esta acción no se puede deshacer. Se eliminarán también sus indicadores y comentarios asociados.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+                <button type="button" x-on:click="close(); $wire.cancelDelete()"
+                    class="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200">
+                    Cancelar
+                </button>
+                <button type="button" wire:click="delActivity({{ $activityToDelete }})"
+                    x-on:click="close()"
+                    wire:loading.attr="disabled" wire:target="delActivity"
+                    class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition-all duration-200 disabled:opacity-60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span wire:loading.remove wire:target="delActivity">Sí, eliminar</span>
+                    <span wire:loading wire:target="delActivity">Eliminando...</span>
+                </button>
+            </div>
+        </div>
+    </x-dialog>
 </div>

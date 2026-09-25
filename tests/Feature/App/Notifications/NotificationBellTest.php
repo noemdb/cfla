@@ -182,7 +182,8 @@ class NotificationBellTest extends TestCase
             'is_leadership' => true,
             'is_coordinacion' => true,
         ]);
-        $this->makeLegacyNotification($user, 'notif-legacy', [
+        $this->makeNotification($user, 'notif-legacy', [
+            'type' => null,
             'event_type' => 'activity_created',
             'action_url' => route('app.leadership.activities'),
             'message' => 'Se registró una nueva actividad (fila histórica)',
@@ -194,5 +195,132 @@ class NotificationBellTest extends TestCase
         $item = collect($component->get('notifications'))->firstWhere('id', 'notif-legacy');
 
         $this->assertSame(route('app.planning.activities.index'), $item['url']);
+    }
+
+    // ─── Digest: agrupacion por asunto ──────────────────────────────────
+
+    private function makeActivityNotification(User $user, string $id, int $pevaluacionId, string $asignatura, string $grado = 'QUINTO AÑO', string $seccion = 'A'): void
+    {
+        $this->makeNotification($user, $id, [
+            'type' => 'activity_created',
+            'pevaluacion_id' => $pevaluacionId,
+            'asignatura' => $asignatura,
+            'grado' => $grado,
+            'seccion' => $seccion,
+            'url' => route('app.planning.activities.index'),
+        ]);
+    }
+
+    public function test_agrupa_los_avisos_del_mismo_asunto_en_una_entrada(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        $this->makeActivityNotification($user, 'n-1', 10, 'MATEMÁTICAS');
+        $this->makeActivityNotification($user, 'n-2', 10, 'MATEMÁTICAS');
+        $this->makeActivityNotification($user, 'n-3', 10, 'MATEMÁTICAS');
+
+        $this->actingAs($user);
+
+        $items = Livewire::test(NotificationBell::class)->get('notifications');
+
+        $this->assertCount(1, $items, 'los 3 avisos de la misma pevaluacion deben colapsar en 1');
+        $this->assertSame(3, $items[0]['count']);
+        $this->assertCount(3, $items[0]['ids']);
+        $this->assertSame('3 actividades nuevas en MATEMÁTICAS · QUINTO AÑO · A', $items[0]['message']);
+    }
+
+    public function test_no_agrupa_asuntos_distintos(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        $this->makeActivityNotification($user, 'n-1', 10, 'MATEMÁTICAS');
+        $this->makeActivityNotification($user, 'n-2', 10, 'MATEMÁTICAS');
+        $this->makeActivityNotification($user, 'n-3', 11, 'FÍSICA');
+
+        $this->actingAs($user);
+
+        $items = Livewire::test(NotificationBell::class)->get('notifications');
+
+        $this->assertCount(2, $items);
+        $this->assertSame([2, 1], array_column($items, 'count'));
+    }
+
+    public function test_un_solo_aviso_conserva_su_mensaje_original(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        $this->makeActivityNotification($user, 'n-1', 10, 'MATEMÁTICAS');
+
+        $this->actingAs($user);
+
+        $items = Livewire::test(NotificationBell::class)->get('notifications');
+
+        $this->assertCount(1, $items);
+        $this->assertFalse($items[0]['grouped']);
+        $this->assertSame('Notificación n-1', $items[0]['message']);
+    }
+
+    public function test_los_tipos_no_agrupables_no_se_colapsan(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        // lesson_scheduled no está en la tabla de agrupación.
+        $this->makeNotification($user, 'n-1');
+        $this->makeNotification($user, 'n-2');
+
+        $this->actingAs($user);
+
+        $items = Livewire::test(NotificationBell::class)->get('notifications');
+
+        $this->assertCount(2, $items);
+    }
+
+    public function test_el_grupo_hereda_el_mas_reciente_y_queda_sin_leer(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        $this->makeNotification($user, 'n-1', ['type' => 'activity_created', 'pevaluacion_id' => 10]);
+        $this->makeNotification($user, 'n-2', ['type' => 'activity_created', 'pevaluacion_id' => 10]);
+
+        // El más reciente ya está leído: el grupo no debe marcarse como leído
+        // mientras el otro siga pendiente.
+        $user->notifications()->whereKey('n-2')->update(['read_at' => now()]);
+
+        $this->actingAs($user);
+
+        $items = Livewire::test(NotificationBell::class)->get('notifications');
+
+        $this->assertCount(1, $items);
+        $this->assertNull($items[0]['read_at']);
+    }
+
+    public function test_al_pulsar_un_grupo_se_marcan_todas_sus_notificaciones(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        $this->makeActivityNotification($user, 'n-1', 10, 'MATEMÁTICAS');
+        $this->makeActivityNotification($user, 'n-2', 10, 'MATEMÁTICAS');
+        $this->makeActivityNotification($user, 'n-3', 10, 'MATEMÁTICAS');
+
+        $this->actingAs($user);
+
+        $component = Livewire::test(NotificationBell::class);
+        $ids = $component->get('notifications')[0]['ids'];
+
+        $component->call('markAsRead', $ids)->assertSet('unreadCount', 0);
+
+        $this->assertSame(0, $user->unreadNotifications()->count());
+    }
+
+    public function test_la_campana_lee_mas_avisos_de_los_que_muestra_para_agrupar(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+
+        // 20 asuntos distintos: si solo leyera MAX_RECENT (8) mostraría 8
+        // entradas; con la ventana de agrupación debe respectar el tope.
+        for ($i = 0; $i < 20; $i++) {
+            $this->makeActivityNotification($user, "n-{$i}", 100 + $i, 'MATEMÁTICAS '.$i);
+        }
+
+        $this->actingAs($user);
+
+        $component = Livewire::test(NotificationBell::class);
+
+        $this->assertCount(NotificationBell::MAX_RECENT, $component->get('notifications'));
+        $this->assertSame(20, $component->get('unreadCount'), 'el badge debe contar los avisos reales, no los grupos');
     }
 }
