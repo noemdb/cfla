@@ -55,8 +55,11 @@ class DiagMainViewer extends Component
         $this->progressSearch = '';
         $this->progressGradoId = null;
         $this->progressPensumId = null;
+        $this->resumenPestudioId = null;
+        $this->resumenGradoId = null;
         $this->activeTab = 'general';
         $this->resetPage('pensumProgressPage');
+        $this->resetPage('gradoProgressPage');
         $this->dispatch('diag-main-selected', id: $this->selectedId);
     }
 
@@ -97,13 +100,17 @@ class DiagMainViewer extends Component
 
     public function updatedResumenGradoId(): void
     {
-        $this->resetPage('pensumProgressPage');
+        // Anidamiento: un grado sólo es válido si hay un pestudio seleccionado.
+        if (! $this->resumenPestudioId) {
+            $this->resumenGradoId = null;
+        }
+        $this->resetPage('gradoProgressPage');
     }
 
     public function updatedResumenPestudioId(): void
     {
         $this->resumenGradoId = null;
-        $this->resetPage('pensumProgressPage');
+        $this->resetPage('gradoProgressPage');
     }
 
     public function updatedPaginate(): void
@@ -145,6 +152,7 @@ class DiagMainViewer extends Component
         $progressPensums = collect();
         $pestudiosForGradoResumen = collect();
         $gradosForResumen = collect();
+        $gradosAnidados = collect();
         $gradoProgress = collect();
 
         // Nuevos indicadores solicitados (pensums/respuestas) + completitud/abandono s2526
@@ -248,20 +256,21 @@ class DiagMainViewer extends Component
             }
 
             // Aplicar filtros al collection ya ordenado y paginar
+            $allProgress = $pensumProgress;
             $filteredProgress = $pensumProgress;
-                if ($this->progressSearch !== '') {
-                    $s = mb_strtolower($this->progressSearch);
-                    $filteredProgress = $filteredProgress->filter(fn ($pp) => str_contains(mb_strtolower($pp->fullname ?? ''), $s) || str_contains(mb_strtolower($pp->pensum->asignatura?->name ?? ''), $s) || str_contains(mb_strtolower($pp->pensum->asignatura?->code ?? ''), $s));
-                }
-                if ($this->progressPestudioId) {
-                    $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->pestudio_id === (int) $this->progressPestudioId);
-                }
-                if ($this->progressGradoId) {
-                    $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->grado_id === (int) $this->progressGradoId);
-                }
-                if ($this->progressPensumId) {
-                    $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->id === (int) $this->progressPensumId);
-                }
+            if ($this->progressSearch !== '') {
+                $s = mb_strtolower($this->progressSearch);
+                $filteredProgress = $filteredProgress->filter(fn ($pp) => str_contains(mb_strtolower($pp->fullname ?? ''), $s) || str_contains(mb_strtolower($pp->pensum->asignatura?->name ?? ''), $s) || str_contains(mb_strtolower($pp->pensum->asignatura?->code ?? ''), $s));
+            }
+            if ($this->progressPestudioId) {
+                $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->pestudio_id === (int) $this->progressPestudioId);
+            }
+            if ($this->progressGradoId) {
+                $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->grado_id === (int) $this->progressGradoId);
+            }
+            if ($this->progressPensumId) {
+                $filteredProgress = $filteredProgress->filter(fn ($pp) => (int) $pp->pensum->id === (int) $this->progressPensumId);
+            }
             $perPage = max(1, (int) $this->paginate);
             $currentPage = LengthAwarePaginator::resolveCurrentPage('pensumProgressPage');
             $total = $filteredProgress->count();
@@ -269,15 +278,31 @@ class DiagMainViewer extends Component
             $pensumProgress = new LengthAwarePaginator($items, $total, $perPage, $currentPage, ['path' => request()->url(), 'pageName' => 'pensumProgressPage']);
 
             // Grado resumen — agregado por gradoId con select pestudio+grado específico
-            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
-            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('grado_id'))->where('status_active','true');
+            // Anidamiento pestudio → grado: el grado sólo aplica si hay un pestudio elegido.
+            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('pestudio_id'))->orderBy('code')->get(['id', 'code', 'name']);
+            if (! $this->resumenPestudioId) {
+                $this->resumenGradoId = null;
+            }
+            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('grado_id'))->where('status_active', 'true');
             if ($this->resumenPestudioId) {
                 $gradosForResumenQuery->where('pestudio_id', (int) $this->resumenPestudioId);
             }
-            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id','name','code','pestudio_id']);
+            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
+            // Todos los grados activos del alcance (independiente del filtro de pestudio).
+            $activeGradoIds = Grado::whereIn('id', Pensum::whereIn('id', $questionPensumIds)->pluck('grado_id'))->where('status_active', 'true')->pluck('id')->map(fn ($id) => (int) $id)->all();
+            // Opciones del select de grado: anidadas bajo el pestudio elegido, sólo grados activos.
+            $gradosAnidados = $this->resumenPestudioId
+                ? $gradosForResumen->values()
+                : collect();
+            // Si el grado elegido no pertenece al pestudio elegido, se descarta.
+            if ($this->resumenGradoId && ! $gradosAnidados->contains('id', (int) $this->resumenGradoId)) {
+                $this->resumenGradoId = null;
+            }
             $gradoProgress = collect();
             if ($questionPensumIds->isNotEmpty()) {
-                $baseForGrado = $filteredProgress;
+                // Base independiente de los filtros de la pestaña "Por área": esta pestaña
+                // se rige sólo por sus propios filtros resumenPestudioId / resumenGradoId.
+                $baseForGrado = $allProgress;
                 $gradoProgress = $baseForGrado->groupBy(fn ($pp) => $pp->pensum->grado_id)->map(function ($items) {
                     $grado = $items->first()->pensum->grado;
                     $totalQ = $items->sum('total_questions');
@@ -287,6 +312,7 @@ class DiagMainViewer extends Component
                     $totalAns = $items->sum('total_answered');
                     $correctAns = $items->sum('correct_answers');
                     $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+
                     return (object) [
                         'grado' => $grado,
                         'fullname' => $grado?->name ?? '—',
@@ -299,6 +325,8 @@ class DiagMainViewer extends Component
                         'correct_answers' => $correctAns,
                     ];
                 })->values()->sortBy('fullname')->values();
+                // Sólo grados activos, coherente con las opciones del select anidado.
+                $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && in_array((int) $gp->grado->id, $activeGradoIds, true))->values();
                 if ($this->resumenPestudioId) {
                     $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && (int) $gp->grado->pestudio_id === (int) $this->resumenPestudioId)->values();
                 }
@@ -354,6 +382,7 @@ class DiagMainViewer extends Component
             'pensumProgress' => $pensumProgress,
             'gradoProgress' => $gradoProgress ?? collect(),
             'gradosForResumen' => $gradosForResumen ?? collect(),
+            'gradosAnidados' => $gradosAnidados ?? collect(),
             'pestudiosForGradoResumen' => $pestudiosForGradoResumen ?? collect(),
             'recentSessions' => $recentSessions,
             'questionsByType' => $questionsByType,

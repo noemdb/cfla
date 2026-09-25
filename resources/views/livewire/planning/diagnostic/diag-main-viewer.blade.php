@@ -336,7 +336,7 @@
 
                 @elseif($activeTab === 'grados')
                 {{-- Resumen por Grado — similar a Resumen por área, con select gradoId específico --}}
-                @if($selected && $gradosForResumen && $gradosForResumen->isNotEmpty())
+                @if($selected && $pestudiosForGradoResumen && $pestudiosForGradoResumen->isNotEmpty())
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
                         <div class="px-3 py-2 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Resumen por Grado</h4>
@@ -348,12 +348,28 @@
                                         <option value="{{ $pe->id }}">{{ $pe->code }} — {{ $pe->name }}</option>
                                     @endforeach
                                 </select>
-                                <select wire:model.live="resumenGradoId" class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[160px]">
-                                    <option value="">Grado: Todos</option>
-                                    @foreach($gradosForResumen as $g)
-                                        <option value="{{ $g->id }}">{{ $g->code ?? $g->name }} — {{ $g->name }}</option>
-                                    @endforeach
-                                </select>
+                                @php $gradoDeshabilitado = ! $resumenPestudioId; @endphp
+                                <div class="flex items-center gap-1.5">
+                                    <span class="sr-only">Grado</span>
+                                    <select id="resumen-grado-select"
+                                        wire:model.live="resumenGradoId"
+                                        @if($gradoDeshabilitado) disabled @endif
+                                        aria-disabled="{{ $gradoDeshabilitado ? 'true' : 'false' }}"
+                                        @if($gradoDeshabilitado) title="Selecciona primero un pestudio" @endif
+                                        class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[180px] disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-white/[0.02] disabled:text-gray-600 {{ $gradoDeshabilitado ? '' : 'text-gray-200' }}">
+                                        @if($gradoDeshabilitado)
+                                            <option value="">Grado: seleccione un pestudio</option>
+                                        @else
+                                            <option value="">Grado: Todos</option>
+                                            @foreach($gradosAnidados as $g)
+                                                <option value="{{ $g->id }}">{{ $g->code ? $g->code.' — ' : '' }}{{ $g->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    @if($gradoDeshabilitado)
+                                        <span class="whitespace-nowrap text-[10px] text-amber-500/80">Requerido un pestudio</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                         <div class="overflow-x-auto">

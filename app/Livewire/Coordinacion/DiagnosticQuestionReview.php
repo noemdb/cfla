@@ -614,6 +614,7 @@ class DiagnosticQuestionReview extends Component
                 $totalAns = (clone $ansBase)->count();
                 $correctAns = (clone $ansBase)->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))->count();
                 $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+
                 return (object) [
                     'pensum' => $pensum,
                     'fullname' => $pensum->full_name ?? ($pensum->grado?->name.' - '.$pensum->asignatura?->name),
@@ -627,22 +628,23 @@ class DiagnosticQuestionReview extends Component
                 ];
             })->sortByDesc('completion_percentage')->values();
             // Paginación Resumen por área — 10 por página
+            $allProgress = $pensumProgress;
             $perPage = 10;
             $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage('pensumProgressPage');
             $total = $pensumProgress->count();
             $items = $pensumProgress->forPage($currentPage, $perPage)->values();
             $pensumProgress = new \Illuminate\Pagination\LengthAwarePaginator($items, $total, $perPage, $currentPage, ['path' => request()->url(), 'pageName' => 'pensumProgressPage']);
-            $progressPestudios = \App\Models\app\Academy\Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
-            $progressGrados = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active','true')->orderBy('order')->get(['id','name','code','pestudio_id']);
-            $progressPensums = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura','grado'])->orderBy('grado_id')->get(['id','grado_id','pestudio_id','asignatura_id']);
+            $progressPestudios = \App\Models\app\Academy\Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id', 'code', 'name']);
+            $progressGrados = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active', 'true')->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
+            $progressPensums = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura', 'grado'])->orderBy('grado_id')->get(['id', 'grado_id', 'pestudio_id', 'asignatura_id']);
             // Grado resumen — agregado por grado con filtro pestudio
-            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id','code','name']);
-            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active','true');
+            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id', 'code', 'name']);
+            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active', 'true');
             if ($this->resumenPestudioId) {
                 $gradosForResumenQuery->where('pestudio_id', (int) $this->resumenPestudioId);
             }
-            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id','name','code','pestudio_id']);
-            $gradoProgress = $pensumProgress->groupBy(fn ($pp) => $pp->pensum->grado_id)->map(function ($items) {
+            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
+            $gradoProgress = $allProgress->groupBy(fn ($pp) => $pp->pensum->grado_id)->map(function ($items) {
                 $grado = $items->first()->pensum->grado;
                 $totalQ = $items->sum('total_questions');
                 $totalS = $items->sum('total_sessions');
@@ -651,6 +653,7 @@ class DiagnosticQuestionReview extends Component
                 $totalAns = $items->sum('total_answered');
                 $correctAns = $items->sum('correct_answers');
                 $prec = $totalAns > 0 ? round((100 * $correctAns) / $totalAns, 1) : null;
+
                 return (object) [
                     'grado' => $grado,
                     'fullname' => $grado?->name ?? '—',
@@ -663,6 +666,9 @@ class DiagnosticQuestionReview extends Component
                     'correct_answers' => $correctAns,
                 ];
             })->values()->sortBy('fullname')->values();
+            // Sólo grados activos, coherente con las opciones del select anidado.
+            $activeGradoIds = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active', 'true')->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && in_array((int) $gp->grado->id, $activeGradoIds, true))->values();
             if ($this->resumenPestudioId) {
                 $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && (int) $gp->grado->pestudio_id === (int) $this->resumenPestudioId)->values();
             }
@@ -691,16 +697,16 @@ class DiagnosticQuestionReview extends Component
                 $assignedForEnriched = null;
             }
             $recentSessions = DiagSession::with(['estudiant', 'pensum'])
-            ->when($assignedForEnriched && $assignedForEnriched->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForEnriched))
-            ->when($this->filterAreaId !== '', function ($q) {
-                $area = AreaConocimiento::find((int) $this->filterAreaId);
-                if ($area) {
-                    $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                    $q->whereIn('pensum_id', $pids);
-                }
-            })
-            ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain))
-            ->orderByDesc('iniciado_at')->limit(5)->get();
+                ->when($assignedForEnriched && $assignedForEnriched->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForEnriched))
+                ->when($this->filterAreaId !== '', function ($q) {
+                    $area = AreaConocimiento::find((int) $this->filterAreaId);
+                    if ($area) {
+                        $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
+                        $q->whereIn('pensum_id', $pids);
+                    }
+                })
+                ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain))
+                ->orderByDesc('iniciado_at')->limit(5)->get();
         }
 
         $typeBase = null;
