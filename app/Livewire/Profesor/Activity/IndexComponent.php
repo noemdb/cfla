@@ -522,7 +522,8 @@ class IndexComponent extends Component
         $this->activityForm->pevaluacion_id = $this->pevaluacion->id;
         $this->activityForm->applyToModel($this->activity);
 
-        $isNew = ! $this->activity->exists;
+        // La notificación de creación la emite ActivityObserver::created()
+        // (punto único para todas las vías: wizard, clonado, planning…).
         $this->activity->save();
 
         // Crear achievements pendientes (copiados desde s2526)
@@ -534,10 +535,6 @@ class IndexComponent extends Component
             $this->s2526PendingAchievements = [];
         }
 
-        if ($isNew) {
-            $this->notifyAreaLeaderActivityCreated();
-        }
-
         $this->notification()->success(
             '¡Excelente, buen trabajo!',
             'Registro realizado exitosamente'
@@ -546,74 +543,6 @@ class IndexComponent extends Component
         $this->resetModel();
         $this->activity_id = null;
         $this->close();
-    }
-
-    /**
-     * Notifica al jefe de área (leader_id del AreaConocimiento asociado al
-     * pensum de la pevaluacion), a los planners puros y a la coordinación
-     * en cuyo ámbito cae la pevaluacion cuando se registra una actividad
-     * nueva. La notificación sale por el punto central (DB + broadcast
-     * Reverb).
-     *
-     * Planners puros = is_planner activo sin is_leadership ni
-     * is_coordinacion (atributos crudos, sin el fallback de is_admin de los
-     * accessors). Coordinación = is_coordinacion activo (sin admin/planner/
-     * director, patrón de LmsPublicationService::getRecipients) y solo si
-     * la pevaluacion está en su scope de peducativos
-     * (CoordinacionScopeService::pevaluacionIsInScope). Quienes ya reciben
-     * por otro rol quedan fuera de estos lotes y el merge final es
-     * unique('id'): nadie recibe duplicadas.
-     */
-    private function notifyAreaLeaderActivityCreated(): void
-    {
-        $leaderIds = $this->activity->areaLeaderIds();
-
-        $users = $leaderIds === []
-            ? collect()
-            : User::whereIn('id', $leaderIds)->get();
-
-        $planners = User::where('is_planner', true)
-            ->where('is_active', 'enable')
-            ->get()
-            ->reject(fn (User $u) => ! empty($u->getAttributes()['is_leadership'])
-                || ! empty($u->getAttributes()['is_coordinacion']));
-
-        $coordinacion = User::query()
-            ->where('is_coordinacion', true)
-            ->where('is_active', 'enable')
-            ->where('is_admin', false)
-            ->where('is_planner', false)
-            ->where('is_director', false)
-            ->get()
-            ->filter(fn (User $u) => app(\App\Services\Lms\CoordinacionScopeService::class, ['user' => $u])
-                ->pevaluacionIsInScope($this->pevaluacion->id));
-
-        $users = $users->concat($planners)->concat($coordinacion)->unique('id')->values();
-
-        if ($users->isEmpty()) {
-            return;
-        }
-
-        $asignatura = $this->pevaluacion->pensum?->asignatura;
-        $grado = $this->pevaluacion->pensum?->grado;
-        $seccion = $this->pevaluacion->seccion;
-
-        $message = 'Se registró una nueva actividad en '.($asignatura?->name ?? 'la asignatura')
-            .($grado?->name ? ' · '.$grado->name : '')
-            .($seccion?->name ? ' · '.$seccion->name : '').'.';
-
-        app(\App\Services\NotificationService::class)->notifyUsers(
-            $users,
-            new \App\Notifications\ActivityCreatedNotification(
-                type: 'activity_created',
-                message: $message,
-                url: route('app.leadership.activities'),
-                activityId: (int) $this->activity->id,
-                asignaturaName: $asignatura?->name,
-                gradoName: $grado?->name,
-                seccionName: $seccion?->name,
-            ),
-        );
     }
 
     public function saveAchievement()

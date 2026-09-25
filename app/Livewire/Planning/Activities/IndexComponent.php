@@ -55,6 +55,11 @@ class IndexComponent extends Component
         $user = User::findOrFail(Auth::id());
         $this->leader_id = $user->id;
 
+        // Al visitar el listado, las `activity_created` pendientes se dan
+        // por vistas (también cubre Leadership\ActivityOverview, que hereda
+        // este mount sin sobreescribirlo).
+        app(\App\Services\NotificationService::class)->markTypeAsRead($user->id, 'activity_created');
+
         $this->close();
         $this->modeIndex = true;
 

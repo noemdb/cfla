@@ -67,6 +67,12 @@ class ActivityList extends Component
         $this->initializeHasCoordinacionScope();
         $service = $this->getCoordinacionService();
 
+        // Al visitar el listado, las `activity_created` pendientes se dan
+        // por vistas (el badge baja sin clics manuales).
+        if (auth()->id()) {
+            app(\App\Services\NotificationService::class)->markTypeAsRead(auth()->id(), 'activity_created');
+        }
+
         $this->listPestudio = Pestudio::whereIn('id', $service->getPestudioIds())
             ->where('status_active', 'true')
             ->orderBy('order')

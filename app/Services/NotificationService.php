@@ -137,4 +137,25 @@ class NotificationService
     {
         Cache::forget(self::UNREAD_PREFIX.$userId);
     }
+
+    /**
+     * Marca como leídas las notificaciones no leídas de un tipo para un
+     * usuario (p. ej. `activity_created` al visitar su listado): el badge
+     * refleja lo visto sin clics manuales. Invalida la caché de no-leídas.
+     */
+    public function markTypeAsRead(int $userId, string $type): void
+    {
+        $user = User::query()->find($userId);
+
+        if (! $user) {
+            return;
+        }
+
+        $user->unreadNotifications()
+            ->where('data->type', $type)
+            ->getQuery()
+            ->update(['read_at' => now()]);
+
+        $this->invalidateUnreadCount($userId);
+    }
 }

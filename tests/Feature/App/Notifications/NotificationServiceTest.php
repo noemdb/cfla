@@ -122,4 +122,26 @@ class NotificationServiceTest extends TestCase
 
         $this->assertNull(Cache::get(NotificationService::UNREAD_PREFIX.$recipient->id));
     }
+
+    public function test_mark_type_as_read_marca_solo_el_tipo_indicado(): void
+    {
+        $recipient = $this->makeRecipient();
+        $service = app(NotificationService::class);
+
+        $service->notifyUsers([$recipient], $this->makeNotification());
+        $service->notifyUsers([$recipient], new \App\Notifications\ActivityCreatedNotification(
+            type: 'activity_created',
+            message: 'Se registró una nueva actividad.',
+            url: route('app.notifications.index'),
+            activityId: 9,
+        ));
+
+        $this->assertSame(2, $service->unreadCountFor($recipient->id));
+
+        $service->markTypeAsRead($recipient->id, 'activity_created');
+
+        $this->assertSame(1, $service->unreadCountFor($recipient->id));
+        $this->assertSame(0, $recipient->unreadNotifications()->where('data->type', 'activity_created')->count());
+        $this->assertSame(1, $recipient->unreadNotifications()->where('data->type', 'lesson_scheduled')->count());
+    }
 }

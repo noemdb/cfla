@@ -9,12 +9,12 @@ use App\Models\User;
  * (blueprint/notifications, hallazgo N3): para `lesson_scheduled`, la URL
  * almacenada apunta al monitor de planificación, pero los destinatarios
  * incluyen coordinación, liderazgo y dirección, que tienen sus propios
- * listados de lecciones; para `activity_created`, la URL almacenada apunta
- * listados de lecciones; para `activity_created`, la URL almacenada apunta
- * a jefatura, pero los planners puros van a su listado de actividades y la
- * coordinación en ámbito al suyo.
- * Para el resto de notificaciones se respeta la URL
- * almacenada (`url`/`action_url`), con el índice como último recurso.
+ * listados de lecciones; para `activity_created` la URL almacenada es
+ * neutra (índice) y el destino lo decide el rol: jefatura/admin a su
+ * listado con scope por áreas, planners puros al suyo global y
+ * coordinación en ámbito al suyo. Para el resto de notificaciones se
+ * respeta la URL almacenada (`url`/`action_url`), con el índice como
+ * último recurso.
  */
 class NotificationTargetResolver
 {
@@ -46,21 +46,20 @@ class NotificationTargetResolver
             }
         }
 
-        // Las notificaciones de actividad creada se almacenan con la URL de
-        // jefatura (app.leadership.activities): los planners puros (sin
-        // jefatura cruda) no pasan el middleware isLeadership (403), así que
-        // van al listado de actividades de planificación, con visión global;
-        // la coordinación en ámbito va a su propio listado de actividades.
-        // Jefatura y admin conservan la URL almacenada (su scope por áreas).
+        // `activity_created` se almacena con URL neutra (índice): cada rol
+        // va a su listado (jefatura con scope por áreas, planificación
+        // global, coordinación en ámbito). Vale también para las filas
+        // históricas, que traen la URL de jefatura almacenada.
         if (($data['type'] ?? null) === 'activity_created') {
-            $isLeadership = ! empty($user->getAttributes()['is_leadership'])
-                || ! empty($user->is_admin);
+            if (! empty($user->getAttributes()['is_leadership']) || ! empty($user->is_admin)) {
+                return route('app.leadership.activities');
+            }
 
-            if (! $isLeadership && $user->is_planner) {
+            if ($user->is_planner) {
                 return route('app.planning.activities.index');
             }
 
-            if (! $isLeadership && $user->isCoordinacion()) {
+            if ($user->isCoordinacion()) {
                 return route('app.coordinacion.activities');
             }
         }
