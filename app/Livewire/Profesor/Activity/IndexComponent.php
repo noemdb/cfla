@@ -550,17 +550,46 @@ class IndexComponent extends Component
 
     /**
      * Notifica al jefe de área (leader_id del AreaConocimiento asociado al
-     * pensum de la pevaluacion) cuando se registra una actividad nueva.
-     * La notificación sale por el punto central (DB + broadcast Reverb).
+     * pensum de la pevaluacion), a los planners puros y a la coordinación
+     * en cuyo ámbito cae la pevaluacion cuando se registra una actividad
+     * nueva. La notificación sale por el punto central (DB + broadcast
+     * Reverb).
+     *
+     * Planners puros = is_planner activo sin is_leadership ni
+     * is_coordinacion (atributos crudos, sin el fallback de is_admin de los
+     * accessors). Coordinación = is_coordinacion activo (sin admin/planner/
+     * director, patrón de LmsPublicationService::getRecipients) y solo si
+     * la pevaluacion está en su scope de peducativos
+     * (CoordinacionScopeService::pevaluacionIsInScope). Quienes ya reciben
+     * por otro rol quedan fuera de estos lotes y el merge final es
+     * unique('id'): nadie recibe duplicadas.
      */
     private function notifyAreaLeaderActivityCreated(): void
     {
         $leaderIds = $this->activity->areaLeaderIds();
-        if ($leaderIds === []) {
-            return;
-        }
 
-        $users = User::whereIn('id', $leaderIds)->get();
+        $users = $leaderIds === []
+            ? collect()
+            : User::whereIn('id', $leaderIds)->get();
+
+        $planners = User::where('is_planner', true)
+            ->where('is_active', 'enable')
+            ->get()
+            ->reject(fn (User $u) => ! empty($u->getAttributes()['is_leadership'])
+                || ! empty($u->getAttributes()['is_coordinacion']));
+
+        $coordinacion = User::query()
+            ->where('is_coordinacion', true)
+            ->where('is_active', 'enable')
+            ->where('is_admin', false)
+            ->where('is_planner', false)
+            ->where('is_director', false)
+            ->get()
+            ->filter(fn (User $u) => app(\App\Services\Lms\CoordinacionScopeService::class, ['user' => $u])
+                ->pevaluacionIsInScope($this->pevaluacion->id));
+
+        $users = $users->concat($planners)->concat($coordinacion)->unique('id')->values();
+
         if ($users->isEmpty()) {
             return;
         }

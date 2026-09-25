@@ -100,4 +100,44 @@ class NotificationTargetResolverTest extends TestCase
             );
         }
     }
+
+    /**
+     * `activity_created` se almacena con URL de jefatura: el planner puro
+     * (sin jefatura) va a su listado de actividades de planificación (la
+     * ruta de jefatura le daría 403); jefatura y admin conservan la URL
+     * almacenada con su scope por áreas.
+     */
+    public function test_activity_created_redirige_a_planning_solo_al_planner_puro(): void
+    {
+        $resolver = app(NotificationTargetResolver::class);
+        $stored = route('app.leadership.activities');
+        $data = ['type' => 'activity_created', 'url' => $stored];
+
+        $purePlanner = User::factory()->create(['is_planner' => true]);
+        $this->assertSame(
+            route('app.planning.activities.index'),
+            $resolver->resolveFor($purePlanner, $data)
+        );
+
+        // Con jefatura (aunque también sea planner): conserva jefatura.
+        $plannerLeader = User::factory()->create(['is_planner' => true, 'is_leadership' => true]);
+        $this->assertSame($stored, $resolver->resolveFor($plannerLeader, $data));
+
+        $leader = User::factory()->create(['is_leadership' => true]);
+        $this->assertSame($stored, $resolver->resolveFor($leader, $data));
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->assertSame($stored, $resolver->resolveFor($admin, $data));
+
+        // Coordinación pura: su propio listado de actividades.
+        $coord = User::factory()->create(['is_coordinacion' => true]);
+        $this->assertSame(
+            route('app.coordinacion.activities'),
+            $resolver->resolveFor($coord, $data)
+        );
+
+        // Con jefatura (aunque también coordine): conserva jefatura.
+        $leaderCoord = User::factory()->create(['is_leadership' => true, 'is_coordinacion' => true]);
+        $this->assertSame($stored, $resolver->resolveFor($leaderCoord, $data));
+    }
 }
