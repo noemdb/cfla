@@ -181,4 +181,118 @@
             </div>
         </div>
     @endif
+    {{-- Respuestas y precisión por pregunta: un tab por área de formación --}}
+    @if(!empty($analytics['by_area_question']))
+        @php
+            $selectedAreaQ = collect($analytics['by_area_question'])->firstWhere('pensum_id', (int) $areaQuestionPensumId) ?? $analytics['by_area_question'][0];
+        @endphp
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Respuestas y precisión por pregunta</h4>
+            <p class="text-[11px] text-gray-500 mb-3">Selecciona un área de formación para ver la cantidad de respuestas y la precisión de cada una de sus preguntas.</p>
+            <div class="flex flex-wrap items-stretch gap-1.5 bg-gray-900/40 border border-white/5 rounded-lg p-1 w-full mb-3" role="tablist" aria-label="Áreas de formación">
+                @foreach($analytics['by_area_question'] as $area)
+                    <button type="button" role="tab" id="areaq-tab-{{ $area['pensum_id'] }}" data-areaq-tab="{{ $area['pensum_id'] }}" wire:key="areaq-tab-{{ $area['pensum_id'] }}"
+                        aria-selected="{{ $selectedAreaQ['pensum_id'] === $area['pensum_id'] ? 'true' : 'false' }}"
+                        aria-controls="areaq-tabpanel"
+                        tabindex="{{ $selectedAreaQ['pensum_id'] === $area['pensum_id'] ? '0' : '-1' }}"
+                        wire:click="setAreaQuestionTab({{ $area['pensum_id'] }})"
+                        title="{{ $area['name'] }}"
+                        class="flex-1 text-center px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500/40 {{ $selectedAreaQ['pensum_id'] === $area['pensum_id'] ? 'bg-purple-500/15 text-purple-300 border border-purple-500/20' : 'text-gray-400 hover:text-white border border-transparent' }}">
+                        {{ $area['short_name'] ?? $area['name'] }}
+                        <span class="ml-1 px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[10px]">{{ $area['total_respuestas'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+            @script
+            <script>
+            (() => {
+                let areaqKeyboardNav = false;
+                document.addEventListener('keydown', (e) => {
+                    const tab = e.target.closest('[data-areaq-tab]');
+                    if (!tab) return;
+                    const tabs = [...document.querySelectorAll('[data-areaq-tab]')];
+                    const i = tabs.indexOf(tab);
+                    let next = null;
+                    if (e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+                    else if (e.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+                    else if (e.key === 'Home') next = tabs[0];
+                    else if (e.key === 'End') next = tabs[tabs.length - 1];
+                    else return;
+                    e.preventDefault();
+                    areaqKeyboardNav = true;
+                    next.focus();
+                    next.click();
+                });
+                Livewire.hook('commit', ({ succeed }) => {
+                    succeed(() => {
+                        if (!areaqKeyboardNav) return;
+                        areaqKeyboardNav = false;
+                        const active = document.querySelector('[data-areaq-tab][aria-selected="true"]');
+                        if (active && document.activeElement !== active) active.focus();
+                    });
+                });
+            })();
+            </script>
+            @endscript
+            <div role="tabpanel" id="areaq-tabpanel" tabindex="0" aria-labelledby="areaq-tab-{{ $selectedAreaQ['pensum_id'] }}"
+                class="focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500/40 rounded-lg">
+                <div class="border border-white/5 rounded-lg overflow-hidden">
+                    <div class="px-4 py-2 bg-white/[0.02] border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div class="min-w-0">
+                            <span class="text-xs font-bold text-white">{{ $selectedAreaQ['name'] }}</span>
+                            <span class="block text-[10px] text-gray-500 truncate" title="{{ $selectedAreaQ['pestudio_name'] ?? '' }} · {{ $selectedAreaQ['grado_name'] ?? '' }} · {{ $selectedAreaQ['asignatura_name'] ?? '' }}">
+                                {{ $selectedAreaQ['pestudio_code'] ?? '—' }} · Pensum #{{ $selectedAreaQ['pensum_id'] }} · {{ $selectedAreaQ['grado_name'] ?? '—' }} ({{ $selectedAreaQ['grado_code'] ?? '—' }}) · {{ $selectedAreaQ['asignatura_name'] ?? '—' }} ({{ $selectedAreaQ['asignatura_code'] ?? '—' }})
+                            </span>
+                        </div>
+                        <span class="text-[11px] text-gray-400 shrink-0">
+                            {{ $selectedAreaQ['total_preguntas'] }} pregunta(s) · {{ $selectedAreaQ['total_sessions'] }} sesione(s) ({{ $selectedAreaQ['completed_sessions'] }} compl.) · {{ $selectedAreaQ['total_respuestas'] }} respuesta(s)
+                            @if($selectedAreaQ['precision'] !== null)
+                                · <span class="font-medium {{ $selectedAreaQ['precision'] >= 70 ? 'text-emerald-400' : ($selectedAreaQ['precision'] >= 40 ? 'text-amber-400' : 'text-red-400') }}">{{ number_format($selectedAreaQ['precision'], 1) }}% precisión</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b border-white/5">
+                                    <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Pregunta</th>
+                                    <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Tipo</th>
+                                    <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Respuestas</th>
+                                    <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Correctas</th>
+                                    <th class="py-2 px-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Precisión</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($selectedAreaQ['questions'] as $qr)
+                                    <tr class="border-b border-white/5 text-xs hover:bg-white/[0.02] transition-colors">
+                                        <td class="py-2 px-3 text-gray-300 max-w-md">
+                                            <span title="{{ $qr['pregunta'] }}">{{ \Illuminate\Support\Str::limit($qr['pregunta'], 120) }}</span>
+                                        </td>
+                                        <td class="py-2 px-3 text-center">
+                                            <span class="text-[10px] text-gray-400">{{ $qr['tipo'] === 'multiple' ? 'Múltiple' : ($qr['tipo'] === 'open' ? 'Abierta' : 'Escala') }}</span>
+                                        </td>
+                                        <td class="py-2 px-3 text-center text-gray-400">{{ $qr['total'] }}</td>
+                                        <td class="py-2 px-3 text-center {{ $qr['tipo'] === 'multiple' ? 'text-emerald-400' : 'text-gray-600' }}">
+                                            {{ $qr['tipo'] === 'multiple' ? $qr['correct'] : '—' }}
+                                        </td>
+                                        <td class="py-2 px-3 text-center">
+                                            @if($qr['precision'] !== null)
+                                                <span class="font-medium {{ $qr['precision'] >= 70 ? 'text-emerald-400' : ($qr['precision'] >= 40 ? 'text-amber-400' : 'text-red-400') }}">{{ number_format($qr['precision'], 1) }}%</span>
+                                            @else
+                                                <span class="text-gray-600">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="py-6 text-center text-xs text-gray-500">Sin preguntas en esta área.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

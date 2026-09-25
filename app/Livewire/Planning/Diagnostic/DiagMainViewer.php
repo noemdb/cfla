@@ -37,6 +37,8 @@ class DiagMainViewer extends Component
 
     public int $paginate = 10;
 
+    public string $activeTab = 'general';
+
     protected $paginationTheme = 'tailwind';
 
     public function mount(): void
@@ -53,8 +55,16 @@ class DiagMainViewer extends Component
         $this->progressSearch = '';
         $this->progressGradoId = null;
         $this->progressPensumId = null;
+        $this->activeTab = 'general';
         $this->resetPage('pensumProgressPage');
         $this->dispatch('diag-main-selected', id: $this->selectedId);
+    }
+
+    public function setTab(string $tab): void
+    {
+        if (in_array($tab, ['general', 'areas', 'grados'], true)) {
+            $this->activeTab = $tab;
+        }
     }
 
     public function triggerCreate(): void

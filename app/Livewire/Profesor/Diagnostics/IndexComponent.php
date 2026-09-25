@@ -45,6 +45,10 @@ class IndexComponent extends Component
     // Propiedades principales
     public $activeTab = 'dashboard';
 
+    // Tab de área de formación dentro de la sección
+    // "Respuestas y precisión por pregunta" (pensum_id)
+    public $areaQuestionPensumId = null;
+
     public $showQuestionModal = false;
 
     public $generatingQuestion = false;
@@ -1115,6 +1119,11 @@ PROMPT;
         }
     }
 
+    public function setAreaQuestionTab($pensumId): void
+    {
+        $this->areaQuestionPensumId = (int) $pensumId;
+    }
+
     public function confirmDeleteQuestion($questionId)
     {
         $this->notification()->confirm([
@@ -1416,6 +1425,16 @@ PROMPT;
             ->sortBy(fn ($pensum) => $pensum->asignatura?->name ?? $pensum->full_name)
             ->values();
 
+        // Analytics solo se calcula en su tab; además se normaliza el tab de
+        // área (pensum) por si los filtros dejaron fuera la selección previa.
+        $analytics = $this->activeTab === 'analytics' ? $this->getAnalyticsData() : null;
+        if ($analytics && ! empty($analytics['by_area_question'])) {
+            $areaIds = array_column($analytics['by_area_question'], 'pensum_id');
+            if (! in_array((int) $this->areaQuestionPensumId, $areaIds, true)) {
+                $this->areaQuestionPensumId = $areaIds[0];
+            }
+        }
+
         return view('livewire.profesor.diagnostics.index-component', [
             'questions' => $questions,
             'sessions' => $sessions,
@@ -1449,6 +1468,7 @@ PROMPT;
             'diagMainCurrent' => DiagMain::find($this->filterDiagMainId),
             'list_grados' => $this->list_grados,
             'list_secciones' => $this->list_secciones,
+            'analytics' => $analytics,
         ]);
     }
 
@@ -1545,6 +1565,208 @@ PROMPT;
     {
         $this->clearCache();
         $this->dispatch('refreshCharts');
+    }
+
+    /**
+     * Construye el arreglo $analytics que consume el parcial
+     * livewire.profesor.diagnostics.partials.analytics, acotado a la carga
+     * académica del profesor (pensum + sección + lapso) y a los filtros
+     * activos (diagMain, grado, sección).
+     */
+    protected function getAnalyticsData(): array
+    {
+        $empty = [
+            'by_pensum' => [],
+            'by_question_type' => [],
+            'by_difficulty' => [],
+            'best_pensum' => null,
+            'worst_pensum' => null,
+            'total_students_evaluated' => 0,
+            'detailed_pensum' => [],
+        ];
+
+        $pensumIds = $this->scopedPensumIds();
+        if ($this->filterGradoId) {
+            $pensumIds = Pensum::whereIn('id', $pensumIds)
+                ->where('grado_id', $this->filterGradoId)
+                ->pluck('id')->map(fn ($id) => (int) $id)->values()->toArray();
+        }
+
+        if (empty($pensumIds)) {
+            return $empty;
+        }
+
+        $sessionScope = function ($query) {
+            $this->scopeToCarga($query);
+
+            if ($this->filterDiagMainId) {
+                $query->where('diag_main_id', $this->filterDiagMainId);
+            }
+            if ($this->filterGradoId) {
+                $query->whereHas('pensum', function ($q) {
+                    $q->where('grado_id', $this->filterGradoId);
+                });
+            }
+        };
+
+        $pensums = Pensum::with(['asignatura', 'grado', 'pestudio'])->whereIn('id', $pensumIds)->get();
+
+        $byPensum = [];
+        $detailed = [];
+        foreach ($pensums as $pensum) {
+            $name = $pensum->full_name ?? trim(($pensum->grado?->name ?? '').' - '.($pensum->asignatura?->name ?? ''));
+
+            $sessionsBase = DiagSession::where('pensum_id', $pensum->id)->where($sessionScope);
+            $totalSessions = (clone $sessionsBase)->count();
+            $completedSessions = (clone $sessionsBase)->whereNotNull('completado_at')->count();
+
+            $answersBase = DiagAnswer::whereHas('question', function ($q) use ($pensum) {
+                $q->where('pensum_id', $pensum->id)
+                    ->where('activo', 1)
+                    ->where('tipo_pregunta', 'multiple')
+                    ->when($this->filterDiagMainId, fn ($qq) => $qq->where('diag_main_id', $this->filterDiagMainId));
+            })
+                ->whereHas('session', function ($q) use ($pensum, $sessionScope) {
+                    $q->where('pensum_id', $pensum->id)->where($sessionScope);
+                })
+                ->whereNotNull('completado_at')
+                ->whereNotNull('option_id');
+
+            $totalAnswered = (clone $answersBase)->count();
+            $correctAnswers = (clone $answersBase)->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))->count();
+            $accuracy = $totalAnswered > 0 ? round((100 * $correctAnswers) / $totalAnswered, 1) : 0;
+
+            $byPensum[] = [
+                'pensum_id' => $pensum->id,
+                'name' => $name,
+                'total_sessions' => $totalSessions,
+                'completed_sessions' => $completedSessions,
+                'accuracy' => $accuracy,
+                'answered' => $totalAnswered,
+            ];
+
+            $totalQuestions = DiagQuestion::where('pensum_id', $pensum->id)
+                ->when($this->filterDiagMainId, fn ($q) => $q->where('diag_main_id', $this->filterDiagMainId))
+                ->count();
+
+            $detailed[] = [
+                'name' => $name,
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'incorrect_answers' => $totalAnswered - $correctAnswers,
+                'accuracy' => $accuracy,
+            ];
+        }
+
+        $withAnswers = array_values(array_filter($byPensum, fn ($row) => $row['answered'] > 0));
+        $best = null;
+        $worst = null;
+        if (! empty($withAnswers)) {
+            $accuracies = array_column($withAnswers, 'accuracy');
+            $best = $withAnswers[array_search(max($accuracies), $accuracies, true)]['name'];
+            $worst = $withAnswers[array_search(min($accuracies), $accuracies, true)]['name'];
+        }
+
+        $questionScope = DiagQuestion::whereIn('pensum_id', $pensumIds)
+            ->when($this->filterDiagMainId, fn ($q) => $q->where('diag_main_id', $this->filterDiagMainId));
+
+        $byType = (clone $questionScope)
+            ->selectRaw('tipo_pregunta as type, COUNT(*) as count')
+            ->groupBy('tipo_pregunta')
+            ->get()->map(fn ($row) => ['type' => $row->type, 'count' => (int) $row->count])->values()->toArray();
+
+        $byDifficulty = (clone $questionScope)
+            ->selectRaw('difficulty, COUNT(*) as count')
+            ->groupBy('difficulty')
+            ->get()->map(fn ($row) => ['difficulty' => $row->difficulty, 'count' => (int) $row->count])->values()->toArray();
+
+        $totalStudents = (int) DiagSession::where($sessionScope)->distinct()->count('estudiant_id');
+
+        // Respuestas y precisión por pregunta, agrupadas por área de formación.
+        $areaQuestions = DiagQuestion::whereIn('pensum_id', $pensumIds)
+            ->when($this->filterDiagMainId, fn ($q) => $q->where('diag_main_id', $this->filterDiagMainId))
+            ->orderBy('orden')->orderBy('id')
+            ->get(['id', 'pensum_id', 'pregunta', 'tipo_pregunta']);
+
+        $totalsByQuestion = collect();
+        $optionByQuestion = collect();
+        $correctByQuestion = collect();
+        $questionIds = $areaQuestions->pluck('id');
+        if ($questionIds->isNotEmpty()) {
+            $answersInScope = fn () => DiagAnswer::whereIn('question_id', $questionIds)
+                ->whereHas('session', fn ($q) => $q->where($sessionScope))
+                ->whereNotNull('completado_at');
+
+            $totalsByQuestion = (clone $answersInScope())
+                ->selectRaw('question_id, COUNT(*) as total')
+                ->groupBy('question_id')->pluck('total', 'question_id');
+
+            $optionByQuestion = (clone $answersInScope())
+                ->whereNotNull('option_id')
+                ->selectRaw('question_id, COUNT(*) as total')
+                ->groupBy('question_id')->pluck('total', 'question_id');
+
+            $correctByQuestion = (clone $answersInScope())
+                ->whereNotNull('option_id')
+                ->whereHas('selectedOption', fn ($q) => $q->where('valor', 1))
+                ->selectRaw('question_id, COUNT(*) as total')
+                ->groupBy('question_id')->pluck('total', 'question_id');
+        }
+
+        // by_pensum ya trae la precisión y sesiones del área calculadas con el mismo scope
+        $byPensumById = collect($byPensum)->keyBy('pensum_id');
+        $accuracyByPensum = $byPensumById->map(fn ($row) => $row['accuracy']);
+
+        $byAreaQuestion = [];
+        foreach ($pensums as $pensum) {
+            $name = $pensum->full_name ?? trim(($pensum->grado?->name ?? '').' - '.($pensum->asignatura?->name ?? ''));
+            $shortName = trim(($pensum->grado?->code_sm ?? $pensum->grado?->code ?? '?').' - '.($pensum->asignatura?->code_sm ?? $pensum->asignatura?->code ?? '?'));
+
+            $rows = [];
+            foreach ($areaQuestions->where('pensum_id', $pensum->id) as $qq) {
+                $total = (int) ($totalsByQuestion[$qq->id] ?? 0);
+                $withOption = (int) ($optionByQuestion[$qq->id] ?? 0);
+                $correct = (int) ($correctByQuestion[$qq->id] ?? 0);
+                $rows[] = [
+                    'pregunta' => $qq->pregunta,
+                    'tipo' => $qq->tipo_pregunta,
+                    'total' => $total,
+                    'correct' => $correct,
+                    'precision' => ($qq->tipo_pregunta === 'multiple' && $withOption > 0)
+                        ? round((100 * $correct) / $withOption, 1)
+                        : null,
+                ];
+            }
+
+            $byAreaQuestion[] = [
+                'pensum_id' => $pensum->id,
+                'name' => $name,
+                'short_name' => $shortName,
+                'grado_name' => $pensum->grado?->name,
+                'grado_code' => $pensum->grado?->code_sm ?? $pensum->grado?->code,
+                'asignatura_name' => $pensum->asignatura?->name,
+                'asignatura_code' => $pensum->asignatura?->code_sm ?? $pensum->asignatura?->code,
+                'pestudio_code' => $pensum->pestudio?->code,
+                'pestudio_name' => $pensum->pestudio?->name,
+                'total_preguntas' => count($rows),
+                'total_respuestas' => array_sum(array_column($rows, 'total')),
+                'total_sessions' => $byPensumById[$pensum->id]['total_sessions'] ?? 0,
+                'completed_sessions' => $byPensumById[$pensum->id]['completed_sessions'] ?? 0,
+                'precision' => $accuracyByPensum[$pensum->id] ?? null,
+                'questions' => $rows,
+            ];
+        }
+
+        return [
+            'by_pensum' => $byPensum,
+            'by_question_type' => $byType,
+            'by_difficulty' => $byDifficulty,
+            'best_pensum' => $best,
+            'worst_pensum' => $worst,
+            'total_students_evaluated' => $totalStudents,
+            'detailed_pensum' => $detailed,
+            'by_area_question' => $byAreaQuestion,
+        ];
     }
 
     // ========================================

@@ -161,7 +161,20 @@
                     <p class="text-gray-500 text-sm">No hay preguntas registradas en <code class="text-gray-400">diag_questions</code>.</p>
                 </div>
             @else
-                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Resumen por pensum ({{ $summary->count() }} pensum con preguntas)</p>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Resumen por pensum ({{ $summary instanceof \Illuminate\Pagination\LengthAwarePaginator ? $summary->total() : $summary->count() }} pensum con preguntas)</p>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Ver</label>
+                        <select wire:model.live="summaryPerPage"
+                            class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none cursor-pointer">
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="overflow-x-auto border border-white/5 rounded-lg">
                     <table class="w-full text-sm">
                         <thead class="bg-white/[0.02] border-b border-white/5">
@@ -208,6 +221,25 @@
                         </tbody>
                     </table>
                 </div>
+                @if($summary instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    @if($summary->hasPages())
+                        <div class="mt-2 border border-white/5 rounded-lg px-3 py-2 bg-gray-800/20">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <p class="text-[11px] text-gray-500">
+                                    <span class="font-medium text-gray-400">{{ $summary->firstItem() }}</span>
+                                    <span>–</span>
+                                    <span class="font-medium text-gray-400">{{ $summary->lastItem() }}</span>
+                                    <span> de </span>
+                                    <span class="font-medium text-gray-400">{{ $summary->total() }}</span>
+                                    <span> resultados</span>
+                                </p>
+                                <div>{{ $summary->links('vendor.livewire.custom-tailwind') }}</div>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-[11px] text-gray-500 mt-2">Mostrando {{ $summary->firstItem() ?? 0 }} a {{ $summary->lastItem() ?? 0 }} de {{ $summary->total() }}</p>
+                    @endif
+                @endif
                 <p class="text-[10px] text-gray-600 mt-2">Tip: selecciona un pensum para ver sus preguntas agrupadas por <code class="text-amber-400">grupo_estable</code> (vía <code class="text-gray-400">pevaluacions.pensum_id → grupo_estable_id</code>).</p>
             @endif
         @else

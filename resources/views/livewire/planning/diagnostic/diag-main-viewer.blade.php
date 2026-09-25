@@ -120,6 +120,73 @@
                     </div>
                 </div>
 
+                {{-- Tabs: Resumen general | Por área de formación | Por Grado --}}
+                @php
+                    $areasTotal = $pensumProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $pensumProgress->total() : $pensumProgress->count();
+                    $gradosTotal = $gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $gradoProgress->total() : $gradoProgress->count();
+                @endphp
+                <div class="flex flex-wrap items-center gap-1.5 bg-gray-800/30 border border-white/5 rounded-lg p-1 w-full" role="tablist" aria-label="Resúmenes del diagnóstico">
+                    <button type="button" role="tab" id="diag-tab-general" data-diag-tab="general" wire:key="diag-tab-general"
+                        aria-selected="{{ $activeTab === 'general' ? 'true' : 'false' }}"
+                        aria-controls="diag-tabpanel"
+                        tabindex="{{ $activeTab === 'general' ? '0' : '-1' }}"
+                        wire:click="setTab('general')"
+                        class="flex-1 text-center px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40 {{ $activeTab === 'general' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20' : 'text-gray-400 hover:text-white border border-transparent' }}">
+                        Resumen general
+                    </button>
+                    <button type="button" role="tab" id="diag-tab-areas" data-diag-tab="areas" wire:key="diag-tab-areas"
+                        aria-selected="{{ $activeTab === 'areas' ? 'true' : 'false' }}"
+                        aria-controls="diag-tabpanel"
+                        tabindex="{{ $activeTab === 'areas' ? '0' : '-1' }}"
+                        wire:click="setTab('areas')"
+                        class="flex-1 text-center px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40 {{ $activeTab === 'areas' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20' : 'text-gray-400 hover:text-white border border-transparent' }}">
+                        Por área <span class="ml-1 px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[10px]">{{ $areasTotal }}</span>
+                    </button>
+                    <button type="button" role="tab" id="diag-tab-grados" data-diag-tab="grados" wire:key="diag-tab-grados"
+                        aria-selected="{{ $activeTab === 'grados' ? 'true' : 'false' }}"
+                        aria-controls="diag-tabpanel"
+                        tabindex="{{ $activeTab === 'grados' ? '0' : '-1' }}"
+                        wire:click="setTab('grados')"
+                        class="flex-1 text-center px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40 {{ $activeTab === 'grados' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20' : 'text-gray-400 hover:text-white border border-transparent' }}">
+                        Por Grado <span class="ml-1 px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[10px]">{{ $gradosTotal }}</span>
+                    </button>
+                </div>
+
+                @script
+                <script>
+                (() => {
+                    let keyboardNav = false;
+                    document.addEventListener('keydown', (e) => {
+                        const tab = e.target.closest('[data-diag-tab]');
+                        if (!tab) return;
+                        const tabs = [...document.querySelectorAll('[data-diag-tab]')];
+                        const i = tabs.indexOf(tab);
+                        let next = null;
+                        if (e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+                        else if (e.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+                        else if (e.key === 'Home') next = tabs[0];
+                        else if (e.key === 'End') next = tabs[tabs.length - 1];
+                        else return;
+                        e.preventDefault();
+                        keyboardNav = true;
+                        next.focus();
+                        next.click();
+                    });
+                    Livewire.hook('commit', ({ succeed }) => {
+                        succeed(() => {
+                            if (!keyboardNav) return;
+                            keyboardNav = false;
+                            const active = document.querySelector('[data-diag-tab][aria-selected="true"]');
+                            if (active && document.activeElement !== active) active.focus();
+                        });
+                    });
+                })();
+                </script>
+                @endscript
+
+                <div role="tabpanel" id="diag-tabpanel" tabindex="0" aria-labelledby="diag-tab-{{ $activeTab }}"
+                    class="focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40 rounded-lg">
+                @if($activeTab === 'general')
                 {{-- Enriquecimiento s2526: sesiones recientes + distribución por tipo/dificultad --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
                     {{-- Sesiones recientes --}}
@@ -189,7 +256,7 @@
                         </div>
                     </div>
                 </div>
-
+                @elseif($activeTab === 'areas')
                 {{-- Resumen por área de formación — con filtros y paginación como s2526 --}}
                 @php $hasProgress = $pensumProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $pensumProgress->total() > 0 : $pensumProgress->isNotEmpty(); @endphp
                 @if($hasProgress)
@@ -267,6 +334,7 @@
                     </div>
                 @endif
 
+                @elseif($activeTab === 'grados')
                 {{-- Resumen por Grado — similar a Resumen por área, con select gradoId específico --}}
                 @if($selected && $gradosForResumen && $gradosForResumen->isNotEmpty())
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
@@ -327,7 +395,6 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
                         @if($gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator && $gradoProgress->hasPages())
                             <x-pagination-wrapper :paginator="$gradoProgress" />
                         @elseif($gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator)
@@ -338,6 +405,8 @@
                         @endif
                     </div>
                 @endif
+                @endif
+                </div>
 
                 <p class="text-[10px] text-gray-600">ID #{{ $selected->id }} @if($selected->created_at) · Creado {{ $selected->created_at->format('d/m/Y') }} @endif</p>
             </div>

@@ -8,10 +8,16 @@ use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Instrument\DiagQuestion;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class QuestionByPensum extends Component
 {
+    use WithPagination;
+
+    protected $paginationTheme = 'tailwind';
+
     public ?int $pensumId = null;
     public ?int $pestudioId = null;
     public ?int $gradoId = null;
@@ -19,6 +25,7 @@ class QuestionByPensum extends Component
     public ?int $grupoEstableId = null;
     public string $search = '';
     public bool $showInactive = true;
+    public int $summaryPerPage = 10;
 
     /** @var array<int,bool> grupos expandidos key = grupo_estable_id (0=sin grupo) */
     public array $expandedGroups = [];
@@ -39,6 +46,7 @@ class QuestionByPensum extends Component
         $this->grupoEstableId = null;
         $this->pensumId = null;
         $this->expandedGroups = [];
+        $this->resetPage('pensumSummaryPage');
     }
 
     public function updatedGradoId(): void
@@ -47,6 +55,7 @@ class QuestionByPensum extends Component
         $this->grupoEstableId = null;
         $this->pensumId = null;
         $this->expandedGroups = [];
+        $this->resetPage('pensumSummaryPage');
     }
 
     public function updatedPevaluacionId(): void
@@ -107,6 +116,11 @@ class QuestionByPensum extends Component
         $this->resetPageIfNeeded();
     }
 
+    public function updatedSummaryPerPage(): void
+    {
+        $this->resetPage('pensumSummaryPage');
+    }
+
     public function clearFilters(): void
     {
         $this->pensumId = null;
@@ -115,6 +129,7 @@ class QuestionByPensum extends Component
         $this->pevaluacionId = null;
         $this->grupoEstableId = null;
         $this->expandedGroups = [];
+        $this->resetPage('pensumSummaryPage');
     }
 
     public function deactivateFiltered(): void
@@ -387,6 +402,13 @@ class QuestionByPensum extends Component
                 })
                 ->filter(fn ($r) => $r->pensum !== null)
                 ->values();
+
+            // Paginación del resumen por pensum
+            $perPage = max(1, (int) $this->summaryPerPage);
+            $currentPage = LengthAwarePaginator::resolveCurrentPage('pensumSummaryPage');
+            $total = $summary->count();
+            $items = $summary->forPage($currentPage, $perPage)->values();
+            $summary = new LengthAwarePaginator($items, $total, $perPage, $currentPage, ['path' => request()->url(), 'pageName' => 'pensumSummaryPage']);
         }
 
         // compatibilidad: seccionsOptions ya no se usa (eliminada), se mantiene vacía
