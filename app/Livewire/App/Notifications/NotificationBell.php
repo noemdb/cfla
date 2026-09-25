@@ -126,7 +126,10 @@ class NotificationBell extends Component
     {
         return [
             'id' => $id,
-            'type' => (string) ($data['type'] ?? 'generic'),
+            // `type` es la clave canónica; `event_type` la de las filas
+            // históricas (TimetableChanged/SubstituteAssigned y anteriores), que
+            // sin este fallback se pintarían como "generic".
+            'type' => (string) ($data['type'] ?? $data['event_type'] ?? 'generic'),
             'message' => (string) ($data['message'] ?? 'Nueva notificación'),
             'url' => $this->targetUrl($data),
             'read_at' => $readAt?->toIso8601String(),

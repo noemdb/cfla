@@ -4,9 +4,10 @@ namespace App\Console\Commands;
 
 use App\Events\ReverbTestEvent;
 use App\Models\User;
-use App\Notifications\ReverbTestNotification;
+use App\Services\NotificationSampleFactory;
 use App\Services\NotificationService;
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 
 /**
  * Diagnóstico de Laravel Reverb.
@@ -55,8 +56,20 @@ use Illuminate\Console\Command;
  *    vía NotificationService::notifyUsers(): persiste la fila en `notifications`
  *    y emite el broadcast `NotificationReceived`. La campana
  *    (`app.notifications.notification-bell`) la muestra al instante (Reverb) o en
- *    ≤30s vía `wire:poll.30s`. Útil para validar el flujo completo de notificación
- *    → WebSocket → UI sin tocar el dominio.
+ *    ≤30s vía `wire:poll.visible.30s`. Útil para validar el flujo completo de
+ *    notificación → WebSocket → UI sin tocar el dominio.
+ *
+ * 7) Probar CUALQUIER tipo de notificación del sistema, sin reproducir el flujo
+ *    real que la origina (registrar actividad, activar horario, guardar
+ *    observaciones…). `NotificationSampleFactory` construye una muestra con datos
+ *    ficticios y rutas reales, respetando el reenvío por rol del resolver:
+ *    `php8.2 artisan reverb:test --notify=ccortez23 --notification=activity_created`
+ *    Acepta el alias (`activity_created`, `peducativo`, `diag_question`…), el
+ *    nombre de la clase o su FQCN. Listar tipos:
+ *    `php8.2 artisan reverb:test --list-notifications`
+ *    Combinar con `--only-notify` para saltar los pasos de WebSocket (2-4) y
+ *    probar solo el flujo de notificaciones, incluso con Reverb caído:
+ *    `php8.2 artisan reverb:test --notify=ccortez23 --notification=activity_created --only-notify`
  *
  * ──────────────────────────────────────────────────────────────────────────────
  */
@@ -68,22 +81,37 @@ class ReverbTest extends Command
         {--proxy-host= : IP/host a conectar para el túnel (si el dominio público no resuelve desde CLI)}
         {--proxy-port= : Puerto del proxy a conectar (default: REVERB_PORT)}
         {--notify= : Username a notificar — envía una notificación a la campana del navbar}
+        {--notification=reverb_test : Tipo de notificación a enviar con --notify (ver --list-notifications)}
+        {--list-notifications : Listar los tipos de notificación disponibles para --notification}
+        {--only-notify : Saltar los pasos de WebSocket (1-4) y ejecutar solo la notificación}
         {--timeout=5 : Segundos a esperar el evento tras emitirlo}';
 
     protected $description = 'Verifica el funcionamiento de Laravel Reverb (config, handshake y entrega end-to-end)';
 
     public function handle(): int
     {
+        if ($this->option('list-notifications')) {
+            return $this->listNotifications() ? self::SUCCESS : self::FAILURE;
+        }
+
         $failures = 0;
 
         $failures += $this->stepConfig() ? 0 : 1;
-        $failures += $this->stepHandshakeInternal() ? 0 : 1;
 
-        if ($this->option('proxy')) {
-            $failures += $this->stepHandshakeProxy() ? 0 : 1;
+        // --only-notify: atajo para probar el flujo de notificaciones sin
+        // depender del WebSocket (útil con Reverb caído o desde CI).
+        if ($this->option('only-notify')) {
+            $this->newLine();
+            $this->line('  (--only-notify: se omiten los pasos 2-4 de WebSocket)');
+        } else {
+            $failures += $this->stepHandshakeInternal() ? 0 : 1;
+
+            if ($this->option('proxy')) {
+                $failures += $this->stepHandshakeProxy() ? 0 : 1;
+            }
+
+            $failures += $this->stepEndToEnd() ? 0 : 1;
         }
-
-        $failures += $this->stepEndToEnd() ? 0 : 1;
 
         if ($this->option('notify')) {
             $failures += $this->stepNotify() ? 0 : 1;
@@ -99,6 +127,32 @@ class ReverbTest extends Command
         $this->error("❌ {$failures} paso(s) con fallo. Revisar §10 de context/reverb/PRODUCCION.md.");
 
         return self::FAILURE;
+    }
+
+    /**
+     * `--list-notifications`: catálogo de notificaciones con muestra disponible
+     * para `--notify --notification=<tipo>`.
+     */
+    private function listNotifications(): bool
+    {
+        $this->newLine();
+        $this->info('Notificaciones con muestra para --notify');
+
+        $rows = [];
+        foreach (NotificationSampleFactory::catalogue() as $alias => $meta) {
+            $rows[] = [
+                $alias,
+                class_basename($meta['class']),
+                $meta['channel'],
+                in_array('database', array_map('trim', explode(',', $meta['channel'])), true) ? 'sí' : 'no',
+            ];
+        }
+
+        $this->table(['--notification', 'Clase', 'Canal (via)', 'Va a la campana'], $rows);
+        $this->line('  Acepta también el nombre de la clase o su FQCN: --notification=ActivityCreatedNotification');
+        $this->line('  Ejemplo: php8.2 artisan reverb:test --notify=ccortez23 --notification=activity_created --only-notify');
+
+        return true;
     }
 
     private function stepConfig(): bool
@@ -129,7 +183,7 @@ class ReverbTest extends Command
         $this->table(['Clave', 'Valor'], $rows);
 
         $ok = ($default === 'reverb') && $internalHost && $internalPort;
-        if (!$ok) {
+        if (! $ok) {
             $this->warn('La conexión por defecto no es "reverb" o faltan host/puerto internos.');
 
             return false;
@@ -164,7 +218,7 @@ class ReverbTest extends Command
         // Auto-fallback: si el host público no resuelve y no se indicó un destino
         // explícito, reintenta contra 127.0.0.1 conservando el Host: del vhost.
         // Así `--proxy` a secas funciona en local (cfla.local sin /etc/hosts).
-        if (!$this->option('proxy-host') && !$this->resolves($publicHost)) {
+        if (! $this->option('proxy-host') && ! $this->resolves($publicHost)) {
             $this->warn("  {$publicHost} no resuelve desde CLI; usando fallback a 127.0.0.1 (Host: {$publicHost}).");
             $targetHost = '127.0.0.1';
         }
@@ -186,7 +240,7 @@ class ReverbTest extends Command
         }
         $records = @dns_get_record($host, DNS_A | DNS_AAAA);
 
-        return !empty($records);
+        return ! empty($records);
     }
 
     private function handshake(string $title, string $host, int $port, string $scheme, ?string $hostHeader = null): bool
@@ -195,26 +249,26 @@ class ReverbTest extends Command
         $this->info($title);
 
         $key = config('reverb.apps.apps.0.key');
-        if (!$key) {
+        if (! $key) {
             $this->warn('REVERB_APP_KEY vacío.');
 
             return false;
         }
 
         $socket = $this->connect($host, $port, $scheme, $key, $hostHeader ?? $host, $httpResponse);
-        if (!$socket) {
+        if (! $socket) {
             return false;
         }
 
         $expected = $this->expectedAccept($this->lastSecKey);
-        if (!str_contains($httpResponse, '101 Switching Protocols')) {
+        if (! str_contains($httpResponse, '101 Switching Protocols')) {
             $this->warn("Sin 101 Switching Protocols. Respuesta:\n{$httpResponse}");
             fclose($socket);
 
             return false;
         }
 
-        if (!str_contains($httpResponse, 'Sec-WebSocket-Accept: '.$expected)) {
+        if (! str_contains($httpResponse, 'Sec-WebSocket-Accept: '.$expected)) {
             $this->warn('Sec-WebSocket-Accept no coincide (handshake no válido).');
             fclose($socket);
 
@@ -238,17 +292,17 @@ class ReverbTest extends Command
         $channel = $this->option('channel');
         $timeout = max(1, (int) $this->option('timeout'));
 
-        if (!$key) {
+        if (! $key) {
             $this->warn('REVERB_APP_KEY vacío.');
 
             return false;
         }
 
         $socket = $this->connect($host, $port, 'http', $key, $host, $httpResponse);
-        if (!$socket) {
+        if (! $socket) {
             return false;
         }
-        if (!str_contains($httpResponse, '101 Switching Protocols')) {
+        if (! str_contains($httpResponse, '101 Switching Protocols')) {
             $this->warn("Handshake falló: {$httpResponse}");
             fclose($socket);
 
@@ -300,6 +354,9 @@ class ReverbTest extends Command
      * Usa NotificationService::notifyUsers() — persiste la fila en `notifications`
      * y emite el broadcast `NotificationReceived` por destinatario — de modo que
      * el dropdown se actualiza en tiempo real (o vía wire:poll.30s si Reverb cae).
+     *
+     * El tipo de notificación se elige con `--notification=<tipo>`
+     * (por defecto `reverb_test`); ver `--list-notifications`.
      */
     private function stepNotify(): bool
     {
@@ -311,17 +368,27 @@ class ReverbTest extends Command
             ->orWhere('email', $username)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             $this->warn("Usuario '{$username}' no encontrado (se buscó por username y email).");
 
             return false;
         }
 
-        $message = 'Reverb: notificación de prueba para '.$user->username.' ('.now()->toDateTimeString().')';
-        $this->line('  Destinatario: #'.$user->id.' '.$user->username.' <'.$user->email.'>');
+        $requested = (string) $this->option('notification');
 
         try {
-            app(NotificationService::class)->notifyUsers([$user], new ReverbTestNotification($message));
+            $notification = NotificationSampleFactory::make($requested, $user->username);
+        } catch (InvalidArgumentException $e) {
+            $this->warn('  '.$e->getMessage());
+
+            return false;
+        }
+
+        $this->line('  Destinatario: #'.$user->id.' '.$user->username.' <'.$user->email.'>');
+        $this->line('  Tipo: '.class_basename($notification::class).'  (--notification='.$requested.')');
+
+        try {
+            app(NotificationService::class)->notifyUsers([$user], $notification);
         } catch (\Throwable $e) {
             $this->warn('  NotificationService lanzó: '.$e->getMessage());
 
@@ -365,7 +432,7 @@ class ReverbTest extends Command
         $errno = 0;
         $errstr = '';
         $socket = @stream_socket_client($transport, $errno, $errstr, 5);
-        if (!$socket) {
+        if (! $socket) {
             $this->warn("No se pudo conectar a {$transport}: {$errstr} (errno {$errno}).");
 
             return false;
@@ -388,7 +455,7 @@ class ReverbTest extends Command
         fwrite($socket, implode("\r\n", $headers));
 
         $response = '';
-        while (!feof($socket) && !str_contains($response, "\r\n\r\n")) {
+        while (! feof($socket) && ! str_contains($response, "\r\n\r\n")) {
             $response .= fread($socket, 1024);
         }
 
@@ -474,9 +541,10 @@ class ReverbTest extends Command
             $chunk = fread($socket, $count - strlen($data));
             if ($chunk === '' || $chunk === false) {
                 $meta = stream_get_meta_data($socket);
-                if (!empty($meta['timed_out']) || feof($socket)) {
+                if (! empty($meta['timed_out']) || feof($socket)) {
                     return null;
                 }
+
                 continue;
             }
             $data .= $chunk;

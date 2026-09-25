@@ -32,6 +32,20 @@ class NotificationBellTest extends TestCase
         ]);
     }
 
+    /**
+     * Fila con la forma histórica: el tipo va en `event_type` y la URL en
+     * `action_url`, sin `type`/`url`.
+     */
+    private function makeLegacyNotification(User $user, string $id, array $data): void
+    {
+        $user->notifications()->create([
+            'id' => $id,
+            'type' => LessonScheduledForApproval::class,
+            'data' => $data,
+            'created_at' => now(),
+        ]);
+    }
+
     public function test_render_muestra_ultimas_notificaciones_y_conteo(): void
     {
         $user = User::factory()->create(['is_planner' => true]);
@@ -127,5 +141,58 @@ class NotificationBellTest extends TestCase
 
         Livewire::test(NotificationBell::class)
             ->assertSee(route('app.notifications.index'));
+    }
+
+    /**
+     * Las filas históricas (TimetableChanged/SubstituteAssigned y anteriores)
+     * guardan el tipo en `event_type`. Sin el fallback se pintarían como
+     * "generic" en la campana.
+     */
+    public function test_las_filas_historicas_con_event_type_no_se_pintan_como_genericas(): void
+    {
+        $user = User::factory()->create(['is_planner' => true]);
+        $this->makeLegacyNotification($user, 'notif-legacy', [
+            'event_type' => 'substitute_assigned',
+            'action_url' => 'https://destino.test/suplencias',
+            'message' => 'Suplencia asignada (fila histórica)',
+        ]);
+
+        $this->actingAs($user);
+
+        $component = Livewire::test(NotificationBell::class)
+            ->assertSet('unreadCount', 1);
+
+        $item = collect($component->get('notifications'))->firstWhere('id', 'notif-legacy');
+
+        $this->assertNotNull($item, 'la notificación histórica no apareció en la campana');
+        $this->assertSame('substitute_assigned', $item['type']);
+        $this->assertNotSame('generic', $item['type']);
+        $this->assertSame('https://destino.test/suplencias', $item['url']);
+    }
+
+    /**
+     * El destino por rol se decide con `type` o, en filas antiguas, con
+     * `event_type`: un planner multi-rol debe ir a planificación, no a
+     * liderazgo (que era lo que pasaba por el orden inverso).
+     */
+    public function test_la_campana_aplica_el_destino_por_rol_a_filas_historicas(): void
+    {
+        $user = User::factory()->create([
+            'is_planner' => true,
+            'is_leadership' => true,
+            'is_coordinacion' => true,
+        ]);
+        $this->makeLegacyNotification($user, 'notif-legacy', [
+            'event_type' => 'activity_created',
+            'action_url' => route('app.leadership.activities'),
+            'message' => 'Se registró una nueva actividad (fila histórica)',
+        ]);
+
+        $this->actingAs($user);
+
+        $component = Livewire::test(NotificationBell::class);
+        $item = collect($component->get('notifications'))->firstWhere('id', 'notif-legacy');
+
+        $this->assertSame(route('app.planning.activities.index'), $item['url']);
     }
 }

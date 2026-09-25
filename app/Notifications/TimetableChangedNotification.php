@@ -34,10 +34,13 @@ class TimetableChangedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'event_type' => $this->type,
+            'type' => $this->type,
             'calendar_id' => $this->calendarId,
             'calendar_name' => $this->calendarName,
             'message' => $this->message,
+            'url' => '/app/coordinacion/timetable',
+            // Se mantiene la clave histórica para no romper consumidores
+            // externos que aún la lean de filas ya persistidas.
             'action_url' => '/app/coordinacion/timetable',
         ];
     }

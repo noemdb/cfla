@@ -103,46 +103,114 @@ class NotificationTargetResolverTest extends TestCase
 
     /**
      * `activity_created` se almacena con URL neutra (índice) y el destino lo
-     * decide el rol: jefatura/admin a su listado con scope, planner puro al
-     * de planificación global y coordinación al suyo. Vale también para las
-     * filas históricas con URL de jefatura almacenada.
+     * decide el rol según el orden de prioridad
+     * is_admin → is_planner → is_director → is_diagnostic → is_coordinacion →
+     * is_leadership → is_profesor → is_student. Gana el primer rol que el
+     * usuario tenga, aunque tenga varios.
      */
-    public function test_activity_created_redirige_a_planning_solo_al_planner_puro(): void
+    public function test_activity_created_sigue_el_orden_de_prioridad_de_roles(): void
     {
         $resolver = app(NotificationTargetResolver::class);
-        $index = route('app.notifications.index');
-        $leadership = route('app.leadership.activities');
+        $planning = route('app.planning.activities.index');
 
-        foreach ([$index, $leadership] as $stored) {
+        foreach ([route('app.notifications.index'), route('app.leadership.activities')] as $stored) {
             $data = ['type' => 'activity_created', 'url' => $stored];
 
-            $purePlanner = User::factory()->create(['is_planner' => true]);
-            $this->assertSame(
-                route('app.planning.activities.index'),
-                $resolver->resolveFor($purePlanner, $data),
-                "planner puro con stored={$stored}"
-            );
+            // is_planner gana sobre is_coordinacion/is_leadership/is_profesor.
+            $this->assertSame($planning, $resolver->resolveFor(
+                User::factory()->create(['is_planner' => true, 'is_leadership' => true, 'is_coordinacion' => true, 'is_profesor' => true]),
+                $data
+            ), "planner multi-rol con stored={$stored}");
 
-            // Con jefatura (aunque también sea planner): listado de jefatura.
-            $plannerLeader = User::factory()->create(['is_planner' => true, 'is_leadership' => true]);
-            $this->assertSame($leadership, $resolver->resolveFor($plannerLeader, $data));
+            // is_admin es el primero de la lista.
+            $this->assertSame($planning, $resolver->resolveFor(
+                User::factory()->create(['is_admin' => true, 'is_leadership' => true]),
+                $data
+            ), "admin con stored={$stored}");
 
-            $leader = User::factory()->create(['is_leadership' => true]);
-            $this->assertSame($leadership, $resolver->resolveFor($leader, $data));
+            // Roles puros: cada uno a su listado.
+            $this->assertSame($planning, $resolver->resolveFor(User::factory()->create(['is_planner' => true]), $data));
+            $this->assertSame(route('app.director.activities'), $resolver->resolveFor(User::factory()->create(['is_director' => true]), $data));
+            $this->assertSame($planning, $resolver->resolveFor(User::factory()->create(['is_diagnostic' => true]), $data));
+            $this->assertSame(route('app.coordinacion.activities'), $resolver->resolveFor(User::factory()->create(['is_coordinacion' => true]), $data));
+            $this->assertSame(route('app.leadership.activities'), $resolver->resolveFor(User::factory()->create(['is_leadership' => true]), $data));
+            $this->assertSame(route('app.profesors.activities.index'), $resolver->resolveFor(User::factory()->create(['is_profesor' => true]), $data));
 
-            $admin = User::factory()->create(['is_admin' => true]);
-            $this->assertSame($leadership, $resolver->resolveFor($admin, $data));
+            // is_diagnostic gana sobre is_coordinacion; is_coordinacion sobre
+            // is_leadership.
+            $this->assertSame($planning, $resolver->resolveFor(
+                User::factory()->create(['is_diagnostic' => true, 'is_coordinacion' => true]),
+                $data
+            ), "diagnostic+coordinacion con stored={$stored}");
 
-            // Coordinación pura: su propio listado de actividades.
-            $coord = User::factory()->create(['is_coordinacion' => true]);
-            $this->assertSame(
-                route('app.coordinacion.activities'),
-                $resolver->resolveFor($coord, $data)
-            );
+            $this->assertSame(route('app.coordinacion.activities'), $resolver->resolveFor(
+                User::factory()->create(['is_coordinacion' => true, 'is_leadership' => true]),
+                $data
+            ), "coordinacion+leadership con stored={$stored}");
 
-            // Con jefatura (aunque también coordine): listado de jefatura.
-            $leaderCoord = User::factory()->create(['is_leadership' => true, 'is_coordinacion' => true]);
-            $this->assertSame($leadership, $resolver->resolveFor($leaderCoord, $data));
+            // El alumnado no gestiona actividades: cae a la URL almacenada.
+            $this->assertSame($stored, $resolver->resolveFor(
+                User::factory()->create(['is_student' => true]),
+                $data
+            ), "student con stored={$stored}");
         }
+    }
+
+    /**
+     * El orden también aplica a `lesson_scheduled`, y los roles sin pantalla
+     * propia para ese tipo (el profesorado) se saltan al siguiente.
+     */
+    public function test_lesson_scheduled_sigue_el_orden_de_prioridad(): void
+    {
+        $resolver = app(NotificationTargetResolver::class);
+        $data = ['type' => 'lesson_scheduled', 'url' => 'https://fallback.test/monitor'];
+        $monitor = route('app.planning.lms.monitor', ['filterStatus' => 'SCHEDULED']);
+
+        $this->assertSame($monitor, $resolver->resolveFor(User::factory()->create(['is_admin' => true]), $data));
+        $this->assertSame($monitor, $resolver->resolveFor(User::factory()->create(['is_planner' => true]), $data));
+        $this->assertSame(route('app.director.lessons'), $resolver->resolveFor(User::factory()->create(['is_director' => true]), $data));
+        $this->assertSame($monitor, $resolver->resolveFor(User::factory()->create(['is_diagnostic' => true]), $data));
+        $this->assertSame(route('app.coordinacion.lessons'), $resolver->resolveFor(User::factory()->create(['is_coordinacion' => true]), $data));
+        $this->assertSame(route('app.leadership.lessons'), $resolver->resolveFor(User::factory()->create(['is_leadership' => true]), $data));
+        $this->assertSame(route('student.lms.lessons'), $resolver->resolveFor(User::factory()->create(['is_student' => true]), $data));
+
+        // El profesorado no tiene listado de lecciones: se salta y, si no hay
+        // otro rol, se respeta la URL almacenada.
+        $this->assertSame(
+            'https://fallback.test/monitor',
+            $resolver->resolveFor(User::factory()->create(['is_profesor' => true]), $data)
+        );
+
+        // profesor + coordinación → gana coordinación.
+        $this->assertSame(
+            route('app.coordinacion.lessons'),
+            $resolver->resolveFor(User::factory()->create(['is_profesor' => true, 'is_coordinacion' => true]), $data)
+        );
+    }
+
+    /**
+     * Las filas históricas guardan el tipo en `event_type` (no en `type`): el
+     * resolver debe seguir aplicándoles el destino por rol.
+     */
+    public function test_las_filas_historicas_con_event_type_conservan_el_destino_por_rol(): void
+    {
+        $resolver = app(NotificationTargetResolver::class);
+
+        $this->assertSame(
+            route('app.planning.activities.index'),
+            $resolver->resolveFor(
+                User::factory()->create(['is_planner' => true, 'is_leadership' => true]),
+                ['event_type' => 'activity_created', 'action_url' => route('app.leadership.activities')]
+            )
+        );
+
+        $this->assertSame(
+            'https://destino.test/suplencias',
+            $resolver->resolveFor(
+                User::factory()->create(['is_admin' => true]),
+                ['event_type' => 'substitute_assigned', 'action_url' => 'https://destino.test/suplencias']
+            ),
+            'un type sin destino por rol debe respetar la URL almacenada'
+        );
     }
 }

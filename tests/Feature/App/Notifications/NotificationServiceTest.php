@@ -93,7 +93,11 @@ class NotificationServiceTest extends TestCase
         Event::assertDispatched(NotificationReceived::class, function ($event) use ($recipient) {
             return $event->userId === $recipient->id
                 && ($event->payload['assignment_id'] ?? null) === 1
-                && ($event->payload['event_type'] ?? null) === 'substitute_assigned';
+                // Forma canónica: la campana lee `type` (y `url`), no
+                // `event_type`/`action_url`, que quedan solo por compatibilidad.
+                && ($event->payload['type'] ?? null) === 'substitute_assigned'
+                && ($event->payload['url'] ?? null) === '/app/profesors/timetable/substitutes'
+                && ($event->payload['action_url'] ?? null) === '/app/profesors/timetable/substitutes';
         });
     }
 

@@ -36,10 +36,13 @@ class SubstituteAssignedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'event_type' => 'substitute_assigned',
+            'type' => 'substitute_assigned',
             'assignment_id' => $this->assignmentId,
             'calendar_name' => $this->calendarName,
             'message' => "Suplencia asignada el {$this->date} ({$this->periodLabel}) para «{$this->subjectLabel}». Confirmá o rechazá en tu bandeja.",
+            'url' => '/app/profesors/timetable/substitutes',
+            // Clave histórica, conservada para no romper consumidores externos
+            // que la lean de filas ya persistidas.
             'action_url' => '/app/profesors/timetable/substitutes',
         ];
     }
