@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -234,24 +235,48 @@ class NotificationService
      * Reclama (destinatario, tipo, huella, ventana) en la tabla de idempotencia.
      * Devuelve `true` si no hay idempotencia, la clave si se reclamó, o `false`
      * si ya estaba reclamada (hay que omitir el envío).
+     *
+     * Fail-open: si la tabla no existe (migración pendiente en algún entorno)
+     * o la BD falla, se permite el envío y se registra un warning. Perder el
+     * aviso es peor que un posible duplicado.
      */
     private function claimDedupe(User $recipient, BaseNotification $notification, string $fingerprint, int $windowMinutes, string $payloadType = '')
     {
-        $bucket = (int) floor(now()->timestamp / max(1, $windowMinutes * 60));
-        $key = sha1($recipient->id.'|'.$payloadType.'|'.$fingerprint.'|'.$bucket);
+        try {
+            if (! Schema::hasTable(self::DEDUPE_TABLE)) {
+                Log::warning('NotificationService: tabla de idempotencia ausente, envío sin dedupe', [
+                    'table' => self::DEDUPE_TABLE,
+                    'notifiable_id' => $recipient->id,
+                    'payload_type' => $payloadType,
+                ]);
 
-        $claimed = DB::table(self::DEDUPE_TABLE)->insertOrIgnore([
-            'dedupe_key' => $key,
-            'notifiable_type' => $recipient->getMorphClass(),
-            'notifiable_id' => $recipient->id,
-            'notification_class' => $notification::class,
-            'payload_type' => $payloadType,
-            'bucket' => $bucket,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+                return true;
+            }
 
-        return $claimed === 1 ? $key : false;
+            $bucket = (int) floor(now()->timestamp / max(1, $windowMinutes * 60));
+            $key = sha1($recipient->id.'|'.$payloadType.'|'.$fingerprint.'|'.$bucket);
+
+            $claimed = DB::table(self::DEDUPE_TABLE)->insertOrIgnore([
+                'dedupe_key' => $key,
+                'notifiable_type' => $recipient->getMorphClass(),
+                'notifiable_id' => $recipient->id,
+                'notification_class' => $notification::class,
+                'payload_type' => $payloadType,
+                'bucket' => $bucket,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return $claimed === 1 ? $key : false;
+        } catch (\Throwable $e) {
+            Log::warning('NotificationService: fallo al reclamar idempotencia, envío sin dedupe', [
+                'notifiable_id' => $recipient->id,
+                'payload_type' => $payloadType,
+                'error' => $e->getMessage(),
+            ]);
+
+            return true;
+        }
     }
 
     private function releaseDedupe(string $key): void

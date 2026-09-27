@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Services\NotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Poda de las reclamaciones de idempotencia (`notification_dedupe`).
@@ -26,9 +27,16 @@ class NotificationDedupePrune extends Command
 
     public function handle(): int
     {
+        $table = NotificationService::DEDUPE_TABLE;
+
+        if (! Schema::hasTable($table)) {
+            $this->warn("Tabla {$table} ausente (migración pendiente): nada que podar.");
+
+            return self::SUCCESS;
+        }
+
         $days = max(1, (int) $this->option('days'));
         $cutoff = now()->subDays($days);
-        $table = NotificationService::DEDUPE_TABLE;
 
         $count = (int) DB::table($table)->where('created_at', '<', $cutoff)->count();
 
