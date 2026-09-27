@@ -45,8 +45,6 @@ class InformationHighlightedComponent extends Component
 
         if (empty($this->images)) {
             \Illuminate\Support\Facades\Log::warning("InformationHighlightedComponent: No images found at " . $fullPath);
-        } else {
-            \Illuminate\Support\Facades\Log::info("InformationHighlightedComponent: Loaded " . count($this->images) . " images from " . $fullPath);
         }
     }
 
