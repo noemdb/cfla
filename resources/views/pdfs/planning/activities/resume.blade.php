@@ -36,10 +36,10 @@
             <tr>
                 <th class="num">N°</th>
                 <th class="fecha">Fecha</th>
-                <th>Contenido (Referentes teórico-prácticos)</th>
-                <th>Act.Eval.</th>
-                <th>Ind.Logros</th>
-                <th>ODS / Sistematización</th>
+                <th>{{ ($labels ?? [])['topic_thematic_referentes'] ?? 'Referentes teórico-prácticos' }}</th>
+                <th>{{ ($labels ?? [])['description'] ?? 'Act.Eval.' }}</th>
+                <th>{{ ($labels ?? [])['name'] ?? 'Ind.Logros' }}</th>
+                <th>{{ ($labels ?? [])['ODS_sistematizacion'] ?? 'ODS / Sistematización' }}</th>
             </tr>
         </thead>
         <tbody>
@@ -48,7 +48,7 @@
                     <td class="num">{{ $i+1 }}</td>
                     <td class="fecha">{{ \Carbon\Carbon::parse($act->finicial)->format('d/m') }}<br>—<br>{{ \Carbon\Carbon::parse($act->ffinal)->format('d/m') }}</td>
                     <td>
-                        <div style="font-weight:700;font-size:6pt;border-top:0.5px solid #ddd;margin-top:1px;padding-top:1px;">Referentes teórico-prácticos y Éticos</div>
+                        <div style="font-weight:700;font-size:6pt;border-top:0.5px solid #ddd;margin-top:1px;padding-top:1px;">{{ ($labels ?? [])['topic_thematic_referentes'] ?? 'Referentes teórico-prácticos y Éticos' }}</div>
                         <div>{{ $act->references }}</div>
                     </td>
                     <td>{{ $act->description }}</td>

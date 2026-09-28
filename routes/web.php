@@ -262,6 +262,11 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
             Route::get('/', \App\Livewire\Planning\Pensum\IndexComponent::class)->name('index');
         });
 
+        // Módulo de Etiquetas de Actividades (labels por Peducativo)
+        Route::prefix('activity-labels')->name('activity-labels.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\ActivityLabel\IndexComponent::class)->name('index');
+        });
+
         // Módulo de Profesores
         Route::prefix('profesors')->name('profesors.')->group(function () {
             Route::get('/', \App\Livewire\Planning\Profesor\IndexComponent::class)->name('index');

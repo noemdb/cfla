@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Planning;
 use App\Http\Controllers\Controller;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Entity\Institucion;
+use App\Services\ActivityLabelResolver;
 use App\Services\Leadership\LeadershipService;
 use App\Services\Lms\CoordinacionScopeService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -33,6 +34,7 @@ class ActivityPdfController extends Controller
         $pdf = Pdf::loadView('pdfs.planning.activities.format', [
             'pevaluacion' => $pevaluacion,
             'institucion' => $institucion,
+            'labels' => ActivityLabelResolver::forPevaluacion($pevaluacion),
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
         ]);
 
@@ -63,6 +65,7 @@ class ActivityPdfController extends Controller
         $pdf = Pdf::loadView('pdfs.planning.activities.resume', [
             'pevaluacion' => $pevaluacion,
             'institucion' => $institucion,
+            'labels' => ActivityLabelResolver::forPevaluacion($pevaluacion),
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
         ]);
 

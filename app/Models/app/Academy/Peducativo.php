@@ -41,6 +41,14 @@ class Peducativo extends Model
         return $this->hasMany(Pestudio::class, 'peducativo_id');
     }
 
+    /**
+     * Etiquetas de Activity/Achievement específicas de este peducativo.
+     */
+    public function activityFieldLabels()
+    {
+        return $this->hasMany(ActivityFieldLabel::class, 'peducativo_id');
+    }
+
     public function getGradosAttribute()
     {
         return Grado::select('grados.*')

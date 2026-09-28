@@ -11,6 +11,7 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\User;
 use App\Services\ActivityImprovementService;
+use App\Services\ActivityLabelResolver;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -179,7 +180,9 @@ class IndexComponent extends Component
         ])->findOrFail($id);
 
         $this->pevaluacion_id = $id;
-        $this->list_comment = array_merge(Activity::COLUMN_COMMENTS, Achievement::COLUMN_COMMENTS);
+        // Labels específicos del peducativo asociado al pevaluacion
+        // (activity_field_labels con fallback a COLUMN_COMMENTS).
+        $this->list_comment = ActivityLabelResolver::forPevaluacion($this->pevaluacion);
         $grado = $this->pevaluacion->grado;
 
         // Descartar la sección actual de la lista de clonación

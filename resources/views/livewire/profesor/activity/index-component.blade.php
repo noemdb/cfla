@@ -248,13 +248,13 @@
                                 {{-- Content --}}
                                 <div class="space-y-1 text-sm text-gray-300">
                                     @if($item->description)
-                                        <div><span class="font-medium text-emerald-400">Act.Eval:</span> {{ $item->description }}</div>
+                                        <div><span class="font-medium text-emerald-400">{{ $list_comment['description'] ?? 'Act.Eval' }}:</span> {{ $item->description }}</div>
                                     @endif
-                                    <div><span class="font-medium text-gray-500">Tema:</span> {{ $item->topic }}</div>
-                                    <div><span class="font-medium text-gray-500">T.Temático:</span> {{ $item->thematic }}</div>
+                                    <div><span class="font-medium text-gray-500">{{ $list_comment['topic'] ?? 'Tema' }}:</span> {{ $item->topic }}</div>
+                                    <div><span class="font-medium text-gray-500">{{ $list_comment['thematic'] ?? 'T.Temático' }}:</span> {{ $item->thematic }}</div>
                                     <div x-data="{ showTeaching: true }">
                                         <div class="flex items-center justify-between">
-                                            <span class="font-medium text-gray-500">Enseñanza:</span>
+                                            <span class="font-medium text-gray-500">{{ $list_comment['teaching'] ?? 'Enseñanza' }}:</span>
                                             @if($item->hasTeachingStructure())
                                                 <button @click="showTeaching = !showTeaching"
                                                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200"
@@ -285,13 +285,13 @@
                                             </div>
                                         @endif
                                     </div>
-                                    <div><span class="font-medium text-gray-500">Aprendizaje:</span> {{ Str::limit($item->learning, 120) }}</div>
+                                    <div><span class="font-medium text-gray-500">{{ $list_comment['learning'] ?? 'Aprendizaje' }}:</span> {{ Str::limit($item->learning, 120) }}</div>
                                 </div>
 
                                 {{-- Comment from J.Área --}}
                                 @if($item->comments)
                                     <div class="mt-2 p-2 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
-                                        <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Comentario [J.Área]</span>
+                                        <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">{{ $list_comment['comments'] ?? 'Comentario [J.Área]' }}</span>
                                         <p class="text-xs text-gray-400 mt-0.5">{{ $item->comments }}</p>
                                     </div>
                                 @endif
@@ -304,7 +304,7 @@
                         <div class="mt-3 ml-8 pl-4 border-l border-white/5">
                             {{-- Achievement list header --}}
                             <div class="flex items-center justify-between py-1.5">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600">Indicadores / Aprendizajes Esperados</span>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600">{{ $list_comment['name'] ?? 'Indicadores / Aprendizajes Esperados' }}</span>
                                 <button wire:click="addAchievement({{ $item->id }})"
                                     {{ $enable_edit ? '' : 'disabled' }}
                                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold {{ $enable_edit ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed' }} transition-all duration-200">
@@ -350,7 +350,7 @@
                                 @php $totalWeight = $achievements->sum(fn($a) => (int)($a->weighting ?? 0)); @endphp
                                 @if($totalWeight > 0 && $achievements->count() > 0)
                                     <div class="flex items-center justify-between py-2 px-3 mt-2 bg-gray-800/30 border border-white/5 rounded-lg">
-                                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Ponderaciones</span>
+                                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total {{ $list_comment['weighting'] ?? 'Ponderaciones' }}</span>
                                         <span class="text-sm font-bold text-emerald-400 font-mono">{{ $totalWeight }}</span>
                                     </div>
                                 @endif
@@ -393,9 +393,9 @@
                             <thead>
                                 <tr class="border-b border-white/5">
                                     <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-8">#</th>
-                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tema</th>
-                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Act.Eval.</th>
-                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">T.Temático</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $list_comment['topic'] ?? 'Tema' }}</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $list_comment['description'] ?? 'Act.Eval.' }}</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $list_comment['thematic'] ?? 'T.Temático' }}</th>
                                     <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-24">Fechas</th>
                                     <th class="px-2 py-2.5 text-center text-[10px] font-bold text-gray-500 uppercase tracking-wider w-12">Ind.</th>
                                     <th class="px-2 py-2.5 text-center text-[10px] font-bold text-gray-500 uppercase tracking-wider w-20">Estado</th>
@@ -577,26 +577,26 @@
                                 {{-- Actividad Evaluativa --}}
                                 @if($detailActivity->description)
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Actividad Evaluativa</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $list_comment['description'] ?? 'Actividad Evaluativa' }}</label>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->description }}</p>
                                 </div>
                                 @endif
 
                                 {{-- Tema generador --}}
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Tema Generador y Énfasis</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $list_comment['topic'] ?? 'Tema Generador y Énfasis' }}</label>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->topic }}</p>
                                 </div>
 
                                 {{-- Tejido temático --}}
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Tejido Temático</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $list_comment['thematic'] ?? 'Tejido Temático' }}</label>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->thematic }}</p>
                                 </div>
 
                                 {{-- Referentes --}}
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Referentes Teórico-Prácticos</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $list_comment['references'] ?? 'Referentes Teórico-Prácticos' }}</label>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->references }}</p>
                                 </div>
                             </div>
@@ -606,7 +606,7 @@
                                 {{-- Enseñanza with structure toggle --}}
                                 <div>
                                     <div class="flex items-center justify-between mb-1">
-                                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Enseñanza / Actividad Globalizada</label>
+                                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500">{{ $list_comment['teaching'] ?? 'Enseñanza / Actividad Globalizada' }}</label>
                                         @if($detailActivity->hasTeachingStructure())
                                             <button @click="showTeaching = !showTeaching"
                                                 class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200"
@@ -640,14 +640,14 @@
 
                                 {{-- Aprendizaje (full) --}}
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Aprendizaje</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $list_comment['learning'] ?? 'Aprendizaje' }}</label>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->learning }}</p>
                                 </div>
 
                                 {{-- Observaciones / ODS --}}
                                 @if($detailActivity->observations)
                                 <div>
-                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">ODS / Sistematización</label>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $list_comment['observations'] ?? 'ODS / Sistematización' }}</label>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->observations }}</p>
                                 </div>
                                 @endif
@@ -661,7 +661,7 @@
                                 <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                                 </svg>
-                                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Comentario [J.Área]</span>
+                                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">{{ $list_comment['comments'] ?? 'Comentario [J.Área]' }}</span>
                             </div>
                             <p class="text-sm text-gray-300 leading-relaxed">{{ $detailActivity->comments }}</p>
                         </div>
@@ -673,7 +673,7 @@
                                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                 </svg>
-                                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Indicadores / Aprendizajes Esperados</span>
+                                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ $list_comment['name'] ?? 'Indicadores / Aprendizajes Esperados' }}</span>
                             </div>
                             @php $detailAchievements = $detailActivity->achievements; @endphp
                             @if($detailAchievements->count() > 0)
@@ -695,7 +695,7 @@
                                     @php $total = $detailAchievements->sum(fn($a) => (int)($a->weighting ?? 0)); @endphp
                                     @if($total > 0)
                                         <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-800/50 border border-white/10">
-                                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Ponderaciones</span>
+                                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total {{ $list_comment['weighting'] ?? 'Ponderaciones' }}</span>
                                             <span class="text-sm font-bold text-emerald-400 font-mono">{{ $total }}</span>
                                         </div>
                                     @endif

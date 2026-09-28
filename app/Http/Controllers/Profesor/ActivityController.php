@@ -10,6 +10,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Entity\Institucion;
+use App\Services\ActivityLabelResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -190,6 +191,7 @@ class ActivityController extends Controller
         $pdf = Pdf::loadView('pdfs.planning.activities.format', [
             'pevaluacion' => $pevaluacion,
             'institucion' => $institucion,
+            'labels' => ActivityLabelResolver::forPevaluacion($pevaluacion),
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
         ]);
 
@@ -223,6 +225,7 @@ class ActivityController extends Controller
         $pdf = Pdf::loadView('pdfs.planning.activities.resume', [
             'pevaluacion' => $pevaluacion,
             'institucion' => $institucion,
+            'labels' => ActivityLabelResolver::forPevaluacion($pevaluacion),
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
         ]);
 

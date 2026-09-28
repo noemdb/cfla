@@ -41,12 +41,12 @@
             <tr>
                 <th class="num">N°</th>
                 <th class="fecha">Fecha</th>
-                <th>Contenido (Topic · Thematic · Referentes)</th>
-                <th>Apren.</th>
-                <th>A.Eval.</th>
-                <th>Ind.Logros</th>
-                <th>ODS/Sist.</th>
-                <th>Comentarios</th>
+                <th>{{ ($labels ?? [])['topic_thematic_referentes'] ?? 'Referentes teórico-prácticos' }}</th>
+                <th>{{ ($labels ?? [])['learning'] ?? 'Apren.' }}</th>
+                <th>{{ ($labels ?? [])['description'] ?? 'A.Eval.' }}</th>
+                <th>{{ ($labels ?? [])['name'] ?? 'Ind.Logros' }}</th>
+                <th>{{ ($labels ?? [])['ODS_sistematizacion'] ?? 'ODS/Sist.' }}</th>
+                <th>{{ ($labels ?? [])['comments'] ?? 'Comentarios' }}</th>
             </tr>
         </thead>
         <tbody>
@@ -55,11 +55,11 @@
                     <td class="num" rowspan="2">{{ $i+1 }}</td>
                     <td class="fecha">{{ \Carbon\Carbon::parse($act->finicial)->format('d/m') }}<br>al<br>{{ \Carbon\Carbon::parse($act->ffinal)->format('d/m') }}</td>
                     <td>
-                        <div class="content-label">Tema generador/Énfasis</div>
+                        <div class="content-label">{{ ($labels ?? [])['topic'] ?? 'Tema generador/Énfasis' }}</div>
                         <div>{{ $act->topic }}</div>
-                        <div class="content-label">Tejido temático/T.Indispensable</div>
+                        <div class="content-label">{{ ($labels ?? [])['thematic'] ?? 'Tejido temático/T.Indispensable' }}</div>
                         <div>{{ $act->thematic }}</div>
-                        <div class="content-label">Referentes teórico-prácticos y Éticos</div>
+                        <div class="content-label">{{ ($labels ?? [])['references'] ?? 'Referentes teórico-prácticos y Éticos' }}</div>
                         <div>{{ $act->references }}</div>
                     </td>
                     <td>{{ $act->learning }}</td>
