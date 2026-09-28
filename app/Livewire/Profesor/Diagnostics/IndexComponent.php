@@ -51,6 +51,10 @@ class IndexComponent extends Component
 
     public $showQuestionModal = false;
 
+    public $confirmDeleteQuestionId = null;
+
+    public $confirmDeleteQuestionText = '';
+
     public $generatingQuestion = false;
 
     public $taggingMath = false;
@@ -1154,20 +1158,43 @@ PROMPT;
         $this->areaQuestionPensumId = (int) $pensumId;
     }
 
+    /**
+     * Abre el diálogo de confirmación (x-dialog WireUI). El cierre visual lo
+     * hace el navegador con `close()`; aquí solo se fija el estado.
+     */
     public function confirmDeleteQuestion($questionId)
     {
-        $this->notification()->confirm([
-            'title' => '¿Eliminar pregunta?',
-            'description' => 'Esta acción no se puede deshacer.',
-            'acceptLabel' => 'Eliminar',
-            'rejectLabel' => 'Cancelar',
-            'method' => 'deleteQuestion',
-            'params' => [$questionId],
+        $question = DiagQuestion::whereIn('pensum_id', $this->pensumIds ?: [0])
+            ->find($questionId);
+
+        if (! $question) {
+            $this->notification()->error(
+                'Pregunta no disponible',
+                'La pregunta no pertenece a su carga académica.'
+            );
+
+            return;
+        }
+
+        $this->confirmDeleteQuestionId = $question->id;
+        $this->confirmDeleteQuestionText = (string) $question->pregunta;
+
+        $this->dialog()->id('question-delete')->show([
+            'icon' => 'warning',
+            'close' => false,
         ]);
     }
 
-    public function deleteQuestion($questionId)
+    public function cancelDeleteQuestion()
     {
+        $this->confirmDeleteQuestionId = null;
+        $this->confirmDeleteQuestionText = '';
+    }
+
+    public function deleteQuestion($questionId = null)
+    {
+        $questionId = $questionId ?? $this->confirmDeleteQuestionId;
+
         try {
             DB::beginTransaction();
 
@@ -1181,6 +1208,7 @@ PROMPT;
                     'No se puede eliminar',
                     'Esta pregunta tiene respuestas asociadas y no puede ser eliminada.'
                 );
+                $this->cancelDeleteQuestion();
 
                 return;
             }
@@ -1189,6 +1217,7 @@ PROMPT;
 
             DB::commit();
             $this->clearCache();
+            $this->cancelDeleteQuestion();
 
             $this->notification()->success(
                 'Pregunta eliminada',

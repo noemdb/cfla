@@ -44,6 +44,85 @@
             </svg>
             + Nueva Pregunta
         </button>
+
+        {{-- Ayuda: formato compatible de notación matemática/química (KaTeX + mhchem) --}}
+        <div x-data="{ mathHelpOpen: false }" class="contents">
+            <button type="button" @click="mathHelpOpen = true"
+                title="Ver formato compatible de notación matemática y química"
+                aria-label="Ayuda de notación matemática"
+                aria-haspopup="dialog"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/10 hover:border-white/20 transition-all duration-200 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01M12 3c1.256 0 2.47.202 3.612.586a9.044 9.044 0 012.907 1.895 8.997 8.997 0 011.896 2.908A8.95 8.95 0 0121 12a8.95 8.95 0 01-.585 3.611 8.997 8.997 0 01-1.896 2.908 9.044 9.044 0 01-2.907 1.895A8.98 8.98 0 0112 21a8.98 8.98 0 01-3.612-.586 9.044 9.044 0 01-2.907-1.895 8.997 8.997 0 01-1.896-2.908A8.95 8.95 0 013 12a8.95 8.95 0 01.585-3.611 8.997 8.997 0 011.896-2.908 9.044 9.044 0 012.907-1.895A8.98 8.98 0 0112 3z"></path>
+                </svg>
+            </button>
+
+            <div x-cloak x-show="mathHelpOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="math-help-title">
+                <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="mathHelpOpen = false"></div>
+                <div x-show="mathHelpOpen"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    @keydown.escape.window="mathHelpOpen = false"
+                    class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
+                        <div>
+                            <h3 id="math-help-title" class="text-sm font-bold text-white">Notación matemática y química</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Formato compatible (KaTeX + mhchem)</p>
+                        </div>
+                        <button type="button" @click="mathHelpOpen = false" aria-label="Cerrar ayuda"
+                            class="min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="px-6 py-5 space-y-5 text-xs leading-relaxed">
+                        <div>
+                            <h4 class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">1 · Delimitadores (obligatorios)</h4>
+                            <p class="text-gray-500 mb-2">Solo el texto <span class="text-gray-300">dentro</span> de estos delimitadores se convierte en fórmula:</p>
+                            <ul class="space-y-1.5">
+                                <li class="flex items-start gap-2"><code class="shrink-0 px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\( ... \)</code><span class="text-gray-400">matemática en línea, dentro de una frase</span></li>
+                                <li class="flex items-start gap-2"><code class="shrink-0 px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">$$ ... $$</code><span class="text-gray-400">fórmula destacada en bloque</span></li>
+                                <li class="flex items-start gap-2"><code class="shrink-0 px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\[ ... \]</code><span class="text-gray-400">alternativa de bloque</span></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">2 · Matemáticas (núcleo KaTeX)</h4>
+                            <ul class="space-y-1.5 text-gray-400">
+                                <li><code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\frac&#123;a&#125;&#123;b&#125;</code>, <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\sqrt&#123;x&#125;</code>, potencias <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">x^&#123;2&#125;</code>, subíndices <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">x_&#123;n&#125;</code></li>
+                                <li>Griegas <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\pi \alpha \beta \theta \Delta</code> · operadores <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\pm \times \cdot \sum \int</code></li>
+                                <li>Funciones <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\sin \cos \tan \log \ln \lim</code> · matrices <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\begin&#123;pmatrix&#125;…\end&#123;pmatrix&#125;</code></li>
+                                <li class="pt-1"><span class="text-gray-500">Ejemplo:</span> <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-emerald-300 font-mono">$$f(x) = \frac&#123;x^2 - 1&#125;&#123;x + 1&#125;$$</code></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">3 · Química (extensión mhchem)</h4>
+                            <ul class="space-y-1.5 text-gray-400">
+                                <li>Ecuaciones con <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\ce&#123;…&#125;</code> — <span class="text-gray-500">también funciona sin delimitadores en estas celdas:</span> <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-emerald-300 font-mono">\ce&#123;N2 + 3H2 &lt;=&gt; 2NH3&#125;</code></li>
+                                <li>Flechas <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">-&gt;</code>, <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">&lt;=&gt;</code>, condición <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">-&gt;[\Delta]</code> · iones <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">Ba^2+</code> · precipitado <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">v</code> · gas <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">^</code></li>
+                                <li>Unidades con <code class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-300 font-mono">\pu&#123;123 kJ/mol&#125;</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="rounded-lg bg-amber-500/5 border border-amber-500/20 px-4 py-3">
+                            <h4 class="text-[11px] font-bold uppercase tracking-widest text-amber-400 mb-1.5">A tener en cuenta</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                                <li>El botón <span class="text-emerald-400 font-medium">Etiquetar Not. Mat.</span> detecta y convierte las expresiones automáticamente con IA.</li>
+                                <li>El <span class="text-gray-300">$ simple no es delimitador aquí</span> (para no confundirlo con precios).</li>
+                                <li>Por seguridad están bloqueadas <code class="px-1 py-px rounded bg-white/5 border border-white/10 text-gray-300 font-mono">\htmlData \htmlClass \htmlStyle</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 
@@ -164,4 +243,45 @@
             {{ $questions->links('vendor.livewire.custom-tailwind') }}
         </div>
     @endif
+
+    <!-- ===== DIALOG: Confirmar Eliminación (WireUI x-dialog) ===== -->
+    <x-dialog id="question-delete" title="Eliminar pregunta" width="md" blur="lg">
+        <div class="text-left">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-sm text-gray-700 dark:text-slate-200">
+                        ¿Eliminar esta pregunta?
+                        @if($confirmDeleteQuestionText)
+                            <span class="mt-1 block font-medium text-gray-500 dark:text-slate-400 line-clamp-3">"{{ \Illuminate\Support\Str::limit(strip_tags($confirmDeleteQuestionText), 180) }}"</span>
+                        @endif
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                        Esta acción no se puede deshacer. Solo se puede eliminar si no tiene respuestas asociadas.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+                <button type="button" x-on:click="close(); $wire.cancelDeleteQuestion()"
+                    class="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200">
+                    Cancelar
+                </button>
+                <button type="button" wire:click="deleteQuestion"
+                    x-on:click="close()"
+                    wire:loading.attr="disabled" wire:target="deleteQuestion"
+                    class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition-all duration-200 disabled:opacity-60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span wire:loading.remove wire:target="deleteQuestion">Sí, eliminar</span>
+                    <span wire:loading wire:target="deleteQuestion">Eliminando...</span>
+                </button>
+            </div>
+        </div>
+    </x-dialog>
 </div>

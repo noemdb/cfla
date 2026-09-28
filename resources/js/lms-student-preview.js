@@ -81,14 +81,31 @@ window._ensureMermaidReady = function _ensureMermaidReady() {
 // when a page has math content — and once cached, loads instantly.
 // The `@once` inline script in math-text.blade.php polls for
 // renderMathInElement and resolves window._mathKatexReady.
+//
+// mhchem (notación química: \ce{}, \pu{}) es una extensión OPCIONAL de
+// KaTeX: el núcleo no la trae, por eso \ce daba "Undefined control
+// sequence". Se carga con el subpath oficial del "exports" map
+// (katex/contrib/* → dist/contrib/*.mjs), NO con katex/dist/contrib/*
+// (ruta UMD). Motivo: los .mjs hacen `import '../katex.mjs'` relativo,
+// así que mhchem y auto-render parchearán SIEMPRE la misma instancia
+// que `import('katex')`. Con la ruta UMD se creaba una segunda copia de
+// KaTeX y los macros de mhchem se registraban en la copia muerta.
+//
+// ORDEN IMPORTANTE: mhchem debe registrarse ANTES de exponer
+// window.renderMathInElement, porque los consumidores (_mathKatexReady,
+// Alpine mathContent, <x-diag.math-cell>) tratan la existencia de ese
+// global como "KaTeX listo" y renderizan de inmediato.
 (async function setupKatex() {
     try {
         await import('katex');
-        var autoRender = await import('katex/dist/contrib/auto-render');
+        await import('katex/contrib/mhchem');
+        var autoRender = await import('katex/contrib/auto-render');
         // ESM no contamina window — asignamos manualmente para que el
         // @once inline script (polling) y las comprobaciones en render()
         // puedan detectar que está disponible.
         window.renderMathInElement = autoRender.default;
+        // Marca de extensión química disponible (diagnóstico en consola).
+        window.__katexMhchem = true;
         // DOMPurify para sanitización — el @once inline también lo usará
         window.DOMPurify = window.DOMPurify || DOMPurify;
         await import('../css/katex-simple.css');
