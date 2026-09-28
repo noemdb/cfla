@@ -53,6 +53,8 @@ class IndexComponent extends Component
 
     public $generatingQuestion = false;
 
+    public $taggingMath = false;
+
     public $SessionModalReport = false;
 
     public $editingQuestion = null;
@@ -215,7 +217,7 @@ class IndexComponent extends Component
             return;
         }
 
-        $query = Pevaluacion::with(['pensum.asignatura', 'pensum.grado', 'seccion', 'lapso'])
+        $query = Pevaluacion::with(['pensum.asignatura', 'pensum.grado', 'pensum.pestudio', 'seccion', 'lapso'])
             ->where('profesor_id', $this->profesor->id);
 
         if ($this->lapsoId) {
@@ -234,7 +236,7 @@ class IndexComponent extends Component
 
         $this->list_grados = $this->cargaPevaluacions
             ->map(fn ($pevaluacion) => $pevaluacion->pensum?->grado)
-            ->filter()
+            ->filter(fn ($grado) => $grado && ($grado->status_active ?? null) === 'true')
             ->unique('id')
             ->sortBy('name')
             ->values();
@@ -327,6 +329,34 @@ class IndexComponent extends Component
         }
 
         $this->scopeToLapso($query, $dateColumn);
+    }
+
+    /**
+     * Solo Pestudio, Grado y Pensum activos (paridad leadership):
+     * pensums.status_active = 1, grados/pestudios.status_active = 'true'.
+     */
+    protected function scopeToActiveChain($query): void
+    {
+        $query->whereHas('pensum', function ($q) {
+            $q->where('status_active', 1)
+                ->whereHas('grado', fn ($qq) => $qq->where('status_active', 'true'))
+                ->whereHas('pestudio', fn ($qq) => $qq->where('status_active', 'true'));
+        });
+    }
+
+    protected function pensumIsActiveChain(Pensum $pensum): bool
+    {
+        if ((int) ($pensum->status_active ?? 0) !== 1) {
+            return false;
+        }
+        if (($pensum->grado?->status_active ?? null) !== 'true') {
+            return false;
+        }
+        if (($pensum->pestudio?->status_active ?? null) !== 'true') {
+            return false;
+        }
+
+        return true;
     }
 
     public function updatedFilterDiagMainId()
@@ -489,7 +519,7 @@ class IndexComponent extends Component
         $subjects = [];
 
         foreach ($this->cargaPevaluacions as $pevaluacion) {
-            if ($pevaluacion->pensum && ! isset($subjects[$pevaluacion->pensum_id])) {
+            if ($pevaluacion->pensum && ! isset($subjects[$pevaluacion->pensum_id]) && $this->pensumIsActiveChain($pevaluacion->pensum)) {
                 $subjects[$pevaluacion->pensum_id] = $pevaluacion->pensum->asignatura?->full_name
                     ?? $pevaluacion->pensum->full_name;
             }
@@ -1366,6 +1396,13 @@ PROMPT;
 
     public function render()
     {
+        // El grado elegido debe seguir en la lista de grados activos de la carga
+        if ($this->filterGradoId !== '' && ! $this->list_grados->contains('id', (int) $this->filterGradoId)) {
+            $this->filterGradoId = '';
+            $this->filterSeccionId = '';
+            $this->list_secciones = [];
+        }
+
         $pensumIds = $this->scopedPensumIds();
 
         $questions = $this->getQuestionsPaginationView();
@@ -1435,12 +1472,15 @@ PROMPT;
             }
         }
 
+        $allQuestionsQuery = DiagQuestion::whereIn('pensum_id', $pensumIds ?: [0]);
+        $this->scopeToActiveChain($allQuestionsQuery);
+
         return view('livewire.profesor.diagnostics.index-component', [
             'questions' => $questions,
             'sessions' => $sessions,
             'stats' => $stats,
             'subjects' => $this->subjects,
-            'allQuestions' => DiagQuestion::whereIn('pensum_id', $pensumIds ?: [0])->get(),
+            'allQuestions' => $allQuestionsQuery->get(),
             'allSessions' => $allSessionsQuery->get(),
             'allAnswers' => DiagAnswer::whereHas('question', function ($q) use ($pensumIds) {
                 $q->whereIn('pensum_id', $pensumIds ?: [0]);
@@ -1476,8 +1516,16 @@ PROMPT;
     {
         $pensumIds = $this->scopedPensumIds();
 
+        // El área elegida debe seguir en la cadena activa
+        if ($this->filterSubject !== '' && ! $this->subjects->has((int) $this->filterSubject)) {
+            $this->filterSubject = '';
+        }
+
         $questions = DiagQuestion::with(['options', 'pensum.asignatura'])
-            ->whereIn('pensum_id', $pensumIds ?: [0])
+            ->whereIn('pensum_id', $pensumIds ?: [0]);
+        $this->scopeToActiveChain($questions);
+
+        return $questions
             ->when($this->search, function ($query) {
                 $query->where('pregunta', 'like', '%'.$this->search.'%');
             })
@@ -1489,8 +1537,6 @@ PROMPT;
             })
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(10, ['*'], 'page');
-
-        return $questions;
     }
 
     private function getStudentAccuracyStats()
@@ -1767,6 +1813,66 @@ PROMPT;
             'detailed_pensum' => $detailed,
             'by_area_question' => $byAreaQuestion,
         ];
+    }
+
+    /**
+     * Etiqueta expresiones matemáticas con LaTeX (KaTeX) en el enunciado y
+     * las opciones del wizard, usando la cadena de modelos math de OpenRouter.
+     * Réplica del flujo "Etiquetar Not. Mat." del LessonWizard.
+     */
+    public function tagQuestionMath(): void
+    {
+        if (trim((string) $this->pregunta) === '') {
+            $this->notification()->warning(
+                'Texto vacío',
+                'Escribe primero el enunciado de la pregunta.'
+            );
+
+            return;
+        }
+
+        $this->taggingMath = true;
+
+        try {
+            $options = $this->tipo_pregunta === 'multiple'
+                ? array_map(fn ($o) => (string) ($o['opcion'] ?? ''), $this->options)
+                : [];
+
+            $result = app(\App\Services\Diagnostic\QuestionMathTaggingService::class)
+                ->tag((string) $this->pregunta, $options);
+
+            if (! ($result['success'] ?? false)) {
+                $this->notification()->error(
+                    'No se pudo etiquetar',
+                    $result['error'] ?? 'La IA no devolvió un resultado válido.'
+                );
+
+                return;
+            }
+
+            $this->pregunta = $result['pregunta'];
+
+            if ($this->tipo_pregunta === 'multiple') {
+                foreach ($result['opciones'] as $i => $text) {
+                    if (isset($this->options[$i])) {
+                        $this->options[$i]['opcion'] = $text;
+                    }
+                }
+            }
+
+            $this->notification()->success(
+                'Notación matemática',
+                'Expresiones convertidas a LaTeX. Revisa la vista previa.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Diagnostics math tagging failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        } finally {
+            $this->taggingMath = false;
+        }
     }
 
     // ========================================

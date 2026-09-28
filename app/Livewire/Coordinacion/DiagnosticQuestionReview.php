@@ -414,7 +414,24 @@ class DiagnosticQuestionReview extends Component
         $service = new CoordinacionScopeService(Auth::user());
         $query = DiagQuestion::query()->with(['pensum.asignatura', 'pensum.grado.pestudio', 'diagMain', 'competency', 'indicator', 'options']);
 
-        return $service->scopeDiagQuestions($query);
+        $query = $service->scopeDiagQuestions($query);
+        $this->scopeToActiveChain($query);
+
+        return $query;
+    }
+
+    /**
+     * Solo cadena activa (paridad leadership/profesors): pensum.status_active = 1
+     * y grado/pestudio.status_active = 'true'. Válido para consultas de
+     * preguntas y de sesiones (ambas tienen relación pensum).
+     */
+    private function scopeToActiveChain($query): void
+    {
+        $query->whereHas('pensum', function ($q) {
+            $q->where('status_active', 1)
+                ->whereHas('grado', fn ($qq) => $qq->where('status_active', 'true'))
+                ->whereHas('pestudio', fn ($qq) => $qq->where('status_active', 'true'));
+        });
     }
 
     private function assertCanReview(DiagQuestion $q): void
@@ -531,11 +548,13 @@ class DiagnosticQuestionReview extends Component
             })
             ->when($this->filterPensumId !== '', fn ($q) => $q->where('pensum_id', (int) $this->filterPensumId))
             ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain));
+        $this->scopeToActiveChain($sessionScopeForMetrics);
         $metrics['estudiantes'] = (clone $sessionScopeForMetrics)->whereNotNull('estudiant_id')->distinct('estudiant_id')->count('estudiant_id');
 
         $precisionBaseForMetrics = DiagAnswer::whereHas('question', function ($q) use ($assignedForBase) {
-            $q->where('tipo_pregunta', 'multiple')->where('activo', 1)
-                ->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $assignedForBase))
+            $q->where('tipo_pregunta', 'multiple')->where('activo', 1);
+            $this->scopeToActiveChain($q);
+            $q->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $assignedForBase))
                 ->when($this->filterAreaId !== '', function ($qq) {
                     $area = AreaConocimiento::find((int) $this->filterAreaId);
                     if ($area) {
@@ -554,6 +573,7 @@ class DiagnosticQuestionReview extends Component
         // ── Réplica planning: header Lapso/Pestudio/Referente + 8-grid (s2526 completitud/abandono) ──
         $questionsCount = $metrics['total'];
         $answerScopedForGrid = DiagAnswer::whereHas('question', function ($q) use ($assignedForBase) {
+            $this->scopeToActiveChain($q);
             $q->when($assignedForBase && $assignedForBase->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $assignedForBase))
                 ->when($this->filterAreaId !== '', function ($qq) {
                     $area = AreaConocimiento::find((int) $this->filterAreaId);
@@ -705,7 +725,9 @@ class DiagnosticQuestionReview extends Component
                         $q->whereIn('pensum_id', $pids);
                     }
                 })
-                ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain))
+                ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain));
+            $this->scopeToActiveChain($recentSessions);
+            $recentSessions = $recentSessions
                 ->orderByDesc('iniciado_at')->limit(5)->get();
         }
 

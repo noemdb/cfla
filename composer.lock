@@ -9445,21 +9445,21 @@
         },
         {
             "name": "wireui/wireui",
-            "version": "v2.5.1",
+            "version": "v2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wireui/wireui.git",
-                "reference": "e4d966689eb840986281f5237149b2480eacf87c"
+                "reference": "ae524c388614e70072a9bf5463ac3aa300dc3e19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wireui/wireui/zipball/e4d966689eb840986281f5237149b2480eacf87c",
-                "reference": "e4d966689eb840986281f5237149b2480eacf87c",
+                "url": "https://api.github.com/repos/wireui/wireui/zipball/ae524c388614e70072a9bf5463ac3aa300dc3e19",
+                "reference": "ae524c388614e70072a9bf5463ac3aa300dc3e19",
                 "shasum": ""
             },
             "require": {
-                "laravel/framework": "^10.0|^11.0|^12.0",
-                "php": "^8.2|^8.3|^8.4|^8.5",
+                "laravel/framework": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.2",
                 "wireui/heroicons": "^2.8"
             },
             "require-dev": {
@@ -9505,9 +9505,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wireui/wireui/issues",
-                "source": "https://github.com/wireui/wireui/tree/v2.5.1"
+                "source": "https://github.com/wireui/wireui/tree/v2.6.0"
             },
-            "time": "2025-11-10T04:46:35+00:00"
+            "time": "2026-03-24T15:41:22+00:00"
         }
     ],
     "packages-dev": [

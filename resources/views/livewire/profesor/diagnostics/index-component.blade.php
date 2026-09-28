@@ -31,13 +31,11 @@
                             </span>
                         @endif
                         <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación:</span>
-                        <select wire:model.live="selectedPensumId"
-                            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 min-w-[200px]">
-                            <option value="">Todas las áreas</option>
+                        <x-select placeholder="Todas las áreas" wire:model.live="selectedPensumId" searchable class="min-w-[200px]">
                             @foreach($cargaPensums as $pensum)
-                                <option value="{{ $pensum->id }}">{{ $pensum->full_name ?? $pensum->asignatura_name }}</option>
+                                <x-select.option :label="$pensum->full_name ?? $pensum->asignatura_name" :value="$pensum->id" />
                             @endforeach
-                        </select>
+                        </x-select>
                     </div>
                 @endif
             </div>
@@ -48,62 +46,32 @@
             <div class="flex flex-wrap items-center gap-3">
                 {{-- Diagnóstico filter --}}
                 <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                    </svg>
-                    <select wire:model.live="filterDiagMainId"
-                        class="bg-gray-800/50 border border-white/10 rounded-lg pl-8 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
-                        <option value="">Todos los Diagnósticos</option>
+                    <x-select placeholder="Todos los Diagnósticos" wire:model.live="filterDiagMainId" searchable class="min-w-[180px]">
                         @foreach($diagMains as $main)
-                            <option value="{{ $main->id }}">{{ $main->name }}</option>
+                            <x-select.option :label="$main->name" :value="$main->id" />
                         @endforeach
-                    </select>
-                    @if($filterDiagMainId)
-                        <button wire:click="$set('filterDiagMainId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    @endif
+                    </x-select>
                 </div>
 
                 {{-- Grado filter --}}
                 <div class="relative">
-                    <select wire:model.live="filterGradoId"
-                        class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
-                        <option value="">Todos los grados</option>
+                    <x-select placeholder="Todos los grados" wire:model.live="filterGradoId" searchable class="min-w-[150px]">
                         @foreach($list_grados as $grado)
-                            <option value="{{ $grado->id }}">{{ $grado->name }}</option>
+                            <x-select.option :label="$grado->name" :value="$grado->id" />
                         @endforeach
-                    </select>
-                    @if($filterGradoId)
-                        <button wire:click="$set('filterGradoId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    @endif
+                    </x-select>
                 </div>
 
                 {{-- Sección filter --}}
                 <div class="relative">
-                    <select wire:model.live="filterSeccionId"
-                        class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]"
-                        {{ empty($list_secciones) ? 'disabled' : '' }}>
-                        <option value="">Todas las secciones</option>
+                    <x-select placeholder="Todas las secciones" wire:model.live="filterSeccionId" searchable class="min-w-[150px]"
+                        :disabled="empty($list_secciones)">
                         @if(!empty($list_secciones))
                             @foreach($list_secciones as $seccion)
-                                <option value="{{ $seccion->id }}">{{ $seccion->name }}</option>
+                                <x-select.option :label="$seccion->name" :value="$seccion->id" />
                             @endforeach
                         @endif
-                    </select>
-                    @if($filterSeccionId)
-                        <button wire:click="$set('filterSeccionId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    @endif
+                    </x-select>
                 </div>
             </div>
         </div>

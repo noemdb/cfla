@@ -1,4 +1,4 @@
-<div class="fade-in space-y-6" x-data @keydown.slash.window.prevent="$refs.searchInput.focus()" @keydown.e.window.prevent="if({{ $questions->first()?->id ?? 0 }}) $wire.openQuestionModal({{ $questions->first()?->id ?? 0 }})" @keydown.v.window.prevent="if({{ $questions->first()?->id ?? 0 }}) $wire.openDetail({{ $questions->first()?->id ?? 0 }})" @keydown.escape.window="$wire.closeDetail(); $wire.closeQuestionModal()">
+<div class="fade-in space-y-6" x-data @keydown.slash.window="if($event.target.closest('input,textarea,select,[contenteditable=true]')) return; $event.preventDefault(); $refs.searchInput.focus()" @keydown.e.window="if($event.target.closest('input,textarea,select,[contenteditable=true]')) return; if({{ $questions->first()?->id ?? 0 }}) $wire.openQuestionModal({{ $questions->first()?->id ?? 0 }})" @keydown.v.window="if($event.target.closest('input,textarea,select,[contenteditable=true]')) return; if({{ $questions->first()?->id ?? 0 }}) $wire.openDetail({{ $questions->first()?->id ?? 0 }})" @keydown.escape.window="$wire.closeDetail(); $wire.closeQuestionModal()">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-1">Diagnóstico · Revisión de Preguntas</h1>
@@ -9,6 +9,55 @@
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
             Seguimiento y revisión
         </span>
+    </div>
+
+    {{-- Filtros globales (afectan a todo: resúmenes, métricas y listado) --}}
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 sm:p-5 rounded-lg space-y-3">
+        <div class="flex items-center justify-between gap-2">
+            <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Filtros · {{ $questions->total() }} pregunta(s)</h3>
+            @if($search !== '' || $filterPensumId !== '' || $filterTipo !== '' || $filterActive !== '' || $filterDiagMain !== '' || $filterPestudioId !== '' || $filterGradoId !== '' || $filterProfesorId !== '')
+                <button wire:click="clearAllFilters" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Limpiar
+                </button>
+            @endif
+        </div>
+        {{-- Diagnóstico (instrumento) — encima de la grilla de filtros --}}
+        <div>
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Diagnóstico</label>
+            <x-select placeholder="Todos" wire:model.live="filterDiagMain" searchable :clearable="false">
+                @foreach($diagMains as $dm)<x-select.option :label="$dm->name" :value="$dm->id" />@endforeach
+            </x-select>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Pestudio</label>
+                <x-select placeholder="Todos" wire:model.live="filterPestudioId" searchable :clearable="false">
+                    @foreach($pestudioOptions as $pe)<x-select.option :label="$pe->code.' — '.$pe->name" :value="$pe->id" />@endforeach
+                </x-select></div>
+            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Grado</label>
+                <x-select placeholder="Todos" wire:model.live="filterGradoId" searchable :clearable="false" :disabled="$filterPestudioId === ''">
+                    @foreach($gradoOptions as $g)<x-select.option :label="($g->code ?? $g->name).' — '.$g->name" :value="$g->id" />@endforeach
+                </x-select></div>
+            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Pensum</label>
+                <x-select placeholder="Todos los pensums" wire:model.live="filterPensumId" searchable :clearable="false" :disabled="$filterGradoId === '' && $filterProfesorId === ''">
+                    @foreach($pensumsOptions as $p)<x-select.option :label="($p->asignatura?->name ?? '?').' — '.($p->grado?->name ?? '?')" :value="$p->id" />@endforeach
+                </x-select></div>
+            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Profesor</label>
+                <x-select placeholder="Todos" wire:model.live="filterProfesorId" searchable :clearable="false">
+                    @foreach($profesorOptions as $pr)<x-select.option :label="$pr->lastname.', '.$pr->name" :value="$pr->id" />@endforeach
+                </x-select></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
+            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Tipo</label>
+                <x-select placeholder="Todos" wire:model.live="filterTipo" :clearable="false">
+                    @foreach($tipos as $t)<x-select.option :label="$t" :value="$t" />@endforeach
+                </x-select></div>
+            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Activa</label>
+                <x-select placeholder="Todas" wire:model.live="filterActive" :clearable="false">
+                    <x-select.option label="Activas" value="1" />
+                    <x-select.option label="Inactivas" value="0" />
+                </x-select></div>
+        </div>
     </div>
 
     {{-- Réplica planning: header Lapso/Pestudio/Referente + grid 8 (respeta is_leadership) --}}
@@ -93,25 +142,7 @@
         </div>
     </div>
 
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 sm:p-5 rounded-lg space-y-3">
-        {{-- Diagnóstico (instrumento) — encima de la grilla de filtros --}}
-        <div>
-            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Diagnóstico</label>
-            <select wire:model.live="filterDiagMain" class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none"><option value="">Todos</option>@foreach($diagMains as $dm)<option value="{{ $dm->id }}">{{ $dm->name }}</option>@endforeach</select>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Área</label>
-                <select wire:model.live="filterAreaId" class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none"><option value="">Todas mis áreas ({{ $areas->count() }})</option>@foreach($areas as $a)<option value="{{ $a->id }}">{{ $a->name }} [{{ $a->pestudio->code ?? '?' }}]</option>@endforeach</select></div>
-            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Pensum</label>
-                <select wire:model.live="filterPensumId" @if($filterAreaId === '') disabled @endif class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none disabled:opacity-40 disabled:cursor-not-allowed"><option value="">Todos los pensums</option>@foreach($pensumsOptions as $p)<option value="{{ $p->id }}">{{ $p->asignatura?->name ?? '?' }} — {{ $p->grado?->name ?? '?' }}</option>@endforeach</select></div>
-            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar <span class="normal-case font-normal text-gray-600">( / )</span> @if($search !== '')<span class="ml-1 text-amber-400">{{ $questions->total() }} resultados</span>@endif</label>
-                <input type="text" x-ref="searchInput" wire:model.live.debounce.300ms="search" placeholder="Pregunta o tipo..." class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none placeholder:text-gray-600"></div>
-            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Tipo</label>
-                <select wire:model.live="filterTipo" class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none"><option value="">Todos</option>@foreach($tipos as $t)<option value="{{ $t }}">{{ $t }}</option>@endforeach</select></div>
-            <div><label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Activa</label>
-                <select wire:model.live="filterActive" class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none"><option value="">Todas</option><option value="1">Activas</option><option value="0">Inactivas</option></select></div>
-        </div>
-    </div>
+    {{-- Filtros de preguntas: justo encima del listado (sin filtro de Área) --}}
 
     {{-- Enriquecimiento — respeta is_leadership (AreaConocimiento → Pensum) --}}
     <div wire:init="loadEnriched" class="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -235,26 +266,13 @@
     @endif
 
 
-    {{-- Resumen por Grado — similar a Resumen por área, con select gradoId específico --}}
-    @if($gradosForResumen && $gradosForResumen->isNotEmpty())
+    {{-- Resumen por Grado — sigue los filtros globales (sin filtros locales) --}}
+    @php $gradoTotal = $gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $gradoProgress->total() : $gradoProgress->count(); @endphp
+    @if($gradoTotal > 0)
         <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
             <div class="px-3 py-2 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Resumen por Grado</h4>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] text-gray-500">{{ $gradoProgress->count() }} grado(s)</span>
-                    <select wire:model.live="resumenPestudioId" class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[140px]">
-                                    <option value="">Pestudio: Todos</option>
-                                    @foreach($pestudiosForGradoResumen as $pe)
-                                        <option value="{{ $pe->id }}">{{ $pe->code }} — {{ $pe->name }}</option>
-                                    @endforeach
-                                </select>
-                                <select wire:model.live="resumenGradoId" class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[160px]">
-                        <option value="">Grado: Todos</option>
-                        @foreach($gradosForResumen as $g)
-                            <option value="{{ $g->id }}">{{ $g->code ?? $g->name }} — {{ $g->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <span class="text-[10px] text-gray-500">{{ $gradoTotal }} grado(s)</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
@@ -290,7 +308,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="px-3 py-6 text-center text-xs text-gray-500">Sin datos para el grado seleccionado.</td></tr>
+                                        <tr><td colspan="6" class="px-3 py-6 text-center text-xs text-gray-500">Sin datos para los filtros aplicados.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -299,6 +317,10 @@
     @endif
 
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
+        <div class="px-4 py-3 border-b border-white/5">
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar <span class="normal-case font-normal text-gray-600">( / )</span> @if($search !== '')<span class="ml-1 text-amber-400">{{ $questions->total() }} resultados</span>@endif</label>
+            <input type="text" x-ref="searchInput" wire:model.live.debounce.300ms="search" placeholder="Texto de la pregunta..." class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none placeholder:text-gray-600">
+        </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead><tr class="border-b border-white/5">
@@ -359,7 +381,7 @@
                                 <p class="text-gray-600 text-sm mt-1">Contacta al administrador para que te asigne como líder de un área de conocimiento.</p>
                                 <p class="text-xs text-gray-500 mt-2">Se requiere <code class="text-gray-400">AreaConocimiento.leader_id = tu userId</code></p>
                             </td></tr>
-                        @elseif($search !== '' || $filterAreaId !== '' || $filterPensumId !== '' || $filterTipo !== '' || $filterActive !== '' || $filterDiagMain !== '')
+                        @elseif($search !== '' || $filterAreaId !== '' || $filterPensumId !== '' || $filterTipo !== '' || $filterActive !== '' || $filterDiagMain !== '' || $filterPestudioId !== '' || $filterGradoId !== '' || $filterProfesorId !== '')
                             <tr><td colspan="5" class="px-4 py-12 text-center">
                                 <p class="text-gray-500 font-medium">No hay resultados para los filtros</p>
                                 <p class="text-gray-600 text-sm mt-1">Ajusta los filtros o limpia la búsqueda.</p>

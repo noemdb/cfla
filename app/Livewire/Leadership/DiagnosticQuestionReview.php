@@ -7,6 +7,8 @@ use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Profesor;
 use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagOption;
@@ -15,6 +17,7 @@ use App\Models\app\Instrument\DiagSession;
 use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -36,15 +39,17 @@ class DiagnosticQuestionReview extends Component
 
     public string $filterDiagMain = '';
 
+    public string $filterPestudioId = '';
+
+    public string $filterGradoId = '';
+
+    public string $filterProfesorId = '';
+
     public ?int $selectedId = null;
 
     public bool $showDetail = false;
 
     public bool $enrichedLoaded = false;
-
-    public ?int $resumenGradoId = null;
-
-    public ?int $resumenPestudioId = null;
 
     // ─── Wizard de edición de pregunta ─────────────────────────────
     public bool $showQuestionModal = false;
@@ -79,6 +84,8 @@ class DiagnosticQuestionReview extends Component
 
     public string $expected_answer = '';
 
+    public bool $taggingMath = false;
+
     public int $paginate = 15;
 
     protected $queryString = [
@@ -88,6 +95,9 @@ class DiagnosticQuestionReview extends Component
         'filterActive' => ['except' => ''],
         'filterTipo' => ['except' => ''],
         'filterDiagMain' => ['except' => ''],
+        'filterPestudioId' => ['except' => ''],
+        'filterGradoId' => ['except' => ''],
+        'filterProfesorId' => ['except' => ''],
     ];
 
     public function updatingPaginate(): void
@@ -101,6 +111,25 @@ class DiagnosticQuestionReview extends Component
     }
 
     public function updatedFilterAreaId(): void
+    {
+        $this->filterPensumId = '';
+        $this->resetPage();
+    }
+
+    public function updatedFilterPestudioId(): void
+    {
+        $this->filterGradoId = '';
+        $this->filterPensumId = '';
+        $this->resetPage();
+    }
+
+    public function updatedFilterGradoId(): void
+    {
+        $this->filterPensumId = '';
+        $this->resetPage();
+    }
+
+    public function updatedFilterProfesorId(): void
     {
         $this->filterPensumId = '';
         $this->resetPage();
@@ -126,17 +155,6 @@ class DiagnosticQuestionReview extends Component
         $this->resetPage();
     }
 
-    public function updatedResumenGradoId(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedResumenPestudioId(): void
-    {
-        $this->resumenGradoId = null;
-        $this->resetPage();
-    }
-
     public function loadEnriched(): void
     {
         $this->enrichedLoaded = true;
@@ -150,6 +168,9 @@ class DiagnosticQuestionReview extends Component
         $this->filterTipo = '';
         $this->filterActive = '';
         $this->filterDiagMain = '';
+        $this->filterPestudioId = '';
+        $this->filterGradoId = '';
+        $this->filterProfesorId = '';
         $this->resetPage();
     }
 
@@ -383,6 +404,66 @@ class DiagnosticQuestionReview extends Component
         $this->resetForm();
     }
 
+    /**
+     * Etiqueta expresiones matemáticas con LaTeX (KaTeX) en el enunciado y
+     * las opciones del wizard, usando la cadena de modelos math de OpenRouter.
+     * Réplica del flujo "Etiquetar Not. Mat." del LessonWizard.
+     */
+    public function tagQuestionMath(): void
+    {
+        if (trim($this->pregunta) === '') {
+            $this->notification()->warning(
+                'Texto vacío',
+                'Escribe primero el enunciado de la pregunta.'
+            );
+
+            return;
+        }
+
+        $this->taggingMath = true;
+
+        try {
+            $options = $this->tipo_pregunta === 'multiple'
+                ? array_map(fn ($o) => (string) ($o['opcion'] ?? ''), $this->options)
+                : [];
+
+            $result = app(\App\Services\Diagnostic\QuestionMathTaggingService::class)
+                ->tag($this->pregunta, $options);
+
+            if (! ($result['success'] ?? false)) {
+                $this->notification()->error(
+                    'No se pudo etiquetar',
+                    $result['error'] ?? 'La IA no devolvió un resultado válido.'
+                );
+
+                return;
+            }
+
+            $this->pregunta = $result['pregunta'];
+
+            if ($this->tipo_pregunta === 'multiple') {
+                foreach ($result['opciones'] as $i => $text) {
+                    if (isset($this->options[$i])) {
+                        $this->options[$i]['opcion'] = $text;
+                    }
+                }
+            }
+
+            $this->notification()->success(
+                'Notación matemática',
+                'Expresiones convertidas a LaTeX. Revisa la vista previa.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Leadership math tagging failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        } finally {
+            $this->taggingMath = false;
+        }
+    }
+
     private function resetOptions(): void
     {
         $this->options = [
@@ -463,40 +544,86 @@ class DiagnosticQuestionReview extends Component
         // Pensums estrictos vía AreaConocimiento.leader_id = userId
         $strictPensumIds = $this->getStrictLeadershipPensumIds($user);
 
+        // Solo cadena activa (paridad profesors): pensum.status_active = 1
+        // y grado/pestudio.status_active = 'true'. Todo lo demás (facetas,
+        // preguntas, sesiones, métricas) deriva de este conjunto.
+        $strictPensumIds = $strictPensumIds->intersect(
+            Pensum::whereIn('id', $strictPensumIds)
+                ->where('status_active', 1)
+                ->whereHas('grado', fn ($q) => $q->where('status_active', 'true'))
+                ->whereHas('pestudio', fn ($q) => $q->where('status_active', 'true'))
+                ->pluck('id')->map(fn ($id) => (int) $id)
+        )->values();
+
         // Inicialización para evitar undefined en la vista si hay excepción temprana
         $recentSessions = collect();
         $questionsByType = collect();
         $questionsByDifficulty = collect();
 
-        // Pensums anidados a la selección de área (solo los adscritos a esa área)
-        $pensumsOptions = collect();
+        // Facetas anidadas Pestudio → Grado → Pensum (+ Área y Profesor):
+        // intersección de cada faceta con los pensums estrictos del líder.
+        $toIntIds = fn ($ids) => collect($ids)->map(fn ($id) => (int) $id)->unique()->values();
+        $facetPensumIds = $toIntIds($strictPensumIds);
         if ($this->filterAreaId !== '') {
-            $areaPensumIds = CampoConocimiento::where('area_conocimiento_id', (int) $this->filterAreaId)
-                ->whereNotNull('pensum_id')->pluck('pensum_id')->unique();
-            $pensumsOptions = Pensum::with(['asignatura', 'grado'])
-                ->whereIn('id', $areaPensumIds)
-                ->whereIn('id', (clone $this->scopedQuery())->distinct()->pluck('pensum_id'))
-                ->orderBy('pestudio_id')->orderBy('grado_id')->get();
+            $areaForFacet = AreaConocimiento::find((int) $this->filterAreaId);
+            if ($areaForFacet) {
+                $facetPensumIds = $facetPensumIds->intersect($toIntIds(
+                    CampoConocimiento::where('area_conocimiento_id', $areaForFacet->id)->whereNotNull('pensum_id')->pluck('pensum_id')
+                ));
+            }
         }
+        if ($this->filterPestudioId !== '') {
+            $facetPensumIds = $facetPensumIds->intersect($toIntIds(
+                Pensum::where('pestudio_id', (int) $this->filterPestudioId)->pluck('id')
+            ));
+        }
+        if ($this->filterGradoId !== '') {
+            $facetPensumIds = $facetPensumIds->intersect($toIntIds(
+                Pensum::where('grado_id', (int) $this->filterGradoId)->pluck('id')
+            ));
+        }
+        if ($this->filterProfesorId !== '') {
+            $facetPensumIds = $facetPensumIds->intersect($toIntIds(
+                Pevaluacion::where('profesor_id', (int) $this->filterProfesorId)->pluck('pensum_id')
+            ));
+        }
+        $facetPensumIds = $facetPensumIds->values();
+
+        // Opciones de los selects anidados (solo dentro del scope del líder)
+        $pestudioOptions = Pestudio::whereIn('id', Pensum::whereIn('id', $strictPensumIds)->pluck('pestudio_id'))
+            ->orderBy('code')->get(['id', 'code', 'name']);
+        $gradoOptions = collect();
+        if ($this->filterPestudioId !== '') {
+            $gradoOptions = Grado::where('pestudio_id', (int) $this->filterPestudioId)
+                ->whereIn('id', Pensum::whereIn('id', $strictPensumIds)->pluck('grado_id'))
+                ->where('status_active', 'true')
+                ->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
+        }
+        $profesorOptions = Profesor::whereIn('id', Pevaluacion::whereIn('pensum_id', $strictPensumIds)->distinct()->pluck('profesor_id'))
+            ->orderBy('lastname')->orderBy('name')->get(['id', 'name', 'lastname']);
+
+        // Pensums anidados a Área/Pestudio/Grado/Profesor
+        $pensumsOptions = Pensum::with(['asignatura', 'grado'])
+            ->whereIn('id', $facetPensumIds)
+            ->orderBy('pestudio_id')->orderBy('grado_id')->get();
+
+        // El pensum elegido debe seguir perteneciendo al conjunto facetado
+        if ($this->filterPensumId !== '' && ! $facetPensumIds->contains((int) $this->filterPensumId)) {
+            $this->filterPensumId = '';
+        }
+
+        // Conjunto efectivo para preguntas, sesiones y métricas (facetas + pensum explícito)
+        $effectivePensumIds = $facetPensumIds;
+        if ($this->filterPensumId !== '') {
+            $effectivePensumIds = collect([(int) $this->filterPensumId]);
+        }
+        $effectivePensumIdsArray = $effectivePensumIds->values()->all();
 
         $query = $this->scopedQuery();
 
-        if ($this->filterAreaId !== '') {
-            $area = AreaConocimiento::find((int) $this->filterAreaId);
-            if ($area) {
-                $pensumIds = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id')->unique();
-                $query->whereIn('pensum_id', $pensumIds);
-            }
-        }
-        if ($this->filterPensumId !== '') {
-            $query->where('pensum_id', (int) $this->filterPensumId);
-        }
+        $query->whereIn('pensum_id', $effectivePensumIdsArray);
         if ($this->search !== '') {
-            $s = $this->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('pregunta', 'like', "%{$s}%")
-                    ->orWhere('tipo_pregunta', 'like', "%{$s}%");
-            });
+            $query->where('pregunta', 'like', '%'.$this->search.'%');
         }
         if ($this->filterActive !== '') {
             $query->where('activo', (bool) $this->filterActive);
@@ -512,16 +639,7 @@ class DiagnosticQuestionReview extends Component
 
         $baseScoped = $this->scopedQuery();
         // Strict is_leadership: baseScoped ya filtra por strictPensumIds vía scopedQuery(); si es vacío, ya es whereRaw 1=0
-        if ($this->filterAreaId !== '') {
-            $area = AreaConocimiento::find((int) $this->filterAreaId);
-            if ($area) {
-                $pensumIds = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                $baseScoped->whereIn('pensum_id', $pensumIds);
-            }
-        }
-        if ($this->filterPensumId !== '') {
-            $baseScoped->where('pensum_id', (int) $this->filterPensumId);
-        }
+        $baseScoped->whereIn('pensum_id', $effectivePensumIdsArray);
         if ($this->filterDiagMain !== '') {
             $baseScoped->where('diag_main_id', (int) $this->filterDiagMain);
         }
@@ -536,29 +654,15 @@ class DiagnosticQuestionReview extends Component
         $sessionScopeForMetrics = DiagSession::query()
             ->when($strictPensumIds->isEmpty(), fn ($q) => $q->whereRaw('1=0'))
             ->when($strictPensumIds->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $strictPensumIds))
-            ->when($this->filterAreaId !== '', function ($q) {
-                $area = AreaConocimiento::find((int) $this->filterAreaId);
-                if ($area) {
-                    $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                    $q->whereIn('pensum_id', $pids);
-                }
-            })
-            ->when($this->filterPensumId !== '', fn ($q) => $q->where('pensum_id', (int) $this->filterPensumId))
+            ->whereIn('pensum_id', $effectivePensumIdsArray)
             ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain));
         $metrics['estudiantes'] = (clone $sessionScopeForMetrics)->whereNotNull('estudiant_id')->distinct('estudiant_id')->count('estudiant_id');
 
-        $precisionBaseForMetrics = DiagAnswer::whereHas('question', function ($q) use ($strictPensumIds) {
+        $precisionBaseForMetrics = DiagAnswer::whereHas('question', function ($q) use ($strictPensumIds, $effectivePensumIdsArray) {
             $q->where('tipo_pregunta', 'multiple')->where('activo', 1)
                 ->when($strictPensumIds->isEmpty(), fn ($qq) => $qq->whereRaw('1=0'))
                 ->when($strictPensumIds->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $strictPensumIds))
-                ->when($this->filterAreaId !== '', function ($qq) {
-                    $area = AreaConocimiento::find((int) $this->filterAreaId);
-                    if ($area) {
-                        $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                        $qq->whereIn('pensum_id', $pids);
-                    }
-                })
-                ->when($this->filterPensumId !== '', fn ($qq) => $qq->where('pensum_id', (int) $this->filterPensumId))
+                ->whereIn('pensum_id', $effectivePensumIdsArray)
                 ->when($this->filterDiagMain !== '', fn ($qq) => $qq->where('diag_main_id', (int) $this->filterDiagMain));
         })->whereNotNull('completado_at')->whereNotNull('option_id');
         $metrics['precisionTotal'] = (clone $precisionBaseForMetrics)->count();
@@ -569,17 +673,10 @@ class DiagnosticQuestionReview extends Component
         // ── Réplica planning: header Lapso/Pestudio/Referente + 8-grid (s2526 completitud/abandono) ──
         $questionsCount = $metrics['total'];
         // totalAnswers / preguntas con resp / pensums con resp (scoped + filtros)
-        $answerScopedForGrid = DiagAnswer::whereHas('question', function ($q) use ($strictPensumIds) {
+        $answerScopedForGrid = DiagAnswer::whereHas('question', function ($q) use ($strictPensumIds, $effectivePensumIdsArray) {
             $q->when($strictPensumIds->isEmpty(), fn ($qq) => $qq->whereRaw('1=0'))
                 ->when($strictPensumIds->isNotEmpty(), fn ($qq) => $qq->whereIn('pensum_id', $strictPensumIds))
-                ->when($this->filterAreaId !== '', function ($qq) {
-                    $area = AreaConocimiento::find((int) $this->filterAreaId);
-                    if ($area) {
-                        $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                        $qq->whereIn('pensum_id', $pids);
-                    }
-                })
-                ->when($this->filterPensumId !== '', fn ($qq) => $qq->where('pensum_id', (int) $this->filterPensumId))
+                ->whereIn('pensum_id', $effectivePensumIdsArray)
                 ->when($this->filterDiagMain !== '', fn ($qq) => $qq->where('diag_main_id', (int) $this->filterDiagMain));
         })->whereNotNull('completado_at');
         $totalAnswersCount = (clone $answerScopedForGrid)->count();
@@ -661,13 +758,7 @@ class DiagnosticQuestionReview extends Component
             $progressPestudios = \App\Models\app\Academy\Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id', 'code', 'name']);
             $progressGrados = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active', 'true')->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
             $progressPensums = Pensum::whereIn('id', $scopePensumIdsForProgress)->with(['asignatura', 'grado'])->orderBy('grado_id')->get(['id', 'grado_id', 'pestudio_id', 'asignatura_id']);
-            // Grado resumen — agregado por grado con filtro pestudio
-            $pestudiosForGradoResumen = Pestudio::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('pestudio_id'))->orderBy('code')->get(['id', 'code', 'name']);
-            $gradosForResumenQuery = Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active', 'true');
-            if ($this->resumenPestudioId) {
-                $gradosForResumenQuery->where('pestudio_id', (int) $this->resumenPestudioId);
-            }
-            $gradosForResumen = $gradosForResumenQuery->orderBy('order')->get(['id', 'name', 'code', 'pestudio_id']);
+            // Grado resumen — agregado por grado; sigue los filtros globales (sin filtros locales)
             $gradoProgress = $allProgress->groupBy(fn ($pp) => $pp->pensum->grado_id)->map(function ($items) {
                 $grado = $items->first()->pensum->grado;
                 $totalQ = $items->sum('total_questions');
@@ -693,12 +784,6 @@ class DiagnosticQuestionReview extends Component
             // Sólo grados activos, coherente con las opciones del select anidado.
             $activeGradoIds = \App\Models\app\Academy\Grado::whereIn('id', Pensum::whereIn('id', $scopePensumIdsForProgress)->pluck('grado_id'))->where('status_active', 'true')->pluck('id')->map(fn ($id) => (int) $id)->all();
             $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && in_array((int) $gp->grado->id, $activeGradoIds, true))->values();
-            if ($this->resumenPestudioId) {
-                $gradoProgress = $gradoProgress->filter(fn ($gp) => $gp->grado && (int) $gp->grado->pestudio_id === (int) $this->resumenPestudioId)->values();
-            }
-            if ($this->resumenGradoId) {
-                $gradoProgress = $gradoProgress->where('grado.id', (int) $this->resumenGradoId)->values();
-            }
             // Paginación por defecto 10 filas por página para Resumen por Grado
             $gradoPerPage = 10;
             $gradoCurrentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage('gradoProgressPage');
@@ -706,7 +791,6 @@ class DiagnosticQuestionReview extends Component
             $gradoItems = $gradoProgress->forPage($gradoCurrentPage, $gradoPerPage)->values();
             $gradoProgress = new \Illuminate\Pagination\LengthAwarePaginator($gradoItems, $gradoTotal, $gradoPerPage, $gradoCurrentPage, ['path' => request()->url(), 'pageName' => 'gradoProgressPage']);
         } else {
-            $gradosForResumen = collect();
             $gradoProgress = collect();
         }
 
@@ -720,13 +804,7 @@ class DiagnosticQuestionReview extends Component
             $recentSessions = DiagSession::with(['estudiant', 'pensum'])
                 ->when($assignedForEnriched->isEmpty(), fn ($q) => $q->whereRaw('1=0'))
                 ->when($assignedForEnriched->isNotEmpty(), fn ($q) => $q->whereIn('pensum_id', $assignedForEnriched))
-                ->when($this->filterAreaId !== '', function ($q) {
-                    $area = AreaConocimiento::find((int) $this->filterAreaId);
-                    if ($area) {
-                        $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                        $q->whereIn('pensum_id', $pids);
-                    }
-                })
+                ->whereIn('pensum_id', $effectivePensumIdsArray)
                 ->when($this->filterDiagMain !== '', fn ($q) => $q->where('diag_main_id', (int) $this->filterDiagMain))
                 ->orderByDesc('iniciado_at')->limit(5)->get();
         }
@@ -736,13 +814,7 @@ class DiagnosticQuestionReview extends Component
         $questionsByDifficulty = collect();
         if ($this->enrichedLoaded) {
             $typeBase = $this->scopedQuery();
-            if ($this->filterAreaId !== '') {
-                $area = AreaConocimiento::find((int) $this->filterAreaId);
-                if ($area) {
-                    $pids = CampoConocimiento::where('area_conocimiento_id', $area->id)->whereNotNull('pensum_id')->pluck('pensum_id');
-                    $typeBase->whereIn('pensum_id', $pids);
-                }
-            }
+            $typeBase->whereIn('pensum_id', $effectivePensumIdsArray);
             if ($this->filterDiagMain !== '') {
                 $typeBase->where('diag_main_id', (int) $this->filterDiagMain);
             }
@@ -767,6 +839,9 @@ class DiagnosticQuestionReview extends Component
             'questions' => $questions,
             'areas' => $areas,
             'pensumsOptions' => $pensumsOptions,
+            'pestudioOptions' => $pestudioOptions,
+            'gradoOptions' => $gradoOptions,
+            'profesorOptions' => $profesorOptions,
             'wizardPensums' => $wizardPensums,
             'metrics' => $metrics,
             'tipos' => $tipos,
@@ -793,9 +868,7 @@ class DiagnosticQuestionReview extends Component
             'progressPestudios' => $progressPestudios ?? collect(),
             'progressGrados' => $progressGrados ?? collect(),
             'progressPensums' => $progressPensums ?? collect(),
-            'gradosForResumen' => $gradosForResumen ?? collect(),
             'gradoProgress' => $gradoProgress ?? collect(),
-            'pestudiosForGradoResumen' => $pestudiosForGradoResumen ?? collect(),
             'precision' => $metrics['precision'] ?? null,
             'precisionCorrect' => $metrics['precisionCorrect'] ?? 0,
             'precisionTotal' => $metrics['precisionTotal'] ?? 0,

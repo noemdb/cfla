@@ -99,7 +99,24 @@
 
                 @elseif($wizardStep === 2)
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Pregunta</label>
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400">Pregunta</label>
+                            <button type="button" wire:click="tagQuestionMath"
+                                wire:loading.attr="disabled"
+                                wire:target="tagQuestionMath"
+                                title="Detectar expresiones matemáticas y convertirlas a LaTeX (KaTeX)"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
+                                <svg wire:loading.remove wire:target="tagQuestionMath" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM8 12h8m-4-4v8"></path>
+                                </svg>
+                                <svg wire:loading wire:target="tagQuestionMath" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                <span wire:loading.remove wire:target="tagQuestionMath">Etiquetar Not. Mat.</span>
+                                <span wire:loading wire:target="tagQuestionMath">Etiquetando…</span>
+                            </button>
+                        </div>
                         <textarea wire:model="pregunta" rows="3"
                             class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
                             placeholder="Escriba el enunciado de la pregunta..."></textarea>
@@ -210,13 +227,13 @@
                     @if($pregunta)
                         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                             <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Vista previa</h4>
-                            <p class="text-sm text-gray-200 mb-2">{{ $pregunta }}</p>
+                            <x-lms.math-text :content="$pregunta" class="text-sm text-gray-200 mb-2" />
                             @if($tipo_pregunta === 'multiple')
                                 <div class="space-y-1.5">
                                     @foreach($options as $index => $option)
                                         <div class="flex items-center gap-2 p-2 rounded-lg {{ $correct_option_index === $index ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-gray-800/30 border border-white/5' }}">
                                             <span class="w-4 h-4 rounded-full border-2 {{ $correct_option_index === $index ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/10' }}"></span>
-                                            <span class="text-xs {{ $correct_option_index === $index ? 'text-emerald-300' : 'text-gray-400' }}">{{ $option['opcion'] ?? 'Opción vacía' }}</span>
+                                            <x-lms.math-text as="span" :content="$option['opcion'] ?? 'Opción vacía'" class="text-xs {{ $correct_option_index === $index ? 'text-emerald-300' : 'text-gray-400' }}" />
                                         </div>
                                     @endforeach
                                 </div>
