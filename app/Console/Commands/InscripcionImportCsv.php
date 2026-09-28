@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\app\Academy\Escolaridad;
 use App\Models\app\Academy\Programacion;
 use App\Models\app\Academy\Tinscripcion;
-use App\Models\app\Learner\Estudiant;
+use App\Services\Planning\ConformadoCiGenerator;
 use App\Services\Planning\InscripcionCsvImporter;
 use Illuminate\Console\Command;
 
@@ -14,9 +14,10 @@ use Illuminate\Console\Command;
  * misma lógica del modal "Importar CSV" de /app/planning/inscripcions.
  *
  * Particularidad: las filas sin CI (columna ci_estudiant vacía) reciben un CI
- * aleatorio alfanumérico de 12 caracteres, verificado contra la tabla
- * `estudiants` (índice único) para garantizar que no exista. El estudiante se
- * crea como nuevo y se inscribe en la sección indicada por el CSV.
+ * conformado de 7 dígitos + 3 letras mayúsculas (p. ej. 4829137XKQ),
+ * aleatorio no consecutivo y verificado contra la tabla `estudiants`
+ * (índice único) para garantizar que no exista. El estudiante se crea como
+ * nuevo y se inscribe en la sección indicada por el CSV.
  *
  * Uso:
  *   php8.2 artisan inscripcion:import-csv --dry-run
@@ -26,9 +27,6 @@ use Illuminate\Console\Command;
  */
 class InscripcionImportCsv extends Command
 {
-    /** Alfabeto para los CI generados (aleatorio alfanumérico). */
-    private const CI_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
     protected $signature = 'inscripcion:import-csv
         {--path= : Archivo o directorio CSV (default: blueprint/inscripcion/csv)}
         {--pestudio= : ID del plan de estudio para desambiguar el grado}
@@ -40,10 +38,9 @@ class InscripcionImportCsv extends Command
         {--representante-ci= : CI del representante para estudiantes nuevos (opcional)}
         {--update-academic-data : Actualiza tipo/escolaridad/programación/grupo en inscripciones existentes}
         {--update-student-names : Actualiza nombre/apellido de estudiantes existentes}
-        {--ci-length=12 : Longitud del CI aleatorio para filas sin CI}
         {--dry-run : Muestra la vista previa sin persistir cambios}';
 
-    protected $description = 'Importa los CSV de blueprint/inscripcion/csv generando CI aleatorios para las filas sin cédula';
+    protected $description = 'Importa los CSV de blueprint/inscripcion/csv generando CI conformados (7 dígitos + 3 letras) para las filas sin cédula';
 
     public function handle(InscripcionCsvImporter $importer): int
     {
@@ -65,27 +62,27 @@ class InscripcionImportCsv extends Command
         }
 
         $dryRun = (bool) $this->option('dry-run');
-        $ciLength = max(1, (int) $this->option('ci-length'));
         $reserved = [];
 
         $this->line($dryRun
             ? '<fg=yellow>Modo DRY-RUN: no se persiste ningún cambio.</>'
             : '<fg=green>Importando inscripciones...</>');
         $this->line(sprintf(
-            'Archivos: %d · tipo=%s · escolaridad=%s · programación=%s · CI generado: %d caracteres',
+            'Archivos: %d · tipo=%s · escolaridad=%s · programación=%s · CI conformado: 7 dígitos + 3 letras',
             count($files),
             $options['tipo_id'],
             $options['escolaridad_id'],
             $options['programacion_id'],
-            $ciLength,
         ));
 
         $totals = [
             'created' => 0,
             'inscribed' => 0,
             'updated' => 0,
+            'ci_updated' => 0,
             'unchanged' => 0,
             'skipped' => 0,
+            'discarded' => 0,
             'generated' => 0,
             'errors' => 0,
         ];
@@ -109,7 +106,7 @@ class InscripcionImportCsv extends Command
                 continue;
             }
 
-            $generated = $this->fillMissingCi($rows, $ciLength, $reserved);
+            $generated = $this->fillMissingCi($rows, $reserved);
             $totals['generated'] += $generated;
 
             $preview = $importer->preview($rows, $options);
@@ -132,17 +129,21 @@ class InscripcionImportCsv extends Command
             $totals['created'] += $report['created'];
             $totals['inscribed'] += $report['inscribed'];
             $totals['updated'] += $report['updated'];
+            $totals['ci_updated'] += $report['ci_updated'] ?? 0;
             $totals['unchanged'] += $report['unchanged'];
             $totals['skipped'] += $report['skipped'];
+            $totals['discarded'] += $report['discarded'] ?? 0;
             $totals['errors'] += count($report['errors']);
 
             $this->line(sprintf(
-                '  creados: %d · inscritos: %d · actualizados: %d · sin cambios: %d · omitidos: %d',
+                '  creados: %d · inscritos: %d · actualizados: %d · CI actualizadas: %d · sin cambios: %d · omitidos: %d · descartados: %d',
                 $report['created'],
                 $report['inscribed'],
                 $report['updated'],
+                $report['ci_updated'] ?? 0,
                 $report['unchanged'],
                 $report['skipped'],
+                $report['discarded'] ?? 0,
             ));
 
             foreach ($report['errors'] as $error) {
@@ -158,14 +159,16 @@ class InscripcionImportCsv extends Command
         $this->newLine();
         $this->line('<fg=cyan>Resumen '.($dryRun ? '(dry-run)' : '').'</>');
         $this->table(
-            ['CI generados', 'Creados', 'Inscritos', 'Actualizados', 'Sin cambios', 'Omitidos', 'Errores'],
+            ['CI generados', 'Creados', 'Inscritos', 'Actualizados', 'CI actualizadas', 'Sin cambios', 'Omitidos', 'Descartados', 'Errores'],
             [[
                 $totals['generated'],
                 $totals['created'],
                 $totals['inscribed'],
                 $totals['updated'],
+                $totals['ci_updated'],
                 $totals['unchanged'],
                 $totals['skipped'],
+                $totals['discarded'],
                 $totals['errors'],
             ]],
         );
@@ -201,51 +204,30 @@ class InscripcionImportCsv extends Command
     }
 
     /**
-     * Rellena el CI de las filas vacías con un valor aleatorio único.
+     * Rellena el CI de las filas vacías con un CI conformado único
+     * (7 dígitos + 3 letras mayúsculas).
      *
      * @param  array<int, array<string, mixed>>  $rows
      * @param  array<string, bool>  $reserved
      * @return int  Cantidad de CI generados
      */
-    private function fillMissingCi(array &$rows, int $length, array &$reserved): int
+    private function fillMissingCi(array &$rows, array &$reserved): int
     {
         $count = 0;
+        $generator = app(ConformadoCiGenerator::class);
 
         foreach ($rows as &$row) {
             if (trim((string) ($row['ci_estudiant'] ?? '')) !== '') {
                 continue;
             }
 
-            $row['ci_estudiant'] = $this->generateUniqueCi($length, $reserved);
+            $row['ci_estudiant'] = $generator->generate($reserved);
             $row['ci_generated'] = true;
             $count++;
         }
         unset($row);
 
         return $count;
-    }
-
-    /**
-     * Genera un CI aleatorio alfanumérico que no exista en `estudiants` ni se
-     * haya reservado antes en esta misma ejecución.
-     *
-     * @param  array<string, bool>  $reserved
-     */
-    private function generateUniqueCi(int $length, array &$reserved): string
-    {
-        $alphabet = self::CI_ALPHABET;
-        $max = strlen($alphabet) - 1;
-
-        do {
-            $ci = '';
-            for ($i = 0; $i < $length; $i++) {
-                $ci .= $alphabet[random_int(0, $max)];
-            }
-        } while (isset($reserved[$ci]) || Estudiant::where('ci_estudiant', $ci)->exists());
-
-        $reserved[$ci] = true;
-
-        return $ci;
     }
 
     /**

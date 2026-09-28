@@ -367,12 +367,12 @@ class IndexComponent extends Component
 
     public function destroy(): void
     {
-        Inscripcion::findOrFail($this->confirmDeleteId)->delete();
+        Inscripcion::findOrFail($this->confirmDeleteId)->forceDelete();
         $this->confirmDeleteId = null;
 
         $this->notification()->success(
             title: 'Inscripción eliminada',
-            description: 'La inscripción fue eliminada correctamente.'
+            description: 'La inscripción fue eliminada permanentemente.'
         );
     }
 
@@ -497,16 +497,7 @@ class IndexComponent extends Component
     protected function refreshImportPreview(): void
     {
         $this->importPreview = $this->importer()->preview($this->importRows, $this->importOptions());
-
-        $ok = count(array_filter($this->importPreview, fn ($row) => $row['status'] === 'ok'));
-        $bad = count($this->importPreview) - $ok;
-        $duplicates = count(array_filter($this->importPreview, fn ($row) => ! empty($row['duplicate'])));
-
-        $this->importStatusType = $ok > 0 ? 'ok' : 'error';
-        $this->importStatus = "{$ok} fila(s) lista(s) para importar"
-            .($bad ? " · {$bad} con errores" : '')
-            .($duplicates ? " · {$duplicates} duplicada(s) en el archivo" : '')
-            .'.';
+        $this->refreshImportStatusCounts();
 
         if ($this->importFileHash && Cache::has($this->importCacheKey())) {
             $this->importStatusType = 'error';
@@ -514,6 +505,61 @@ class IndexComponent extends Component
         }
 
         $this->dispatch('inscripcion-import-preview-ready');
+    }
+
+    protected function refreshImportStatusCounts(): void
+    {
+        $isOk = fn ($row) => ($row['status'] ?? '') === 'ok';
+        $isSelected = fn ($row) => $isOk($row) && ! empty($row['selected']);
+
+        $ok = count(array_filter($this->importPreview, $isSelected));
+        $bad = count(array_filter($this->importPreview, fn ($row) => ! $isOk($row)));
+        $duplicates = count(array_filter($this->importPreview, fn ($row) => ! empty($row['duplicate'])));
+        $review = count(array_filter($this->importPreview, fn ($row) => $isOk($row) && ! empty($row['requires_review'])));
+        $discarded = count(array_filter($this->importPreview, fn ($row) => $isOk($row) && empty($row['selected'])));
+
+        $this->importStatusType = $ok > 0 ? 'ok' : 'error';
+        $this->importStatus = "{$ok} fila(s) lista(s) para importar"
+            .($bad ? " · {$bad} con errores" : '')
+            .($duplicates ? " · {$duplicates} duplicada(s) en el archivo" : '')
+            .($review ? " · {$review} señalada(s) por nombre" : '')
+            .($discarded ? " · {$discarded} descartada(s)" : '')
+            .'.';
+    }
+
+    /**
+     * Checkbox aceptar/descartar de la vista previa: solo recalcula
+     * contadores, sin reconstruir el preview (conserva `selected`).
+     */
+    public function updated(string $name, mixed $value): void
+    {
+        if (str_starts_with($name, 'importPreview.')) {
+            $this->refreshImportStatusCounts();
+        }
+    }
+
+    public function acceptAllImportRows(): void
+    {
+        foreach ($this->importPreview as $index => $row) {
+            if (($row['status'] ?? '') === 'ok') {
+                $this->importPreview[$index]['selected'] = true;
+            }
+        }
+
+        $this->refreshImportStatusCounts();
+        $this->reopenImportDialog();
+    }
+
+    public function discardFlaggedImportRows(): void
+    {
+        foreach ($this->importPreview as $index => $row) {
+            if (! empty($row['requires_review'])) {
+                $this->importPreview[$index]['selected'] = false;
+            }
+        }
+
+        $this->refreshImportStatusCounts();
+        $this->reopenImportDialog();
     }
 
     protected function importCacheKey(): string
@@ -576,15 +622,21 @@ class IndexComponent extends Component
         if ($report['updated']) {
             $summary[] = "{$report['updated']} inscripción(es) actualizada(s)";
         }
+        if ($report['ci_updated'] ?? false) {
+            $summary[] = "{$report['ci_updated']} CI(s) actualizada(s)";
+        }
         if ($report['unchanged']) {
             $summary[] = "{$report['unchanged']} sin cambios";
         }
         if ($report['skipped']) {
             $summary[] = "{$report['skipped']} omitida(s)";
         }
+        if ($report['discarded'] ?? false) {
+            $summary[] = "{$report['discarded']} descartada(s)";
+        }
 
         $message = $summary ? implode(', ', $summary).'.' : 'No se procesó ninguna fila.';
-        $processed = $report['created'] + $report['inscribed'] + $report['updated'];
+        $processed = $report['created'] + $report['inscribed'] + $report['updated'] + ($report['ci_updated'] ?? 0);
 
         $this->importStatusType = $processed > 0 ? 'ok' : 'error';
         $this->importStatus = $message;

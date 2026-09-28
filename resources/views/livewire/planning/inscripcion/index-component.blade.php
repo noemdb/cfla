@@ -467,7 +467,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta inscripción?</h3>
-            <p class="text-sm text-gray-400 mb-6">Esta acción eliminará la inscripción del estudiante.</p>
+            <p class="text-sm text-gray-400 mb-6">Esta acción eliminará permanentemente la inscripción del estudiante. No se podrá recuperar.</p>
             <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
@@ -923,12 +923,31 @@
             {{-- Vista previa --}}
             @if(!empty($importPreview))
                 <div class="border-t border-white/10 pt-3">
-                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">
-                        Vista previa <span class="text-gray-500 font-normal normal-case">({{ count($importPreview) }} filas)</span>
-                    </h4>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">
+                            Vista previa <span class="text-gray-500 font-normal normal-case">({{ count($importPreview) }} filas)</span>
+                        </h4>
+                        <div class="flex items-center gap-2">
+                            <button type="button" wire:click="acceptAllImportRows"
+                                class="px-2.5 py-1 rounded-md text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all">
+                                Aceptar todas
+                            </button>
+                            <button type="button" wire:click="discardFlaggedImportRows"
+                                class="px-2.5 py-1 rounded-md text-[10px] font-bold text-gray-400 bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+                                Descartar señaladas
+                            </button>
+                        </div>
+                    </div>
                     <div class="max-h-64 overflow-y-auto rounded-lg border border-white/5 divide-y divide-white/5">
-                        @foreach($importPreview as $row)
-                            <div class="flex items-center gap-3 px-3 py-2 text-xs">
+                        @foreach($importPreview as $index => $row)
+                            <div class="flex items-center gap-3 px-3 py-2 text-xs {{ ($row['status'] ?? '') === 'ok' && empty($row['selected']) ? 'opacity-50' : '' }}">
+                                @if(($row['status'] ?? '') === 'ok')
+                                    <input type="checkbox" wire:model.live="importPreview.{{ $index }}.selected"
+                                        title="Aceptar / descartar este registro"
+                                        class="shrink-0 rounded border-white/20 bg-white/5 text-amber-500 focus:ring-amber-500/50">
+                                @else
+                                    <span class="shrink-0 w-4"></span>
+                                @endif
                                 <span class="font-mono text-gray-600 w-7 shrink-0">{{ $row['line'] }}</span>
                                 <span class="font-mono text-gray-300 w-24 shrink-0 truncate" title="{{ $row['ci'] }}">{{ $row['ci'] }}</span>
                                 <span class="text-gray-200 flex-1 min-w-0 truncate">{{ trim($row['lastname'].' '.$row['name']) }}</span>
@@ -941,18 +960,26 @@
                                         DUP
                                     </span>
                                 @endif
+                                @if(!empty($row['requires_review']))
+                                    <span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/12 text-amber-400 border border-amber-500/20"
+                                          title="{{ $row['message'] }}">
+                                        REVISAR
+                                    </span>
+                                @endif
                                 @if($row['status'] === 'ok')
                                     @php
                                         $actionStyles = [
                                             'crear' => 'bg-purple-500/12 text-purple-400 border-purple-500/20',
                                             'inscribir' => 'bg-emerald-500/12 text-emerald-400 border-emerald-500/20',
                                             'actualizar' => 'bg-amber-500/12 text-amber-400 border-amber-500/20',
+                                            'actualizar_ci' => 'bg-sky-500/12 text-sky-400 border-sky-500/20',
                                             'sin_cambios' => 'bg-gray-500/12 text-gray-400 border-gray-500/20',
                                         ];
                                         $actionLabels = [
                                             'crear' => 'Crear',
                                             'inscribir' => 'Inscribir',
                                             'actualizar' => 'Actualizar',
+                                            'actualizar_ci' => 'Actualizar CI',
                                             'sin_cambios' => 'Sin cambios',
                                         ];
                                     @endphp

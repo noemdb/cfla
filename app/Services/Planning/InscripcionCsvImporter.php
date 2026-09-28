@@ -31,6 +31,20 @@ use Illuminate\Support\Facades\DB;
  *                                 en inscripciones existentes.
  *  - update_student_names bool    Actualiza nombre/apellido del estudiante.
  *  - observations_note    ?string Nota de origen a guardar en observations.
+ *
+ * Detección de duplicados (paso 2, vista previa):
+ *  - Primer criterio, siempre: la CI normalizada (solo dígitos).
+ *  - Segundo criterio: el nombre [lastname, name] normalizado (insensible a
+ *    mayúsculas, tildes y espacios). Si la CI no existe pero el nombre sí
+ *    (con otra CI), la fila se señala con `requires_review = true`:
+ *      · con inscripción en la misma sección → acción `actualizar_ci`
+ *        (solo se actualiza la CI);
+ *      · con inscripción en otra sección → acción `actualizar`
+ *        (se actualiza la CI y la sección);
+ *      · sin inscripción → acción `crear` (estudiante nuevo, con aviso).
+ *  - Cada fila lleva `selected` (checkbox aceptar/descartar de la vista
+ *    previa, marcado por defecto). Las filas con `selected = false` se
+ *    omiten en `import()` y cuentan como `discarded`.
  */
 class InscripcionCsvImporter
 {
@@ -43,6 +57,9 @@ class InscripcionCsvImporter
     private ?int $defaultPlanPagoId = null;
 
     private ?int $sentinelRepresentantId = null;
+
+    /** @var array<string, array<int, Estudiant>>|null Índice nombre normalizado → estudiantes. */
+    private ?array $nameIndex = null;
 
     // ─── Parseo ────────────────────────────────────────────────
 
@@ -196,6 +213,8 @@ class InscripcionCsvImporter
 
         $preview = [];
         $seen = [];
+        $seenNames = [];
+        $this->nameIndex = null;
 
         foreach ($rows as $row) {
             $ciOriginal = trim((string) ($row['ci_estudiant'] ?? ''));
@@ -226,6 +245,12 @@ class InscripcionCsvImporter
                 'duplicate' => false,
                 'estudiant_id' => null,
                 'seccion_id' => null,
+                // Paso 2: selección manual y segunda coincidencia por nombre.
+                'selected' => true,
+                'requires_review' => false,
+                'name_match' => false,
+                'name_match_id' => null,
+                'name_match_ci' => null,
             ];
 
             if ($ci === '' || $gradoName === '' || $seccionName === '') {
@@ -301,6 +326,51 @@ class InscripcionCsvImporter
             } else {
                 $item['action'] = 'crear';
                 $item['message'] = 'Estudiante nuevo; se creará y se inscribirá.';
+
+                // Segundo criterio (el primero siempre es la CI): si el nombre
+                // [lastname, name] ya existe en BD con otra CI, se señala.
+                $nameMatches = array_values(array_filter(
+                    $this->findEstudiantsByName($lastname, $name),
+                    fn ($candidate) => $this->normalizeCi((string) $candidate->ci_estudiant) !== $ci
+                ));
+
+                if ($nameMatches !== []) {
+                    $match = $nameMatches[0];
+                    $item['name_match'] = true;
+                    $item['name_match_id'] = (int) $match->id;
+                    $item['name_match_ci'] = (string) $match->ci_estudiant;
+                    $item['requires_review'] = true;
+
+                    $existingByName = Inscripcion::where('estudiant_id', $match->id)->first();
+
+                    if ($existingByName && (int) $existingByName->seccion_id === (int) $seccion->id) {
+                        // Mismo estudiante con CI actualizada: solo se actualiza la CI.
+                        $item['estudiant_id'] = (int) $match->id;
+                        $item['action'] = 'actualizar_ci';
+                        $item['message'] = "El nombre coincide con {$match->lastname} {$match->name} (CI {$match->ci_estudiant}) ya inscrito en esta sección; se actualizará solo la CI a {$ci}.";
+                    } elseif ($existingByName) {
+                        // Inscrito en otra sección: se actualiza la CI y la sección.
+                        $item['estudiant_id'] = (int) $match->id;
+                        $item['action'] = 'actualizar';
+                        $item['message'] = "El nombre coincide con {$match->lastname} {$match->name} (CI {$match->ci_estudiant}) inscrito en otra sección; se actualizará la CI a {$ci} y la sección.";
+                    } else {
+                        // Sin inscripción: se trata como estudiante nuevo, con aviso.
+                        $item['action'] = 'crear';
+                        $item['message'] = "Existe {$match->lastname} {$match->name} con CI {$match->ci_estudiant} sin inscripción; se creará como estudiante nuevo con CI {$ci}. Desmárcalo para omitirlo.";
+                    }
+
+                    if (count($nameMatches) > 1) {
+                        $item['message'] .= ' Hay '.count($nameMatches).' registros con ese nombre; se usa el primero.';
+                    }
+                }
+            }
+
+            // Aviso intra-archivo: mismo nombre con CI distinta en otra fila.
+            $nameKey = $this->normalizeFullName($lastname, $name);
+            if ($nameKey !== '' && isset($seenNames[$nameKey]) && $seenNames[$nameKey]['ci'] !== $ci) {
+                $item['requires_review'] = true;
+                $item['message'] .= ($item['message'] !== '' ? ' ' : '')
+                    ."Nombre repetido en el archivo con CI distinta (línea {$seenNames[$nameKey]['line']}).";
             }
 
             $seen[$ci] = [
@@ -308,6 +378,10 @@ class InscripcionCsvImporter
                 'seccion_id' => $seccion->id,
                 'estudiant_id' => $item['estudiant_id'],
             ];
+
+            if ($nameKey !== '') {
+                $seenNames[$nameKey] = ['line' => $item['line'], 'ci' => $ci];
+            }
 
             $preview[] = $item;
         }
@@ -335,8 +409,10 @@ class InscripcionCsvImporter
             'created' => 0,
             'inscribed' => 0,
             'updated' => 0,
+            'ci_updated' => 0,
             'unchanged' => 0,
             'skipped' => 0,
+            'discarded' => 0,
             'errors' => [],
             'plan_pago_id' => $planPagoId,
             'representant_id' => $representantId,
@@ -345,6 +421,13 @@ class InscripcionCsvImporter
         foreach ($preview as $item) {
             if (($item['status'] ?? '') !== 'ok') {
                 $report['skipped']++;
+
+                continue;
+            }
+
+            // Paso 2: filas descartadas con el checkbox de la vista previa.
+            if (array_key_exists('selected', $item) && ! $item['selected']) {
+                $report['discarded']++;
 
                 continue;
             }
@@ -373,11 +456,35 @@ class InscripcionCsvImporter
                             'status_blacklist' => 'false',
                         ]);
                         $report['created']++;
-                    } elseif ($updateNames && $this->nameChanges($estudiant, $item['lastname'], $item['name'])) {
-                        $estudiant->update([
-                            'lastname' => $item['lastname'] ?: $estudiant->lastname,
-                            'name' => $item['name'] ?: $estudiant->name,
-                        ]);
+                    } else {
+                        if (($item['action'] ?? '') === 'actualizar_ci') {
+                            // CI actualizada (coincidencia por nombre, misma sección):
+                            // solamente se actualiza la CI del estudiante.
+                            if ((string) $estudiant->ci_estudiant !== (string) $item['ci']) {
+                                $this->assertCiAvailable((string) $item['ci'], (int) $estudiant->id);
+                                $estudiant->update(['ci_estudiant' => (string) $item['ci']]);
+                                $report['ci_updated']++;
+                            } else {
+                                $report['unchanged']++;
+                            }
+
+                            return;
+                        }
+
+                        // Fila aceptada desde una coincidencia por nombre: la CI
+                        // del CSV prevalece sobre la registrada.
+                        if (! empty($item['name_match']) && (string) $estudiant->ci_estudiant !== (string) $item['ci']) {
+                            $this->assertCiAvailable((string) $item['ci'], (int) $estudiant->id);
+                            $estudiant->update(['ci_estudiant' => (string) $item['ci']]);
+                            $report['ci_updated']++;
+                        }
+
+                        if ($updateNames && $this->nameChanges($estudiant, $item['lastname'], $item['name'])) {
+                            $estudiant->update([
+                                'lastname' => $item['lastname'] ?: $estudiant->lastname,
+                                'name' => $item['name'] ?: $estudiant->name,
+                            ]);
+                        }
                     }
 
                     $inscripcion = Inscripcion::where('estudiant_id', $estudiant->id)->first();
@@ -449,6 +556,67 @@ class InscripcionCsvImporter
         }
 
         return null;
+    }
+
+    /**
+     * Segundo criterio de coincidencia (el primero siempre es la CI): busca
+     * estudiantes por [lastname, name] normalizados. Requiere ambos campos
+     * no vacíos para evitar falsos positivos.
+     *
+     * @return array<int, Estudiant>
+     */
+    public function findEstudiantsByName(string $lastname, string $name): array
+    {
+        if ($this->normalizeFullName($lastname, $name) === '') {
+            return [];
+        }
+
+        return $this->nameIndex()[$this->normalizeFullName($lastname, $name)] ?? [];
+    }
+
+    /**
+     * Clave normalizada de [lastname, name]; '' si alguno viene vacío.
+     */
+    public function normalizeFullName(string $lastname, string $name): string
+    {
+        if (trim($lastname) === '' || trim($name) === '') {
+            return '';
+        }
+
+        return $this->normalizeText(trim($lastname).' '.trim($name));
+    }
+
+    /** @return array<string, array<int, Estudiant>> */
+    protected function nameIndex(): array
+    {
+        if ($this->nameIndex !== null) {
+            return $this->nameIndex;
+        }
+
+        $map = [];
+        foreach (Estudiant::query()->select(['id', 'ci_estudiant', 'name', 'lastname'])->get() as $estudiant) {
+            $key = $this->normalizeFullName((string) $estudiant->lastname, (string) $estudiant->name);
+            if ($key === '') {
+                continue;
+            }
+            $map[$key][] = $estudiant;
+        }
+
+        return $this->nameIndex = $map;
+    }
+
+    /**
+     * @throws \RuntimeException si la CI ya pertenece a otro estudiante.
+     */
+    protected function assertCiAvailable(string $ci, int $exceptId): void
+    {
+        $taken = Estudiant::where('ci_estudiant', $ci)
+            ->where('id', '!=', $exceptId)
+            ->exists();
+
+        if ($taken) {
+            throw new \RuntimeException("La CI {$ci} ya pertenece a otro estudiante.");
+        }
     }
 
     public function resolveSeccion(string $gradoName, string $seccionName, ?int $pestudioId = null): ?Seccion
@@ -685,6 +853,7 @@ class InscripcionCsvImporter
     {
         $item['status'] = 'error';
         $item['message'] = $message;
+        $item['selected'] = false;
 
         return $item;
     }

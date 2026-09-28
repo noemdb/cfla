@@ -403,4 +403,153 @@ class InscripcionCsvImporterTest extends TestCase
         $this->assertSame('NOMBRE', $estudiant->fresh()->name);
         $this->assertSame('NUEVO', $estudiant->fresh()->lastname);
     }
+
+    // ─── Segundo criterio: nombre [lastname, name] ──────────────
+
+    /** @test */
+    public function it_flags_name_match_with_new_ci_as_ci_update_when_same_section(): void
+    {
+        [, , $seccion] = $this->makeSection('GRADO CI', 'A');
+        $estudiant = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500020',
+            'name' => 'ANA',
+            'lastname' => 'PEREZ',
+        ]);
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => Tinscripcion::factory()->create()->id,
+            'escolaridad_id' => Escolaridad::factory()->create()->id,
+            'programacion_id' => Programacion::factory()->create()->id,
+        ]);
+
+        $options = $this->baseImportOptions();
+        $rows = $this->importer->parse($this->writeCsv("ci,lastname,name,grado,seccion\n55500021,PEREZ,ANA,GRADO CI,A\n"));
+        $preview = $this->importer->preview($rows, $options);
+
+        $this->assertSame('actualizar_ci', $preview[0]['action']);
+        $this->assertTrue($preview[0]['requires_review']);
+        $this->assertTrue($preview[0]['name_match']);
+        $this->assertTrue($preview[0]['selected']);
+        $this->assertSame($estudiant->id, $preview[0]['estudiant_id']);
+
+        $report = $this->importer->import($preview, $options);
+
+        $this->assertSame(1, $report['ci_updated']);
+        $this->assertSame(0, $report['created']);
+        $this->assertSame('55500021', $estudiant->fresh()->ci_estudiant);
+        $this->assertSame(1, Estudiant::where('name', 'ANA')->where('lastname', 'PEREZ')->count());
+        $this->assertDatabaseHas('inscripcions', [
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+        ]);
+    }
+
+    /** @test */
+    public function it_matches_names_ignoring_accents_and_case(): void
+    {
+        [, , $seccion] = $this->makeSection('GRADO ACC', 'A');
+        $estudiant = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500024',
+            'name' => 'JOSÉ',
+            'lastname' => 'MUÑOZ',
+        ]);
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => Tinscripcion::factory()->create()->id,
+            'escolaridad_id' => Escolaridad::factory()->create()->id,
+            'programacion_id' => Programacion::factory()->create()->id,
+        ]);
+
+        $rows = $this->importer->parse($this->writeCsv("ci,lastname,name,grado,seccion\n55500025,Munoz,Jose,GRADO ACC,A\n"));
+        $preview = $this->importer->preview($rows, $this->baseImportOptions());
+
+        $this->assertSame('actualizar_ci', $preview[0]['action']);
+        $this->assertTrue($preview[0]['requires_review']);
+    }
+
+    /** @test */
+    public function it_treats_name_match_without_inscription_as_new_student(): void
+    {
+        $this->makeSection('GRADO SN', 'A');
+        $existing = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500022',
+            'name' => 'LUIS',
+            'lastname' => 'GOMEZ',
+        ]);
+
+        $options = $this->baseImportOptions();
+        $rows = $this->importer->parse($this->writeCsv("ci,lastname,name,grado,seccion\n55500023,GOMEZ,LUIS,GRADO SN,A\n"));
+        $preview = $this->importer->preview($rows, $options);
+
+        $this->assertSame('crear', $preview[0]['action']);
+        $this->assertTrue($preview[0]['requires_review']);
+        $this->assertTrue($preview[0]['selected']);
+
+        $report = $this->importer->import($preview, $options);
+
+        $this->assertSame(1, $report['created']);
+        $this->assertSame(1, $report['inscribed']);
+        // El registro previo (sin inscripción) queda intacto.
+        $this->assertSame('55500022', $existing->fresh()->ci_estudiant);
+        $this->assertNotNull(Estudiant::where('ci_estudiant', '55500023')->first());
+    }
+
+    /** @test */
+    public function it_updates_ci_and_section_when_name_matches_in_another_section(): void
+    {
+        [, $grado, $seccionA] = $this->makeSection('GRADO CS', 'A');
+        $seccionB = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'B', 'status_active' => 'true']);
+        $estudiant = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500026',
+            'name' => 'ELENA',
+            'lastname' => 'RIOS',
+        ]);
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionA->id,
+            'tipo_id' => Tinscripcion::factory()->create()->id,
+            'escolaridad_id' => Escolaridad::factory()->create()->id,
+            'programacion_id' => Programacion::factory()->create()->id,
+        ]);
+
+        $options = $this->baseImportOptions();
+        $rows = $this->importer->parse($this->writeCsv("ci,lastname,name,grado,seccion\n55500027,RIOS,ELENA,GRADO CS,B\n"));
+        $preview = $this->importer->preview($rows, $options);
+
+        $this->assertSame('actualizar', $preview[0]['action']);
+        $this->assertTrue($preview[0]['requires_review']);
+
+        $report = $this->importer->import($preview, $options);
+
+        $this->assertSame(1, $report['ci_updated']);
+        $this->assertSame(1, $report['updated']);
+        $this->assertSame('55500027', $estudiant->fresh()->ci_estudiant);
+        $this->assertDatabaseHas('inscripcions', [
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionB->id,
+        ]);
+    }
+
+    /** @test */
+    public function it_skips_discarded_preview_rows(): void
+    {
+        $this->makeSection('GRADO DS', 'A');
+
+        $options = $this->baseImportOptions();
+        $csv = "ci,lastname,name,grado,seccion\n"
+            ."55500028,UNO,A,GRADO DS,A\n"
+            ."55500029,DOS,B,GRADO DS,A\n";
+        $preview = $this->importer->preview($this->importer->parse($this->writeCsv($csv)), $options);
+        $preview[0]['selected'] = false;
+
+        $report = $this->importer->import($preview, $options);
+
+        $this->assertSame(1, $report['created']);
+        $this->assertSame(1, $report['inscribed']);
+        $this->assertSame(1, $report['discarded']);
+        $this->assertNull(Estudiant::where('ci_estudiant', '55500028')->first());
+        $this->assertNotNull(Estudiant::where('ci_estudiant', '55500029')->first());
+    }
 }

@@ -194,7 +194,7 @@ class InscripcionsTest extends TestCase
     }
 
     /** @test */
-    public function it_soft_deletes_an_inscripcion(): void
+    public function it_force_deletes_an_inscripcion(): void
     {
         $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
         $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
@@ -220,7 +220,7 @@ class InscripcionsTest extends TestCase
             ->call('destroy')
             ->assertHasNoErrors();
 
-        $this->assertSoftDeleted('inscripcions', [
+        $this->assertDatabaseMissing('inscripcions', [
             'id' => $inscripcion->id,
         ]);
     }
@@ -515,6 +515,93 @@ class InscripcionsTest extends TestCase
             'escolaridad_id' => $escolaridadNew->id,
             'programacion_id' => $programacionNew->id,
         ]);
+    }
+
+    /** @test */
+    public function it_flags_name_match_in_preview_and_updates_ci_on_import(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'name' => 'GRADO CSV CI',
+            'status_active' => 'true',
+        ]);
+        $seccion = Seccion::factory()->create([
+            'grado_id' => $grado->id,
+            'name' => 'X',
+            'status_active' => 'true',
+        ]);
+        $tipo = Tinscripcion::factory()->create();
+        $escolaridad = Escolaridad::factory()->create();
+        $programacion = Programacion::factory()->create();
+
+        $estudiant = $this->createMinimalEstudiant([
+            'ci_estudiant' => '55500031',
+            'name' => 'ANA',
+            'lastname' => 'PEREZ',
+        ]);
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
+        ]);
+
+        $csv = "ci_estudiant,lastname,name,grado,seccion\n"
+            ."55500032,PEREZ,ANA,GRADO CSV CI,X\n";
+
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->call('openImportModal')
+            ->set('importCsvFile', UploadedFile::fake()->createWithContent('inscripciones.csv', $csv))
+            ->set('importTipoId', $tipo->id)
+            ->set('importEscolaridadId', $escolaridad->id)
+            ->set('importProgramacionId', $programacion->id)
+            ->assertSee('REVISAR')
+            ->assertSee('Actualizar CI')
+            ->call('importInscriptions')
+            ->assertHasNoErrors();
+
+        $this->assertSame('55500032', $estudiant->fresh()->ci_estudiant);
+        $this->assertSame(1, Estudiant::where('lastname', 'PEREZ')->where('name', 'ANA')->count());
+    }
+
+    /** @test */
+    public function it_skips_rows_discarded_with_the_preview_checkbox(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'name' => 'GRADO CSV CK',
+            'status_active' => 'true',
+        ]);
+        $seccion = Seccion::factory()->create([
+            'grado_id' => $grado->id,
+            'name' => 'X',
+            'status_active' => 'true',
+        ]);
+        $tipo = Tinscripcion::factory()->create();
+        $escolaridad = Escolaridad::factory()->create();
+        $programacion = Programacion::factory()->create();
+
+        $csv = "ci_estudiant,lastname,name,grado,seccion\n"
+            ."55500033,UNO,A,GRADO CSV CK,X\n"
+            ."55500034,DOS,B,GRADO CSV CK,X\n";
+
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->call('openImportModal')
+            ->set('importCsvFile', UploadedFile::fake()->createWithContent('inscripciones.csv', $csv))
+            ->set('importTipoId', $tipo->id)
+            ->set('importEscolaridadId', $escolaridad->id)
+            ->set('importProgramacionId', $programacion->id)
+            ->set('importPreview.0.selected', false)
+            ->call('importInscriptions')
+            ->assertHasNoErrors();
+
+        $this->assertNull(Estudiant::where('ci_estudiant', '55500033')->first());
+        $this->assertNotNull(Estudiant::where('ci_estudiant', '55500034')->first());
     }
 
     // ─── PDF export Tests ───────────────────────────────────────
