@@ -6,6 +6,7 @@ use App\Livewire\Leadership\LessonMonitor;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Asignatura;
+use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
@@ -86,9 +87,15 @@ class LeadershipLessonsPrintTest extends TestCase
         $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
         $asignatura = Asignatura::factory()->create();
 
+        $pensum = Pensum::factory()->create([
+            'pestudio_id'   => $pestudio->id,
+            'grado_id'      => $grado->id,
+            'asignatura_id' => $asignatura->id,
+        ]);
+
         if ($attachToLeaderArea) {
-            // Área asignada al líder; la asignatura entra al scope del módulo
-            // vía el pivot campo_conocimientos.
+            // Área asignada al líder; el pensum entra al scope del módulo
+            // vía campo_conocimientos.pensum_id.
             $area = AreaConocimiento::create([
                 'leader_id'     => $this->leader->id,
                 'name'          => 'Área de Ciencias',
@@ -97,14 +104,14 @@ class LeadershipLessonsPrintTest extends TestCase
                 'pestudio_id'   => $pestudio->id,
                 'order'         => 1,
             ]);
-            $asignatura->areasConocimiento()->attach($area->id);
+            CampoConocimiento::create([
+                'area_conocimiento_id' => $area->id,
+                'asignatura_id' => $asignatura->id,
+                'pensum_id' => $pensum->id,
+                'order' => 1,
+            ]);
         }
 
-        $pensum = Pensum::factory()->create([
-            'pestudio_id'   => $pestudio->id,
-            'grado_id'      => $grado->id,
-            'asignatura_id' => $asignatura->id,
-        ]);
         $lapso = Lapso::factory()->create();
 
         $pevaluacion = Pevaluacion::create([

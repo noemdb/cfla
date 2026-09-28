@@ -32,10 +32,10 @@
 
     <!-- Filters -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Nombre, código..."
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Nombre, código, jefe de área..."
                     class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
             </div>
             <div>
@@ -59,6 +59,37 @@
                 </select>
             </div>
             <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Jefe de Área</label>
+                <select wire:model.live="filter_leader"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Todos</option>
+                    <option value="none">Sin jefe</option>
+                    @foreach($lideres as $id => $username)
+                        <option value="{{ $id }}">{{ $username }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Adscripción</label>
+                <select wire:model.live="filter_adscripcion"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Todas</option>
+                    <option value="with">Con adscripciones</option>
+                    <option value="empty">Sin adscripciones</option>
+                    <option value="pending">Con pendientes (sin pensum)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Ordenar</label>
+                <select wire:model.live="sortBy"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="order">Por orden</option>
+                    <option value="name">Por nombre</option>
+                    <option value="count_desc">Más adscritas</option>
+                    <option value="count_asc">Menos adscritas</option>
+                </select>
+            </div>
+            <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Ver</label>
                 <select wire:model.live="paginate"
                     class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
@@ -67,15 +98,6 @@
                     <option value="48">48</option>
                     <option value="96">96</option>
                 </select>
-            </div>
-            <div class="flex items-end">
-                <button wire:click="$refresh"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Filtrar
-                </button>
             </div>
         </div>
     </div>
@@ -143,47 +165,58 @@
                                 {{ $area->campo_conocimientos_count }}
                             </span>
                             <span class="text-[10px] text-gray-500 font-medium">asignaturas</span>
+                            @if($area->campos_sin_pensum_count > 0)
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold leading-none bg-amber-500/10 text-amber-300 border border-amber-500/20"
+                                    title="Adscripciones sin pensum asociado">
+                                    {{ $area->campos_sin_pensum_count }} sin pensum
+                                </span>
+                            @endif
                         </div>
                         @if($area->observations)
                             <span class="text-[9px] text-gray-600 truncate max-w-[120px]" title="{{ $area->observations }}">{{ \Illuminate\Support\Str::limit($area->observations, 20) }}</span>
                         @endif
                     </div>
 
-                    {{-- ── Actions: btnGroup ── --}}
-                    <div class="px-4 pb-4 pt-2.5 border-t border-white/5 flex items-center gap-2"
+                    {{-- ── Actions: btn-group ── --}}
+                    <div class="px-4 pb-4 pt-2.5 border-t border-white/5"
                          x-data="{ actionsOpen: false }"
                          @click.away="actionsOpen = false">
-                        {{-- Primary: Asignaturas (siempre visible) --}}
-                        <button type="button" wire:click="openCampoManager({{ $area->id }})"
-                            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/12 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-500/12 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                            Asignaturas
-                        </button>
-
-                        {{-- Desktop group (Editar + Eliminar) --}}
-                        <div class="hidden sm:flex items-center gap-2">
+                        {{-- Desktop: segmented btn-group (Asignaturas + Editar + Clonar + Eliminar) --}}
+                        <div class="hidden sm:flex items-stretch rounded-lg overflow-hidden border border-white/10 divide-x divide-white/5"
+                             role="group" aria-label="Acciones del área">
+                            <button type="button" wire:click="openCampoManager({{ $area->id }})"
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/12 text-blue-400 hover:bg-blue-500/20' : 'bg-gray-500/12 text-gray-500 hover:bg-gray-500/20' }}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                Asignaturas
+                            </button>
                             <button type="button" wire:click="edit({{ $area->id }})"
-                                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200"
-                                title="Editar">
-                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                class="w-11 inline-flex items-center justify-center py-2 text-xs font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 transition-all duration-200"
+                                title="Editar" aria-label="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button type="button" wire:click="confirmClone({{ $area->id }})"
+                                class="w-11 inline-flex items-center justify-center py-2 text-xs font-bold bg-sky-500/12 text-sky-400 hover:bg-sky-500/20 transition-all duration-200"
+                                title="Clonar área con sus asignaturas" aria-label="Clonar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                             </button>
                             <button type="button" wire:click="confirmDelete({{ $area->id }})"
-                                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-red-500/12 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200"
-                                title="Eliminar">
-                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                class="w-11 inline-flex items-center justify-center py-2 text-xs font-bold bg-red-500/12 text-red-400 hover:bg-red-500/20 transition-all duration-200"
+                                title="Eliminar" aria-label="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </div>
 
-                        {{-- Mobile dropdown "···" (2 botones secundarios) --}}
+                        {{-- Mobile dropdown "···" (4 acciones) --}}
                         <div class="relative sm:hidden">
                             <button @click="actionsOpen = !actionsOpen"
-                                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 transition-all"
+                                class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11px] font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
                                 title="Más acciones">
-                                <svg class="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4z"/>
                                     <path d="M10 12a2 2 0 110-4 2 2 0 010 4z"/>
                                     <path d="M10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                 </svg>
+                                Acciones
                             </button>
                             <div x-show="actionsOpen"
                                  x-transition:enter="transition ease-out duration-100"
@@ -193,11 +226,21 @@
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-95"
                                  class="absolute right-0 z-50 mt-1 min-w-[160px] bg-gray-800 border border-white/10 rounded-lg shadow-xl py-1"
-                                 @click="actionsOpen = false">
+                                  @click="actionsOpen = false">
+                                <button wire:click="openCampoManager({{ $area->id }})"
+                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
+                                    <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                    Asignaturas
+                                </button>
                                 <button wire:click="edit({{ $area->id }})"
                                     class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
                                     <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     Editar
+                                </button>
+                                <button wire:click="confirmClone({{ $area->id }})"
+                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
+                                    <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                    Clonar
                                 </button>
                                 <button wire:click="confirmDelete({{ $area->id }})"
                                     class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
@@ -227,25 +270,114 @@
         </div>
     @endif
 
-    <!-- ===== MODAL: Confirmar Eliminación ===== -->
-    <x-modal title="Eliminar Área de Conocimiento" blur="lg" wire:model="confirmDeleteId" max-width="md" x-on:close="confirmDeleteId = null" persistent>
-        <div class="p-6 text-center">
-            <svg class="w-16 h-16 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
-            <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta área de conocimiento?</h3>
-            <p class="text-sm text-gray-400 mb-6">Solo se puede eliminar si no tiene asignaturas adscritas.</p>
-            <div class="flex justify-center gap-3">
-                <x-button flat label="Cancelar" x-on:click="$wire.confirmDeleteId = null" />
-                <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
+    <!-- ===== DIALOG: Confirmar Eliminación (WireUI x-dialog) ===== -->
+    <x-dialog id="area-delete" title="Eliminar Área de Conocimiento" width="md" blur="lg">
+        <div class="text-left">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-sm text-gray-700 dark:text-slate-200">
+                        ¿Eliminar el área
+                        @if($confirmDeleteName)
+                            <span class="font-bold text-gray-900 dark:text-white">"{{ $confirmDeleteName }}"</span>
+                        @endif
+                        ?
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                        Solo se puede eliminar si no tiene asignaturas adscritas.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+                <button type="button" x-on:click="close(); $wire.cancelDelete()"
+                    class="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200">
+                    Cancelar
+                </button>
+                <button type="button" wire:click="destroy"
+                    x-on:click="close()"
+                    wire:loading.attr="disabled" wire:target="destroy"
+                    class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-500 transition-all duration-200 disabled:opacity-60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span wire:loading.remove wire:target="destroy">Sí, eliminar</span>
+                    <span wire:loading wire:target="destroy">Eliminando...</span>
+                </button>
             </div>
         </div>
-    </x-modal>
+    </x-dialog>
 
-    <!-- ===== MODAL: Formulario Crear/Editar Área ===== -->
-    <x-modal-card title="{{ $isEditing ? 'Editar Área de Conocimiento' : 'Nueva Área de Conocimiento' }}" blur="lg" wire:model="modeForm" max-width="3xl" persistent>
+    <!-- ===== DIALOG: Confirmar Clonación (WireUI x-dialog) ===== -->
+    <x-dialog id="area-clone" title="Clonar Área de Conocimiento" width="md" blur="lg">
+        <div class="text-left">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500/10 text-sky-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-sm text-gray-700 dark:text-slate-200">
+                        ¿Clonar el área
+                        @if($confirmCloneName)
+                            <span class="font-bold text-gray-900 dark:text-white">"{{ $confirmCloneName }}"</span>
+                        @endif
+                        ?
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                        Se copiará el área junto con todas sus asignaturas adscritas (con pensum y orden conservados).
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+                <button type="button" x-on:click="close(); $wire.cancelClone()"
+                    class="px-4 py-2 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200">
+                    Cancelar
+                </button>
+                <button type="button" wire:click="cloneArea"
+                    x-on:click="close()"
+                    wire:loading.attr="disabled" wire:target="cloneArea"
+                    class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold text-white bg-sky-600 hover:bg-sky-500 transition-all duration-200 disabled:opacity-60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    <span wire:loading.remove wire:target="cloneArea">Sí, clonar</span>
+                    <span wire:loading wire:target="cloneArea">Clonando...</span>
+                </button>
+            </div>
+        </div>
+    </x-dialog>
+
+    <!-- ===== MODAL: Formulario Crear (wizard) / Editar Área (90% viewport) ===== -->
+    <style>
+        .area-modal-wide [wireui-modal] > div:last-child { max-width: 90vw; }
+    </style>
+    <div class="area-modal-wide">
+    <x-modal-card title="{{ $isEditing ? 'Editar Área de Conocimiento' : ($creatingArea && $createStep === 2 ? 'Nueva Área — Adscribir Asignaturas' : 'Nueva Área de Conocimiento') }}" blur="lg" wire:model="modeForm" max-width="7xl" persistent>
         <div class="space-y-6">
 
+            @if($creatingArea)
+                {{-- Step indicator del wizard de creación --}}
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold {{ $createStep === 1 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-emerald-500/10 text-emerald-400' }}">1</span>
+                        <span class="text-[10px] font-bold {{ $createStep === 1 ? 'text-emerald-400' : 'text-gray-500' }}">Datos del área</span>
+                    </div>
+                    <div class="w-8 h-px {{ $createStep === 2 ? 'bg-emerald-500/40' : 'bg-white/10' }}"></div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold {{ $createStep === 2 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-white/5 text-gray-500' }}">2</span>
+                        <span class="text-[10px] font-bold {{ $createStep === 2 ? 'text-emerald-400' : 'text-gray-500' }}">Adscribir asignaturas</span>
+                    </div>
+                </div>
+            @endif
+
+            @if(!$creatingArea || $createStep === 1)
             @if($errors->any())
                 <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                     <div class="flex items-start gap-3">
@@ -376,16 +508,38 @@
                     </div>
                 </div>
             </div>
+            @endif
+
+            @if($creatingArea && $createStep === 2)
+                {{-- Paso 2 del wizard: seleccionar campoConocimiento --}}
+                @if($wizardStep === 1)
+                    @include('livewire.planning.area-conocimiento.partials.wizard-filter')
+                @else
+                    @include('livewire.planning.area-conocimiento.partials.wizard-select', [
+                        'primaryAction' => 'saveNewArea',
+                        'primaryLabel' => 'Crear Área',
+                        'showDataBack' => true,
+                    ])
+                @endif
+            @endif
 
         </div>
 
         <x-slot name="footer">
             <div class="flex justify-end gap-x-4">
-                <x-button flat label="Cancelar" x-on:click="$wire.modeForm = false" />
-                <x-button primary label="{{ $isEditing ? 'Actualizar Área' : 'Guardar Área' }}" wire:click="save" spinner="save" />
+                @if($creatingArea)
+                    <x-button flat label="Cancelar" wire:click="closeForm" spinner="closeForm" />
+                    @if($createStep === 1)
+                        <x-button primary label="Siguiente: Adscribir" wire:click="nextCreateStep" spinner="nextCreateStep" />
+                    @endif
+                @else
+                    <x-button flat label="Cancelar" wire:click="closeForm" spinner="closeForm" />
+                    <x-button primary label="Actualizar Área" wire:click="save" spinner="save" />
+                @endif
             </div>
         </x-slot>
     </x-modal-card>
+    </div>
 
     <!-- ===== DIALOG 95%: Gestión de Campo Conocimientos (Alpine custom) ===== -->
     <div x-data="{ show: @entangle('modeCampo') }"
@@ -464,347 +618,13 @@
                         </div>
 
                         @if($wizardStep === 1)
-                            {{-- Paso 1: Filtrar --}}
-                            <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                                <h4 class="text-xs font-bold text-gray-300 mb-3 flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                                    </svg>
-                                    Filtrar Asignaturas
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-                                    <div>
-                                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan de Estudio</label>
-                                        <select wire:model.live="wizardFilterPestudio"
-                                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                                            <option value="">Todos</option>
-                                            @foreach($pestudios as $id => $name)
-                                                <option value="{{ $id }}">{{ $name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Grado (opcional)</label>
-                                        <select wire:model.live="wizardFilterGrado"
-                                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                                            <option value="">Todos los grados</option>
-                                            @foreach($gradosList as $id => $name)
-                                                <option value="{{ $id }}">{{ $name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Buscar asignatura</label>
-                                        <input type="text" wire:model.live.debounce.300ms="wizardSearch" placeholder="Nombre o código..."
-                                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                                    </div>
-                                    <div class="flex gap-2 items-end">
-                                        <button type="button" wire:click="nextStepWizard"
-                                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
-                                            Ver Asignaturas
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                                <p class="text-[10px] text-gray-600 mt-2">
-                                    @php
-                                        $count = $this->availableSubjects->count();
-                                    @endphp
-                                    {{ $count }} asignatura(s) disponibles
-                                    @if($wizardFilterPestudio)
-                                        para el plan de estudio seleccionado
-                                    @endif
-                                </p>
-                            </div>
+                            @include('livewire.planning.area-conocimiento.partials.wizard-filter')
                         @else
-                            {{-- Paso 2: Seleccionar --}}
-                            <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-3">
-                                    <h4 class="text-xs font-bold text-gray-300 flex items-center gap-2">
-                                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        Seleccionar Asignaturas
-                                    </h4>
-                                    <div class="flex items-center gap-1.5">
-                                        <button type="button" wire:click="selectAllAvailable"
-                                            class="px-2 py-1 text-[10px] font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-all duration-200">
-                                            Seleccionar Todas
-                                        </button>
-                                        <button type="button" wire:click="deselectAll"
-                                            class="px-2 py-1 text-[10px] font-bold bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 border border-white/5 rounded-lg transition-all duration-200">
-                                            Deseleccionar
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {{-- Búsqueda en el listado --}}
-                                <div class="mb-3">
-                                    <div class="relative">
-                                        <svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                        </svg>
-                                        <input type="text"
-                                            wire:model.live.debounce.300ms="wizardSearch"
-                                            placeholder="Buscar por nombre o código..."
-                                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                                        @if($wizardSearch)
-                                            <button type="button" wire:click="wizardSearch = ''"
-                                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors duration-200"
-                                                title="Limpiar búsqueda">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                </svg>
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                {{-- Grid de asignaturas disponibles (sin agrupar) --}}
-                                <div class="max-h-[360px] overflow-y-auto pr-1">
-                                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                                        @forelse($this->availableSubjects->take($this->visibleCount) as $asignatura)
-                                                    @php
-                                                        $isSelected = array_key_exists($asignatura->id, $selectedSubjects);
-                                                        $selectedPensumId = $selectedSubjects[$asignatura->id] ?? null;
-                                                        $colorKey = \App\Models\app\Academy\Asignatura::colorKey($asignatura->name);
-                                                        // Pensums activos con grado activo, priorizando el plan seleccionado.
-                                                        $pensums = $asignatura->pensums
-                                                            ->where('status_active', true)
-                                                            ->filter(fn ($p) => $p->grado?->status_active === 'true');
-                                                        if ($wizardFilterPestudio) {
-                                                            $filtered = $pensums->where('pestudio_id', (int) $wizardFilterPestudio);
-                                                            if ($filtered->isNotEmpty()) { $pensums = $filtered; }
-                                                        }
-                                                        $pensums = $pensums->values();
-
-                                                        // Resumen agregado: grados y secciones únicos a partir de los pensums.
-                                                        $gradosUnicos = $pensums->pluck('grado')->filter()->unique('id');
-                                                        $seccionesUnicas = $gradosUnicos->flatMap(fn ($g) => $g->seccions ?? collect())->unique('id');
-                                                        $pensumCount = $pensums->count();
-                                                        $pensumSummary = $gradosUnicos->pluck('code')->filter()->join(', ') ?: $gradosUnicos->pluck('name')->filter()->join(', ');
-                                                        $seccionSummary = $seccionesUnicas->pluck('name')->join(', ') ?: '—';
-
-                                                        $hiddenCount = max(0, $pensums->count() - 2);
-                                                        $tipLines = $pensums->map(function ($pensum) {
-                                                            $grado = $pensum->grado;
-                                                            $pestudio = $pensum->pestudio ?? $grado?->pestudio;
-                                                            $psName = $pestudio?->name ?? '?';
-                                                            $psShort = match (true) {
-                                                                str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
-                                                                str_contains($psName, 'MEDIA GENERAL') => 'MG',
-                                                                str_contains($psName, 'PRIMARIA') => 'PRI',
-                                                                str_contains($psName, 'INICIAL') => 'INI',
-                                                                default => \Illuminate\Support\Str::limit($psName, 10),
-                                                            };
-                                                            $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
-                                                            return "{$psShort} · ".($grado?->code ?? $grado?->name ?? '—')." · Secc {$secciones}";
-                                                        });
-
-                                                        // Metadatos académicos.
-                                                        $horasT = $asignatura->hour_t_week;
-                                                        $horasP = $asignatura->hour_p_week;
-                                                        $creditos = $asignatura->unid_credit;
-                                                        $escala = $asignatura->tescala;
-
-                                                        // Distinción sutil por Grado (color Tailwind-compatible)
-                                                        $primaryGrado = $pensums->first()?->grado;
-                                                        $gradoClasses = $primaryGrado?->tailwind_classes ?? [
-                                                            'bar' => 'bg-slate-500',
-                                                            'badge' => 'bg-slate-500/10 text-slate-300 border border-slate-500/20',
-                                                            'dot' => 'bg-slate-500',
-                                                            'border' => 'border-slate-500/30',
-                                                            'ring' => 'ring-slate-500/20',
-                                                            'subtleBg' => 'bg-slate-500/[0.04]',
-                                                        ];
-                                                    @endphp
-                                                    <div x-data="{ showTip: false, top: 0, left: 0 }"
-                                                         @mouseenter="showTip = true; const r = $el.getBoundingClientRect(); top = r.top; left = r.left + r.width/2"
-                                                         @mouseleave="showTip = false"
-                                                         class="relative">
-                                                        <button type="button"
-                                                            wire:click="toggleSubject({{ $asignatura->id }})"
-                                                            class="relative h-56 w-full flex flex-col items-start text-left rounded-xl border p-3 overflow-hidden transition-all duration-200 group
-                                                                {{ $isSelected
-                                                                    ? 'bg-emerald-500/15 border-emerald-500/50 ring-1 ring-emerald-500/40'
-                                                                    : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/25' }}">
-                                                            @if($primaryGrado)
-                                                                <span class="absolute top-0 inset-x-0 h-0.5 {{ $gradoClasses['bar'] }} opacity-60 pointer-events-none"></span>
-                                                                <span class="absolute inset-0 rounded-xl {{ $gradoClasses['subtleBg'] }} pointer-events-none"></span>
-                                                            @endif
-                                                            <span class="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200
-                                                                {{ $isSelected ? 'bg-emerald-500 text-white' : 'bg-white/5 text-transparent border border-white/10' }}">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                                                </svg>
-                                                            </span>
-
-                                                            <span class="inline-flex items-center gap-1.5 pr-6 flex-wrap">
-                                                                <span class="w-2 h-2 rounded-full {{ $this->materiaColorClass($colorKey) }}"></span>
-                                                                <span class="text-[10px] font-mono text-gray-400">{{ $asignatura->code }}</span>
-                                                                @if($primaryGrado)
-                                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold leading-none {{ $gradoClasses['badge'] }}" title="{{ $primaryGrado->full_name }}">{{ $primaryGrado->code_sm }}</span>
-                                                                @endif
-                                                                @if($escala)
-                                                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/5">Esc {{ $escala }}</span>
-                                                                @endif
-                                                            </span>
-
-                                                            <span class="text-[13px] font-semibold leading-snug line-clamp-2 mt-0.5 {{ $isSelected ? 'text-emerald-200' : 'text-gray-200' }}">
-                                                                {{ $asignatura->name }}
-                                                            </span>
-
-                                                            @if($isSelected && $pensums->count() > 1)
-                                                                <label class="mt-2 block w-full">
-                                                                    <span class="block text-[8px] font-bold uppercase tracking-wider text-gray-600 mb-0.5">Pensum / Grado</span>
-                                                                    <select
-                                                                        wire:change="selectPensum({{ $asignatura->id }}, $event.target.value)"
-                                                                        class="w-full bg-white/5 border border-emerald-500/30 text-gray-200 rounded-md px-1.5 py-1 text-[10px] focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all">
-                                                                        @foreach($pensums as $pensum)
-                                                                            @php
-                                                                                $grado = $pensum->grado;
-                                                                                $pestudio = $pensum->pestudio ?? $grado?->pestudio;
-                                                                                $psName = $pestudio?->name ?? '?';
-                                                                                $psShort = match (true) {
-                                                                                    str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
-                                                                                    str_contains($psName, 'MEDIA GENERAL') => 'MG',
-                                                                                    str_contains($psName, 'PRIMARIA') => 'PRI',
-                                                                                    str_contains($psName, 'INICIAL') => 'INI',
-                                                                                    default => \Illuminate\Support\Str::limit($psName, 10),
-                                                                                };
-                                                                            @endphp
-                                                                            <option value="{{ $pensum->id }}" {{ (int) $selectedPensumId === (int) $pensum->id ? 'selected' : '' }}>
-                                                                                {{ $psShort }} · {{ $grado?->code ?? $grado?->name ?? '—' }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </label>
-                                                            @endif
-
-                                                            {{-- Metadatos académicos: créditos · horas T/P --}}
-                                                            <span class="mt-2 grid grid-cols-3 gap-1 text-center">
-                                                                @if($creditos !== null)
-                                                                    <span class="flex flex-col rounded-md bg-white/[0.03] border border-white/5 px-1 py-1">
-                                                                        <span class="text-[8px] uppercase tracking-wider text-gray-600">Créditos</span>
-                                                                        <span class="text-[10px] font-bold text-gray-300">{{ $creditos }}</span>
-                                                                    </span>
-                                                                @endif
-                                                                @if($horasT !== null)
-                                                                    <span class="flex flex-col rounded-md bg-white/[0.03] border border-white/5 px-1 py-1">
-                                                                        <span class="text-[8px] uppercase tracking-wider text-gray-600">H Teóricas</span>
-                                                                        <span class="text-[10px] font-bold text-gray-300">{{ $horasT }}</span>
-                                                                    </span>
-                                                                @endif
-                                                                @if($horasP !== null)
-                                                                    <span class="flex flex-col rounded-md bg-white/[0.03] border border-white/5 px-1 py-1">
-                                                                        <span class="text-[8px] uppercase tracking-wider text-gray-600">H Prácticas</span>
-                                                                        <span class="text-[10px] font-bold text-gray-300">{{ $horasP }}</span>
-                                                                    </span>
-                                                                @endif
-                                                            </span>
-
-                                                            {{-- Asociación plan de estudio · grado · sección (según pensum activo) --}}
-                                                            <span class="mt-auto pt-1.5 border-t border-white/5 w-full space-y-0.5">
-                                                                @forelse($pensums->take(2) as $pensum)
-                                                                    @php
-                                                                        $grado = $pensum->grado;
-                                                                        $pestudio = $pensum->pestudio ?? $grado?->pestudio;
-                                                                        $psName = $pestudio?->name ?? '?';
-                                                                        $psShort = match (true) {
-                                                                            str_contains($psName, 'CIENCIA') && str_contains($psName, 'TECNOLOG') => 'MG-CT',
-                                                                            str_contains($psName, 'MEDIA GENERAL') => 'MG',
-                                                                            str_contains($psName, 'PRIMARIA') => 'PRI',
-                                                                            str_contains($psName, 'INICIAL') => 'INI',
-                                                                            default => \Illuminate\Support\Str::limit($psName, 10),
-                                                                        };
-                                                                        $secciones = $grado?->seccions?->pluck('name')->join(', ') ?? '—';
-                                                                    @endphp
-                                                                    <span class="block text-[9px] leading-tight text-gray-500 truncate">
-                                                                        <span class="font-bold text-gray-400">{{ $psShort }}</span>
-                                                                        <span class="text-gray-600"> · </span>
-                                                                        <span>{{ $grado?->code ?? $grado?->name ?? '—' }}</span>
-                                                                        <span class="text-gray-600"> · </span>
-                                                                        <span>Secc {{ $secciones }}</span>
-                                                                    </span>
-                                                                @empty
-                                                                    <span class="block text-[9px] text-gray-600">Sin pensum activo</span>
-                                                                @endforelse
-                                                                @if($hiddenCount > 0)
-                                                                    <span class="block text-[9px] text-gray-600">+{{ $hiddenCount }} más</span>
-                                                                @endif
-                                                                @if($pensumCount > 0 && $pensumSummary)
-                                                                    <span class="block text-[9px] text-gray-600 truncate">
-                                                                        Grados: <span class="text-gray-400">{{ $pensumSummary }}</span> · Secc: <span class="text-gray-400">{{ $seccionSummary }}</span>
-                                                                    </span>
-                                                                @endif
-                                                            </span>
-                                                        </button>
-
-                                                        {{-- Tooltip: detalle completo de la asociación (#8) --}}
-                                                        <div x-show="showTip" x-cloak
-                                                             class="fixed z-[80] w-72 bg-gray-800 border border-white/15 rounded-xl shadow-2xl p-3 pointer-events-none"
-                                                             :style="`top:${top}px; left:${left}px; transform: translate(-50%, calc(-100% - 8px));`">
-                                                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $asignatura->name }}</p>
-                                                            @forelse($tipLines as $line)
-                                                                <p class="text-[11px] text-gray-300 leading-relaxed truncate">{{ $line }}</p>
-                                                            @empty
-                                                                <p class="text-[11px] text-gray-500">Sin pensum activo</p>
-                                                            @endforelse
-                                                        </div>
-                                                    </div>
-                                        @empty
-                                        <div class="py-10 text-center">
-                                            <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                            </svg>
-                                            <p class="text-gray-500 text-xs">
-                                                {{ $wizardSearch
-                                                    ? 'No hay asignaturas que coincidan con la búsqueda "' . $wizardSearch . '".'
-                                                    : 'No hay asignaturas disponibles para adscribir.' }}
-                                            </p>
-                                        </div>
-                                    @endforelse
-                                    </div>
-                                </div>
-
-                                {{-- Cargar más (#4) --}}
-                                @if($this->remainingSubjectsCount > 0)
-                                    <div class="flex justify-center mt-3">
-                                        <button type="button" wire:click="loadMore"
-                                            class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/10 transition-all duration-200">
-                                            Cargar más ({{ $this->remainingSubjectsCount }} restantes)
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                @endif
-
-                                {{-- Acciones paso 2 --}}
-                                <div class="flex items-center justify-between mt-3">
-                                    <button type="button" wire:click="prevStepWizard"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all duration-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                        </svg>
-                                        Atrás
-                                    </button>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-[11px] text-gray-500">
-                                            <strong class="text-emerald-400">{{ count($selectedSubjects) }}</strong> seleccionada(s) de <strong class="text-gray-300">{{ $this->availableSubjects->count() }}</strong> disponible(s)
-                                        </span>
-                                        <button type="button" wire:click="assignSelectedSubjects" wire:loading.attr="disabled"
-                                            class="inline-flex items-center gap-1.5 px-4 py-1.5 text-[11px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-200 {{ empty($selectedSubjects) ? 'opacity-40 cursor-not-allowed' : '' }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                            </svg>
-                                            Adscribir Seleccionadas ({{ count($selectedSubjects) }})
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                            @include('livewire.planning.area-conocimiento.partials.wizard-select', [
+                                'primaryAction' => 'assignSelectedSubjects',
+                                'primaryLabel' => 'Adscribir Seleccionadas',
+                                'showDataBack' => false,
+                            ])
                         @endif
                         @else
                             {{-- Vista: Adscritas (gestión + reordenar por arrastre) --}}
@@ -832,14 +652,21 @@
                                          $wire.reorderCampo(ids);
                                      }
                                  }">
-                                <div class="flex items-center justify-between px-4 py-2 border-b border-white/5">
-                                    <h4 class="text-xs font-bold text-gray-300 flex items-center gap-2">
+                                <div class="flex items-center justify-between gap-3 px-4 py-2 border-b border-white/5">
+                                    <h4 class="text-xs font-bold text-gray-300 flex items-center gap-2 shrink-0">
                                         <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                                         </svg>
                                         Asignaturas Adscritas
                                     </h4>
-                                    <span class="text-[10px] text-gray-500 flex items-center gap-1">
+                                    <div class="relative w-56 max-w-[50%]">
+                                        <svg class="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        <input type="text" wire:model.live.debounce.300ms="campoSearch" placeholder="Buscar adscrita..."
+                                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg pl-8 pr-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                                    </div>
+                                    <span class="text-[10px] text-gray-500 hidden sm:flex items-center gap-1 shrink-0">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h8m-8 6h8M5 5v14M19 5v14"></path>
                                         </svg>
@@ -854,6 +681,7 @@
                                                 <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
                                                 <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Asignatura</th>
                                                 <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden sm:table-cell">Código</th>
+                                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Pensum</th>
                                                 <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Observaciones</th>
                                                 <th class="text-right px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24">Acción</th>
                                             </tr>
@@ -877,6 +705,13 @@
                                                     </td>
                                                     <td class="px-4 py-2 hidden sm:table-cell">
                                                         <span class="text-xs font-mono bg-white/5 text-gray-400 px-1.5 py-0.5 rounded-md">{{ $campo->asignatura?->code ?? '—' }}</span>
+                                                    </td>
+                                                    <td class="px-4 py-2 hidden lg:table-cell">
+                                                        @if($campo->pensum)
+                                                            <span class="text-xs text-gray-300" title="{{ $campo->pensum->pestudio?->name ?? '' }}">{{ $campo->pensum->grado?->code ?? $campo->pensum->grado?->name ?? '—' }}</span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold leading-none bg-amber-500/10 text-amber-300 border border-amber-500/20">Sin pensum</span>
+                                                        @endif
                                                     </td>
                                                     <td class="px-4 py-2 hidden md:table-cell">
                                                         <span class="text-xs text-gray-500">{{ $campo->observations ? \Illuminate\Support\Str::limit($campo->observations, 30) : '—' }}</span>
@@ -902,7 +737,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="px-4 py-10 text-center">
+                                                    <td colspan="7" class="px-4 py-10 text-center">
                                                         <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                                         </svg>
@@ -925,7 +760,7 @@
                                 </svg>
                                 Editar Adscripción
                             </h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Asignatura</label>
                                     <select wire:model="campo_asignatura_id" disabled
@@ -933,6 +768,16 @@
                                         <option value="">Seleccione...</option>
                                         @foreach($asignaturasList as $id => $name)
                                             <option value="{{ $id }}">{{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Pensum / Grado</label>
+                                    <select wire:model="campo_pensum_id"
+                                        class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                                        <option value="">Sin pensum</option>
+                                        @foreach($this->campoEditPensums as $pensum)
+                                            <option value="{{ $pensum->id }}">{{ ($pensum->pestudio?->code ?? $pensum->pestudio?->name ?? '?') }} · {{ $pensum->grado?->code ?? $pensum->grado?->name ?? '—' }}</option>
                                         @endforeach
                                     </select>
                                 </div>

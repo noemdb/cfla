@@ -5,6 +5,7 @@ namespace Tests\Feature\Planning;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Asignatura;
+use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
@@ -40,8 +41,8 @@ class PlanningDailyRemindersTest extends TestCase
     private const TARGET = '2099-01-01';
 
     /**
-     * Crea la cadena Pevaluacion → Pensum → Asignatura (con área del líder
-     * opcional) para colgar actividades.
+     * Crea la cadena Pevaluacion → Pensum → CampoConocimiento(pensum_id) →
+     * AreaConocimiento (con área del líder opcional) para colgar actividades.
      *
      * @return array{0: Pevaluacion, 1: Asignatura}
      */
@@ -57,6 +58,12 @@ class PlanningDailyRemindersTest extends TestCase
         $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
         $asignatura = Asignatura::factory()->create(['pestudio_id' => $pestudio->id]);
 
+        $pensum = Pensum::factory()->create([
+            'pestudio_id' => $pestudio->id,
+            'grado_id' => $grado->id,
+            'asignatura_id' => $asignatura->id,
+        ]);
+
         if ($leader) {
             $area = AreaConocimiento::create([
                 'leader_id' => $leader->id,
@@ -66,14 +73,14 @@ class PlanningDailyRemindersTest extends TestCase
                 'pestudio_id' => $pestudio->id,
                 'order' => 1,
             ]);
-            $asignatura->areasConocimiento()->attach($area->id);
+            CampoConocimiento::create([
+                'area_conocimiento_id' => $area->id,
+                'asignatura_id' => $asignatura->id,
+                'pensum_id' => $pensum->id,
+                'order' => 1,
+            ]);
         }
 
-        $pensum = Pensum::factory()->create([
-            'pestudio_id' => $pestudio->id,
-            'grado_id' => $grado->id,
-            'asignatura_id' => $asignatura->id,
-        ]);
         $lapso = Lapso::factory()->create();
 
         $profUser = User::factory()->create();

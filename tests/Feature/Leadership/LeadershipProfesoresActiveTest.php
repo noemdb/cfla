@@ -63,13 +63,14 @@ class LeadershipProfesoresActiveTest extends TestCase
             'leader_id' => $user->id, 'pestudio_id' => $pestudio->id,
             'name' => 'ÁREA LIDERADA', 'code' => 'AL',
         ]);
-        CampoConocimiento::create([
-            'area_conocimiento_id' => $area->id, 'asignatura_id' => $asignatura->id,
-        ]);
 
         $lapso = Lapso::factory()->create();
         $pensum = Pensum::factory()->create([
             'pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignatura->id,
+        ]);
+        CampoConocimiento::create([
+            'area_conocimiento_id' => $area->id, 'asignatura_id' => $asignatura->id,
+            'pensum_id' => $pensum->id,
         ]);
 
         $active = $this->makeProfesor('true');
