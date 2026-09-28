@@ -710,7 +710,7 @@ class IndexComponent extends Component
             'escolaridad',
             'programacion',
             'grupoEstable',
-        ]);
+        ])->withCount('diagAnswers');
 
         if ($this->search) {
             $query->whereHas('estudiant', function ($q) {

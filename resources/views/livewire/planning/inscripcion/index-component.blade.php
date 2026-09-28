@@ -178,6 +178,7 @@
                                 <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Plan</th>
                                 <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Tipo</th>
                                 <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden xl:table-cell">Escolaridad</th>
+                                <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Respuestas del diagnóstico registradas">Resp.</th>
                                 <th class="text-right px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
                             </tr>
                         </thead>
@@ -213,6 +214,12 @@
                                     <td class="px-4 py-2 text-sm text-gray-400 hidden xl:table-cell">
                                         {{ $inscripcion->escolaridad?->name ?? '—' }}
                                     </td>
+                                    <td class="px-4 py-2 text-center">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border {{ ($inscripcion->diag_answers_count ?? 0) > 0 ? 'bg-sky-500/12 text-sky-400 border-sky-500/20' : 'bg-gray-500/12 text-gray-500 border-white/5' }}"
+                                              title="Respuestas del diagnóstico registradas">
+                                            {{ $inscripcion->diag_answers_count ?? 0 }}
+                                        </span>
+                                    </td>
                                     <td class="px-5 py-2 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
                                             <button type="button" wire:click="viewStudent({{ $inscripcion->id }})"
@@ -242,7 +249,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-5 py-16 text-center">
+                                    <td colspan="10" class="px-5 py-16 text-center">
                                         <div>
                                             <svg class="w-14 h-14 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -297,6 +304,13 @@
                                                 {{ $inscripcion->tipo->name }}
                                             </span>
                                         @endif
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/12 text-sky-400 border border-sky-500/20"
+                                              title="Respuestas del diagnóstico registradas">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                            </svg>
+                                            {{ $inscripcion->diag_answers_count ?? 0 }} resp.
+                                        </span>
                                     </div>
                                 </div>
                             </div>

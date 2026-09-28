@@ -10,6 +10,7 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Programacion;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Academy\Tinscripcion;
+use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Learner\Estudiant;
 use App\Models\app\Learner\Representant;
 use App\Models\User;
@@ -515,6 +516,39 @@ class InscripcionsTest extends TestCase
             'escolaridad_id' => $escolaridadNew->id,
             'programacion_id' => $programacionNew->id,
         ]);
+    }
+
+    /** @test */
+    public function it_shows_the_diagnostic_answers_count_in_the_listing(): void
+    {
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        $estudiant = $this->createMinimalEstudiant();
+        $tipo = Tinscripcion::factory()->create();
+        $escolaridad = Escolaridad::factory()->create();
+        $programacion = Programacion::factory()->create();
+        $grupo = GrupoEstable::factory()->create();
+
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccion->id,
+            'tipo_id' => $tipo->id,
+            'escolaridad_id' => $escolaridad->id,
+            'programacion_id' => $programacion->id,
+            'grupo_estable_id' => $grupo->id,
+        ]);
+
+        for ($i = 0; $i < 3; $i++) {
+            DiagAnswer::create(['estudiant_id' => $estudiant->id]);
+        }
+
+        $this->assertSame(3, $estudiant->fresh()->inscripcion->diagAnswers()->count());
+
+        Livewire::actingAs($this->user)
+            ->test(\App\Livewire\Planning\Inscripcion\IndexComponent::class)
+            ->assertSee('Resp.')
+            ->assertSee('3 resp.');
     }
 
     /** @test */

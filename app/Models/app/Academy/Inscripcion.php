@@ -2,6 +2,7 @@
 
 namespace App\Models\app\Academy;
 
+use App\Models\app\Instrument\DiagAnswer;
 use App\Models\app\Learner\Estudiant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -60,5 +61,14 @@ class Inscripcion extends Model implements \App\Contracts\Auditable
     public function grupoEstable()
     {
         return $this->belongsTo(GrupoEstable::class, 'grupo_estable_id');
+    }
+
+    /**
+     * Respuestas del diagnóstico registradas por el estudiante
+     * (DiagAnswer comparte la clave estudiant_id).
+     */
+    public function diagAnswers()
+    {
+        return $this->hasMany(DiagAnswer::class, 'estudiant_id', 'estudiant_id');
     }
 }
