@@ -382,7 +382,7 @@
                                                                         <span class="mt-0.5 w-1.5 h-1.5 rounded-full bg-gray-600 shrink-0" title="Inactiva"></span>
                                                                     @endif
                                                                     <div class="min-w-0">
-                                                                        <p class="text-xs {{ $q->activo ? 'text-white' : 'text-gray-400' }} leading-relaxed line-clamp-2" title="{{ $q->pregunta }}">{{ $q->pregunta }}</p>
+                                                                        <x-diag.math-cell :content="$q->pregunta" uid="plan-{{ $g->key }}-{{ $q->id }}" title="{{ $q->pregunta }}" class="text-xs {{ $q->activo ? 'text-white' : 'text-gray-400' }} leading-relaxed" />
                                                                         <span class="text-[10px] {{ $q->activo ? 'text-gray-400' : 'text-gray-600' }}">
                                                                             @if($q->competency) {{ $q->competency->name }} @endif
                                                                             @if($q->indicator) · {{ $q->indicator->name }} @endif

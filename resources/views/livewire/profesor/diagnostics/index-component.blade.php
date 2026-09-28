@@ -11,51 +11,39 @@
 
     {{-- Main card --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
-        {{-- Header: Área de Formación Selector --}}
+        {{-- Header --}}
         <div class="border-b border-white/5 px-4 sm:px-6 py-2">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 002-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                     </svg>
                     {{ $profesor->full_name ?? 'Profesor' }}
                 </h3>
-                @if(!empty($cargaPensums) && $cargaPensums->isNotEmpty())
-                    <div class="flex items-center gap-2">
-                        @if($lapso)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-gray-400 border border-white/10">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                {{ $lapso->name }}
-                            </span>
-                        @endif
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación:</span>
-                        <x-select placeholder="Todas las áreas" wire:model.live="selectedPensumId" searchable class="min-w-[200px]">
-                            @foreach($cargaPensums as $pensum)
-                                <x-select.option :label="$pensum->full_name ?? $pensum->asignatura_name" :value="$pensum->id" />
-                            @endforeach
-                        </x-select>
-                    </div>
-                @endif
             </div>
         </div>
 
         {{-- Filters Section --}}
-        <div class="border-b border-white/5 px-4 sm:px-6 py-2">
-            <div class="flex flex-wrap items-center gap-3">
-                {{-- Diagnóstico filter --}}
-                <div class="relative">
-                    <x-select placeholder="Todos los Diagnósticos" wire:model.live="filterDiagMainId" searchable class="min-w-[180px]">
-                        @foreach($diagMains as $main)
-                            <x-select.option :label="$main->name" :value="$main->id" />
-                        @endforeach
-                    </x-select>
-                </div>
+        <style>
+            /* El popover del x-select (sm:z-10) quedaba bajo tablas/tarjetas.
+               Se eleva dentro del stacking context de esta sección (relative z-30). */
+            .diag-filters div[x-ref="popover"] { z-index: 60 !important; }
+        </style>
+        <div class="diag-filters relative z-30 border-b border-white/5 px-4 sm:px-6 py-2 space-y-3">
+            {{-- Diagnóstico filter — una sola línea --}}
+            <div class="relative">
+                <x-select placeholder="Todos los Diagnósticos" wire:model.live="filterDiagMainId" searchable>
+                    @foreach($diagMains as $main)
+                        <x-select.option :label="$main->name" :value="$main->id" />
+                    @endforeach
+                </x-select>
+            </div>
 
+            {{-- Resto de filtros a todo lo ancho --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {{-- Grado filter --}}
                 <div class="relative">
-                    <x-select placeholder="Todos los grados" wire:model.live="filterGradoId" searchable class="min-w-[150px]">
+                    <x-select placeholder="Todos los grados" wire:model.live="filterGradoId" searchable class="w-full">
                         @foreach($list_grados as $grado)
                             <x-select.option :label="$grado->name" :value="$grado->id" />
                         @endforeach
@@ -64,7 +52,7 @@
 
                 {{-- Sección filter --}}
                 <div class="relative">
-                    <x-select placeholder="Todas las secciones" wire:model.live="filterSeccionId" searchable class="min-w-[150px]"
+                    <x-select placeholder="Todas las secciones" wire:model.live="filterSeccionId" searchable class="w-full"
                         :disabled="empty($list_secciones)">
                         @if(!empty($list_secciones))
                             @foreach($list_secciones as $seccion)
@@ -73,6 +61,17 @@
                         @endif
                     </x-select>
                 </div>
+
+                {{-- Área de Formación --}}
+                @if(!empty($cargaPensums) && $cargaPensums->isNotEmpty())
+                    <div class="relative">
+                        <x-select placeholder="Todas las áreas" wire:model.live="selectedPensumId" searchable class="w-full">
+                            @foreach($cargaPensums as $pensum)
+                                <x-select.option :label="$pensum->full_name ?? $pensum->asignatura_name" :value="$pensum->id" />
+                            @endforeach
+                        </x-select>
+                    </div>
+                @endif
             </div>
         </div>
 

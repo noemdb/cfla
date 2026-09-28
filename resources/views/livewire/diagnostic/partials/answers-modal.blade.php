@@ -80,7 +80,7 @@
                                 {{ $index + 1 }}
                             </span>
                             <div class="flex-1 min-w-0">
-                                <p class="text-white font-medium leading-relaxed">{{ $question->pregunta }}</p>
+                                <x-diag.math-cell :content="$question->pregunta" uid="am-{{ $question->id }}" class="text-white font-medium leading-relaxed" />
                                 <div class="flex flex-wrap items-center gap-2 mt-2">
                                     @if ($question->difficulty)
                                         <span
@@ -124,7 +124,7 @@
                                                     </svg>
                                                 @endif
                                             </span>
-                                            <span>{{ $option->opcion }}</span>
+                                            <x-diag.math-cell as="span" :content="$option->opcion" uid="am-{{ $question->id }}-o-{{ $option->id }}" />
                                             @if ($isSelected)
                                                 <span
                                                     class="ml-auto text-[10px] font-bold uppercase tracking-wide text-emerald-300">

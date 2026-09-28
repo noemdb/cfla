@@ -106,40 +106,39 @@
 
                 @elseif($wizardStep === 2)
                     {{-- Step 2: Contenido --}}
-                    <div>
-                        <div class="flex items-center justify-between gap-3 mb-2">
-                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400">Pregunta</label>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button type="button" wire:click="tagQuestionMath"
-                                    wire:loading.attr="disabled"
-                                    wire:target="tagQuestionMath"
-                                    title="Detectar expresiones matemáticas y convertirlas a LaTeX (KaTeX)"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
-                                    <svg wire:loading.remove wire:target="tagQuestionMath" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM8 12h8m-4-4v8"></path>
-                                    </svg>
-                                    <svg wire:loading wire:target="tagQuestionMath" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                    </svg>
-                                    <span wire:loading.remove wire:target="tagQuestionMath">Etiquetar Not. Mat.</span>
-                                    <span wire:loading wire:target="tagQuestionMath">Etiquetando…</span>
-                                </button>
-                                <button type="button" wire:click="generateQuestionWithAi"
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400">Pregunta</label>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" wire:click="tagQuestionMath"
                                 wire:loading.attr="disabled"
-                                wire:target="generateQuestionWithAi"
-                                title="Generar la pregunta con IA usando las actividades y referentes del área"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
-                                <svg wire:loading.remove wire:target="generateQuestionWithAi" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                wire:target="tagQuestionMath"
+                                title="Detectar expresiones matemáticas y convertirlas a LaTeX (KaTeX)"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
+                                <svg wire:loading.remove wire:target="tagQuestionMath" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM8 12h8m-4-4v8"></path>
                                 </svg>
-                                <svg wire:loading wire:target="generateQuestionWithAi" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <svg wire:loading wire:target="tagQuestionMath" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
-                                <span wire:loading.remove wire:target="generateQuestionWithAi">Generar con IA</span>
-                                <span wire:loading wire:target="generateQuestionWithAi">Generando…</span>
+                                <span wire:loading.remove wire:target="tagQuestionMath">Etiquetar Not. Mat.</span>
+                                <span wire:loading wire:target="tagQuestionMath">Etiquetando…</span>
                             </button>
+                            <button type="button" wire:click="generateQuestionWithAi"
+                            wire:loading.attr="disabled"
+                            wire:target="generateQuestionWithAi"
+                            title="Generar la pregunta con IA usando las actividades y referentes del área"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <svg wire:loading.remove wire:target="generateQuestionWithAi" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <svg wire:loading wire:target="generateQuestionWithAi" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span wire:loading.remove wire:target="generateQuestionWithAi">Generar con IA</span>
+                            <span wire:loading wire:target="generateQuestionWithAi">Generando…</span>
+                        </button>
                         </div>
                         <textarea wire:model="pregunta" rows="3"
                             class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
@@ -258,13 +257,13 @@
                     @if($pregunta)
                         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                             <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Vista previa</h4>
-                            <x-lms.math-text :content="$pregunta" class="text-sm text-gray-200 mb-2" />
+                            <x-diag.math-cell :content="$pregunta" uid="pq-preview" class="text-sm text-gray-200 mb-2" />
                             @if($tipo_pregunta === 'multiple')
                                 <div class="space-y-1.5">
                                     @foreach($options as $index => $option)
                                         <div class="flex items-center gap-2 p-2 rounded-lg {{ $correct_option_index === $index ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-gray-800/30 border border-white/5' }}">
                                             <span class="w-4 h-4 rounded-full border-2 {{ $correct_option_index === $index ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/10' }}"></span>
-                                            <x-lms.math-text as="span" :content="$option['opcion'] ?? 'Opción vacía'" class="text-xs {{ $correct_option_index === $index ? 'text-emerald-300' : 'text-gray-400' }}" />
+                                            <x-diag.math-cell as="span" :content="$option['opcion'] ?? 'Opción vacía'" uid="pq-preview-o-{{ $index }}" class="text-xs {{ $correct_option_index === $index ? 'text-emerald-300' : 'text-gray-400' }}" />
                                             @if($correct_option_index === $index)
                                                 <svg class="w-3.5 h-3.5 text-emerald-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>

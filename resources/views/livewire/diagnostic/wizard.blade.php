@@ -95,7 +95,7 @@
                         </div>
                         <div class="flex-1">
                             <h3 class="text-lg font-medium text-white mb-2">
-                                {{ $currentQuestion->pregunta }}
+                                <x-diag.math-cell as="span" :content="$currentQuestion->pregunta" uid="qw-{{ $currentQuestion->id }}" />
                             </h3>
 
                             <!-- Metadatos de la pregunta -->
@@ -125,7 +125,7 @@
                                         {{ $isReviewMode || $showAnsweredQuestions ? 'opacity-50 cursor-not-allowed' : '' }}">
                                     <span
                                         class="ml-3 text-white {{ ($isReviewMode || $showAnsweredQuestions) && $selectedAnswer === $option->opcion ? 'font-semibold text-green-400' : '' }}">
-                                        {{ $option->opcion }}
+                                        <x-diag.math-cell as="span" :content="$option->opcion" uid="qw-{{ $currentQuestion->id }}-o-{{ $option->id }}" />
                                     </span>
                                 </label>
                             @endforeach

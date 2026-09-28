@@ -271,13 +271,21 @@ Alpine.data('mathContent', () => ({
         if (!window.renderMathInElement) return;
 
         try {
-            renderMathInElement(target, {
-                delimiters: [
+            var delimMode = this.$el.getAttribute('data-math-delimiters') || 'all';
+            var delims = delimMode === 'safe'
+                ? [
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '$$', right: '$$', display: true },
+                    { left: '\\[', right: '\\]', display: true },
+                ]
+                : [
                     { left: '\\(', right: '\\)', display: false },
                     { left: '$$', right: '$$', display: true },
                     { left: '\\[', right: '\\]', display: true },
                     { left: '$', right: '$', display: false },
-                ],
+                ];
+            renderMathInElement(target, {
+                delimiters: delims,
                 throwOnError: false,
             });
         } catch (e) {
@@ -704,13 +712,21 @@ Alpine.data('mathContent', () => ({
         if (!window.renderMathInElement) return;
 
         try {
-            renderMathInElement(target, {
-                delimiters: [
+            var delimMode2 = this.$el.getAttribute('data-math-delimiters') || 'all';
+            var delims2 = delimMode2 === 'safe'
+                ? [
+                    {left:'\\(', right:'\\)', display:false},
+                    {left:'$$',   right:'$$',   display:true},
+                    {left:'\\[',  right:'\\]',  display:true},
+                ]
+                : [
                     {left:'\\(', right:'\\)', display:false},
                     {left:'$$',   right:'$$',   display:true},
                     {left:'\\[',  right:'\\]',  display:true},
                     {left:'$',    right:'$',    display:false},
-                ],
+                ];
+            renderMathInElement(target, {
+                delimiters: delims2,
                 throwOnError: false,
             });
         } catch (e) {

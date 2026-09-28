@@ -26,9 +26,7 @@
 @endphp
 
 <div class="mt-2 text-left">
-    <p class="mb-3 text-[13px] font-semibold leading-snug text-secondary-800 dark:text-secondary-200">
-        {{ $question->pregunta }}
-    </p>
+    <x-diag.math-cell :content="$question->pregunta" uid="qd-{{ $question->id }}" class="mb-3 text-[13px] font-semibold leading-snug text-secondary-800 dark:text-secondary-200" />
 
     <div class="mb-3 rounded-lg bg-secondary-100/70 p-3 dark:bg-secondary-900/40">
         @foreach ($rows as $label => $value)
@@ -40,13 +38,22 @@
     </div>
 
     @if ($question->tipo_pregunta === 'multiple' && $question->options->isNotEmpty())
-        <ul class="text-left">
+        <p class="mb-2 text-[10px] font-bold uppercase tracking-widest text-secondary-500">Opciones ({{ $question->options->count() }})</p>
+        <ul class="space-y-2 text-left">
             @foreach ($question->options->values() as $index => $option)
-                <li class="flex items-start gap-2 py-1 text-[12px] text-secondary-700 dark:text-secondary-300">
-                    <span class="font-bold">{{ chr(65 + $index) }}.</span>
-                    <span class="flex-1">{{ $option->opcion }}</span>
-                    @if ((int) $option->valor > 0)
-                        <span class="ml-2 shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Correcta</span>
+                @php($isCorrect = (int) $option->valor > 0)
+                <li class="flex items-center gap-3 rounded-lg border px-3 py-2 text-[12px] transition-colors {{ $isCorrect
+                        ? 'border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.25)]'
+                        : 'border-secondary-200/60 bg-white/40 dark:border-white/5 dark:bg-white/[0.02]' }}">
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold {{ $isCorrect
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-secondary-200 text-secondary-600 dark:bg-white/10 dark:text-secondary-300' }}">{{ chr(65 + $index) }}</span>
+                    <x-diag.math-cell as="span" :content="$option->opcion" uid="qd-{{ $question->id }}-o-{{ $index }}" class="flex-1 {{ $isCorrect ? 'font-semibold text-secondary-800 dark:text-secondary-100' : 'text-secondary-600 dark:text-secondary-300' }}" />
+                    @if ($isCorrect)
+                        <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                            Correcta
+                        </span>
                     @endif
                 </li>
             @endforeach

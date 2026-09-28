@@ -86,7 +86,7 @@ class DiagnosticQuestionReview extends Component
 
     public bool $taggingMath = false;
 
-    public int $paginate = 15;
+    public int $paginate = 10;
 
     protected $queryString = [
         'search' => ['except' => ''],

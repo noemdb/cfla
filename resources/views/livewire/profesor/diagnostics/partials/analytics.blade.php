@@ -266,7 +266,7 @@
                                 @forelse($selectedAreaQ['questions'] as $qr)
                                     <tr class="border-b border-white/5 text-xs hover:bg-white/[0.02] transition-colors">
                                         <td class="py-2 px-3 text-gray-300 max-w-md">
-                                            <span title="{{ $qr['pregunta'] }}">{{ \Illuminate\Support\Str::limit($qr['pregunta'], 120) }}</span>
+                                            <x-diag.math-cell :content="$qr['pregunta']" uid="aq-{{ $qr['id'] ?? md5($qr['pregunta']) }}" title="{{ $qr['pregunta'] }}" />
                                         </td>
                                         <td class="py-2 px-3 text-center">
                                             <span class="text-[10px] text-gray-400">{{ $qr['tipo'] === 'multiple' ? 'Múltiple' : ($qr['tipo'] === 'open' ? 'Abierta' : 'Escala') }}</span>

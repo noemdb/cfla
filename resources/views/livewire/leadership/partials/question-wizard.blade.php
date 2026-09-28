@@ -227,13 +227,13 @@
                     @if($pregunta)
                         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                             <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Vista previa</h4>
-                            <x-lms.math-text :content="$pregunta" class="text-sm text-gray-200 mb-2" />
+                            <x-diag.math-cell :content="$pregunta" uid="wq-preview" class="text-sm text-gray-200 mb-2" />
                             @if($tipo_pregunta === 'multiple')
                                 <div class="space-y-1.5">
                                     @foreach($options as $index => $option)
                                         <div class="flex items-center gap-2 p-2 rounded-lg {{ $correct_option_index === $index ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-gray-800/30 border border-white/5' }}">
                                             <span class="w-4 h-4 rounded-full border-2 {{ $correct_option_index === $index ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/10' }}"></span>
-                                            <x-lms.math-text as="span" :content="$option['opcion'] ?? 'Opción vacía'" class="text-xs {{ $correct_option_index === $index ? 'text-emerald-300' : 'text-gray-400' }}" />
+                                            <x-diag.math-cell as="span" :content="$option['opcion'] ?? 'Opción vacía'" uid="wq-preview-o-{{ $index }}" class="text-xs {{ $correct_option_index === $index ? 'text-emerald-300' : 'text-gray-400' }}" />
                                         </div>
                                     @endforeach
                                 </div>

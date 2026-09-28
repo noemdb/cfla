@@ -1458,6 +1458,7 @@ PROMPT;
         $cargaPensums = $this->cargaPevaluacions
             ->map(fn ($pevaluacion) => $pevaluacion->pensum)
             ->filter()
+            ->filter(fn ($pensum) => $this->pensumIsActiveChain($pensum))
             ->unique('id')
             ->sortBy(fn ($pensum) => $pensum->asignatura?->name ?? $pensum->full_name)
             ->values();
@@ -1774,12 +1775,13 @@ PROMPT;
                 $withOption = (int) ($optionByQuestion[$qq->id] ?? 0);
                 $correct = (int) ($correctByQuestion[$qq->id] ?? 0);
                 $rows[] = [
+                    'id' => $qq->id,
                     'pregunta' => $qq->pregunta,
                     'tipo' => $qq->tipo_pregunta,
-                    'total' => $total,
-                    'correct' => $correct,
-                    'precision' => ($qq->tipo_pregunta === 'multiple' && $withOption > 0)
-                        ? round((100 * $correct) / $withOption, 1)
+                    'total' => $t,
+                    'correct' => $c,
+                    'precision' => ($qq->tipo_pregunta === 'multiple' && $o > 0)
+                        ? round((100 * $c) / $o, 1)
                         : null,
                 ];
             }

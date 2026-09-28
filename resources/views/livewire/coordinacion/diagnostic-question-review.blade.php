@@ -312,8 +312,7 @@
                     @forelse($questions as $q)
                         <tr class="hover:bg-white/[0.02] transition-colors">
                             <td class="px-4 py-3">
-                                @php $displayPregunta = \Illuminate\Support\Str::limit($q->pregunta, 130); @endphp
-                                <p class="text-white font-medium line-clamp-2 leading-snug" title="{{ $q->pregunta }}">{!! $search !== '' ? str_ireplace(e($search), '<mark class="bg-amber-500/30 text-amber-200 px-0.5 rounded">'.e($search).'</mark>', e($displayPregunta)) : e($displayPregunta) !!}</p>
+                                <x-diag.math-cell :content="$q->pregunta" uid="q-{{ $q->id }}" title="{{ $q->pregunta }}" class="text-white font-medium leading-snug" />
                                 <div class="flex flex-wrap items-center gap-1.5 mt-1">
                                     <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold border {{ $q->tipo_pregunta === 'multiple' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20' }}">{{ $q->tipo_pregunta }}</span>
                                     <span class="text-[10px] text-gray-500">orden {{ $q->orden ?? '—' }} · {{ $q->difficulty ?? '—' }} · peso {{ $q->weighing ?? '—' }}</span>
@@ -406,7 +405,7 @@
                 <div class="p-5 space-y-4 overflow-y-auto">
                     {{-- Pregunta --}}
                     <div class="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                        <p class="text-sm text-white leading-relaxed">{{ $selected->pregunta }}</p>
+                        <x-diag.math-cell :content="$selected->pregunta" uid="detail-{{ $selected->id }}" class="text-sm text-white leading-relaxed" />
                         <div class="flex flex-wrap items-center gap-1.5 mt-3">
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-cyan-500/10 text-cyan-400 border-cyan-500/20">{{ $tipoLabel }}</span>
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $selected->activo ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-gray-500/10 text-gray-400 border-white/10' }}">{{ $selected->activo ? 'Activa' : 'Inactiva' }}</span>
@@ -451,7 +450,7 @@
                         @forelse($selected->options->sortBy('orden') as $opt)
                             <div class="flex items-start gap-2 py-2 border-b border-white/5 last:border-0 {{ $optCorrect($opt) ? 'bg-emerald-500/[0.04] rounded-lg px-2' : '' }}">
                                 <span class="w-5 h-5 rounded-full border flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 {{ $optCorrect($opt) ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-gray-500 border-white/10' }}">{{ chr(65 + $loop->index) }}</span>
-                                <span class="text-xs text-gray-200 flex-1">{{ $opt->opcion }}</span>
+                                <x-diag.math-cell as="span" :content="$opt->opcion" uid="detail-{{ $selected->id }}-o-{{ $loop->index }}" class="text-xs text-gray-200 flex-1" />
                                 @if($optCorrect($opt))<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Correcta</span>@endif
                             </div>
                         @empty

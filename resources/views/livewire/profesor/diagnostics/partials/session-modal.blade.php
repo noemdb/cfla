@@ -101,10 +101,10 @@
                                         <tr class="border-b border-white/5">
                                             <td class="py-2 px-3 text-xs text-gray-500">{{ $loop->iteration }}</td>
                                             <td class="py-2 px-3">
-                                                <p class="text-xs text-gray-300 max-w-[250px] truncate">{{ $answer->question?->pregunta ?? '—' }}</p>
+                                                <x-diag.math-cell :content="$answer->question?->pregunta ?? '—'" uid="ans-{{ $answer->id }}-q" class="text-xs text-gray-300 max-w-[250px] leading-snug" />
                                             </td>
                                             <td class="py-2 px-3">
-                                                <p class="text-xs text-gray-400 max-w-[200px] truncate">{{ $answer->respuesta_texto ?? '—' }}</p>
+                                                <x-diag.math-cell :content="$answer->respuesta_texto ?? '—'" uid="ans-{{ $answer->id }}-a" class="text-xs text-gray-400 max-w-[200px] leading-snug" />
                                             </td>
                                             <td class="py-2 px-3 text-center">
                                                 @if($answer->is_correct)

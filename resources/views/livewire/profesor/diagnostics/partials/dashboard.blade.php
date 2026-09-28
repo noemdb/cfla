@@ -127,7 +127,7 @@
                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase {{ $question->tipo_pregunta === 'multiple' ? 'bg-blue-500/10 text-blue-400' : ($question->tipo_pregunta === 'open' ? 'bg-amber-500/10 text-amber-400' : 'bg-green-500/10 text-green-400') }}">
                             {{ $question->tipo_pregunta === 'multiple' ? 'Múltiple' : ($question->tipo_pregunta === 'open' ? 'Abierta' : 'Escala') }}
                         </span>
-                        <span class="text-xs text-gray-400 truncate flex-1">{{ Str::limit($question->pregunta, 60) }}</span>
+                        <x-diag.math-cell :content="$question->pregunta" uid="dash-{{ $question->id }}" title="{{ $question->pregunta }}" class="text-xs text-gray-400 flex-1 leading-snug" />
                     </div>
                 @empty
                     <p class="text-xs text-gray-600 italic py-2">No hay preguntas recientes.</p>

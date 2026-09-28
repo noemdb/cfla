@@ -1,6 +1,8 @@
 @props([
     'content' => '',
     'as' => 'div',
+    // 'all': \( \) $$ \[ \] $ (defecto) · 'safe': sin $ simple (precios "Bs. $5" no disparan render)
+    'delimiters' => 'all',
 ])
 
 {{-- Auto‑registro del Alpine component y bootstrap de KaTeX —        --}}
@@ -115,13 +117,21 @@
                         if (!window.renderMathInElement) return;
 
                         try {
-                            renderMathInElement(target, {
-                                delimiters: [
+                            var delimMode = this.$el.getAttribute('data-math-delimiters') || 'all';
+                            var delims = delimMode === 'safe'
+                                ? [
+                                    {left:'\\(', right:'\\)', display:false},
+                                    {left:'$$',   right:'$$',   display:true},
+                                    {left:'\\[',  right:'\\]',  display:true},
+                                ]
+                                : [
                                     {left:'\\(', right:'\\)', display:false},
                                     {left:'$$',   right:'$$',   display:true},
                                     {left:'\\[',  right:'\\]',  display:true},
                                     {left:'$',    right:'$',    display:false},
-                                ],
+                                ];
+                            renderMathInElement(target, {
+                                delimiters: delims,
                                 throwOnError: false,
                             });
                         } catch (e) {
@@ -141,6 +151,7 @@
 <{{ $as }}
     x-data="mathContent()"
     data-math-content="{{ $content }}"
+    data-math-delimiters="{{ $delimiters === 'safe' ? 'safe' : 'all' }}"
     {{ $attributes }}
 >
     <div wire:ignore>
