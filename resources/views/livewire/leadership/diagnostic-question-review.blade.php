@@ -324,7 +324,17 @@
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="px-4 py-3 border-b border-white/5">
             <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar <span class="normal-case font-normal text-gray-600">( / )</span> @if($search !== '')<span class="ml-1 text-amber-400">{{ $questions->total() }} resultados</span>@endif</label>
-            <input type="text" x-ref="searchInput" wire:model.live.debounce.300ms="search" placeholder="Texto de la pregunta..." class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none placeholder:text-gray-600">
+            <div class="flex items-center gap-2">
+                <input type="text" x-ref="searchInput" wire:model.live.debounce.300ms="search" placeholder="Texto de la pregunta..." class="flex-1 min-w-0 min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 outline-none placeholder:text-gray-600">
+                <button type="button" wire:click="openCreateQuestionModal"
+                    title="Registrar pregunta en tus áreas asignadas"
+                    class="inline-flex shrink-0 items-center gap-1.5 min-h-[44px] px-4 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    + Nueva
+                </button>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">

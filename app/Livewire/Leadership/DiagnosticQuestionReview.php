@@ -51,8 +51,10 @@ class DiagnosticQuestionReview extends Component
 
     public bool $enrichedLoaded = false;
 
-    // ─── Wizard de edición de pregunta ─────────────────────────────
+    // ─── Wizard de pregunta (edición + registro) ───────────────────
     public bool $showQuestionModal = false;
+
+    public bool $isCreatingQuestion = false;
 
     public int $wizardStep = 1;
 
@@ -198,11 +200,33 @@ class DiagnosticQuestionReview extends Component
         $this->selectedId = null;
     }
 
+    // ─── Wizard: registro de pregunta (solo pensums del ámbito) ───
+
+    public function openCreateQuestionModal(): void
+    {
+        $scopeIds = $this->activeLeadershipPensumIds();
+
+        if ($scopeIds->isEmpty()) {
+            $this->notification()->warning(
+                'Sin áreas asignadas',
+                'No tienes pensums activos en tu ámbito para registrar preguntas.'
+            );
+
+            return;
+        }
+
+        $this->resetForm();
+        $this->isCreatingQuestion = true;
+        $this->wizardStep = 1;
+        $this->showQuestionModal = true;
+    }
+
     // ─── Wizard: edición de pregunta (sin crear) ───────────────────
 
     public function openQuestionModal(int $id): void
     {
         $this->resetForm();
+        $this->isCreatingQuestion = false;
         $this->wizardStep = 1;
 
         $question = $this->scopedQuery()->with('options')->find($id);
@@ -336,37 +360,61 @@ class DiagnosticQuestionReview extends Component
 
     public function saveQuestion(): void
     {
-        if (! $this->editingQuestion) {
-            $this->notification()->error('Sin pregunta', 'No hay una pregunta en edición.');
-
-            return;
-        }
-
         $this->validateStep();
 
-        // Autorización: el área (pensum) debe pertenecer al scope del líder.
-        $service = new LeadershipService(Auth::user());
-        if (! Auth::user()->is_admin) {
-            $service->assertCanAccessPensum((int) $this->pensum_id);
+        if ($this->editingQuestion) {
+            // Autorización edición: el área (pensum) debe pertenecer al scope del líder.
+            $service = new LeadershipService(Auth::user());
+            if (! Auth::user()->is_admin) {
+                $service->assertCanAccessPensum((int) $this->pensum_id);
+            }
+        } elseif (! $this->activeLeadershipPensumIds()->contains((int) $this->pensum_id)) {
+            // Registro: el pensum debe estar en el ámbito activo.
+            // Aviso en vez de abort para no dejar el wizard en estado inconsistente.
+            $this->notification()->error(
+                'Área fuera de tu ámbito',
+                'Solo puedes registrar preguntas en pensums activos de tus áreas asignadas.'
+            );
+
+            return;
         }
 
         try {
             DB::beginTransaction();
 
-            $question = $this->editingQuestion;
-            $question->update([
-                'pregunta' => $this->pregunta,
-                'tipo_pregunta' => $this->tipo_pregunta,
-                'pensum_id' => $this->pensum_id,
-                'diag_main_id' => $this->diag_main_id ?: null,
-                'orden' => $this->orden,
-                'weighing' => $this->weighing,
-                'difficulty' => $this->difficulty,
-                'activo' => $this->activo,
-            ]);
+            if ($this->editingQuestion) {
+                $question = $this->editingQuestion;
+                $question->update([
+                    'pregunta' => $this->pregunta,
+                    'tipo_pregunta' => $this->tipo_pregunta,
+                    'pensum_id' => $this->pensum_id,
+                    'diag_main_id' => $this->diag_main_id ?: null,
+                    'orden' => $this->orden,
+                    'weighing' => $this->weighing,
+                    'difficulty' => $this->difficulty,
+                    'activo' => $this->activo,
+                ]);
+                $savedMessage = 'Pregunta actualizada';
+            } else {
+                $nextOrder = (int) (DiagQuestion::where('pensum_id', $this->pensum_id)->max('orden') ?? 0) + 1;
+
+                $question = DiagQuestion::create([
+                    'pregunta' => $this->pregunta,
+                    'tipo_pregunta' => $this->tipo_pregunta,
+                    'pensum_id' => $this->pensum_id,
+                    'diag_main_id' => $this->diag_main_id ?: null,
+                    'orden' => $this->orden ?: $nextOrder,
+                    'weighing' => $this->weighing,
+                    'difficulty' => $this->difficulty,
+                    'activo' => $this->activo,
+                ]);
+                $savedMessage = 'Pregunta registrada';
+            }
 
             if ($this->tipo_pregunta === 'multiple') {
-                $question->options()->delete();
+                if ($this->editingQuestion) {
+                    $question->options()->delete();
+                }
 
                 $optionsData = [];
                 foreach ($this->options as $index => $option) {
@@ -390,7 +438,7 @@ class DiagnosticQuestionReview extends Component
             DB::commit();
 
             $this->closeQuestionModal();
-            $this->notification()->success('Pregunta actualizada', 'La pregunta se ha guardado correctamente.');
+            $this->notification()->success($savedMessage, 'La pregunta se ha guardado correctamente.');
         } catch (\Throwable $e) {
             DB::rollBack();
             $this->notification()->error('Error', 'Ocurrió un error al guardar la pregunta: '.$e->getMessage());
@@ -400,6 +448,7 @@ class DiagnosticQuestionReview extends Component
     public function closeQuestionModal(): void
     {
         $this->showQuestionModal = false;
+        $this->isCreatingQuestion = false;
         $this->wizardStep = 1;
         $this->resetForm();
     }
@@ -475,6 +524,7 @@ class DiagnosticQuestionReview extends Component
     private function resetForm(): void
     {
         $this->editingQuestion = null;
+        $this->isCreatingQuestion = false;
         $this->pregunta = '';
         $this->tipo_pregunta = 'multiple';
         $this->orden = 1;
@@ -517,6 +567,27 @@ class DiagnosticQuestionReview extends Component
             ->map(fn ($id) => (int) $id)
             ->unique()
             ->values();
+    }
+
+    /**
+     * Pensums del ámbito del líder que además están activos
+     * (pensum.status_active = 1 y grado/pestudio.status_active = 'true').
+     * Misma regla que el render usa para facetas y preguntas.
+     */
+    private function activeLeadershipPensumIds(): \Illuminate\Support\Collection
+    {
+        $strictIds = $this->getStrictLeadershipPensumIds(Auth::user());
+        if ($strictIds->isEmpty()) {
+            return collect();
+        }
+
+        return $strictIds->intersect(
+            Pensum::whereIn('id', $strictIds)
+                ->where('status_active', 1)
+                ->whereHas('grado', fn ($q) => $q->where('status_active', 'true'))
+                ->whereHas('pestudio', fn ($q) => $q->where('status_active', 'true'))
+                ->pluck('id')->map(fn ($id) => (int) $id)
+        )->values();
     }
 
     private function assertCanReview(DiagQuestion $q): void
@@ -830,6 +901,11 @@ class DiagnosticQuestionReview extends Component
             ->whereIn('id', (clone $this->scopedQuery())->distinct()->pluck('pensum_id'))
             ->orderBy('pestudio_id')->orderBy('grado_id')->get();
 
+        // Pensums activos del ámbito — para el registro de preguntas.
+        $createPensums = Pensum::with(['asignatura', 'grado'])
+            ->whereIn('id', $this->activeLeadershipPensumIds())
+            ->orderBy('pestudio_id')->orderBy('grado_id')->get();
+
         $selected = null;
         if ($this->showDetail && $this->selectedId) {
             $selected = $this->scopedQuery()->with(['pensum.asignatura', 'pensum.grado', 'pensum.pestudio', 'competency', 'indicator', 'options', 'diagMain'])->find($this->selectedId);
@@ -843,6 +919,7 @@ class DiagnosticQuestionReview extends Component
             'gradoOptions' => $gradoOptions,
             'profesorOptions' => $profesorOptions,
             'wizardPensums' => $wizardPensums,
+            'createPensums' => $createPensums,
             'metrics' => $metrics,
             'tipos' => $tipos,
             'diagMains' => $diagMains,

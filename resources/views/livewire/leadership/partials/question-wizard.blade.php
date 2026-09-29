@@ -1,12 +1,12 @@
-{{-- Wizard de edición de pregunta de diagnóstico (solo modificar, no crear) --}}
-@if($showQuestionModal && $editingQuestion)
+{{-- Wizard de pregunta de diagnóstico (edición + registro en ámbito) --}}
+@if($showQuestionModal && ($editingQuestion || $isCreatingQuestion))
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeQuestionModal"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
             <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-2 flex items-center justify-between z-10">
                 <div>
-                    <h3 class="text-sm font-bold text-white">Editar Pregunta #{{ $editingQuestion->id }}</h3>
+                    <h3 class="text-sm font-bold text-white">{{ $isCreatingQuestion ? 'Nueva Pregunta' : 'Editar Pregunta #' . $editingQuestion->id }}</h3>
                     <p class="text-[11px] text-gray-500 mt-0.5">Paso {{ $wizardStep }} de 3</p>
                 </div>
                 <button wire:click="closeQuestionModal" class="min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
@@ -45,7 +45,7 @@
                         <select wire:model="pensum_id"
                             class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
                             <option value="">Seleccione un área</option>
-                            @foreach($wizardPensums as $pensum)
+                            @foreach(($isCreatingQuestion ? $createPensums : $wizardPensums) as $pensum)
                                 <option value="{{ $pensum->id }}">{{ $pensum->asignatura?->name ?? $pensum->full_name }} — {{ $pensum->grado?->name }}</option>
                             @endforeach
                         </select>
@@ -272,7 +272,7 @@
                     @else
                         <button wire:click="saveQuestion" wire:loading.attr="disabled"
                             class="px-6 py-2 rounded-lg text-xs font-bold bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200 disabled:opacity-50">
-                            <span wire:loading.remove wire:target="saveQuestion">Guardar Cambios</span>
+                            <span wire:loading.remove wire:target="saveQuestion">{{ $isCreatingQuestion ? 'Crear Pregunta' : 'Guardar Cambios' }}</span>
                             <span wire:loading wire:target="saveQuestion">Guardando...</span>
                         </button>
                     @endif
