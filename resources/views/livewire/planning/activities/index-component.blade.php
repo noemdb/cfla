@@ -1257,6 +1257,11 @@
                                 <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
                             @endforeach
                         </x-select>
+                        <x-select wire:model.live="copyLapsoId" placeholder="Momento: todos" searchable clearable>
+                            @foreach($copyLapsoOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
                     </div>
                     <x-input wire:model.live.debounce.300ms="copyFromSearch" placeholder="Buscar por materia, profesor, sección o ID..." />
                     <div class="mt-2">
@@ -1285,6 +1290,11 @@
                         </x-select>
                         <x-select wire:model.live="copyToGradoId" placeholder="Grado/Año: todos" searchable clearable>
                             @foreach($copyToGradoOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                        <x-select wire:model.live="copyToLapsoId" placeholder="Momento: todos" searchable clearable>
+                            @foreach($copyToLapsoOptions as $opt)
                                 <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
                             @endforeach
                         </x-select>

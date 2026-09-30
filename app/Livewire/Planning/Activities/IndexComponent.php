@@ -428,6 +428,10 @@ class IndexComponent extends Component
 
     public $copyGradoOptions = [];
 
+    public $copyLapsoId = '';
+
+    public $copyLapsoOptions = [];
+
     public $copyToId = '';
 
     public $copyToSearch = '';
@@ -441,6 +445,10 @@ class IndexComponent extends Component
     public $copyToGradoId = '';
 
     public $copyToGradoOptions = [];
+
+    public $copyToLapsoId = '';
+
+    public $copyToLapsoOptions = [];
 
     public $copyPreview = null;
 
@@ -497,6 +505,12 @@ class IndexComponent extends Component
         $this->refreshCopyFromOptions(app(ActivityCopyService::class));
     }
 
+    public function updatedCopyLapsoId($value)
+    {
+        $this->copyFromId = '';
+        $this->refreshCopyFromOptions(app(ActivityCopyService::class));
+    }
+
     public function updatedCopyFromSearch($value)
     {
         $this->refreshCopyFromOptions(app(ActivityCopyService::class));
@@ -512,6 +526,12 @@ class IndexComponent extends Component
     }
 
     public function updatedCopyToGradoId($value)
+    {
+        $this->copyToId = '';
+        $this->refreshCopyToOptions(app(ActivityCopyService::class));
+    }
+
+    public function updatedCopyToLapsoId($value)
     {
         $this->copyToId = '';
         $this->refreshCopyToOptions(app(ActivityCopyService::class));
@@ -542,9 +562,17 @@ class IndexComponent extends Component
                     'description' => trim(($g->pestudio?->name ?? '').' · '.(in_array($g->status_active, ['true', true, 1, '1'], true) ? 'Activo' : 'Inactivo'), ' ·'),
                 ])
                 ->all();
+            $this->copyToLapsoOptions = $service->listLapsos($connection)
+                ->map(fn ($l) => [
+                    'id' => $l->id,
+                    'label' => $l->name,
+                    'description' => $l->code ?? '',
+                ])
+                ->all();
         } catch (\Throwable) {
             $this->copyToPestudioOptions = [];
             $this->copyToGradoOptions = [];
+            $this->copyToLapsoOptions = [];
         }
     }
 
@@ -556,7 +584,8 @@ class IndexComponent extends Component
                 (string) $this->copyToSearch,
                 30,
                 $this->copyToPestudioId ?: null,
-                $this->copyToGradoId ?: null
+                $this->copyToGradoId ?: null,
+                $this->copyToLapsoId ?: null
             )
                 ->map(fn ($p) => [
                     'id' => $p->id,
@@ -590,6 +619,7 @@ class IndexComponent extends Component
         if ($connection === null) {
             $this->copyPestudioOptions = [];
             $this->copyGradoOptions = [];
+            $this->copyLapsoOptions = [];
 
             return;
         }
@@ -611,9 +641,17 @@ class IndexComponent extends Component
                     'description' => trim(($g->pestudio?->name ?? '').' · '.(in_array($g->status_active, ['true', true, 1, '1'], true) ? 'Activo' : 'Inactivo'), ' ·'),
                 ])
                 ->all();
+            $this->copyLapsoOptions = $service->listLapsos($connection)
+                ->map(fn ($l) => [
+                    'id' => $l->id,
+                    'label' => $l->name,
+                    'description' => $l->code ?? '',
+                ])
+                ->all();
         } catch (\Throwable) {
             $this->copyPestudioOptions = [];
             $this->copyGradoOptions = [];
+            $this->copyLapsoOptions = [];
         }
     }
 
@@ -633,7 +671,8 @@ class IndexComponent extends Component
                 (string) $this->copyFromSearch,
                 30,
                 $this->copyPestudioId ?: null,
-                $this->copyGradoId ?: null
+                $this->copyGradoId ?: null,
+                $this->copyLapsoId ?: null
             )
                 ->map(fn ($p) => [
                     'id' => $p->id,

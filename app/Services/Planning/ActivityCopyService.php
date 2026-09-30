@@ -69,7 +69,7 @@ class ActivityCopyService
     /**
      * Buscador de Pevaluaciones en una conexión (para los selects del wizard).
      */
-    public function searchPevaluacions(string $connection, string $search = '', int $limit = 30, mixed $pestudioId = null, mixed $gradoId = null)
+    public function searchPevaluacions(string $connection, string $search = '', int $limit = 30, mixed $pestudioId = null, mixed $gradoId = null, mixed $lapsoId = null)
     {
         $query = Pevaluacion::on($connection)
             ->with('pensum.asignatura', 'seccion.grado', 'profesor', 'lapso')
@@ -84,6 +84,10 @@ class ActivityCopyService
             $query->whereHas('seccion', fn ($q) => $q->where('grado_id', $gradoId));
         }
 
+        if ($lapsoId) {
+            $query->where('pevaluacions.lapso_id', $lapsoId);
+        }
+
         $search = trim($search);
 
         if ($search !== '') {
@@ -96,6 +100,16 @@ class ActivityCopyService
         }
 
         return $query->limit($limit)->get();
+    }
+
+    /**
+     * Momentos/lapsos de una conexión (todos, sin filtrar por fechas).
+     */
+    public function listLapsos(string $connection)
+    {
+        return \App\Models\app\Academy\Lapso::on($connection)
+            ->orderBy('id')
+            ->get(['id', 'name', 'code']);
     }
 
     /**
