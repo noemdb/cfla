@@ -1003,7 +1003,7 @@
     <!-- ===== MODAL: Vista Previa de Actividad ===== -->
     <x-modal-card title="Vista Previa de la Actividad" blur="lg" wire:model="modePreview" width="max-w-[80vw]" class="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-gray-900">
         @if($previewActivity)
-            <div class="space-y-5" x-data="{ showTeaching: false, previewTab: 0 }" x-init="$watch('$wire.previewActivity', () => { previewTab = 0; showTeaching = false; })">
+            <div class="space-y-5" x-data="{ showTeaching: false, previewTab: 0, previewLightbox: false }" x-init="$watch('$wire.previewActivity', () => { previewTab = 0; showTeaching = false; previewLightbox = false; })">
 
                 {{-- Fechas --}}
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
@@ -1216,10 +1216,43 @@
                     @endif
 
                     @if(!empty($previewActivity->supplement?->image_url))
+                        @php $previewSuppImg = str_starts_with($previewActivity->supplement->image_url, 'http') ? $previewActivity->supplement->image_url : \Illuminate\Support\Facades\Storage::url($previewActivity->supplement->image_url); @endphp
                         <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
-                            <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5">Imagen complementaria</div>
-                            <img src="{{ str_starts_with($previewActivity->supplement->image_url, 'http') ? $previewActivity->supplement->image_url : \Illuminate\Support\Facades\Storage::url($previewActivity->supplement->image_url) }}"
-                                alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto">
+                            <div class="flex items-center justify-between gap-2 mb-1.5">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Imagen complementaria</div>
+                                <button type="button" @click="previewLightbox = true"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 rounded-lg border border-cyan-500/20 text-[10px] font-bold uppercase tracking-wider transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M15 11a4 4 0 11-8 0 4 4 0 018 0zm-4-7v3m0 8v3M4 11h3m8 0h3"></path>
+                                    </svg>
+                                    Tamaño original
+                                </button>
+                            </div>
+                            <img src="{{ $previewSuppImg }}"
+                                alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto cursor-zoom-in" @click="previewLightbox = true">
+                        </div>
+
+                        {{-- Lightbox: imagen en dimensiones originales --}}
+                        <div x-show="previewLightbox" x-cloak
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            class="fixed inset-0 z-[90] overflow-auto bg-gray-950/90 p-4 sm:p-8"
+                            @keydown.escape.window="previewLightbox = false">
+                            <div class="absolute inset-0" @click="previewLightbox = false"></div>
+                            <div class="relative min-h-full flex items-center justify-center">
+                                <img src="{{ $previewSuppImg }}" alt="Imagen complementaria en tamaño original" class="max-w-none rounded-lg border border-white/20 shadow-2xl">
+                            </div>
+                            <button type="button" @click="previewLightbox = false"
+                                class="fixed top-4 right-4 inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 text-xs font-bold uppercase tracking-widest backdrop-blur transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cerrar
+                            </button>
                         </div>
                     @endif
 
@@ -1239,7 +1272,7 @@
     <!-- ===== MODAL: Información Complementaria (solo lectura) ===== -->
     <x-modal-card title="Información Complementaria" blur="lg" wire:model="modeSupplement" width="max-w-2xl" class="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-gray-900">
         @if($supplementActivity)
-            <div class="space-y-5">
+            <div class="space-y-5" x-data="{ supplementLightbox: false }">
                 <div class="bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
                     <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1">Actividad</div>
                     <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $supplementActivity->topic ?? '—' }}</p>
@@ -1253,10 +1286,43 @@
                 @endif
 
                 @if(!empty($supplementActivity->supplement?->image_url))
+                    @php $suppModalImg = str_starts_with($supplementActivity->supplement->image_url, 'http') ? $supplementActivity->supplement->image_url : \Illuminate\Support\Facades\Storage::url($supplementActivity->supplement->image_url); @endphp
                     <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5">Imagen complementaria</div>
-                        <img src="{{ str_starts_with($supplementActivity->supplement->image_url, 'http') ? $supplementActivity->supplement->image_url : \Illuminate\Support\Facades\Storage::url($supplementActivity->supplement->image_url) }}"
-                            alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto">
+                        <div class="flex items-center justify-between gap-2 mb-1.5">
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Imagen complementaria</div>
+                            <button type="button" @click="supplementLightbox = true"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 rounded-lg border border-cyan-500/20 text-[10px] font-bold uppercase tracking-wider transition-all">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M15 11a4 4 0 11-8 0 4 4 0 018 0zm-4-7v3m0 8v3M4 11h3m8 0h3"></path>
+                                </svg>
+                                Tamaño original
+                            </button>
+                        </div>
+                        <img src="{{ $suppModalImg }}"
+                            alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto cursor-zoom-in" @click="supplementLightbox = true">
+                    </div>
+
+                    {{-- Lightbox: imagen en dimensiones originales --}}
+                    <div x-show="supplementLightbox" x-cloak
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="fixed inset-0 z-[90] overflow-auto bg-gray-950/90 p-4 sm:p-8"
+                        @keydown.escape.window="supplementLightbox = false">
+                        <div class="absolute inset-0" @click="supplementLightbox = false"></div>
+                        <div class="relative min-h-full flex items-center justify-center">
+                            <img src="{{ $suppModalImg }}" alt="Imagen complementaria en tamaño original" class="max-w-none rounded-lg border border-white/20 shadow-2xl">
+                        </div>
+                        <button type="button" @click="supplementLightbox = false"
+                            class="fixed top-4 right-4 inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 text-xs font-bold uppercase tracking-widest backdrop-blur transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cerrar
+                        </button>
                     </div>
                 @endif
 
