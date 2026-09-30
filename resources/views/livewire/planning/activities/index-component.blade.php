@@ -1003,7 +1003,7 @@
     <!-- ===== MODAL: Vista Previa de Actividad ===== -->
     <x-modal-card title="Vista Previa de la Actividad" blur="lg" wire:model="modePreview" width="max-w-[80vw]" class="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-gray-900">
         @if($previewActivity)
-            <div class="space-y-5" x-data="{ showTeaching: false, previewTab: 0, previewLightbox: false }" x-init="$watch('$wire.previewActivity', () => { previewTab = 0; showTeaching = false; previewLightbox = false; })">
+            <div class="space-y-5" x-data="{ showTeaching: false, previewTab: 0, previewLightbox: false, lbFit: true, lbZoom: 1, lbSize: '' }" x-init="$watch('$wire.previewActivity', () => { previewTab = 0; showTeaching = false; previewLightbox = false; }); $watch('previewLightbox', v => { if (v) { lbFit = true; lbZoom = 1; } })">
 
                 {{-- Fechas --}}
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
@@ -1232,7 +1232,7 @@
                                 alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto cursor-zoom-in" @click="previewLightbox = true">
                         </div>
 
-                        {{-- Lightbox: imagen en dimensiones originales --}}
+                        {{-- Lightbox: imagen con zoom (por defecto ajustada a pantalla) --}}
                         <div x-show="previewLightbox" x-cloak
                             x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0"
@@ -1240,19 +1240,39 @@
                             x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100"
                             x-transition:leave-end="opacity-0"
-                            class="fixed inset-0 z-[90] overflow-auto bg-gray-950/90 p-4 sm:p-8"
+                            class="fixed inset-0 z-[90] bg-gray-950/95 flex flex-col"
                             @keydown.escape.window="previewLightbox = false">
-                            <div class="absolute inset-0" @click="previewLightbox = false"></div>
-                            <div class="relative min-h-full flex items-center justify-center">
-                                <img src="{{ $previewSuppImg }}" alt="Imagen complementaria en tamaño original" class="max-w-none rounded-lg border border-white/20 shadow-2xl">
+                            {{-- Toolbar --}}
+                            <div class="relative z-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 bg-gray-950/80 border-b border-white/10">
+                                <button type="button" @click="lbFit = false; lbZoom = Math.max(0.1, (lbFit ? 1 : lbZoom) / 1.25)"
+                                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white text-lg font-bold transition-all" title="Reducir">−</button>
+                                <span class="min-w-[86px] text-center text-xs font-bold text-white tabular-nums" x-text="lbFit ? 'Ajustada' + (lbSize ? ' · ' + lbSize : '') : Math.round(lbZoom * 100) + '%' + (lbSize ? ' · ' + lbSize : '')"></span>
+                                <button type="button" @click="lbFit = false; lbZoom = Math.min(5, (lbFit ? 1 : lbZoom) * 1.25)"
+                                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white text-lg font-bold transition-all" title="Ampliar">+</button>
+                                <span class="w-px h-6 bg-white/15 mx-1"></span>
+                                <button type="button" @click="lbFit = true"
+                                    :class="lbFit ? 'bg-cyan-500/30 text-cyan-200 border-cyan-400/40' : 'bg-white/10 text-white border-transparent'"
+                                    class="px-3 h-10 rounded-lg border text-[11px] font-bold uppercase tracking-wider hover:bg-white/20 transition-all">Ajustar</button>
+                                <button type="button" @click="lbFit = false; lbZoom = 1"
+                                    :class="!lbFit ? 'bg-cyan-500/30 text-cyan-200 border-cyan-400/40' : 'bg-white/10 text-white border-transparent'"
+                                    class="px-3 h-10 rounded-lg border text-[11px] font-bold uppercase tracking-wider hover:bg-white/20 transition-all">1:1</button>
+                                <span class="w-px h-6 bg-white/15 mx-1"></span>
+                                <button type="button" @click="previewLightbox = false"
+                                    class="inline-flex items-center gap-1.5 px-4 h-10 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Cerrar
+                                </button>
                             </div>
-                            <button type="button" @click="previewLightbox = false"
-                                class="fixed top-4 right-4 inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 text-xs font-bold uppercase tracking-widest backdrop-blur transition-all">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Cerrar
-                            </button>
+                            {{-- Canvas con scroll --}}
+                            <div class="flex-1 overflow-auto flex p-4" @click.self="previewLightbox = false">
+                                <img src="{{ $previewSuppImg }}" alt="Imagen complementaria en tamaño original"
+                                    x-ref="previewLbImg"
+                                    @load="lbSize = $el.naturalWidth + ' × ' + $el.naturalHeight"
+                                    :style="lbFit ? 'max-width: 100%; max-height: 100%; object-fit: contain;' : 'max-width: none; width: ' + ($refs.previewLbImg.naturalWidth * lbZoom) + 'px;'"
+                                    class="m-auto rounded-lg border border-white/20 shadow-2xl">
+                            </div>
                         </div>
                     @endif
 
@@ -1272,7 +1292,7 @@
     <!-- ===== MODAL: Información Complementaria (solo lectura) ===== -->
     <x-modal-card title="Información Complementaria" blur="lg" wire:model="modeSupplement" width="max-w-2xl" class="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-gray-900">
         @if($supplementActivity)
-            <div class="space-y-5" x-data="{ supplementLightbox: false }">
+            <div class="space-y-5" x-data="{ supplementLightbox: false, lbFit: true, lbZoom: 1, lbSize: '' }" x-init="$watch('supplementLightbox', v => { if (v) { lbFit = true; lbZoom = 1; } })">
                 <div class="bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
                     <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1">Actividad</div>
                     <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $supplementActivity->topic ?? '—' }}</p>
@@ -1302,7 +1322,7 @@
                             alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto cursor-zoom-in" @click="supplementLightbox = true">
                     </div>
 
-                    {{-- Lightbox: imagen en dimensiones originales --}}
+                    {{-- Lightbox: imagen con zoom (por defecto ajustada a pantalla) --}}
                     <div x-show="supplementLightbox" x-cloak
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0"
@@ -1310,19 +1330,39 @@
                         x-transition:leave="transition ease-in duration-150"
                         x-transition:leave-start="opacity-100"
                         x-transition:leave-end="opacity-0"
-                        class="fixed inset-0 z-[90] overflow-auto bg-gray-950/90 p-4 sm:p-8"
+                        class="fixed inset-0 z-[90] bg-gray-950/95 flex flex-col"
                         @keydown.escape.window="supplementLightbox = false">
-                        <div class="absolute inset-0" @click="supplementLightbox = false"></div>
-                        <div class="relative min-h-full flex items-center justify-center">
-                            <img src="{{ $suppModalImg }}" alt="Imagen complementaria en tamaño original" class="max-w-none rounded-lg border border-white/20 shadow-2xl">
+                        {{-- Toolbar --}}
+                        <div class="relative z-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-3 py-2.5 bg-gray-950/80 border-b border-white/10">
+                            <button type="button" @click="lbFit = false; lbZoom = Math.max(0.1, (lbFit ? 1 : lbZoom) / 1.25)"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white text-lg font-bold transition-all" title="Reducir">−</button>
+                            <span class="min-w-[86px] text-center text-xs font-bold text-white tabular-nums" x-text="lbFit ? 'Ajustada' + (lbSize ? ' · ' + lbSize : '') : Math.round(lbZoom * 100) + '%' + (lbSize ? ' · ' + lbSize : '')"></span>
+                            <button type="button" @click="lbFit = false; lbZoom = Math.min(5, (lbFit ? 1 : lbZoom) * 1.25)"
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white text-lg font-bold transition-all" title="Ampliar">+</button>
+                            <span class="w-px h-6 bg-white/15 mx-1"></span>
+                            <button type="button" @click="lbFit = true"
+                                :class="lbFit ? 'bg-cyan-500/30 text-cyan-200 border-cyan-400/40' : 'bg-white/10 text-white border-transparent'"
+                                class="px-3 h-10 rounded-lg border text-[11px] font-bold uppercase tracking-wider hover:bg-white/20 transition-all">Ajustar</button>
+                            <button type="button" @click="lbFit = false; lbZoom = 1"
+                                :class="!lbFit ? 'bg-cyan-500/30 text-cyan-200 border-cyan-400/40' : 'bg-white/10 text-white border-transparent'"
+                                class="px-3 h-10 rounded-lg border text-[11px] font-bold uppercase tracking-wider hover:bg-white/20 transition-all">1:1</button>
+                            <span class="w-px h-6 bg-white/15 mx-1"></span>
+                            <button type="button" @click="supplementLightbox = false"
+                                class="inline-flex items-center gap-1.5 px-4 h-10 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Cerrar
+                            </button>
                         </div>
-                        <button type="button" @click="supplementLightbox = false"
-                            class="fixed top-4 right-4 inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] bg-white/10 hover:bg-white/20 text-white rounded-lg border border-white/20 text-xs font-bold uppercase tracking-widest backdrop-blur transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Cerrar
-                        </button>
+                        {{-- Canvas con scroll --}}
+                        <div class="flex-1 overflow-auto flex p-4" @click.self="supplementLightbox = false">
+                            <img src="{{ $suppModalImg }}" alt="Imagen complementaria en tamaño original"
+                                x-ref="supplementLbImg"
+                                @load="lbSize = $el.naturalWidth + ' × ' + $el.naturalHeight"
+                                :style="lbFit ? 'max-width: 100%; max-height: 100%; object-fit: contain;' : 'max-width: none; width: ' + ($refs.supplementLbImg.naturalWidth * lbZoom) + 'px;'"
+                                class="m-auto rounded-lg border border-white/20 shadow-2xl">
+                        </div>
                     </div>
                 @endif
 
