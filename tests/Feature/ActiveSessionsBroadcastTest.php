@@ -156,4 +156,29 @@ class ActiveSessionsBroadcastTest extends TestCase
         $this->assertSame($before + 1, ActiveSessionsUpdated::countActiveSessions());
         $this->assertSame($before + 1, ActiveSessionsUpdated::currentPayload()['active_sessions']);
     }
+
+    public function test_dashboard_shows_active_sessions_button_and_dialog(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $response = $this->actingAs($admin)->get('/admin');
+
+        $response->assertOk();
+        $response->assertSee('Ver usuarios', false);
+        $response->assertSee('wireui:dialog:active-sessions', false);
+        $response->assertSee('Usuarios con sesión activa', false);
+    }
+
+    public function test_dashboard_dialog_lists_online_users(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $online = User::factory()->create();
+        $online->forceFill(['last_seen_at' => now()])->saveQuietly();
+
+        $response = $this->actingAs($admin)->get('/admin');
+
+        $response->assertOk();
+        $response->assertSee($online->username, false);
+        $response->assertSee($online->role_label, false);
+    }
 }

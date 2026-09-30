@@ -18,6 +18,15 @@
             $sessionsPayload = \App\Events\ActiveSessionsUpdated::currentPayload();
             $activeSessionsInit = $sessionsPayload['active_sessions'];
             $authOnlineInit = $sessionsPayload['authenticated_online'];
+            try {
+                $onlineUsers = \App\Models\User::with('profile')
+                    ->where('last_seen_at', '>=', now()->subMinutes(15))
+                    ->orderByDesc('last_seen_at')
+                    ->limit(30)
+                    ->get();
+            } catch (\Throwable $e) {
+                $onlineUsers = collect();
+            }
         @endphp
 
         <!-- Indicators Section -->
@@ -58,13 +67,24 @@
                     <p class="text-purple-400/70 text-xs font-medium mt-1">De {{ number_format($totalProfesores) }} registrados</p>
                 </div>
                 <!-- Card 4: Sesiones Activas -->
-                <div class="diagnostic-card flex-1 bg-amber-500/10 border border-amber-500/20 p-6 rounded-lg">
+                <div class="diagnostic-card flex-1 bg-amber-500/10 border border-amber-500/20 p-6 rounded-lg flex flex-col">
                     <div class="flex items-center justify-between mb-1">
                         <p class="text-amber-300 text-sm font-medium">Sesiones Activas</p>
                         <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
                     </div>
                     <p class="text-white text-2xl font-extrabold"><span id="indicatorActiveSessions">{{ $activeSessionsInit }}</span></p>
                     <p class="text-amber-400/70 text-xs font-medium mt-1">Usuarios conectados ahora</p>
+                    <div class="mt-auto pt-4 flex justify-end">
+                        <button type="button" x-data
+                            x-on:click="$dispatch('wireui:dialog:active-sessions', { options: { icon: 'info', close: 'Cerrar' }, componentId: 'admin-dashboard' })"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-lg border border-amber-500/20 transition-all duration-300 text-[11px] font-bold uppercase tracking-wider">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Ver usuarios
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -89,6 +109,40 @@
                 <div id="activeSessionsChart"></div>
             </div>
         </section>
+
+        <!-- Dialog: usuarios con sesión activa (WireUI x-dialog) -->
+        <x-dialog id="active-sessions" title="Usuarios con sesión activa" width="lg" blur="lg">
+            <div class="text-left">
+                <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">
+                    Actividad en los últimos 15 minutos · {{ $onlineUsers->count() }} usuario(s) · actualizado al cargar la página ({{ now()->format('H:i:s') }})
+                </p>
+                @if ($onlineUsers->isEmpty())
+                    <div class="py-8 text-center">
+                        <p class="text-sm font-medium text-gray-500 dark:text-slate-400">Sin usuarios conectados en este momento.</p>
+                    </div>
+                @else
+                    <ul class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-white/5 -mx-1 px-1">
+                        @foreach ($onlineUsers as $onlineUser)
+                            <li class="flex items-center gap-3 py-2.5">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-sm font-extrabold uppercase">
+                                    {{ mb_substr($onlineUser->full_name ?? $onlineUser->username, 0, 1) }}
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-bold text-gray-800 dark:text-slate-100">{{ $onlineUser->full_name ?? $onlineUser->username }}</span>
+                                    <span class="block truncate text-xs text-gray-500 dark:text-slate-400">@@{{ $onlineUser->username }} · {{ $onlineUser->role_label }}</span>
+                                </span>
+                                <span class="shrink-0 text-right">
+                                    <span class="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                        {{ $onlineUser->last_seen_at?->diffForHumans() }}
+                                    </span>
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </x-dialog>
 
         <!-- Welcome Section -->
         <div class="mb-10">
