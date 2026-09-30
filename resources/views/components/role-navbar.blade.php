@@ -6,9 +6,10 @@ $subtitle = $subtitle ?? \App\Services\MenuBuilder::subtitleForLayout($layout);
 $menuBuilder = app(\App\Services\MenuBuilder::class, ['layout' => $layout]);
 ?>
 
-<header x-data="{ mobileOpen: false }"
-        @keydown.escape.window="mobileOpen = false"
-        class="bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-900/50 dark:border-white/5 sticky top-0 z-50">
+<div x-data="{ mobileOpen: false }"
+     @keydown.escape.window="mobileOpen = false">
+<header
+        class="bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-900/50 dark:border-white/5 sticky top-0 z-50 relative">
     <div class="container-fluid w-full px-4 py-2">
         <div class="flex items-center justify-around space-x-2">
             <!-- Logo -->
@@ -47,10 +48,10 @@ $menuBuilder = app(\App\Services\MenuBuilder::class, ['layout' => $layout]);
                 <x-theme-toggle />
 
                 <!-- Hamburger button (mobile) -->
-                <div class="lg:hidden flex items-center">
+                <div class="lg:hidden flex items-center relative z-50">
                     <button @click="mobileOpen = !mobileOpen"
                             class="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            :aria-expanded="mobileOpen"
+                            :aria-expanded="mobileOpen.toString()"
                             aria-controls="mobile-nav-content"
                             aria-label="Abrir menú de navegación">
                         <svg x-show="!mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,18 +66,10 @@ $menuBuilder = app(\App\Services\MenuBuilder::class, ['layout' => $layout]);
         </div>
     </div>
 
-    {{-- Backdrop (mobile) --}}
-    <div x-show="mobileOpen" x-cloak
-         @click="mobileOpen = false"
-         x-transition:enter="transition-opacity ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"></div>
-
-    {{-- Mobile menu panel --}}
+    {{-- Mobile menu panel: absolute respecto al header (sticky = ancestro
+         posicionado) para que flote SOBRE el contenido en vez de empujarlo.
+         Hereda el stacking context z-50 del header, por encima de cards,
+         sticky y demás divs de la página. --}}
     <div x-show="mobileOpen" x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -84,7 +77,7 @@ $menuBuilder = app(\App\Services\MenuBuilder::class, ['layout' => $layout]);
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="lg:hidden relative z-50 border-t border-gray-200 dark:border-white/5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-xl shadow-gray-200/50 dark:shadow-black/50">
+         class="lg:hidden absolute inset-x-0 top-full z-50 border-t border-gray-200 dark:border-white/5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-xl shadow-gray-200/50 dark:shadow-black/50">
         <div class="container mx-auto px-4 py-4 space-y-3 max-h-[calc(100vh-4rem)] overflow-y-auto" id="mobile-nav-content" role="navigation" aria-label="Menú móvil">
 
             {{-- Leading items --}}
@@ -115,3 +108,18 @@ $menuBuilder = app(\App\Services\MenuBuilder::class, ['layout' => $layout]);
         </div>
     </div>
 </header>
+
+    {{-- Backdrop (mobile): FUERA del header porque el backdrop-blur del header
+         lo convierte en containing block de los `fixed` y el inset-0 dejaría
+         de cubrir el viewport. Como hermano con z-40 queda sobre el contenido
+         pero debajo del header (z-50), así el botón sigue siendo clicable. --}}
+    <div x-show="mobileOpen" x-cloak
+         @click="mobileOpen = false"
+         x-transition:enter="transition-opacity ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"></div>
+</div>

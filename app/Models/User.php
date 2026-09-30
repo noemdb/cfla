@@ -78,6 +78,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_seen_at' => 'datetime',
         'password' => 'hashed',
         'is_planner' => 'boolean',
         'is_diagnostic' => 'boolean',
@@ -157,28 +158,28 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         // Se lee el atributo crudo para no heredar el fallback de is_planner/is_leadership/is_director que incluyen is_admin.
         $a = $this->attributes;
 
-        if (!empty($a['is_admin'])) {
+        if (! empty($a['is_admin'])) {
             return 'Administrador';
         }
-        if (!empty($a['is_planner'])) {
+        if (! empty($a['is_planner'])) {
             return 'Planificación';
         }
-        if (!empty($a['is_coordinacion'])) {
+        if (! empty($a['is_coordinacion'])) {
             return 'Coordinación';
         }
-        if (!empty($a['is_leadership'])) {
+        if (! empty($a['is_leadership'])) {
             return 'Jefe de Área';
         }
-        if (!empty($a['is_profesor'])) {
+        if (! empty($a['is_profesor'])) {
             return 'Profesor';
         }
-        if (!empty($a['is_director'])) {
+        if (! empty($a['is_director'])) {
             return 'Dirección';
         }
-        if (!empty($a['is_student'])) {
+        if (! empty($a['is_student'])) {
             return 'Estudiante';
         }
-        if (!empty($a['is_diagnostic'])) {
+        if (! empty($a['is_diagnostic'])) {
             return 'Personal de Diagnóstico';
         }
 

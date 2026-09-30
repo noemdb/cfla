@@ -2,12 +2,13 @@
 
 namespace App\Events;
 
-use App\Models\Visit;
+use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Conteo de sesiones activas para el chart del dashboard /admin.
@@ -28,38 +29,71 @@ class ActiveSessionsUpdated implements ShouldBroadcast
     }
 
     /**
-     * Foto actual: sesiones vigentes (driver file) + usuarios
-     * autenticados con actividad reciente (15 min, tabla visits).
+     * Foto actual: sesiones vigentes según el driver configurado
+     * (`database` → tabla sessions por last_activity, `file` → archivos
+     * vigentes en storage) + usuarios autenticados con actividad
+     * reciente (15 min, heartbeat `users.last_seen_at`).
      */
     public static function currentPayload(): array
     {
         $lifetime = (int) config('session.lifetime', 120);
-        $threshold = now()->subMinutes($lifetime)->timestamp;
-        $activeSessions = 0;
-        $sessionPath = storage_path('framework/sessions');
-        if (is_dir($sessionPath)) {
-            foreach (glob($sessionPath.'/*') ?: [] as $file) {
-                if (is_file($file) && filemtime($file) >= $threshold) {
-                    $activeSessions++;
-                }
+
+        return [
+            'active_sessions' => self::countActiveSessions($lifetime),
+            'authenticated_online' => self::countOnlineUsers(),
+            'timestamp' => now()->format('H:i:s'),
+        ];
+    }
+
+    /**
+     * Usuarios autenticados con heartbeat reciente (middleware
+     * UpdateLastSeen, ventana 15 min). Independiente del SESSION_DRIVER.
+     */
+    public static function countOnlineUsers(int $minutes = 15): int
+    {
+        try {
+            return (int) User::where('last_seen_at', '>=', now()->subMinutes($minutes))->count();
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Cuenta sesiones vigentes según SESSION_DRIVER. Los drivers no
+     * enumerables (redis, memcached, cookie, array…) caen al heartbeat
+     * de `users.last_seen_at` en vez de devolver 0.
+     */
+    public static function countActiveSessions(?int $lifetime = null): int
+    {
+        $lifetime ??= (int) config('session.lifetime', 120);
+        $driver = (string) config('session.driver', 'file');
+
+        if ($driver === 'database') {
+            try {
+                return (int) DB::table(config('session.table', 'sessions'))
+                    ->where('last_activity', '>=', now()->subMinutes($lifetime)->timestamp)
+                    ->count();
+            } catch (\Throwable $e) {
+                return 0;
             }
         }
 
-        $authenticatedOnline = 0;
-        try {
-            $authenticatedOnline = Visit::whereNotNull('user_id')
-                ->where('created_at', '>=', now()->subMinutes(15))
-                ->distinct('user_id')
-                ->count('user_id');
-        } catch (\Throwable $e) {
-            $authenticatedOnline = 0;
+        if ($driver === 'file') {
+            $threshold = now()->subMinutes($lifetime)->timestamp;
+            $count = 0;
+            $sessionPath = storage_path('framework/sessions');
+            if (is_dir($sessionPath)) {
+                foreach (glob($sessionPath.'/*') ?: [] as $file) {
+                    if (is_file($file) && filemtime($file) >= $threshold) {
+                        $count++;
+                    }
+                }
+            }
+
+            return $count;
         }
 
-        return [
-            'active_sessions' => $activeSessions,
-            'authenticated_online' => $authenticatedOnline,
-            'timestamp' => now()->format('H:i:s'),
-        ];
+        return self::countOnlineUsers();
     }
 
     /**

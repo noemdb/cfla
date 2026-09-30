@@ -69,6 +69,9 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // Heartbeat de presencia (chart /admin): al final del grupo,
+            // con sesión y auth ya disponibles. Throttle interno de 5 min.
+            \App\Http\Middleware\UpdateLastSeen::class,
         ],
 
         'api' => [

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Events\ActiveSessionsUpdated;
+use App\Models\BinnacleEntry;
 use App\Models\User;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -120,5 +121,39 @@ class ActiveSessionsBroadcastTest extends TestCase
         $response->assertSee('sessions.updated', false);
         $response->assertDontSee('admin.active-sessions', false);
         $response->assertDontSee('setInterval(refreshSessions', false);
+    }
+
+    public function test_web_request_stamps_last_seen_at(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->assertNull($admin->fresh()->last_seen_at);
+
+        $this->actingAs($admin)->get('/admin')->assertOk();
+
+        $this->assertNotNull($admin->fresh()->last_seen_at);
+    }
+
+    public function test_heartbeat_does_not_write_binnacle_model_updated(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $before = BinnacleEntry::where('event_type', 'model_updated')->count();
+
+        $this->actingAs($admin)->get('/admin')->assertOk();
+
+        $this->assertNotNull($admin->fresh()->last_seen_at);
+        $this->assertSame($before, BinnacleEntry::where('event_type', 'model_updated')->count());
+    }
+
+    public function test_redis_driver_falls_back_to_heartbeat(): void
+    {
+        config()->set('session.driver', 'redis');
+        $before = ActiveSessionsUpdated::countOnlineUsers();
+
+        $user = User::factory()->create();
+        $user->forceFill(['last_seen_at' => now()])->saveQuietly();
+
+        $this->assertSame($before + 1, ActiveSessionsUpdated::countOnlineUsers());
+        $this->assertSame($before + 1, ActiveSessionsUpdated::countActiveSessions());
+        $this->assertSame($before + 1, ActiveSessionsUpdated::currentPayload()['active_sessions']);
     }
 }
