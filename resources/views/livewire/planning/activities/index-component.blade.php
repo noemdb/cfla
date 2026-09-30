@@ -1003,7 +1003,7 @@
     <!-- ===== MODAL: Vista Previa de Actividad ===== -->
     <x-modal-card title="Vista Previa de la Actividad" blur="lg" wire:model="modePreview" width="max-w-[80vw]" class="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-gray-900">
         @if($previewActivity)
-            <div class="space-y-5" x-data="{ showTeaching: false }">
+            <div class="space-y-5" x-data="{ showTeaching: false, previewTab: 0 }" x-init="$watch('$wire.previewActivity', () => { previewTab = 0; showTeaching = false; })">
 
                 {{-- Fechas --}}
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
@@ -1030,6 +1030,40 @@
                             @endif
                         </span>
                     @endif
+                </div>
+
+                {{-- Tab Navigation: Actividad | Complementaria --}}
+                <div class="border-b border-gray-200 dark:border-white/5">
+                    <nav class="flex gap-1">
+                        <button type="button" @click="previewTab = 0"
+                            :class="previewTab === 0
+                                ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-50 dark:bg-emerald-500/5'
+                                : 'text-gray-500 dark:text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                            class="flex-1 px-4 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                            Actividad
+                        </button>
+                        <button type="button" @click="previewTab = 1"
+                            :class="previewTab === 1
+                                ? 'text-cyan-600 dark:text-cyan-400 border-cyan-500 bg-cyan-50 dark:bg-cyan-500/5'
+                                : 'text-gray-500 dark:text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                            class="flex-1 px-4 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                            <span class="inline-flex items-center justify-center gap-1.5">
+                                Complementaria
+                                @if($previewActivity->supplement && (!empty(trim($previewActivity->supplement->text ?? '')) || !empty($previewActivity->supplement->image_url)))
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                                @endif
+                            </span>
+                        </button>
+                    </nav>
+                </div>
+
+                {{-- TAB 1: Actividad (contenido actual) --}}
+                <div x-show="previewTab === 0" class="space-y-5">
+
+                {{-- Topic --}}
+                <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1.5">Tema generador / Énfasis</div>
+                    <p class="text-sm text-gray-900 dark:text-white">{{ $previewActivity->topic ?? '—' }}</p>
                 </div>
 
                 {{-- Topic --}}
@@ -1165,6 +1199,34 @@
                         @endif
                     </div>
                 @endif
+                </div>{{-- /TAB 1 --}}
+
+                {{-- TAB 2: Información Complementaria (ActivitySupplement) --}}
+                <div x-show="previewTab === 1" x-cloak class="space-y-5">
+                    <div class="bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1">Actividad</div>
+                        <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $previewActivity->topic ?? '—' }}</p>
+                    </div>
+
+                    @if(!empty(trim($previewActivity->supplement?->text ?? '')))
+                        <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5">Texto complementario</div>
+                            <p class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ $previewActivity->supplement->text }}</p>
+                        </div>
+                    @endif
+
+                    @if(!empty($previewActivity->supplement?->image_url))
+                        <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5">Imagen complementaria</div>
+                            <img src="{{ str_starts_with($previewActivity->supplement->image_url, 'http') ? $previewActivity->supplement->image_url : \Illuminate\Support\Facades\Storage::url($previewActivity->supplement->image_url) }}"
+                                alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto">
+                        </div>
+                    @endif
+
+                    @if(empty(trim($previewActivity->supplement?->text ?? '')) && empty($previewActivity->supplement?->image_url))
+                        <p class="text-sm text-gray-500 dark:text-slate-400 text-center py-6">Esta actividad no tiene información complementaria registrada.</p>
+                    @endif
+                </div>
             </div>
         @endif
         <x-slot name="footer">

@@ -52,7 +52,7 @@
         <tbody>
             @forelse($pevaluacion->activities as $i => $act)
                 <tr>
-                    <td class="num" rowspan="2">{{ $i+1 }}</td>
+                    <td class="num" rowspan="3">{{ $i+1 }}</td>
                     <td class="fecha">{{ \Carbon\Carbon::parse($act->finicial)->format('d/m') }}<br>al<br>{{ \Carbon\Carbon::parse($act->ffinal)->format('d/m') }}</td>
                     <td>
                         <div class="content-label">{{ ($labels ?? [])['topic'] ?? 'Tema generador/Énfasis' }}</div>

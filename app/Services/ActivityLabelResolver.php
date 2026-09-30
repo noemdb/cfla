@@ -87,8 +87,11 @@ class ActivityLabelResolver
         }
 
         try {
-            return Cache::rememberForever(
+            // TTL 1h (además del flush por eventos): si alguien edita fuera
+            // del modelo/CRUD, el valor se refresca solo en ≤1h.
+            return Cache::remember(
                 "activity-field-labels:peducativo:{$peducativoId}",
+                3600,
                 function () use ($peducativoId, $defaults) {
                     $overrides = ActivityFieldLabel::query()
                         ->where('peducativo_id', $peducativoId)

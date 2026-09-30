@@ -388,7 +388,7 @@ class IndexComponent extends Component
 
     public function showPreview($activitie_id)
     {
-        $this->previewActivity = Activity::with('achievements')->findOrFail($activitie_id);
+        $this->previewActivity = Activity::with(['achievements', 'supplement'])->findOrFail($activitie_id);
         $this->close();
         $this->modePreview = true;
     }
