@@ -920,7 +920,8 @@ PROMPT;
             $options = collect($payload['options'] ?? [])
                 ->map(fn ($option) => is_array($option) ? ($option['opcion'] ?? '') : (string) $option)
                 ->map(fn ($option) => mb_substr(trim($option), 0, 200))
-                ->filter()
+                // '0' es opción válida: filter() sin callback la descartaría por ser falsy.
+                ->filter(fn ($option) => $option !== '')
                 ->take(6)
                 ->values();
 
@@ -988,7 +989,8 @@ PROMPT;
 
                 $optionsData = [];
                 foreach ($this->options as $index => $option) {
-                    if (! empty($option['opcion'])) {
+                    // trim() !== '': '0' es una opción válida (empty('0') === true la descartaría).
+                    if (trim((string) ($option['opcion'] ?? '')) !== '') {
                         $optionsData[] = [
                             'question_id' => $question->id,
                             'opcion' => $option['opcion'],

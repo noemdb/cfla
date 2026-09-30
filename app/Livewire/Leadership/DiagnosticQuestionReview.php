@@ -418,7 +418,8 @@ class DiagnosticQuestionReview extends Component
 
                 $optionsData = [];
                 foreach ($this->options as $index => $option) {
-                    if (! empty($option['opcion'])) {
+                    // trim() !== '': '0' es una opción válida (empty('0') === true la descartaría).
+                    if (trim((string) ($option['opcion'] ?? '')) !== '') {
                         $optionsData[] = [
                             'question_id' => $question->id,
                             'opcion' => $option['opcion'],
