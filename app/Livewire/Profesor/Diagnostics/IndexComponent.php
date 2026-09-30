@@ -1807,10 +1807,10 @@ PROMPT;
                     'id' => $qq->id,
                     'pregunta' => $qq->pregunta,
                     'tipo' => $qq->tipo_pregunta,
-                    'total' => $t,
-                    'correct' => $c,
-                    'precision' => ($qq->tipo_pregunta === 'multiple' && $o > 0)
-                        ? round((100 * $c) / $o, 1)
+                    'total' => $total,
+                    'correct' => $correct,
+                    'precision' => ($qq->tipo_pregunta === 'multiple' && $withOption > 0)
+                        ? round((100 * $correct) / $withOption, 1)
                         : null,
                 ];
             }

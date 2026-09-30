@@ -68,6 +68,11 @@ class Kernel extends ConsoleKernel
         // más antiguas que notifications.retention_days (180 por defecto); las
         // no leídas nunca, salvo que se pase --purge-unread-days a mano.
         $schedule->command('notifications:prune')->weeklyOn(0, '05:00')->withoutOverlapping();
+
+        // Chart "sesiones activas" del dashboard /admin: emite cada minuto
+        // el conteo al canal privado admin.sessions vía Reverb. Sin overlap
+        // para no acumular emisiones si Reverb responde lento.
+        $schedule->command('admin:broadcast-sessions')->everyMinute()->withoutOverlapping();
     }
 
     protected $commands = [

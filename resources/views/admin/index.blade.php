@@ -4,31 +4,96 @@
 
 @section('content')
     <div class="fade-in">
+        @php
+            $activeUsers = \App\Models\User::where('is_active', 1)->count();
+            $totalProfesores = \App\Models\User::where('is_profesor', 1)->count();
+            $activeProfesores = \App\Models\User::where('is_profesor', 1)->where('is_active', 1)->count();
+            try {
+                $totalNotifications = \Illuminate\Support\Facades\DB::table('notifications')->count();
+                $readNotifications = \Illuminate\Support\Facades\DB::table('notifications')->whereNotNull('read_at')->count();
+            } catch (\Throwable $e) {
+                $totalNotifications = 0;
+                $readNotifications = 0;
+            }
+            $sessionsPayload = \App\Events\ActiveSessionsUpdated::currentPayload();
+            $activeSessionsInit = $sessionsPayload['active_sessions'];
+            $authOnlineInit = $sessionsPayload['authenticated_online'];
+        @endphp
+
+        <!-- Indicators Section -->
+        <section aria-label="Indicadores principales">
+            <!-- Fila 1: 4 indicator cards en una línea flex -->
+            <div class="flex flex-col md:flex-row gap-6 mb-6">
+                <!-- Card 1: Notificaciones Registradas/Leídas -->
+                <div class="diagnostic-card flex-1 bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-emerald-300 text-sm font-medium">Notificaciones Registradas</p>
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </div>
+                    <p class="text-white text-2xl font-extrabold">{{ number_format($totalNotifications) }}</p>
+                    <p class="text-emerald-400/70 text-xs font-medium mt-1">{{ number_format($readNotifications) }} leídas · {{ number_format($totalNotifications - $readNotifications) }} sin leer</p>
+                </div>
+                <!-- Card 2: Usuarios Activos -->
+                <div class="diagnostic-card flex-1 bg-blue-500/10 border border-blue-500/20 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-blue-300 text-sm font-medium">Usuarios Activos</p>
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-white text-2xl font-extrabold">{{ number_format($activeUsers) }}</p>
+                    <p class="text-blue-400/70 text-xs font-medium mt-1">Con estado activo</p>
+                </div>
+                <!-- Card 3: Profesores Activos/Registrados -->
+                <div class="diagnostic-card flex-1 bg-purple-500/10 border border-purple-500/20 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-purple-300 text-sm font-medium">Profesores Activos</p>
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
+                        </svg>
+                    </div>
+                    <p class="text-white text-2xl font-extrabold">{{ number_format($activeProfesores) }}</p>
+                    <p class="text-purple-400/70 text-xs font-medium mt-1">De {{ number_format($totalProfesores) }} registrados</p>
+                </div>
+                <!-- Card 4: Sesiones Activas -->
+                <div class="diagnostic-card flex-1 bg-amber-500/10 border border-amber-500/20 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-amber-300 text-sm font-medium">Sesiones Activas</p>
+                        <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                    </div>
+                    <p class="text-white text-2xl font-extrabold"><span id="indicatorActiveSessions">{{ $activeSessionsInit }}</span></p>
+                    <p class="text-amber-400/70 text-xs font-medium mt-1">Usuarios conectados ahora</p>
+                </div>
+            </div>
+
+            <!-- Fila 2: chart ApexCharts online — usuarios conectados con sesión activa -->
+            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg mb-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-white font-bold flex items-center gap-2">
+                            <span id="sessionsWsDot" class="w-2.5 h-2.5 bg-gray-500 rounded-full"></span>
+                            Usuarios conectados con sesión activa
+                        </h3>
+                        <p class="text-gray-400 text-xs mt-1">
+                            <span id="sessionsWsStatus" class="font-bold text-gray-500">Conectando…</span>
+                            <span class="text-gray-600"> · WebSocket (Reverb) · canal privado</span>
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-extrabold text-emerald-400"><span id="chartLiveCount">{{ $activeSessionsInit }}</span></p>
+                        <p class="text-[11px] uppercase tracking-widest text-gray-500 font-bold">En línea · <span id="chartAuthOnline">{{ $authOnlineInit }}</span> autenticados</p>
+                    </div>
+                </div>
+                <div id="activeSessionsChart"></div>
+            </div>
+        </section>
+
         <!-- Welcome Section -->
         <div class="mb-10">
             <h1 class="text-lg font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
             <p class="text-emerald-400 font-medium">Bienvenido de nuevo al ecosistema administrativo de SAEFL.</p>
-        </div>
-
-        <!-- Quick Stats / Overview (Mockup for now) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-lg">
-                <p class="text-emerald-300 text-sm font-medium mb-1">Sesión Activa</p>
-                <p class="text-white text-lg font-bold">{{ now()->format('H:i A') }}</p>
-            </div>
-            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-lg">
-                <p class="text-blue-300 text-sm font-medium mb-1">Estado del Sistema</p>
-                <p class="text-white text-lg font-bold flex items-center">
-                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                    Operacional
-                </p>
-            </div>
-            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-lg">
-                <p class="text-purple-300 text-sm font-medium mb-1">Nivel de Acceso</p>
-                <p class="text-white text-lg font-bold">
-                    {{ Auth::user()->role_label }}
-                </p>
-            </div>
         </div>
 
         <h2 class="text-lg font-bold text-white mb-6 flex items-center">
@@ -443,4 +508,101 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    @parent
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const el = document.querySelector('#activeSessionsChart');
+            if (!el || typeof ApexCharts === 'undefined') return;
+
+            const MAX_POINTS = 20;
+            const initial = parseInt(document.querySelector('#chartLiveCount')?.textContent ?? '0', 10) || 0;
+            let seriesData = Array(MAX_POINTS).fill(initial);
+            let labels = Array.from({ length: MAX_POINTS }, (_, i) => {
+                const d = new Date(Date.now() - (MAX_POINTS - 1 - i) * 60000);
+                return d.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            });
+
+            const options = {
+                chart: { type: 'area', height: 280, animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 500 } }, toolbar: { show: false }, zoom: { enabled: false }, foreColor: '#94a3b8' },
+                series: [{ name: 'Sesiones activas', data: seriesData }],
+                xaxis: { categories: labels, labels: { rotate: -30, style: { fontSize: '10px' } } },
+                yaxis: { min: 0, forceNiceScale: true, labels: { formatter: (v) => Math.round(v) }, title: { text: 'Usuarios conectados' } },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2, colors: ['#10b981'] },
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 100] } },
+                markers: { size: 0 },
+                colors: ['#10b981'],
+                grid: { borderColor: 'rgba(255,255,255,0.06)' },
+                tooltip: { theme: 'dark', x: { show: true }, y: { title: { formatter: () => 'Conectados:' } } },
+            };
+
+            const chart = new ApexCharts(el, options);
+            chart.render();
+
+            function setWsStatus(online) {
+                const status = document.querySelector('#sessionsWsStatus');
+                const dot = document.querySelector('#sessionsWsDot');
+                if (status) {
+                    status.textContent = online ? 'En vivo' : 'Sin conexión';
+                    status.classList.toggle('text-emerald-400', online);
+                    status.classList.toggle('text-gray-500', !online);
+                }
+                if (dot) {
+                    dot.classList.toggle('bg-emerald-500', online);
+                    dot.classList.toggle('animate-pulse', online);
+                    dot.classList.toggle('bg-gray-500', !online);
+                }
+            }
+
+            function applySessionsUpdate(value, stamp, authOnline) {
+                seriesData.push(value);
+                labels.push(stamp);
+                if (seriesData.length > MAX_POINTS) seriesData.shift();
+                if (labels.length > MAX_POINTS) labels.shift();
+
+                chart.updateOptions({ xaxis: { categories: [...labels] } }, false, false);
+                chart.updateSeries([{ name: 'Sesiones activas', data: [...seriesData] }]);
+
+                const live = document.querySelector('#chartLiveCount');
+                if (live) live.textContent = value;
+                const indicator = document.querySelector('#indicatorActiveSessions');
+                if (indicator) indicator.textContent = value;
+                if (typeof authOnline !== 'undefined' && authOnline !== null) {
+                    const authEl = document.querySelector('#chartAuthOnline');
+                    if (authEl) authEl.textContent = authOnline;
+                }
+            }
+
+            // Tiempo real vía WebSocket (Reverb, canal privado admin.sessions).
+            // Sin polling: el backend emite `sessions.updated` cada minuto
+            // (scheduler) y al abrir el dashboard.
+            if (window.Echo) {
+                window.Echo.private('admin.sessions')
+                    .listen('.sessions.updated', (e) => {
+                        setWsStatus(true);
+                        applySessionsUpdate(
+                            parseInt(e.active_sessions ?? 0, 10) || 0,
+                            e.timestamp ?? new Date().toLocaleTimeString(),
+                            e.authenticated_online
+                        );
+                    });
+
+                try {
+                    const connection = window.Echo.connector?.pusher?.connection;
+                    connection?.bind('connected', () => setWsStatus(true));
+                    connection?.bind('disconnected', () => setWsStatus(false));
+                    connection?.bind('error', () => setWsStatus(false));
+                    if (connection?.state === 'connected') setWsStatus(true);
+                } catch (e) {
+                    // Silencioso: el estado queda en "Conectando…".
+                }
+            } else {
+                setWsStatus(false);
+            }
+        });
+    </script>
 @endsection

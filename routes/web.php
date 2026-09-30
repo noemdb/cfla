@@ -113,6 +113,16 @@ Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', '
     Route::middleware(['isAdminOrDiagnostic'])->group(function () {
 
         Route::get('/', function () {
+            // Valor inmediato por WebSocket al abrir el dashboard (el flujo
+            // continuo lo emite el scheduler `admin:broadcast-sessions`).
+            // try/catch: si Reverb está caído la página igual renderiza con
+            // el valor inicial calculado en la vista.
+            try {
+                \App\Events\ActiveSessionsUpdated::dispatch();
+            } catch (\Throwable $e) {
+                // Silencioso.
+            }
+
             return view('admin.index');
         })->name('index');
 

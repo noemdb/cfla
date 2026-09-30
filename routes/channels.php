@@ -16,3 +16,9 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+// Chart "sesiones activas" del dashboard /admin: solo admin o
+// personal de diagnóstico (evento ActiveSessionsUpdated).
+Broadcast::channel('admin.sessions', function ($user) {
+    return $user->isAdminOrDiagnostic();
+});
