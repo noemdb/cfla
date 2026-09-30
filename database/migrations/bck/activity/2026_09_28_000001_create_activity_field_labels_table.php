@@ -40,6 +40,8 @@ return new class extends Migration
         'topic_thematic_referentes' => 'Referentes teórico-prácticos',
         // Columna "ODS / Sistematización" de los PDFs (formato y resumen).
         'ODS_sistematizacion' => 'ODS / Sistematización',
+        // Tab "Enseñanza y Evaluación" del form del profesor.
+        'teaching_assessment' => 'Enseñanza y Evaluación',
     ];
 
     /** Labels actuales de Achievement (semilla inicial, editables luego). */

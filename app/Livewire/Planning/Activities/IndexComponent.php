@@ -13,6 +13,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Academy\Asignatura;
 use App\Livewire\Concerns\InteractsWithLmsLessons;
 use App\Models\User;
+use App\Services\Planning\ActivityCopyService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -35,6 +36,7 @@ class IndexComponent extends Component
     public $modeComments = false;
     public $modePreview = false;
     public $modeSupplement = false;
+    public $modeCopy = false;
 
     // Filters
     public $pestudio_id, $grado_id, $seccion_id, $lapso_id, $profesor_id;
@@ -406,6 +408,370 @@ class IndexComponent extends Component
         $this->close();
     }
 
+    // ─── WIZARD: COPIAR ACTIVIDADES (activity:copy) ────────────
+
+    public $copyStep = 1;
+
+    public $copySource = '2';
+
+    public $copyFromId = '';
+
+    public $copyFromSearch = '';
+
+    public $copyFromOptions = [];
+
+    public $copyPestudioId = '';
+
+    public $copyPestudioOptions = [];
+
+    public $copyGradoId = '';
+
+    public $copyGradoOptions = [];
+
+    public $copyToId = '';
+
+    public $copyToSearch = '';
+
+    public $copyToOptions = [];
+
+    public $copyToPestudioId = '';
+
+    public $copyToPestudioOptions = [];
+
+    public $copyToGradoId = '';
+
+    public $copyToGradoOptions = [];
+
+    public $copyPreview = null;
+
+    public $copyPreviewError = '';
+
+    public $copyConfirm = false;
+
+    public $copyResult = null;
+
+    public $copyRunning = false;
+
+    public function openCopyWizard(?int $preselectToId = null)
+    {
+        $this->close();
+        $this->modeCopy = true;
+        $this->copyStep = 1;
+        $this->copyPreview = null;
+        $this->copyPreviewError = '';
+        $this->copyConfirm = false;
+        $this->copyResult = null;
+        $this->copyRunning = false;
+        if ($preselectToId) {
+            $this->copyToId = (string) $preselectToId;
+        }
+        $service = app(ActivityCopyService::class);
+        $this->refreshCopyFilterLists($service);
+        $this->refreshCopyFromOptions($service);
+        $this->refreshCopyToFilterLists($service);
+        $this->refreshCopyToOptions($service);
+    }
+
+    public function updatedCopySource($value)
+    {
+        $this->copyFromId = '';
+        $this->copyFromSearch = '';
+        $this->copyPestudioId = '';
+        $this->copyGradoId = '';
+        $this->refreshCopyFilterLists(app(ActivityCopyService::class));
+        $this->refreshCopyFromOptions(app(ActivityCopyService::class));
+    }
+
+    public function updatedCopyPestudioId($value)
+    {
+        $this->copyGradoId = '';
+        $this->copyFromId = '';
+        $service = app(ActivityCopyService::class);
+        $this->refreshCopyFilterLists($service);
+        $this->refreshCopyFromOptions($service);
+    }
+
+    public function updatedCopyGradoId($value)
+    {
+        $this->copyFromId = '';
+        $this->refreshCopyFromOptions(app(ActivityCopyService::class));
+    }
+
+    public function updatedCopyFromSearch($value)
+    {
+        $this->refreshCopyFromOptions(app(ActivityCopyService::class));
+    }
+
+    public function updatedCopyToPestudioId($value)
+    {
+        $this->copyToGradoId = '';
+        $this->copyToId = '';
+        $service = app(ActivityCopyService::class);
+        $this->refreshCopyToFilterLists($service);
+        $this->refreshCopyToOptions($service);
+    }
+
+    public function updatedCopyToGradoId($value)
+    {
+        $this->copyToId = '';
+        $this->refreshCopyToOptions(app(ActivityCopyService::class));
+    }
+
+    public function updatedCopyToSearch($value)
+    {
+        $this->refreshCopyToOptions(app(ActivityCopyService::class));
+    }
+
+    protected function refreshCopyToFilterLists(ActivityCopyService $service)
+    {
+        // El destino siempre vive en la conexión actual.
+        $connection = $service->targetConnection();
+
+        try {
+            $this->copyToPestudioOptions = $service->listPestudios($connection)
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'label' => trim(($p->code ? "[{$p->code}] " : '').$p->name),
+                    'description' => self::copyStatusDescription($p->status_active),
+                ])
+                ->all();
+            $this->copyToGradoOptions = $service->listGrados($connection, $this->copyToPestudioId ?: null)
+                ->map(fn ($g) => [
+                    'id' => $g->id,
+                    'label' => $g->name,
+                    'description' => trim(($g->pestudio?->name ?? '').' · '.(in_array($g->status_active, ['true', true, 1, '1'], true) ? 'Activo' : 'Inactivo'), ' ·'),
+                ])
+                ->all();
+        } catch (\Throwable) {
+            $this->copyToPestudioOptions = [];
+            $this->copyToGradoOptions = [];
+        }
+    }
+
+    protected function refreshCopyToOptions(ActivityCopyService $service)
+    {
+        try {
+            $this->copyToOptions = $service->searchPevaluacions(
+                $service->targetConnection(),
+                (string) $this->copyToSearch,
+                30,
+                $this->copyToPestudioId ?: null,
+                $this->copyToGradoId ?: null
+            )
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'label' => '#'.$p->id.' · '.($p->pensum?->asignatura?->name ?? 'Sin asignatura'),
+                    'description' => trim(($p->seccion?->grado?->name ?? '').' · Sec. '.($p->seccion?->name ?? '—').' · '.($p->profesor?->lastname ?? '').' '.($p->profesor?->name ?? '').' · '.($p->lapso?->name ?? '—').' · '.$p->activities_count.' acts.'),
+                ])
+                ->all();
+        } catch (\Throwable) {
+            $this->copyToOptions = [];
+        }
+    }
+
+    /**
+     * Descripción de estado para los selects del wizard de copia.
+     * Marca textual ●/○ porque x-select.option no admite template propio;
+     * los inactivos se siguen pudiendo elegir (copiar desde planes viejos
+     * es un caso de uso válido), solo se diferencian visualmente.
+     */
+    protected static function copyStatusDescription(mixed $status): string
+    {
+        // status_active es string: 'true' = activo, 'false' = inactivo.
+        // Comparación estricta: 'false' == true daría verdadero con ==.
+        $active = in_array($status, ['true', true, 1, '1'], true);
+
+        return $active ? '● Activo' : '○ Inactivo · solo como fuente';
+    }
+
+    protected function refreshCopyFilterLists(ActivityCopyService $service)
+    {        $connection = $service->resolveSourceConnection((string) $this->copySource);
+
+        if ($connection === null) {
+            $this->copyPestudioOptions = [];
+            $this->copyGradoOptions = [];
+
+            return;
+        }
+
+        try {
+            $this->copyPestudioOptions = $service->listPestudios($connection)
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    // Código + nombre: desambigua planes homónimos
+                    // (p. ej. dos "EDUCACION MEDIA GENERAL" con distinto code).
+                    'label' => trim(($p->code ? "[{$p->code}] " : '').$p->name),
+                    'description' => self::copyStatusDescription($p->status_active),
+                ])
+                ->all();
+            $this->copyGradoOptions = $service->listGrados($connection, $this->copyPestudioId ?: null)
+                ->map(fn ($g) => [
+                    'id' => $g->id,
+                    'label' => $g->name,
+                    'description' => trim(($g->pestudio?->name ?? '').' · '.(in_array($g->status_active, ['true', true, 1, '1'], true) ? 'Activo' : 'Inactivo'), ' ·'),
+                ])
+                ->all();
+        } catch (\Throwable) {
+            $this->copyPestudioOptions = [];
+            $this->copyGradoOptions = [];
+        }
+    }
+
+    protected function refreshCopyFromOptions(ActivityCopyService $service)
+    {
+        $connection = $service->resolveSourceConnection((string) $this->copySource);
+
+        if ($connection === null) {
+            $this->copyFromOptions = [];
+
+            return;
+        }
+
+        try {
+            $this->copyFromOptions = $service->searchPevaluacions(
+                $connection,
+                (string) $this->copyFromSearch,
+                30,
+                $this->copyPestudioId ?: null,
+                $this->copyGradoId ?: null
+            )
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'label' => '#'.$p->id.' · '.($p->pensum?->asignatura?->name ?? 'Sin asignatura'),
+                    'description' => trim(($p->seccion?->grado?->name ?? '').' · Sec. '.($p->seccion?->name ?? '—').' · '.($p->profesor?->lastname ?? '').' '.($p->profesor?->name ?? '').' · '.($p->lapso?->name ?? '—').' · '.$p->activities_count.' acts.'),
+                ])
+                ->all();
+        } catch (\Throwable) {
+            $this->copyFromOptions = [];
+        }
+    }
+
+    public function closeCopyWizard()
+    {
+        $this->copyPreview = null;
+        $this->copyPreviewError = '';
+        $this->copyConfirm = false;
+        $this->copyResult = null;
+        $this->copyRunning = false;
+        $this->copyStep = 1;
+        $this->close();
+        $this->modeIndex = true;
+    }
+
+    public function copyGoToStep(int $step)
+    {
+        $step = max(1, min(4, $step));
+
+        // Pasos 1 y 2: navegación libre. Paso 3: solo con vista previa
+        // cargada. Paso 4: solo con resultado de copia.
+        if ($step <= 2) {
+            $this->copyStep = $step;
+        } elseif ($step === 3 && $this->copyPreview !== null) {
+            $this->copyStep = $step;
+        } elseif ($step === 4 && $this->copyResult !== null) {
+            $this->copyStep = $step;
+        }
+    }
+
+    public function loadCopyPreview(ActivityCopyService $service)
+    {
+        $this->validate([
+            'copySource' => 'required|in:1,2',
+            'copyFromId' => 'required|integer|min:1',
+            'copyToId' => 'required|integer|min:1|different:copyFromId',
+        ], [
+            'copyFromId.required' => 'Indica el ID de la Pevaluación origen.',
+            'copyToId.required' => 'Indica el ID de la Pevaluación destino.',
+            'copyToId.different' => 'El destino debe ser distinto al origen.',
+        ]);
+
+        $this->copyPreviewError = '';
+        $this->copyPreview = null;
+        $this->copyConfirm = false;
+        $this->copyResult = null;
+
+        try {
+            $preview = $service->preview((int) $this->copyFromId, (int) $this->copyToId, (string) $this->copySource);
+
+            $this->copyPreview = [
+                'from_id' => $preview['from']->id,
+                'from_name' => $preview['from']->full_name,
+                'to_id' => $preview['to']->id,
+                'to_name' => $preview['to']->full_name,
+                'source' => $preview['source'],
+                'sourceConnection' => $preview['sourceConnection'],
+                'targetConnection' => $preview['targetConnection'],
+                'toCopy' => $preview['toCopy']->map(fn ($a) => [
+                    'id' => $a->id,
+                    'topic' => $a->topic,
+                    'thematic' => $a->thematic,
+                    'finicial' => $a->finicial,
+                    'ffinal' => $a->ffinal,
+                    'achievements' => $a->achievements->count(),
+                ])->values()->all(),
+                'skipped' => $preview['skipped']->map(fn ($a) => [
+                    'id' => $a->id,
+                    'topic' => $a->topic,
+                    'thematic' => $a->thematic,
+                    'finicial' => $a->finicial,
+                    'ffinal' => $a->ffinal,
+                    'achievements' => $a->achievements->count(),
+                ])->values()->all(),
+                'achievementsToCopy' => $preview['achievementsToCopy'],
+            ];
+            $this->copyStep = 3;
+        } catch (\InvalidArgumentException $e) {
+            $this->copyPreviewError = $e->getMessage();
+        } catch (\Throwable $e) {
+            $this->copyPreviewError = 'No se pudo cargar la vista previa: '.$e->getMessage();
+        }
+    }
+
+    public function runCopy(ActivityCopyService $service)
+    {
+        $this->validate([
+            'copySource' => 'required|in:1,2',
+            'copyFromId' => 'required|integer|min:1',
+            'copyToId' => 'required|integer|min:1|different:copyFromId',
+            'copyConfirm' => 'accepted',
+        ], [
+            'copyConfirm.accepted' => 'Debes confirmar que entiendes que no hay deshacer automático.',
+        ]);
+
+        if ($this->copyPreview === null) {
+            $this->copyPreviewError = 'Primero genera la vista previa (paso 3).';
+
+            return;
+        }
+
+        $this->copyRunning = true;
+
+        try {
+            $result = $service->copy((int) $this->copyFromId, (int) $this->copyToId, (string) $this->copySource);
+
+            $this->copyResult = [
+                'copiedActivities' => $result['copiedActivities'],
+                'copiedAchievements' => $result['copiedAchievements'],
+                'skippedActivities' => $result['skippedActivities'],
+                'to_name' => $result['to']->full_name,
+                'details' => $result['details'],
+            ];
+            $this->copyStep = 4;
+
+            $this->notification()->success(
+                title: 'Actividades copiadas',
+                description: "{$result['copiedActivities']} actividades y {$result['copiedAchievements']} indicadores copiados. {$result['skippedActivities']} omitidas."
+            );
+        } catch (\Throwable $e) {
+            $this->notification()->error(
+                title: 'No se pudo copiar',
+                description: $e->getMessage()
+            );
+        } finally {
+            $this->copyRunning = false;
+        }
+    }
+
     // ─── MODE MANAGEMENT ────────────────────────────────────────
 
     public function close()
@@ -415,6 +781,7 @@ class IndexComponent extends Component
         $this->modeComments = false;
         $this->modePreview = false;
         $this->modeSupplement = false;
+        $this->modeCopy = false;
     }
 
     #[Layout('planning.layouts.app')]

@@ -2,6 +2,7 @@
     modeObservation: @entangle('modeObservation'),
     modeComments: @entangle('modeComments'),
     modePreview: @entangle('modePreview'),
+    modeCopy: @entangle('modeCopy'),
     commentStatus: @entangle('status')
 }">
     <!-- Header -->
@@ -11,6 +12,13 @@
             <p class="text-emerald-600 dark:text-emerald-400 font-medium">Revisión y control de calidad pedagógica de los planes de evaluación.</p>
         </div>
         <div class="flex items-center gap-2">
+            <button wire:click="openCopyWizard"
+                class="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-lg shadow-emerald-500/20 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+                </svg>
+                Copiar actividades
+            </button>
             <button wire:click="$refresh"
                 class="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -701,7 +709,7 @@
                                                                 </button>
                                                                 @if(!$act->status)
                                                                     <button type="button"
-                                                                        @click="$dispatch('confirm-delete-activity', { id: {{ $act->id }}, message: '¿Eliminar la actividad «{{ addslashes($act->topic ?? '') }}»? Esta acción no se puede deshacer.' })"
+                                                                        @click="$dispatch('confirm-delete-activity', { id: {{ $act->id }}, message: '¿Eliminar la actividad «{{ addslashes(preg_replace('/\s+/', ' ', $act->topic ?? '')) }}»? Esta acción no se puede deshacer.' })"
                                                                         class="flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] bg-gray-100 dark:bg-white/5 hover:bg-red-100 dark:hover:bg-red-500/10 rounded-lg border border-gray-200 dark:border-white/5 hover:border-red-300 dark:hover:border-red-500/20 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 text-[10px] font-bold uppercase tracking-wider transition-all duration-300"
                                                                         title="Eliminar actividad">
                                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -761,7 +769,7 @@
                                             <p class="text-xs text-gray-700 dark:text-gray-200">{{ $item->observations }}</p>
                                         </div>
                                         <button type="button"
-                                            @click="$dispatch('confirm-delete-observation', { id: {{ $item->id }}, message: '¿Eliminar las observaciones de «{{ addslashes($item->pensum->asignatura->name ?? '') }}»?' })"
+                                            @click="$dispatch('confirm-delete-observation', { id: {{ $item->id }}, message: '¿Eliminar las observaciones de «{{ addslashes(preg_replace('/\s+/', ' ', $item->pensum->asignatura->name ?? '')) }}»?' })"
                                             class="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-md border border-red-200 dark:border-red-500/20 transition-all"
                                             title="Eliminar observaciones">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1198,6 +1206,196 @@
         <x-slot name="footer">
             <div class="flex justify-end">
                 <x-button flat label="Cerrar" wire:click="closeSupplementModal" />
+            </div>
+        </x-slot>
+    </x-modal-card>
+
+    <!-- ===== MODAL: Wizard copiar actividades (activity:copy) ===== -->
+    <x-modal-card title="Copiar actividades entre planes" blur="lg" wire:model="modeCopy" width="max-w-[90vw]">
+        {{-- Stepper --}}
+        <div class="flex items-center gap-1.5 mb-5">
+            @foreach(['1' => 'Origen', '2' => 'Destino', '3' => 'Vista previa', '4' => 'Resultado'] as $n => $label)
+                <button type="button" wire:click="copyGoToStep({{ $n }})"
+                    class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all
+                    {{ $copyStep == $n ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : ($copyStep > $n ? 'bg-emerald-500/5 text-emerald-600 dark:text-emerald-500 border-emerald-500/20' : 'bg-gray-50 dark:bg-white/5 text-gray-400 border-gray-200 dark:border-white/5') }}">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] {{ $copyStep >= $n ? 'bg-emerald-500 text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-500' }}">{{ $n }}</span>
+                    <span class="hidden sm:inline">{{ $label }}</span>
+                </button>
+                @if($n < 4)
+                    <div class="w-2 h-px {{ $copyStep > $n ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/10' }}"></div>
+                @endif
+            @endforeach
+        </div>
+
+        {{-- PASO 1: Origen --}}
+        @if($copyStep === 1)
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">Fuente de datos</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all {{ $copySource === '2' ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5' }}">
+                            <input type="radio" wire:model.live="copySource" value="2" class="w-4 h-4 text-emerald-500 focus:ring-emerald-500/50">
+                            <span class="text-sm text-gray-700 dark:text-gray-200"><strong>S2526</strong> <span class="text-xs text-gray-500">· período anterior</span></span>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all {{ $copySource === '1' ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5' }}">
+                            <input type="radio" wire:model.live="copySource" value="1" class="w-4 h-4 text-emerald-500 focus:ring-emerald-500/50">
+                            <span class="text-sm text-gray-700 dark:text-gray-200"><strong>Actual</strong> <span class="text-xs text-gray-500">· base en uso</span></span>
+                        </label>
+                    </div>
+                    @error('copySource')<p class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">Pevaluación origen (en la fuente)</label>
+                    <div class="space-y-2 mb-2">
+                        <x-select wire:model.live="copyPestudioId" placeholder="Plan Estudio: todos" searchable clearable>
+                            @foreach($copyPestudioOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                        <x-select wire:model.live="copyGradoId" placeholder="Grado/Año: todos" searchable clearable>
+                            @foreach($copyGradoOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                    </div>
+                    <x-input wire:model.live.debounce.300ms="copyFromSearch" placeholder="Buscar por materia, profesor, sección o ID..." />
+                    <div class="mt-2">
+                        <x-select wire:model.live="copyFromId" placeholder="Selecciona el plan origen..." searchable>
+                            @foreach($copyFromOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                    </div>
+                    @error('copyFromId')<p class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>@enderror
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-500">El origen nunca se modifica. Solo se copian <strong>actividades + indicadores</strong>; no se copian relaciones LMS ni comentarios de aprobación (<code>comments</code> queda en NULL).</p>
+            </div>
+        @endif
+
+        {{-- PASO 2: Destino --}}
+        @if($copyStep === 2)
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">Pevaluación destino (base actual)</label>
+                    <div class="space-y-2 mb-2">
+                        <x-select wire:model.live="copyToPestudioId" placeholder="Plan Estudio: todos" searchable clearable>
+                            @foreach($copyToPestudioOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                        <x-select wire:model.live="copyToGradoId" placeholder="Grado/Año: todos" searchable clearable>
+                            @foreach($copyToGradoOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                    </div>
+                    <x-input wire:model.live.debounce.300ms="copyToSearch" placeholder="Buscar por materia, profesor, sección o ID..." />
+                    <div class="mt-2">
+                        <x-select wire:model.live="copyToId" placeholder="Selecciona el plan destino..." searchable>
+                            @foreach($copyToOptions as $opt)
+                                <x-select.option :label="$opt['label']" :value="$opt['id']" :description="$opt['description']" />
+                            @endforeach
+                        </x-select>
+                    </div>
+                    @error('copyToId')<p class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        @endif
+
+        {{-- PASO 3: Vista previa --}}
+        @if($copyStep === 3)
+            <div class="space-y-4">
+                @if($copyPreviewError)
+                    <div class="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-xs text-red-700 dark:text-red-300 font-medium">{{ $copyPreviewError }}</div>
+                @endif
+                @if($copyPreview)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="p-3 rounded-lg border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.03]">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Origen #{{ $copyPreview['from_id'] }} <span class="normal-case font-normal">({{ $copyPreview['sourceConnection'] }})</span></p>
+                            <p class="text-xs font-bold text-gray-900 dark:text-white">{{ $copyPreview['from_name'] }}</p>
+                        </div>
+                        <div class="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Destino #{{ $copyPreview['to_id'] }} <span class="normal-case font-normal">({{ $copyPreview['targetConnection'] }})</span></p>
+                            <p class="text-xs font-bold text-gray-900 dark:text-white">{{ $copyPreview['to_name'] }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-[11px] font-bold">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">{{ count($copyPreview['toCopy']) }} se copiarían</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">{{ $copyPreview['achievementsToCopy'] }} indicadores</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">{{ count($copyPreview['skipped']) }} ya existen (skip)</span>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto border border-gray-200 dark:border-white/5 rounded-lg divide-y divide-gray-100 dark:divide-white/5">
+                        @forelse($copyPreview['toCopy'] as $row)
+                            <div class="flex items-start gap-2 px-3 py-2">
+                                <span class="mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold shrink-0">○</span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-gray-900 dark:text-white truncate">act {{ $row['id'] }} · {{ $row['topic'] ?? '—' }}</p>
+                                    <p class="text-[11px] text-gray-500">{{ $row['finicial'] ?? '—' }} → {{ $row['ffinal'] ?? '—' }} · {{ $row['achievements'] }} ind.</p>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-xs text-gray-500 text-center py-4">Nada que copiar: todo ya existe en el destino.</p>
+                        @endforelse
+                        @foreach($copyPreview['skipped'] as $row)
+                            <div class="flex items-start gap-2 px-3 py-2 opacity-70">
+                                <span class="mt-0.5 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-bold shrink-0">→</span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">act {{ $row['id'] }} · {{ $row['topic'] ?? '—' }} (ya existe)</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <label class="flex items-start gap-2 p-3 rounded-lg border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5 cursor-pointer">
+                        <input type="checkbox" wire:model="copyConfirm" class="mt-0.5 w-4 h-4 text-emerald-500 rounded focus:ring-emerald-500/50">
+                        <span class="text-xs text-amber-800 dark:text-amber-200">Entiendo que la copia es idempotente (omite duplicados por huella topic+thematic+fechas) y que <strong>no hay deshacer automático</strong>.</span>
+                    </label>
+                    @error('copyConfirm')<p class="text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>@enderror
+                @endif
+            </div>
+        @endif
+
+        {{-- PASO 4: Resultado --}}
+        @if($copyStep === 4 && $copyResult)
+            <div class="space-y-4">
+                <div class="p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-center">
+                    <p class="text-sm font-black text-emerald-600 dark:text-emerald-400">¡Copia completada!</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ $copyResult['to_name'] }}</p>
+                    <div class="flex flex-wrap justify-center gap-2 mt-3 text-[11px] font-bold">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">{{ $copyResult['copiedActivities'] }} actividades</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">{{ $copyResult['copiedAchievements'] }} indicadores</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">{{ $copyResult['skippedActivities'] }} omitidas</span>
+                    </div>
+                </div>
+                <div class="max-h-48 overflow-y-auto border border-gray-200 dark:border-white/5 rounded-lg divide-y divide-gray-100 dark:divide-white/5">
+                    @foreach($copyResult['details'] as $detail)
+                        <div class="px-3 py-1.5 text-xs {{ $detail['status'] === 'copied' ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400' }}">
+                            @if($detail['status'] === 'copied')
+                                ✓ act {{ $detail['id'] }} → {{ $detail['new_id'] }}: {{ $detail['topic'] }}
+                            @else
+                                → act {{ $detail['id'] }} omitida (ya existía): {{ $detail['topic'] }}
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <x-slot name="footer">
+            <div class="flex justify-between gap-3">
+                <x-button flat label="Cerrar" wire:click="closeCopyWizard" />
+                <div class="flex gap-2">
+                    @if($copyStep === 1)
+                        <x-button primary label="Siguiente →" wire:click="copyGoToStep(2)" />
+                    @elseif($copyStep === 2)
+                        <x-button flat label="← Atrás" wire:click="copyGoToStep(1)" />
+                        <x-button primary label="Vista previa" wire:click="loadCopyPreview" spinner="loadCopyPreview" />
+                    @elseif($copyStep === 3)
+                        <x-button flat label="← Atrás" wire:click="copyGoToStep(2)" />
+                        <x-button primary label="Copiar ahora" wire:click="runCopy" spinner="runCopy" />
+                    @elseif($copyStep === 4)
+                        <x-button primary label="Listo" wire:click="closeCopyWizard" />
+                    @endif
+                </div>
             </div>
         </x-slot>
     </x-modal-card>

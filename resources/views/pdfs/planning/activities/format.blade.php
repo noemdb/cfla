@@ -88,6 +88,11 @@
                     </td>
                 </tr>
                 {{-- Fila completa para Enseñanza/Actividad Globalizada --}}
+                <tr class="teaching-row">
+                    <td colspan="7">
+                        <span class="teaching-label">{{ ($labels ?? [])['teaching_assessment'] ?? 'Enseñanza y Evaluación' }}:</span>
+                    </td>
+                </tr>
                 @php $sections = $act->teaching ? $act->getTeachingSections() : []; @endphp
                 @if(!empty($sections))
                     <tr class="teaching-row">

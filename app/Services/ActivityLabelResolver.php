@@ -28,6 +28,7 @@ class ActivityLabelResolver
     public const VIRTUAL_LABELS = [
         'activity.topic_thematic_referentes' => 'Referentes teórico-prácticos',
         'activity.ODS_sistematizacion' => 'ODS / Sistematización',
+        'activity.teaching_assessment' => 'Enseñanza y Evaluación',
     ];
 
     /**

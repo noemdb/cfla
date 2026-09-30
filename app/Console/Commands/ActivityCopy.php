@@ -2,11 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\app\Academy\Activity;
-use App\Models\app\Academy\Pevaluacion;
+use App\Services\Planning\ActivityCopyService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Copia las activities y sus achievements de una Pevaluación origen a una
@@ -33,19 +30,13 @@ class ActivityCopy extends Command
 
     protected $description = 'Copia las actividades (y sus indicadores) entre Pevaluaciones, eligiendo la fuente de datos (DB_CONNECTION o S2526)';
 
-    private int $copiedActivities = 0;
-
-    private int $copiedAchievements = 0;
-
-    private int $skippedActivities = 0;
-
-    public function handle(): int
+    public function handle(ActivityCopyService $service): int
     {
         $fromId = (int) $this->option('from');
         $toId = (int) $this->option('to');
         $dryRun = (bool) $this->option('dry-run');
 
-        $sourceConnection = $this->resolveSourceConnection((string) $this->option('source'));
+        $sourceConnection = $service->resolveSourceConnection((string) $this->option('source'));
         if ($sourceConnection === null) {
             $this->error('Fuente de datos inválida. Usa --source=1 (DB_CONNECTION) o --source=2 (DB_CONNECTION_S2526).');
 
@@ -54,38 +45,17 @@ class ActivityCopy extends Command
 
         $targetConnection = (string) ($this->option('target-connection') ?: config('database.default'));
 
-        if (! $fromId || ! $toId) {
-            $this->error('Debes indicar --from y --to con los IDs de las Pevaluaciones.');
+        try {
+            $preview = $service->preview($fromId, $toId, (string) $this->option('source'), $targetConnection);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
 
             return self::FAILURE;
         }
 
-        if ($fromId === $toId && $sourceConnection === $targetConnection) {
-            $this->error('La Pevaluación origen y destino no pueden ser la misma.');
-
-            return self::FAILURE;
-        }
-
-        $from = Pevaluacion::on($sourceConnection)
-            ->with('pensum.asignatura', 'pensum.grado', 'seccion', 'lapso')
-            ->find($fromId);
-
-        $to = Pevaluacion::on($targetConnection)
-            ->with('pensum.asignatura', 'pensum.grado', 'seccion', 'lapso')
-            ->find($toId);
-
-        if (! $from || ! $to) {
-            $this->error('Pevaluación origen o destino no encontrada.');
-
-            return self::FAILURE;
-        }
-
-        $sourceActivities = Activity::on($sourceConnection)
-            ->with('achievements')
-            ->where('pevaluacion_id', $from->id)
-            ->orderBy('finicial')
-            ->orderBy('id')
-            ->get();
+        $from = $preview['from'];
+        $to = $preview['to'];
+        $sourceActivities = $preview['toCopy']->concat($preview['skipped'])->sortBy([['finicial', 'asc'], ['id', 'asc']])->values();
 
         $this->info('=== Origen ===');
         $this->line("Fuente: {$this->option('source')} (conexión: {$sourceConnection})");
@@ -113,103 +83,59 @@ class ActivityCopy extends Command
             return self::SUCCESS;
         }
 
-        $existingFingerprints = Activity::on($targetConnection)
-            ->where('pevaluacion_id', $to->id)
-            ->get(['topic', 'thematic', 'finicial', 'ffinal'])
-            ->mapWithKeys(fn ($a) => [$this->fingerprint($a) => true]);
-
-        DB::connection($targetConnection)->beginTransaction();
-
-        try {
-            foreach ($sourceActivities as $source) {
-                if ($existingFingerprints->has($this->fingerprint($source))) {
-                    $this->line("  → act {$source->id}: ya existe en destino, skip — {$source->topic}");
-                    $this->skippedActivities++;
-
-                    continue;
-                }
-
-                if ($dryRun) {
-                    $this->line("  ○ act {$source->id}: se copiaría — {$source->topic}");
-                    $this->copiedActivities += 1;
-                    $this->copiedAchievements += $source->achievements->count();
-
-                    continue;
-                }
-
-                $copy = $source->replicate();
-                $copy->setConnection($targetConnection);
-                $copy->pevaluacion_id = $to->id;
-                $copy->comments = null;
-                $copy->save();
-
-                foreach ($source->achievements as $achievement) {
-                    $achievementCopy = $achievement->replicate();
-                    $achievementCopy->setConnection($targetConnection);
-                    $achievementCopy->activity_id = $copy->id;
-                    $achievementCopy->save();
-                    $this->copiedAchievements++;
-                }
-
-                $existingFingerprints->put($this->fingerprint($copy), true);
-                $this->copiedActivities++;
-                $this->line("  ✓ act {$source->id} → {$copy->id}: {$source->topic}");
+        if ($dryRun) {
+            $this->warn('MODO DRY-RUN — no se escribirá nada.');
+            foreach ($preview['toCopy'] as $source) {
+                $this->line("  ○ act {$source->id}: se copiaría — {$source->topic}");
             }
-
-            if ($dryRun) {
-                DB::connection($targetConnection)->rollBack();
-                $this->newLine();
-                $this->warn('DRY-RUN completado — cambios no persistidos.');
-            } else {
-                DB::connection($targetConnection)->commit();
-                $this->newLine();
-                $this->info('Copia completada.');
+            foreach ($preview['skipped'] as $source) {
+                $this->line("  → act {$source->id}: ya existe en destino, skip — {$source->topic}");
             }
-
+            $this->newLine();
+            $this->warn('DRY-RUN completado — cambios no persistidos.');
             $this->newLine();
             $this->table(
                 ['Métrica', 'Valor'],
                 [
-                    ['Actividades copiadas', $this->copiedActivities],
-                    ['Indicadores copiados', $this->copiedAchievements],
-                    ['Actividades omitidas (ya existían)', $this->skippedActivities],
+                    ['Actividades que se copiarían', $preview['toCopy']->count()],
+                    ['Indicadores que se copiarían', $preview['achievementsToCopy']],
+                    ['Actividades omitidas (ya existían)', $preview['skipped']->count()],
+                ]
+            );
+
+            return self::SUCCESS;
+        }
+
+        try {
+            $result = $service->copy($fromId, $toId, (string) $this->option('source'), $targetConnection);
+
+            foreach ($result['details'] as $detail) {
+                if ($detail['status'] === 'skipped') {
+                    $this->line("  → act {$detail['id']}: ya existe en destino, skip — {$detail['topic']}");
+                } else {
+                    $this->line("  ✓ act {$detail['id']} → {$detail['new_id']}: {$detail['topic']}");
+                }
+            }
+
+            $this->newLine();
+            $this->info('Copia completada.');
+            $this->newLine();
+            $this->table(
+                ['Métrica', 'Valor'],
+                [
+                    ['Actividades copiadas', $result['copiedActivities']],
+                    ['Indicadores copiados', $result['copiedAchievements']],
+                    ['Actividades omitidas (ya existían)', $result['skippedActivities']],
                 ]
             );
 
             return self::SUCCESS;
         } catch (\Throwable $e) {
-            DB::connection($targetConnection)->rollBack();
             $this->error("Error: {$e->getMessage()}");
             $this->line($e->getTraceAsString());
 
             return self::FAILURE;
         }
-    }
-
-    /**
-     * Resuelve la conexión de origen a partir de la opción --source.
-     * 1 = DB_CONNECTION, 2 = DB_CONNECTION_S2526.
-     */
-    private function resolveSourceConnection(string $source): ?string
-    {
-        return match ($source) {
-            '1' => (string) config('database.default'),
-            '2' => 's2526',
-            default => null,
-        };
-    }
-
-    /**
-     * Huella de una actividad para detectar copias ya existentes en el destino.
-     */
-    private function fingerprint(Activity $activity): string
-    {
-        return implode('|', [
-            trim((string) $activity->topic),
-            trim((string) $activity->thematic),
-            $activity->finicial ? Carbon::parse($activity->finicial)->toDateString() : '',
-            $activity->ffinal ? Carbon::parse($activity->ffinal)->toDateString() : '',
-        ]);
     }
 }
 
