@@ -28,7 +28,8 @@
             label="Actividades" value="{{ number_format($totalActivities) }}" color="emerald" />
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-            label="Evaluaciones" value="{{ number_format($totalPevaluacions) }}" color="emerald" />
+            label="Evaluaciones" value="{{ number_format($totalPevaluacions) }}" color="emerald"
+            subtext="Respuestas diagnóstico: {{ number_format($totalDiagAnswers) }}" />
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
             label="Profesores Activos" value="{{ number_format($totalProfesoresActivos) }}" color="emerald" />

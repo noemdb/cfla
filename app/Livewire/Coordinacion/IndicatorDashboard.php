@@ -10,6 +10,7 @@ use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Activity;
+use App\Models\app\Instrument\DiagAnswer;
 use App\Services\Lms\CoordinacionScopeService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -54,6 +55,7 @@ class IndicatorDashboard extends Component
     public $totalActivities = 0;
     public $totalProfesoresActivos = 0;
     public $totalPevaluacions = 0;
+    public $totalDiagAnswers = 0;
 
     // Charts
     public $chartActivitiesByDay = [];
@@ -299,6 +301,12 @@ class IndicatorDashboard extends Component
         $this->totalPevaluacions = Pevaluacion::join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->whereIn('pensums.pestudio_id', $this->pestudioIds)
             ->count();
+
+        // Respuestas de diagnóstico registradas en el ámbito del coordinador:
+        // DiagAnswer → DiagQuestion → Pensum → Pestudio (peducativo.manager_id = user).
+        $this->totalDiagAnswers = DiagAnswer::whereHas('question.pensum', function ($q) {
+            $q->whereIn('pestudio_id', $this->pestudioIds);
+        })->count();
 
         // ══ TAB 2: Profesores data ══
         $this->tab2Data = [];
