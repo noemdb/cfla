@@ -25,6 +25,7 @@ class IndexComponent extends Component
 
     public $activity, $activity_id, $pevaluacion_id, $objetivo, $comments, $status;
     public $previewActivity;
+    public $supplementActivity = null;
     public $pevaluacion, $observations, $pestudios;
     public $lapso_current;
 
@@ -33,6 +34,7 @@ class IndexComponent extends Component
     public $modeObservation = false;
     public $modeComments = false;
     public $modePreview = false;
+    public $modeSupplement = false;
 
     // Filters
     public $pestudio_id, $grado_id, $seccion_id, $lapso_id, $profesor_id;
@@ -185,6 +187,7 @@ class IndexComponent extends Component
         ])
         ->with('activities.lmsPublication')
         ->with('activities.lmsSections')
+        ->with('activities.supplement')
         ->withCount([
             'activities',
             'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
@@ -388,6 +391,21 @@ class IndexComponent extends Component
         $this->modePreview = true;
     }
 
+    // ─── MODAL SUPLEMENTO (solo lectura) ──────────────────────────
+
+    public function openSupplementModal($activityId)
+    {
+        $this->supplementActivity = Activity::with('supplement')->findOrFail($activityId);
+        $this->close();
+        $this->modeSupplement = true;
+    }
+
+    public function closeSupplementModal()
+    {
+        $this->supplementActivity = null;
+        $this->close();
+    }
+
     // ─── MODE MANAGEMENT ────────────────────────────────────────
 
     public function close()
@@ -396,6 +414,7 @@ class IndexComponent extends Component
         $this->modeObservation = false;
         $this->modeComments = false;
         $this->modePreview = false;
+        $this->modeSupplement = false;
     }
 
     #[Layout('planning.layouts.app')]

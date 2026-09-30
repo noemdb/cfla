@@ -581,6 +581,9 @@
                                                     @if($act->status !== null)
                                                         <span class="w-1.5 h-1.5 rounded-full {{ $act->status ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                                     @endif
+                                                    @if($act->supplement && (!empty(trim($act->supplement->text ?? '')) || !empty($act->supplement->image_url)))
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400" title="Tiene información complementaria"></span>
+                                                    @endif
                                                 </span>
                                             </button>
                                         @endforeach
@@ -606,6 +609,44 @@
                                                     <!-- Topic -->
                                                     <p class="text-sm text-gray-800 dark:text-gray-100 font-medium mb-1">{{ $act->topic }}</p>
                                                     <p class="text-xs text-gray-500 dark:text-gray-300 line-clamp-2">{{ $act->teaching }}</p>
+
+                                                    <!-- Señalización (E / Ev / suplemento) -->
+                                                    <div class="flex items-center gap-1.5 mt-2">
+                                                        @if(!empty($act->teaching))
+                                                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20" title="Contiene planificación de enseñanza">
+                                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                                                </svg>
+                                                                <span>E</span>
+                                                            </span>
+                                                        @endif
+                                                        @if(!empty($act->description))
+                                                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20" title="Contiene actividad evaluativa">
+                                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                </svg>
+                                                                <span>Ev</span>
+                                                            </span>
+                                                        @endif
+                                                        @if($act->supplement && !empty(trim($act->supplement->text ?? '')))
+                                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-md text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/25" title="Tiene texto complementario">T</span>
+                                                        @endif
+                                                        @if($act->supplement && !empty($act->supplement->image_url))
+                                                            <span class="inline-flex items-center justify-center min-w-[30px] px-1 rounded-md text-[9px] font-bold bg-violet-500/15 text-violet-400 border border-violet-500/25" title="Tiene imagen complementaria">
+                                                                <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                                <span>IMG</span>
+                                                            </span>
+                                                        @endif
+                                                        @if($act->supplement && (!empty(trim($act->supplement->text ?? '')) || !empty($act->supplement->image_url)))
+                                                            <button type="button" wire:click="openSupplementModal({{ $act->id }})"
+                                                                title="Información complementaria"
+                                                                class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                                </svg>
+                                                            </button>
+                                                        @endif
+                                                    </div>
 
                                                     <!-- Word quality indicator -->
                                                     @php
@@ -1121,6 +1162,42 @@
         <x-slot name="footer">
             <div class="flex justify-end">
                 <x-button flat label="Cerrar" x-on:click="modePreview = false" />
+            </div>
+        </x-slot>
+    </x-modal-card>
+
+    <!-- ===== MODAL: Información Complementaria (solo lectura) ===== -->
+    <x-modal-card title="Información Complementaria" blur="lg" wire:model="modeSupplement" width="max-w-2xl" class="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-gray-900">
+        @if($supplementActivity)
+            <div class="space-y-5">
+                <div class="bg-gray-50 dark:bg-white/5 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-white/5">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1">Actividad</div>
+                    <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $supplementActivity->topic ?? '—' }}</p>
+                </div>
+
+                @if(!empty(trim($supplementActivity->supplement?->text ?? '')))
+                    <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5">Texto complementario</div>
+                        <p class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ $supplementActivity->supplement->text }}</p>
+                    </div>
+                @endif
+
+                @if(!empty($supplementActivity->supplement?->image_url))
+                    <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5">Imagen complementaria</div>
+                        <img src="{{ str_starts_with($supplementActivity->supplement->image_url, 'http') ? $supplementActivity->supplement->image_url : \Illuminate\Support\Facades\Storage::url($supplementActivity->supplement->image_url) }}"
+                            alt="Imagen complementaria" class="rounded-lg border border-gray-200 dark:border-white/10 max-h-96 w-auto mx-auto">
+                    </div>
+                @endif
+
+                @if(empty(trim($supplementActivity->supplement?->text ?? '')) && empty($supplementActivity->supplement?->image_url))
+                    <p class="text-sm text-gray-500 dark:text-slate-400 text-center py-6">Esta actividad no tiene información complementaria registrada.</p>
+                @endif
+            </div>
+        @endif
+        <x-slot name="footer">
+            <div class="flex justify-end">
+                <x-button flat label="Cerrar" wire:click="closeSupplementModal" />
             </div>
         </x-slot>
     </x-modal-card>

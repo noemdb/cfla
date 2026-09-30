@@ -128,6 +128,16 @@
         </div>
     </div>
 
+    {{-- Buscador global (siempre habilitado; filtra al elegir pensum) --}}
+    <div class="px-4 sm:px-6 py-3 bg-gray-800/20 border-b border-white/5">
+        <div class="relative">
+            <input type="text" wire:model.live.debounce.300ms="search"
+                placeholder="Filtrar por texto de pregunta…"
+                class="w-full bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 pl-8 pr-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+            <svg class="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+    </div>
+
     {{-- Filters row (only when pensum selected) --}}
     @if($selectedPensum)
         <div class="px-4 sm:px-6 py-3 bg-gray-800/20 border-b border-white/5 flex flex-col sm:flex-row gap-2 sm:items-center justify-between">
@@ -138,12 +148,6 @@
                 <span class="hidden sm:inline text-gray-500">{{ $selectedPensum->pestudio?->code }} · {{ $totalQuestions }} pregunta(s)</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="relative">
-                    <input type="text" wire:model.live.debounce.300ms="search"
-                        placeholder="Filtrar por texto de pregunta…"
-                        class="w-full sm:w-64 bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 pl-8 pr-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
-                    <svg class="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </div>
                 <label class="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-gray-400">
                     <input type="checkbox" wire:model.live="showInactive" class="rounded border-white/10 bg-gray-800 text-cyan-500 focus:ring-cyan-500/20">
                     Inactivas

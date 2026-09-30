@@ -222,7 +222,7 @@ class PevaluacionList extends Component
         }
 
         $pevaluacions = $pevaluacionsQuery->with([
-            'activities.achievements', 'pensum.asignatura',
+            'activities.achievements', 'activities.supplement', 'pensum.asignatura',
             'pensum.grado.pestudio', 'seccion', 'lapso', 'grupoEstable',
         ])->paginate($this->paginate);
 
