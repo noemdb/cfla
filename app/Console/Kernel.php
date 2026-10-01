@@ -69,11 +69,16 @@ class Kernel extends ConsoleKernel
         // no leídas nunca, salvo que se pase --purge-unread-days a mano.
         $schedule->command('notifications:prune')->weeklyOn(0, '05:00')->withoutOverlapping();
 
+        // Vigilante de errores del log: avisa al superadmin (las ÚNICAS
+        // notificaciones que recibe) de cada entrada ERROR nueva de
+        // storage/logs. Arranca desde el final en la primera ejecución.
+        $schedule->command('admin:notify-log-errors')->everyFiveMinutes()->withoutOverlapping();
+
         // Chart "sesiones activas" del dashboard /admin: emite cada minuto
         // el conteo al canal privado admin.sessions vía Reverb. Sin overlap
         // para no acumular emisiones si Reverb responde lento.
         // se desactiva, no es necesario, reverb se encarga de enviar el conteo de sesiones activas cada minuto
-        //$schedule->command('admin:broadcast-sessions')->everyMinute()->withoutOverlapping();
+        // $schedule->command('admin:broadcast-sessions')->everyMinute()->withoutOverlapping();
     }
 
     protected $commands = [

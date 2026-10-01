@@ -20,6 +20,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Regla del superadmin (userId=1)
+    |--------------------------------------------------------------------------
+    | El superadmin solo recibe las notificaciones de ESTOS tipos: las alertas
+    | de error del log de Laravel (`admin/logs`). Todo lo demás (actividades,
+    | lecciones, horarios, recordatorios…) se filtra en `NotificationService`
+    | aunque tenga otros roles (is_admin, is_planner…), para que su campana no
+    | se llene de avisos operativos que no le corresponden.
+    */
+    'superadmin_id' => (int) env('NOTIFICATIONS_SUPERADMIN_ID', 1),
+    'superadmin_types' => ['laravel_log_error'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Marcar como leídas al visitar el destino (ítem 12)
     |--------------------------------------------------------------------------
     | Rutas cuyo listado ES el destino de uno o más tipos de notificación. Al

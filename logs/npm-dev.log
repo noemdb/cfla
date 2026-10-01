@@ -172,3 +172,5 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 9:14:57 AM [vite] page reload resources/views/admin/index.blade.php
 9:15:41 AM [vite] full reload resources/views/admin/index.blade.php
 9:15:41 AM [vite] page reload resources/views/admin/index.blade.php
+9:34:55 AM [vite] full reload app/Livewire/Admin/Logs/Services/LogParser.php
+9:34:55 AM [vite] page reload app/Livewire/Admin/Logs/Services/LogParser.php

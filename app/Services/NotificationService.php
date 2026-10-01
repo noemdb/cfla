@@ -114,6 +114,13 @@ class NotificationService
     public function notifyUsers(iterable $recipients, BaseNotification $notification, $fingerprint = null, int $idempotencyMinutes = self::IDEMPOTENCY_MINUTES): int
     {
         $recipients = collect($recipients);
+
+        // Regla del superadmin: solo recibe las alertas de error del log.
+        // Todo lo demás se le filtra aunque tenga otros roles (is_admin,
+        // is_planner…), porque su campana no debe llenarse de avisos
+        // operativos que no le corresponden.
+        $recipients = $this->applySuperadminRule($recipients, $notification)->values();
+
         $sentAt = now();
         $fingerprint = $this->normalizeFingerprint($fingerprint);
         $idempotent = $fingerprint !== null && $idempotencyMinutes > 0;
@@ -205,6 +212,62 @@ class NotificationService
         $this->auditDispatched($notification, $payloadType, $sent, $duplicates, $failed, $idempotent);
 
         return $sent;
+    }
+
+    /**
+     * Id del superadmin (`config/notifications.php#superadmin_id`).
+     */
+    public function superadminId(): int
+    {
+        return (int) config('notifications.superadmin_id', 1);
+    }
+
+    /**
+     * ¿Puede este aviso llegar a este usuario según la regla del superadmin?
+     *
+     * Para todos menos el superadmin siempre es `true`. El superadmin solo
+     * recibe los tipos listados en `superadmin_types` (alertas de error del
+     * log), aunque tenga otros roles. Se evalúa contra el `type` del payload,
+     * no contra la clase, para que la regla sobreviva a refactors de nombres.
+     */
+    public function isSuperadminAllowed(User $user, BaseNotification $notification): bool
+    {
+        if ((int) $user->id !== $this->superadminId()) {
+            return true;
+        }
+
+        $type = (string) (((array) $this->presentationData($notification, $user))['type'] ?? '');
+        $allowed = (array) config('notifications.superadmin_types', []);
+
+        return $type !== '' && in_array($type, $allowed, true);
+    }
+
+    /**
+     * Regla del superadmin: lo quita de los destinatarios salvo que el aviso
+     * sea de un tipo permitido.
+     *
+     * Se aplica aunque el superadmin tenga otros roles: la audiencia de cada
+     * observer lo incluiría (is_admin entra en casi todos los conjuntos), así
+     * que sin este filtro su campana se llenaría de avisos operativos.
+     *
+     * @param  \Illuminate\Support\Collection<int, User>  $recipients
+     * @return \Illuminate\Support\Collection<int, User>
+     */
+    private function applySuperadminRule($recipients, BaseNotification $notification)
+    {
+        $superadminId = $this->superadminId();
+
+        if (! $recipients->contains(fn (User $user) => (int) $user->id === $superadminId)) {
+            return $recipients;
+        }
+
+        $admin = $recipients->first(fn (User $user) => (int) $user->id === $superadminId);
+
+        if ($this->isSuperadminAllowed($admin, $notification)) {
+            return $recipients;
+        }
+
+        return $recipients->reject(fn (User $user) => (int) $user->id === $superadminId);
     }
 
     /**

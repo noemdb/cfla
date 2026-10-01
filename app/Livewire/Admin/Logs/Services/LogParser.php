@@ -213,12 +213,9 @@ class LogParser
             return @file_get_contents($path) ?: '';
         });
 
-        $entries = array_map(fn ($chunk) => $this->normalize((string) $chunk), $this->split($raw));
+        $entries = $this->parseContent($raw, $level);
 
         // Apply filters in memory (files are small thanks to the size guard above).
-        if ($level) {
-            $entries = array_values(array_filter($entries, fn ($e) => $e['level'] === strtoupper($level)));
-        }
         if ($search) {
             $needle = mb_strtolower($search);
             $entries = array_values(array_filter(
@@ -241,6 +238,28 @@ class LogParser
 
         // Sort by date descending by default (most recent first).
         usort($entries, fn ($a, $b) => strcmp($b['date'], $a['date']));
+
+        return $entries;
+    }
+
+    /**
+     * Parse un tramo de contenido crudo (p. ej. los bytes nuevos de un `tail`)
+     * con la misma normalización que `parse()`, en orden cronológico.
+     *
+     * Lo usa el vigilante de errores (`admin:notify-log-errors`) para no
+     * releer el archivo completo en cada pasada.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function parseContent(string $content, ?string $level = null): array
+    {
+        $entries = array_map(fn ($chunk) => $this->normalize((string) $chunk), $this->split($content));
+
+        if ($level) {
+            $entries = array_values(array_filter($entries, fn ($e) => $e['level'] === strtoupper($level)));
+        }
+
+        usort($entries, fn ($a, $b) => strcmp($a['date'], $b['date']));
 
         return $entries;
     }

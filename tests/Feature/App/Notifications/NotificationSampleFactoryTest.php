@@ -4,6 +4,7 @@ namespace Tests\Feature\App\Notifications;
 
 use App\Models\User;
 use App\Notifications\ActivityCreatedNotification;
+use App\Notifications\AdminLogErrorNotification;
 use App\Notifications\BinnacleBacklogNotification;
 use App\Notifications\DiagQuestionNotification;
 use App\Notifications\ReverbTestNotification;
@@ -241,5 +242,25 @@ class NotificationSampleFactoryTest extends TestCase
             '--notification' => 'peducativo',
             '--only-notify' => true,
         ])->assertExitCode(1);
+    }
+
+    public function test_comando_al_superadmin_envia_la_muestra_permitida_en_su_lugar(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'is_active' => 'enable']);
+
+        config(['notifications.superadmin_id' => $admin->id]);
+
+        // Sin el fallback esto devolvería exit 1 y no escribiría nada: el tipo
+        // por defecto se filtra por la regla del superadmin.
+        $this->reverbTest([
+            '--notify' => $admin->username,
+            '--only-notify' => true,
+        ])->assertExitCode(0);
+
+        $last = $admin->notifications()->orderByDesc('created_at')->first();
+
+        $this->assertNotNull($last);
+        $this->assertSame(AdminLogErrorNotification::class, $last->type);
+        $this->assertSame('laravel_log_error', $last->data['type']);
     }
 }

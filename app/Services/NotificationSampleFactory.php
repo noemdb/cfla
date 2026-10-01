@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Notifications\ActivityApprovedNotification;
 use App\Notifications\ActivityCreatedNotification;
+use App\Notifications\AdminLogErrorNotification;
 use App\Notifications\BinnacleBacklogNotification;
 use App\Notifications\BinnacleDailyReportNotification;
 use App\Notifications\CompetitionUpdateNotification;
@@ -48,6 +49,7 @@ class NotificationSampleFactory
         'reverb_test' => ReverbTestNotification::class,
         'activity_created' => ActivityCreatedNotification::class,
         'activity_approved' => ActivityApprovedNotification::class,
+        'laravel_log_error' => AdminLogErrorNotification::class,
         'lesson_scheduled' => LessonScheduledForApproval::class,
         'lms_activity_published' => LmsActivityPublicationNotification::class,
         'lms_publication_deleted' => LmsActivityPublicationNotification::class,
@@ -184,6 +186,20 @@ class NotificationSampleFactory
     private static function build(string $class, string $recipientLabel, ?string $alias = null): BaseNotification
     {
         $now = now();
+
+        if ($alias === 'laravel_log_error') {
+            return new AdminLogErrorNotification(
+                type: 'laravel_log_error',
+                message: '[ERROR] laravel.log — Error de prueba del vigilante (muestra).',
+                url: route('admin.logs'),
+                logFile: 'laravel.log',
+                logDate: $now->toDateTimeString(),
+                logEnv: config('app.env'),
+                logContext: null,
+                logHash: sha1('muestra'),
+                action: 'registró un error',
+            );
+        }
 
         // Muestras que dependen del alias y no solo de la clase.
         if ($alias === 'lms_activity_published' || $alias === 'lms_publication_deleted') {

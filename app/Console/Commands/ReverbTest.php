@@ -387,10 +387,31 @@ class ReverbTest extends Command
         $this->line('  Destinatario: #'.$user->id.' '.$user->username.' <'.$user->email.'>');
         $this->line('  Tipo: '.class_basename($notification::class).'  (--notification='.$requested.')');
 
+        // Al superadmin solo le llegan las alertas de error del log: si el tipo
+        // pedido se filtraría, se envía en su lugar la muestra permitida para
+        // que la prueba de la campana siga sirviendo (y se dice en voz alta).
+        if (! app(NotificationService::class)->isSuperadminAllowed($user, $notification)) {
+            $this->warn("  El tipo '{$requested}' se filtraría por la regla del superadmin (solo recibe alertas de error del log): se envía 'laravel_log_error' en su lugar.");
+            $notification = NotificationSampleFactory::make('laravel_log_error', $user->username);
+            $this->line('  Tipo: AdminLogErrorNotification  (--notification=laravel_log_error, fallback)');
+        }
+
         try {
-            app(NotificationService::class)->notifyUsers([$user], $notification);
+            $sent = app(NotificationService::class)->notifyUsers([$user], $notification);
         } catch (\Throwable $e) {
             $this->warn('  NotificationService lanzó: '.$e->getMessage());
+
+            return false;
+        }
+
+        if ($sent === 0) {
+            $superadminId = (int) config('notifications.superadmin_id', 1);
+
+            if ((int) $user->id === $superadminId) {
+                $this->warn('  El envío se filtró por la regla del superadmin: userId='.$superadminId.' solo recibe alertas de error del log (--notification=laravel_log_error).');
+            } else {
+                $this->warn('  El envío se omitió (anti-spam/idempotencia o sin destinatarios).');
+            }
 
             return false;
         }
