@@ -140,3 +140,35 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 7:06:10 PM [vite] page reload resources/views/pdfs/planning/activities/format.blade.php
 7:09:46 PM [vite] full reload app/Livewire/Planning/ActivityLabel/IndexComponent.php
 7:09:46 PM [vite] page reload app/Livewire/Planning/ActivityLabel/IndexComponent.php
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 2339 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+8:54:12 AM [vite] full reload routes/channels.php
+8:54:25 AM [vite] page reload resources/js/bootstrap.js
+8:55:06 AM [vite] full reload resources/views/admin/index.blade.php
+8:55:06 AM [vite] page reload resources/views/admin/index.blade.php
+8:55:51 AM [vite] full reload resources/views/admin/index.blade.php
+8:55:51 AM [vite] page reload resources/views/admin/index.blade.php
+9:13:28 AM [vite] full reload resources/views/admin/index.blade.php
+9:13:28 AM [vite] page reload resources/views/admin/index.blade.php
+9:14:06 AM [vite] full reload resources/views/admin/index.blade.php
+9:14:06 AM [vite] page reload resources/views/admin/index.blade.php
+9:14:57 AM [vite] full reload resources/views/admin/index.blade.php
+9:14:57 AM [vite] page reload resources/views/admin/index.blade.php
+9:15:41 AM [vite] full reload resources/views/admin/index.blade.php
+9:15:41 AM [vite] page reload resources/views/admin/index.blade.php

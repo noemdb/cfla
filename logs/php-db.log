@@ -2221,3 +2221,7 @@
 [Mon Sep 28 19:14:06 2026] 127.0.0.1:58630 Accepted
 [Mon Sep 28 19:14:06 2026] 127.0.0.1:58630 [200]: POST /index.php?route=/config/set
 [Mon Sep 28 19:14:06 2026] 127.0.0.1:58630 Closing
+[Thu Oct  1 08:40:57 2026] PHP 8.2.30 Development Server (http://127.0.0.1:8080) started
+[Thu Oct  1 08:42:15 2026] 127.0.0.1:33858 Accepted
+[Thu Oct  1 08:43:15 2026] 127.0.0.1:33858 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Oct  1 08:43:15 2026] 127.0.0.1:33858 Closing

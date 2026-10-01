@@ -153,7 +153,10 @@ class NotificationMetricsTest extends TestCase
         $this->assertNotNull($json['stored']['read_rate']);
 
         $this->assertNotEmpty($json['by_notification']);
-        $this->assertSame('ActivityCreatedNotification', $json['by_notification'][0]['notification']);
+        // La tabla viene ordenada por enviadas de la ventana, que acumula
+        // historia: no se comprueba la posición, sino que esté la de este test.
+        $classes = array_column($json['by_notification'], 'notification');
+        $this->assertContains('ActivityCreatedNotification', $classes);
     }
 
     /**

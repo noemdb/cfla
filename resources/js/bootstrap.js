@@ -54,5 +54,18 @@ if (document.documentElement.dataset.reverb === 'enabled') {
                 }
             });
     }
+
+    /*
+     * Canal de PRESENCIA `presence-app.sessions`.
+     *
+     * Reverb mantiene la lista de miembros y empuja `member_added` /
+     * `member_removed` al instante, así que el dashboard /admin puede seguir
+     * los usuarios conectados en tiempo real sin polling ni scheduler.
+     *
+     * Se une UNA sola vez y se expone en `window.sessionsPresence`: si dos
+     * partes de la página llamaran a `Echo.join()` por su cuenta, la misma
+     * persona se contaría dos veces (una por pestaña).
+     */
+    window.sessionsPresence = window.Echo.join('app.sessions');
 }
 

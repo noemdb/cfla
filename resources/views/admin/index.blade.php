@@ -113,34 +113,38 @@
         <!-- Dialog: usuarios con sesión activa (WireUI x-dialog) -->
         <x-dialog id="active-sessions" title="Usuarios con sesión activa" width="lg" blur="lg">
             <div class="text-left">
-                <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">
-                    Actividad en los últimos 15 minutos · {{ $onlineUsers->count() }} usuario(s) · actualizado al cargar la página ({{ now()->format('H:i:s') }})
+                <p id="activeSessionsMeta" class="text-xs text-gray-500 dark:text-slate-400 mb-4">
+                    <span id="activeSessionsLiveBadge" class="font-bold text-emerald-400">En vivo</span>
+                    <span class="text-gray-600"> · WebSocket (Reverb) · canal de presencia</span>
+                    <span id="activeSessionsLiveCount" class="ml-1"></span>
                 </p>
-                @if ($onlineUsers->isEmpty())
-                    <div class="py-8 text-center">
-                        <p class="text-sm font-medium text-gray-500 dark:text-slate-400">Sin usuarios conectados en este momento.</p>
-                    </div>
-                @else
-                    <ul class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-white/5 -mx-1 px-1">
-                        @foreach ($onlineUsers as $onlineUser)
-                            <li class="flex items-center gap-3 py-2.5">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-sm font-extrabold uppercase">
-                                    {{ mb_substr($onlineUser->full_name ?? $onlineUser->username, 0, 1) }}
-                                </span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="block truncate text-sm font-bold text-gray-800 dark:text-slate-100">{{ $onlineUser->full_name ?? $onlineUser->username }}</span>
-                                    <span class="block truncate text-xs text-gray-500 dark:text-slate-400">@@{{ $onlineUser->username }} · {{ $onlineUser->role_label }}</span>
-                                </span>
-                                <span class="shrink-0 text-right">
-                                    <span class="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                        {{ $onlineUser->last_seen_at?->diffForHumans() }}
+                <div id="activeSessionsList">
+                    @if ($onlineUsers->isEmpty())
+                        <div class="py-8 text-center">
+                            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">Sin usuarios conectados en este momento.</p>
+                        </div>
+                    @else
+                        <ul class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-white/5 -mx-1 px-1">
+                            @foreach ($onlineUsers as $onlineUser)
+                                <li class="flex items-center gap-3 py-2.5">
+                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-sm font-extrabold uppercase">
+                                        {{ mb_substr($onlineUser->full_name ?? $onlineUser->username, 0, 1) }}
                                     </span>
-                                </span>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block truncate text-sm font-bold text-gray-800 dark:text-slate-100">{{ $onlineUser->full_name ?? $onlineUser->username }}</span>
+                                        <span class="block truncate text-xs text-gray-500 dark:text-slate-400">@@{{ $onlineUser->username }} · {{ $onlineUser->role_label }}</span>
+                                    </span>
+                                    <span class="shrink-0 text-right">
+                                        <span class="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                            {{ $onlineUser->last_seen_at?->diffForHumans() }}
+                                        </span>
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
             </div>
         </x-dialog>
 
@@ -631,18 +635,119 @@
                 }
             }
 
-            // Tiempo real vía WebSocket (Reverb, canal privado admin.sessions).
-            // Sin polling: el backend emite `sessions.updated` cada minuto
-            // (scheduler) y al abrir el dashboard.
-            if (window.Echo) {
-                window.Echo.private('admin.sessions')
-                    .listen('.sessions.updated', (e) => {
+            // ─────────────────────────────────────────────────────────────
+            // Tiempo real vía PRESENCIA de Reverb (canal presence-app.sessions)
+            // ─────────────────────────────────────────────────────────────
+            // Reverb lleva la cuenta de miembros del canal y empuja
+            // member_added / member_removed al instante: el número se mueve
+            // cuando alguien abre o cierra una pestaña, sin polling y sin
+            // depender del scheduler `admin:broadcast-sessions`.
+            //
+            // `window.sessionsPresence` se crea una sola vez en bootstrap.js
+            // (si cada bloque hiciera join(), una persona con dos pestañas
+            // contaría dos veces).
+            const presence = window.sessionsPresence;
+            const members = new Map(); // id de pestaña -> miembro
+
+            // Un usuario con varias pestañas es UNO solo en el conteo.
+            const uniqueOnline = () => new Set([...members.values()].map((m) => m.id)).size;
+
+            /*
+             * Echo entrega los miembros como {id, info}, pero en `leaving`
+             * pusher-js reenvía el frame crudo de Reverb, que viene como
+             * {user_id} sin `info`. Se aceptan ambas formas para que una
+             * desconexión nunca deje el contador congelado.
+             */
+            const memberKey = (m) => m?.id ?? m?.user_id ?? null;
+            const memberInfo = (m) => m?.info ?? m ?? {};
+
+            function stamp() {
+                return new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            function renderUsers() {
+                const container = document.querySelector('#activeSessionsList');
+                if (!container) return;
+
+                // Solo los miembros con datos identificables (roles
+                // privilegiados) se listan: el resto solo publica su id.
+                const named = [...members.values()]
+                    .filter((m) => m.username)
+                    .filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i)
+                    .sort((a, b) => String(a.fullname).localeCompare(String(b.fullname)));
+
+                const badge = document.querySelector('#activeSessionsLiveCount');
+                if (badge) badge.textContent = ` · ${uniqueOnline()} en línea ahora`;
+
+                if (named.length === 0) {
+                    container.innerHTML =
+                        '<div class="py-8 text-center"><p class="text-sm font-medium text-gray-500 dark:text-slate-400">Sin personal conectado en este momento.</p></div>';
+                    return;
+                }
+
+                const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+                    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+                container.innerHTML =
+                    '<ul class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-white/5 -mx-1 px-1">' +
+                    named.map((m) => `
+                        <li class="flex items-center gap-3 py-2.5">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-sm font-extrabold uppercase">${esc(String(m.fullname || m.username).charAt(0))}</span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block truncate text-sm font-bold text-gray-800 dark:text-slate-100">${esc(m.fullname || m.username)}</span>
+                                <span class="block truncate text-xs text-gray-500 dark:text-slate-400">@@${esc(m.username)} · ${esc(m.role)}</span>
+                            </span>
+                            <span class="shrink-0 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <span class="w-2 h-2 inline-block bg-emerald-500 rounded-full animate-pulse"></span> en línea
+                            </span>
+                        </li>`).join('') +
+                    '</ul>';
+            }
+
+            function renderPresence() {
+                // No se anima la serie en el primer `here`: el chart ya se
+                // pintó con el valor inicial de servidor.
+                const value = uniqueOnline();
+                applySessionsUpdate(value, stamp(), value);
+
+                const badge = document.querySelector('#activeSessionsLiveBadge');
+                if (badge) {
+                    badge.textContent = `${value} conectado${value === 1 ? '' : 's'}`;
+                    badge.className = 'font-bold ' + (value > 0 ? 'text-emerald-400' : 'text-gray-500');
+                }
+            }
+
+            if (window.Echo && presence) {
+                presence
+                    .here((current) => {
+                        members.clear();
+                        (current || []).forEach((m) => {
+                            const id = memberKey(m);
+                            if (id) members.set(id, memberInfo(m));
+                        });
                         setWsStatus(true);
-                        applySessionsUpdate(
-                            parseInt(e.active_sessions ?? 0, 10) || 0,
-                            e.timestamp ?? new Date().toLocaleTimeString(),
-                            e.authenticated_online
-                        );
+                        renderPresence();
+                        renderUsers();
+                    })
+                    .joining((member) => {
+                        const id = memberKey(member);
+                        if (id) members.set(id, memberInfo(member));
+                        setWsStatus(true);
+                        renderPresence();
+                        renderUsers();
+                    })
+                    .leaving((member) => {
+                        const id = memberKey(member);
+                        if (id) {
+                            members.delete(id);
+                        } else {
+                            // Sin id utilizable no se puede saber a quién quitar;
+                            // se descarta el estado y el siguiente `here`
+                            // (reconexión) lo repone.
+                            members.clear();
+                        }
+                        renderPresence();
+                        renderUsers();
                     });
 
                 try {
@@ -656,6 +761,20 @@
                 }
             } else {
                 setWsStatus(false);
+            }
+
+            // Canal privado admin.sessions: aquí solo llegan los contadores de
+            // BD (autenticados con actividad en 15 min). El conteo de EN LÍNEA
+            // ya lo lleva la presencia, que es instantánea.
+            if (window.Echo) {
+                window.Echo.private('admin.sessions')
+                    .listen('.sessions.updated', (e) => {
+                        const authOnline = e.authenticated_online;
+                        const authEl = document.querySelector('#chartAuthOnline');
+                        if (authEl && authOnline !== undefined && authOnline !== null) {
+                            authEl.textContent = authOnline;
+                        }
+                    });
             }
         });
     </script>

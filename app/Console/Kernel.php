@@ -72,7 +72,8 @@ class Kernel extends ConsoleKernel
         // Chart "sesiones activas" del dashboard /admin: emite cada minuto
         // el conteo al canal privado admin.sessions vía Reverb. Sin overlap
         // para no acumular emisiones si Reverb responde lento.
-        $schedule->command('admin:broadcast-sessions')->everyMinute()->withoutOverlapping();
+        // se desactiva, no es necesario, reverb se encarga de enviar el conteo de sesiones activas cada minuto
+        //$schedule->command('admin:broadcast-sessions')->everyMinute()->withoutOverlapping();
     }
 
     protected $commands = [
