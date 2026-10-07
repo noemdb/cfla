@@ -1,66 +1,144 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SAEFL — Sistema de Gestión Escolar (NoDoz)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de gestión escolar en español construido con **Laravel 10 + Livewire 3 + Tailwind CSS 3 + Alpine.js + Vite**.
+Gestiona censo (catchment), matrícula, pagos, prosecución, votaciones anónimas, competencias/debates, diagnósticos, blog y horarios.
 
-## About Laravel
+> Locale: `es`. App name (`APP_NAME`): `NoDoz`. URLs legado SAEFL vía `APP_URL_SAEFL`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Capa | Tecnología |
+|------|------------|
+| Backend | PHP 8.2 / Laravel 10 |
+| Interactividad | Livewire 3 + Alpine.js 3 |
+| UI | Tailwind CSS 3 + WireUI 2 + Flowbite + tw-elements + Swiper |
+| Build | Vite 5 + laravel-vite-plugin |
+| BD | MySQL (producción), SQLite (testing) |
+| Tiempo real | Laravel Reverb (WebSockets, protocolo Pusher) |
+| Colas | Database driver |
+| Auth | Sesiones + Sanctum + middlewares `IsAdmin`, `IsDiagnostic`, `IsAdminOrDiagnostic` |
+| PDF / Excel / QR | `barryvdh/laravel-dompdf`, `maatwebsite/excel`, `simplesoftwareio/simple-qrcode` |
+| Email | Gmail API (`google/apiclient`), Resend, SendPulse |
+| Monitor | Laravel Pulse, Log Viewer |
+| Diagramas frontend | Mermaid (chunk bajo demanda solo en páginas LMS) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requisitos
 
-## Learning Laravel
+- **PHP `php8.2` siempre.** El `php` plano del sistema es 7.4 y NO sirve (`?->` falla, `composer.json` exige `"php": "^8.2"`).
+  Toda tarea PHP (`-l`, `artisan`, `phpunit`, `pint`) debe usar `/usr/bin/php8.2`.
+- Composer 2, Node 20 (ver `.nvmrc`), npm.
+- MySQL para desarrollo/producción. SQLite solo para tests.
+- Extensiones PHP estándar de Laravel 10 + `gd`/`imagick` (QR/PDF), `mbstring`, `xml`, `bcmath`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Instalación
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+nvm use 20
+composer install
+npm install
+cp .env.example .env   # o ajustar el .env existente, nunca commitear el real
+/usr/bin/php8.2 artisan key:generate
+/usr/bin/php8.2 artisan migrate          # SOLO agrega, nunca dropea
+npm run dev                              # dev con hot-reload
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Build producción:
 
-## Laravel Sponsors
+```bash
+npm run build
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Servir backend + realtime:
 
-### Premium Partners
+```bash
+/usr/bin/php8.2 artisan serve
+/usr/bin/php8.2 artisan reverb:start --host=127.0.0.1 --port=8090
+/usr/bin/php8.2 artisan queue:work
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Comandos útiles
 
-## Contributing
+```bash
+/usr/bin/php8.2 artisan config:clear          # OBLIGATORIO antes de tests si hay bootstrap/cache/config.php cacheado (si no, POSTs fallan 419)
+/usr/bin/php8.2 artisan test                  # todos los tests (usan DatabaseTransactions, no borran nada)
+/usr/bin/php8.2 artisan test --filter=NombreTest
+./vendor/bin/pint                             # fixer estilo PHP
+/usr/bin/php8.2 artisan pulse:check
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚫 Regla de base de datos (producción)
 
-## Code of Conduct
+**JAMÁS dropear, vaciar ni reconstruir la BD.** Prohibido:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- `migrate:fresh` (con o sin `--seed`, `--force`, `--path=` — siempre dropea TODO)
+- `schema:dump --prune`, `db:wipe`
+- `DROP DATABASE/TABLE`, `TRUNCATE` (incl. vía tinker / `DB::statement` / CLI mysql)
+- `migrate:rollback` de más de un batch sin confirmación explícita
 
-## Security Vulnerabilities
+Seguro: `migrate` (solo agrega), `test` / `--filter`, `config:clear`.
+El schema NO es reconstruible solo desde migraciones (`database/migrations/bck/` no es descubrible por Artisan). Ante pérdida, restaurar SOLO desde dump SQL provisto por el usuario.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Módulos
 
-## License
+| Módulo | Qué hace | Modelos clave |
+|--------|----------|---------------|
+| Censo (Catchment) | Pre-registro por jornadas/ventanas | `Academy\Catchment`, `CatchmentGroup` |
+| Matrícula | Registro completo (médico, transporte, familia) | `Academy\Enrollment` |
+| Prosecución | Progresión de grado | `Learner\Estudiant` (trait `Prosecucions`) |
+| Estudiantes / Representantes | Núcleo alumnos y apoderados | `Learner\Estudiant`, `Representant` |
+| Pagos | Pagos multi-estudiante, bancos, tasa de cambio | `Admon\Payment`, `Banco`, `ExchangeRate` |
+| Votación | Encuestas anónimas por token + QR + fingerprint opcional | `Voting\VotingPoll`, `VotingVote`, `VotingSession` |
+| Debate | Competencias académicas en tiempo real | `Educational\DebateCompetition`, `Debate` |
+| Diagnóstico | Evaluaciones con preguntas/opciones/sesiones | `Instrument\DiagQuestion`, `DiagSession` |
+| Blog | Noticias/artículos, categorías, portadas | `Blog\Post`, `Category` |
+| Institución | Datos colegio, autoridades, períodos | `Entity\Institucion`, `Autoridad`, `Pescolar` |
+| Horarios (Timetable) | Calendarios/secciones, vistas públicas por enlace firmado | `timetable.*`, `TimetablePublicController` |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Rutas principales
+
+- Públicas `/`: `home`, `studia`, `diagnostico`, `censo`, `matricula`, `pago`, `post/{id}`, `prosecucion`, `bot`.
+- `/general/educational/competition/{moderator,board,scoreboard}/{token}` — vistas de competencia por token.
+- Votación: `/poll/voting/{access_token}`, `/poll/voting/result/{access_token}`, `/voting/results`, `/poll/qr/{uuid}`, `/voting/asistent` (throttle), `/voting/guia`.
+- Horarios públicos (enlace firmado): `/timetable/section|teacher|room/{calendar}/{id}` (`signed`).
+- Admin `/admin/` (`auth` + `binnacle.track`): subgrupo `isAdminOrDiagnostic` (votación, diagnóstico, educational) y subgrupo `isAdmin` (logs, backup BD).
+- Auth personalizado (sin Breeze/Jetstream). API mínima con Sanctum (`/api/user`).
+
+Patrón: páginas interactivas como componentes **Livewire full-page** (`App\Livewire\Admin/*`, `App\Livewire\App/*`) antes que vistas de controlador. PDFs con dompdf. Realtime con Reverb (config supervisor en `supervisor-reverb.conf`).
+
+## Estructura
+
+```
+app/Http/Controllers/  # Admin/, Auth/, Census/, Educational/, Planning/, Timetable/ + controladores planos
+app/Livewire/          # Admin/, App/, Bot/, Forms/
+app/Models/app/        # Academy/, Admon/, Blog/, Control/, Educational/, Entity/, Instrument/, Learner/, Voting/
+app/Services/ Jobs/ Events/ Notifications/ Mail/
+routes/web.php          # ~630 líneas: públicas, general, voting, timetable firmado, admin
+resources/views/ + resources/js/app.js + resources/css/app.css
+database/migrations/ (+ bck/ histórico no descubrible) + factories/ + seeders/
+docs/                   # design-context-emil.md, seguridad-api-keys.md, timetable/, coexistencia/, etc.
+tests/                  # PHPUnit 10 (DatabaseTransactions sobre BD real)
+```
+
+Detalles de arquitectura, agentes y skills disponibles: ver `CLAUDE.md` y `context.md`.
+
+## Tests
+
+```bash
+/usr/bin/php8.2 artisan config:clear
+/usr/bin/php8.2 artisan test --filter=NombreDelTest
+```
+
+Los tests usan `DatabaseTransactions` sobre la BD real: hacen rollback, no borran datos. Si `bootstrap/cache/config.php` existe, los tests arrancan con `APP_ENV=local` y fallan con 419 — por eso el `config:clear` previo es obligatorio.
+
+## Diseño frontend
+
+Referencia: `docs/design-context-emil.md` (inspirado en Emil Kowalski / animations.dev).
+Paleta: acento amarillo `#f5d06a`, neutros Radix, stone/slate Tailwind. Tipos: Inter + Commit Mono / JetBrains Mono. Micro-interacciones Alpine `x-transition` 150–300ms. Evitar gradientes genéricos y placeholders tipo "Jane Doe".
+
+## Seguridad
+
+Ver `docs/seguridad-api-keys.md`. No commitear `.env`, dumps SQL, tokens de votación ni credenciales Gmail/Resend/SendPulse. Reportar vulnerabilidades por canal privado del colegio (no por issue público).
+
+## Licencia
+
+Código propietario del colegio (SAEFL/NoDoz). El scaffold base Laravel es MIT. Ver `composer.json` (`laravel/laravel`, `type: project`).

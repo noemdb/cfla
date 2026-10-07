@@ -586,11 +586,13 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
 
         // ─── Horario: suplencias asignadas (confirmar/rechazar) ────
         Route::get('/timetable/substitutes', \App\Livewire\Profesor\Timetable\SubstituteInbox::class)
-            ->name('timetable.substitutes');
+            ->name('timetable.substitutes')
+            ->middleware(['binnacle.track', 'binnacle.sql']);
 
         // ─── Horario: mi horario (solo sus slots) ─────────────────
         Route::get('/timetable', \App\Livewire\Profesor\Timetable\MyTimetable::class)
-            ->name('timetable');
+            ->name('timetable')
+            ->middleware(['binnacle.track', 'binnacle.sql']);
     });
 });
 

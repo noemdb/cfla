@@ -272,3 +272,23 @@ Datos completos · fechas válidas · relaciones correctas · permisos de export
 - **Flujo documental:** Planificación (semanal/quincenal) → Proyecto de aula → Evaluaciones → Informes/Planes especiales → Exportación PDF oficial, con integración explícita entre cada etapa.
 
 > ⚠️ **Nota de veracidad:** estas reglas están **documentadas** en las vistas use-cases del legacy, pero el código real no siempre las implementa (p. ej. el diagnóstico `min:50` documentado vs `min:10` real en `EiplanningwkComponent`; el `after_or_equal` sí existe; la "validación ≥ 3 días con estrategias" y "≥ 2 áreas" no constan en los traits de validación — ver 03-livewire-componentes.md). El blueprint de migración debe decidir qué reglas se adoptan.
+
+## Decisión de reglas para cfla (resuelto 2026-10-06)
+
+Principio: **el runtime manda en F2/F3 (MVP sin romper producción); lo aspiracional va a backlog con dueño pedagógico**. Evidencia: `eiplanningwsummaries=0` en producción prueba que el docente ya evita fricción; endurecer validaciones antes de F6 expulsaría uso.
+
+| # | Regla documentada en use-cases | Runtime real | Decisión cfla | Fase |
+|---|---|---|---|---|
+| R1 | Diagnóstico `min:50` (weekly-planning) | `min:10` inline (`EiplanningwkComponent::save`) | **ADOPT runtime (`min:10`)**; `min:50` solo como hint UI, no bloqueante | F2 |
+| R2 | `finicial < ffinal`, `after_or_equal` | Sí existe inline | **ADOPT** tal cual | F2 |
+| R3 | `tiempo_ejecucion` calculado auto / mín 1 semana | `required\|integer\|min:1` manual | **ADOPT runtime** (manual); cálculo auto = backlog UX | F2 / backlog |
+| R4 | Estrategias: ≥3 días con contenido, momento de lista, orden lógico | Solo "≥1 celda con texto" en `saveStrategies()`; `LIST_MOMENT` sí se valida por select | **ADOPT runtime**; ≥3 días = warning no bloqueante (contador `getDayProgress` ya existe) | F2 |
+| R5 | Resúmenes: área válida, `componente/objetivo/aprendizaje/indicadores` required | Inline: esos 4 required + `linea/enfasis` nullable (trait pedía required — se descarta trait) | **ADOPT runtime** | F2 |
+| R6 | Proyecto: título único/docente-período, 3–6 semanas, justificación ≥100, objetivo general + ≥3 específicos, ≥2 áreas, ≥3 fases | No implementado: `diagnostico min:10`, sin unicidad, sin límites de semanas, sin conteo de objetivos/áreas/fases | **DISCARD como validación dura**; conservar como guía pedagógica en ayuda contextual. Unicidad y rangos solo si Coordinación lo pide por escrito | Backlog |
+| R7 | Evaluación: lapso activo, área válida, orden lógico | `lapso_id required`, FKs required, resto nullable | **ADOPT runtime**; "lapso activo" = validar contra `Lapso::current()` solo como default, no como rechazo | F3 |
+| R8 | Informe final: estudiante de la sección, lapso vigente, ≥1 expectativa, título/contexto/conclusiones obligatorios | `pevaluacion/estudiant exists`, `title required max:191`, resto nullable; expectativas vía `attach/sync` sin mínimo | **ADOPT runtime + endurecer solo ≥1 expectativa** (sin catálogo no hay informe; el seeder F0 lo habilita) | F3 |
+| R9 | Especial: justificación detallada + ≥1 actividad/área | `justificacion min:10`, activities con 4 required | **ADOPT runtime** | F3 |
+| R10 | Duplicar como plantilla, autocompletado, validación realtime, autosave | No existe en código | **DISCARD de MVP**; duplicar = backlog P1 (clonar cabecera+hijos es trivial con el schema actual) | Backlog |
+| R11 | Export: A4/Carta/Legal, V/H, márgenes, marca de agua, PDF/A, protección | No existe (solo HTML print) | **DISCARD**; F4 = `@media print` + `window.print()` + dompdf; PDF/A solo si Dirección lo exige | F4 |
+
+> Ninguna regla DISCARD se pierde: quedan en este doc como spec pedagógica para iteración con Coordinación de Inicial tras F6.

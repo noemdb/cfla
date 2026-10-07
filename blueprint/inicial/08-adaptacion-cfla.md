@@ -149,7 +149,7 @@ foreach ($tablas as $t) {
 
 ### 4.3 Pre-verificación FK (script de guardián)
 
-Antes de insertar: para cada columna FK usada (`profesor_id`, `grado_id`, `seccion_id`, `lapso_id`, `pevaluacion_id`, `eiprojectk_id`), contar ids referenciados en s2526 que NO existan en s2627 (verificado hoy: 0 faltantes para profesores/secciones/lapsos; repetir para `pevaluacion_id` — 958 pevaluacions en s2526, verificar los ~usados por summaries/acts/evaluationps). Si hay faltantes, detenerse y construir el mapeo (profesor por `user_id`/CI, pevaluacion por clave natural profesor+pensum+seccion+lapso) antes de continuar.
+Antes de insertar: para cada columna FK usada (`profesor_id`, `grado_id`, `seccion_id`, `lapso_id`, `pevaluacion_id`, `eiprojectk_id`), contar ids referenciados en s2526 que NO existan en s2627. Estado verificado por `SELECT COUNT(*)` directo el **2026-10-06**: `pevaluacions`=958 en s2526; 0 faltantes para profesores/secciones/lapsos (población continuada, INSERT…SELECT sin remapping). Repetir el guardián para `pevaluacion_id` usados por summaries/acts/evaluationps en el momento de F6. Si hay faltantes, detenerse y construir el mapeo (profesor por `user_id`/CI, pevaluacion por clave natural profesor+pensum+seccion+lapso) antes de continuar.
 
 ## 5. Plan de fases
 
@@ -173,7 +173,7 @@ Consolidado desde los docs 01/02/03/04/05/07 — se corrigen por diseño en las 
 1. `dd()` en `EifinalksComponent` y `save()` falso → componente no se porta (F5).
 2. `Eipedagogicalk` (formato informe pedagógico) reutiliza `$eievaluationk` + filtrado por área anulado → decidir: rehacer como vista real de Eifinalk o descartar (F4).
 3. Quirk `lunes` documentado y accessors portados; cualquier UI nueva escribe vía `setEstrategiaAttribute` (F0/F2).
-4. `Eiplanningbwk::getOrderedViews()` no existe / relación `eiprojectk` de bwk rota en detalles → usar `getOrderedViews()` de projectk solo donde existe (F3).
+4. ~~`Eiplanningbwk::getOrderedViews()` no existe / relación `eiprojectk` de bwk rota en detalles~~ **CORREGIDO 2026-10-06:** la relación `Eiplanningbwk::eiprojectk()` **SÍ existe** (`Eiplanningbwk.php:47`, `belongsTo(Eiprojectk,'eiprojectk_id')`) y `plan-details` la usa correctamente (eager `with(['grado','seccion','eiprojectk','profesor'])` + `@if($plan->eiprojectk)`). `getOrderedViews()` es método exclusivo de `Eiprojectk` (reviews del proyecto) y **ninguna vista bwk lo invoca** (grep: solo 5 usos, todos sobre `Eiprojectk` en `modal/eiprojectk/*`, `formats/eiprojectks/*`, `table/eiprojectk/*`). No hay bug aquí; en F3 usar `getOrderedViews()` solo en contexto `Eiprojectk`.
 5. `deleteStrategy` firma `(day, momento)` consistente en toda la UI nueva (F2).
 6. Mount desalineado grado→sección en perspectiva Evaluación → props nombradas (F5).
 7. `as_replace()` con `{!! !!}` → `nl2br(e())` en todo (F4).
@@ -210,4 +210,4 @@ Consolidado desde los docs 01/02/03/04/05/07 — se corrigen por diseño en las 
 
 ---
 
-*Con este documento el blueprint del módulo Inicial queda completo: 01 rutas/controladores · 02 modelos/schema · 03 Livewire · 04 vistas/UI · 05 formatos · 06 casos de uso funcionales · 07 perspectivas/roles · 08 adaptación cfla.*
+*Con este documento el blueprint del módulo Inicial queda completo: 01 rutas/controladores · 02 modelos/schema · 03 Livewire · 04 vistas/UI · 05 formatos · 06 casos de uso funcionales · 07 perspectivas/roles · 08 adaptación cfla · 09 evaluación y próximos pasos (I1–I4 resueltas 2026-10-06). Ver [`09-evaluacion-proximos-pasos.md`](09-evaluacion-proximos-pasos.md).*

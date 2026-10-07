@@ -10,10 +10,10 @@
 
 Solo `Eilearningarea` y `Eilearningexpectation` declaran `protected $table` explícito; el resto usa convención Laravel (snake_case plural). 18 tablas con modelo + 1 pivote (`eifinalk_expectation`, sin modelo propio — se usa vía `belongsToMany` con `->withPivot('eilearningarea_id','pevaluacion_id')`).
 
-| Modelo | Tabla | Filas (s2526 viva) | Rol |
+| Modelo | Tabla | Filas (s2526 viva, censo canónico 2026-10-06) | Rol |
 |---|---|---|---|
-| `Eiplanningwk` | `eiplanningwks` | 274 | Cabecera plan semanal |
-| `Eiplanningwstrategy` | `eiplanningwstrategies` | 1,630 | Estrategias por día/momento del plan semanal |
+| `Eiplanningwk` | `eiplanningwks` | 319 | Cabecera plan semanal |
+| `Eiplanningwstrategy` | `eiplanningwstrategies` | 1,696 | Estrategias por día/momento del plan semanal |
 | `Eiplanningwsummary` | `eiplanningwsummaries` | 0 | Resumen curricular semanal |
 | `Eiplanningbwk` | `eiplanningbwks` | 6 | Cabecera plan quincenal |
 | `Eiplanningbwstrategy` | `eiplanningbwstrategies` | 49 | Estrategias quincenales |
@@ -32,7 +32,9 @@ Solo `Eilearningarea` y `Eilearningexpectation` declaran `protected $table` expl
 | `Eilearningarea` | `eilearningareas` | 0 | Áreas de aprendizaje (currículo inicial) |
 | `Eilearningexpectation` | `eilearningexpectations` | 0 | Aprendizajes esperados por área |
 
-> ℹ️ Tablas con contador AUTO_INCREMENT alto pero 0 filas (`eifinalks` AI=190, `eilearningareas` AI=28, `eilearningexpectations` AI=136, `eifinalk_expectation` AI=6, `eiplanningwsummaries` AI=51): **hubo datos que fueron eliminados** de s2526. El seeder `EILearningSeeder` (areas+expectations, 1,021 líneas, grado_id=22 en el seeder) nunca corrió en s2526 o fue vaciado después.
+> ℹ️ Tablas con contador AUTO_INCREMENT alto pero 0 filas (`eifinalks` AI=190, `eilearningareas` AI=28, `eilearningexpectations` AI=136, `eifinalk_expectation` AI=6, `eiplanningwsummaries` AI=51): **hubo datos que fueron eliminados** de s2526.
+> Censo canónico: re-verificado por lectura directa `SELECT COUNT(*)` el **2026-10-06** (319 wk / 1.696 wstrategies / resto idéntico). Los valores previos 274/1.630 documentados en una medición anterior (2026-09-08) quedan **obsoletos por crecimiento de producción (+45 planes, +66 estrategias)** — no por error de conteo. Toda referencia a "274/1.630" en este blueprint debe leerse como 319/1.696.
+> El seeder `EILearningSeeder` (`saefl/s2526/database/seeds/EILearningSeeder.php`, 1.021 líneas, namespace `Database\Seeders`, 27 inserts en `eilearningareas` — 9 por cada `grado_id` 22/23/24 — + 135 inserts en `eilearningexpectations` = 162 inserts) **nunca se ejecutó**: `database/seeds/DatabaseSeeder.php` solo llama a `DiagnosticsSeeder`, y las 2 tablas están en 0 filas en s2526.
 
 ## A.2 DDL — Familia Planificación Semanal
 
@@ -449,8 +451,8 @@ CREATE TABLE `eilearningexpectations` (
 
 1. **El schema ya está en s2627 (BD principal de cfla)** — 19 tablas clonadas con DDL idéntico, 0 filas, sin migraciones formales registradas. **No crear migraciones nuevas** sin necesidad: la fuente de verdad es `SHOW CREATE TABLE` de s2526.
 2. Si se quieren migraciones formales reproducibles en cfla, generarlas desde el DDL de §A.2–A.7 (no desde las migraciones backUp del legacy, que están incompletas — p. ej. les faltan columnas `max_number_*` registradas ni aplicadas — y contienen los bugs §A.9).
-3. **Migración de datos** desde la conexión `s2526` (ya definida en `config/database.php` de cfla) por dumps/INSERT…SELECT, respetando: tablas 2024 sin FK física (orden libre), tablas 2025 con CASCADE (cargar padres antes que hijas). Volumen real: 274 planes semanales, 1,630 estrategias semanales, 322 de proyecto, 49 quincenales, 19 proyectos, 47 resúmenes de proyecto, 8 revisiones, 3 planes especiales, 8 actividades, 24 evaluaciones, 98 posiciones.
-4. **Sembrar** `eilearningareas` + `eilearningexpectations` con el `EILearningSeeder` del legacy (1,021 líneas, adaptando `grado_id` al id del grado de Inicial en la BD destino) — en s2526 están vacías pese a haber tenido datos.
+3. **Migración de datos** desde la conexión `s2526` (ya definida en `config/database.php` de cfla) por dumps/INSERT…SELECT, respetando: tablas 2024 sin FK física (orden libre), tablas 2025 con CASCADE (cargar padres antes que hijas). Volumen canónico (2026-10-06): 319 planes semanales, 1.696 estrategias semanales, 322 de proyecto, 49 quincenales, 19 proyectos, 47 resúmenes de proyecto, 8 revisiones, 3 planes especiales, 8 actividades, 24 evaluaciones, 98 posiciones.
+4. **Sembrar** `eilearningareas` + `eilearningexpectations` con el `EILearningSeeder` del legacy (`saefl/s2526/database/seeds/EILearningSeeder.php`, 1.021 líneas, 27 áreas — 9 por `grado_id` 22/23/24 — + 135 expectativas = 162 inserts; los `grado_id` 22/23/24 coinciden con 1ER/2DO/3ER GRUPO en s2627, sin remapping) — en s2526 están vacías pese a haber tenido datos (AI altos prueban borrado posterior o seed nunca ejecutado; `DatabaseSeeder` solo llama a `DiagnosticsSeeder`).
 5. Bajo la regla absoluta del proyecto cfla: prohibido `migrate:fresh`/drop; cualquier operación de datos solo con INSERT/UPDATE selectivos o dump SQL provisto.
 
 ---
