@@ -3732,3 +3732,7 @@
 [Tue Oct  6 18:21:09 2026] 127.0.0.1:44302 Accepted
 [Tue Oct  6 18:21:10 2026] 127.0.0.1:44302 Closed without sending a request; it was probably just an unused speculative preconnection
 [Tue Oct  6 18:21:10 2026] 127.0.0.1:44302 Closing
+[Wed Oct  7 13:41:25 2026] PHP 8.2.30 Development Server (http://127.0.0.1:8080) started
+[Wed Oct  7 13:42:54 2026] 127.0.0.1:53924 Accepted
+[Wed Oct  7 13:43:55 2026] 127.0.0.1:53924 Closed without sending a request; it was probably just an unused speculative preconnection
+[Wed Oct  7 13:43:55 2026] 127.0.0.1:53924 Closing

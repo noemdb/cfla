@@ -5,6 +5,7 @@ namespace App\Livewire\Leadership;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pevaluacion;
@@ -90,6 +91,17 @@ class DiagnosticQuestionReview extends Component
 
     public int $paginate = 10;
 
+    // ─── Resultados por estudiante (réplica del tab Sesiones de profesores) ───
+    public string $searchSessions = '';
+
+    public string $filterDateFrom = '';
+
+    public string $filterDateTo = '';
+
+    public ?int $selectedSessionId = null;
+
+    public bool $showSessionDetail = false;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'filterAreaId' => ['except' => ''],
@@ -100,6 +112,9 @@ class DiagnosticQuestionReview extends Component
         'filterPestudioId' => ['except' => ''],
         'filterGradoId' => ['except' => ''],
         'filterProfesorId' => ['except' => ''],
+        'searchSessions' => ['except' => ''],
+        'filterDateFrom' => ['except' => ''],
+        'filterDateTo' => ['except' => ''],
     ];
 
     public function updatingPaginate(): void
@@ -155,6 +170,42 @@ class DiagnosticQuestionReview extends Component
     public function updatingFilterDiagMain(): void
     {
         $this->resetPage();
+        $this->resetPage('sessionsPage');
+    }
+
+    public function updatingSearchSessions(): void
+    {
+        $this->resetPage('sessionsPage');
+    }
+
+    public function updatingFilterDateFrom(): void
+    {
+        $this->resetPage('sessionsPage');
+    }
+
+    public function updatingFilterDateTo(): void
+    {
+        $this->resetPage('sessionsPage');
+    }
+
+    public function resetSessionFilters(): void
+    {
+        $this->searchSessions = '';
+        $this->filterDateFrom = '';
+        $this->filterDateTo = '';
+        $this->resetPage('sessionsPage');
+    }
+
+    public function openSessionDetail(int $id): void
+    {
+        $this->selectedSessionId = $id;
+        $this->showSessionDetail = true;
+    }
+
+    public function closeSessionDetail(): void
+    {
+        $this->showSessionDetail = false;
+        $this->selectedSessionId = null;
     }
 
     public function loadEnriched(): void
@@ -174,6 +225,7 @@ class DiagnosticQuestionReview extends Component
         $this->filterGradoId = '';
         $this->filterProfesorId = '';
         $this->resetPage();
+        $this->resetSessionFilters();
     }
 
     public function toggleActivo(int $id): void
@@ -907,6 +959,76 @@ class DiagnosticQuestionReview extends Component
             ->whereIn('id', $this->activeLeadershipPensumIds())
             ->orderBy('pestudio_id')->orderBy('grado_id')->get();
 
+        // ── Resultados por estudiante (réplica del tab Sesiones de profesors) ──
+        // Scope: pensums estrictos del líder ∩ pensums efectivos por facetas.
+        // `diag_sessions.diag_main_id` queda NULL en todas las sesiones (las crea
+        // Diagnostic::startDiagnostic sin persistirlo), así que —igual que en
+        // profesors— se acepta la pertenencia implícita: sesiones cuyo pensum
+        // tiene preguntas del diagnóstico filtrado.
+        $sessionScopeIds = $effectivePensumIdsArray;
+        $diagMainPensumIds = [];
+        if ($this->filterDiagMain !== '') {
+            $diagMainPensumIds = DiagQuestion::where('diag_main_id', (int) $this->filterDiagMain)
+                ->distinct()->pluck('pensum_id')->filter()
+                ->map(fn ($id) => (int) $id)->values()->all();
+        }
+
+        $sessionsQuery = DiagSession::with([
+            'estudiant:id,name,lastname,email',
+            'estudiant.inscripcion.seccion.grado',
+            'pensum.asignatura:id,name',
+            'diagMain',
+            'answers.selectedOption',
+            'answeredQuestions:diag_main_id',
+        ])->whereIn('pensum_id', $sessionScopeIds ?: [0]);
+
+        if ($this->filterDiagMain !== '') {
+            $sessionsQuery->where(function ($q) use ($diagMainPensumIds) {
+                $q->where('diag_main_id', (int) $this->filterDiagMain);
+
+                if (! empty($diagMainPensumIds)) {
+                    $q->orWhereIn('pensum_id', $diagMainPensumIds);
+                }
+            });
+        }
+
+        if ($this->searchSessions !== '') {
+            $term = '%'.$this->searchSessions.'%';
+            $sessionsQuery->whereHas('estudiant', fn ($q) => $q
+                ->where('name', 'like', $term)
+                ->orWhere('lastname', 'like', $term));
+        }
+
+        if ($this->filterDateFrom !== '') {
+            $sessionsQuery->whereDate('iniciado_at', '>=', $this->filterDateFrom);
+        }
+        if ($this->filterDateTo !== '') {
+            $sessionsQuery->whereDate('iniciado_at', '<=', $this->filterDateTo);
+        }
+
+        $sessions = $sessionsQuery->latest('iniciado_at')->paginate(10, ['*'], 'sessionsPage');
+
+        // KPIs del bloque: estudiantes del scope vs. los que tienen sesión.
+        $sessionSeccionIds = Pevaluacion::whereIn('pensum_id', $sessionScopeIds ?: [0])
+            ->distinct()->pluck('seccion_id')->filter()->map(fn ($id) => (int) $id);
+        $totalStudentsCount = $sessionSeccionIds->isEmpty()
+            ? 0
+            : (int) Inscripcion::whereIn('seccion_id', $sessionSeccionIds)->distinct()->count('estudiant_id');
+        $studentsWithSessions = (int) (clone $sessionsQuery)->distinct()->count('estudiant_id');
+        $sessionStats = [
+            'total_students' => $totalStudentsCount,
+            'students_with_sessions' => $studentsWithSessions,
+            'students_without_sessions' => max(0, $totalStudentsCount - $studentsWithSessions),
+        ];
+
+        $sessionDetail = null;
+        if ($this->showSessionDetail && $this->selectedSessionId) {
+            // Rehidratado acotado al scope: no se expone la sesión de otro ámbito.
+            $sessionDetail = DiagSession::with(['answers.question', 'answers.selectedOption', 'diagMain', 'answeredQuestions:diag_main_id'])
+                ->whereIn('pensum_id', $sessionScopeIds ?: [0])
+                ->find($this->selectedSessionId);
+        }
+
         $selected = null;
         if ($this->showDetail && $this->selectedId) {
             $selected = $this->scopedQuery()->with(['pensum.asignatura', 'pensum.grado', 'pensum.pestudio', 'competency', 'indicator', 'options', 'diagMain'])->find($this->selectedId);
@@ -950,6 +1072,10 @@ class DiagnosticQuestionReview extends Component
             'precision' => $metrics['precision'] ?? null,
             'precisionCorrect' => $metrics['precisionCorrect'] ?? 0,
             'precisionTotal' => $metrics['precisionTotal'] ?? 0,
+            // Resultados por estudiante
+            'sessions' => $sessions,
+            'sessionStats' => $sessionStats,
+            'sessionDetail' => $sessionDetail,
         ]);
     }
 }

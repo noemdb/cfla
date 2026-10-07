@@ -30,7 +30,7 @@
         {{-- Diagnóstico (instrumento) — encima de la grilla de filtros --}}
         <div>
             <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Diagnóstico</label>
-            <x-select placeholder="Todos" wire:model.live="filterDiagMain" searchable :clearable="false">
+            <x-select placeholder="Selecciona un Diagnóstico" wire:model.live="filterDiagMain" searchable>
                 @foreach($diagMains as $dm)<x-select.option :label="$dm->name" :value="$dm->id" />@endforeach
             </x-select>
         </div>
@@ -64,6 +64,19 @@
                 </x-select></div>
         </div>
     </div>
+
+    {{-- Sin diagnóstico seleccionado no hay cifras ni contenido: solo el aviso --}}
+    @if($filterDiagMain === '')
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
+            <div class="px-5 py-12 text-center">
+                <svg class="w-9 h-9 mx-auto mb-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-sm font-medium text-gray-300">No hay diagnóstico seleccionado</p>
+                <p class="text-xs text-gray-500 mt-1">Elige un diagnóstico en el filtro superior para ver sus cifras y el contenido.</p>
+            </div>
+        </div>
+    @else
 
     {{-- Réplica planning: header Lapso/Pestudio/Referente + grid 8 (respeta is_leadership) --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
@@ -414,6 +427,168 @@
         <x-pagination-wrapper :paginator="$questions" />
     </div>
 
+    {{-- Resultados por estudiante — réplica del tab Sesiones de profesors --}}
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
+        <div class="px-5 py-4 border-b border-white/5">
+            <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Resultados por estudiante</h4>
+        </div>
+
+        {{-- KPIs --}}
+        <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Estudiantes</span>
+                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <p class="text-lg font-bold text-white">{{ $sessionStats['total_students'] }}</p>
+            </div>
+            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Con sesión</span>
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <p class="text-lg font-bold text-white">{{ $sessionStats['students_with_sessions'] }}</p>
+            </div>
+            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Sin sesión</span>
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <p class="text-lg font-bold text-white">{{ $sessionStats['students_without_sessions'] }}</p>
+            </div>
+        </div>
+
+        {{-- Búsqueda y rango de fechas --}}
+        <div class="px-5 pb-4 flex flex-wrap items-center gap-3 border-b border-white/5">
+            <div class="relative flex-1 min-w-[200px] max-w-xs">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" wire:model.live.debounce.300ms="searchSessions" placeholder="Buscar estudiante..."
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all duration-200">
+            </div>
+
+            <input type="date" wire:model.live="filterDateFrom" aria-label="Desde"
+                class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 min-h-[44px] text-xs text-gray-300 focus:border-amber-500/50 transition-all duration-200">
+
+            <input type="date" wire:model.live="filterDateTo" aria-label="Hasta"
+                class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 min-h-[44px] text-xs text-gray-300 focus:border-amber-500/50 transition-all duration-200">
+
+            <button wire:click="resetSessionFilters"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Limpiar
+            </button>
+        </div>
+
+        {{-- Tabla de sesiones --}}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-white/5">
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estudiante</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Diagnóstico</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Inicio</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Aciertos</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($sessions as $session)
+                        <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                            <td class="py-2 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/20 to-cyan-500/20 flex items-center justify-center border border-white/5">
+                                        <span class="text-[10px] font-bold text-amber-400">{{ strtoupper(substr($session->estudiant?->full_name ?? '?', 0, 2)) }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-gray-300 font-medium">{{ $session->estudiant?->full_name ?? 'N/A' }}</p>
+                                        <span class="text-[10px] text-gray-600">{{ $session->estudiant?->email ?? '' }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-2 px-4">
+                                <span class="text-xs text-gray-400">{{ $session->estudiant?->grado?->name ?? '—' }}</span>
+                            </td>
+                            <td class="py-2 px-4">
+                                <span class="text-xs text-gray-400">{{ $session->resolvedDiagMain?->name ?? '—' }}</span>
+                            </td>
+                            <td class="py-2 px-4">
+                                <span class="text-xs text-gray-400">{{ $session->iniciado_at ? \Carbon\Carbon::parse($session->iniciado_at)->format('d/m/Y H:i') : '—' }}</span>
+                            </td>
+                            <td class="py-2 px-4">
+                                @if($session->completado_at)
+                                    <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        Completado
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 text-xs text-amber-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                        En progreso
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="py-2 px-4">
+                                @if($session->completado_at && $session->answers->isNotEmpty())
+                                    @php
+                                        // is_correct no es una columna: lo determina DiagAnswer::isCorrect()
+                                        // a partir de la opción seleccionada (valor === 1).
+                                        $correct = $session->answers->filter(fn ($a) => $a->isCorrect())->count();
+                                        $total = $session->answers->count();
+                                        $pct = $total > 0 ? round(($correct / $total) * 100) : 0;
+                                    @endphp
+                                    <span class="text-xs font-medium {{ $pct >= 70 ? 'text-emerald-400' : ($pct >= 40 ? 'text-amber-400' : 'text-red-400') }}">
+                                        {{ $correct }}/{{ $total }} ({{ $pct }}%)
+                                    </span>
+                                @else
+                                    <span class="text-xs text-gray-600">—</span>
+                                @endif
+                            </td>
+                            <td class="py-2 px-4 text-right">
+                                <button wire:click="openSessionDetail({{ $session->id }})"
+                                    title="Ver detalles"
+                                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="py-12 text-center">
+                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <p class="text-sm font-medium text-gray-400">No hay sesiones registradas</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($sessions->hasPages())
+            <div class="mt-4 pt-4 border-t border-white/5">
+                {{ $sessions->links('vendor.livewire.custom-tailwind') }}
+            </div>
+        @endif
+    </div>
+
+    @endif {{-- fin @else: sin filterDiagMain solo se muestra el aviso --}}
+
     @if($showDetail && $selected)
         @php
             $optCorrect = fn ($o) => ((int) ($o->valor ?? 0)) === 1;
@@ -510,5 +685,6 @@
         </div>
     @endif
 
+    @include('livewire.leadership.partials.session-modal')
     @include('livewire.leadership.partials.question-wizard')
 </div>

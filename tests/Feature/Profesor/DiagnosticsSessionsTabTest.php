@@ -177,10 +177,28 @@ class DiagnosticsSessionsTabTest extends TestCase
 
         $this->actingAs($this->user);
 
+        // El tab solo se renderiza con un diagnóstico seleccionado.
+        Livewire::test(IndexComponent::class)
+            ->set('activeTab', 'sessions')
+            ->set('filterDiagMainId', (string) $this->diagMain->id)
+            ->assertOk()
+            ->assertSee($session->id);
+    }
+
+    /**
+     * Sin diagnóstico seleccionado no se pintan cifras ni tabs: solo el aviso.
+     */
+    public function test_sin_diagnostigo_solo_muestra_el_aviso(): void
+    {
+        $this->crearSesion();
+
+        $this->actingAs($this->user);
+
         Livewire::test(IndexComponent::class)
             ->set('activeTab', 'sessions')
             ->assertOk()
-            ->assertSee($session->id);
+            ->assertSee('No hay diagnóstico seleccionado')
+            ->assertDontSee('Sesiones</button>');
     }
 
     /**

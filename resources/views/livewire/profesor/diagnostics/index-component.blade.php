@@ -32,7 +32,7 @@
         <div class="diag-filters relative z-30 border-b border-white/5 px-4 sm:px-6 py-2 space-y-3">
             {{-- Diagnóstico filter — una sola línea --}}
             <div class="relative">
-                <x-select placeholder="Todos los Diagnósticos" wire:model.live="filterDiagMainId" searchable>
+                <x-select placeholder="Selecciona un Diagnóstico" wire:model.live="filterDiagMainId" searchable>
                     @foreach($diagMains as $main)
                         <x-select.option :label="$main->name" :value="$main->id" />
                     @endforeach
@@ -75,6 +75,18 @@
             </div>
         </div>
 
+        {{-- Sin diagnóstico seleccionado no hay cifras ni tabs: solo el aviso --}}
+        @if(! $filterDiagMainId)
+            <div class="px-4 sm:px-6 py-10">
+                <div class="rounded-lg border border-white/5 bg-gray-800/40 px-6 py-8 text-center">
+                    <svg class="w-8 h-8 mx-auto mb-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-sm font-medium text-gray-300">No hay diagnóstico seleccionado</p>
+                    <p class="text-xs text-gray-500 mt-1">Elige un diagnóstico en el filtro superior para ver sus cifras y el contenido.</p>
+                </div>
+            </div>
+        @else
         {{-- Tabs --}}
         <div class="border-b border-white/5">
             <div class="flex w-full">
@@ -121,6 +133,7 @@
                 @include('livewire.profesor.diagnostics.partials.analytics')
             @endif
         </div>
+        @endif
     </div>
 
     {{-- Question Modal --}}
