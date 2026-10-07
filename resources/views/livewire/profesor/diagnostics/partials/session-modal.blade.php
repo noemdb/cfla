@@ -1,20 +1,20 @@
 {{-- Session Detail Modal --}}
-@if($SessionModalReport && $selectedSession)
+@if($SessionModalReport && $selectedSessionDetail)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showSessionModal', false)"></div>
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('SessionModalReport', false)"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
             <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-2 flex items-center justify-between z-10">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
-                        <span class="text-sm font-bold text-purple-400">{{ strtoupper(substr($selectedSession->estudiant?->full_name ?? '?', 0, 2)) }}</span>
+                        <span class="text-sm font-bold text-purple-400">{{ strtoupper(substr($selectedSessionDetail->estudiant?->full_name ?? '?', 0, 2)) }}</span>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-white">{{ $selectedSession->estudiant?->full_name ?? 'N/A' }}</h3>
-                        <p class="text-[11px] text-gray-500">{{ $selectedSession->estudiant?->email ?? '' }}</p>
+                        <h3 class="text-sm font-bold text-white">{{ $selectedSessionDetail->estudiant?->full_name ?? 'N/A' }}</h3>
+                        <p class="text-[11px] text-gray-500">{{ $selectedSessionDetail->estudiant?->email ?? '' }}</p>
                     </div>
                 </div>
-                <button wire:click="$set('showSessionModal', false)" class="min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <button wire:click="$set('SessionModalReport', false)" class="min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -26,19 +26,19 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Grado</span>
-                        <span class="text-xs font-medium text-gray-200">{{ $selectedSession->estudiant?->grado?->name ?? '—' }}</span>
+                        <span class="text-xs font-medium text-gray-200">{{ $selectedSessionDetail->estudiant?->grado?->name ?? '—' }}</span>
                     </div>
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Diagnóstico</span>
-                        <span class="text-xs font-medium text-gray-200">{{ $selectedSession->diagMain?->name ?? '—' }}</span>
+                        <span class="text-xs font-medium text-gray-200">{{ $selectedSessionDetail->resolvedDiagMain?->name ?? '—' }}</span>
                     </div>
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Inicio</span>
-                        <span class="text-xs font-medium text-gray-200">{{ $selectedSession->iniciado_at ? \Carbon\Carbon::parse($selectedSession->iniciado_at)->format('d/m/Y H:i:s') : '—' }}</span>
+                        <span class="text-xs font-medium text-gray-200">{{ $selectedSessionDetail->iniciado_at ? \Carbon\Carbon::parse($selectedSessionDetail->iniciado_at)->format('d/m/Y H:i:s') : '—' }}</span>
                     </div>
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Estado</span>
-                        @if($selectedSession->completado_at)
+                        @if($selectedSessionDetail->completado_at)
                             <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                                 Completado
@@ -53,14 +53,14 @@
                 </div>
 
                 {{-- Progress Bar --}}
-                @if($selectedSession->completado_at)
+                @if($selectedSessionDetail->completado_at)
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                         <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Progreso de Respuestas</h4>
                         @php
-                            $totalQ = $selectedSession->answers->count();
-                            $correctQ = $selectedSession->answers->where('is_correct', 1)->count();
-                            $incorrectQ = $selectedSession->answers->where('is_correct', 0)->count();
-                            $unansweredQ = max(0, ($selectedSession->diagMain?->questions->count() ?? $totalQ) - $totalQ);
+                            $totalQ = $selectedSessionDetail->answers->count();
+                            $correctQ = $selectedSessionDetail->answers->filter(fn ($a) => $a->isCorrect())->count();
+                            $incorrectQ = $selectedSessionDetail->answers->filter(fn ($a) => $a->option_id && ! $a->isCorrect())->count();
+                            $unansweredQ = max(0, ($selectedSessionDetail->resolvedDiagMain?->questions->count() ?? $totalQ) - $totalQ);
                             $pct = $totalQ > 0 ? round(($correctQ / $totalQ) * 100) : 0;
                         @endphp
                         <div class="grid grid-cols-3 gap-3 mb-2">
@@ -97,32 +97,37 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($selectedSession->answers as $answer)
+                                    @forelse($selectedSessionDetail->answers as $answer)
                                         <tr class="border-b border-white/5">
                                             <td class="py-2 px-3 text-xs text-gray-500">{{ $loop->iteration }}</td>
                                             <td class="py-2 px-3">
                                                 <x-diag.math-cell :content="$answer->question?->pregunta ?? '—'" uid="ans-{{ $answer->id }}-q" class="text-xs text-gray-300 max-w-[250px] leading-snug" />
                                             </td>
                                             <td class="py-2 px-3">
-                                                <x-diag.math-cell :content="$answer->respuesta_texto ?? '—'" uid="ans-{{ $answer->id }}-a" class="text-xs text-gray-400 max-w-[200px] leading-snug" />
+                                                {{-- respuesta = texto libre del estudiante; en opción múltiple se muestra la
+                                     opción seleccionada. respuesta_texto no existe. --}}
+                                                @php
+                                                    $respuesta = $answer->respuesta ?: $answer->selectedOption?->opcion;
+                                                @endphp
+                                                <x-diag.math-cell :content="$respuesta ?: '—'" uid="ans-{{ $answer->id }}-a" class="text-xs text-gray-400 max-w-[200px] leading-snug" />
                                             </td>
                                             <td class="py-2 px-3 text-center">
-                                                @if($answer->is_correct)
+                                                @if(! $answer->option_id)
+                                                    <span class="text-xs text-gray-600">—</span>
+                                                @elseif($answer->isCorrect())
                                                     <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                                         </svg>
                                                         Correcto
                                                     </span>
-                                                @elseif($answer->is_correct === 0)
+                                                @else
                                                     <span class="inline-flex items-center gap-1 text-xs text-red-400">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                                         </svg>
                                                         Incorrecto
                                                     </span>
-                                                @else
-                                                    <span class="text-xs text-gray-600">—</span>
                                                 @endif
                                             </td>
                                         </tr>

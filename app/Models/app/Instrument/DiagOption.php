@@ -2,10 +2,12 @@
 
 namespace App\Models\app\Instrument;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DiagOption extends Model implements \App\Contracts\Auditable
 {
+    use HasFactory;
     protected $table = 'diag_options';
 
     protected $fillable = [

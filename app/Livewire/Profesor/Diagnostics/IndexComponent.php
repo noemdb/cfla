@@ -336,6 +336,47 @@ class IndexComponent extends Component
     }
 
     /**
+     * Filtra sesiones por diagnóstico.
+     *
+     * `diag_sessions.diag_main_id` está NULL en todas las sesiones: las crea
+     * `Diagnostic::startDiagnostic`, que no lo persiste (las preguntas sí lo
+     * tienen). Filtrar solo por esa columna devuelve 0 filas siempre, así que se
+     * acepta también la pertenencia implícita: sesiones cuyo pensum tiene
+     * preguntas del diagnóstico.
+     */
+    protected function scopeSessionsToDiagMain($query): void
+    {
+        if (! $this->filterDiagMainId) {
+            return;
+        }
+
+        $diagMainId = (int) $this->filterDiagMainId;
+        $pensumIds = $this->diagMainPensumIds($diagMainId);
+
+        $query->where(function ($q) use ($diagMainId, $pensumIds) {
+            $q->where('diag_main_id', $diagMainId);
+
+            if (! empty($pensumIds)) {
+                $q->orWhereIn('pensum_id', $pensumIds);
+            }
+        });
+    }
+
+    /**
+     * Pensums que tienen preguntas del diagnóstico indicado.
+     */
+    protected function diagMainPensumIds(int $diagMainId): array
+    {
+        return DiagQuestion::where('diag_main_id', $diagMainId)
+            ->distinct()
+            ->pluck('pensum_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
      * Solo Pestudio, Grado y Pensum activos (paridad leadership):
      * pensums.status_active = 1, grados/pestudios.status_active = 'true'.
      */
@@ -392,9 +433,19 @@ class IndexComponent extends Component
         return $this->scopedPensumIds();
     }
 
+    /**
+     * Versión del cálculo de estadísticas.
+     *
+     * Se incluye en la clave de caché para que un cambio en las reglas de
+     * filtrado (scopeToCarga / scopeSessionsToDiagMain) no deje sirviendo
+     * resultados cacheados de la lógica anterior durante los 30 min de TTL.
+     * Subir este valor al modificar esas reglas.
+     */
+    protected const STATS_CACHE_VERSION = 'v3-diagmain-fallback';
+
     protected function statsCacheKey(): string
     {
-        return 'diag_prof_stats_'.Auth::id()
+        return 'diag_prof_stats_'.self::STATS_CACHE_VERSION.'_'.Auth::id()
             .'_'.($this->lapsoId ?? 'none')
             .'_'.($this->selectedPensumId ?? 'all')
             .'_'.($this->filterDiagMainId ?: 'all')
@@ -413,10 +464,8 @@ class IndexComponent extends Component
             // Sesiones de la carga académica (pensum + sección + lapso) y filtros.
             $sessionScope = function ($query) {
                 $this->scopeToCarga($query);
+                $this->scopeSessionsToDiagMain($query);
 
-                if ($this->filterDiagMainId) {
-                    $query->where('diag_main_id', $this->filterDiagMainId);
-                }
                 if ($this->filterGradoId) {
                     $query->whereHas('pensum', function ($q) {
                         $q->where('grado_id', $this->filterGradoId);
@@ -1438,14 +1487,13 @@ PROMPT;
 
         $questions = $this->getQuestionsPaginationView();
 
-        $sessionsQuery = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.inscripcion.seccion.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers'])
+        // answeredQuestions evita N+1 al resolver el diagnóstico por fila.
+        $sessionsQuery = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.inscripcion.seccion.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers.selectedOption', 'answeredQuestions:diag_main_id'])
             ->select(['id', 'estudiant_id', 'pensum_id', 'diag_main_id', 'iniciado_at', 'completado_at', 'progreso', 'total_preguntas', 'activo']);
 
         $this->scopeToCarga($sessionsQuery);
 
-        if ($this->filterDiagMainId) {
-            $sessionsQuery->where('diag_main_id', $this->filterDiagMainId);
-        }
+        $this->scopeSessionsToDiagMain($sessionsQuery);
 
         if ($this->filterGradoId) {
             $sessionsQuery->whereHas('pensum', function ($q) {
@@ -1478,6 +1526,8 @@ PROMPT;
 
         $selectedSessionObject = null;
         if ($this->selectedSession && $this->SessionModalReport) {
+            // 'answers.question' resuelve el diagnóstico de la sesión y 'answers.selectedOption'
+            // es obligatorio para DiagAnswer::isCorrect() (no existe columna is_correct).
             $selectedSessionObject = DiagSession::with(['answers.question', 'answers.selectedOption'])
                 ->whereIn('pensum_id', $pensumIds ?: [0])
                 ->find($this->selectedSession);
@@ -1529,7 +1579,10 @@ PROMPT;
             'selectedSessionAnswers' => $this->selectedSessionAnswers,
             'selectedSessionData' => $this->selectedSessionData,
             'selectedStudentData' => $this->selectedStudentData,
-            'selectedSession' => $selectedSessionObject,
+            // OJO: no usar la clave 'selectedSession' — es propiedad pública del
+            // componente (int con el id) y Livewire la reinyecta en la vista,
+            // pisando el modelo hidratado.
+            'selectedSessionDetail' => $selectedSessionObject,
             'diagMains' => DiagMain::query()
                 ->when($this->lapsoId, function ($query) {
                     $query->where(function ($q) {
@@ -1589,10 +1642,7 @@ PROMPT;
                 ->whereNotNull('option_id')
                 ->whereHas('session', function ($q) {
                     $this->scopeToCarga($q);
-
-                    if ($this->filterDiagMainId) {
-                        $q->where('diag_main_id', $this->filterDiagMainId);
-                    }
+                    $this->scopeSessionsToDiagMain($q);
 
                     if ($this->filterGradoId) {
                         $q->whereHas('pensum', function ($qq) {
@@ -1676,10 +1726,8 @@ PROMPT;
 
         $sessionScope = function ($query) {
             $this->scopeToCarga($query);
+            $this->scopeSessionsToDiagMain($query);
 
-            if ($this->filterDiagMainId) {
-                $query->where('diag_main_id', $this->filterDiagMainId);
-            }
             if ($this->filterGradoId) {
                 $query->whereHas('pensum', function ($q) {
                     $q->where('grado_id', $this->filterGradoId);

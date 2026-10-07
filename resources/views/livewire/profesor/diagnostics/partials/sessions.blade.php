@@ -88,7 +88,7 @@
                             <span class="text-xs text-gray-400">{{ $session->estudiant?->grado?->name ?? '—' }}</span>
                         </td>
                         <td class="py-2 px-4">
-                            <span class="text-xs text-gray-400">{{ $session->diagMain?->name ?? '—' }}</span>
+                            <span class="text-xs text-gray-400">{{ $session->resolvedDiagMain?->name ?? '—' }}</span>
                         </td>
                         <td class="py-2 px-4">
                             <span class="text-xs text-gray-400">{{ $session->iniciado_at ? \Carbon\Carbon::parse($session->iniciado_at)->format('d/m/Y H:i') : '—' }}</span>
@@ -107,9 +107,11 @@
                             @endif
                         </td>
                         <td class="py-2 px-4">
-                            @if($session->completado_at && $session->answers_count > 0)
+                            @if($session->completado_at && $session->answers->isNotEmpty())
                                 @php
-                                    $correct = $session->answers->where('is_correct', 1)->count();
+                                    // is_correct no es una columna: lo determina DiagAnswer::isCorrect()
+                                    // a partir de la opción seleccionada (valor === 1).
+                                    $correct = $session->answers->filter(fn ($a) => $a->isCorrect())->count();
                                     $total = $session->answers->count();
                                     $pct = $total > 0 ? round(($correct / $total) * 100) : 0;
                                 @endphp

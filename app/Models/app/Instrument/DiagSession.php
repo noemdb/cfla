@@ -73,4 +73,60 @@ class DiagSession extends Model implements \App\Contracts\Auditable
     {
         return $this->hasMany(DiagAnswer::class, 'session_id');
     }
+
+    /**
+     * Diagnósticos de las preguntas contestadas en la sesión.
+     *
+     * Se usa con with() para resolver `resolvedDiagMain` en la lista paginada
+     * sin una consulta por fila (el accessor cae a la columna cuando existe).
+     */
+    public function answeredQuestions()
+    {
+        return $this->hasManyThrough(
+            DiagQuestion::class,
+            DiagAnswer::class,
+            'session_id',
+            'id',
+            'id',
+            'question_id'
+        );
+    }
+
+    /**
+     * Diagnóstico resuelto de la sesión.
+     *
+     * `diag_main_id` no lo persiste `Diagnostic::startDiagnostic` (queda NULL),
+     * pero las preguntas contestadas sí lo tienen. Si la columna está vacía se
+     * deriva de ellas para no mostrar la sesión sin diagnóstico.
+     */
+    public function getResolvedDiagMainAttribute(): ?DiagMain
+    {
+        if ($this->diag_main_id && ($main = $this->diagMain)) {
+            return $main;
+        }
+
+        if ($this->relationLoaded('answeredQuestions')) {
+            $diagMainId = $this->answeredQuestions
+                ->pluck('diag_main_id')
+                ->filter()
+                ->unique()
+                ->first();
+        } else {
+            $diagMainId = $this->answers
+                ->pluck('question.diag_main_id')
+                ->filter()
+                ->unique()
+                ->first();
+        }
+
+        if (! $diagMainId) {
+            // Sin respuestas cargadas: se recurre al diagnóstico de las
+            // preguntas del área evaluada.
+            $diagMainId = DiagQuestion::where('pensum_id', $this->pensum_id)
+                ->whereNotNull('diag_main_id')
+                ->value('diag_main_id');
+        }
+
+        return $diagMainId ? DiagMain::find($diagMainId) : null;
+    }
 }

@@ -5,10 +5,12 @@ namespace App\Models\app\Instrument;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DiagMain extends Model implements \App\Contracts\Auditable
 {
+    use HasFactory;
     protected $table = 'diag_mains';
 
     protected $fillable = [
