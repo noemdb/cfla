@@ -17,6 +17,7 @@ use App\Models\app\Instrument\DiagReferent;
 use App\Models\app\Instrument\DiagReport;
 use App\Models\app\Instrument\DiagSession;
 use App\Models\app\Learner\Estudiant;
+use App\Services\Diagnostic\SessionResultsService;
 use App\Services\OpenRouterService;
 use Carbon\Carbon;
 use Exception;
@@ -1525,12 +1526,17 @@ PROMPT;
         ];
 
         $selectedSessionObject = null;
+        $sessionDetailSummary = null;
         if ($this->selectedSession && $this->SessionModalReport) {
             // 'answers.question' resuelve el diagnóstico de la sesión y 'answers.selectedOption'
             // es obligatorio para DiagAnswer::isCorrect() (no existe columna is_correct).
             $selectedSessionObject = DiagSession::with(['answers.question', 'answers.selectedOption'])
                 ->whereIn('pensum_id', $pensumIds ?: [0])
                 ->find($this->selectedSession);
+
+            if ($selectedSessionObject) {
+                $sessionDetailSummary = app(SessionResultsService::class)->summarize($selectedSessionObject);
+            }
         }
 
         $allSessionsQuery = DiagSession::query();
@@ -1583,6 +1589,7 @@ PROMPT;
             // componente (int con el id) y Livewire la reinyecta en la vista,
             // pisando el modelo hidratado.
             'selectedSessionDetail' => $selectedSessionObject,
+            'sessionDetailSummary' => $sessionDetailSummary,
             'diagMains' => DiagMain::query()
                 ->when($this->lapsoId, function ($query) {
                     $query->where(function ($q) {

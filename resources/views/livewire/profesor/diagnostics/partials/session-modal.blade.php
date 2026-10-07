@@ -56,31 +56,30 @@
                 @if($selectedSessionDetail->completado_at)
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                         <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Progreso de Respuestas</h4>
-                        @php
-                            $totalQ = $selectedSessionDetail->answers->count();
-                            $correctQ = $selectedSessionDetail->answers->filter(fn ($a) => $a->isCorrect())->count();
-                            $incorrectQ = $selectedSessionDetail->answers->filter(fn ($a) => $a->option_id && ! $a->isCorrect())->count();
-                            $unansweredQ = max(0, ($selectedSessionDetail->resolvedDiagMain?->questions->count() ?? $totalQ) - $totalQ);
-                            $pct = $totalQ > 0 ? round(($correctQ / $totalQ) * 100) : 0;
-                        @endphp
+                        {{-- El universo es el del área evaluada (sessionDetailSummary lo
+                             calcula contra las preguntas activas del pensum), no el del
+                             diagnóstico completo. --}}
                         <div class="grid grid-cols-3 gap-3 mb-2">
                             <div class="text-center">
-                                <span class="block text-lg font-bold text-emerald-400">{{ $correctQ }}</span>
+                                <span class="block text-lg font-bold text-emerald-400">{{ $sessionDetailSummary['correct'] }}</span>
                                 <span class="text-[10px] text-gray-500">Correctas</span>
                             </div>
                             <div class="text-center">
-                                <span class="block text-lg font-bold text-red-400">{{ $incorrectQ }}</span>
+                                <span class="block text-lg font-bold text-red-400">{{ $sessionDetailSummary['incorrect'] }}</span>
                                 <span class="text-[10px] text-gray-500">Incorrectas</span>
                             </div>
                             <div class="text-center">
-                                <span class="block text-lg font-bold text-gray-400">{{ $unansweredQ }}</span>
+                                <span class="block text-lg font-bold text-gray-400">{{ $sessionDetailSummary['unanswered'] }}</span>
                                 <span class="text-[10px] text-gray-500">Sin responder</span>
                             </div>
                         </div>
+                        @php $pct = (int) ($sessionDetailSummary['percentage'] ?? 0); @endphp
                         <div class="w-full bg-gray-700/50 rounded-full h-2.5">
                             <div class="bg-emerald-500 h-2.5 rounded-full" style="width: {{ $pct }}%"></div>
                         </div>
-                        <span class="text-[10px] text-gray-500 mt-1 block text-right">{{ $pct }}% de precisión</span>
+                        <span class="text-[10px] text-gray-500 mt-1 block text-right">
+                            {{ $sessionDetailSummary['answered'] }} de {{ $sessionDetailSummary['total'] }} pregunta(s) · {{ $pct }}% de precisión
+                        </span>
                     </div>
 
                     {{-- Answers Table --}}

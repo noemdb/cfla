@@ -15,6 +15,7 @@ use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagOption;
 use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagSession;
+use App\Services\Diagnostic\SessionResultsService;
 use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -1022,11 +1023,16 @@ class DiagnosticQuestionReview extends Component
         ];
 
         $sessionDetail = null;
+        $sessionDetailSummary = null;
         if ($this->showSessionDetail && $this->selectedSessionId) {
             // Rehidratado acotado al scope: no se expone la sesión de otro ámbito.
             $sessionDetail = DiagSession::with(['answers.question', 'answers.selectedOption', 'diagMain', 'answeredQuestions:diag_main_id'])
                 ->whereIn('pensum_id', $sessionScopeIds ?: [0])
                 ->find($this->selectedSessionId);
+
+            if ($sessionDetail) {
+                $sessionDetailSummary = app(SessionResultsService::class)->summarize($sessionDetail);
+            }
         }
 
         $selected = null;
@@ -1076,6 +1082,7 @@ class DiagnosticQuestionReview extends Component
             'sessions' => $sessions,
             'sessionStats' => $sessionStats,
             'sessionDetail' => $sessionDetail,
+            'sessionDetailSummary' => $sessionDetailSummary,
         ]);
     }
 }
