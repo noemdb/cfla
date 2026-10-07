@@ -19,7 +19,6 @@ use App\Models\app\Instrument\DiagQuestion;
 use App\Models\app\Instrument\DiagSession;
 use App\Models\app\Learner\Estudiant;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -60,10 +59,11 @@ class DiagnosticsSessionsTabTest extends TestCase
 
         Cache::flush();
 
-        $this->lapso = Lapso::factory()->create([
-            'finicial' => Carbon::now()->subDays(10)->toDateString(),
-            'ffinal' => Carbon::now()->addDays(10)->toDateString(),
-        ]);
+        // El componente se acota a Lapso::current(); en esta base ya existe uno
+        // sembrado (id 1) que cubre la fecha de hoy, así que se reutiliza.
+        $this->lapso = Lapso::current();
+
+        $this->assertNotNull($this->lapso, 'La prueba requiere un lapso vigente.');
 
         $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
         $grado = Grado::factory()->create(['status_active' => 'true']);
@@ -257,7 +257,9 @@ class DiagnosticsSessionsTabTest extends TestCase
 
         // is_correct no es una columna; el acierto sale de la opción elegida.
         $this->assertSame(1, $row->answers->filter(fn ($a) => $a->isCorrect())->count());
-        $this->assertSame(1, $row->resolvedDiagMain->id);
+
+        // diag_main_id es NULL en la sesión; se resuelve desde las preguntas.
+        $this->assertNull($row->diag_main_id);
         $this->assertSame($this->diagMain->id, $row->resolvedDiagMain->id);
     }
 
