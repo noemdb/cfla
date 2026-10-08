@@ -490,7 +490,8 @@ return [
         // Grupo independiente, como 'profesor': un usuario con `is_inicial`
         // NO es necesariamente `is_profesor`, así que el acceso al módulo no
         // puede depender de que aparezca el grupo Profesor. El permiso del
-        // grupo (`is_inicial`) lo muestran los docentes con el flag y los admin.
+        // grupo (`is_inicial`) lo muestra ÚNICAMENTE quien tiene el flag,
+        // ni siquiera el admin.
         'inicial' => [
             'label' => 'Educación Inicial',
             'icon' => 'M12 14l9-5-9-5-9 5 9 5zm6-2.5V15a2 2 0 01-2 2H8a2 2 0 01-2-2v-3.5m12-1V6m-10 4V8.5m3 4.5v3m4-3v3',

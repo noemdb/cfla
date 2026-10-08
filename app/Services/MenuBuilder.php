@@ -120,8 +120,9 @@ class MenuBuilder
             'is_leadership' => (bool) $user->is_leadership,
             'is_planner_or_admin_or_diagnostic' => $user->is_planner || $user->is_admin || $user->is_diagnostic,
             'is_planner_or_admin_or_diagnostic_or_director' => $user->is_planner || $user->is_admin || $user->is_diagnostic || (bool) $user->is_director,
-            // Módulo de Educación Inicial: solo los docentes con el flag (o admin).
-            'is_inicial' => $user->is_admin || $user->isInicial(),
+            // Módulo de Educación Inicial: ÚNICAMENTE usuarios con el flag
+            // `is_inicial` (ni siquiera admin: así lo exige el requerimiento).
+            'is_inicial' => (bool) $user->isInicial(),
             default => true,
         };
     }

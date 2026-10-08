@@ -159,8 +159,13 @@ class MenuInicialTest extends TestCase
         $this->assertNotContains('Educación Inicial', $labels);
     }
 
-    /** @test */
-    public function un_admin_tambien_ve_la_entrada(): void
+    /**
+     * Ni siquiera el admin ve el grupo: el requerimiento es que aparezca
+     * ÚNICAMENTE para usuarios con `is_inicial = true`.
+     *
+     * @test
+     */
+    public function un_admin_sin_el_flag_no_ve_la_entrada(): void
     {
         $this->saltarSiFaltaLaMigracion();
 
@@ -169,14 +174,19 @@ class MenuInicialTest extends TestCase
             'is_admin' => true,
         ]);
 
-        $this->actingAs($admin);
+        if (Schema::hasColumn('users', 'is_inicial')) {
+            DB::table('users')->where('id', $admin->id)->update(['is_inicial' => false]);
+        }
 
-        // El admin accede al módulo: el grupo 'inicial' está en el layout admin
-        // y su permiso (is_admin || is_inicial) lo deja entrar.
-        $items = $this->itemsDelGrupoInicial('admin');
+        $this->actingAs($admin->fresh());
 
-        $this->assertNotEmpty($items, 'El grupo Educación Inicial debe aparecer en el layout admin.');
-        $this->assertContains('Inicio', collect($items)->pluck('label'));
+        $grupos = collect((new MenuBuilder('admin'))->resolveGroups())->pluck('label');
+
+        $this->assertNotContains(
+            'Educación Inicial',
+            $grupos,
+            'Sin is_inicial, ni siquiera el admin debe ver el grupo.'
+        );
     }
 
     /** @test */
