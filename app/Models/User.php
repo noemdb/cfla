@@ -16,6 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @method bool isProfesor()
  * @method bool isStudent()
  * @method bool isAdminOrDiagnostic()
+ * @method bool isInicial()
  */
 class User extends Authenticatable implements \App\Contracts\Auditable
 {
@@ -30,7 +31,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
     {
         return [
             'id', 'username', 'email', 'is_active',
-            'is_admin', 'is_planner', 'is_diagnostic', 'is_profesor',
+            'is_admin', 'is_planner', 'is_diagnostic', 'is_profesor', 'is_inicial',
             'is_coordinacion', 'is_leadership', 'is_director', 'is_student',
         ];
     }
@@ -54,6 +55,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         'is_planner',
         'is_diagnostic',
         'is_profesor',
+        'is_inicial',
         'is_coordinacion',
         'is_leadership',
         'is_director',
@@ -83,6 +85,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         'is_planner' => 'boolean',
         'is_diagnostic' => 'boolean',
         'is_profesor' => 'boolean',
+        'is_inicial' => 'boolean',
         'is_coordinacion' => 'boolean',
         'is_leadership' => 'boolean',
         'is_director' => 'boolean',
@@ -92,6 +95,19 @@ class User extends Authenticatable implements \App\Contracts\Auditable
     public function profile()
     {
         return $this->hasOne(\App\Models\sys\Profile::class);
+    }
+
+    /**
+     * Ficha de profesor asociada al usuario.
+     *
+     * Relación inversa de la que usa el módulo de Educación Inicial: el
+     * docente del módulo se identifica por su `users.is_inicial`, y desde ahí
+     * se llega a su `profesors.id`, que es la FK de cabecera de los planes,
+     * proyectos, evaluaciones e informes finales.
+     */
+    public function profesor()
+    {
+        return $this->hasOne(\App\Models\app\Academy\Profesor::class, 'user_id');
     }
 
     public function estudiant()
@@ -122,6 +138,22 @@ class User extends Authenticatable implements \App\Contracts\Auditable
     public function isProfesor()
     {
         return $this->is_profesor ?? false;
+    }
+
+    /**
+     * Acceso al módulo de Educación Inicial (pestudio 6).
+     *
+     * Lee el atributo crudo para NO HEREDAR el fallback de otros flags: si se
+     * usara `$this->is_inicial`, un administrador caería en el grupo "Inicial"
+     * de la etiqueta de rol y se mostraría como docente de Inicial en la
+     * navbar, que es exactamente el tipo de solapamiento que seam el módulo.
+     *
+     * Devuelve `false` (no null) mientras la migración
+     * `add_is_inicial_to_users_table` no se haya corrido.
+     */
+    public function isInicial(): bool
+    {
+        return $this->attributes['is_inicial'] ?? false;
     }
 
     public function isStudent(): bool
@@ -172,6 +204,9 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         }
         if (! empty($a['is_profesor'])) {
             return 'Profesor';
+        }
+        if (! empty($a['is_inicial'])) {
+            return 'Educación Inicial';
         }
         if (! empty($a['is_director'])) {
             return 'Dirección';

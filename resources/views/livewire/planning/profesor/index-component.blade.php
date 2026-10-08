@@ -994,6 +994,25 @@
                 </select>
                 @error('editUserIsActive') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
             </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+                    Roles y Permisos
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    @foreach (\App\Livewire\Planning\Profesor\IndexComponent::ROLE_LABELS as $flag => $label)
+                        <label class="flex items-center gap-3 px-3 py-2 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+                            <input type="checkbox" wire:model="editUserRoles.{{ $flag }}"
+                                class="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500/30">
+                            <span class="text-sm text-gray-300">{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                @error('editUserRoles') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                <p class="text-[9px] text-gray-600 mt-1">
+                    El rol de administrador no se edita aquí por seguridad; se cambia en /admin/users.
+                </p>
+            </div>
         </div>
 
         <x-slot name="footer">

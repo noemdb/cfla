@@ -38,6 +38,11 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/auth.php'));
+
+            // Módulo de Educación Inicial (pestudio 6): 4 perspectivas.
+            // Blueprint: blueprint/inicial · F1.
+            Route::middleware('web')
+                ->group(base_path('routes/app/inicials.php'));
         });
 
         RateLimiter::for('global', function (Request $request) {

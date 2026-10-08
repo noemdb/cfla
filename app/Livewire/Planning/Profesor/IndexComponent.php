@@ -10,6 +10,7 @@ use App\Models\sys\Profile;
 use App\Models\sys\Rol;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -18,10 +19,11 @@ use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WithPagination, WireUiActions;
+    use WireUiActions, WithPagination;
 
     // Modal modes
     public $modeIndex = true;
+
     public $modeForm = false;
 
     // Wizard step
@@ -29,43 +31,63 @@ class IndexComponent extends Component
 
     // Editing flag
     public $isEditing = false;
+
     public $profesor_id;
 
     // ─── Paso 1: Datos Personales ────────────────────────────────
     public $ci_profesor;
+
     public $ti_teacher = 'Titular';
+
     public $name;
+
     public $lastname;
+
     public $gender = 'M';
+
     public $date_birth;
 
     // ─── Paso 2: Contacto ────────────────────────────────────────
     public $email;
+
     public $phone;
+
     public $cellphone;
+
     public $whatsapp;
+
     public $gsemail;
+
     public $dir_address;
 
     // ─── Paso 3: Cuenta y Rol ────────────────────────────────────
     public $user_username;
+
     public $user_password;
+
     public $rol_finicial;
+
     public $rol_ffinal;
+
     public $status_active = true;
 
     // Select lists
     public $peducativos;
+
     public $lapsos;
 
     // Filters
     public $search = '';
+
     public $filter_peducativo = '';
+
     public $filter_pevaluacions = '';
+
     public $filter_activities = '';
 
     // Sorting
     public $sortField = 'profesors.id';
+
     public $sortDirection = 'asc';
 
     // Pagination
@@ -76,22 +98,66 @@ class IndexComponent extends Component
 
     // ─── Edit user modal ────────────────────────────────────────
     public bool $showUserEditModal = false;
+
     public ?int $editUserUserId = null;
+
     public ?int $editUserProfesorId = null;
+
     public string $editUserUsername = '';
+
     public string $editUserEmail = '';
+
     public string $editUserPassword = '';
+
     public string $editUserIsActive = 'enable';
+
+    /**
+     * Roles editables desde el modal de Planificación.
+     *
+     * `is_admin` queda deliberadamente FUERA: esta pantalla la abre un
+     * `is_planner`, no un administrador, y conceder/retirar el flag de
+     * administrador desde aquí sería una escalada de privilegios — con un solo
+     * flag, quien lo active controla todo lo demás. Se gestiona desde
+     * `/admin/users`, que sí está tras `isAdmin`.
+     *
+     * El orden es el de `User::getRoleLabelAttribute()` para que la lista se
+     * lea igual que la etiqueta que muestra el sistema.
+     */
+    public array $editUserRoles = [
+        'is_planner' => false,
+        'is_coordinacion' => false,
+        'is_leadership' => false,
+        'is_profesor' => false,
+        'is_inicial' => false,
+        'is_director' => false,
+        'is_diagnostic' => false,
+        'is_student' => false,
+    ];
+
+    /**
+     * Etiquetas de los roles del modal.
+     */
+    public const ROLE_LABELS = [
+        'is_planner' => 'Planificación',
+        'is_coordinacion' => 'Coordinación',
+        'is_leadership' => 'Jefe de Área',
+        'is_profesor' => 'Profesor',
+        'is_inicial' => 'Educación Inicial',
+        'is_director' => 'Dirección',
+        'is_diagnostic' => 'Diagnóstico',
+        'is_student' => 'Estudiante',
+    ];
 
     public function editUser(int $profesorId): void
     {
         $profesor = Profesor::with('user')->findOrFail($profesorId);
 
-        if (!$profesor->user) {
+        if (! $profesor->user) {
             $this->notification()->error(
                 title: 'Sin usuario',
                 description: 'Este profesor no tiene un usuario asociado.'
             );
+
             return;
         }
 
@@ -101,6 +167,22 @@ class IndexComponent extends Component
         $this->editUserEmail = $profesor->user->email ?? '';
         $this->editUserPassword = '';
         $this->editUserIsActive = $profesor->user->is_active;
+
+        // Se leen los atributos CRUDO con `getAttributes()`, NO los accessors:
+        // `is_planner`, `is_leadership` y `is_director` heredan el `is_admin`
+        // del usuario y aparecerían marcadas sin serlo de verdad.
+        //
+        // OJO: `$user->attributes[...]` NO sirve aquí. Desde fuera de la clase
+        // `attributes` es una propiedad protegida y `Model::__get()` la
+        // intercepta como si fuera un atributo normal, devolviendo `null` —
+        // todos los roles saldrían `false`. Hay que pasar por
+        // `getAttributes()` o `getRawOriginal()`.
+        $atributos = $profesor->user->getAttributes();
+
+        foreach (array_keys($this->editUserRoles) as $flag) {
+            $this->editUserRoles[$flag] = (bool) ($atributos[$flag] ?? false);
+        }
+
         $this->showUserEditModal = true;
     }
 
@@ -108,27 +190,48 @@ class IndexComponent extends Component
     {
         $this->validate([
             'editUserUsername' => 'required|string|max:150',
-            'editUserEmail'    => 'nullable|email|max:255',
+            'editUserEmail' => 'nullable|email|max:255',
             'editUserPassword' => 'nullable|string|min:4',
             'editUserIsActive' => 'required|in:enable,disable',
+            'editUserRoles.*' => 'boolean',
+        ], [
+            'editUserRoles.*.boolean' => 'El valor de cada rol debe ser verdadero o falso.',
         ]);
 
         $user = User::findOrFail($this->editUserUserId);
 
         $user->update([
-            'username'  => $this->editUserUsername,
-            'email'     => $this->editUserEmail ?: $user->email,
+            'username' => $this->editUserUsername,
+            'email' => $this->editUserEmail ?: $user->email,
             'is_active' => $this->editUserIsActive,
         ]);
 
-        if (!empty($this->editUserPassword)) {
+        $flags = array_keys($this->editUserRoles);
+
+        // `users.is_inicial` nace con la migración
+        // `add_is_inicial_to_users_table` (YA APLICADA en s2627). El guarda se
+        // mantiene porque el mismo código también corre contra entornos que no
+        // la tengan —un clon recién bajado, una base de pruebas— y escribir la
+        // columna a ciegas haría fallar el guardado de TODOS los usuarios con
+        // "Unknown column", no solo el de este profesor.
+        if (! Schema::hasColumn('users', 'is_inicial')) {
+            $flags = array_values(array_diff($flags, ['is_inicial']));
+        }
+
+        foreach ($flags as $flag) {
+            $user->setAttribute($flag, $this->editUserRoles[$flag] ? 1 : 0);
+        }
+
+        $user->save();
+
+        if (! empty($this->editUserPassword)) {
             $user->update(['password' => bcrypt($this->editUserPassword)]);
         }
 
         $this->showUserEditModal = false;
         $this->notification()->success(
             title: 'Usuario Actualizado',
-            description: 'Los datos del usuario se actualizaron correctamente.'
+            description: 'Los datos y roles del usuario se actualizaron correctamente.'
         );
     }
 
@@ -138,16 +241,21 @@ class IndexComponent extends Component
         $this->editUserUserId = null;
         $this->editUserProfesorId = null;
         $this->editUserPassword = '';
+        $this->editUserRoles = array_fill_keys(array_keys(self::ROLE_LABELS), false);
     }
 
     // Toggle active
     public $confirmToggleActiveId = null;
+
     public $toggleActiveProfesorId = null;
+
     public $toggleActiveName = '';
+
     public $toggleActiveCurrentStatus = false;
 
     // Preview
     public $previewMode = false;
+
     public $previewProfesorId = null;
 
     protected function rules()
@@ -226,17 +334,17 @@ class IndexComponent extends Component
             ->addSelect([
                 'activities_count' => Pevaluacion::selectRaw('COUNT(activities.id)')
                     ->join('activities', 'pevaluacions.id', '=', 'activities.pevaluacion_id')
-                    ->whereColumn('pevaluacions.profesor_id', 'profesors.id')
+                    ->whereColumn('pevaluacions.profesor_id', 'profesors.id'),
             ]);
 
         // Search
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('profesors.name', 'like', "%{$this->search}%")
-                  ->orWhere('profesors.lastname', 'like', "%{$this->search}%")
-                  ->orWhere('profesors.ci_profesor', 'like', "%{$this->search}%")
-                  ->orWhere('profesors.email', 'like', "%{$this->search}%")
-                  ->orWhere('users.username', 'like', "%{$this->search}%");
+                    ->orWhere('profesors.lastname', 'like', "%{$this->search}%")
+                    ->orWhere('profesors.ci_profesor', 'like', "%{$this->search}%")
+                    ->orWhere('profesors.email', 'like', "%{$this->search}%")
+                    ->orWhere('users.username', 'like', "%{$this->search}%");
             });
         }
 
@@ -294,10 +402,25 @@ class IndexComponent extends Component
 
     // ─── FILTERS RESET PAGE ──────────────────────────────────────
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingFilterPeducativo() { $this->resetPage(); }
-    public function updatingFilterPevaluacions() { $this->resetPage(); }
-    public function updatingFilterActivities() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterPeducativo()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterPevaluacions()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterActivities()
+    {
+        $this->resetPage();
+    }
 
     // ─── SORTING ────────────────────────────────────────────────
 
@@ -326,7 +449,7 @@ class IndexComponent extends Component
             if (empty($this->rol_finicial)) {
                 $year = now()->year;
                 $this->rol_finicial = "{$year}-09-01";
-                $this->rol_ffinal = ($year + 1) . "-08-31";
+                $this->rol_ffinal = ($year + 1).'-08-31';
             }
         }
     }
@@ -424,18 +547,18 @@ class IndexComponent extends Component
                 }
             }
 
-            if (!$user) {
+            if (! $user) {
                 // Ensure username is unique
                 $username = $this->user_username;
                 $counter = 1;
                 while (User::where('username', $username)->exists()) {
-                    $username = $this->user_username . $counter;
+                    $username = $this->user_username.$counter;
                     $counter++;
                 }
 
                 $userData = [
                     'username' => $username,
-                    'email' => $this->email ?: ($this->ci_profesor . '@temp.com'),
+                    'email' => $this->email ?: ($this->ci_profesor.'@temp.com'),
                     'password' => bcrypt($this->user_password ?: $this->ci_profesor),
                     'number_id' => $this->ci_profesor,
                     'is_active' => $this->status_active ? 'enable' : 'disable',
@@ -450,7 +573,7 @@ class IndexComponent extends Component
                     'is_active' => $this->status_active ? 'enable' : 'disable',
                 ]);
 
-                if (!empty($this->user_password)) {
+                if (! empty($this->user_password)) {
                     $user->update(['password' => bcrypt($this->user_password)]);
                 }
             }
@@ -475,8 +598,8 @@ class IndexComponent extends Component
                 ],
                 [
                     'descripcion' => 'Profesor de la institución',
-                    'finicial' => $this->rol_finicial ?: now()->year . '-09-01',
-                    'ffinal' => $this->rol_ffinal ?: (now()->year + 1) . '-08-31',
+                    'finicial' => $this->rol_finicial ?: now()->year.'-09-01',
+                    'ffinal' => $this->rol_ffinal ?: (now()->year + 1).'-08-31',
                 ]
             );
 
@@ -519,7 +642,7 @@ class IndexComponent extends Component
             DB::rollBack();
             $this->notification()->error(
                 title: 'Error',
-                description: 'Ocurrió un error al guardar: ' . $e->getMessage()
+                description: 'Ocurrió un error al guardar: '.$e->getMessage()
             );
         }
     }
@@ -547,6 +670,7 @@ class IndexComponent extends Component
                 description: "El profesor tiene {$profesor->pevaluacions_count} carga(s) académica(s) asociada(s)."
             );
             $this->cancelDelete();
+
             return;
         }
 
@@ -567,11 +691,12 @@ class IndexComponent extends Component
     {
         $profesor = Profesor::with('user')->findOrFail($profesorId);
 
-        if (!$profesor->user) {
+        if (! $profesor->user) {
             $this->notification()->error(
                 title: 'Sin usuario',
                 description: 'Este profesor no tiene un usuario asociado.'
             );
+
             return;
         }
 
@@ -596,7 +721,7 @@ class IndexComponent extends Component
 
         $label = $newStatus === 'enable' ? 'activado' : 'desactivado';
         $this->notification()->success(
-            title: 'Usuario ' . ($newStatus === 'enable' ? 'Activado' : 'Desactivado'),
+            title: 'Usuario '.($newStatus === 'enable' ? 'Activado' : 'Desactivado'),
             description: "El usuario de {$this->toggleActiveName} fue {$label} correctamente."
         );
 
@@ -622,7 +747,7 @@ class IndexComponent extends Component
 
     public function autoGenerateUsername()
     {
-        if (!$this->isEditing && !empty($this->name) && !empty($this->lastname) && !empty($this->ci_profesor)) {
+        if (! $this->isEditing && ! empty($this->name) && ! empty($this->lastname) && ! empty($this->ci_profesor)) {
             $this->user_username = $this->generateUsername();
         }
     }
@@ -632,15 +757,15 @@ class IndexComponent extends Component
         $nameParts = explode(' ', trim($this->name));
         $lastnameParts = explode(' ', trim($this->lastname));
         $base = strtolower(
-            substr($nameParts[0] ?? '', 0, 1) . ($lastnameParts[0] ?? '')
+            substr($nameParts[0] ?? '', 0, 1).($lastnameParts[0] ?? '')
         );
         $ciDigits = substr(preg_replace('/[^0-9]/', '', $this->ci_profesor), -2, 2);
-        $username = $base . $ciDigits;
+        $username = $base.$ciDigits;
 
         $original = $username;
         $counter = 1;
         while (User::where('username', $username)->exists()) {
-            $username = $original . $counter;
+            $username = $original.$counter;
             $counter++;
         }
 

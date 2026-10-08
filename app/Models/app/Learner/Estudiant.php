@@ -103,6 +103,14 @@ class Estudiant extends Model implements \App\Contracts\Auditable
         return $this->hasOne(Administrativa::class, 'estudiant_id');
     }
 
+    /**
+     * Informes finales de Educación Inicial (módulo Inicial).
+     */
+    public function eifinalks()
+    {
+        return $this->hasMany(\App\Models\app\Inicial\Eifinalk::class, 'estudiant_id');
+    }
+
     public function getShortNameAttribute()
     {
         $arr_name = explode(' ', $this->name);
@@ -281,5 +289,40 @@ class Estudiant extends Model implements \App\Contracts\Auditable
             ->wherenull('estudiants.deleted_at')
             ->groupby('pensums.id')
             ->get();
+    }
+
+    // ─── INFORMES FINALES · MÓDULO INICIAL ───────────────────────
+
+    /**
+     * ¿Tiene al menos un informe final emitido?
+     */
+    public function getHasEifinalkAttribute()
+    {
+        return $this->eifinalks()->exists();
+    }
+
+    /**
+     * Id del primer informe final (para enlaces "ver informe" desde otras
+     * pantallas). En un colegio de Inicial lo habitual es 1 informe por área
+     * y lapso, así que se toma el más bajo id.
+     */
+    public function getEifinalkIdAttribute()
+    {
+        $eifinalk = $this->eifinalks()->first();
+
+        return $eifinalk ? $eifinalk->id : null;
+    }
+
+    /**
+     * ¿Tiene informe final en un lapso concreto?
+     *
+     * @param  int  $lapsoId
+     */
+    public function hasEifinalkForLapso($lapsoId)
+    {
+        return $this->eifinalks()
+            ->whereHas('pevaluacion', function ($query) use ($lapsoId) {
+                $query->where('lapso_id', $lapsoId);
+            })->exists();
     }
 }

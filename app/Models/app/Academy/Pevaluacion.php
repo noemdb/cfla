@@ -132,6 +132,15 @@ class Pevaluacion extends Model implements \App\Contracts\Auditable
         return $this->hasMany(Evaluacion::class, 'pevaluacion_id');
     }
 
+    /**
+     * Informes finales de Educación Inicial emitidos sobre esta carga
+     * académica (área × grado × sección × lapso).
+     */
+    public function eifinalks()
+    {
+        return $this->hasMany(\App\Models\app\Inicial\Eifinalk::class, 'pevaluacion_id');
+    }
+
     public function escala()
     {
         return $this->belongsTo(Escala::class, 'escala_id');

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Users;
 use App\Models\sys\Profile;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -39,6 +40,9 @@ class IndexComponent extends Component
     public $is_planner = false;
 
     public $is_profesor = false;
+
+    /** Acceso al módulo de Educación Inicial (pestudio 6). Blueprint inicial · D2/F1. */
+    public $is_inicial = false;
 
     public $is_leadership = false;
 
@@ -85,6 +89,7 @@ class IndexComponent extends Component
             'is_diagnostic' => 'boolean',
             'is_planner' => 'boolean',
             'is_profesor' => 'boolean',
+            'is_inicial' => 'boolean',
             'is_leadership' => 'boolean',
             'is_coordinacion' => 'boolean',
             'is_director' => 'boolean',
@@ -106,6 +111,7 @@ class IndexComponent extends Component
         'is_diagnostic' => 'diagnóstico',
         'is_planner' => 'planificador',
         'is_profesor' => 'profesor',
+        'is_inicial' => 'educación inicial',
         'is_leadership' => 'jefe de área',
         'is_coordinacion' => 'coordinación',
         'is_director' => 'dirección',
@@ -131,6 +137,13 @@ class IndexComponent extends Component
             });
         }
 
+        // `users.is_inicial` nace con la migración
+        // `add_is_inicial_to_users_table` (YA APLICADA en s2627). El guarda se
+        // mantiene para entornos que aún no la tengan: filtrar por ese flag
+        // antes de aplicarla revienta con "Unknown column", así que se degrada
+        // a "sin resultados" en vez de tumbar el listado de usuarios.
+        $tieneIsInicial = Schema::hasColumn('users', 'is_inicial');
+
         // Filter by role
         if ($this->filter_role === 'admin') {
             $query->where('is_admin', true);
@@ -140,6 +153,10 @@ class IndexComponent extends Component
             $query->where('is_planner', true);
         } elseif ($this->filter_role === 'profesor') {
             $query->where('is_profesor', true);
+        } elseif ($this->filter_role === 'inicial') {
+            $tieneIsInicial
+                ? $query->where('is_inicial', true)
+                : $query->whereRaw('1 = 0');
         } elseif ($this->filter_role === 'leadership') {
             $query->where('is_leadership', true);
         } elseif ($this->filter_role === 'coordinacion') {
@@ -157,6 +174,12 @@ class IndexComponent extends Component
                 ->where('is_coordinacion', false)
                 ->where('is_director', false)
                 ->where('is_student', false);
+
+            // Sin la columna, ningún usuario puede "ser solo estándar por
+            // no ser docente de Inicial" porque el flag no existe todavía.
+            $tieneIsInicial
+                ? $query->where('is_inicial', false)
+                : $query->whereRaw('1 = 1');
         }
 
         if (in_array($this->sortField, ['id', 'username', 'email', 'is_active'])) {
@@ -173,6 +196,7 @@ class IndexComponent extends Component
             'diagnostic' => 'Diagnóstico',
             'planner' => 'Planificación',
             'profesor' => 'Profesor',
+            'inicial' => 'Educación Inicial',
             'leadership' => 'Jefe de Área',
             'coordinacion' => 'Coordinación',
             'director' => 'Dirección',
@@ -235,6 +259,9 @@ class IndexComponent extends Component
         $this->is_diagnostic = (bool) $user->is_diagnostic;
         $this->is_planner = (bool) $user->is_planner;
         $this->is_profesor = (bool) $user->is_profesor;
+        // Blueprint inicial F1. `isInicial()` lee el atributo crudo y tolera
+        // que la columna no exista todavía (entornos sin la migración).
+        $this->is_inicial = (bool) $user->isInicial();
         $this->is_leadership = (bool) ($user->is_leadership ?? false);
         $this->is_coordinacion = (bool) ($user->is_coordinacion ?? false);
         $this->is_director = (bool) ($user->is_director ?? false);
@@ -270,6 +297,15 @@ class IndexComponent extends Component
                 'is_student' => $this->is_student ? 1 : 0,
                 'is_active' => $this->is_active,
             ];
+
+            // La columna `is_inicial` nace con la migración
+            // `add_is_inicial_to_users_table` (YA APLICADA en s2627). Incluirla
+            // a ciegas haría fallar TODO el guardado de usuarios con un
+            // "Unknown column", así que solo se escribe si la columna existe:
+            // así el mismo código sirve para entornos que aún no la tengan.
+            if (Schema::hasColumn('users', 'is_inicial')) {
+                $userData['is_inicial'] = $this->is_inicial ? 1 : 0;
+            }
 
             if ($this->isEditing) {
                 $user = User::findOrFail($this->user_id);
@@ -355,7 +391,7 @@ class IndexComponent extends Component
     {
         $this->reset([
             'username', 'email', 'password',
-            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_leadership', 'is_coordinacion', 'is_director', 'is_student',
+            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_inicial', 'is_leadership', 'is_coordinacion', 'is_director', 'is_student',
             'firstname', 'lastname', 'card_number',
         ]);
         $this->is_active = 'enable';

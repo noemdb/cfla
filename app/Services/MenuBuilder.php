@@ -31,6 +31,7 @@ class MenuBuilder
         'coordinacion' => 'Coordinación de Programas Educativos',
         'planning' => 'Planificación Académica',
         'profesor' => 'Panel del Profesor',
+        'inicial' => 'Educación Inicial',
         'student' => 'Portal Estudiante',
     ];
 
@@ -64,6 +65,9 @@ class MenuBuilder
             (bool) $user->isCoordinacion() => 'coordinacion',
             (bool) $user->is_planner => 'planning',
             (bool) $user->isProfesor() => 'profesor',
+            // Un docente de Educación Inicial NO es necesariamente `is_profesor`:
+            // con solo el flag, su layout es el del módulo (grupo 'inicial').
+            (bool) $user->is_inicial => 'inicial',
             (bool) $user->is_student => 'student',
             default => 'admin',
         };
@@ -116,6 +120,8 @@ class MenuBuilder
             'is_leadership' => (bool) $user->is_leadership,
             'is_planner_or_admin_or_diagnostic' => $user->is_planner || $user->is_admin || $user->is_diagnostic,
             'is_planner_or_admin_or_diagnostic_or_director' => $user->is_planner || $user->is_admin || $user->is_diagnostic || (bool) $user->is_director,
+            // Módulo de Educación Inicial: solo los docentes con el flag (o admin).
+            'is_inicial' => $user->is_admin || $user->isInicial(),
             default => true,
         };
     }
@@ -203,6 +209,24 @@ class MenuBuilder
      * grupos filtrados por permiso, admin_only_items fusionados,
      * ítems con 'active' (bool) y 'href' calculados.
      */
+    /**
+     * Filtra ítems de menú por su permiso individual.
+     *
+     * Un ítem sin `permission` se muestra siempre que se muestre el grupo: es el
+     * comportamiento original. Un ítem con `permission` (p. ej. `is_inicial`)
+     * solo se muestra si el usuario lo cumple.
+     *
+     * @param  array<int, array<string, mixed>>  $items
+     * @return array<int, array<string, mixed>>
+     */
+    protected function filterItemsByPermission(array $items): array
+    {
+        return array_filter(
+            $items,
+            fn (array $item) => $this->hasPermission($item['permission'] ?? null)
+        );
+    }
+
     public function resolveGroups(): array
     {
         $groups = [];
@@ -212,7 +236,7 @@ class MenuBuilder
                 $hasActive = false;
 
                 foreach ($group['columns'] as $colKey => $col) {
-                    foreach ($col['items'] as $itemKey => $item) {
+                    foreach ($this->filterItemsByPermission($col['items'] ?? []) as $itemKey => $item) {
                         $item['active'] = $this->isActive($item['active'] ?? null);
                         $item['href'] = $this->resolveHref($item);
                         $hasActive = $hasActive || $item['active'];
@@ -238,6 +262,12 @@ class MenuBuilder
             if (! empty($group['admin_only_items']) && Auth::user()?->is_admin) {
                 $allItems = array_merge($allItems, $group['admin_only_items']);
             }
+
+            // Cada ítem puede declarar su propio `permission` (p. ej. el acceso
+            // al módulo de Educación Inicial solo para docentes con el flag).
+            // Sin `permission` el ítem se muestra a quien ve el grupo, como
+            // antes: es un filtro ADITIVO, no un cambio de comportamiento.
+            $allItems = $this->filterItemsByPermission($allItems);
 
             if (empty($allItems)) {
                 continue;
