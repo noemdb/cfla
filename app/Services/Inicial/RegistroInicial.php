@@ -51,7 +51,7 @@ final class RegistroInicial
     private const DOCUMENTOS = [
         'eiplanningwks' => [
             'modelo' => Eiplanningwk::class,
-            'relaciones' => ['grado', 'seccion', 'profesor', 'eiplanningwsummaries', 'eiplanningwstrategies'],
+            'relaciones' => ['grado', 'seccion', 'profesor', 'pensum.asignatura', 'eiplanningwsummaries', 'eiplanningwstrategies'],
             'detalle' => 'livewire.inicial.eiplanningwk.partials.plan-details',
             'formato' => 'inicial.eiplanningwk.format',
             'revision' => 'observacion',
@@ -60,7 +60,7 @@ final class RegistroInicial
         ],
         'eiplanningbwks' => [
             'modelo' => Eiplanningbwk::class,
-            'relaciones' => ['grado', 'seccion', 'profesor', 'eiplanningbwsummaries', 'eiplanningbwstrategies', 'eiprojectk'],
+            'relaciones' => ['grado', 'seccion', 'profesor', 'pensum.asignatura', 'eiplanningbwsummaries', 'eiplanningbwstrategies', 'eiprojectk'],
             'detalle' => 'livewire.inicial.eiplanningbwk.partials.plan-details',
             'formato' => 'inicial.eiplanningbwk.format',
             'revision' => 'observacion',
@@ -69,7 +69,7 @@ final class RegistroInicial
         ],
         'eiprojectks' => [
             'modelo' => Eiprojectk::class,
-            'relaciones' => ['grado', 'seccion', 'profesor', 'eiprojectsummaries', 'eiprojectkstrategies', 'eiprojectreviews'],
+            'relaciones' => ['grado', 'seccion', 'profesor', 'pensum.asignatura', 'eiprojectsummaries', 'eiprojectkstrategies', 'eiprojectreviews'],
             'detalle' => 'livewire.inicial.eiprojectk.partials.plan-details',
             'formato' => 'inicial.eiprojectk.format',
             'revision' => 'observacion',
@@ -78,7 +78,7 @@ final class RegistroInicial
         ],
         'eispecialks' => [
             'modelo' => Eispecialk::class,
-            'relaciones' => ['grado', 'seccion', 'profesor', 'activities', 'eispecialstrategies'],
+            'relaciones' => ['grado', 'seccion', 'profesor', 'pensum.asignatura', 'activities', 'eispecialstrategies'],
             'detalle' => 'livewire.inicial.eispecialk.partials.plan-details',
             'formato' => 'inicial.eispecialk.format',
             'revision' => 'observacion',
@@ -87,7 +87,7 @@ final class RegistroInicial
         ],
         'eievaluationks' => [
             'modelo' => Eievaluationk::class,
-            'relaciones' => ['grado', 'seccion', 'profesor', 'lapso', 'eievaluationps'],
+            'relaciones' => ['grado', 'seccion', 'profesor', 'lapso', 'pensum.asignatura', 'eievaluationps'],
             'detalle' => 'livewire.inicial.eievaluationk.partials.plan-details',
             'formato' => 'inicial.eievaluationk.format',
             // El plan de evaluación se revisa con `recomendacion`, no con
@@ -219,6 +219,7 @@ final class RegistroInicial
                 ['F. final', fn ($plan) => $plan->ffinal?->format('d/m/Y')],
                 ['Grupo', fn ($plan) => trim(($plan->grado?->name ?? '—').' · '.($plan->seccion?->name ?? '—'))],
                 ['Docente', fn ($plan) => $plan->profesor?->full_name],
+                ['Área', fn ($plan) => $plan->pensum?->asignatura?->name],
                 ['T. resumen', fn ($plan) => $plan->eiplanningwsummaries->count()],
                 ['Estrategias', fn ($plan) => $plan->eiplanningwstrategies->count()],
                 ['Diagnóstico', fn ($plan) => str($plan->diagnostico)->limit(80)],
@@ -229,6 +230,7 @@ final class RegistroInicial
                 ['F. final', fn ($plan) => $plan->ffinal?->format('d/m/Y')],
                 ['Grupo', fn ($plan) => trim(($plan->grado?->name ?? '—').' · '.($plan->seccion?->name ?? '—'))],
                 ['Docente', fn ($plan) => $plan->profesor?->full_name],
+                ['Área', fn ($plan) => $plan->pensum?->asignatura?->name],
                 ['Proyecto', fn ($plan) => $plan->eiprojectk?->id],
                 ['T. resumen', fn ($plan) => $plan->eiplanningbwsummaries->count()],
                 ['Diagnóstico', fn ($plan) => str($plan->diagnostico)->limit(80)],
@@ -240,6 +242,7 @@ final class RegistroInicial
                 ['Tiempo', fn ($proyecto) => $proyecto->tiempo_ejecucion],
                 ['Grupo', fn ($proyecto) => trim(($proyecto->grado?->name ?? '—').' · '.($proyecto->seccion?->name ?? '—'))],
                 ['Docente', fn ($proyecto) => $proyecto->profesor?->full_name],
+                ['Área', fn ($proyecto) => $proyecto->pensum?->asignatura?->name],
                 ['Revisiones', fn ($proyecto) => $proyecto->eiprojectreviews->count()],
                 ['Diagnóstico', fn ($proyecto) => str($proyecto->diagnostico)->limit(80)],
             ],
@@ -249,6 +252,7 @@ final class RegistroInicial
                 ['F. final', fn ($plan) => $plan->ffinal?->format('d/m/Y')],
                 ['Grupo', fn ($plan) => trim(($plan->grado?->name ?? '—').' · '.($plan->seccion?->name ?? '—'))],
                 ['Docente', fn ($plan) => $plan->profesor?->full_name],
+                ['Área', fn ($plan) => $plan->pensum?->asignatura?->name],
                 ['Actividades', fn ($plan) => $plan->activities->count()],
                 ['Justificación', fn ($plan) => str($plan->justificacion)->limit(80)],
             ],
@@ -259,6 +263,7 @@ final class RegistroInicial
                 ['Lapso', fn ($plan) => $plan->lapso?->name],
                 ['Grupo', fn ($plan) => trim(($plan->grado?->name ?? '—').' · '.($plan->seccion?->name ?? '—'))],
                 ['Docente', fn ($plan) => $plan->profesor?->full_name],
+                ['Área', fn ($plan) => $plan->pensum?->asignatura?->name],
                 ['Posiciones', fn ($plan) => $plan->eievaluationps->count()],
                 ['Asistencia', fn ($plan) => $plan->asistencia],
             ],

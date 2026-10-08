@@ -100,6 +100,7 @@ class EiplanningwkComponentTest extends TestCase
             'user' => $user,
             'profesor_id' => $profesorId,
             'pevaluacion_id' => $pevaluacionId,
+            'pensum_id' => $pensum->id,
         ];
     }
 
@@ -279,6 +280,232 @@ class EiplanningwkComponentTest extends TestCase
         $this->assertSame('2026-10-05', $plan->finicial->format('Y-m-d'));
         $this->assertSame(1, (int) $plan->tiempo_ejecucion);
         $this->assertFalse($component->get('showModal'), 'El modal debe cerrarse tras guardar.');
+    }
+
+    // ─── Edición de cabecera (grid + table) ───────────────────
+
+    /** @test */
+    public function el_boton_editar_aparece_en_modo_tarjetas_y_en_modo_tabla(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $this->makePlan($docente['profesor_id']);
+
+        $grid = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class);
+
+        $grid->assertSee('Editar plan');
+
+        $grid->call('toggleView');
+        $grid->assertSet('viewMode', 'table');
+        $grid->assertSee('Editar plan');
+    }
+
+    /**
+     * Regresión del bug de consola `The specified value "2026-10-05T00:00:00-04:00"
+     * does not conform to "yyyy-MM-dd"`: al abrir en edición, el formulario
+     * cargaba objetos `Carbon` y Livewire los serializaba con zona horaria; el
+     * `input[type=date]` los rechazaba, mostraba vacío y el valor volvía `null`.
+     * El formulario debe llevar siempre strings `Y-m-d`.
+     *
+     * @test
+     */
+    public function editar_un_plan_carga_las_fechas_como_cadenas_y_m_d(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        $form = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'edit', $plan->id)
+            ->get('eiplanningwk');
+
+        $this->assertSame('2026-10-05', $form['finicial']);
+        $this->assertSame('2026-10-09', $form['ffinal']);
+
+        // Y una fecha elegida en el datepicker sobrevive al roundtrip.
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'edit', $plan->id)
+            ->set('eiplanningwk.finicial', '2026-10-06')
+            ->set('eiplanningwk.ffinal', '2026-10-10')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('2026-10-06', $plan->fresh()->finicial->format('Y-m-d'));
+        $this->assertSame('2026-10-10', $plan->fresh()->ffinal->format('Y-m-d'));
+    }
+
+    /** Asigna al docente un pensum distinto al primero de su grado. */
+    private function darPensumDistinto(array $docente): array
+    {
+        $gradoId = (int) Grado::where('pestudio_id', 6)->value('id');
+
+        $pensum = Pensum::where('grado_id', $gradoId)
+            ->where('id', '!=', $docente['pensum_id'])
+            ->first();
+
+        if ($pensum) {
+            DB::table('pevaluacions')->where('id', $docente['pevaluacion_id'])
+                ->update(['pensum_id' => $pensum->id]);
+            $docente['pensum_id'] = (int) $pensum->id;
+        }
+
+        return $docente;
+    }
+
+    // ─── Área de aprendizaje opcional (pensum_id) ──────────────
+
+    /** @test */
+    public function guarda_un_plan_con_el_area_de_aprendizaje_del_docente(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->set($this->planForm())
+            ->set('eiplanningwk.pensum_id', $docente['pensum_id'])
+            ->call('save');
+
+        $component->assertHasNoErrors();
+
+        $plan = Eiplanningwk::where('profesor_id', $docente['profesor_id'])->first();
+
+        $this->assertNotNull($plan);
+        $this->assertSame($docente['pensum_id'], (int) $plan->pensum_id);
+        $this->assertSame($docente['pensum_id'], (int) $plan->pensum->id);
+    }
+
+    /** @test */
+    public function el_area_sigue_siendo_opcional(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->set($this->planForm())
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $plan = Eiplanningwk::where('profesor_id', $docente['profesor_id'])->first();
+
+        $this->assertNotNull($plan);
+        $this->assertNull($plan->pensum_id, 'Sin elegir área, el plan se guarda desvinculado.');
+    }
+
+    /** @test */
+    public function el_select_de_area_solo_ofrece_los_pensums_del_docente(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $otro = $this->darPensumDistinto($this->makeDocenteInicial(isAdmin: false));
+
+        $lista = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->get('listPensum');
+
+        $ids = $lista instanceof \Illuminate\Support\Collection ? $lista->keys()->all() : [];
+
+        $this->assertContains($docente['pensum_id'], $ids);
+        $this->assertNotContains($otro['pensum_id'], $ids, 'Un área de otro docente no debe aparecer.');
+    }
+
+    /** @test */
+    public function rechaza_un_area_de_aprendizaje_de_otro_docente(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $otro = $this->darPensumDistinto($this->makeDocenteInicial(isAdmin: false));
+
+        // El `exists` del Request no basta: el pensum existe, pero no es suyo.
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->set($this->planForm())
+            ->set('eiplanningwk.pensum_id', $otro['pensum_id'])
+            ->call('save');
+
+        $component->assertHasErrors('eiplanningwk.pensum_id');
+
+        $this->assertSame(
+            0,
+            Eiplanningwk::where('profesor_id', $docente['profesor_id'])->count(),
+            'No debe persistirse nada cuando el área no pertenece al docente.'
+        );
+    }
+
+    /** @test */
+    public function el_filtro_de_area_acota_el_listado_al_pensum_elegido(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $conArea = $this->makePlan($docente['profesor_id']);
+        $conArea->update(['pensum_id' => $docente['pensum_id']]);
+        $this->makePlan($docente['profesor_id']);
+
+        $ids = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->set('filterPensum', $docente['pensum_id'])
+            ->viewData('eiplanningwks')
+            ->pluck('id')
+            ->all();
+
+        $this->assertSame([$conArea->id], $ids);
+    }
+
+    /** @test */
+    public function cambiar_de_grado_limpia_el_filtro_de_area(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->set('filterPensum', $docente['pensum_id']);
+
+        $this->assertNotEmpty($component->get('listPensumFiltro'));
+
+        $component->set('filterGrado', $component->get('listGrado')->keys()->first());
+
+        $this->assertSame('', $component->get('filterPensum'));
+    }
+
+    /** @test */
+    public function editar_un_plan_actualiza_su_cabecera(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'edit', $plan->id);
+
+        // El formulario se precarga con los datos del plan.
+        $this->assertSame(
+            $plan->diagnostico,
+            $component->get('eiplanningwk')['diagnostico']
+        );
+
+        $component
+            ->set('eiplanningwk.diagnostico', 'Diagnóstico actualizado tras la revisión semanal del grupo.')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame(
+            'Diagnóstico actualizado tras la revisión semanal del grupo.',
+            $plan->fresh()->diagnostico
+        );
+        $this->assertFalse($component->get('showModal'), 'El modal debe cerrarse tras guardar.');
+    }
+
+    /** @test */
+    public function editar_el_plan_de_otro_docente_da_404(): void
+    {
+        $dueno = $this->makeDocenteInicial();
+        $invasor = $this->makeDocenteInicial();
+        $ajeno = $this->makePlan($dueno['profesor_id']);
+
+        Livewire::actingAs($invasor['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'edit', $ajeno->id)
+            ->assertStatus(404);
+
+        $this->assertNotNull(Eiplanningwk::find($ajeno->id));
     }
 
     /** @test */

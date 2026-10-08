@@ -45,6 +45,25 @@
         </div>
     </div>
 
+    {{-- Área de aprendizaje (opcional): solo las del docente en su lapso en curso. --}}
+    <div>
+        <label for="p-pensum" class="block text-xs font-medium text-gray-400 mb-1.5">
+            Área de aprendizaje <span class="text-gray-500">(opcional)</span>
+        </label>
+        <select id="p-pensum" wire:model.live="eiprojectk.pensum_id"
+            @disabled(! ($eiprojectk['grado_id'] ?? null))
+            class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none disabled:opacity-50">
+            <option value="">Sin área vinculada</option>
+            @foreach ($listPensum as $id => $descripcion)
+                <option value="{{ $id }}">{{ $descripcion }}</option>
+            @endforeach
+        </select>
+        @error('eiprojectk.pensum_id')
+            <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+        @enderror
+        <p class="mt-1 text-[11px] text-gray-600">Solo las áreas de tu carga académica en este lapso.</p>
+    </div>
+
     <div class="grid gap-4 sm:grid-cols-3">
         <div>
             <label for="p-inicial" class="block text-xs font-medium text-gray-400 mb-1.5">

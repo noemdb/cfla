@@ -105,6 +105,47 @@ class HomeInicialTest extends TestCase
     }
 
     /** @test */
+    public function la_pagina_de_perfil_del_modulo_muestra_la_ficha_del_docente(): void
+    {
+        $this->saltarSiFaltaLaMigracion();
+
+        $docente = $this->makeDocenteInicial();
+
+        $this->actingAs($docente['user'])
+            ->get(route('inicials.users'))
+            ->assertOk()
+            // Misma ficha que profesors.users.index.
+            ->assertSee('Mi Perfil')
+            ->assertSee('Home Test')
+            ->assertSee('Cédula')
+            // …pero con navegación del módulo: el botón vuelve a inicials.home.
+            ->assertSee(route('inicials.home'), false)
+            ->assertSee('Volver al módulo');
+    }
+
+    /** @test */
+    public function la_pagina_de_perfil_exige_el_flag_de_inicial(): void
+    {
+        $this->actingAs(User::factory()->create(['is_profesor' => false, 'is_admin' => false]))
+            ->get(route('inicials.users'))
+            ->assertForbidden();
+    }
+
+    /** @test */
+    public function la_pagina_de_perfil_sin_ficha_muestra_el_estado_vacio(): void
+    {
+        $this->saltarSiFaltaLaMigracion();
+
+        // Usuario is_inicial SIN fila en profesors: no revienta, informa.
+        $user = User::factory()->create(['is_profesor' => false, 'is_admin' => false, 'is_inicial' => true]);
+
+        $this->actingAs($user)
+            ->get(route('inicials.users'))
+            ->assertOk()
+            ->assertSee('Información no disponible');
+    }
+
+    /** @test */
     public function los_casos_de_uso_documentan_los_siete_recorridos(): void
     {
         $this->saltarSiFaltaLaMigracion();

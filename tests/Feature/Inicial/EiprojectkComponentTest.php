@@ -86,7 +86,26 @@ class EiprojectkComponentTest extends TestCase
             'user' => $user,
             'profesor_id' => $profesorId,
             'pevaluacion_id' => $pevaluacionId,
+            'pensum_id' => $pensum->id,
         ];
+    }
+
+    /** Asigna al docente un pensum distinto al primero de su grado. */
+    private function darPensumDistinto(array $docente): array
+    {
+        $gradoId = $this->gradoInicialId();
+
+        $pensum = Pensum::where('grado_id', $gradoId)
+            ->where('id', '!=', $docente['pensum_id'])
+            ->first();
+
+        if ($pensum) {
+            DB::table('pevaluacions')->where('id', $docente['pevaluacion_id'])
+                ->update(['pensum_id' => $pensum->id]);
+            $docente['pensum_id'] = (int) $pensum->id;
+        }
+
+        return $docente;
     }
 
     private function gradoInicialId(): int
@@ -186,6 +205,62 @@ class EiprojectkComponentTest extends TestCase
 
         $this->assertContains($propio->id, $ids);
         $this->assertNotContains($ajeno->id, $ids, 'Un docente no debe ver el proyecto de otro.');
+    }
+
+    // ─── Área de aprendizaje opcional (pensum_id) ──────────────
+
+    /** @test */
+    public function guarda_un_proyecto_con_el_area_de_aprendizaje_del_docente(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiprojectkComponent::class)
+            ->set($this->projectForm())
+            ->set('eiprojectk.pensum_id', $docente['pensum_id'])
+            ->call('save');
+
+        $component->assertHasNoErrors();
+
+        $proyecto = Eiprojectk::where('profesor_id', $docente['profesor_id'])->first();
+
+        $this->assertNotNull($proyecto);
+        $this->assertSame($docente['pensum_id'], (int) $proyecto->pensum_id);
+    }
+
+    /** @test */
+    public function rechaza_un_area_de_aprendizaje_de_otro_docente(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $otro = $this->darPensumDistinto($this->makeDocenteInicial(isAdmin: false));
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiprojectkComponent::class)
+            ->set($this->projectForm())
+            ->set('eiprojectk.pensum_id', $otro['pensum_id'])
+            ->call('save');
+
+        $component->assertHasErrors('eiprojectk.pensum_id');
+        $this->assertSame(0, Eiprojectk::where('profesor_id', $docente['profesor_id'])->count());
+    }
+
+    /** @test */
+    public function el_filtro_de_area_acota_el_listado_al_pensum_elegido(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $conArea = $this->makeProject($docente['profesor_id']);
+        $conArea->update(['pensum_id' => $docente['pensum_id']]);
+        $this->makeProject($docente['profesor_id']);
+
+        $ids = Livewire::actingAs($docente['user'])
+            ->test(EiprojectkComponent::class)
+            ->set('filterPensum', $docente['pensum_id'])
+            ->viewData('eiprojectks')
+            ->pluck('id')
+            ->all();
+
+        $this->assertSame([$conArea->id], $ids);
     }
 
     /** @test */

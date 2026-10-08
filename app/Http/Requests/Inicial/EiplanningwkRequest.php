@@ -49,6 +49,9 @@ class EiplanningwkRequest extends InicialRequest
             'eiplanningwk.profesor_id' => ['required', 'integer', 'exists:profesors,id'],
             'eiplanningwk.grado_id' => ['required', 'integer', 'exists:grados,id'],
             'eiplanningwk.seccion_id' => ['required', 'integer', 'exists:seccions,id'],
+            // Área de aprendizaje opcional. La pertenencia al docente se
+            // comprueba en el componente (un FormRequest no sabe quién llama).
+            'eiplanningwk.pensum_id' => ['nullable', 'integer', 'exists:pensums,id'],
             'eiplanningwk.eiprojectk_id' => ['nullable', 'integer', 'exists:eiprojectks,id'],
 
             // R2: coherencia de fechas.
@@ -74,6 +77,7 @@ class EiplanningwkRequest extends InicialRequest
             'eiplanningwk.profesor_id' => 'profesor',
             'eiplanningwk.grado_id' => 'grado',
             'eiplanningwk.seccion_id' => 'sección',
+            'eiplanningwk.pensum_id' => 'área de aprendizaje',
             'eiplanningwk.eiprojectk_id' => 'proyecto vinculado',
             'eiplanningwk.finicial' => 'fecha de inicio',
             'eiplanningwk.ffinal' => 'fecha de culminación',
@@ -95,6 +99,7 @@ class EiplanningwkRequest extends InicialRequest
             'eiplanningwk.tiempo_ejecucion.min' => 'La planificación semanal dura al menos 1 semana.',
             'eiplanningwk.diagnostico.min' => 'El diagnóstico inicial debe tener al menos 10 caracteres.',
             'eiplanningwk.eiprojectk_id.exists' => 'El proyecto vinculado no existe.',
+            'eiplanningwk.pensum_id.exists' => 'El área de aprendizaje elegida no existe.',
         ];
     }
 
@@ -112,6 +117,7 @@ class EiplanningwkRequest extends InicialRequest
             'profesor_id' => (int) $this->field('profesor_id'),
             'grado_id' => (int) $this->field('grado_id'),
             'seccion_id' => (int) $this->field('seccion_id'),
+            'pensum_id' => $this->field('pensum_id') ?: null,
             // FKs vacías vienen como "" desde el formulario.
             'eiprojectk_id' => $this->field('eiprojectk_id') ?: null,
             'finicial' => $this->field('finicial'),

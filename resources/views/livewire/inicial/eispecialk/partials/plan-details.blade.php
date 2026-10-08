@@ -10,7 +10,7 @@
         //     necesita;
         //   · las perspectivas de revisión (F5), que le pasan `$plan` YA
         //     cargado con todas sus relaciones — así no se repite la consulta.
-        $plan = $plan ?? \App\Models\app\Inicial\Eispecialk::with(['grado', 'seccion'])->find($eispecialk_id);
+        $plan = $plan ?? \App\Models\app\Inicial\Eispecialk::with(['grado', 'seccion', 'pensum.asignatura', 'pensum.grado'])->find($eispecialk_id);
     @endphp
 
     @if (! $plan)
@@ -34,6 +34,15 @@
                 </dd>
             </div>
         </dl>
+
+        @if ($plan->pensum)
+            <div>
+                <dt class="text-xs font-medium text-gray-500">Área de aprendizaje</dt>
+                <dd class="text-sm text-gray-200 mt-0.5">
+                    {{ $plan->pensum->asignatura?->name ?? '—' }} · {{ $plan->pensum->grado?->name ?? '—' }}
+                </dd>
+            </div>
+        @endif
 
         <div>
             <dt class="text-xs font-medium text-gray-500">Justificación del plan</dt>

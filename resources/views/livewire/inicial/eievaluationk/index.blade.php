@@ -67,12 +67,48 @@
                 </select>
             </div>
 
+            <div class="w-full sm:w-44">
+                <label for="f-pensum" class="block text-xs font-medium text-gray-400 mb-1">Área</label>
+                <select id="f-pensum" wire:model.live="filterPensum"
+                    class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
+                    <option value="">Todas</option>
+                    @foreach ($listPensumFiltro as $id => $nombre)
+                        <option value="{{ $id }}">{{ $nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <button wire:click="openModal('create')" type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 Nuevo plan de evaluación
+            </button>
+
+            <button wire:click="openImport" type="button"
+                class="inline-flex items-center gap-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 text-sm font-medium text-gray-200 transition-colors"
+                title="Traer planes del período anterior (s2526) como punto de partida">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Importar de s2526
+            </button>
+
+            <button wire:click="toggleView" type="button"
+                class="inline-flex items-center gap-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 text-sm font-medium text-gray-300 transition-colors"
+                title="{{ $viewMode === 'grid' ? 'Ver como tabla' : 'Ver como tarjetas' }}">
+                @if ($viewMode === 'grid')
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M3 6h18M3 18h18" />
+                    </svg>
+                    Tabla
+                @else
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Tarjetas
+                @endif
             </button>
         </div>
     </div>
@@ -88,6 +124,7 @@
             </button>
         </div>
     @else
+        @if ($viewMode === 'grid')
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @foreach ($eievaluationks as $plan)
                 @php
@@ -134,6 +171,14 @@
                             title="Posiciones de evaluación por área">
                             Posiciones ({{ $posiciones }})
                         </button>
+                        <button wire:click="openModal('edit', {{ $plan->id }})" type="button"
+                            class="p-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/20 text-amber-300 transition-colors"
+                            title="Editar plan">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
                         <button wire:click="openModal('view', {{ $plan->id }})" type="button"
                             class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
                             title="Ver detalle">
@@ -164,6 +209,89 @@
                 </article>
             @endforeach
         </div>
+        @else
+        {{-- ─── Vista tabla ─── --}}
+        <div class="overflow-x-auto rounded-xl border border-white/10">
+            <table class="min-w-full text-sm">
+                <thead class="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Lapso</th>
+                        <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Grado · Sección</th>
+                        <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Período</th>
+                        <th scope="col" class="px-3 py-2.5 text-right font-medium whitespace-nowrap">Posiciones</th>
+                        <th scope="col" class="px-3 py-2.5 text-left font-medium min-w-48">Observaciones</th>
+                        <th scope="col" class="px-3 py-2.5 text-right font-medium">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @foreach ($eievaluationks as $plan)
+                        @php $posiciones = $plan->eievaluationps()->count(); @endphp
+                        <tr class="align-top hover:bg-white/[0.02]">
+                            <td class="px-3 py-2.5 text-gray-200 whitespace-nowrap font-medium">
+                                {{ $plan->lapso?->name ?? '—' }}
+                            </td>
+                            <td class="px-3 py-2.5 text-gray-300 whitespace-nowrap">
+                                {{ $plan->grado?->name ?? '—' }} · {{ $plan->seccion?->name ?? '—' }}
+                            </td>
+                            <td class="px-3 py-2.5 text-gray-300 whitespace-nowrap">
+                                {{ $plan->finicial->format('d/m/Y') }} → {{ $plan->ffinal->format('d/m/Y') }}
+                            </td>
+                            <td class="px-3 py-2.5 text-gray-300 text-right whitespace-nowrap tabular-nums">{{ $posiciones }}</td>
+                            <td class="px-3 py-2.5 text-gray-400 min-w-48 max-w-xs truncate"
+                                title="{{ $plan->observaciones }}">
+                                {{ $plan->observaciones ?: '—' }}
+                            </td>
+                            <td class="px-3 py-2.5 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1">
+                                    <button wire:click="openModal('edit', {{ $plan->id }})" type="button"
+                                        class="p-1.5 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/20 text-amber-300 transition-colors"
+                                        title="Editar plan">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button wire:click="openModal('position', {{ $plan->id }})" type="button"
+                                        class="p-1.5 rounded-md bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/20 text-purple-300 transition-colors"
+                                        title="Posiciones de evaluación por área">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </button>
+                                    <button wire:click="openModal('view', {{ $plan->id }})" type="button"
+                                        class="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
+                                        title="Ver detalle">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                    <a href="{{ route('inicials.eievaluationks.format', $plan->id) }}" target="_blank"
+                                        class="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
+                                        title="Formato imprimible">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" />
+                                        </svg>
+                                    </a>
+                                    <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
+                                        class="p-1.5 rounded-md bg-white/5 hover:bg-red-500/20 border border-white/5 text-gray-400 hover:text-red-400 transition-colors"
+                                        title="Eliminar plan">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
 
         <div>{{ $eievaluationks->links() }}</div>
     @endif
@@ -171,6 +299,8 @@
     {{-- ═══════════════════════════════════════════════════════════
          BLOQUE 3 · MODAL ÚNICO
          ═══════════════════════════════════════════════════════════ --}}
+    @include('livewire.inicial.shared.import-wizard')
+
     @if ($showModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
             wire:key="modal-{{ $modalType }}-{{ $eievaluationk_id }}">

@@ -88,6 +88,26 @@ class HomeInicialController extends AbstractInicialController
     }
 
     /**
+     * Perfil del docente dentro del módulo.
+     *
+     * Equivalente a `app.profesors.users.index`: la misma ficha (`profesors`
+     * por `user_id`), pero con navegación del módulo (vuelve a
+     * `inicials.home`, no al dashboard del profesor). Un usuario `is_inicial`
+     * no es necesariamente `is_profesor`, así que sin ficha se muestra el
+     * estado vacío en vez de reventar.
+     */
+    public function users()
+    {
+        $user = Auth::user();
+
+        abort_if(! $user || (! $user->isInicial() && ! $user->is_admin), 403, 'Acceso denegado al módulo de Educación Inicial.');
+
+        $profesor = \App\Models\app\Academy\Profesor::where('user_id', $user->id)->first();
+
+        return view('inicial.users.index', compact('profesor'));
+    }
+
+    /**
      * Los 7 casos de uso del módulo.
      *
      * @return array<int, array{titulo: string, descripcion: string, icono: string, color: string}>

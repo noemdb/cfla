@@ -61,6 +61,9 @@
                 <p><span>Docente </span>: {{ $profesor?->full_name ?? '—' }}</p>
                 <p><span>Grupo </span>: {{ $grado?->name ?? '—' }}</p>
                 <p><span>Sección </span>: {{ $seccion?->name ?? '—' }}</p>
+                @if ($eiplanningwk->pensum)
+                    <p><span>Área </span>: {{ $eiplanningwk->pensum->asignatura?->name ?? '—' }}</p>
+                @endif
             </td>
             <td>
                 <p><span>Fecha de Inicio </span>: {{ $eiplanningwk->finicial }}</p>

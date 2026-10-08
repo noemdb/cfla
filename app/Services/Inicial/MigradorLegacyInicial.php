@@ -34,10 +34,10 @@ use Throwable;
  * ─────────────────────────────────────────────────────────────────────────────
  * LOS HUÉRFANOS
  * ─────────────────────────────────────────────────────────────────────────────
- * La fuente tiene 33 filas (de 2.615) cuyo plan padre fue borrado sin cascada:
- * 27 estrategias semanales, 4 resúmenes de proyecto, 1 revisión y 1 actividad
- * especial. Insertarlas tal cual dejaría strategies sin plan detrás, que es justo
- * lo que el guardián debe impedir.
+ * La fuente puede contener filas cuyo plan padre fue borrado sin cascada
+ * (estrategias, resúmenes, revisiones o actividades sin plan detrás).
+ * Insertarlas tal cual dejaría registros sin padre, que es justo lo que el
+ * guardián debe impedir.
  *
  * Por defecto el comando ABORTA y las cuenta. Con `--omitir-huerfanas` se saltan
  * y quedan en el log. No se borran de la fuente en ningún caso: la fuente es
@@ -186,8 +186,10 @@ class MigradorLegacyInicial
         }
 
         // Las claves foráneas que NO son tablas del módulo: si un `profesor_id`
-        // del legacy no existe en cfla, su plan no debe entrar.
-        $resultado['claves_roto'] = $this->clavesRotas();
+        // del legacy no existe en cfla, su plan no debe entrar. Solo se revisan
+        // las tablas SELECCIONADAS: con `--solo` el guardián no debe abortar
+        // por tablas que no se van a migrar.
+        $resultado['claves_roto'] = $this->clavesRotas($tablas);
 
         return $resultado;
     }
@@ -383,9 +385,10 @@ class MigradorLegacyInicial
      * Referencias de las tablas del módulo que no existen en las tablas de CFLA
      * (`profesors`, `grados`, `seccions`, `lapsos`, `pevaluacions`).
      *
+     * @param  array<int, array{tabla: string, padre: ?string, fk: ?string}>  $tablas  solo las seleccionadas
      * @return array<string, int> columna => cuántas referencias no resuelven
      */
-    private function clavesRotas(): array
+    private function clavesRotas(array $tablas): array
     {
         $destinos = [
             'profesor_id' => ['tabla' => 'profesors'],
@@ -397,7 +400,7 @@ class MigradorLegacyInicial
 
         $rotas = [];
 
-        foreach (self::ORDEN as $entrada) {
+        foreach ($tablas as $entrada) {
             $tabla = $entrada['tabla'];
 
             if (! $this->existeEnOrigen($tabla) || ! Schema::hasTable($tabla)) {

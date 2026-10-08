@@ -54,12 +54,32 @@
                 </select>
             </div>
 
+            <div class="w-full sm:w-44">
+                <label for="f-pensum" class="block text-xs font-medium text-gray-400 mb-1">Área</label>
+                <select id="f-pensum" wire:model.live="filterPensum"
+                    class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
+                    <option value="">Todas</option>
+                    @foreach ($listPensumFiltro as $id => $nombre)
+                        <option value="{{ $id }}">{{ $nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <button wire:click="openModal('create')" type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 Nuevo proyecto
+            </button>
+
+            <button wire:click="openImport" type="button"
+                class="inline-flex items-center gap-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 text-sm font-medium text-gray-200 transition-colors"
+                title="Traer proyectos del período anterior (s2526) como punto de partida">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Importar de s2526
             </button>
         </div>
     </div>
@@ -184,6 +204,8 @@
     {{-- ═══════════════════════════════════════════════════════════
          BLOQUE 3 · MODAL ÚNICO
          ═══════════════════════════════════════════════════════════ --}}
+    @include('livewire.inicial.shared.import-wizard')
+
     @if ($showModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true"
             wire:key="modal-{{ $modalType }}-{{ $eiprojectk_id }}">

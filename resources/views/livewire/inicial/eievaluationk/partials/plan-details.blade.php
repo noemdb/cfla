@@ -13,7 +13,7 @@
         //     necesita;
         //   · las perspectivas de revisión (F5), que le pasan `$plan` YA
         //     cargado con todas sus relaciones — así no se repite la consulta.
-        $plan = $plan ?? \App\Models\app\Inicial\Eievaluationk::with(['grado', 'seccion', 'lapso'])->find($eievaluationk_id);
+        $plan = $plan ?? \App\Models\app\Inicial\Eievaluationk::with(['grado', 'seccion', 'lapso', 'pensum.asignatura', 'pensum.grado'])->find($eievaluationk_id);
     @endphp
 
     @if (! $plan)
@@ -32,6 +32,14 @@
                 <dt class="text-xs font-medium text-gray-500">Lapso</dt>
                 <dd class="text-sm text-gray-200 mt-0.5">{{ $plan->lapso?->name ?? '—' }}</dd>
             </div>
+            @if ($plan->pensum)
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Área de aprendizaje</dt>
+                    <dd class="text-sm text-gray-200 mt-0.5">
+                        {{ $plan->pensum->asignatura?->name ?? '—' }} · {{ $plan->pensum->grado?->name ?? '—' }}
+                    </dd>
+                </div>
+            @endif
             <div>
                 <dt class="text-xs font-medium text-gray-500">Período</dt>
                 <dd class="text-sm text-gray-200 mt-0.5">

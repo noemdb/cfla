@@ -93,6 +93,7 @@ class EiplanningbwkComponentTest extends TestCase
             'user' => $user,
             'profesor_id' => $profesorId,
             'pevaluacion_id' => $pevaluacionId,
+            'pensum_id' => $pensum->id,
         ];
     }
 
@@ -183,6 +184,41 @@ class EiplanningbwkComponentTest extends TestCase
     }
 
     // ─── Listado y carga en cascada ──────────────────────────────
+
+    /** @test */
+    public function el_filtro_de_area_acota_el_listado_al_pensum_elegido(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $conArea = $this->makePlan($docente['profesor_id']);
+        $conArea->update(['pensum_id' => $docente['pensum_id']]);
+        $this->makePlan($docente['profesor_id']);
+
+        $ids = Livewire::actingAs($docente['user'])
+            ->test(EiplanningbwkComponent::class)
+            ->set('filterPensum', $docente['pensum_id'])
+            ->viewData('eiplanningbwks')
+            ->pluck('id')
+            ->all();
+
+        $this->assertSame([$conArea->id], $ids);
+    }
+
+    /** @test */
+    public function cambiar_de_grado_limpia_el_filtro_de_area(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningbwkComponent::class)
+            ->set('filterPensum', $docente['pensum_id']);
+
+        $this->assertNotEmpty($component->get('listPensumFiltro'));
+
+        $component->set('filterGrado', $component->get('listGrado')->keys()->first());
+
+        $this->assertSame('', $component->get('filterPensum'));
+    }
 
     /** @test */
     public function el_listado_muestra_solo_los_planes_del_docente(): void

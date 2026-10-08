@@ -10,7 +10,7 @@
         //     necesita;
         //   · las perspectivas de revisión (F5), que le pasan `$plan` YA
         //     cargado con todas sus relaciones — así no se repite la consulta.
-        $plan = $plan ?? \App\Models\app\Inicial\Eiplanningbwk::with(['grado', 'seccion', 'eiprojectk'])->find($eiplanningbwk_id);
+        $plan = $plan ?? \App\Models\app\Inicial\Eiplanningbwk::with(['grado', 'seccion', 'eiprojectk', 'pensum.asignatura', 'pensum.grado'])->find($eiplanningbwk_id);
     @endphp
 
     @if (! $plan)
@@ -39,6 +39,14 @@
                     {{ $plan->eiprojectk ? \Illuminate\Support\Str::limit($plan->eiprojectk->diagnostico, 60) : '—' }}
                 </dd>
             </div>
+            @if ($plan->pensum)
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Área de aprendizaje</dt>
+                    <dd class="text-sm text-gray-200 mt-0.5">
+                        {{ $plan->pensum->asignatura?->name ?? '—' }} · {{ $plan->pensum->grado?->name ?? '—' }}
+                    </dd>
+                </div>
+            @endif
         </dl>
 
         <div>

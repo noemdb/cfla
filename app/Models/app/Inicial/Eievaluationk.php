@@ -5,6 +5,7 @@ namespace App\Models\app\Inicial;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $grado_id
  * @property int $lapso_id
  * @property int $seccion_id
+ * @property int|null $pensum_id
  * @property string $finicial
  * @property string $ffinal
  * @property string|null $observaciones
@@ -45,6 +47,7 @@ class Eievaluationk extends Model
         'grado_id',
         'lapso_id',
         'seccion_id',
+        'pensum_id',
         'finicial',
         'ffinal',
         'observaciones',
@@ -62,6 +65,7 @@ class Eievaluationk extends Model
         'grado_id' => 'Grado',
         'lapso_id' => 'Momento',
         'seccion_id' => 'Sección',
+        'pensum_id' => 'Área de aprendizaje',
         'finicial' => 'Fecha inicial',
         'ffinal' => 'Fecha final',
         'observaciones' => 'Observaciones del docente',
@@ -89,6 +93,14 @@ class Eievaluationk extends Model
     public function seccion()
     {
         return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
+
+    /**
+     * Área de aprendizaje del grado (pensum: asignatura × grado), opcional.
+     */
+    public function pensum()
+    {
+        return $this->belongsTo(Pensum::class, 'pensum_id');
     }
 
     public function lapso()

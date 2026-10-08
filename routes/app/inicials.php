@@ -55,6 +55,7 @@ Route::middleware(['auth', 'isInicial'])
     ->group(function () {
         Route::get('/', [HomeInicialController::class, 'index'])->name('home');
         Route::get('/use-cases', [HomeInicialController::class, 'useCases'])->name('use-cases');
+        Route::get('/users', [HomeInicialController::class, 'users'])->name('users');
 
         Route::resource('eiplanningwks', EiplanningwkController::class);
         Route::get('eiplanningwks/{eiplanningwk}/format', [EiplanningwkController::class, 'format'])

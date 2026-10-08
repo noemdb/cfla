@@ -41,6 +41,8 @@ class EievaluationkRequest extends InicialRequest
             'eievaluationk.lapso_id' => ['required', 'integer', 'exists:lapsos,id'],
 
             'eievaluationk.seccion_id' => ['required', 'integer', 'exists:seccions,id'],
+            // Área de aprendizaje opcional. La pertenencia al docente se valida en el componente.
+            'eievaluationk.pensum_id' => ['nullable', 'integer', 'exists:pensums,id'],
 
             // R2.
             'eievaluationk.finicial' => ['required', 'date'],
@@ -67,6 +69,7 @@ class EievaluationkRequest extends InicialRequest
             'eievaluationk.grado_id' => 'grado',
             'eievaluationk.lapso_id' => 'lapso',
             'eievaluationk.seccion_id' => 'sección',
+            'eievaluationk.pensum_id' => 'área de aprendizaje',
             'eievaluationk.finicial' => 'fecha de inicio',
             'eievaluationk.ffinal' => 'fecha de culminación',
             'eievaluationk.observaciones' => 'observaciones',
@@ -102,6 +105,7 @@ class EievaluationkRequest extends InicialRequest
             'grado_id' => (int) $this->field('grado_id'),
             'lapso_id' => (int) $this->field('lapso_id'),
             'seccion_id' => (int) $this->field('seccion_id'),
+            'pensum_id' => $this->field('pensum_id') ?: null,
             'finicial' => $this->field('finicial'),
             'ffinal' => $this->field('ffinal'),
             'observaciones' => trim((string) $this->field('observaciones')),

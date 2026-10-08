@@ -35,6 +35,8 @@ class EispecialkRequest extends InicialRequest
             'eispecialk.profesor_id' => ['required', 'integer', 'exists:profesors,id'],
             'eispecialk.grado_id' => ['required', 'integer', 'exists:grados,id'],
             'eispecialk.seccion_id' => ['required', 'integer', 'exists:seccions,id'],
+            // Área de aprendizaje opcional. La pertenencia al docente se valida en el componente.
+            'eispecialk.pensum_id' => ['nullable', 'integer', 'exists:pensums,id'],
 
             // R2: coherencia de fechas.
             'eispecialk.finicial' => ['required', 'date'],
@@ -55,6 +57,7 @@ class EispecialkRequest extends InicialRequest
             'eispecialk.profesor_id' => 'profesor',
             'eispecialk.grado_id' => 'grado',
             'eispecialk.seccion_id' => 'sección',
+            'eispecialk.pensum_id' => 'área de aprendizaje',
             'eispecialk.finicial' => 'fecha de inicio',
             'eispecialk.ffinal' => 'fecha de culminación',
             'eispecialk.tiempo_ejecucion' => 'cantidad de semanas',
@@ -74,6 +77,7 @@ class EispecialkRequest extends InicialRequest
             'eispecialk.ffinal.after_or_equal' => 'La fecha de culminación no puede ser anterior a la de inicio.',
             'eispecialk.tiempo_ejecucion.min' => 'El plan especial dura al menos 1 semana.',
             'eispecialk.justificacion.min' => 'La justificación debe tener al menos 10 caracteres.',
+            'eispecialk.pensum_id.exists' => 'El área de aprendizaje elegida no existe.',
         ];
     }
 
@@ -86,6 +90,7 @@ class EispecialkRequest extends InicialRequest
             'profesor_id' => (int) $this->field('profesor_id'),
             'grado_id' => (int) $this->field('grado_id'),
             'seccion_id' => (int) $this->field('seccion_id'),
+            'pensum_id' => $this->field('pensum_id') ?: null,
             'finicial' => $this->field('finicial'),
             'ffinal' => $this->field('ffinal'),
             'tiempo_ejecucion' => (int) $this->field('tiempo_ejecucion'),

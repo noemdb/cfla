@@ -4,6 +4,8 @@ namespace App\Livewire\Inicial;
 
 use App\Http\Requests\Inicial\EiplanningwkRequest;
 use App\Http\Requests\Inicial\EiplanningwsummaryRequest;
+use App\Livewire\Inicial\Concerns\ImportaDocumento;
+use App\Livewire\Inicial\Concerns\PensumCabecera;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Profesor;
@@ -12,6 +14,7 @@ use App\Models\app\Inicial\Eiplanningwk;
 use App\Models\app\Inicial\Eiplanningwstrategy;
 use App\Models\app\Inicial\Eiplanningwsummary;
 use App\Models\app\Inicial\Eiprojectk;
+use App\Services\Inicial\ImportadorEiplanningwk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -53,7 +56,13 @@ use WireUi\Traits\WireUiActions;
  */
 class EiplanningwkComponent extends Component
 {
-    use WireUiActions, WithPagination;
+    use ImportaDocumento, PensumCabecera, WireUiActions, WithPagination;
+
+    /** Instancia del asistente de importación del documento. */
+    protected function importador(): ImportadorEiplanningwk
+    {
+        return new ImportadorEiplanningwk;
+    }
 
     // ─── Estado del modal ─────────────────────────────────────────
 
@@ -119,7 +128,21 @@ class EiplanningwkComponent extends Component
 
     public $filterSeccion = '';
 
+    public $filterPensum = '';
+
+    /** Áreas para el FILTRO del listado (no confundir con `listPensum` del form). */
+    public Collection $listPensumFiltro;
+
     public int $paginate = 10;
+
+    /** Modo de vista del listado: `grid` (tarjetas) o `table` (tabla). */
+    public string $viewMode = 'grid';
+
+    /** Alterna tarjetas ↔ tabla. */
+    public function toggleView(): void
+    {
+        $this->viewMode = $this->viewMode === 'grid' ? 'table' : 'grid';
+    }
 
     // ─── Listas para los selects ─────────────────────────────────
 
@@ -130,6 +153,15 @@ class EiplanningwkComponent extends Component
     public Collection $listLapso;
 
     public Collection $listPevaluacion;
+
+    /**
+     * Áreas de aprendizaje (pensums) del docente para el select de la cabecera.
+     *
+     * Se escopan a las `pevaluaciones` del docente en el lapso en curso: solo
+     * los pensums donde realmente tiene carga. Se recargan al elegir grado
+     * (más abajo), porque un grado tiene sus propias áreas.
+     */
+    public Collection $listPensum;
 
     public Collection $listEiprojectk;
 
@@ -165,7 +197,11 @@ class EiplanningwkComponent extends Component
         $this->listSeccion = collect();
         $this->listLapso = $this->loadLapsos();
         $this->listPevaluacion = collect();
+        $this->listPensum = $this->loadPensums();
+        $this->listPensumFiltro = $this->loadPensums();
         $this->listEiprojectk = $this->loadProyectos();
+
+        $this->importCandidatos = collect();
 
         $this->resetModels();
     }
@@ -188,6 +224,10 @@ class EiplanningwkComponent extends Component
 
         if ($this->filterSeccion) {
             $query->where('seccion_id', $this->filterSeccion);
+        }
+
+        if ($this->filterPensum) {
+            $query->where('pensum_id', $this->filterPensum);
         }
 
         $eiplanningwks = $query->orderByDesc('created_at')->paginate($this->paginate);
@@ -265,11 +305,18 @@ class EiplanningwkComponent extends Component
 
         $this->eiplanningwk_id = $plan->id;
         $this->eiplanningwk = $plan->only([
-            'profesor_id', 'grado_id', 'seccion_id', 'eiprojectk_id',
+            'profesor_id', 'grado_id', 'seccion_id', 'pensum_id', 'eiprojectk_id',
             'finicial', 'ffinal', 'tiempo_ejecucion', 'diagnostico', 'observacion',
         ]);
+        // Los `date` del modelo llegan como Carbon (`2026-10-05 00:00:00`):
+        // el `input[type=date]` lo rechaza como valor inválido, muestra vacío
+        // y en el siguiente roundtrip vuelve `null`. Se normaliza a `Y-m-d`.
+        $this->eiplanningwk['finicial'] = $this->fechaInput($this->eiplanningwk['finicial'] ?? null);
+        $this->eiplanningwk['ffinal'] = $this->fechaInput($this->eiplanningwk['ffinal'] ?? null);
 
         $this->listSeccion = $this->seccionesDe($plan->grado_id);
+        // Las áreas dependen del grado del plan.
+        $this->listPensum = $this->loadPensums($plan->grado_id);
     }
 
     private function loadPlanForStrategy(?int $id): void
@@ -507,6 +554,10 @@ class EiplanningwkComponent extends Component
     {
         $this->listSeccion = $value ? $this->seccionesDe($value) : collect();
         $this->eiplanningwk['seccion_id'] = null;
+        // Las áreas dependen del grado: al cambiar de grado se recargan y se
+        // limpia la elegida (podía ser de otro grado).
+        $this->listPensum = $this->loadPensums($value);
+        $this->eiplanningwk['pensum_id'] = null;
     }
 
     public function updatedFilterGrado(): void
@@ -514,6 +565,13 @@ class EiplanningwkComponent extends Component
         $this->resetPage();
         $this->filterSeccion = null;
         $this->listSeccion = $this->filterGrado ? $this->seccionesDe($this->filterGrado) : collect();
+        $this->filterPensum = '';
+        $this->listPensumFiltro = $this->loadPensums($this->filterGrado ?: null);
+    }
+
+    public function updatedFilterPensum(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -553,6 +611,14 @@ class EiplanningwkComponent extends Component
         $request = EiplanningwkRequest::fromInput($this->eiplanningwk);
         $request->validateResolved();
         $validated = $request->planData();
+
+        // El área (pensum) elegida debe ser de una carga del docente: el
+        // `exists` del Request solo prueba que existe, no de quién es.
+        if (! empty($validated['pensum_id']) && ! $this->loadPensums($validated['grado_id'] ?? null)->has($validated['pensum_id'])) {
+            $this->addError('eiplanningwk.pensum_id', 'El área de aprendizaje elegida no pertenece a este docente.');
+
+            return;
+        }
 
         $plan = $this->eiplanningwk_id
             ? $this->findPlan($this->eiplanningwk_id)
@@ -945,6 +1011,7 @@ class EiplanningwkComponent extends Component
             'profesor_id' => $this->profesor_id,
             'grado_id' => null,
             'seccion_id' => null,
+            'pensum_id' => null,
             'eiprojectk_id' => null,
             'finicial' => null,
             'ffinal' => null,
@@ -994,5 +1061,21 @@ class EiplanningwkComponent extends Component
     private function lapsoActivoId(): ?int
     {
         return \App\Models\app\Academy\Lapso::current()?->id;
+    }
+
+    /**
+     * Normaliza un valor de fecha para `input[type=date]` (`Y-m-d` o null).
+     */
+    private function fechaInput(mixed $valor): ?string
+    {
+        if ($valor instanceof \DateTimeInterface) {
+            return $valor->format('Y-m-d');
+        }
+
+        if (is_string($valor) && substr($valor, 0, 10) !== '') {
+            return substr($valor, 0, 10);
+        }
+
+        return null;
     }
 }

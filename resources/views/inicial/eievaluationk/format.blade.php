@@ -113,6 +113,9 @@
                 <tr>
                     <td colspan="6" class="cierre">
                         Lapso: {{ $eievaluationk->lapso?->name ?? '—' }} ·
+                        @if ($eievaluationk->pensum)
+                            Área: {{ $eievaluationk->pensum->asignatura?->name ?? '—' }} ·
+                        @endif
                         Tiempo de ejecución:
                         {{ $eievaluationk->finicial->format('d') }}
                         al

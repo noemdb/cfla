@@ -111,8 +111,8 @@ class MigracionLegacyInicialTest extends TestCase
 
         $plan = (new MigradorLegacyInicial)->planificar();
 
-        // La fuente tiene 33 filas huérfanas (estrategias, resúmenes, revisiones
-        // y actividades cuyo plan se borró sin cascada).
+        // La fuente puede contener filas huérfanas (estrategias, resúmenes,
+        // revisiones y actividades cuyo plan se borró sin cascada).
         $huerfanas = collect($plan['huerfanas'])->sum(fn (array $h) => $h['filas']);
 
         $this->assertGreaterThan(0, $huerfanas, 'La fuente debería tener filas huérfanas para que esta prueba signifique algo.');
@@ -140,7 +140,7 @@ class MigracionLegacyInicialTest extends TestCase
     }
 
     /** @test */
-    public function el_comando_aborta_con_las_33_huerfanas_de_la_fuente(): void
+    public function el_comando_aborta_cuando_hay_referencias_rotas(): void
     {
         $this->saltarSiNoHayLegacy();
 
@@ -184,6 +184,11 @@ class MigracionLegacyInicialTest extends TestCase
         $tabla = 'eiplanningwks';
         $migrador = new MigradorLegacyInicial;
 
+        // El destino puede traer filas propias (planes reales del período
+        // actual): la idempotencia se mide contra la base previa, no contra
+        // una tabla vacía.
+        $baseDestino = DB::table($tabla)->count();
+
         $antes = $migrador->planificar(solo: [$tabla])['total_nuevos'];
         $this->assertGreaterThan(0, $antes);
 
@@ -205,9 +210,9 @@ class MigracionLegacyInicialTest extends TestCase
 
         $this->assertSame($antes - 1, $insertadas[$tabla]);
         $this->assertSame(
-            DB::connection('s2526')->table($tabla)->count(),
+            $baseDestino + $antes,
             DB::table($tabla)->count(),
-            'Tras migrar, el destino tiene exactamente las filas del origen.'
+            'Tras migrar, el destino suma sus filas propias más las del origen.'
         );
 
         // Reejecutar no inserta ni una fila: esa es la propiedad de idempotencia.

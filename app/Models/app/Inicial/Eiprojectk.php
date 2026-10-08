@@ -4,6 +4,7 @@ namespace App\Models\app\Inicial;
 
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
@@ -31,6 +32,7 @@ use Illuminate\Support\Str;
  * @property int $profesor_id
  * @property int $grado_id
  * @property int $seccion_id
+ * @property int|null $pensum_id
  * @property string|null $finicial
  * @property string|null $ffinal
  * @property int $tiempo_ejecucion
@@ -45,6 +47,7 @@ class Eiprojectk extends Model
         'profesor_id',
         'grado_id',
         'seccion_id',
+        'pensum_id',
         'finicial',
         'ffinal',
         'tiempo_ejecucion',
@@ -67,6 +70,7 @@ class Eiprojectk extends Model
         'profesor_id' => 'Profesor',
         'grado_id' => 'Grado/Año',
         'seccion_id' => 'Sección',
+        'pensum_id' => 'Área de aprendizaje',
         'finicial' => 'Inicio',
         'ffinal' => 'Culminación',
         'tiempo_ejecucion' => 'Cant.Semanas',
@@ -104,6 +108,14 @@ class Eiprojectk extends Model
     public function seccion()
     {
         return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
+
+    /**
+     * Área de aprendizaje del grado (pensum: asignatura × grado), opcional.
+     */
+    public function pensum()
+    {
+        return $this->belongsTo(Pensum::class, 'pensum_id');
     }
 
     // ─── CONTEXTO ACADÉMICO ───────────────────────────────────────

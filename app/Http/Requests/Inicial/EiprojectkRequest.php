@@ -42,6 +42,8 @@ class EiprojectkRequest extends InicialRequest
             'eiprojectk.profesor_id' => ['required', 'integer', 'exists:profesors,id'],
             'eiprojectk.grado_id' => ['required', 'integer', 'exists:grados,id'],
             'eiprojectk.seccion_id' => ['required', 'integer', 'exists:seccions,id'],
+            // Área de aprendizaje opcional. La pertenencia al docente se valida en el componente.
+            'eiprojectk.pensum_id' => ['nullable', 'integer', 'exists:pensums,id'],
 
             // R2: coherencia de fechas.
             'eiprojectk.finicial' => ['required', 'date'],
@@ -62,6 +64,7 @@ class EiprojectkRequest extends InicialRequest
             'eiprojectk.profesor_id' => 'profesor',
             'eiprojectk.grado_id' => 'grado',
             'eiprojectk.seccion_id' => 'sección',
+            'eiprojectk.pensum_id' => 'área de aprendizaje',
             'eiprojectk.finicial' => 'fecha de inicio',
             'eiprojectk.ffinal' => 'fecha de culminación',
             'eiprojectk.tiempo_ejecucion' => 'cantidad de semanas',
@@ -81,6 +84,7 @@ class EiprojectkRequest extends InicialRequest
             'eiprojectk.ffinal.after_or_equal' => 'La fecha de culminación no puede ser anterior a la de inicio.',
             'eiprojectk.tiempo_ejecucion.min' => 'El proyecto dura al menos 1 semana.',
             'eiprojectk.diagnostico.min' => 'El diagnóstico inicial debe tener al menos 10 caracteres.',
+            'eiprojectk.pensum_id.exists' => 'El área de aprendizaje elegida no existe.',
         ];
     }
 
@@ -93,6 +97,7 @@ class EiprojectkRequest extends InicialRequest
             'profesor_id' => (int) $this->field('profesor_id'),
             'grado_id' => (int) $this->field('grado_id'),
             'seccion_id' => (int) $this->field('seccion_id'),
+            'pensum_id' => $this->field('pensum_id') ?: null,
             'finicial' => $this->field('finicial'),
             'ffinal' => $this->field('ffinal'),
             'tiempo_ejecucion' => (int) $this->field('tiempo_ejecucion'),

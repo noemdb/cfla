@@ -4,6 +4,7 @@ namespace App\Models\app\Inicial;
 
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $profesor_id
  * @property int $grado_id
  * @property int $seccion_id
+ * @property int|null $pensum_id
  * @property int|null $eiprojectk_id
  * @property string $finicial
  * @property string $ffinal
@@ -39,6 +41,7 @@ class Eiplanningwk extends Model
         'profesor_id',
         'grado_id',
         'seccion_id',
+        'pensum_id',
         'eiprojectk_id',
         'finicial',
         'ffinal',
@@ -62,6 +65,7 @@ class Eiplanningwk extends Model
         'profesor_id' => 'Profesor',
         'grado_id' => 'Grado/Año',
         'seccion_id' => 'Sección',
+        'pensum_id' => 'Área de aprendizaje',
         'finicial' => 'Inicio',
         'ffinal' => 'Culminación',
         'tiempo_ejecucion' => 'Cant.Semanas',
@@ -101,6 +105,17 @@ class Eiplanningwk extends Model
     public function seccion()
     {
         return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
+
+    /**
+     * Área de aprendizaje del grado (pensum: asignatura × grado), opcional.
+     *
+     * Es una conveniencia para relacionar el plan con su área. NULL significa
+     * "sin área vinculada": el plan sigue válido.
+     */
+    public function pensum()
+    {
+        return $this->belongsTo(Pensum::class, 'pensum_id');
     }
 
     // ─── CONTEXTO ACADÉMICO ───────────────────────────────────────

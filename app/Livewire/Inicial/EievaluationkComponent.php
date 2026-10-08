@@ -4,11 +4,14 @@ namespace App\Livewire\Inicial;
 
 use App\Http\Requests\Inicial\EievaluationkRequest;
 use App\Http\Requests\Inicial\EievaluationpRequest;
+use App\Livewire\Inicial\Concerns\ImportaDocumento;
+use App\Livewire\Inicial\Concerns\PensumCabecera;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Inicial\Eievaluationk;
 use App\Models\app\Inicial\Eievaluationp;
+use App\Services\Inicial\ImportadorEievaluationk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -49,7 +52,22 @@ use WireUi\Traits\WireUiActions;
  */
 class EievaluationkComponent extends Component
 {
-    use WireUiActions, WithPagination;
+    use ImportaDocumento, PensumCabecera, WireUiActions, WithPagination;
+
+    /** Modo de vista del listado: `grid` (tarjetas) o `table` (tabla). */
+    public string $viewMode = 'grid';
+
+    /** Alterna tarjetas ↔ tabla. */
+    public function toggleView(): void
+    {
+        $this->viewMode = $this->viewMode === 'grid' ? 'table' : 'grid';
+    }
+
+    /** Instancia del asistente de importación del documento. */
+    protected function importador(): ImportadorEievaluationk
+    {
+        return new ImportadorEievaluationk;
+    }
 
     // ─── Estado del modal ─────────────────────────────────────────
 
@@ -82,6 +100,11 @@ class EievaluationkComponent extends Component
 
     public $filterSeccion = '';
 
+    public $filterPensum = '';
+
+    /** Áreas para el FILTRO del listado (no confundir con `listPensum` del form). */
+    public Collection $listPensumFiltro;
+
     public $filterLapso = '';
 
     public int $paginate = 10;
@@ -107,6 +130,10 @@ class EievaluationkComponent extends Component
         $this->listSeccion = collect();
         $this->listLapso = $this->loadLapsos();
         $this->listPevaluacion = collect();
+        $this->listPensum = $this->loadPensums();
+        $this->listPensumFiltro = $this->loadPensums();
+
+        $this->importCandidatos = collect();
 
         $this->resetModels();
     }
@@ -130,6 +157,10 @@ class EievaluationkComponent extends Component
 
         if ($this->filterSeccion) {
             $query->where('seccion_id', $this->filterSeccion);
+        }
+
+        if ($this->filterPensum) {
+            $query->where('pensum_id', $this->filterPensum);
         }
 
         if ($this->filterLapso) {
@@ -194,12 +225,18 @@ class EievaluationkComponent extends Component
 
         $this->eievaluationk_id = $plan->id;
         $this->eievaluationk = $plan->only([
-            'profesor_id', 'grado_id', 'lapso_id', 'seccion_id',
+            'profesor_id', 'grado_id', 'lapso_id', 'seccion_id', 'pensum_id',
             'finicial', 'ffinal', 'observaciones', 'recomendacion',
             'asistencia', 'observacion',
         ]);
+        // Los `date` del modelo llegan como Carbon (`2026-10-05 00:00:00`):
+        // el `input[type=date]` lo rechaza como valor inválido, muestra vacío
+        // y en el siguiente roundtrip vuelve `null`. Se normaliza a `Y-m-d`.
+        $this->eievaluationk['finicial'] = $this->fechaInput($this->eievaluationk['finicial'] ?? null);
+        $this->eievaluationk['ffinal'] = $this->fechaInput($this->eievaluationk['ffinal'] ?? null);
 
         $this->listSeccion = $this->seccionesDe($plan->grado_id);
+        $this->listPensum = $this->loadPensums($plan->grado_id);
     }
 
     private function loadEvaluationForPosition(?int $id): void
@@ -234,6 +271,9 @@ class EievaluationkComponent extends Component
             'pevaluacion_id', 'fecha', 'nombre_ninos', 'aprendizaje_alcanzado',
             'componente', 'indicadores', 'instrumento', 'observacion', 'order',
         ]);
+        // Igual que la cabecera: el `input[type=date]` rechaza el Carbon con
+        // zona horaria que Livewire serializa (`...T00:00:00-04:00`).
+        $this->eievaluationp['fecha'] = $this->fechaInput($this->eievaluationp['fecha'] ?? null);
         $this->listPevaluacion = collect(
             $position->eievaluationk->getPevaluacionsList($this->profesor_id, $position->eievaluationk->lapso_id)
         );
@@ -284,6 +324,8 @@ class EievaluationkComponent extends Component
     {
         $this->listSeccion = $value ? $this->seccionesDe($value) : collect();
         $this->eievaluationk['seccion_id'] = null;
+        $this->listPensum = $this->loadPensums($value);
+        $this->eievaluationk['pensum_id'] = null;
     }
 
     public function updatedEievaluationkLapsoId($value): void
@@ -307,6 +349,13 @@ class EievaluationkComponent extends Component
         $this->resetPage();
         $this->filterSeccion = null;
         $this->listSeccion = $this->filterGrado ? $this->seccionesDe($this->filterGrado) : collect();
+        $this->filterPensum = '';
+        $this->listPensumFiltro = $this->loadPensums($this->filterGrado ?: null);
+    }
+
+    public function updatedFilterPensum(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -329,6 +378,12 @@ class EievaluationkComponent extends Component
         $request = EievaluationkRequest::fromInput($this->eievaluationk);
         $request->validateResolved();
         $validated = $request->planData();
+
+        if (! empty($validated['pensum_id']) && ! $this->loadPensums($validated['grado_id'] ?? null)->has($validated['pensum_id'])) {
+            $this->addError('eievaluationk.pensum_id', 'El área de aprendizaje elegida no pertenece a este docente.');
+
+            return;
+        }
 
         $plan = $this->eievaluationk_id
             ? $this->findEvaluation($this->eievaluationk_id)
@@ -518,6 +573,7 @@ class EievaluationkComponent extends Component
             'grado_id' => null,
             'lapso_id' => null,
             'seccion_id' => null,
+            'pensum_id' => null,
             'finicial' => null,
             'ffinal' => null,
             'observaciones' => null,
@@ -551,5 +607,21 @@ class EievaluationkComponent extends Component
     private function lapsoActivoId(): ?int
     {
         return \App\Models\app\Academy\Lapso::current()?->id;
+    }
+
+    /**
+     * Normaliza un valor de fecha para `input[type=date]` (`Y-m-d` o null).
+     */
+    private function fechaInput(mixed $valor): ?string
+    {
+        if ($valor instanceof \DateTimeInterface) {
+            return $valor->format('Y-m-d');
+        }
+
+        if (is_string($valor) && substr($valor, 0, 10) !== '') {
+            return substr($valor, 0, 10);
+        }
+
+        return null;
     }
 }

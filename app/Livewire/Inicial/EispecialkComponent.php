@@ -4,6 +4,8 @@ namespace App\Livewire\Inicial;
 
 use App\Http\Requests\Inicial\EispecialactRequest;
 use App\Http\Requests\Inicial\EispecialkRequest;
+use App\Livewire\Inicial\Concerns\ImportaDocumento;
+use App\Livewire\Inicial\Concerns\PensumCabecera;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Seccion;
@@ -11,6 +13,7 @@ use App\Models\app\Inicial\Eiprojectk;
 use App\Models\app\Inicial\Eispecialact;
 use App\Models\app\Inicial\Eispecialk;
 use App\Models\app\Inicial\Eispecialstrategy;
+use App\Services\Inicial\ImportadorEispecialk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -57,7 +60,22 @@ use WireUi\Traits\WireUiActions;
  */
 class EispecialkComponent extends Component
 {
-    use WireUiActions, WithPagination;
+    use ImportaDocumento, PensumCabecera, WireUiActions, WithPagination;
+
+    /** Modo de vista del listado: `grid` (tarjetas) o `table` (tabla). */
+    public string $viewMode = 'grid';
+
+    /** Alterna tarjetas ↔ tabla. */
+    public function toggleView(): void
+    {
+        $this->viewMode = $this->viewMode === 'grid' ? 'table' : 'grid';
+    }
+
+    /** Instancia del asistente de importación del documento. */
+    protected function importador(): ImportadorEispecialk
+    {
+        return new ImportadorEispecialk;
+    }
 
     // ─── Estado del modal ─────────────────────────────────────────
 
@@ -120,6 +138,11 @@ class EispecialkComponent extends Component
 
     public $filterSeccion = '';
 
+    public $filterPensum = '';
+
+    /** Áreas para el FILTRO del listado (no confundir con `listPensum` del form). */
+    public Collection $listPensumFiltro;
+
     public int $paginate = 10;
 
     // ─── Listas para los selects ─────────────────────────────────
@@ -163,7 +186,11 @@ class EispecialkComponent extends Component
         $this->listSeccion = collect();
         $this->listLapso = $this->loadLapsos();
         $this->listPevaluacion = collect();
+        $this->listPensum = $this->loadPensums();
+        $this->listPensumFiltro = $this->loadPensums();
         $this->listEiprojectk = $this->loadProyectos();
+
+        $this->importCandidatos = collect();
 
         $this->resetModels();
     }
@@ -188,6 +215,10 @@ class EispecialkComponent extends Component
 
         if ($this->filterSeccion) {
             $query->where('seccion_id', $this->filterSeccion);
+        }
+
+        if ($this->filterPensum) {
+            $query->where('pensum_id', $this->filterPensum);
         }
 
         $eispecialks = $query->orderByDesc('created_at')->paginate($this->paginate);
@@ -262,11 +293,17 @@ class EispecialkComponent extends Component
 
         $this->eispecialk_id = $plan->id;
         $this->eispecialk = $plan->only([
-            'profesor_id', 'grado_id', 'seccion_id',
+            'profesor_id', 'grado_id', 'seccion_id', 'pensum_id',
             'finicial', 'ffinal', 'tiempo_ejecucion', 'justificacion', 'observacion',
         ]);
+        // Los `date` del modelo llegan como Carbon (`2026-10-05 00:00:00`):
+        // el `input[type=date]` lo rechaza como valor inválido, muestra vacío
+        // y en el siguiente roundtrip vuelve `null`. Se normaliza a `Y-m-d`.
+        $this->eispecialk['finicial'] = $this->fechaInput($this->eispecialk['finicial'] ?? null);
+        $this->eispecialk['ffinal'] = $this->fechaInput($this->eispecialk['ffinal'] ?? null);
 
         $this->listSeccion = $this->seccionesDe($plan->grado_id);
+        $this->listPensum = $this->loadPensums($plan->grado_id);
     }
 
     private function loadPlanForStrategy(?int $id): void
@@ -490,6 +527,8 @@ class EispecialkComponent extends Component
     {
         $this->listSeccion = $value ? $this->seccionesDe($value) : collect();
         $this->eispecialk['seccion_id'] = null;
+        $this->listPensum = $this->loadPensums($value);
+        $this->eispecialk['pensum_id'] = null;
     }
 
     public function updatedFilterGrado(): void
@@ -497,6 +536,13 @@ class EispecialkComponent extends Component
         $this->resetPage();
         $this->filterSeccion = null;
         $this->listSeccion = $this->filterGrado ? $this->seccionesDe($this->filterGrado) : collect();
+        $this->filterPensum = '';
+        $this->listPensumFiltro = $this->loadPensums($this->filterGrado ?: null);
+    }
+
+    public function updatedFilterPensum(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -533,6 +579,12 @@ class EispecialkComponent extends Component
         $request = EispecialkRequest::fromInput($this->eispecialk);
         $request->validateResolved();
         $validated = $request->planData();
+
+        if (! empty($validated['pensum_id']) && ! $this->loadPensums($validated['grado_id'] ?? null)->has($validated['pensum_id'])) {
+            $this->addError('eispecialk.pensum_id', 'El área de aprendizaje elegida no pertenece a este docente.');
+
+            return;
+        }
 
         $plan = $this->eispecialk_id
             ? $this->findPlan($this->eispecialk_id)
@@ -920,6 +972,7 @@ class EispecialkComponent extends Component
             'profesor_id' => $this->profesor_id,
             'grado_id' => null,
             'seccion_id' => null,
+            'pensum_id' => null,
             'finicial' => null,
             'ffinal' => null,
             'tiempo_ejecucion' => 1,
@@ -968,5 +1021,21 @@ class EispecialkComponent extends Component
     private function lapsoActivoId(): ?int
     {
         return \App\Models\app\Academy\Lapso::current()?->id;
+    }
+
+    /**
+     * Normaliza un valor de fecha para `input[type=date]` (`Y-m-d` o null).
+     */
+    private function fechaInput(mixed $valor): ?string
+    {
+        if ($valor instanceof \DateTimeInterface) {
+            return $valor->format('Y-m-d');
+        }
+
+        if (is_string($valor) && substr($valor, 0, 10) !== '') {
+            return substr($valor, 0, 10);
+        }
+
+        return null;
     }
 }
