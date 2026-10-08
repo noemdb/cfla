@@ -170,7 +170,7 @@
                                         <span class="text-gray-200 text-xs font-medium truncate">{{ $det['topic'] }}</span>
                                         <span class="shrink-0 text-[11px] px-1.5 py-0.5 rounded {{ $det['cumple'] ? 'bg-emerald-500/15 text-emerald-300' : 'bg-gray-500/15 text-gray-400' }}">{{ $det['palabras'] }} palabras</span>
                                     </div>
-                                    <p class="text-[11px] text-gray-500 mt-0.5">#{{ $det['id'] }} · {{ $det['cumple'] ? 'Cumple el criterio' : 'No cumple (menos de 10)' }}</p>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">#{{ $det['id'] }} · {{ $det['grado'] ?? '—' }} · Sec. {{ $det['seccion'] ?? '—' }} · {{ $det['cumple'] ? 'Cumple el criterio' : 'No cumple (menos de 10)' }}</p>
                                 </li>
                             @endforeach
                         </ul>

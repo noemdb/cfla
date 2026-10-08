@@ -233,6 +233,10 @@ class PerformanceEstructuraTest extends TestCase
             $payload['actividades_planificadas']['detalle'][0]['estado']
         );
         $this->assertArrayHasKey('palabras', $payload['actividades_planificadas']['detalle'][0]);
+        $this->assertArrayHasKey('grado', $payload['actividades_planificadas']['detalle'][0]);
+        $this->assertArrayHasKey('seccion', $payload['actividades_planificadas']['detalle'][0]);
+        $this->assertArrayHasKey('grado', $payload['calidad_detalle_palabras'][0]);
+        $this->assertArrayHasKey('seccion', $payload['calidad_detalle_palabras'][0]);
         $this->assertStringContainsString(
             '15',
             $payload['estructura']['presentacion']['reglas']

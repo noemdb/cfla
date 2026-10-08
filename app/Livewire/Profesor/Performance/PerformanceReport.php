@@ -372,13 +372,20 @@ class PerformanceReport extends Component
 
             // Calidad de enseñanza: de las planificadas en el rango, cuántas
             // cumplen teachingWordsMayorCount(3) >= 10 (ver Activity.php:177).
-            // JSON sin límite; visible top 15 (cumplen primero).
+            // JSON sin límite; visible top 15 (cumplen primero). Incluye
+            // grado/sección para que toda fila de la unión esté completa.
             $metrics['calidad_detalle'] = self::ordenarRelevancia((clone $base)
+                ->with(['pevaluacion.pensum.grado', 'pevaluacion.seccion', 'pevaluacion.seccion.grado'])
                 ->orderBy('finicial')
                 ->get()
                 ->map(fn (Activity $a) => [
                     'id' => $a->id,
                     'topic' => $a->topic ?? 'Sin título',
+                    'finicial' => $a->finicial?->toDateString() ?? '—',
+                    'grado' => $a->pevaluacion?->pensum?->grado?->name
+                        ?? $a->pevaluacion?->seccion?->grado?->name ?? '—',
+                    'seccion' => $a->pevaluacion?->seccion?->name ?? '—',
+                    'estado' => $a->status ? 'Aprobada' : 'En revisión',
                     'palabras' => $a->teachingWordsMayorCount(3),
                     'cumple' => $a->teachingWordsMayorCount(3) >= 10,
                 ])->toArray(), 'finicial');

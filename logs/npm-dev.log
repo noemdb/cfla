@@ -699,3 +699,7 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 4:02:48 PM [vite] page reload resources/views/livewire/profesor/performance/report.blade.php
 4:02:56 PM [vite] full reload resources/views/livewire/profesor/performance/report.blade.php
 4:02:56 PM [vite] page reload resources/views/livewire/profesor/performance/report.blade.php
+4:08:01 PM [vite] full reload app/Livewire/Profesor/Performance/PerformanceReport.php
+4:08:01 PM [vite] page reload app/Livewire/Profesor/Performance/PerformanceReport.php
+4:08:06 PM [vite] full reload resources/views/livewire/profesor/performance/report.blade.php
+4:08:07 PM [vite] page reload resources/views/livewire/profesor/performance/report.blade.php
