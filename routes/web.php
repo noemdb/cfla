@@ -593,6 +593,12 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
         Route::get('/timetable', \App\Livewire\Profesor\Timetable\MyTimetable::class)
             ->name('timetable')
             ->middleware(['binnacle.track', 'binnacle.sql']);
+
+        // ─── Desempeño: reporte de seguimiento del profesor ──
+        // Solo datos propios (profesor_id = auth), con rango [desde, hasta].
+        Route::get('/performance', \App\Livewire\Profesor\Performance\PerformanceReport::class)
+            ->name('performance')
+            ->middleware(['binnacle.track', 'binnacle.sql']);
     });
 });
 

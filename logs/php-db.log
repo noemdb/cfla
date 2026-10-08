@@ -5267,3 +5267,39 @@
 [Thu Oct  8 10:27:51 2026] 127.0.0.1:44448 Accepted
 [Thu Oct  8 10:28:09 2026] 127.0.0.1:44448 [200]: POST /index.php?route=/
 [Thu Oct  8 10:28:09 2026] 127.0.0.1:44448 Closing
+[Thu Oct  8 15:21:53 2026] 127.0.0.1:56616 Accepted
+[Thu Oct  8 15:21:56 2026] 127.0.0.1:56616 [200]: GET /index.php?route=/import
+[Thu Oct  8 15:21:56 2026] 127.0.0.1:56616 Closing
+[Thu Oct  8 15:21:56 2026] 127.0.0.1:56630 Accepted
+[Thu Oct  8 15:21:56 2026] 127.0.0.1:56632 Accepted
+[Thu Oct  8 15:21:56 2026] 127.0.0.1:56634 Accepted
+[Thu Oct  8 15:21:56 2026] 127.0.0.1:56636 Accepted
+[Thu Oct  8 15:21:57 2026] 127.0.0.1:56634 [200]: GET /themes/darkwolf/img/logo_right.png
+[Thu Oct  8 15:21:57 2026] 127.0.0.1:56632 [200]: GET /themes/dot.gif
+[Thu Oct  8 15:21:57 2026] 127.0.0.1:56634 Closing
+[Thu Oct  8 15:21:57 2026] 127.0.0.1:56632 Closing
+[Thu Oct  8 15:21:59 2026] 127.0.0.1:56630 [200]: GET /themes/darkwolf/img/help-alt.svg
+[Thu Oct  8 15:21:59 2026] 127.0.0.1:56630 Closing
+[Thu Oct  8 15:22:00 2026] 127.0.0.1:56636 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Oct  8 15:22:00 2026] 127.0.0.1:56636 Closing
+[Thu Oct  8 15:38:03 2026] 127.0.0.1:43652 Accepted
+[Thu Oct  8 15:38:08 2026] 127.0.0.1:43652 [200]: GET /index.php?route=/import
+[Thu Oct  8 15:38:08 2026] 127.0.0.1:43652 Closing
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43656 Accepted
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43672 Accepted
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43674 Accepted
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43678 Accepted
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43686 Accepted
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43694 Accepted
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43678 [200]: GET /themes/darkwolf/img/logo_right.png
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43674 [200]: GET /themes/dot.gif
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43678 Closing
+[Thu Oct  8 15:38:09 2026] 127.0.0.1:43674 Closing
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43656 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43656 Closing
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43672 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43672 Closing
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43686 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43686 Closing
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43694 Closed without sending a request; it was probably just an unused speculative preconnection
+[Thu Oct  8 15:38:13 2026] 127.0.0.1:43694 Closing
