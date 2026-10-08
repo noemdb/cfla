@@ -65,6 +65,13 @@ class LoginController extends Controller
                 return redirect()->to('/app/profesors/home');
             }
 
+            // Docente de Educación Inicial. Se comprueba DESPUÉS de isProfesor a
+            // propósito: un usuario con ambos roles (profesor + inicial) debe
+            // ir al panel del profesor, no al del módulo.
+            if ($user->isInicial()) {
+                return redirect()->to('/app/inicials');
+            }
+
             if ($user->is_student) {
                 return redirect()->to('/app/estudiante/home');
             }

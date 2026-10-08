@@ -39,6 +39,12 @@ class Activity extends Model implements \App\Contracts\Auditable
 
     protected $casts = [
         'status' => 'boolean',
+        // `finicial` y `ffinal` son columnas `date` en el esquema (valores
+        // 'YYYY-MM-DD'). Sin estos casts Eloquent las devuelve como STRING y
+        // cualquier `->format()` en la vista revienta con "Call to a member
+        // function format() on string" (bug reportado en lesson-wizard).
+        'finicial' => 'date',
+        'ffinal' => 'date',
     ];
 
     const COLUMN_COMMENTS = [
