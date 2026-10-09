@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Planning\Diagnostic;
 
+use App\Models\app\Academy\AreaConocimiento;
+use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
@@ -35,6 +37,8 @@ class DiagMainViewer extends Component
 
     public ?int $resumenPestudioId = null;
 
+    public ?int $resumenAreaId = null;
+
     public int $paginate = 10;
 
     public string $activeTab = 'general';
@@ -57,17 +61,24 @@ class DiagMainViewer extends Component
         $this->progressPensumId = null;
         $this->resumenPestudioId = null;
         $this->resumenGradoId = null;
+        $this->resumenAreaId = null;
         $this->activeTab = 'general';
         $this->resetPage('pensumProgressPage');
         $this->resetPage('gradoProgressPage');
+        $this->resetPage('areaProgressPage');
         $this->dispatch('diag-main-selected', id: $this->selectedId);
     }
 
     public function setTab(string $tab): void
     {
-        if (in_array($tab, ['general', 'areas', 'grados'], true)) {
+        if (in_array($tab, ['general', 'areas', 'grados', 'areas_conocimiento'], true)) {
             $this->activeTab = $tab;
         }
+    }
+
+    public function updatedResumenAreaId(): void
+    {
+        $this->resetPage('areaProgressPage');
     }
 
     public function triggerCreate(): void
@@ -154,6 +165,8 @@ class DiagMainViewer extends Component
         $gradosForResumen = collect();
         $gradosAnidados = collect();
         $gradoProgress = collect();
+        $areasConocimientoOptions = collect();
+        $areaProgress = collect();
 
         // Nuevos indicadores solicitados (pensums/respuestas) + completitud/abandono s2526
         $pensumsWithAnswersCount = null;
@@ -341,6 +354,92 @@ class DiagMainViewer extends Component
                 $gradoProgress = new \Illuminate\Pagination\LengthAwarePaginator($gradoItems, $gradoTotal, $gradoPerPage, $gradoCurrentPage, ['path' => request()->url(), 'pageName' => 'gradoProgressPage']);
             }
 
+            // Resumen por Área de Conocimiento — agrega la base por pensum
+            // ($allProgress) según campo_conocimientos.pensum_id. Un pensum
+            // puede pertenecer a 0..N áreas: los sin adscripción caen en la
+            // fila "Sin área asignada" y los compartidos suman en cada área
+            // (los totales del tab pueden solaparse, igual que las preguntas
+            // compartidas entre grados no existen pero entre áreas sí).
+            if ($questionPensumIds->isNotEmpty()) {
+                $areaIds = CampoConocimiento::whereIn('pensum_id', $questionPensumIds)
+                    ->distinct()->pluck('area_conocimiento_id')
+                    ->filter()->map(fn ($id) => (int) $id)->values();
+                $areasConocimientoOptions = AreaConocimiento::whereIn('id', $areaIds)
+                    ->with(['pestudio', 'leader.profile'])
+                    ->orderBy('code')->orderBy('name')
+                    ->get(['id', 'name', 'code', 'pestudio_id', 'leader_id']);
+
+                // El área elegida debe seguir perteneciendo al alcance del diagnóstico.
+                if ($this->resumenAreaId && ! $areasConocimientoOptions->contains('id', (int) $this->resumenAreaId)) {
+                    $this->resumenAreaId = null;
+                }
+
+                $pensumAreaMap = CampoConocimiento::whereIn('pensum_id', $questionPensumIds)
+                    ->get(['pensum_id', 'area_conocimiento_id'])
+                    ->groupBy('pensum_id');
+                $areasById = $areasConocimientoOptions->keyBy('id');
+
+                $areaRows = [];
+                foreach ($allProgress as $pp) {
+                    $pid = $pp->pensum->id;
+                    $aids = isset($pensumAreaMap[$pid])
+                        ? $pensumAreaMap[$pid]->pluck('area_conocimiento_id')->map(fn ($id) => (int) $id)->unique()->values()->all()
+                        : [];
+                    if (empty($aids)) {
+                        $aids = [0];
+                    }
+                    foreach ($aids as $aid) {
+                        if (! isset($areaRows[$aid])) {
+                            $areaRows[$aid] = [
+                                'area' => $areasById->get($aid),
+                                'pensum_ids' => [],
+                                'total_questions' => 0,
+                                'total_sessions' => 0,
+                                'completed_sessions' => 0,
+                                'total_answered' => 0,
+                                'correct_answers' => 0,
+                            ];
+                        }
+                        $areaRows[$aid]['pensum_ids'][$pid] = true;
+                        $areaRows[$aid]['total_questions'] += $pp->total_questions;
+                        $areaRows[$aid]['total_sessions'] += $pp->total_sessions;
+                        $areaRows[$aid]['completed_sessions'] += $pp->completed_sessions;
+                        $areaRows[$aid]['total_answered'] += $pp->total_answered;
+                        $areaRows[$aid]['correct_answers'] += $pp->correct_answers;
+                    }
+                }
+
+                $areaProgress = collect($areaRows)->map(function ($row) {
+                    $totalS = $row['total_sessions'];
+                    $completion = $totalS > 0 ? round((100 * $row['completed_sessions']) / $totalS, 1) : 0;
+                    $totalAns = $row['total_answered'];
+                    $prec = $totalAns > 0 ? round((100 * $row['correct_answers']) / $totalAns, 1) : null;
+
+                    return (object) [
+                        'area' => $row['area'],
+                        'fullname' => $row['area'] ? (($row['area']->code ? $row['area']->code.' — ' : '').$row['area']->name) : 'Sin área asignada',
+                        'pensums_count' => count($row['pensum_ids']),
+                        'total_questions' => $row['total_questions'],
+                        'total_sessions' => $totalS,
+                        'completed_sessions' => $row['completed_sessions'],
+                        'completion_percentage' => $completion,
+                        'precision' => $prec,
+                        'total_answered' => $totalAns,
+                        'correct_answers' => $row['correct_answers'],
+                    ];
+                })->values()->sortBy('fullname')->values();
+
+                if ($this->resumenAreaId) {
+                    $areaProgress = $areaProgress->filter(fn ($ap) => $ap->area && (int) $ap->area->id === (int) $this->resumenAreaId)->values();
+                }
+
+                $areaPerPage = 10;
+                $areaCurrentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage('areaProgressPage');
+                $areaTotal = $areaProgress->count();
+                $areaItems = $areaProgress->forPage($areaCurrentPage, $areaPerPage)->values();
+                $areaProgress = new \Illuminate\Pagination\LengthAwarePaginator($areaItems, $areaTotal, $areaPerPage, $areaCurrentPage, ['path' => request()->url(), 'pageName' => 'areaProgressPage']);
+            }
+
             // Sesiones recientes y distribución por tipo/dificultad (como en s2526 dashboard)
             $recentSessions = (clone $sessionQuery)->with(['estudiant', 'pensum'])->orderByDesc('iniciado_at')->limit(5)->get();
             $questionsByType = DiagQuestion::where('diag_main_id', $selected->id)->select('tipo_pregunta as type', DB::raw('count(*) as count'))->groupBy('tipo_pregunta')->get();
@@ -383,6 +482,8 @@ class DiagMainViewer extends Component
             'gradoProgress' => $gradoProgress ?? collect(),
             'gradosForResumen' => $gradosForResumen ?? collect(),
             'gradosAnidados' => $gradosAnidados ?? collect(),
+            'areasConocimientoOptions' => $areasConocimientoOptions ?? collect(),
+            'areaProgress' => $areaProgress ?? collect(),
             'pestudiosForGradoResumen' => $pestudiosForGradoResumen ?? collect(),
             'recentSessions' => $recentSessions,
             'questionsByType' => $questionsByType,

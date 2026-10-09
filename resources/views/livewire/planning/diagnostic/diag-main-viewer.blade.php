@@ -124,6 +124,7 @@
                 @php
                     $areasTotal = $pensumProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $pensumProgress->total() : $pensumProgress->count();
                     $gradosTotal = $gradoProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $gradoProgress->total() : $gradoProgress->count();
+                    $areasConocimientoTotal = $areaProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $areaProgress->total() : $areaProgress->count();
                 @endphp
                 <div class="flex flex-wrap items-center gap-1.5 bg-gray-800/30 border border-white/5 rounded-lg p-1 w-full" role="tablist" aria-label="Resúmenes del diagnóstico">
                     <button type="button" role="tab" id="diag-tab-general" data-diag-tab="general" wire:key="diag-tab-general"
@@ -149,6 +150,15 @@
                         wire:click="setTab('grados')"
                         class="flex-1 text-center px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40 {{ $activeTab === 'grados' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20' : 'text-gray-400 hover:text-white border border-transparent' }}">
                         Por Grado <span class="ml-1 px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[10px]">{{ $gradosTotal }}</span>
+                    </button>
+                    <button type="button" role="tab" id="diag-tab-areas-conocimiento" data-diag-tab="areas_conocimiento" wire:key="diag-tab-areas-conocimiento"
+                        aria-selected="{{ $activeTab === 'areas_conocimiento' ? 'true' : 'false' }}"
+                        aria-controls="diag-tabpanel"
+                        tabindex="{{ $activeTab === 'areas_conocimiento' ? '0' : '-1' }}"
+                        wire:click="setTab('areas_conocimiento')"
+                        title="Por Área de Conocimiento"
+                        class="flex-1 text-center px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40 {{ $activeTab === 'areas_conocimiento' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20' : 'text-gray-400 hover:text-white border border-transparent' }}">
+                        Por Área Conoc. <span class="ml-1 px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-[10px]">{{ $areasConocimientoTotal }}</span>
                     </button>
                 </div>
 
@@ -417,6 +427,83 @@
                             <div class="px-3 py-2 border-t border-white/5 flex items-center justify-between">
                                 <span class="text-[11px] text-gray-500">Mostrando {{ $gradoProgress->firstItem() ?? 0 }} a {{ $gradoProgress->lastItem() ?? 0 }} de {{ $gradoProgress->total() }}</span>
                                 <span class="text-[11px] text-gray-600">{{ $gradoProgress->total() }} grado(s) en total</span>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                @elseif($activeTab === 'areas_conocimiento')
+                {{-- Resumen por Área de Conocimiento — agrega pensums vía campo_conocimientos --}}
+                @php $hasAreaProgress = $areaProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $areaProgress->total() > 0 : $areaProgress->isNotEmpty(); @endphp
+                @if($selected && ($areasConocimientoOptions->isNotEmpty() || $hasAreaProgress))
+                    @if(! $areasConocimientoOptions->isNotEmpty())
+                        <p class="text-[11px] text-amber-500/80 mb-2">Ningún pensum de este diagnóstico está adscrito a un área de conocimiento (campo_conocimientos).</p>
+                    @endif
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
+                        <div class="px-3 py-2 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Resumen por Área de Conocimiento</h4>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-gray-500">{{ $areaProgress instanceof \Illuminate\Pagination\LengthAwarePaginator ? $areaProgress->total() : $areaProgress->count() }} área(s)</span>
+                                <select wire:model.live="resumenAreaId" class="bg-gray-900/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:ring-1 focus:ring-cyan-500/30 outline-none min-w-[200px]">
+                                    <option value="">Área: Todas</option>
+                                    @foreach($areasConocimientoOptions as $area)
+                                        <option value="{{ $area->id }}">{{ $area->code ? $area->code.' — ' : '' }}{{ $area->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead class="bg-white/[0.02] border-b border-white/5">
+                                    <tr class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                        <th class="text-left px-3 py-1.5">Área</th>
+                                        <th class="text-left px-3 py-1.5">Líder</th>
+                                        <th class="text-center px-3 py-1.5">A. Form.</th>
+                                        <th class="text-center px-3 py-1.5">Preg.</th>
+                                        <th class="text-center px-3 py-1.5">Ses.</th>
+                                        <th class="text-center px-3 py-1.5">Compl.</th>
+                                        <th class="text-center px-3 py-1.5">% Finalización</th>
+                                        <th class="text-center px-3 py-1.5">Precisión</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    @forelse($areaProgress as $ap)
+                                        <tr class="hover:bg-white/[0.02]">
+                                            <td class="px-3 py-1.5 text-white font-medium">
+                                                {{ $ap->fullname }}
+                                                @if($ap->area?->pestudio)<span class="block text-[10px] text-gray-500 font-normal">{{ $ap->area->pestudio->code }} · {{ $ap->area->pestudio->name }}</span>@endif
+                                            </td>
+                                            <td class="px-3 py-1.5 text-gray-400">{{ $ap->area?->leader?->full_name ?? '—' }}</td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-gray-300 text-[10px]">{{ $ap->pensums_count }}</span></td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px]">{{ $ap->total_questions }}</span></td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-gray-300 text-[10px]">{{ $ap->total_sessions }}</span></td>
+                                            <td class="px-3 py-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px]">{{ $ap->completed_sessions }}</span></td>
+                                            <td class="px-3 py-1.5">
+                                                <div class="flex items-center gap-1.5 justify-center">
+                                                    <div class="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full rounded-full {{ $ap->completion_percentage >= 80 ? 'bg-emerald-500' : ($ap->completion_percentage >= 50 ? 'bg-amber-500' : 'bg-red-500') }}" style="width: {{ $ap->completion_percentage }}%"></div></div>
+                                                    <span class="text-[10px] text-gray-400">{{ number_format($ap->completion_percentage, 1) }}%</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-3 py-1.5 text-center">
+                                                @if($ap->precision !== null)
+                                                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold border {{ $ap->precision >= 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : ($ap->precision >= 60 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-red-500/10 border-red-500/20 text-red-400') }}">{{ $ap->precision }}%</span>
+                                                @else
+                                                    <span class="text-[10px] text-gray-600">—</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="8" class="px-3 py-6 text-center text-xs text-gray-500">Sin datos para el área seleccionada.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        @if($areaProgress instanceof \Illuminate\Pagination\LengthAwarePaginator && $areaProgress->hasPages())
+                            <x-pagination-wrapper :paginator="$areaProgress" />
+                        @elseif($areaProgress instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                            <div class="px-3 py-2 border-t border-white/5 flex items-center justify-between">
+                                <span class="text-[11px] text-gray-500">Mostrando {{ $areaProgress->firstItem() ?? 0 }} a {{ $areaProgress->lastItem() ?? 0 }} de {{ $areaProgress->total() }}</span>
+                                <span class="text-[11px] text-gray-600">{{ $areaProgress->total() }} área(s) en total</span>
                             </div>
                         @endif
                     </div>
