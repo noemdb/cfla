@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -588,18 +589,67 @@ class IndexComponent extends Component
         // Acotado a la pevaluacion del componente: sin este where un id
         // manipulado desde el navegador borraria actividades de otra pevaluacion.
         $activity = Activity::where('pevaluacion_id', $this->pevaluacion_id)->findOrFail($id);
-        if ($activity) {
-            $activity->delete();
-            $this->close();
-            $this->resetModel();
-            $this->activity_id = null;
-            $this->forgetDeleteConfirmation();
 
-            $this->notification()->success(
-                '¡Excelente, buen trabajo!',
-                'Registro eliminado exitosamente'
+        // Bloqueos de negocio (defensa en profundidad: askDelete ya los
+        // verifica, pero delActivity puede invocarse directo). Los logs del
+        // LMS son telemetría y se purgan en la transacción; los logros y las
+        // asistencias (FK RESTRICT) sí bloquean el borrado.
+        if ($activity->achievements()->exists()) {
+            $this->forgetDeleteConfirmation();
+            $this->notification()->warning(
+                'No se puede eliminar',
+                'La actividad tiene indicadores (logros) asociados. Elimínalos primero.'
             );
+
+            return;
         }
+
+        if ($this->activityHasAttendances($activity->id)) {
+            $this->forgetDeleteConfirmation();
+            $this->notification()->warning(
+                'No se puede eliminar',
+                'La actividad tiene asistencias registradas. No se puede eliminar.'
+            );
+
+            return;
+        }
+
+        try {
+            DB::transaction(function () use ($activity) {
+                // lms_activity_logs.activity_id es ON DELETE RESTRICT: purgar
+                // la telemetría antes de borrar (igual que emptyActivities()).
+                // El resto (publications, sections, resources, links, embeds,
+                // progress, assessments, comments, reads, supplements,
+                // achievements) es ON DELETE CASCADE.
+                $activity->lmsLogs()->delete();
+                $activity->delete();
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            // FK 1451 por carrera u otro RESTRICT no previsto: aviso
+            // amigable en vez del 500 de producción (activity id 85).
+            Log::warning('delActivity bloqueado por FK', [
+                'activity_id' => $activity->id,
+                'pevaluacion_id' => $this->pevaluacion_id,
+                'error' => $e->getMessage(),
+            ]);
+            $this->forgetDeleteConfirmation();
+            $this->notification()->warning(
+                'No se puede eliminar',
+                'La actividad tiene registros asociados (auditoría o asistencias) y no se puede eliminar.'
+            );
+
+            return;
+        }
+
+        $this->close();
+        $this->resetModel();
+        $this->activity_id = null;
+        $this->forgetDeleteConfirmation();
+
+        $this->notification()->success(
+            '¡Excelente, buen trabajo!',
+            'Registro eliminado exitosamente'
+        );
     }
 
     // ─── CONFIRMACIÓN DE ELIMINACIÓN (x-dialog) ───────────
@@ -608,6 +658,9 @@ class IndexComponent extends Component
      * Abre el diálogo de confirmación. Replica en el servidor los mismos
      * bloqueos que el botón deshabilita en la vista: si la actividad tiene
      * logros asociados no se puede eliminar, así que no se pide confirmación.
+     * Las asistencias (lms_activity_attendances, FK RESTRICT) también
+     * bloquean; los logs del LMS (telemetría) se purgan al borrar y no
+     * bloquean.
      */
     public function askDelete($id): void
     {
@@ -617,6 +670,15 @@ class IndexComponent extends Component
             $this->notification()->warning(
                 'No se puede eliminar',
                 'La actividad tiene indicadores (logros) asociados. Elimínalos primero.'
+            );
+
+            return;
+        }
+
+        if ($this->activityHasAttendances($activity->id)) {
+            $this->notification()->warning(
+                'No se puede eliminar',
+                'La actividad tiene asistencias registradas. No se puede eliminar.'
             );
 
             return;
@@ -645,6 +707,31 @@ class IndexComponent extends Component
     {
         $this->activityToDelete = null;
         $this->activityToDeleteTopic = null;
+    }
+
+    /**
+     * Indica si la actividad tiene asistencias (lms_activity_attendances,
+     * FK ON DELETE RESTRICT). Sin modelo Eloquent propio: consulta directa
+     * con guarda por si la tabla no existe en el entorno.
+     */
+    private function activityHasAttendances(int $activityId): bool
+    {
+        try {
+            if (! Schema::hasTable('lms_activity_attendances')) {
+                return false;
+            }
+
+            return DB::table('lms_activity_attendances')
+                ->where('activity_id', $activityId)
+                ->exists();
+        } catch (\Throwable $e) {
+            Log::warning('No se pudo verificar asistencias de la actividad', [
+                'activity_id' => $activityId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 
     public function deleteAchievement($id)
@@ -679,22 +766,44 @@ class IndexComponent extends Component
         }
 
         $count = 0;
+        $skipped = 0;
         foreach ($activities as $activity) {
-            $activity->achievements()->delete();
-            $activity->lmsLogs()?->delete();
-            $activity->lmsPublication()?->delete();
-            $activity->lmsSections()?->delete();
-            $activity->lmsResources()?->delete();
-            $activity->lmsLinks()?->delete();
-            $activity->lmsHtmlEmbeds()?->delete();
-            $activity->delete();
-            $count++;
+            // Las asistencias son RESTRICT y no se purgan: se omiten para
+            // no abortar el vaciado con un 500 (FK 1451).
+            if ($this->activityHasAttendances($activity->id)) {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                DB::transaction(function () use ($activity) {
+                    $activity->achievements()->delete();
+                    $activity->lmsLogs()->delete();
+                    $activity->lmsPublication()?->delete();
+                    $activity->lmsSections()->delete();
+                    $activity->lmsResources()->delete();
+                    $activity->lmsLinks()->delete();
+                    $activity->lmsHtmlEmbeds()->delete();
+                    $activity->delete();
+                });
+                $count++;
+            } catch (\Illuminate\Database\QueryException $e) {
+                Log::warning('emptyActivities: actividad omitida por FK', [
+                    'activity_id' => $activity->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $skipped++;
+            }
         }
 
         if ($count > 0) {
+            $msg = "{$count} actividades eliminadas exitosamente";
+            if ($skipped > 0) {
+                $msg .= ". {$skipped} omitidas por tener asistencias o registros asociados.";
+            }
             $this->notification()->success(
                 '¡Excelente, buen trabajo!',
-                "{$count} actividades eliminadas exitosamente"
+                $msg
             );
         } else {
             $this->notification()->error(
