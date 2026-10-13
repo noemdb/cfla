@@ -703,3 +703,91 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 4:08:01 PM [vite] page reload app/Livewire/Profesor/Performance/PerformanceReport.php
 4:08:06 PM [vite] full reload resources/views/livewire/profesor/performance/report.blade.php
 4:08:07 PM [vite] page reload resources/views/livewire/profesor/performance/report.blade.php
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 566 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+11:39:38 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:38 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:45 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:45 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:50 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:50 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:56 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:39:56 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:40:02 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:40:02 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:40:09 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:40:09 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:40:15 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:40:15 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:41:04 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:41:04 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:41:17 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:41:17 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:42:26 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:42:26 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:42:28 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:42:28 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:42:40 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:42:40 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:49:07 AM [vite] full reload resources/views/pdfs/timetable/preview-pestudio.blade.php
+11:49:07 AM [vite] page reload resources/views/pdfs/timetable/preview-pestudio.blade.php
+11:56:16 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:16 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:23 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:23 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:29 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:29 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:35 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:35 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:42 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:42 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:47 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:56:47 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+11:59:16 AM [vite] full reload resources/views/pdfs/timetable/teachers.blade.php
+11:59:16 AM [vite] page reload resources/views/pdfs/timetable/teachers.blade.php
+12:03:02 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:02 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:09 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:09 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:16 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:16 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:23 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:23 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:29 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:03:29 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:04:35 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:04:35 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:04:41 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:04:41 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:04:49 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:04:49 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+12:08:52 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:08:52 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+12:08:58 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:08:58 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+12:09:03 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:09:03 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+12:09:09 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:09:09 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+12:09:15 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:09:15 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+12:13:10 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:13:10 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+12:13:16 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
+12:13:16 PM [vite] page reload resources/views/timetable/teachers-all.blade.php

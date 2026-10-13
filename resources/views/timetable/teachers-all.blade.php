@@ -47,8 +47,8 @@
             /* Se conserva la estética (esquinas redondeadas, paleta teal y
                jerarquía tipográfica), sólo se compacta el ritmo vertical. */
             header{border-radius:8px;padding:9px 14px;margin-bottom:8px;}
-            header h1{font-size:1.05rem;}
-            header p{font-size:0.68rem;margin-top:2px;}
+            header h1{font-size:1.2rem;}
+            header p{font-size:0.78rem;margin-top:2px;}
             .pestudio{margin:8px 0 5px;padding:5px 10px;break-after:avoid;page-break-after:avoid;}
             .pestudio h2{font-size:0.82rem;}
             .pestudio p{font-size:0.62rem;margin-top:1px;}
@@ -60,19 +60,19 @@
             .sheet:last-child{break-after:auto;page-break-after:auto;}
             .card{margin-bottom:4mm;border-radius:10px;box-shadow:none;border:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;}
             .card-head{padding:6px 10px;break-after:avoid;page-break-after:avoid;}
-            .card-head h3{font-size:0.8rem;}
-            .card-head p{font-size:0.62rem;margin-top:1px;}
-            .shift-title{padding:3px 10px;font-size:0.62rem;break-after:avoid;page-break-after:avoid;}
+            .card-head h3{font-size:0.95rem;}
+            .card-head p{font-size:0.72rem;margin-top:1px;}
+            .shift-title{padding:3px 10px;font-size:0.74rem;break-after:avoid;page-break-after:avoid;}
             table{width:100%;border-collapse:collapse;table-layout:fixed;}
-            th{padding:3px 4px;font-size:0.6rem;}
-            th:first-child{width:64px;}
-            td{padding:3px 4px;font-size:0.68rem;line-height:1.2;}
-            td.time{width:64px;font-size:0.64rem;}
-            td.break{font-size:0.62rem;}
-            .subject{font-size:0.68rem;}
-            .meta{font-size:0.56rem;margin-top:1px;}
+            th{padding:3px 4px;font-size:0.72rem;}
+            th:first-child{width:78px;}
+            td{padding:3px 4px;font-size:0.8rem;line-height:1.2;overflow:hidden;}
+            td.time{width:78px;font-size:0.76rem;}
+            td.break{font-size:0.72rem;}
+            .subject{font-size:0.8rem;}
+            .meta{font-size:0.68rem;margin-top:1px;}
             .empty{padding:3px;}
-            footer{font-size:0.62rem;margin-top:10px;}
+            footer{font-size:0.72rem;margin-top:10px;}
         }
     </style>
 </head>
@@ -92,8 +92,7 @@
             @php($profesor = $teacherData['profesor'])
             <div class="card">
                 <div class="card-head">
-                    <h3>{{ $profesor->lastname }}, {{ $profesor->name }}</h3>
-                    <p>CI: {{ $profesor->ci_profesor ?? '—' }}</p>
+                    <h3>{{ $profesor->lastname }}, {{ $profesor->name }} · CI {{ $profesor->ci_profesor ?? '—' }}</h3>
                 </div>
 
                 {{-- Horarios del docente por P.Educativo, en un único horario
@@ -112,21 +111,30 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Bloque</th>
-                                        <th>Lunes</th>
-                                        <th>Martes</th>
-                                        <th>Miércoles</th>
-                                        <th>Jueves</th>
-                                        <th>Viernes</th>
+                                        <th>Hora</th>
+                                        <th>Lun</th>
+                                        <th>Mar</th>
+                                        <th>Mié</th>
+                                        <th>Jue</th>
+                                        <th>Vie</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php($nBloque = 0)
                                     @foreach ($shiftSchedule['periods'] as $order => $dayPeriods)
                                         @php($firstPeriod = $dayPeriods->first())
+                                        @php($esReceso = $dayPeriods->contains('is_break', true))
+                                        @if(!$esReceso)
+                                            @php($nBloque = $nBloque + 1)
+                                        @endif
                                         <tr>
                                             <td class="time">
-                                                {{ $order }}º<br>
-                                                <span class="meta">{{ substr((string) $firstPeriod->start_time, 0, 5) }}–{{ substr((string) $firstPeriod->end_time, 0, 5) }}</span>
+                                                @if($esReceso)
+                                                    <span class="meta">{{ substr((string) $firstPeriod?->start_time, 0, 5) }}–{{ substr((string) $firstPeriod?->end_time, 0, 5) }}</span>
+                                                @else
+                                                    {{ $nBloque }}º<br>
+                                                    <span class="meta">{{ substr((string) $firstPeriod?->start_time, 0, 5) }}–{{ substr((string) $firstPeriod?->end_time, 0, 5) }}</span>
+                                                @endif
                                             </td>
                                             @foreach (range(1, 5) as $day)
                                                 @php($period = $dayPeriods->get($day))
@@ -137,8 +145,8 @@
                                                         @forelse ($shiftSchedule['grid']->get($order, collect())->get($day, collect()) as $slot)
                                                             <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
                                                             <div class="meta">
-                                                                {{ $slot->lesson?->pevaluacion?->seccion?->grado?->name ?? '' }}
-                                                                · {{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}
+                                                                {{ $slot->lesson?->pevaluacion?->seccion?->grado?->code_sm ?? $slot->lesson?->pevaluacion?->seccion?->grado?->code ?? $slot->lesson?->pevaluacion?->seccion?->grado?->name ?? '' }}
+                                                                {{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}
                                                                 @if ($slot->grupo_estable_id)
                                                                     · {{ $slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id }}
                                                                 @endif

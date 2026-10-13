@@ -5,35 +5,29 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         @page{margin:0;}
-        body{font-family:Helvetica,sans-serif;font-size:7pt;color:#1a1a2e;margin:2.2cm 1cm 1cm;line-height:1.25;text-transform:uppercase;}
-        .page-header{position:fixed;top:1cm;left:1cm;right:1cm;text-align:center;}
-        h1{font-size:10pt;font-weight:800;color:#0d9488;}
-        h2{font-size:8pt;font-weight:700;color:#374151;margin-top:2px;}
-        .subhead{font-size:6.5pt;color:#6b7280;margin-top:2px;}
-        .grade{margin-top:9px;}
-        .grade-section-title{display:block;background:#eff6ff;border:1px solid #bfdbfe;padding:4px 6px;color:#1d4ed8;font-size:7.5pt;font-weight:800;}
+        body{font-family:Helvetica,sans-serif;font-size:8pt;color:#1a1a2e;margin:1.8cm 0.8cm 0.6cm;line-height:1.15;text-transform:uppercase;}
+        .page-header{position:fixed;top:0.5cm;left:0.8cm;right:0.8cm;text-align:center;}
+        h1{font-size:13pt;font-weight:800;color:#0d9488;letter-spacing:0.4px;}
+        h2{font-size:10pt;font-weight:700;color:#374151;margin-top:1px;}
+        .subhead{font-size:7.5pt;color:#6b7280;margin-top:1px;}
+        .grade{margin-top:4px;}
+        .grade-section-title{display:block;background:#eff6ff;border:1px solid #93c5fd;padding:4px 8px;color:#1d4ed8;font-size:10pt;font-weight:800;margin-bottom:4px;}
         .grade-section-title .section-label{float:right;color:#047857;}
-        .section{margin-top:5px;page-break-inside:avoid;}
+        .section{margin-top:2px;page-break-inside:avoid;}
         .section.new-page{page-break-before:always;}
-        .section-title{background:#ecfdf5;border:1px solid #a7f3d0;padding:4px 6px;color:#047857;font-size:7pt;font-weight:800;}
-        table{width:100%;border-collapse:collapse;}
-        td,th{border:1px solid #d1d5db;padding:2px 3px;vertical-align:middle;text-align:center;font-size:6.5pt;line-height:1.2;}
-        th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:6pt;padding:3px;}
-        tbody tr{height:1.5cm;}
-        tbody td{height:1.5cm;}
-        td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
-        .subject{font-weight:700;font-size:8pt;text-align:center;}
-        .group{font-size:5.5pt;color:#047857;text-align:center;margin-top:1px;}
-        .teacher{font-size:5.5pt;color:#4b5563;}
-        tr.break-row td{background:#fffbeb;color:#a16207;}
-        td.break-cell{text-align:center;font-size:6pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
-        .summary{margin:14px 0 6px;border:1px solid #cbd5e1;padding:4px 6px;}
-        .summary-title{color:#374151;font-size:7pt;font-weight:800;margin-bottom:3px;}
-        .summary table{width:100%;}
-        .summary td,.summary th{font-size:6pt;padding:2px 4px;}
-        .summary th{background:#475569;text-align:left;}
-        .summary td:last-child,.summary th:last-child{text-align:center;width:70px;}
-        .footer{text-align:center;font-size:5.5pt;color:#6b7280;margin-top:5px;padding-top:2px;border-top:1px solid #ccc;}
+        table{width:100%;border-collapse:collapse;table-layout:fixed;}
+        td,th{border:1px solid #9ca3af;padding:2px 4px;vertical-align:middle;text-align:center;font-size:8pt;line-height:1.15;}
+        th{background:#0d9488;color:#fff;font-weight:800;text-align:center;font-size:8.5pt;padding:4px 2px;letter-spacing:0.3px;}
+        th.time-col{width:68px;}
+        tbody tr{height:1.15cm;}
+        tbody td{height:1.15cm;}
+        td.time{text-align:center;font-weight:700;width:68px;background:#f8fafc;font-size:8.5pt;color:#1e293b;}
+        .subject{font-weight:800;font-size:10pt;text-align:center;line-height:1.15;color:#0f172a;}
+        .group{font-size:8pt;font-weight:700;color:#047857;text-align:center;margin-top:2px;}
+        .cell-assignment + .cell-assignment{margin-top:2px;padding-top:2px;border-top:1px dashed #cbd5e1;}
+        tr.break-row, tr.break-row td{height:0.7cm;background:#fffbeb;color:#a16207;}
+        td.break-cell{text-align:center;font-size:8.5pt;font-weight:800;letter-spacing:1px;color:#a16207;}
+        .footer{position:fixed;bottom:0.35cm;left:0.8cm;right:0.8cm;text-align:center;font-size:6.5pt;color:#6b7280;padding-top:2px;border-top:1px solid #cbd5e1;}
     </style>
 </head>
 <body>
@@ -55,7 +49,16 @@
                     </div>
                     @foreach ($schedule['shiftGrids'] as $shiftGrid)
                         <table>
-                            <thead><tr><th>Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th class="time-col">Hora</th>
+                                    <th>Lunes</th>
+                                    <th>Martes</th>
+                                    <th>Miércoles</th>
+                                    <th>Jueves</th>
+                                    <th>Viernes</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 @foreach ($shiftGrid['rows'] as $row)
                                     @php $period = $row['period']; $isBreak = (bool) $period->is_break; @endphp
@@ -67,12 +70,14 @@
                                                     RECESO
                                                 @else
                                                     @forelse ($day['assignments'] as $cell)
-                                                        <div class="subject">{{ $cell['asignatura'] }}</div>
-                                                        @if (!empty($cell['grupo']))
-                                                            <div class="group">{{ $cell['grupo'] }}</div>
-                                                        @endif
+                                                        <div class="cell-assignment">
+                                                            <div class="subject">{{ $cell['asignatura'] }}</div>
+                                                            @if (!empty($cell['grupo']))
+                                                                <div class="group">{{ $cell['grupo'] }}</div>
+                                                            @endif
+                                                        </div>
                                                     @empty
-                                                        <span class="teacher">&nbsp;</span>
+                                                        &nbsp;
                                                     @endforelse
                                                 @endif
                                             </td>
