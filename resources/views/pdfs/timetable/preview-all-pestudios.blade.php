@@ -5,33 +5,33 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         @page{margin:0;}
-        body{font-family:Helvetica,sans-serif;font-size:9pt;color:#1a1a2e;margin:2.2cm 1cm 1cm;line-height:1.2;text-transform:uppercase;}
+        body{font-family:Helvetica,sans-serif;font-size:9.5pt;color:#1a1a2e;margin:2.2cm 1cm 1cm;line-height:1.2;text-transform:uppercase;}
         .page-header{position:fixed;top:1cm;left:1cm;right:1cm;text-align:center;}
-        h1{font-size:13pt;font-weight:800;color:#0d9488;}
-        h2{font-size:10pt;font-weight:700;color:#374151;margin-top:2px;}
-        .subhead{font-size:7.5pt;color:#6b7280;margin-top:2px;}
-        .pestudio-title{background:#0d9488;color:#fff;font-size:10.5pt;font-weight:800;padding:3px 6px;margin-top:9px;}
+        h1{font-size:14pt;font-weight:800;color:#0d9488;}
+        h2{font-size:11pt;font-weight:700;color:#374151;margin-top:2px;}
+        .subhead{font-size:8pt;color:#6b7280;margin-top:2px;}
+        .pestudio-title{background:#0d9488;color:#fff;font-size:11.5pt;font-weight:800;padding:3px 6px;margin-top:9px;}
         .pestudio-title.new-page{page-break-before:always;}
         .pestudio-title .calendar-label{float:right;font-weight:600;color:#d1fae5;}
-        .grade-section-title{display:block;background:#eff6ff;border:1px solid #bfdbfe;padding:3px 6px;color:#1d4ed8;font-size:9.5pt;font-weight:800;}
+        .grade-section-title{display:block;background:#eff6ff;border:1px solid #bfdbfe;padding:3px 6px;color:#1d4ed8;font-size:10.5pt;font-weight:800;}
         .grade-section-title .section-label{float:right;color:#047857;}
         .section{margin-top:5px;page-break-inside:avoid;}
         .section.new-page{page-break-before:always;}
         table{width:100%;border-collapse:collapse;}
-        td,th{border:1px solid #d1d5db;padding:2px;vertical-align:top;font-size:8.5pt;line-height:1.2;}
-        th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:8pt;padding:2px;}
+        td,th{border:1px solid #d1d5db;padding:2px;vertical-align:top;font-size:9.5pt;line-height:1.2;}
+        th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:9pt;padding:2px;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
-        .subject{font-weight:700;font-size:8.5pt;}
+        .subject{font-weight:700;font-size:9.5pt;}
         .teacher{font-size:7.5pt;color:#4b5563;}
         tr.break-row td{background:#fffbeb;color:#a16207;}
-        td.break-cell{text-align:center;font-size:8pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
+        td.break-cell{text-align:center;font-size:9pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
         .summary{margin:5px 0 6px;border:1px solid #cbd5e1;padding:3px 6px;}
-        .summary-title{color:#374151;font-size:9pt;font-weight:800;margin-bottom:3px;}
+        .summary-title{color:#374151;font-size:10pt;font-weight:800;margin-bottom:3px;}
         .summary table{width:100%;}
         .summary td,.summary th{font-size:8pt;padding:2px 4px;}
         .summary th{background:#475569;text-align:left;}
         .summary td:last-child,.summary th:last-child{text-align:center;width:70px;}
-        .footer{text-align:center;font-size:7pt;color:#6b7280;margin-top:5px;padding-top:2px;border-top:1px solid #ccc;}
+        .footer{text-align:center;font-size:7.5pt;color:#6b7280;margin-top:5px;padding-top:2px;border-top:1px solid #ccc;}
     </style>
 </head>
 <body>

@@ -791,3 +791,9 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 12:13:10 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
 12:13:16 PM [vite] full reload resources/views/timetable/teachers-all.blade.php
 12:13:16 PM [vite] page reload resources/views/timetable/teachers-all.blade.php
+3:20:59 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:20:59 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:21:06 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:21:06 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:21:13 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:21:13 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
