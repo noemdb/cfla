@@ -5,33 +5,33 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         @page{margin:0;}
-        body{font-family:Helvetica,sans-serif;font-size:9.5pt;color:#1a1a2e;margin:2.2cm 1cm 1cm;line-height:1.2;text-transform:uppercase;}
+        body{font-family:Helvetica,sans-serif;font-size:9.5pt;color:#1a1a2e;margin:2.2cm 0.7cm 0.7cm;line-height:1.05;text-transform:uppercase;}
         .page-header{position:fixed;top:1cm;left:1cm;right:1cm;text-align:center;}
         h1{font-size:14pt;font-weight:800;color:#0d9488;}
         h2{font-size:11pt;font-weight:700;color:#374151;margin-top:2px;}
         .subhead{font-size:8pt;color:#6b7280;margin-top:2px;}
-        .pestudio-title{background:#0d9488;color:#fff;font-size:11.5pt;font-weight:800;padding:3px 6px;margin-top:9px;}
+        .pestudio-title{background:#0d9488;color:#fff;font-size:11.5pt;font-weight:800;padding:2px 6px;margin-top:6px;}
         .pestudio-title.new-page{page-break-before:always;}
         .pestudio-title .calendar-label{float:right;font-weight:600;color:#d1fae5;}
-        .grade-section-title{display:block;background:#eff6ff;border:1px solid #bfdbfe;padding:3px 6px;color:#1d4ed8;font-size:10.5pt;font-weight:800;}
+        .grade-section-title{display:block;background:#eff6ff;border:1px solid #bfdbfe;padding:1px 6px;color:#1d4ed8;font-size:10.5pt;font-weight:800;}
         .grade-section-title .section-label{float:right;color:#047857;}
-        .section{margin-top:5px;page-break-inside:avoid;}
+        .section{margin-top:2px;page-break-inside:avoid;}
         .section.new-page{page-break-before:always;}
         table{width:100%;border-collapse:collapse;}
-        td,th{border:1px solid #d1d5db;padding:2px;vertical-align:top;font-size:9.5pt;line-height:1.2;}
-        th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:9pt;padding:2px;}
+        td,th{border:1px solid #d1d5db;padding:1px 2px;vertical-align:top;font-size:9.5pt;line-height:1;}
+        th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:9pt;padding:1px 2px;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
-        .subject{font-weight:700;font-size:9.5pt;}
-        .teacher{font-size:7.5pt;color:#4b5563;}
+        .subject{font-weight:700;font-size:10.5pt;}
+        .teacher{font-size:6.5pt;color:#4b5563;}
         tr.break-row td{background:#fffbeb;color:#a16207;}
         td.break-cell{text-align:center;font-size:9pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
-        .summary{margin:5px 0 6px;border:1px solid #cbd5e1;padding:3px 6px;}
-        .summary-title{color:#374151;font-size:10pt;font-weight:800;margin-bottom:3px;}
+        .summary{margin:2px 0 2px;border:1px solid #cbd5e1;padding:1px 6px;}
+        .summary-title{color:#374151;font-size:10pt;font-weight:800;margin-bottom:1px;}
         .summary table{width:100%;}
-        .summary td,.summary th{font-size:8pt;padding:2px 4px;}
+        .summary td,.summary th{font-size:8pt;line-height:1;padding:1px 4px;}
         .summary th{background:#475569;text-align:left;}
-        .summary td:last-child,.summary th:last-child{text-align:center;width:70px;}
-        .footer{text-align:center;font-size:7.5pt;color:#6b7280;margin-top:5px;padding-top:2px;border-top:1px solid #ccc;}
+        .summary td.blq,.summary th.blq{text-align:center;width:56px;}
+        .footer{text-align:center;font-size:7.5pt;color:#6b7280;margin-top:1px;padding-top:1px;border-top:1px solid #ccc;page-break-before:avoid;}
     </style>
 </head>
 <body>
@@ -91,10 +91,10 @@
                         <div class="summary">
                             <div class="summary-title">Profesores de la sección ({{ count($schedule['teacherSummary']) }})</div>
                             <table>
-                                <thead><tr><th>Profesor</th><th>Bloques</th></tr></thead>
+                                <thead><tr><th>Profesor</th><th class="blq">Blq.</th><th>Profesor</th><th class="blq">Blq.</th></tr></thead>
                                 <tbody>
-                                    @foreach ($schedule['teacherSummary'] as $teacher)
-                                        <tr><td>{{ $teacher['name'] ?: 'Sin nombre' }}</td><td>{{ $teacher['blocks'] }}</td></tr>
+                                    @foreach (array_chunk($schedule['teacherSummary'], 2) as $pair)
+                                        <tr><td>{{ $pair[0]['name'] ?? '' }}</td><td class="blq">{{ $pair[0]['blocks'] ?? '' }}</td><td>{{ $pair[1]['name'] ?? '' }}</td><td class="blq">{{ $pair[1]['blocks'] ?? '' }}</td></tr>
                                     @endforeach
                                 </tbody>
                             </table>
