@@ -1,9 +1,20 @@
 <?php
 
-use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\Admin\Fix\DB\HomeController;
-use App\Http\Controllers\Restapi\Exchange\GoutteController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\VotingDashboardController;
+use App\Http\Controllers\Admin\VotingPollController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Census\CatchmentPDFController;
+use App\Http\Controllers\CensusController;
+use App\Http\Controllers\Educational\CompetitionController;
+use App\Http\Controllers\GmailController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Planning\PlanningController;
+use App\Http\Controllers\PollVotingController;
+use App\Http\Controllers\VotingFingerprintController;
+use App\Livewire\Admin\Diagnostic\IndexComponent as DiagnosticIndex;
+use App\Livewire\Admin\Educational\Competition\IndexComponent as CompetitionIndex;
+use App\Livewire\Bot\IndexComponent as BotIndex;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,38 +32,38 @@ use Illuminate\Support\Facades\Route;
 // RUTAS NORMALES DE LA APLICACIÓN
 // ===================================================
 
-Route::get('/studia', [\App\Http\Controllers\HomeController::class, 'studia'])->name('studia');
-Route::get('/diagnostico', [\App\Http\Controllers\HomeController::class, 'diagnostico'])->name('diagnostico');
+Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
+Route::get('/diagnostico', [HomeController::class, 'diagnostico'])->name('diagnostico');
 
-Route::get('/', [\App\Http\Controllers\HomeController::class, 'home'])->name('home');
-Route::get('/matricula', [\App\Http\Controllers\HomeController::class, 'enrollment'])->name('enrollment');
-Route::get('/pago', [\App\Http\Controllers\HomeController::class, 'credicard'])->name('credicard');
-Route::get('/post/{id}', [\App\Http\Controllers\HomeController::class, 'post'])->name('post');
+Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('/matricula', [HomeController::class, 'enrollment'])->name('enrollment');
+Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
+Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 
-Route::get('/bot', \App\Livewire\Bot\IndexComponent::class)->name('bot.index');
+Route::get('/bot', BotIndex::class)->name('bot.index');
 
-Route::get('/censo', [\App\Http\Controllers\CensusController::class, 'index'])->name('census');
-Route::get('/catchment/download-pdf/{token}', [\App\Http\Controllers\Census\CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
-Route::get('/catchment/preview', [\App\Http\Controllers\Census\CatchmentPDFController::class, 'preview'])->name('catchment.preview');
+Route::get('/censo', [CensusController::class, 'index'])->name('census');
+Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
+Route::get('/catchment/preview', [CatchmentPDFController::class, 'preview'])->name('catchment.preview');
 
 // Ruta para la prosecución
-Route::get('/prosecucion', [\App\Http\Controllers\HomeController::class, 'prosecucion'])->name('prosecucion');
-Route::get('/prosecucion/guia', [\App\Http\Controllers\HomeController::class, 'prosecucion_guia'])->name('prosecucion_guia');
-Route::get('/prosecucion/download/{id}', [\App\Http\Controllers\HomeController::class, 'downloadProsecucionPDF'])->name('prosecucion.download.pdf');
+Route::get('/prosecucion', [HomeController::class, 'prosecucion'])->name('prosecucion');
+Route::get('/prosecucion/guia', [HomeController::class, 'prosecucion_guia'])->name('prosecucion_guia');
+Route::get('/prosecucion/download/{id}', [HomeController::class, 'downloadProsecucionPDF'])->name('prosecucion.download.pdf');
 
 Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
-    Route::get('/educational/competition/moderator/{token}', [\App\Http\Controllers\Educational\CompetitionController::class, 'moderator'])->name('general.educational.competition.moderator');
-    Route::get('/educational/competition/board/{token}', [\App\Http\Controllers\Educational\CompetitionController::class, 'board'])->name('general.educational.competition.board');
-    Route::get('/educational/competition/scoreboard/{token}', [\App\Http\Controllers\Educational\CompetitionController::class, 'scoreboard'])->name('general.educational.competition.scoreboard');
+    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class, 'moderator'])->name('general.educational.competition.moderator');
+    Route::get('/educational/competition/board/{token}', [CompetitionController::class, 'board'])->name('general.educational.competition.board');
+    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class, 'scoreboard'])->name('general.educational.competition.scoreboard');
 });
 
 // Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
-Route::get('/competitions/{orderId}/status/{status}', [\App\Http\Controllers\OrderController::class, 'updateOrderStatus']);
+Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
 
 // Api Gmail
-Route::get('/auth/google', [\App\Http\Controllers\GmailController::class, 'redirectToGoogle'])->name('google.auth');
-Route::get('/oauth2callback', [\App\Http\Controllers\GmailController::class, 'handleGoogleCallback'])->name('google.callback');
-Route::get('/send-email', [\App\Http\Controllers\GmailController::class, 'sendEmail']);
+Route::get('/auth/google', [GmailController::class, 'redirectToGoogle'])->name('google.auth');
+Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/send-email', [GmailController::class, 'sendEmail']);
 
 // ///////////////////////////////////////////////////////////
 // ////////////// Encuestas Anonimas /////////////////////////
@@ -61,29 +72,29 @@ Route::get('/send-email', [\App\Http\Controllers\GmailController::class, 'sendEm
 // Route::get('/voting/index', [PollVotingController::class, 'index'])->name('poll.voting.index');
 
 // Ruta para el asistente de votación
-Route::get('/voting/asistent', [\App\Http\Controllers\PollVotingController::class, 'asistent'])
+Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])
     ->name('voting.asistent')
     ->middleware('throttle:voting-asistent'); // limitar el peticiones por IP
 
 // Ruta para guía del módulo de votación
-Route::get('/voting/guia', [\App\Http\Controllers\PollVotingController::class, 'guia'])->name('voting.guia');
+Route::get('/voting/guia', [PollVotingController::class, 'guia'])->name('voting.guia');
 
-Route::get('/voting/proposal', [\App\Http\Controllers\PollVotingController::class, 'guia'])->name('voting.proposal');
+Route::get('/voting/proposal', [PollVotingController::class, 'guia'])->name('voting.proposal');
 
 // Ruta para índice de votación
 // Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
 
 // Ruta para votacion, sin verificaciones de unicidad de voto
-Route::get('/poll/voting/{access_token}', [\App\Http\Controllers\PollVotingController::class, 'show'])->name('poll.voting.show');
+Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])->name('poll.voting.show');
 
 // Nueva ruta para resultados de encuesta
-Route::get('/poll/voting/result/{access_token}', [\App\Http\Controllers\PollVotingController::class, 'result'])->name('poll.voting.result');
+Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])->name('poll.voting.result');
 
 // Ruta para resultados de todas las encuestas
-Route::get('/voting/results', [\App\Http\Controllers\PollVotingController::class, 'results'])->name('voting.results');
+Route::get('/voting/results', [PollVotingController::class, 'results'])->name('voting.results');
 
-Route::get('/poll/qr/{uuid}', [\App\Http\Controllers\PollVotingController::class, 'showQR'])->name('poll.qr.show');
-Route::get('/poll/participation/{uuid}', [\App\Http\Controllers\PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
+Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
+Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
 // Horario: vistas públicas por enlace firmado (SPEC-TIMETABLE-001 §8)
 Route::prefix('timetable')->name('timetable.public.')->middleware('signed')->group(function () {
@@ -117,24 +128,24 @@ Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', '
 
         // Módulo de Votación
         Route::prefix('voting')->name('voting.')->group(function () {
-            Route::get('/dashboard', [\App\Http\Controllers\Admin\VotingDashboardController::class, 'index'])->name('dashboard');
-            Route::resource('polls', \App\Http\Controllers\Admin\VotingPollController::class);
-            Route::post('/polls/{poll}/start', [\App\Http\Controllers\Admin\VotingPollController::class, 'start'])->name('polls.start');
-            Route::post('/polls/{poll}/stop', [\App\Http\Controllers\Admin\VotingPollController::class, 'stop'])->name('polls.stop');
-            Route::post('/polls/{poll}/reset', [\App\Http\Controllers\Admin\VotingPollController::class, 'reset'])->name('polls.reset');
-            Route::get('/results', [\App\Http\Controllers\Admin\VotingPollController::class, 'results'])->name('results');
-            Route::get('/list', [\App\Http\Controllers\Admin\VotingPollController::class, 'publicList'])->name('list');
+            Route::get('/dashboard', [VotingDashboardController::class, 'index'])->name('dashboard');
+            Route::resource('polls', VotingPollController::class);
+            Route::post('/polls/{poll}/start', [VotingPollController::class, 'start'])->name('polls.start');
+            Route::post('/polls/{poll}/stop', [VotingPollController::class, 'stop'])->name('polls.stop');
+            Route::post('/polls/{poll}/reset', [VotingPollController::class, 'reset'])->name('polls.reset');
+            Route::get('/results', [VotingPollController::class, 'results'])->name('results');
+            Route::get('/list', [VotingPollController::class, 'publicList'])->name('list');
         });
 
         // Módulo de Diagnóstico
         Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
-            Route::get('/', \App\Livewire\Admin\Diagnostic\IndexComponent::class)->name('index');
+            Route::get('/', DiagnosticIndex::class)->name('index');
         });
 
         // Módulo de Competiciones Académicas
         Route::prefix('educational')->name('educational.')->group(function () {
-            Route::get('/competition', \App\Livewire\Admin\Educational\Competition\IndexComponent::class)->name('competition.index');
-            Route::get('/competition/{token}/answers', [\App\Http\Controllers\Educational\CompetitionController::class, 'answers'])->name('competition.answers');
+            Route::get('/competition', CompetitionIndex::class)->name('competition.index');
+            Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
         });
 
         // Módulo de Usuarios
@@ -187,7 +198,7 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
     // MÓDULO DE PLANIFICACIÓN
     // ───────────────────────────────────────────────
     Route::prefix('planning')->middleware(['auth', 'isPlanner'])->name('planning.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Planning\PlanningController::class, 'index'])->name('index');
+        Route::get('/', [PlanningController::class, 'index'])->name('index');
 
         // Módulo de Indicadores de Planificación
         Route::prefix('indicators')->name('indicators.')->group(function () {
@@ -204,8 +215,8 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
 
         // Módulo de Competiciones Académicas
         Route::prefix('educational')->name('educational.')->group(function () {
-            Route::get('/competition', \App\Livewire\Planning\Educational\Competition\IndexComponent::class)->name('competition.index');
-            Route::get('/competition/{token}/answers', [\App\Http\Controllers\Educational\CompetitionController::class, 'answers'])->name('competition.answers');
+            Route::get('/competition', CompetitionIndex::class)->name('competition.index');
+            Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
         });
 
         // Módulo de Carga Académica (Pevaluacions)
@@ -373,7 +384,7 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
             // nombre de ruta (patrón ADR-006).
             Route::get('/lecciones/print', [
                 \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
-            ])->name('lecciones.print')->middleware(['binnacle.track', 'binnacle.sql']);
+            ])->name('lessons.print')->middleware(['binnacle.track', 'binnacle.sql']);
 
             Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
                 ->name('resources');
@@ -431,9 +442,11 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
             Route::get('/activities', \App\Livewire\Leadership\ActivityOverview::class)
                 ->name('activities')
                 ->middleware(['binnacle.track', 'binnacle.sql']);
-            Route::get('/activities/format/{pevaluacion}', [\App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
+            Route::get('/activities/format/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
             ])->name('activities.format')->middleware(['binnacle.track', 'binnacle.sql']);
-            Route::get('/activities/resume/{pevaluacion}', [\App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
+            Route::get('/activities/resume/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
             ])->name('activities.resume')->middleware(['binnacle.track', 'binnacle.sql']);
 
             // Lecciones LMS por área
@@ -472,4 +485,157 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
                 ->name('timetable.view');
         });
 
-    // ... rest of file unchanged (truncated for brevity)
+    // ─── Dirección: Supervisión y Seguimiento (READ-ONLY) ─────────
+    Route::prefix('director')
+        ->middleware(['auth', 'isDirector'])
+        ->name('director.')
+        ->group(function () {
+
+            // Dashboard con indicadores globales
+            Route::get('/', \App\Livewire\Director\IndicatorDashboard::class)
+                ->name('index');
+
+            // Información Académica: Pensums
+            Route::get('/pensums', \App\Livewire\Director\PensumList::class)
+                ->name('pensums');
+
+            // Carga Académica (Pevaluacions)
+            Route::get('/carga-academica', \App\Livewire\Director\CargaAcademicaList::class)
+                ->name('carga-academica');
+
+            // Actividades de Planificación (SÓLO VISUALIZACIÓN + PDF)
+            Route::get('/activities', \App\Livewire\Director\ActivityList::class)
+                ->name('activities');
+            Route::get('/activities/format/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
+            ])->name('activities.format');
+            Route::get('/activities/resume/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
+            ])->name('activities.resume');
+
+            // Lecciones LMS
+            Route::get('/lecciones', \App\Livewire\Director\LessonList::class)
+                ->name('lessons');
+
+            // Impresión de lecciones LMS (Mermaid/KaTeX renderizado en el navegador;
+            // misma semántica de filtros que el listado; SOLO LECTURA)
+            Route::get('/lecciones/print', [
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
+            ])->name('lessons.print');
+
+            // Recursos Compartidos
+            Route::get('/recursos', \App\Livewire\Director\ResourceList::class)
+                ->name('resources');
+
+            // Seguimiento Docente (KPIs)
+            Route::get('/profesores', \App\Livewire\Director\ProfesorIndicators::class)
+                ->name('profesores');
+
+            // Horario (SOLO lectura, cualquier sección) — ADR-TT-013
+            Route::get('/timetable/{seccion?}', \App\Livewire\Director\Timetable\SectionGrid::class)
+                ->name('timetable.view');
+        });
+
+    // ───────────────────────────────────────────────
+    // MÓDULO DE PROFESOR (Dashboard)
+    // ───────────────────────────────────────────────
+    Route::prefix('profesors')->middleware(['auth', 'isProfesor'])->name('profesors.')->group(function () {
+        Route::get('/home', [\App\Http\Controllers\Profesor\HomeController::class, 'home'])->name('home');
+        Route::get('/users', [\App\Http\Controllers\Profesor\HomeController::class, 'users'])->name('users.index');
+
+        // Módulo de Actividades
+        Route::prefix('activities')->name('activities.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Profesor\ActivityController::class, 'index'])->name('index');
+            Route::get('/create/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'create'])->name('create');
+            Route::get('/format/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'format'])->name('format');
+            Route::get('/resume/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'resume'])->name('resume');
+            Route::get('/grados-by-pestudio/{pestudio_id}', [\App\Http\Controllers\Profesor\ActivityController::class, 'gradosByPestudio'])
+                ->name('grados.by.pestudio')
+                ->where('pestudio_id', '[0-9]+');
+            Route::get('/secciones-by-grado/{grado_id}', [\App\Http\Controllers\Profesor\ActivityController::class, 'seccionesByGrado'])
+                ->name('secciones.by.grado')
+                ->where('grado_id', '[0-9]+');
+        });
+
+        // Módulo de Competencias (Debates Educativos)
+        Route::prefix('competitions')->name('competitions.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Profesor\DebateController::class, 'competitions'])->name('index');
+        });
+
+        // Módulo de Diagnósticos
+        Route::prefix('diagnostics')->name('diagnostics.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Profesor\DiagnosticController::class, 'index'])->name('index');
+        });
+
+        // ─── LMS: Editor de Contenido del Profesor ─────────────────
+        Route::prefix('lms')->name('lms.')->group(function () {
+            Route::get('/activity/lesson/new', \App\Livewire\Profesor\Lms\LessonWizard::class)
+                ->name('lesson.wizard')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
+            Route::get('/activity/{activity}', \App\Livewire\Profesor\Lms\ActivityEditor::class)
+                ->name('editor')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
+            Route::get('/comments', \App\Livewire\Profesor\Lms\CommentModeration::class)
+                ->name('comments')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
+            Route::get('/lessons/print', [\App\Http\Controllers\Profesor\Lms\LessonsPrintController::class, 'index'])
+                ->name('lessons.print')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
+        });
+
+        // ─── Binnacle: Mi Bitácora (solo registros propios) ───────
+        Route::get('/binnacle/mi-bitcora', \App\Livewire\Profesor\Binnacle\ActivityTimeline::class)
+            ->name('binnacle.mi-bitcora');
+
+        // ─── Horario: suplencias asignadas (confirmar/rechazar) ────
+        Route::get('/timetable/substitutes', \App\Livewire\Profesor\Timetable\SubstituteInbox::class)
+            ->name('timetable.substitutes')
+            ->middleware(['binnacle.track', 'binnacle.sql']);
+
+        // ─── Horario: mi horario (solo sus slots) ─────────────────
+        Route::get('/timetable', \App\Livewire\Profesor\Timetable\MyTimetable::class)
+            ->name('timetable')
+            ->middleware(['binnacle.track', 'binnacle.sql']);
+
+        // ─── Desempeño: reporte de seguimiento del profesor ──
+        // Solo datos propios (profesor_id = auth), con rango [desde, hasta].
+        Route::get('/performance', \App\Livewire\Profesor\Performance\PerformanceReport::class)
+            ->name('performance')
+            ->middleware(['binnacle.track', 'binnacle.sql']);
+    });
+});
+
+// ─── LMS: Rutas de Estudiante ───────────────────────────────────────────────
+Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isStudent'])->group(function () {
+    Route::get('/home', \App\Livewire\Student\Lms\StudentHome::class)->name('home');
+    Route::get('/perfil', \App\Livewire\Student\Lms\Profile::class)->name('profile');
+    Route::get('/academica', \App\Livewire\Student\Lms\AcademicInfo::class)->name('academic');
+    Route::get('/lecciones', \App\Livewire\Student\Lms\LessonList::class)->name('lessons');
+    Route::get('/recursos', \App\Livewire\Student\Lms\ResourceList::class)->name('resources');
+    Route::get('/timetable', \App\Livewire\Student\Lms\Timetable::class)->name('timetable');
+    Route::get('/activity/{activity}', \App\Livewire\Student\Lms\ActivityView::class)->name('activity');
+    Route::get('/activity/{activity}/print', [\App\Http\Controllers\Lms\ActivityPrintController::class, 'show'])->name('activity.print');
+    Route::get('/resource/{resource}/download', [
+        \App\Http\Controllers\Lms\ResourceDownloadController::class, 'download',
+    ])->name('resource.download');
+});
+
+// API para fingerprinting
+Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
+    ->name('voting.store-fingerprint');
+
+// Rutas de Perfil de Usuario
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/perfil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/perfil', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Mostrar formulario de login
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+
+// Procesar login
+Route::post('/login', [LoginController::class, 'login']);
+
+// Logout
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
