@@ -398,7 +398,7 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
             Route::get('/timetable', \App\Livewire\Coordinacion\Timetable\TimetableWizard::class)
                 ->name('timetable');
             // Add TimetableLight route reused from Planning under coordinacion path
-            Route::get('/timetable/light/{calendar?}', \App\Livewire\Planning\Timetable\TimetableLight::class)
+            Route::get('/timetable/light/{calendar?}', \App\Livewire\Coordinacion\Timetable\TimetableLight::class)
                 ->name('timetable.light');
             Route::get('/timetable/editor/{calendar?}', \App\Livewire\Coordinacion\Timetable\TimetableEditor::class)
                 ->name('timetable.editor');

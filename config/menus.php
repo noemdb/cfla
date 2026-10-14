@@ -165,9 +165,9 @@ return [
                 ],
                 [
                     'label' => 'Horario rápido',
-                    'route' => 'app.planning.timetable.light',
+                    'route' => 'app.coordinacion.timetable.light',
                     'icon' => 'M13 10V3L4 14h7v7l9-11h-7z',
-                    'active' => 'app.planning.timetable.light*',
+                    'active' => 'app.coordinacion.timetable.light*',
                     'icon_color' => 'emerald',
                 ],
                 [
