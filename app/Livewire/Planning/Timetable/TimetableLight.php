@@ -34,6 +34,10 @@ class TimetableLight extends BaseTimetableWizard
     {
         if (is_numeric($calendar)) {
             $this->calendarId = (int) $calendar;
+        } elseif (! $this->calendarId && is_numeric(request()->query('calendarId'))) {
+            // Entrada directa con ?calendarId=N (el #[Url] del componente base
+            // puede hidratarse después del mount): se toma el query string.
+            $this->calendarId = (int) request()->query('calendarId');
         }
 
         parent::mount();
@@ -74,7 +78,7 @@ class TimetableLight extends BaseTimetableWizard
         $this->enterGrid();
     }
 
-    /** Paso 2 → 1: vuelve a la selección de calendario. */
+    /** Paso 2 → 1: vuelve a la selección de calendario (pantalla inicial). */
     public function changeCalendar(): void
     {
         $this->lightStep = 1;
@@ -87,6 +91,8 @@ class TimetableLight extends BaseTimetableWizard
         $this->generationState = null;
         $this->showAddPreviewLessonModal = false;
         $this->highlightProfesorId = null;
+        $this->showTeacherScheduleDialog = false;
+        $this->teacherScheduleActiveCalendarId = null;
     }
 
     /** Alterna el resaltado de todas las celdas de un docente. */

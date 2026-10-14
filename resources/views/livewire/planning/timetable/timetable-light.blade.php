@@ -5,6 +5,29 @@
 @endphp
 
 <div class="mx-auto w-full max-w-[1600px] px-4 py-6">
+    @if ($lightStep === 2)
+        <div class="mb-3 flex justify-end">
+            <button type="button" wire:click="changeCalendar"
+                wire:loading.attr="disabled" wire:target="changeCalendar"
+                title="Volver a la pantalla inicial para elegir otro calendario (P.Estudio)"
+                aria-label="Volver a la selección de calendario"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
+                <span wire:loading.remove wire:target="changeCalendar" class="inline-flex items-center gap-1.5">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Cambiar P.Estudio / calendario
+                </span>
+                <span wire:loading wire:target="changeCalendar" class="inline-flex items-center gap-1.5">
+                    <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Volviendo…
+                </span>
+            </button>
+        </div>
+    @endif
     <header class="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
             <h1 class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">Horario · modo rápido</h1>
@@ -45,10 +68,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                     Horario docente
-                </button>
-                <button type="button" wire:click="changeCalendar"
-                    class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
-                    Cambiar calendario
                 </button>
 
                 {{-- Dropdown: formatos y reportes PDF --}}

@@ -52,27 +52,27 @@
             .pestudio{margin:8px 0 5px;padding:5px 10px;break-after:avoid;page-break-after:avoid;}
             .pestudio h2{font-size:0.82rem;}
             .pestudio p{font-size:0.62rem;margin-top:1px;}
-            .peducativo-block + .peducativo-block{border-top:2px solid #0f766e;margin-top:5px;}
-            .peducativo-title{padding:3px 10px;font-size:0.62rem;}
+            .peducativo-block + .peducativo-block{border-top:2px solid #0f766e;margin-top:4px;}
+            .peducativo-title{padding:2px 10px;font-size:0.58rem;}
             /* {{ $perPage }} docente(s) por hoja: cada hoja ocupa una página
                completa y las tarjetas conservan su alto natural (sin recortes). */
             .sheet{break-after:page;page-break-after:always;}
             .sheet:last-child{break-after:auto;page-break-after:auto;}
-            .card{margin-bottom:4mm;border-radius:10px;box-shadow:none;border:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;}
-            .card-head{padding:6px 10px;break-after:avoid;page-break-after:avoid;}
-            .card-head h3{font-size:0.95rem;}
-            .card-head p{font-size:0.72rem;margin-top:1px;}
-            .shift-title{padding:3px 10px;font-size:0.74rem;break-after:avoid;page-break-after:avoid;}
+            .card{margin-bottom:3mm;border-radius:10px;box-shadow:none;border:1px solid #e5e7eb;break-inside:avoid;page-break-inside:avoid;}
+            .card-head{padding:4px 10px;break-after:avoid;page-break-after:avoid;}
+            .card-head h3{font-size:0.85rem;}
+            .card-head p{font-size:0.68rem;margin-top:1px;}
+            .shift-title{padding:2px 10px;font-size:0.66rem;break-after:avoid;page-break-after:avoid;}
             table{width:100%;border-collapse:collapse;table-layout:fixed;}
-            th{padding:3px 4px;font-size:0.72rem;}
-            th:first-child{width:78px;}
-            td{padding:3px 4px;font-size:0.8rem;line-height:1.2;overflow:hidden;}
-            td.time{width:78px;font-size:0.76rem;}
-            td.break{font-size:0.72rem;}
-            .subject{font-size:0.8rem;}
-            .meta{font-size:0.68rem;margin-top:1px;}
-            .empty{padding:3px;}
-            footer{font-size:0.72rem;margin-top:10px;}
+            th{padding:2px 4px;font-size:0.64rem;}
+            th:first-child{width:72px;}
+            td{padding:2px 4px;font-size:0.8rem;line-height:1.15;overflow:hidden;}
+            td.time{width:72px;font-size:0.68rem;line-height:1.15;}
+            td.break{font-size:0.66rem;padding:2px 4px;}
+            .subject{font-size:0.8rem;line-height:1.15;}
+            .meta{font-size:0.6rem;margin-top:0;line-height:1.15;}
+            .empty{padding:1px;line-height:1;}
+            footer{font-size:0.68rem;margin-top:8px;}
         }
     </style>
 </head>
