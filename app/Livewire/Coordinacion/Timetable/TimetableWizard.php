@@ -2745,6 +2745,7 @@ class TimetableWizard extends Component
     {
         $asignatura = $pev->pensum?->asignatura;
         $grupo = $pev->grupoEstable?->name;
+        $halfBlock = false;
 
         return [
             'pev_id' => $pev->id,
@@ -2752,15 +2753,31 @@ class TimetableWizard extends Component
             'seccion_id' => $pev->seccion_id,
             'profesor_id' => $pev->profesor_id,
             'grupo_estable_id' => $pev->grupo_estable_id,
-            'weekly_blocks_t' => (int) ceil(((int) ($asignatura?->hour_t_week ?? 0)) * 60 / $periodMinutes),
-            'weekly_blocks_p' => (int) ceil(((int) ($asignatura?->hour_p_week ?? 0)) * 60 / $periodMinutes),
+            'weekly_blocks_t' => $this->blocksForMinutes((int) ($asignatura?->hour_t_week ?? 0), $periodMinutes, $halfBlock),
+            'weekly_blocks_p' => $this->blocksForMinutes((int) ($asignatura?->hour_p_week ?? 0), $periodMinutes, $halfBlock),
             'shift_id' => $this->defaultShiftId(),
             'room_type_required' => null,
             'is_half_group' => false,
             'allow_shared_teacher' => false,
+            'half_block' => $halfBlock,
             'priority' => 0,
             'locked' => false,
         ];
+    }
+
+    /**
+     * Unidades asignables a partir de horas semanales y la duración del período.
+     *
+     * ADR-TT-017: en una lección `half_block` cada unidad es una media franja
+     * (la mitad del período), por lo que el número de unidades se duplica
+     * respecto de una lección de bloque completo.
+     */
+    private function blocksForMinutes(int $hours, int $periodMinutes, bool $halfBlock = false): int
+    {
+        $periodMinutes = max(1, $periodMinutes);
+        $unitMinutes = $halfBlock ? max(1.0, $periodMinutes / 2) : $periodMinutes;
+
+        return (int) ceil($hours * 60 / $unitMinutes);
     }
 
     public function saveLessons(): void
@@ -2781,6 +2798,17 @@ class TimetableWizard extends Component
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = now()->format('H:i:s');
         session()->flash('message', count($this->lessons).' lecciones registradas.');
+        $this->afterLessonsSaved();
+    }
+
+    /**
+     * Punto de extensión posterior al guardado de clases.
+     *
+     * El wizard completo avanza al paso de generación; el asistente light
+     * vuelve a la grilla y refresca el preview persistido.
+     */
+    protected function afterLessonsSaved(): void
+    {
         $this->goToStep(4);
     }
 
@@ -8937,7 +8965,7 @@ PROMPT;
         }
 
         $calendar = TimetableCalendar::query()->find($this->calendarId);
-        if (! $calendar || ! $calendar->slots()->exists()) {
+        if (! $calendar) {
             return;
         }
 
@@ -8960,12 +8988,13 @@ PROMPT;
                 ];
             });
 
+        // `onlyActiveLessons()` filtra por clave (lesson_id), así que la lista
+        // de no asignadas se indexa por id antes de pasarla.
         $unassigned = TimetableLesson::query()
             ->where('calendar_id', $calendar->id)
             ->whereNotIn('id', array_keys($assignedLessonIds))
             ->pluck('id')
-            ->map(fn ($id): int => (int) $id)
-            ->values()
+            ->mapWithKeys(fn ($id): array => [(int) $id => (int) $id])
             ->all();
 
         $calendar->update([
@@ -10093,11 +10122,19 @@ PROMPT;
 
         $shifts = TimetableShift::query()->orderBy('start_time')->get();
 
-        // Los pasos 3, 4 y 5 necesitan las pevaluaciones/tabs; los pasos 1 y 2
-        // no, y así se evita la consulta (rendimiento).
-        $pevaluaciones = in_array($this->currentStep, [3, 4, 5], true)
-            ? $this->allPevaluaciones()
+        $periodsList = $this->calendarId
+            ? TimetablePeriod::query()
+                ->where('calendar_id', $this->calendarId)
+                ->with('shift:id,code,name')
+                ->orderBy('day_of_week')
+                ->orderBy('order_in_day')
+                ->get()
             : collect();
+
+        // Los pasos 3, 4 y 5 necesitan las pevaluaciones/tabs; los pasos 1 y 2
+        // no. El método compartido devuelve colecciones vacías en ese caso.
+        $step3 = $this->step3ViewData($periodsList);
+        $pevaluaciones = $step3['pevaluaciones'];
 
         $profesores = collect();
         if ($this->calendarId && $pevaluaciones->isNotEmpty()) {
@@ -10125,40 +10162,8 @@ PROMPT;
             $this->availability = [];
         }
 
-        $periodsList = $this->calendarId
-            ? TimetablePeriod::query()
-                ->where('calendar_id', $this->calendarId)
-                ->with('shift:id,code,name')
-                ->orderBy('day_of_week')
-                ->orderBy('order_in_day')
-                ->get()
-            : collect();
-
-        $calendarPeriodMinutes = $this->calendarId
-            ? (int) (TimetableCalendar::find($this->calendarId)?->period_minutes ?? 60)
-            : 60;
-
-        $tabData = $this->resolveTabData($pevaluaciones);
-
-        // Lecciones ya persistidas (guardadas) para el calendario.
-        $savedPevIds = $this->calendarId
-            ? TimetableLesson::query()->where('calendar_id', $this->calendarId)->pluck('pevaluacion_id')->flip()->all()
-            : [];
-
-        // Períodos disponibles por turno (factibilidad).
-        $periodsByShift = $periodsList->where('is_break', false)->groupBy('shift_id')->map->count()->all();
-
-        $step3Warnings = $this->buildLessonWarnings($periodsByShift);
-        $generationConflictGroups = $this->generationConflictGroups();
-
-        // Capacidad del turno por día: bloques de clase (sin recreos) distintos
-        // por día — la rejilla de una sección. Se usa en el resumen del Paso 3.
-        $shiftCapacityPerDay = $periodsList->where('is_break', false)
-            ->groupBy('shift_id')
-            ->map(fn ($group) => $group->groupBy('order_in_day')->count())
-            ->all();
-
-        $selectedCount = count(array_filter($this->selectedPevs));
+        // El resto de datos del Paso 3 (tabs, warnings, capacidad, etc.) vive
+        // en step3ViewData() y se comparte con el asistente light.
 
         // Paso 5: grilla del horario previsualizado de la sección activa.
         $sectionPreviewGrid = ($this->currentStep === 5 && $this->preview)
@@ -10296,19 +10301,19 @@ PROMPT;
             'lapsos' => $lapsos,
             'pestudios' => \App\Models\app\Academy\Pestudio::query()->where('status_active', 'true')->orderBy('name')->get(),
             'shifts' => $shifts,
-            'pevaluaciones' => $pevaluaciones,
-            'pevaluacionesGrouped' => $tabData['pevaluacionesGrouped'],
-            'tabPestudioOptions' => $tabData['tabPestudioOptions'],
-            'tabGradoOptions' => $tabData['tabGradoOptions'],
-            'tabSeccionOptions' => $tabData['tabSeccionOptions'],
-            'tabActivePevaluaciones' => $tabData['tabActivePevaluaciones'],
-            'lockedSectionIdSet' => $this->lockedSectionIdSet(),
+            'pevaluaciones' => $step3['pevaluaciones'],
+            'pevaluacionesGrouped' => $step3['pevaluacionesGrouped'],
+            'tabPestudioOptions' => $step3['tabPestudioOptions'],
+            'tabGradoOptions' => $step3['tabGradoOptions'],
+            'tabSeccionOptions' => $step3['tabSeccionOptions'],
+            'tabActivePevaluaciones' => $step3['tabActivePevaluaciones'],
+            'lockedSectionIdSet' => $step3['lockedSectionIdSet'],
             'activeSectionLocked' => $this->activeSectionTimetableLocked(),
-            'savedPevIds' => $savedPevIds,
-            'step3Warnings' => $step3Warnings,
-            'generationConflictGroups' => $generationConflictGroups,
-            'shiftCapacityPerDay' => $shiftCapacityPerDay,
-            'step3SelectedCount' => $selectedCount,
+            'savedPevIds' => $step3['savedPevIds'],
+            'step3Warnings' => $step3['step3Warnings'],
+            'generationConflictGroups' => $step3['generationConflictGroups'],
+            'shiftCapacityPerDay' => $step3['shiftCapacityPerDay'],
+            'step3SelectedCount' => $step3['step3SelectedCount'],
             'profesores' => $profesores,
             'profesoresFiltrados' => $profesoresFiltrados,
             'selectedProfesor' => $selectedProfesor,
@@ -10316,7 +10321,7 @@ PROMPT;
             'availabilityGrid' => $this->availabilityGrid(),
             'sectionPreviewGrid' => $sectionPreviewGrid,
             'sectionSlotParity' => $this->sectionSlotParity(),
-            'calendarPeriodMinutes' => $calendarPeriodMinutes,
+            'calendarPeriodMinutes' => $step3['calendarPeriodMinutes'],
             'roomPestudios' => $this->loadRoomPestudios(),
             'roomGrados' => $this->loadRoomGrados(),
             'roomSecciones' => $this->loadRoomSecciones(),
@@ -10333,6 +10338,84 @@ PROMPT;
             'teacherJsonTeachers' => $teacherJsonTeachers,
             'teachersPdfTeachers' => $this->teachersPdfOptions(),
         ])->layout($this->getLayout());
+    }
+
+    /**
+     * Datos compartidos del Paso 3 (Clases) y de la navegación
+     * P.Estudio → Grado → Sección que usan los pasos 3, 4 y 5.
+     *
+     * El asistente light lo consume en ambos tabs: la navegación común y el
+     * tab «Clases» necesitan las Pevaluaciones del lapso. El parámetro
+     * `$periodsList` permite reutilizar la consulta que ya hizo el render y
+     * evitar duplicarla.
+     *
+     * @return array{
+     *     pevaluaciones: \Illuminate\Support\Collection,
+     *     calendarPeriodMinutes: int,
+     *     pevaluacionesGrouped: array,
+     *     tabPestudioOptions: array,
+     *     tabGradoOptions: array,
+     *     tabSeccionOptions: array,
+     *     tabActivePevaluaciones: \Illuminate\Support\Collection,
+     *     lockedSectionIdSet: array<int, bool>,
+     *     savedPevIds: array,
+     *     step3Warnings: array<int, list<string>>,
+     *     generationConflictGroups: array,
+     *     shiftCapacityPerDay: array,
+     *     step3SelectedCount: int
+     * }
+     */
+    protected function step3ViewData($periodsList = null): array
+    {
+        $pevaluaciones = in_array($this->currentStep, [3, 4, 5], true)
+            ? $this->allPevaluaciones()
+            : collect();
+
+        $periodsList ??= $this->calendarId
+            ? TimetablePeriod::query()
+                ->where('calendar_id', $this->calendarId)
+                ->with('shift:id,code,name')
+                ->orderBy('day_of_week')
+                ->orderBy('order_in_day')
+                ->get()
+            : collect();
+
+        $calendarPeriodMinutes = $this->calendarId
+            ? (int) (TimetableCalendar::find($this->calendarId)?->period_minutes ?? 60)
+            : 60;
+
+        $tabData = $this->resolveTabData($pevaluaciones);
+
+        // Lecciones ya persistidas (guardadas) para el calendario.
+        $savedPevIds = $this->calendarId
+            ? TimetableLesson::query()->where('calendar_id', $this->calendarId)->pluck('pevaluacion_id')->flip()->all()
+            : [];
+
+        // Períodos disponibles por turno (factibilidad).
+        $periodsByShift = $periodsList->where('is_break', false)->groupBy('shift_id')->map->count()->all();
+
+        // Capacidad del turno por día: bloques de clase (sin recreos) distintos
+        // por día — la rejilla de una sección. Se usa en el resumen del Paso 3.
+        $shiftCapacityPerDay = $periodsList->where('is_break', false)
+            ->groupBy('shift_id')
+            ->map(fn ($group) => $group->groupBy('order_in_day')->count())
+            ->all();
+
+        return [
+            'pevaluaciones' => $pevaluaciones,
+            'calendarPeriodMinutes' => $calendarPeriodMinutes,
+            'pevaluacionesGrouped' => $tabData['pevaluacionesGrouped'],
+            'tabPestudioOptions' => $tabData['tabPestudioOptions'],
+            'tabGradoOptions' => $tabData['tabGradoOptions'],
+            'tabSeccionOptions' => $tabData['tabSeccionOptions'],
+            'tabActivePevaluaciones' => $tabData['tabActivePevaluaciones'],
+            'lockedSectionIdSet' => $this->lockedSectionIdSet(),
+            'savedPevIds' => $savedPevIds,
+            'step3Warnings' => $this->buildLessonWarnings($periodsByShift),
+            'generationConflictGroups' => $this->generationConflictGroups(),
+            'shiftCapacityPerDay' => $shiftCapacityPerDay,
+            'step3SelectedCount' => count(array_filter($this->selectedPevs)),
+        ];
     }
 
     /**

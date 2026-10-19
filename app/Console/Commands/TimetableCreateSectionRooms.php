@@ -14,6 +14,8 @@ class TimetableCreateSectionRooms extends Command
         {--capacity= : Capacidad por defecto cuando la sección no tiene cantidad de estudiantes}
         {--dry-run : Muestra las aulas que se crearían sin persistir}';
 
+    // php8.2 artisan timetable:create-section-rooms
+
     protected $description = 'Crea un aula activa por cada sección activa, por ejemplo 1ER-GRADO-A';
 
     public function handle(): int

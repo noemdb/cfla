@@ -30,6 +30,11 @@ final class LessonToSchedule
         public readonly bool $allowSharedTeacher = false,
         /** @var list<SlotCandidate> Slots válidos ya asignados que deben conservarse. */
         public readonly array $preassignedSlots = [],
+        /**
+         * ADR-TT-017: la lección se asigna en unidades de media franja.
+         * `blocksT`/`blocksP` pasan a contar sub-franjas, no períodos completos.
+         */
+        public readonly bool $halfBlock = false,
     ) {}
 
     public function blocksNeeded(): int
@@ -67,11 +72,15 @@ final class LessonToSchedule
      * lecciones `allow_shared_teacher` reciben un peso extra para colocarlas
      * antes y facilitar su agrupación por período.
      */
-    public function constraintDegree(bool $halfGroupPriority = false, bool $sharedTeacherPriority = false): int
-    {
+    public function constraintDegree(
+        bool $halfGroupPriority = false,
+        bool $sharedTeacherPriority = false,
+        bool $halfBlockPriority = false,
+    ): int {
         return ($this->priority * 10)
             + ($halfGroupPriority && $this->isHalfGroup ? 6 : 0)
             + ($sharedTeacherPriority && $this->allowSharedTeacher ? 4 : 0)
+            + ($halfBlockPriority && $this->halfBlock ? 3 : 0)
             + ($this->roomTypeRequired !== null ? 5 : 0)
             + min($this->blocksNeeded(), 9);
     }

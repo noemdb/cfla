@@ -36,6 +36,8 @@ final class TimetableSolverOrchestrator
         private int $halfGroupBonus = 20,
         private bool $sharedTeacherPriority = false,
         private int $sharedTeacherBonus = 15,
+        private bool $halfBlockPriority = false,
+        private int $halfBlockBonus = 15,
     ) {}
 
     public function solve(): SolverOutcome
@@ -114,6 +116,8 @@ final class TimetableSolverOrchestrator
             $this->halfGroupBonus,
             $this->sharedTeacherPriority,
             $this->sharedTeacherBonus,
+            $this->halfBlockPriority,
+            $this->halfBlockBonus,
         );
 
         $result = $solver->solve();
@@ -160,6 +164,12 @@ final class TimetableSolverOrchestrator
         // antepone un intento que las coloca primero y las agrupa por docente.
         if ($this->sharedTeacherPriority) {
             $configs[] = new SolverAttemptConfig('S1s', SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST, 0, $this->attemptSeconds);
+        }
+
+        // ADR-TT-017: intento que coloca primero las lecciones de media franja
+        // y las agrupa por sección para completar ambos lados del período.
+        if ($this->halfBlockPriority) {
+            $configs[] = new SolverAttemptConfig('S1b', SolverAttemptConfig::ORDER_HALF_BLOCK_FIRST, 0, $this->attemptSeconds);
         }
 
         $configs[] = new SolverAttemptConfig('S2', SolverAttemptConfig::ORDER_SCARCITY, 0, $this->attemptSeconds);

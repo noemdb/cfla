@@ -23,6 +23,9 @@ class ConflictValidator
      * @param  int  $lessonId  Lección que se quiere ubicar
      * @param  int  $periodId  Período destino
      * @param  int|null  $ignoreSlotId  Slot que se está moviendo (edición), se excluye del chequeo
+     * @param  int|null  $half  ADR-TT-017: null = bloque completo; 0/1 = media franja.
+     *                          Un bloque completo choca con cualquier mitad del período;
+     *                          una mitad solo choca con la misma mitad o con un bloque completo.
      * @return array{valid: bool, reasons: list<string>}
      */
     public function validate(
@@ -34,6 +37,7 @@ class ConflictValidator
         ?int $roomId = null,
         ?int $ignoreSlotId = null,
         ?int $grupoEstableId = null,
+        ?int $half = null,
     ): array {
         $reasons = [];
 
@@ -57,11 +61,18 @@ class ConflictValidator
         // Docente doble: otro slot (distinto al ignorado) ocupa al docente.
         // Se permite el docente compartido solo si AMBAS lessons lo autorizan
         // (o ambas son de medio grupo), y nunca una tercera ocupación.
-        $conflictQuery = function (int $calendarId, int $periodId, ?int $ignoreSlotId) {
+        $conflictQuery = function (int $calendarId, int $periodId, ?int $ignoreSlotId) use ($half) {
             return TimetableSlot::query()
                 ->where('calendar_id', $calendarId)
                 ->where('period_id', $periodId)
-                ->when($ignoreSlotId, fn ($q) => $q->where('id', '!=', $ignoreSlotId));
+                ->when($ignoreSlotId, fn ($q) => $q->where('id', '!=', $ignoreSlotId))
+                // ADR-TT-017: una mitad choca con la misma mitad o con un
+                // bloque completo (half = NULL). Un bloque completo choca con todo.
+                ->when($half !== null, function ($q) use ($half): void {
+                    $q->where(function ($qq) use ($half): void {
+                        $qq->whereNull('half')->orWhere('half', $half);
+                    });
+                });
         };
 
         $teacherConflicts = $conflictQuery($calendarId, $periodId, $ignoreSlotId)

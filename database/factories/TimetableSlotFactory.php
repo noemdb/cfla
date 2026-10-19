@@ -23,6 +23,9 @@ class TimetableSlotFactory extends Factory
             'room_id' => null,
             'is_manual_override' => false,
             'locked' => false,
+            'is_half_group' => false,
+            'allow_shared_teacher' => false,
+            'half' => null,
         ];
     }
 }

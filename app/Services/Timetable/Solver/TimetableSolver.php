@@ -54,6 +54,8 @@ final class TimetableSolver
         private int $halfGroupBonus = 0,
         private bool $sharedTeacherPriority = false,
         private int $sharedTeacherBonus = 0,
+        private bool $halfBlockPriority = false,
+        private int $halfBlockBonus = 0,
     ) {
         foreach ($this->lessons as $lesson) {
             $this->lessonById[$lesson->lessonId] = $lesson;
@@ -85,6 +87,7 @@ final class TimetableSolver
                     $lesson->isHalfGroup,
                     $lesson->lessonId,
                     $lesson->allowSharedTeacher,
+                    $slot->half,
                 )) {
                     $unassigned[] = $lesson->lessonId;
 
@@ -102,6 +105,7 @@ final class TimetableSolver
                     $lesson->isHalfGroup,
                     $lesson->lessonId,
                     $lesson->allowSharedTeacher,
+                    $slot->half,
                 );
             }
             $assignment[$lesson->lessonId] = $lesson->preassignedSlots;
@@ -203,9 +207,12 @@ final class TimetableSolver
             case SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST:
                 $this->sharedTeacherOrder($free);
                 break;
+            case SolverAttemptConfig::ORDER_HALF_BLOCK_FIRST:
+                $this->halfBlockOrder($free);
+                break;
             case SolverAttemptConfig::ORDER_CONSTRAINT:
             default:
-                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority));
+                usort($free, fn (LessonToSchedule $a, LessonToSchedule $b): int => $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority));
                 break;
         }
 
@@ -242,7 +249,7 @@ final class TimetableSolver
                 return $a->seccionId <=> $b->seccionId;
             }
 
-            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority);
+            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority);
         });
     }
 
@@ -264,7 +271,31 @@ final class TimetableSolver
                 return $a->profesorId <=> $b->profesorId;
             }
 
-            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority);
+            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority) <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority);
+        });
+    }
+
+    /**
+     * ADR-TT-017 — Orden que prioriza las lecciones de media franja
+     * (`halfBlock`), agrupadas por sección, y luego por grado de restricción.
+     * Así el backtracking explora juntas las mitades que pueden compartir
+     * período (una superior y otra inferior).
+     *
+     * @param  LessonToSchedule[]  $free
+     */
+    private function halfBlockOrder(array &$free): void
+    {
+        usort($free, function (LessonToSchedule $a, LessonToSchedule $b): int {
+            if ($a->halfBlock !== $b->halfBlock) {
+                return $b->halfBlock <=> $a->halfBlock;
+            }
+
+            if ($a->halfBlock && $a->seccionId !== $b->seccionId) {
+                return $a->seccionId <=> $b->seccionId;
+            }
+
+            return $b->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority)
+                <=> $a->constraintDegree($this->halfGroupPriority, $this->sharedTeacherPriority, $this->halfBlockPriority);
         });
     }
 
@@ -435,6 +466,7 @@ final class TimetableSolver
 
         return $score
             + $this->halfGroupGroupingScore($assignment)
+            + $this->halfBlockGroupingScore($assignment)
             + $this->sharedTeacherGroupingScore($assignment);
     }
 
@@ -508,6 +540,51 @@ final class TimetableSolver
     }
 
     /**
+     * ADR-TT-017 — Bonus por completar las dos mitades de un mismo período con
+     * asignaturas distintas (B1/B2). Solo cuenta parejas de la misma sección.
+     *
+     * @param  array<int, list<SlotCandidate>>  $assignment
+     */
+    private function halfBlockGroupingScore(array $assignment): int
+    {
+        if (! $this->halfBlockPriority || $this->halfBlockBonus <= 0) {
+            return 0;
+        }
+
+        $cells = [];
+        foreach ($assignment as $lessonId => $slots) {
+            $lesson = $this->lessonById[(int) $lessonId] ?? null;
+            if (! $lesson || ! $lesson->halfBlock) {
+                continue;
+            }
+
+            foreach ($slots as $slot) {
+                if ($slot->half === null) {
+                    continue;
+                }
+
+                $cells[$slot->periodId.':'.$lesson->seccionId][$slot->half] = (int) $lessonId;
+            }
+        }
+
+        $bonus = 0;
+        foreach ($cells as $halves) {
+            if (! isset($halves[0], $halves[1])) {
+                continue;
+            }
+
+            // B2: las dos mitades del mismo período deben ser asignaturas distintas.
+            if ($halves[0] === $halves[1]) {
+                continue;
+            }
+
+            $bonus += $this->halfBlockBonus;
+        }
+
+        return $bonus;
+    }
+
+    /**
      * @param  LessonToSchedule[]  $lessons
      * @param  array<int, list<SlotCandidate>>  $assignment
      * @param  array<int, int>  $unassigned
@@ -543,7 +620,7 @@ final class TimetableSolver
 
         foreach ($this->combinationsOfSize($domain, $lesson, $ctx) as $combo) {
             foreach ($combo as $slot) {
-                $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher);
+                $ctx->occupy($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher, $slot->half);
             }
             $existingSlots = $assignment[$lesson->lessonId] ?? [];
             $assignment[$lesson->lessonId] = array_merge($existingSlots, $combo);
@@ -563,7 +640,7 @@ final class TimetableSolver
             }
 
             foreach ($combo as $slot) {
-                $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId);
+                $ctx->release($slot->periodId, $lesson->profesorId, $lesson->seccionId, $slot->roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $slot->half);
             }
             if ($existingSlots === []) {
                 unset($assignment[$lesson->lessonId]);
@@ -638,19 +715,25 @@ final class TimetableSolver
             ?? [];
         $domain = ['t' => [], 'p' => []];
 
-        foreach ($base as $periodId) {
-            if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
-                $domain['t'][] = new SlotCandidate($periodId, null, false);
-            }
+        // ADR-TT-017: una lección de media franja genera un candidato por
+        // (período, mitad); una normal, un candidato por período (half = null).
+        $halves = $lesson->halfBlock ? [0, 1] : [null];
 
-            if ($lesson->roomTypeRequired !== null) {
-                foreach ($this->roomsByType[$lesson->roomTypeRequired] ?? [] as $roomId) {
-                    if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, $roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
-                        $domain['p'][] = new SlotCandidate($periodId, $roomId, true);
-                    }
+        foreach ($base as $periodId) {
+            foreach ($halves as $half) {
+                if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher, $half)) {
+                    $domain['t'][] = new SlotCandidate($periodId, null, false, $half);
                 }
-            } elseif ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher)) {
-                $domain['p'][] = new SlotCandidate($periodId, null, true);
+
+                if ($lesson->roomTypeRequired !== null) {
+                    foreach ($this->roomsByType[$lesson->roomTypeRequired] ?? [] as $roomId) {
+                        if ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, $roomId, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher, $half)) {
+                            $domain['p'][] = new SlotCandidate($periodId, $roomId, true, $half);
+                        }
+                    }
+                } elseif ($ctx->isFree($periodId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup, $lesson->lessonId, $lesson->allowSharedTeacher, $half)) {
+                    $domain['p'][] = new SlotCandidate($periodId, null, true, $half);
+                }
             }
         }
 
@@ -661,7 +744,8 @@ final class TimetableSolver
                     fn (SlotCandidate $a, SlotCandidate $b): int => $ctx->halfGroupLoad(
                         $b->periodId,
                         $lesson->seccionId,
-                    ) <=> $ctx->halfGroupLoad($a->periodId, $lesson->seccionId),
+                        $b->half,
+                    ) <=> $ctx->halfGroupLoad($a->periodId, $lesson->seccionId, $a->half),
                 );
             }
         }
@@ -727,11 +811,14 @@ final class TimetableSolver
 
         // ADR-TT-011: el pool crece adaptativamente con $n para que una lección
         // con muchos bloques (ej. 20 T) no quede huérfana por un tope fijo.
+        // ADR-TT-017: una lección de media franja tiene el doble de candidatos.
+        $basePool = $lesson?->halfBlock ? self::MAX_CANDIDATE_POOL * 2 : self::MAX_CANDIDATE_POOL;
+        $absPool = $lesson?->halfBlock ? self::MAX_CANDIDATE_POOL_ABS * 2 : self::MAX_CANDIDATE_POOL_ABS;
         $pool = $candidates;
-        if (count($pool) > self::MAX_CANDIDATE_POOL) {
+        if (count($pool) > $basePool) {
             $pool = array_slice($pool, 0, min(
-                max(self::MAX_CANDIDATE_POOL, $n),
-                self::MAX_CANDIDATE_POOL_ABS,
+                max($basePool, $n),
+                $absPool,
             ));
         }
 
@@ -748,10 +835,10 @@ final class TimetableSolver
             $nodes = 0;
             $this->combine($pool, count($pool) - $n, 0, [], $excluded, $nodes);
             foreach ($excluded as $exclude) {
-                $excludeIds = array_flip(array_map(fn (SlotCandidate $s) => $s->periodId, $exclude));
+                $excludeIds = array_flip(array_map(fn (SlotCandidate $s) => $s->periodId.':'.$s->half, $exclude));
                 $results[] = array_values(array_filter(
                     $pool,
-                    fn (SlotCandidate $s) => ! isset($excludeIds[$s->periodId]),
+                    fn (SlotCandidate $s) => ! isset($excludeIds[$s->periodId.':'.$s->half]),
                 ));
             }
         } else {
@@ -818,8 +905,15 @@ final class TimetableSolver
 
             if ($ctx !== null && $lesson !== null
                 && $this->halfGroupPriority && $lesson->isHalfGroup
-                && $ctx->halfGroupLoad($slot->periodId, $lesson->seccionId) > 0) {
+                && $ctx->halfGroupLoad($slot->periodId, $lesson->seccionId, $slot->half) > 0) {
                 $score += $this->halfGroupBonus;
+            }
+
+            // ADR-TT-017 (B1): preferir completar la otra mitad del período.
+            if ($ctx !== null && $lesson !== null
+                && $this->halfBlockPriority && $lesson->halfBlock && $slot->half !== null
+                && $ctx->sectionHalfLoad($slot->periodId, $lesson->seccionId, 1 - $slot->half) > 0) {
+                $score += $this->halfBlockBonus;
             }
         }
 

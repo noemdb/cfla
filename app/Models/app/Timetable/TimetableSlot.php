@@ -16,7 +16,7 @@ class TimetableSlot extends Model
     protected $fillable = [
         'calendar_id', 'lesson_id', 'period_id', 'profesor_id', 'seccion_id',
         'grupo_estable_id', 'room_id', 'is_manual_override', 'locked',
-        'is_half_group', 'allow_shared_teacher',
+        'is_half_group', 'allow_shared_teacher', 'half',
     ];
 
     protected $casts = [
@@ -24,10 +24,12 @@ class TimetableSlot extends Model
         'locked' => 'boolean',
         'is_half_group' => 'boolean',
         'allow_shared_teacher' => 'boolean',
+        'half' => 'integer',
     ];
 
     protected $hidden = [
         'slot_section_key',
+        'slot_half_key',
     ];
 
     public function calendar()

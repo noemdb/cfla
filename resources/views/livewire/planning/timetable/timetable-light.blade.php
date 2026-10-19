@@ -32,7 +32,11 @@
         <div>
             <h1 class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">Horario · modo rápido</h1>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Elige un calendario y organiza los bloques con arrastrar y soltar. Los cambios se guardan al instante.
+                @if ($lightStep === 2 && $lightTab === 'classes')
+                    Define las clases del calendario (asignaturas, bloques, turno y aula). Los cambios se aplican al guardar.
+                @else
+                    Elige un calendario y organiza los bloques con arrastrar y soltar. Los cambios se guardan al instante.
+                @endif
             </p>
         </div>
 
@@ -40,12 +44,12 @@
             <div class="flex flex-wrap items-center gap-2">
                 {{-- Indicador guardado / guardando --}}
                 <span class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider dark:border-white/10">
-                    <span wire:loading.remove wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock"
+                    <span wire:loading.remove wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock,saveLessons"
                         class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                         Guardado{{ $lastSavedAt ? ' · '.$lastSavedAt : '' }}
                     </span>
-                    <span wire:loading wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock"
+                    <span wire:loading wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock,saveLessons"
                         class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-300">
                         <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500"></span>
                         Guardando…
@@ -384,44 +388,11 @@
             @endforeach
         @endif
     @else
-        {{-- ── Paso 2: grilla (agregar / intercambiar + colisiones) ─────── --}}
         @php
-            $secGrid = $sectionPreviewGrid ?? [];
             $sectionLockedGrid = is_numeric($activeSeccionId) && (int) $activeSeccionId > 0 ? $activeSectionLocked : false;
-            $highlightProfesorId = $this->highlightProfesorId;
-            $dayLabels = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes'];
-
-            $lightCollisions = [];
-            $lightCollisionSources = [];
-            foreach ($secGrid as $orders) {
-                foreach ($orders as $order => $days) {
-                    foreach ($days as $day => $cellItems) {
-                        foreach ($cellItems as $item) {
-                            if (empty($item['collision'])) {
-                                continue;
-                            }
-
-                            $lightCollisions[] = [
-                                'lesson_id' => (int) $item['lesson_id'],
-                                'period_id' => (int) $item['period_id'],
-                                'asignatura' => (string) $item['asignatura'],
-                                'profesor' => (string) ($item['profesor'] ?? ''),
-                                'profesor_id' => (int) ($item['profesor_id'] ?? 0),
-                                'day' => (int) $day,
-                                'order' => (int) $order,
-                                'sources' => $item['collision_pestudios'] ?? [],
-                            ];
-
-                            foreach ($item['collision_pestudios'] as $source) {
-                                $lightCollisionSources[$source] = true;
-                            }
-                        }
-                    }
-                }
-            }
         @endphp
 
-        {{-- Selectores de P.Estudio · Grado · Sección --}}
+        {{-- Encabezado común: selección P.Estudio · Grado · Sección --}}
         <div class="mb-4 grid grid-cols-1 items-end gap-2 sm:grid-cols-3">
             @if (! empty($tabPestudioOptions))
                 <label class="flex flex-col gap-1">
@@ -483,6 +454,107 @@
                 </div>
             @endif
         </div>
+
+        {{-- Pestañas del modo rápido: grilla (Paso 5) ↔ clases (Paso 3). --}}
+        <nav class="mb-5 flex w-full overflow-x-auto" role="tablist" aria-label="Vistas del modo rápido">
+            <button type="button"
+                id="light-tab-grid"
+                role="tab"
+                aria-selected="{{ $lightTab !== 'classes' ? 'true' : 'false' }}"
+                aria-controls="light-panel-grid"
+                wire:click="setLightTab('grid')"
+                wire:loading.attr="disabled"
+                wire:target="setLightTab"
+                class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 {{ $lightTab !== 'classes' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                Grilla
+            </button>
+            <button type="button"
+                id="light-tab-classes"
+                role="tab"
+                aria-selected="{{ $lightTab === 'classes' ? 'true' : 'false' }}"
+                aria-controls="light-panel-classes"
+                wire:click="setLightTab('classes')"
+                wire:loading.attr="disabled"
+                wire:target="setLightTab"
+                class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 {{ $lightTab === 'classes' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
+                Clases
+            </button>
+        </nav>
+
+        @if ($lightTab === 'classes')
+            <div id="light-panel-classes" role="tabpanel" aria-labelledby="light-tab-classes" class="space-y-4">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">Gestión de clases</h2>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Configura bloques T/P, prioridad, turno, aula y agrupación de la selección actual.
+                            Al guardar, volverás a la grilla.
+                        </p>
+                    </div>
+                    <span class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+                        {{ $step3SelectedCount }} seleccionadas
+                    </span>
+                </div>
+
+                @include('livewire.coordinacion.timetable.partials.step3-lessons-summary')
+
+                @include('livewire.coordinacion.timetable.partials.step3-lessons-table')
+
+                <div class="flex items-center justify-end">
+                    <button wire:click="saveLessons"
+                        @disabled($step3SelectedCount === 0 && ! $lessonsDirty)
+                        wire:loading.attr="disabled"
+                        wire:loading.class="opacity-50 cursor-not-allowed"
+                        wire:target="saveLessons"
+                        class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">
+                        <span wire:loading.remove wire:target="saveLessons">Guardar clases</span>
+                        <span wire:loading wire:target="saveLessons" class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Guardando…
+                        </span>
+                    </button>
+                </div>
+            </div>
+        @else
+            <div id="light-panel-grid" role="tabpanel" aria-labelledby="light-tab-grid">
+        {{-- ── Paso 2: grilla (agregar / intercambiar + colisiones) ─────── --}}
+        @php
+            $secGrid = $sectionPreviewGrid ?? [];
+            $highlightProfesorId = $this->highlightProfesorId;
+            $dayLabels = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes'];
+
+            $lightCollisions = [];
+            $lightCollisionSources = [];
+            foreach ($secGrid as $orders) {
+                foreach ($orders as $order => $days) {
+                    foreach ($days as $day => $cellItems) {
+                        foreach ($cellItems as $item) {
+                            if (empty($item['collision'])) {
+                                continue;
+                            }
+
+                            $lightCollisions[] = [
+                                'lesson_id' => (int) $item['lesson_id'],
+                                'period_id' => (int) $item['period_id'],
+                                'asignatura' => (string) $item['asignatura'],
+                                'profesor' => (string) ($item['profesor'] ?? ''),
+                                'profesor_id' => (int) ($item['profesor_id'] ?? 0),
+                                'day' => (int) $day,
+                                'order' => (int) $order,
+                                'sources' => $item['collision_pestudios'] ?? [],
+                            ];
+
+                            foreach ($item['collision_pestudios'] as $source) {
+                                $lightCollisionSources[$source] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        @endphp
 
         {{-- PDF de la sección (usa los slots persistidos) --}}
         @if (is_numeric($activeSeccionId) && (int) $activeSeccionId > 0)
@@ -912,6 +984,8 @@
                         @endif
                     </div>
                 </div>
+            </div>
+        @endif
             </div>
         @endif
     @endif

@@ -239,9 +239,9 @@ class TimetableGlobalPdfTest extends TestCase
         $html = $response->getContent();
 
         // Orden por CI: 3 (Ávila), 20 (Zamora), 8801 (López).
-        $posCi3 = strpos($html, 'CI: 3</p>');
-        $posCi20 = strpos($html, 'CI: 20</p>');
-        $posCi8801 = strpos($html, 'CI: 8801</p>');
+        $posCi3 = strpos($html, 'CI 3</h3>');
+        $posCi20 = strpos($html, 'CI 20</h3>');
+        $posCi8801 = strpos($html, 'CI 8801</h3>');
         $this->assertNotFalse($posCi3);
         $this->assertNotFalse($posCi20);
         $this->assertNotFalse($posCi8801);

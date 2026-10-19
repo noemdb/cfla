@@ -8,21 +8,29 @@ use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableShift;
 use Illuminate\View\View;
+use Livewire\Attributes\Url;
 
 /**
- * Asistente «light» de horarios (ADR-TT-006): solo dos pasos.
+ * Asistente «light» de horarios (ADR-TT-006): dos pasos.
  *
  *  1. Elegir el calendario (combinación del Paso 1 del wizard completo).
- *  2. Grilla de la sección (Paso 5) centrada en dos acciones: agregar /
- *     intercambiar lecciones en los slots y alertar colisiones (no bloqueantes).
+ *  2. Espacio de trabajo con dos tabs sobre la sección activa:
+ *     «Grilla» (Paso 5: drag & drop y colisiones) y «Clases» (Paso 3:
+ *     asignaturas, bloques, turno, aula y agrupación).
  *
- * Reutiliza toda la lógica del wizard completo (drag & drop, persistencia,
- * detección de colisiones, agregar/retirar) pero con una vista reducida.
+ * La selección P.Estudio → Grado → Sección es común a ambos tabs y se
+ * construye desde todas las Pevaluaciones del lapso. Reutiliza toda la lógica
+ * del wizard completo (drag & drop, persistencia, detección de colisiones,
+ * agregar/retirar) pero con una vista reducida.
  */
 class TimetableLight extends BaseTimetableWizard
 {
-    /** 1 = seleccionar calendario; 2 = grilla. */
+    /** 1 = seleccionar calendario; 2 = espacio de trabajo (grilla | clases). */
     public int $lightStep = 1;
+
+    /** Tab activo dentro del paso 2: grid (grilla) | classes (Paso 3). */
+    #[Url(as: 'tab', history: true)]
+    public string $lightTab = 'grid';
 
     /** Docente resaltado en la grilla (null = sin resaltado). */
     public ?int $highlightProfesorId = null;
@@ -32,6 +40,11 @@ class TimetableLight extends BaseTimetableWizard
 
     public function mount(int|string|null $calendar = null): void
     {
+        // Normaliza ?tab=... también en la carga inicial (Livewire hidrata la
+        // propiedad desde la URL antes de mount, pero no siempre dispara el
+        // hook `updatedLightTab`).
+        $this->lightTab = $this->lightTab === 'classes' ? 'classes' : 'grid';
+
         if (is_numeric($calendar)) {
             $this->calendarId = (int) $calendar;
         } elseif (! $this->calendarId && is_numeric(request()->query('calendarId'))) {
@@ -43,6 +56,9 @@ class TimetableLight extends BaseTimetableWizard
         parent::mount();
 
         if ($this->calendarId) {
+            // El tab Clases administra todas las lessons guardadas, incluidas
+            // las que aún no tienen slots (recién creadas desde la tabla).
+            $this->loadLessons(true);
             $this->enterGrid();
         } else {
             $this->lightStep = 1;
@@ -93,6 +109,28 @@ class TimetableLight extends BaseTimetableWizard
         $this->highlightProfesorId = null;
         $this->showTeacherScheduleDialog = false;
         $this->teacherScheduleActiveCalendarId = null;
+    }
+
+    /** Cambia el tab visible del modo rápido (grid ↔ classes). */
+    public function setLightTab(string $tab): void
+    {
+        $this->lightTab = $tab === 'classes' ? 'classes' : 'grid';
+
+        // Al cambiar de tab se cierran overlays de la grilla para no dejar
+        // capas abiertas sobre la otra vista.
+        $this->showAddPreviewLessonModal = false;
+        $this->showTeacherScheduleDialog = false;
+        $this->highlightProfesorId = null;
+    }
+
+    /** Normaliza valores entrantes por URL (?tab=...) a un tab soportado. */
+    public function updatedLightTab(string $value): void
+    {
+        $normalized = $value === 'classes' ? 'classes' : 'grid';
+
+        if ($this->lightTab !== $normalized) {
+            $this->lightTab = $normalized;
+        }
     }
 
     /** Alterna el resaltado de todas las celdas de un docente. */
@@ -163,8 +201,69 @@ class TimetableLight extends BaseTimetableWizard
         $this->lastSavedAt = now()->format('H:i:s');
     }
 
+    /**
+     * Guardar desde el tab Clases vuelve a la grilla para ver el resultado.
+     * Reconstruye el payload desde los slots persistidos (incluido el caso
+     * de 0 slots) y refresca la copia en memoria usada por la grilla.
+     */
+    protected function afterLessonsSaved(): void
+    {
+        $this->lightTab = 'grid';
+        $this->lightStep = 2;
+        $this->currentStep = 5;
+
+        $this->syncPreviewPayloadFromSlots();
+
+        $calendar = TimetableCalendar::query()->find($this->calendarId);
+
+        if ($calendar) {
+            $this->preview = $calendar->preview_payload;
+            $this->generationState = 'preview_ready';
+        }
+
+        $this->lastSavedAt = now()->format('H:i:s');
+
+        $this->notification()->success(
+            'Clases guardadas',
+            'La grilla se actualizó con los cambios.',
+        );
+    }
+
+    /**
+     * Al abrir un calendario, prioriza la sección que ya tiene lessons.
+     * Si no hay lessons, el render cae en la primera Pevaluación disponible
+     * (selección común construida desde todas las Pevaluaciones del lapso).
+     */
+    private function initializeActiveSectionFromLessons(): void
+    {
+        if (is_numeric($this->activeSeccionId) && (int) $this->activeSeccionId > 0) {
+            return;
+        }
+
+        $lesson = TimetableLesson::query()
+            ->where('calendar_id', $this->calendarId)
+            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
+            ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
+            ->with('pevaluacion.seccion.grado')
+            ->orderBy('id')
+            ->first();
+
+        $seccion = $lesson?->pevaluacion?->seccion;
+        $grado = $seccion?->grado;
+
+        if (! $seccion || ! $grado) {
+            return;
+        }
+
+        $this->activePestudioId = $grado->pestudio_id;
+        $this->activeGradoId = $grado->id;
+        $this->activeSeccionId = $seccion->id;
+    }
+
     private function enterGrid(): void
     {
+        $this->initializeActiveSectionFromLessons();
+
         // Un calendario sin slots no tiene preview persistido: se arranca con
         // una asignación vacía para que la grilla permita agregar lecciones.
         if (! $this->preview) {
@@ -206,88 +305,10 @@ class TimetableLight extends BaseTimetableWizard
     }
 
     /**
-     * Navegación P.Estudio → Grado → Sección para los selectores del Paso 2,
-     * calculada directamente desde las lessons del calendario (sin el costo del
-     * render completo del wizard). Auto-selecciona el primer valor disponible.
-     *
-     * @return array{pestudios: list<array{id:int,name:string}>, grados: list<array{id:int,name:string,pestudio_id:int}>, secciones: list<array{id:int,name:string,grado_id:int}>}
-     */
-    private function lightNavigation(): array
-    {
-        $lessons = TimetableLesson::query()
-            ->where('calendar_id', $this->calendarId)
-            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
-            ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
-            ->with(['pevaluacion.seccion.grado.pestudio'])
-            ->get();
-
-        $pestudios = [];
-        $grados = [];
-        $secciones = [];
-
-        foreach ($lessons as $lesson) {
-            $seccion = $lesson->pevaluacion?->seccion;
-            $grado = $seccion?->grado;
-
-            if (! $seccion || ! $grado) {
-                continue;
-            }
-
-            $pestudio = $grado->pestudio;
-            $pestudioId = (int) ($pestudio?->id ?? 0);
-
-            if ($pestudioId > 0) {
-                $pestudios[$pestudioId] = ['id' => $pestudioId, 'name' => (string) $pestudio->name];
-            }
-
-            $grados[(int) $grado->id] = [
-                'id' => (int) $grado->id,
-                'name' => (string) $grado->name,
-                'pestudio_id' => $pestudioId,
-            ];
-
-            $secciones[(int) $seccion->id] = [
-                'id' => (int) $seccion->id,
-                'name' => (string) $seccion->name,
-                'grado_id' => (int) $grado->id,
-            ];
-        }
-
-        $pestudios = array_values($pestudios);
-
-        if ($pestudios !== [] && ! collect($pestudios)->contains('id', (int) $this->activePestudioId)) {
-            $this->activePestudioId = $pestudios[0]['id'];
-        }
-
-        $gradosFiltrados = array_values(array_filter(
-            $grados,
-            fn (array $grado): bool => (int) $grado['pestudio_id'] === (int) $this->activePestudioId,
-        ));
-
-        if ($gradosFiltrados !== [] && ! collect($gradosFiltrados)->contains('id', (int) $this->activeGradoId)) {
-            $this->activeGradoId = $gradosFiltrados[0]['id'];
-        }
-
-        $seccionesFiltradas = array_values(array_filter(
-            $secciones,
-            fn (array $seccion): bool => (int) $seccion['grado_id'] === (int) $this->activeGradoId,
-        ));
-
-        if ($seccionesFiltradas !== [] && ! collect($seccionesFiltradas)->contains('id', (int) $this->activeSeccionId)) {
-            $this->activeSeccionId = $seccionesFiltradas[0]['id'];
-        }
-
-        return [
-            'pestudios' => $pestudios,
-            'grados' => $gradosFiltrados,
-            'secciones' => $seccionesFiltradas,
-        ];
-    }
-
-    /**
-     * Render propio y ligero: solo lo que la vista del asistente consume
-     * (períodos, turnos, grilla de la sección y navegación), en vez del render
-     * completo del wizard (pevaluaciones, disponibilidad, aulas, paridad…).
+     * Render propio del asistente: períodos, turnos, selección común
+     * (P.Estudio → Grado → Sección) y, en el tab Grilla, la previsualización
+     * de la sección activa. La tabla del tab Clases reutiliza el parcial del
+     * Paso 3 con las Pevaluaciones de la sección activa.
      */
     public function render(): View
     {
@@ -308,16 +329,34 @@ class TimetableLight extends BaseTimetableWizard
         $tabPestudioOptions = [];
         $tabGradoOptions = [];
         $tabSeccionOptions = [];
+        $step3 = [];
 
         if ($this->calendarId) {
-            $nav = $this->lightNavigation();
-            $tabPestudioOptions = $nav['pestudios'];
-            $tabGradoOptions = $nav['grados'];
-            $tabSeccionOptions = $nav['secciones'];
+            // La selección común (P.Estudio → Grado → Sección) se construye
+            // desde TODAS las Pevaluaciones del lapso, no solo desde las
+            // lessons ya creadas. Así el tab Clases puede crear clases desde
+            // cero para cualquier sección.
+            $step3 = $this->step3ViewData($periodsList);
+            $tabPestudioOptions = $step3['tabPestudioOptions'];
+            $tabGradoOptions = $step3['tabGradoOptions'];
+            $tabSeccionOptions = $step3['tabSeccionOptions'];
 
-            $sectionPreviewGrid = $this->previewSectionGrid(
-                is_numeric($this->activeSeccionId) ? (int) $this->activeSeccionId : 0,
-            );
+            // La tabla de clases siempre trabaja con la sección activa.
+            $step3['rows'] = $step3['tabActivePevaluaciones'];
+            $step3['step3SelectedCount'] = $step3['tabActivePevaluaciones']
+                ->filter(function ($pev): bool {
+                    $pevId = (int) $pev->id;
+
+                    return (array_key_exists($pevId, $this->selectedPevs) && (bool) $this->selectedPevs[$pevId])
+                        || in_array($pevId, array_map('intval', array_values($this->selectedPevs)), true);
+                })
+                ->count();
+
+            if ($this->lightTab !== 'classes') {
+                $sectionPreviewGrid = $this->previewSectionGrid(
+                    is_numeric($this->activeSeccionId) ? (int) $this->activeSeccionId : 0,
+                );
+            }
         }
 
         $teacherScheduleOptions = [];
@@ -349,7 +388,7 @@ class TimetableLight extends BaseTimetableWizard
             $teacherScheduleHasAssignments = (bool) ($activeBlock['has_assignments'] ?? false);
         }
 
-        return view('livewire.planning.timetable.timetable-light', [
+        return view('livewire.planning.timetable.timetable-light', array_merge([
             'lightCalendars' => $lightCalendars,
             'shifts' => $shifts,
             'periodsList' => $periodsList,
@@ -363,6 +402,6 @@ class TimetableLight extends BaseTimetableWizard
             'teacherScheduleCalendars' => $teacherScheduleCalendars,
             'teacherScheduleGrid' => $teacherScheduleGrid,
             'teacherScheduleHasAssignments' => $teacherScheduleHasAssignments,
-        ])->layout($this->getLayout());
+        ], $step3))->layout($this->getLayout());
     }
 }

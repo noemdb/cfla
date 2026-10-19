@@ -22,7 +22,8 @@ use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
- * Asistente «light»: solo dos pasos (elegir calendario + grilla drag&drop).
+ * Asistente «light»: dos pasos (elegir calendario + espacio de trabajo) con dos
+ * tabs sobre la sección activa: «Grilla» (drag&drop) y «Clases» (Paso 3).
  */
 class TimetableLightTest extends TestCase
 {
@@ -95,11 +96,11 @@ class TimetableLightTest extends TestCase
         $this->assertSame(2, $component->get('lightStep'));
         $this->assertSame($calendar->id, (int) $component->get('calendarId'));
         $this->assertSame((int) $seccion->id, (int) $component->get('activeSeccionId'));
-        $component->assertSee('Cambiar calendario');
+        $component->assertSee('Cambiar P.Estudio / calendario');
 
         // Dropdown de formatos/reportes.
         $component->assertSee('Formatos');
-        $component->assertSee('PDF todos P.Estudios');
+        $component->assertSee('Exportar P.Estudios');
 
         // La grilla debe ser arrastrable (drag & drop).
         $component->assertSee('x-on:drop.prevent', false);
@@ -324,5 +325,171 @@ class TimetableLightTest extends TestCase
 
         $this->assertSame(1, $component->get('lightStep'));
         $this->assertNull($component->get('calendarId'));
+    }
+
+    public function test_light_tab_defaults_to_grid_and_normalizes_invalid_values(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $this->assertSame('grid', $component->get('lightTab'));
+
+        // setLightTab normaliza cualquier valor no soportado a grid.
+        $component->call('setLightTab', 'bogus');
+        $this->assertSame('grid', $component->get('lightTab'));
+
+        // updatedLightTab normaliza entradas tipo ?tab=...
+        $component->set('lightTab', 'desconocido');
+        $this->assertSame('grid', $component->get('lightTab'));
+
+        $component->call('setLightTab', 'classes');
+        $this->assertSame('classes', $component->get('lightTab'));
+
+        $component->call('setLightTab', 'grid');
+        $this->assertSame('grid', $component->get('lightTab'));
+    }
+
+    public function test_light_tab_url_param_selects_classes_and_normalizes_invalid(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $classes = Livewire::withQueryParams(['tab' => 'classes'])
+            ->actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $this->assertSame('classes', $classes->get('lightTab'));
+
+        $invalid = Livewire::withQueryParams(['tab' => 'nope'])
+            ->actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $this->assertSame('grid', $invalid->get('lightTab'));
+    }
+
+    public function test_light_classes_tab_renders_management_table_without_grid(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->call('setLightTab', 'classes');
+
+        $this->assertSame('classes', $component->get('lightTab'));
+        $component->assertSee('Gestión de clases');
+        $component->assertSee('Guardar clases');
+        $component->assertSee('Asignatura · Sección');
+        $component->assertSee('Capacidad por turno');
+
+        // El tab Clases no renderiza la grilla drag & drop.
+        $component->assertDontSee('x-on:drop.prevent', false);
+    }
+
+    public function test_light_selector_options_come_from_all_pevaluaciones_of_lapso(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+
+        // Sección del mismo P.Estudio/Grado con Pevaluación, pero sin lesson.
+        $seccionZ = Seccion::factory()->create([
+            'grado_id' => $seccion->grado_id,
+            'name' => 'Z',
+            'status_active' => 'true',
+        ]);
+        $this->makeExtraPevaluacion($seccionZ, (int) $calendar->lapso_id, $profesorId, 'Música sin clases');
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        // La sección sin lessons aparece igual en el selector común: las
+        // opciones vienen de todas las Pevaluaciones del P.Estudio del lapso.
+        $component->assertSee('Sección Z');
+    }
+
+    public function test_light_classes_tab_lists_pevaluaciones_without_lessons(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+        $pevWithoutLesson = $this->makeExtraPevaluacion(
+            $seccion,
+            (int) $calendar->lapso_id,
+            $profesorId,
+            'Física sin lesson',
+        );
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $component->call('setLightTab', 'classes');
+
+        // La pevaluación sin lesson aparece igual en la tabla de la sección activa.
+        $component->assertSee('Física sin lesson');
+        $component->assertSee('lesson-row-'.$pevWithoutLesson->id, false);
+        $this->assertDatabaseMissing('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pevWithoutLesson->id,
+        ]);
+    }
+
+    public function test_light_save_lessons_from_classes_returns_to_grid_and_persists(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+        $pevWithoutLesson = $this->makeExtraPevaluacion(
+            $seccion,
+            (int) $calendar->lapso_id,
+            $profesorId,
+            'Química por guardar',
+        );
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->call('setLightTab', 'classes');
+        $component->call('addLesson', $pevWithoutLesson->id);
+
+        // En memoria: todavía no toca la base de datos.
+        $this->assertDatabaseMissing('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pevWithoutLesson->id,
+        ]);
+
+        $component->call('saveLessons');
+
+        // Guardar desde Clases vuelve a la grilla...
+        $this->assertSame('grid', $component->get('lightTab'));
+        $this->assertSame(2, $component->get('lightStep'));
+
+        // ...y persiste la lesson nueva.
+        $this->assertDatabaseHas('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pevWithoutLesson->id,
+        ]);
+
+        $calendar->refresh();
+        $this->assertSame('light_slots', $calendar->preview_payload['assignment_source'] ?? null);
+    }
+
+    /**
+     * Crea una Pevaluación adicional reutilizando la sección/lapso dados.
+     */
+    private function makeExtraPevaluacion(Seccion $seccion, int $lapsoId, int $profesorId, string $asignaturaName): Pevaluacion
+    {
+        $asignatura = Asignatura::factory()->create([
+            'name' => $asignaturaName,
+            'hour_t_week' => 1,
+            'hour_p_week' => 0,
+        ]);
+        $pensum = Pensum::factory()->create([
+            'pestudio_id' => $seccion->grado->pestudio_id,
+            'grado_id' => $seccion->grado_id,
+            'asignatura_id' => $asignatura->id,
+        ]);
+
+        return Pevaluacion::factory()->create([
+            'profesor_id' => $profesorId,
+            'seccion_id' => $seccion->id,
+            'pensum_id' => $pensum->id,
+            'lapso_id' => $lapsoId,
+        ]);
     }
 }

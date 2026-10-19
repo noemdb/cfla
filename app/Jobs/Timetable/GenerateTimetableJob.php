@@ -124,6 +124,7 @@ class GenerateTimetableJob implements ShouldQueue
                             periodId: (int) ($slot['period_id'] ?? 0),
                             roomId: ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                             isPractical: (bool) ($slot['is_practical'] ?? false),
+                            half: isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
                         ))
                             ->filter(fn (SlotCandidate $slot) => $slot->periodId > 0)
                             ->unique(fn (SlotCandidate $slot): int => $slot->periodId)
@@ -195,6 +196,7 @@ class GenerateTimetableJob implements ShouldQueue
                         periodId: (int) data_get($slot, 'period_id'),
                         roomId: data_get($slot, 'room_id') ? (int) data_get($slot, 'room_id') : null,
                         isPractical: (bool) data_get($slot, 'is_practical', false),
+                        half: data_get($slot, 'half') !== null ? (int) data_get($slot, 'half') : null,
                     ))
                     ->filter(fn (SlotCandidate $slot): bool => $slot->periodId > 0)
                     ->unique(fn (SlotCandidate $slot): int => $slot->periodId)
@@ -248,6 +250,7 @@ class GenerateTimetableJob implements ShouldQueue
                 lockedPeriodIds: $lockedPeriods,
                 grupoEstableId: $pev->grupo_estable_id ? (int) $pev->grupo_estable_id : null,
                 preassignedSlots: $preassignedSlots,
+                halfBlock: (bool) $lesson->half_block,
             );
         }
 
@@ -284,6 +287,8 @@ class GenerateTimetableJob implements ShouldQueue
             halfGroupBonus: max(0, (int) config('timetable.solver.half_group_bonus', 20)),
             sharedTeacherPriority: (bool) config('timetable.solver.shared_teacher_priority', true),
             sharedTeacherBonus: max(0, (int) config('timetable.solver.shared_teacher_bonus', 15)),
+            halfBlockPriority: (bool) config('timetable.solver.half_block_priority', true),
+            halfBlockBonus: max(0, (int) config('timetable.solver.half_block_bonus', 15)),
         ))->solve();
 
         $halfGroupMetrics = $outcome->halfGroupMetrics($dto);
@@ -358,6 +363,7 @@ class GenerateTimetableJob implements ShouldQueue
                     periodId: (int) $slot->period_id,
                     roomId: $slot->room_id ? (int) $slot->room_id : null,
                     isPractical: false,
+                    half: $slot->half !== null ? (int) $slot->half : null,
                 ))
                 ->all();
 
@@ -683,9 +689,9 @@ class GenerateTimetableJob implements ShouldQueue
                 'elapsed_seconds' => round($result->elapsedSeconds, 2),
                 'assignment' => $assignment,
                 'unassigned' => $unassigned,
-            'unassigned_reasons' => $unassignedReasons,
-            'half_group_metrics' => $this->halfGroupMetrics,
-            'assignment_diagnostics' => $this->assignmentDiagnostics($calendar, $assignment),
+                'unassigned_reasons' => $unassignedReasons,
+                'half_group_metrics' => $this->halfGroupMetrics,
+                'assignment_diagnostics' => $this->assignmentDiagnostics($calendar, $assignment),
             ],
             'status' => 'draft',
         ]);

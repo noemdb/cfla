@@ -38,6 +38,13 @@ final class SolverAttemptConfig
     public const ORDER_SHARED_TEACHER_FIRST = 'shared_teacher_first';
 
     /**
+     * ADR-TT-017: prioriza las lecciones de media franja (agrupadas por
+     * sección) para que el backtracking explore juntas las mitades que pueden
+     * completar un mismo período.
+     */
+    public const ORDER_HALF_BLOCK_FIRST = 'half_block_first';
+
+    /**
      * @param  list<int>  $priorityLessonIds  lecciones a colocar primero (reparación)
      */
     public function __construct(

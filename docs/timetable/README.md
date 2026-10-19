@@ -39,6 +39,8 @@ Lecturas: docente / estudiante / leadership / dirección / enlace público / PDF
 |---|---|---|
 | Coordinación | `/app/coordinacion/timetable` | `Coordinacion\Timetable\TimetableWizard` |
 | Planning | `/app/planning/timetable` | `Planning\Timetable\TimetableWizard` (subclase, cambia layout) |
+| Planning (modo rápido) | `/app/planning/timetable/light/{calendar?}` | `Planning\Timetable\TimetableLight` (tabs Grilla/Clases) |
+| Coordinación (modo rápido) | `/app/coordinacion/timetable/light/{calendar?}` | `Coordinacion\Timetable\TimetableLight` (subclase) |
 | Editor | `/app/{módulo}/timetable/editor/{calendar?}` | `TimetableEditor` (gemelo Planning) |
 | Suplencias | `/app/{módulo}/timetable/substitutes/{calendar?}` | `TimetableSubstitutes` (gemelo Planning) |
 | Profesor | `/app/profesors/timetable` | `MyTimetable` (solo sus slots) |
@@ -196,6 +198,32 @@ parciales, duplicados y slots inválidos. `timetable:audit-capacity` informa, po
 sección y docente, la carga semanal vs. los períodos asignables y el **overflow**
 (bloques que ningún solver puede ubicar): úsalo para decidir si ajustar horas,
 períodos o turnos. Solo lectura.
+
+### Modo rápido (`/app/{módulo}/timetable/light`)
+
+Espacio de trabajo reducido sobre el mismo `TimetableWizard` (subclase
+`TimetableLight`): **dos pasos** en lugar de cinco.
+
+1. **Elegir calendario**: lista los calendarios activos/archivados del lapso.
+2. **Espacio de trabajo** con dos tabs sobre la **sección activa**:
+   - **Grilla**: la vista del Paso 5 (drag & drop, colisiones, agregar lección
+     desde celdas vacías, bloqueo de sección). Los cambios se aplican al instante.
+   - **Clases**: la gestión del Paso 3 (tabla de asignaturas, bloques T/P,
+     prioridad, turno, aula requerida, medio grupo, docente compartido) más el
+     resumen informativo de capacidad por turno/bloques y el botón
+     **Guardar clases**. Al guardar, vuelve a la Grilla con el preview
+     reconstruido desde los slots persistidos.
+
+El selector **P.Estudio → Grado → Sección** es común a ambos tabs y se construye
+desde **todas las Pevaluaciones del P.Estudio del lapso** (no solo desde las
+secciones que ya tienen lessons), así que se pueden crear clases desde cero para
+cualquier grado/sección. El tab activo se refleja en la URL con `?tab=classes`;
+valores no válidos caen en `grid`.
+
+El modo rápido reutiliza los parciales compartidos del Paso 3
+(`resources/views/livewire/coordinacion/timetable/partials/step3-lessons*.blade.php`),
+de modo que la tabla y el resumen informativo son idénticos en el wizard completo
+y en el modo rápido.
 
 ---
 
@@ -411,6 +439,9 @@ La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
 |---|---|
 | Wizard (5 pasos) | `app/Livewire/Coordinacion/Timetable/TimetableWizard.php` |
 | Wizard Planning | `app/Livewire/Planning/Timetable/TimetableWizard.php` |
+| Modo rápido (light) | `app/Livewire/{Planning,Coordinacion}/Timetable/TimetableLight.php` |
+| Vista del modo rápido | `resources/views/livewire/planning/timetable/timetable-light.blade.php` |
+| Parciales del Paso 3 (compartidos) | `resources/views/livewire/coordinacion/timetable/partials/step3-lessons{,-summary,-table}.blade.php` |
 | Editor manual | `app/Livewire/Coordinacion/Timetable/TimetableEditor.php` (+ gemelo Planning) |
 | Suplencias | `app/Livewire/Coordinacion/Timetable/TimetableSubstitutes.php` (+ gemelo Planning) |
 | Bandeja suplente | `app/Livewire/Profesor/Timetable/SubstituteInbox.php` |
@@ -447,6 +478,9 @@ La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
 php8.2 artisan config:clear
 php8.2 artisan test --filter=Timetable
 
+# Modo rápido (tabs Grilla/Clases y guardado desde Clases)
+php8.2 artisan test tests/Feature/Timetable/TimetableLightTest.php
+
 # Tests unitarios del solver (sin Eloquent)
 php8.2 artisan test --testsuite=unit --filter=TimetableSolver
 
@@ -468,8 +502,8 @@ Cobertura: solver (factible/infactible/locked/timeout/sub-grupos/pool adaptativo
 ConflictValidator por regla, wizard end-to-end, editor con bloqueo optimista,
 multi-calendario (democión, índice DB, dry-run), publicación (enlace firmado,
 vistas por rol), notificaciones (diff vacío no notifica), suplencias,
-disponibilidad por turno·día·bloque (prefill desde lecciones) y duplicación
-de borradores.
+disponibilidad por turno·día·bloque (prefill desde lecciones), modo rápido
+(tabs Grilla/Clases y guardado desde Clases) y duplicación de borradores.
 
 ## 13. FAQ operativa
 

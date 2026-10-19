@@ -22,6 +22,8 @@ class TimetableLessonFactory extends Factory
             'weekly_blocks_p' => 0,
             'room_type_required' => null,
             'is_half_group' => false,
+            'allow_shared_teacher' => false,
+            'half_block' => false,
             'priority' => 0,
             'locked' => false,
         ];

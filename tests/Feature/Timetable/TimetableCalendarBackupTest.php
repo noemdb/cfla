@@ -715,8 +715,9 @@ class TimetableCalendarBackupTest extends TestCase
             ->firstOrFail();
 
         // Las claves de unicidad las calcula MySQL: nunca se escriben desde PHP.
-        $this->assertSame('S'.$f['pevB']->seccion_id.':H'.$lessonB->id, $slot->slot_section_key);
-        $this->assertSame('T'.$f['pevB']->profesor_id.':S'.$lessonB->id, $slot->slot_teacher_key);
+        // ADR-TT-017: incluyen el sufijo de mitad (':F' = bloque completo).
+        $this->assertSame('S'.$f['pevB']->seccion_id.':H'.$lessonB->id.':F', $slot->slot_section_key);
+        $this->assertSame('T'.$f['pevB']->profesor_id.':S'.$lessonB->id.':F', $slot->slot_teacher_key);
         $this->assertTrue((bool) $slot->is_half_group);
     }
 
