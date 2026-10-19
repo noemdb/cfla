@@ -162,6 +162,7 @@ final class TimetableSolverPlaybook
                 ['id' => 'S-2', 'weight' => -50, 'term' => 'por cada par de días consecutivos usados por la lección', 'intent' => 'evitar bloques en días seguidos'],
                 ['id' => 'S-3', 'weight' => -10, 'term' => 'por cada bloque teórico con order_in_day > 3', 'intent' => 'evitar teoría al final del día'],
                 ['id' => 'S-4', 'weight' => '+half_group_bonus', 'term' => 'por cada bloque de una lección medio-grupo ubicado en una celda que ya tiene al menos otro medio-grupo de la misma sección', 'intent' => 'concentrar las mitades de una sección (HG-02)', 'applies_when' => 'half_group_priority && lección is_half_group'],
+                ['id' => 'S-6', 'weight' => '+half_block_bonus', 'term' => 'por cada bloque de una lección de media franja cuya otra mitad del período ya está ocupada por otra asignatura de la misma sección', 'intent' => 'completar las dos mitades del período (ADR-TT-017)', 'applies_when' => 'half_block_priority && lección half_block'],
             ],
             'assignment_term' => [
                 'id' => 'S-5',
@@ -195,6 +196,7 @@ final class TimetableSolverPlaybook
             SolverAttemptConfig::ORDER_RANDOM => 'Barajado determinista por semilla (restarts).',
             SolverAttemptConfig::ORDER_REPAIR => 'Prioriza las lecciones que quedaron sin asignar.',
             SolverAttemptConfig::ORDER_HALF_GROUP_FIRST => "Medio-grupos primero (agrupados por sección asc), luego por grado de restricción. Intento 'S1h', solo si half_group_priority (HG-03).",
+            SolverAttemptConfig::ORDER_HALF_BLOCK_FIRST => "Lecciones de media franja primero (agrupadas por sección asc), luego por grado de restricción. Intento 'S1b', solo si half_block_priority (ADR-TT-017).",
             SolverAttemptConfig::ORDER_SHARED_TEACHER_FIRST => "Lecciones de docente compartido primero (agrupadas por docente), luego por grado de restricción. Intento 'S1s', solo si shared_teacher_priority (ST-01).",
         ];
 
@@ -289,6 +291,8 @@ final class TimetableSolverPlaybook
         return [
             'half_group_priority' => (bool) config('timetable.solver.half_group_priority', true),
             'half_group_bonus' => (int) config('timetable.solver.half_group_bonus', 20),
+            'half_block_priority' => (bool) config('timetable.solver.half_block_priority', true),
+            'half_block_bonus' => (int) config('timetable.solver.half_block_bonus', 15),
             'note' => "Valores EFECTIVOS al momento del export, leídos de config('timetable.solver.*'). No son defaults hardcodeados: si el entorno cambia la variable, el playbook lo refleja.",
         ];
     }
