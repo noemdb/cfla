@@ -238,11 +238,11 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 
 ## 12. Orden de implementación
 
-1. **Fase 0** — este ADR + invariantes.
-2. **Fase 1** — migración (Fase 5) + modelos + factory. *(cambio sensible en BD)*
+1. **Fase 0** — este ADR + invariantes. ✅
+2. **Fase 1** — migración (Fase 5) + modelos + factory. *(cambio sensible en BD)* ✅
 3. **Fase 2** — núcleo de ocupación: `SlotCandidate`, `LessonToSchedule`,
-   `SchedulingContext`, `ConflictValidator`, `buildLesson`.
-4. **Fase 3** — solver: `buildDomain`, `comboScore`, orquestador, config + tests.
+   `SchedulingContext`, `ConflictValidator`, `buildLesson`. ✅
+4. **Fase 3** — solver: `buildDomain`, `comboScore`, orquestador, config + tests. ✅
 5. **Fase 4** — persistencia: `persistPreviewLessonSlotsToDatabase`,
    `TimetableLessonPersistenceService`, `syncPreviewPayloadFromSlots`,
    `GenerateTimetableJob::persist`, snapshot.
@@ -259,3 +259,37 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 - Existen pruebas automatizadas de esquema, motor, solver y regresión.
 - La documentación funcional y el contrato v2 quedan actualizados con referencia a
   este ADR.
+
+## 14. Estado de implementación
+
+Avance al 2026-10-19 (Fases 0–3 completas; suite de Timetable en verde):
+
+- **Migración** `2026_10_19_000001_add_half_block_to_timetable_lessons_and_slots`
+  aplicada (`migrate --force`): `timetable_lessons.half_block` (bool, default 0),
+  `timetable_slots.half` (tinyint unsigned, nullable), `slot_half_key CHAR(2)`,
+  claves generadas y `uq_slot_room` ampliada. Datos existentes intactos
+  (789 lecciones / 1618 slots verificados).
+- **Modelos/factorías**: `TimetableLesson` (`half_block`), `TimetableSlot`
+  (`half`, oculta `slot_half_key`), factorías actualizadas.
+- **Motor**: `SchedulingContext` evalúa la ocupación por sub-franja
+  (`half = null` ocupa/libera ambas mitades); se añadió `sectionHalfLoad(...)`
+  para el pareo blando. `SlotCandidate` incorpora `?int $half`
+  (`null` = bloque completo); `LessonToSchedule` incorpora `bool $halfBlock`.
+- **Validación manual**: `ConflictValidator::validate(...)` acepta `?int $half`
+  (filtro `half IS NULL OR half = ?` cuando el candidato es media franja).
+- **Solver**: `buildDomain` genera un candidato por (período, mitad) para
+  lecciones `halfBlock`; `comboScore`/`qualityScore` aplican el bonus de pareo
+  (B1/B2) vía `halfBlockGroupingScore`; nuevo intento `S1b`
+  (`ORDER_HALF_BLOCK_FIRST`) y claves `half_block_priority` / `half_block_bonus`.
+  El playbook (`TimetableSolverPlaybook`) documenta S-6, la estrategia y los
+  levers para mantener la suite anti-deriva.
+- **Demanda**: `TimetableWizard::blocksForMinutes()` — una lección `half_block`
+  cuenta sub-franjas (`hour*60 / (periodMinutes/2)`), duplicando las unidades.
+
+Pendiente (Fases 4–7): persistencia del `half` en
+`persistPreviewLessonSlotsToDatabase` / `TimetableLessonPersistenceService` /
+`syncPreviewPayloadFromSlots` / snapshot; UI (celdas partidas, drop por mitad,
+modal); editor + capacidad + publicación; solo-lectura, PDFs y docs funcionales.
+El detalle accionable de este pendiente vive en
+`PLAN-TIMETABLE-HALF-BLOCK-001-PENDIENTE.md`.
+
