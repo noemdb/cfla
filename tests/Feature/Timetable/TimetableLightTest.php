@@ -385,6 +385,50 @@ class TimetableLightTest extends TestCase
         $component->assertDontSee('x-on:drop.prevent', false);
     }
 
+    public function test_light_classes_tab_shows_persisted_grid_summary_instead_of_dry_run(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->call('setLightTab', 'classes');
+
+        // El modo rápido edita `timetable_slots` directamente: no hay dry-run;
+        // el resumen muestra la grilla guardada de la sección activa y debe
+        // reflejar los números reales (id de lección ↔ payload persistido).
+        $component->assertDontSee('Dry-run');
+        $component->assertSee('Grilla: 1 celdas ocupadas');
+        $component->assertSee('1/1 clases ubicadas');
+        $component->assertSee('todas las clases ubicadas');
+        $component->assertSee('Grilla guardada');
+    }
+
+    public function test_light_classes_tab_prompts_when_section_has_no_lessons(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+
+        // Sección con Pevaluación pero sin lección configurada.
+        $seccionZ = Seccion::factory()->create([
+            'grado_id' => $seccion->grado_id,
+            'name' => 'Z',
+            'status_active' => 'true',
+        ]);
+        $this->makeExtraPevaluacion($seccionZ, (int) $calendar->lapso_id, $profesorId, 'Música sin clases');
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->set('activeSeccionId', $seccionZ->id);
+        $component->call('setLightTab', 'classes');
+
+        // Sin clases guardadas: ni Dry-run ni métricas vacías; una guía útil.
+        $component->assertDontSee('Dry-run');
+        $component->assertDontSee('clases ubicadas');
+        $component->assertSee('aún no tiene clases guardadas');
+    }
+
     public function test_light_selector_options_come_from_all_pevaluaciones_of_lapso(): void
     {
         [$user, $calendar, $seccion, $lesson] = $this->makeContext();

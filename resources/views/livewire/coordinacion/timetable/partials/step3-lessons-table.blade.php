@@ -36,6 +36,12 @@
                                 <th class="px-3 py-2">Turno</th>
                                 <th class="px-3 py-2">Aula req.</th>
                                 <th class="px-3 py-2 text-nowrap">Medio grupo</th>
+                                <th class="px-3 py-2 text-nowrap">
+                                    <span class="inline-flex items-center gap-1" title="Mitad de bloque: cada unidad ocupa media franja (dos por período)">
+                                        Mitad
+                                        <span class="rounded bg-sky-500/15 px-1 text-[9px] font-extrabold text-sky-700 dark:text-sky-300">½</span>
+                                    </span>
+                                </th>
                                 <th class="px-3 py-2 text-nowrap">Doc. compartido</th>
                                 <th class="px-3 py-2">Estado</th>
                                 <th class="px-3 py-2 text-right">Acciones</th>
@@ -117,6 +123,19 @@
                                     </td>
                                     <td class="px-3 py-2 text-center">
                                         <input type="checkbox"
+                                            wire:key="lesson-half-block-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}-{{ !empty($lessons[$pev->id]['half_block']) ? 'on' : 'off' }}"
+                                            @checked($selected && !empty($lessons[$pev->id]['half_block']))
+                                            @if ($selected && ! $rowLocked)
+                                                wire:click="setLessonHalfBlock({{ (int) $pev->id }})"
+                                                wire:loading.attr="disabled"
+                                                wire:target="setLessonHalfBlock"
+                                            @endif
+                                            @disabled(! $selected || $rowLocked)
+                                            title="Mitad de bloque: la asignatura ocupa media franja; recíproco con otra mitad en el mismo período"
+                                            class="rounded border-gray-300 text-sky-600 focus:ring-sky-500 disabled:opacity-60 disabled:cursor-not-allowed">
+                                    </td>
+                                    <td class="px-3 py-2 text-center">
+                                        <input type="checkbox"
                                             wire:key="lesson-shared-{{ $pev->id }}-{{ $selected ? 'selected' : 'unselected' }}"
                                             @if ($selected && ! $rowLocked)
                                                 wire:model.live="lessons.{{ $pev->id }}.allow_shared_teacher"
@@ -161,7 +180,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="12" class="px-3 py-8 text-center text-sm text-gray-400">No hay lecciones (pevaluaciones) para la selección.</td>
+                                    <td colspan="13" class="px-3 py-8 text-center text-sm text-gray-400">No hay lecciones (pevaluaciones) para la selección.</td>
                                 </tr>
                             @endforelse
                         </tbody>

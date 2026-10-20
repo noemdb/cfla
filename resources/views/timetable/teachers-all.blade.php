@@ -142,21 +142,23 @@
                                                     <td class="break">Receso</td>
                                                 @else
                                                     <td>
-                                                        @forelse ($shiftSchedule['grid']->get($order, collect())->get($day, collect()) as $slot)
-                                                            <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
-                                                            <div class="meta">
-                                                                {{ $slot->lesson?->pevaluacion?->seccion?->grado?->code_sm ?? $slot->lesson?->pevaluacion?->seccion?->grado?->code ?? $slot->lesson?->pevaluacion?->seccion?->grado?->name ?? '' }}
-                                                                {{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}
-                                                                @if ($slot->grupo_estable_id)
-                                                                    · {{ $slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id }}
-                                                                @endif
-                                                                @if ($slot->room?->code)
-                                                                    · Aula {{ $slot->room->code }}
-                                                                @endif
-                                                            </div>
-                                                        @empty
-                                                            <span class="empty">&nbsp;</span>
-                                                        @endforelse
+                                                        @include('timetable.partials.half-cell', [
+                                                            'slots' => $shiftSchedule['grid']->get($order, collect())->get($day, collect()),
+                                                            'emptyClass' => 'empty',
+                                                            'lines' => function ($slot): array {
+                                                                $pev = $slot->lesson?->pevaluacion;
+                                                                $grado = (string) ($pev?->seccion?->grado?->code_sm ?? $pev?->seccion?->grado?->code ?? $pev?->seccion?->grado?->name ?? '');
+                                                                $group = $slot->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                                                $meta = trim(trim($grado.' '.(string) ($pev?->seccion?->name ?? ''))
+                                                                    .($group !== '' ? ' · '.$group : '')
+                                                                    .($slot->room?->code ? ' · Aula '.$slot->room->code : ''));
+
+                                                                return [
+                                                                    ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
+                                                                    ['class' => 'meta', 'text' => $meta],
+                                                                ];
+                                                            },
+                                                        ])
                                                     </td>
                                                 @endif
                                             @endforeach

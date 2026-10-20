@@ -780,6 +780,7 @@ class TimetableWizard extends Component
                 'weekly_blocks_t' => $lesson->weekly_blocks_t, 'weekly_blocks_p' => $lesson->weekly_blocks_p,
                 'room_type_required' => $lesson->room_type_required, 'is_half_group' => $lesson->is_half_group,
                 'allow_shared_teacher' => $lesson->allow_shared_teacher,
+                'half_block' => (bool) $lesson->half_block,
                 'priority' => $lesson->priority, 'locked' => $lesson->locked,
             ]);
             foreach ($lesson->slots as $slot) {
@@ -794,6 +795,7 @@ class TimetableWizard extends Component
                     'grupo_estable_id' => $slot->grupo_estable_id, 'room_id' => $slot->room_id,
                     'is_half_group' => $slot->is_half_group,
                     'allow_shared_teacher' => $slot->allow_shared_teacher,
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                     'locked' => $slot->locked, 'is_manual_override' => $slot->is_manual_override,
                 ]);
             }
@@ -2089,6 +2091,7 @@ class TimetableWizard extends Component
                         : null,
                     'is_half_group' => filter_var(data_get($sourceLesson, 'is_half_group', false), FILTER_VALIDATE_BOOLEAN),
                     'allow_shared_teacher' => false,
+                    'half_block' => filter_var(data_get($sourceLesson, 'half_block', false), FILTER_VALIDATE_BOOLEAN),
                     'priority' => (int) data_get($sourceLesson, 'priority', 0),
                     'locked' => (bool) data_get($sourceLesson, 'locked', false),
                 ])->save();
@@ -2615,6 +2618,7 @@ class TimetableWizard extends Component
         $savedLessons = TimetableLesson::query()
             ->where('calendar_id', $calendar->id)
             ->get([
+                'id',
                 'pevaluacion_id',
                 'shift_id',
                 'weekly_blocks_t',
@@ -2622,6 +2626,7 @@ class TimetableWizard extends Component
                 'room_type_required',
                 'is_half_group',
                 'allow_shared_teacher',
+                'half_block',
                 'priority',
                 'locked',
             ])
@@ -2662,20 +2667,32 @@ class TimetableWizard extends Component
 
             $savedLesson = $savedLessons->get((int) $pev->id);
 
+            // El id persistido de la lección permite cruzar la configuración
+            // de esta Pevaluación con `preview['assignment']` (indexado por
+            // `timetable_lessons.id`).
+            if ($savedLesson) {
+                $lesson['id'] = (int) $savedLesson->id;
+            }
+
             if (isset($existing[$pev->id])) {
                 $lesson['shift_id'] = (int) ($existing[$pev->id]['shift_id'] ?? $lesson['shift_id']);
                 $lesson['room_type_required'] = $existing[$pev->id]['room_type_required'] ?? null;
                 $lesson['is_half_group'] = (bool) ($existing[$pev->id]['is_half_group'] ?? false);
                 $lesson['allow_shared_teacher'] = (bool) ($existing[$pev->id]['allow_shared_teacher'] ?? false);
+                $lesson['half_block'] = (bool) ($existing[$pev->id]['half_block'] ?? false);
                 $lesson['weekly_blocks_t'] = (int) ($existing[$pev->id]['weekly_blocks_t'] ?? $lesson['weekly_blocks_t']);
                 $lesson['weekly_blocks_p'] = (int) ($existing[$pev->id]['weekly_blocks_p'] ?? $lesson['weekly_blocks_p']);
                 $lesson['priority'] = (int) ($existing[$pev->id]['priority'] ?? 0);
                 $lesson['locked'] = (bool) ($existing[$pev->id]['locked'] ?? false);
+                if (isset($existing[$pev->id]['id'])) {
+                    $lesson['id'] = (int) $existing[$pev->id]['id'];
+                }
             } elseif ($savedLesson) {
                 $lesson['shift_id'] = (int) ($savedLesson->shift_id ?: $lesson['shift_id']);
                 $lesson['room_type_required'] = $savedLesson->room_type_required ?? null;
                 $lesson['is_half_group'] = (bool) ($savedLesson->is_half_group ?? false);
                 $lesson['allow_shared_teacher'] = (bool) ($savedLesson->allow_shared_teacher ?? false);
+                $lesson['half_block'] = (bool) ($savedLesson->half_block ?? false);
                 $lesson['priority'] = (int) ($savedLesson->priority ?? 0);
                 $lesson['locked'] = (bool) ($savedLesson->locked ?? false);
                 $savedBlocksT = (int) $savedLesson->weekly_blocks_t;
@@ -2780,6 +2797,61 @@ class TimetableWizard extends Component
         return (int) ceil($hours * 60 / $unitMinutes);
     }
 
+    /**
+     * ADR-TT-017 — Marca/desmarca la lección como «mitad de bloque» y recalcula
+     * su demanda: en media franja cada unidad es la mitad del período, por lo
+     * que los bloques teóricos/prácticos se duplican (o se restauran al
+     * desmarcar). No toca el preview: si hay slots incompatibles en el mismo
+     * período, se avisa para que el usuario los revise.
+     */
+    public function setLessonHalfBlock(int $pevId, ?bool $value = null): void
+    {
+        if (! $this->calendarId || ! isset($this->lessons[$pevId]) || ! is_array($this->lessons[$pevId])) {
+            return;
+        }
+
+        $seccionId = (int) (Pevaluacion::query()->whereKey($pevId)->value('seccion_id') ?? 0);
+        if ($seccionId > 0 && $this->blockIfSectionLocked($seccionId)) {
+            return;
+        }
+
+        $halfBlock = $value ?? ! (bool) ($this->lessons[$pevId]['half_block'] ?? false);
+        $this->lessons[$pevId]['half_block'] = $halfBlock;
+
+        $pev = Pevaluacion::query()->with('pensum.asignatura')->find($pevId);
+        $asignatura = $pev?->pensum?->asignatura;
+        $periodMinutes = max(1, (int) (TimetableCalendar::query()
+            ->whereKey($this->calendarId)
+            ->value('period_minutes') ?? $this->periodMinutes));
+
+        $this->lessons[$pevId]['weekly_blocks_t'] = $this->blocksForMinutes(
+            (int) ($asignatura?->hour_t_week ?? 0),
+            $periodMinutes,
+            $halfBlock,
+        );
+        $this->lessons[$pevId]['weekly_blocks_p'] = $this->blocksForMinutes(
+            (int) ($asignatura?->hour_p_week ?? 0),
+            $periodMinutes,
+            $halfBlock,
+        );
+
+        $this->lessonsDirty = true;
+
+        // Si ya hay slots de esta lección en el preview, su cantidad puede no
+        // coincidir con la nueva demanda; se avisa para revisarlos.
+        $hasPreviewSlots = $this->preview
+            && collect($this->preview['assignment'][(string) $pevId] ?? $this->preview['assignment'][$pevId] ?? [])->isNotEmpty();
+
+        $this->notification()->info(
+            $halfBlock ? 'Mitad de bloque activada' : 'Mitad de bloque desactivada',
+            $halfBlock
+                ? 'La lección usará medias franjas (dos por período).'
+                    .($hasPreviewSlots ? ' Revisa los bloques asignados en la vista previa.' : '')
+                : 'La lección volvió al cálculo de bloque completo.'
+                    .($hasPreviewSlots ? ' Revisa los bloques asignados en la vista previa.' : ''),
+        );
+    }
+
     public function saveLessons(): void
     {
         if (! $this->calendarId) {
@@ -2794,6 +2866,9 @@ class TimetableWizard extends Component
 
         $this->deleteRemovedLessons();
         $this->persistLessons();
+        // Refresca el estado con los ids ya persistidos: el resumen del Paso 3
+        // cruza cada Pevaluación con `preview['assignment']` por lección.
+        $this->loadLessons(true);
         $this->removedLessonPevIds = [];
         $this->lessonsDirty = false;
         $this->lessonsSavedAt = now()->format('H:i:s');
@@ -3243,6 +3318,7 @@ class TimetableWizard extends Component
                     'room_type_required' => $lesson['room_type_required'] ?: null,
                     'is_half_group' => (bool) ($lesson['is_half_group'] ?? false),
                     'allow_shared_teacher' => (bool) ($lesson['allow_shared_teacher'] ?? false),
+                    'half_block' => (bool) ($lesson['half_block'] ?? false),
                     'priority' => max(0, (int) ($lesson['priority'] ?? 0)),
                     'locked' => (bool) ($lesson['locked'] ?? false),
                 ],
@@ -4460,6 +4536,7 @@ class TimetableWizard extends Component
                 'room_type_required' => $configuration['room_type_required'] ?? null,
                 'is_half_group' => (bool) ($configuration['is_half_group'] ?? false),
                 'allow_shared_teacher' => (bool) ($configuration['allow_shared_teacher'] ?? false),
+                'half_block' => (bool) ($configuration['half_block'] ?? false),
                 'priority' => max(0, (int) ($configuration['priority'] ?? 0)),
                 'locked' => (bool) ($configuration['locked'] ?? false),
             ];
@@ -4808,7 +4885,7 @@ class TimetableWizard extends Component
      * Grilla del horario previsualizado de una sección: del `preview_payload`
      * (assignment) coloca cada asignatura en su período (turno + orden + día).
      *
-     * @return array<int, array<int, array<int, list<array{lesson_id:int, period_id:int, asignatura:string, profesor:string, grupo:?string}>>>>
+     * @return array<int, array<int, array<int, list<array{lesson_id:int, period_id:int, asignatura:string, profesor:string, grupo:?string, is_half_group:bool, half:?int, half_block:bool, locked:bool, collision:bool, collision_pestudios:list<string>}>>>>
      */
     protected function previewSectionGrid(?int $seccionId): array
     {
@@ -4924,6 +5001,9 @@ class TimetableWizard extends Component
                     'profesor_id' => $teacherId,
                     'grupo' => $pev?->grupoEstable?->name,
                     'is_half_group' => (bool) $lesson->is_half_group,
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
+                    'half_block' => (bool) $lesson->half_block,
                     'locked' => (bool) ($slot['locked'] ?? false),
                     'collision' => $collisionPestudios !== [],
                     'collision_pestudios' => array_keys($collisionPestudios),
@@ -5583,11 +5663,15 @@ class TimetableWizard extends Component
         return true;
     }
 
-    public function movePreviewLesson(int $lessonId, int $fromPeriodId, int $newPeriodId): void
+    public function movePreviewLesson(int $lessonId, int $fromPeriodId, int $newPeriodId, ?int $half = null): void
     {
         if (! $this->preview || $lessonId <= 0 || $fromPeriodId <= 0 || $newPeriodId <= 0) {
             return;
         }
+
+        // ADR-TT-017: la mitad destino es opcional (0 = superior, 1 = inferior,
+        // null = bloque completo). Solo se aplica si el llamador la envía.
+        $targetHalf = $half !== null ? max(0, min(1, $half)) : null;
 
         $targetPeriod = TimetablePeriod::query()
             ->where('calendar_id', $this->calendarId)
@@ -5621,6 +5705,15 @@ class TimetableWizard extends Component
 
         if ($slotIndex === false) {
             return;
+        }
+
+        // ADR-TT-017: si se mueve una lección de media franja cuyo slot aún no
+        // tiene mitad definida (p. ej. dato heredado), se fija la superior.
+        if ($targetHalf === null && $lesson->half_block) {
+            $currentHalf = $slots[$slotIndex]['half'] ?? null;
+            if ($currentHalf === null) {
+                $targetHalf = 0;
+            }
         }
 
         if ($this->blockIfSlotLocked($lessonId, $fromPeriodId)) {
@@ -5704,10 +5797,13 @@ class TimetableWizard extends Component
             $swapOriginalSlots = $swapSlots;
             $previousPreview = $this->preview;
 
-            $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId)
+            $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId, $targetHalf)
                 ?? $this->detectCrossSectionCollision($swapLessonId, $fromPeriodId);
 
             $slots[$slotIndex]['period_id'] = $newPeriodId;
+            if ($targetHalf !== null) {
+                $slots[$slotIndex]['half'] = $targetHalf;
+            }
             $swapSlots[$swapSlotIndex]['period_id'] = $fromPeriodId;
             $assignment[$lessonKey] = array_values($slots);
             $assignment[$swapKey] = array_values($swapSlots);
@@ -5749,10 +5845,13 @@ class TimetableWizard extends Component
             return;
         }
 
-        $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId);
+        $collisionWarning = $this->detectCrossSectionCollision($lessonId, $newPeriodId, $targetHalf);
         $previousPreview = $this->preview;
 
         $slots[$slotIndex]['period_id'] = $newPeriodId;
+        if ($targetHalf !== null) {
+            $slots[$slotIndex]['half'] = $targetHalf;
+        }
         $assignment[$lessonKey] = array_values($slots);
         $this->preview['assignment'] = $assignment;
         $this->preview['manual_override'] = true;
@@ -5790,7 +5889,7 @@ class TimetableWizard extends Component
      * mensaje de advertencia (o null) para que el movimiento se aplique y solo
      * se notifique al usuario.
      */
-    private function detectCrossSectionCollision(int $lessonId, int $periodId): ?string
+    private function detectCrossSectionCollision(int $lessonId, int $periodId, ?int $half = null): ?string
     {
         $lesson = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)
@@ -5815,10 +5914,18 @@ class TimetableWizard extends Component
 
         foreach ($slots as $slot) {
             $slotTeacher = (int) ($slot->lesson?->pevaluacion?->profesor_id ?? $slot->profesor_id);
-            $slotHalf = (bool) ($slot->lesson?->is_half_group ?? false);
+            $slotHalfGroup = (bool) ($slot->lesson?->is_half_group ?? false);
             $slotShared = (bool) ($slot->lesson?->allow_shared_teacher ?? false);
-            $bothHalf = $isHalfGroup && $slotHalf;
+            $bothHalf = $isHalfGroup && $slotHalfGroup;
             $bothShared = $isShared && $slotShared;
+
+            // ADR-TT-017: dos medias franjas distintas del mismo período son
+            // secuenciales (no se solapan en el tiempo), así que no hay colisión
+            // de docente. Un bloque completo (half = null) sí solapa con ambas.
+            $otherHalf = $slot->half !== null ? (int) $slot->half : null;
+            if ($half !== null && $otherHalf !== null && $half !== $otherHalf) {
+                continue;
+            }
 
             if ($slotTeacher === $profesorId && ! $bothHalf && ! $bothShared) {
                 $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'La lección';
@@ -6284,6 +6391,7 @@ class TimetableWizard extends Component
                 'weekly_blocks_p' => (int) ceil(((int) ($asignatura?->hour_p_week ?? 0)) * 60 / $minutes),
                 'room_type_required' => null,
                 'is_half_group' => false,
+                'half_block' => false,
                 'priority' => 0,
                 'locked' => false,
             ],
@@ -6292,8 +6400,11 @@ class TimetableWizard extends Component
         $this->addPreviewLesson((int) $lesson->id);
     }
 
-    public function addPreviewLesson(int $lessonId): void
+    public function addPreviewLesson(int $lessonId, ?int $half = null): void
     {
+        // ADR-TT-017: mitad destino opcional (0 = superior, 1 = inferior).
+        $newHalf = $half !== null ? max(0, min(1, $half)) : null;
+
         $period = TimetablePeriod::query()
             ->where('calendar_id', $this->calendarId)
             ->whereKey($this->addPreviewLessonPeriodId)
@@ -6316,6 +6427,22 @@ class TimetableWizard extends Component
         $hasShiftMismatch = (int) $lesson->shift_id !== (int) $period->shift_id;
 
         $assignment = $this->preview['assignment'] ?? [];
+
+        // ADR-TT-017: al agregar una lección de media franja sin indicar mitad,
+        // se elige la primera libre del período (superior 0, luego inferior 1).
+        if ($newHalf === null && $lesson->half_block) {
+            $occupiedHalves = [];
+            foreach ($assignment as $otherSlots) {
+                foreach ($otherSlots as $otherSlot) {
+                    if ((int) ($otherSlot['period_id'] ?? 0) === $period->id
+                        && isset($otherSlot['half']) && $otherSlot['half'] !== null) {
+                        $occupiedHalves[(int) $otherSlot['half']] = true;
+                    }
+                }
+            }
+            $newHalf = isset($occupiedHalves[0]) ? 1 : 0;
+        }
+
         $targetLessonIds = collect($assignment)
             ->filter(fn ($slots) => collect($slots)->contains(
                 fn (array $slot): bool => (int) ($slot['period_id'] ?? 0) === $period->id
@@ -6334,6 +6461,22 @@ class TimetableWizard extends Component
                 ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.seccion.grado', 'pevaluacion.profesor'])
                 ->find($targetLessonId);
             if (! $targetLesson?->pevaluacion) {
+                continue;
+            }
+
+            // ADR-TT-017: la mitad del slot ya ubicado en ese período. Dos
+            // medias franjas distintas conviven sin colisión.
+            $targetSlots = $assignment[(string) $targetLessonId] ?? $assignment[$targetLessonId] ?? [];
+            $occupiedHalf = null;
+            foreach ($targetSlots as $targetSlot) {
+                if ((int) ($targetSlot['period_id'] ?? 0) === $period->id) {
+                    $occupiedHalf = isset($targetSlot['half']) && $targetSlot['half'] !== null
+                        ? (int) $targetSlot['half']
+                        : null;
+                    break;
+                }
+            }
+            if ($newHalf !== null && $occupiedHalf !== null && $newHalf !== $occupiedHalf) {
                 continue;
             }
 
@@ -6367,7 +6510,12 @@ class TimetableWizard extends Component
         $lessonSlotsBefore = $lessonSlots;
 
         $isPractical = $this->addPreviewLessonType === 'practice';
-        $lessonSlots[] = ['period_id' => $period->id, 'room_id' => null, 'is_practical' => $isPractical];
+        $lessonSlots[] = [
+            'period_id' => $period->id,
+            'room_id' => null,
+            'is_practical' => $isPractical,
+            'half' => $newHalf,
+        ];
         $assignment[$lessonKey] = array_values($lessonSlots);
         $this->preview['assignment'] = $assignment;
         $this->preview['unassigned'] = array_values(array_filter(
@@ -6440,6 +6588,7 @@ class TimetableWizard extends Component
 
         if (is_array($this->lessons)) {
             $this->lessons[$pevId] = [
+                'id' => (int) $lesson->id,
                 'pev_id' => $pevId,
                 'shift_id' => (int) $lesson->shift_id,
                 'weekly_blocks_t' => (int) $lesson->weekly_blocks_t,
@@ -6447,6 +6596,7 @@ class TimetableWizard extends Component
                 'room_type_required' => $lesson->room_type_required ?: null,
                 'is_half_group' => (bool) $lesson->is_half_group,
                 'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
+                'half_block' => (bool) $lesson->half_block,
                 'priority' => (int) $lesson->priority,
                 'locked' => (bool) $lesson->locked,
             ];
@@ -6520,6 +6670,7 @@ class TimetableWizard extends Component
             'room_type_required' => $lesson->room_type_required ?: null,
             'is_half_group' => (bool) $lesson->is_half_group,
             'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
+            'half_block' => (bool) $lesson->half_block,
             'priority' => (int) $lesson->priority,
             'locked' => (bool) $lesson->locked,
         ], $config, [
@@ -6602,7 +6753,7 @@ class TimetableWizard extends Component
                 ->get();
             $slotColumns = Schema::getColumnListing('timetable_slots');
             $assignmentColumns = array_values(array_intersect(
-                ['lesson_id', 'period_id', 'room_id', 'is_practical'],
+                ['lesson_id', 'period_id', 'room_id', 'is_practical', 'half'],
                 $slotColumns,
             ));
             $assignment = TimetableSlot::query()
@@ -6614,6 +6765,10 @@ class TimetableWizard extends Component
                     'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                     'is_practical' => in_array('is_practical', $assignmentColumns, true)
                         && (bool) ($slot->is_practical ?? false),
+                    // ADR-TT-017: mitad de bloque (null = completa) en el contexto IA.
+                    'half' => in_array('half', $assignmentColumns, true) && $slot->half !== null
+                        ? (int) $slot->half
+                        : null,
                 ])->values()->all())
                 ->all();
             $readiness = app(TimetablePublicationReadinessService::class)->evaluate($calendar, [
@@ -6630,6 +6785,7 @@ class TimetableWizard extends Component
                     'shift_id' => $lesson->shift_id ? (int) $lesson->shift_id : null,
                     'room_type_required' => $lesson->room_type_required,
                     'is_half_group' => (bool) $lesson->is_half_group,
+                    'half_block' => (bool) $lesson->half_block,
                     'assignment' => $assignment[(string) $lesson->id] ?? [],
                     'subject' => $pev?->pensum?->asignatura?->name,
                     'teacher' => $pev?->profesor
@@ -7087,6 +7243,8 @@ PROMPT;
                             'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
                             'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                             'locked' => (bool) ($slot['locked'] ?? false),
+                            // ADR-TT-017: conservar la mitad de bloque del candidato.
+                            'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
                             'is_manual_override' => true,
                             'created_at' => now(),
                             'updated_at' => now(),
@@ -7152,6 +7310,8 @@ PROMPT;
                     'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                     'is_practical' => (bool) ($slot->is_practical ?? false),
                     'locked' => (bool) $slot->locked,
+                    // ADR-TT-017: la mitad del slot persistido alimenta el motor.
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ])->all();
 
             if ($slots !== []) {
@@ -7610,6 +7770,8 @@ PROMPT;
                     'allow_shared_teacher' => (bool) ($slot['allow_shared_teacher'] ?? $lesson->allow_shared_teacher),
                     'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                     'locked' => (bool) ($slot['locked'] ?? $lesson->locked),
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
                     'is_manual_override' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -7756,6 +7918,8 @@ PROMPT;
                     'allow_shared_teacher' => (bool) ($slot['allow_shared_teacher'] ?? $lesson->allow_shared_teacher),
                     'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                     'locked' => (bool) ($slot['locked'] ?? $lesson->locked),
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
                     'is_manual_override' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -7852,6 +8016,8 @@ PROMPT;
                     ],
                     'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                     'is_practical' => (bool) ($slot->is_practical ?? false),
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ];
             })->values()->all(),
         ];
@@ -7978,6 +8144,8 @@ PROMPT;
                 'is_half_group' => $lesson->is_half_group,
                 'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                 'locked' => $lesson->locked,
+                // ADR-TT-017: persistir la mitad indicada en el respaldo (null = completa).
+                'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
                 'is_manual_override' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -8846,6 +9014,8 @@ PROMPT;
                     'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                     'is_practical' => (bool) ($slot->is_practical ?? false),
                     'locked' => (bool) ($slot->locked ?? false),
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ];
             });
 
@@ -8985,6 +9155,8 @@ PROMPT;
                     'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                     'is_practical' => (bool) ($slot->is_practical ?? false),
                     'locked' => (bool) ($slot->locked ?? false),
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ];
             });
 
@@ -9621,6 +9793,17 @@ PROMPT;
                             return false;
                         }
 
+                        // ADR-TT-017: si las sub-franjas no se solapan (una
+                        // superior, otra inferior), no hay colisión aunque
+                        // compartan período, sección, docente o aula.
+                        $assignmentHalf = isset($assignment['half']) && $assignment['half'] !== null
+                            ? (int) $assignment['half']
+                            : null;
+                        $slotHalf = $slot->half !== null ? (int) $slot->half : null;
+                        if ($assignmentHalf !== null && $slotHalf !== null && $assignmentHalf !== $slotHalf) {
+                            return false;
+                        }
+
                         $bothHalfGroup = (bool) $slot->is_half_group
                             && (bool) $lesson?->is_half_group;
                         $bothShared = (bool) ($slot->lesson?->allow_shared_teacher ?? $slot->allow_shared_teacher)
@@ -9701,6 +9884,9 @@ PROMPT;
                 'period_id' => (int) $slot->period_id,
                 'room_id' => $slot->room_id ? (int) $slot->room_id : null,
                 'is_practical' => (bool) ($slot->is_practical ?? false),
+                // ADR-TT-017: la mitad del slot preservado no debe perderse al
+                // reconstruir el payload publicado.
+                'half' => $slot->half !== null ? (int) $slot->half : null,
             ])->values()->all())
             ->all();
         $publishableAssignment = collect($this->preview['assignment'] ?? [])
@@ -9725,6 +9911,8 @@ PROMPT;
                     ? (int) $lesson->pevaluacion->grupo_estable_id
                     : null,
                 'is_half_group' => (bool) ($lesson?->is_half_group ?? false),
+                // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
             ])->all();
         })->filter(fn (array $row): bool => $row['period_id'] > 0);
         $internalPublicationConflict = $publicationRows
@@ -9733,6 +9921,14 @@ PROMPT;
                 $complete = $rows->filter(fn (array $row): bool => ! $row['is_half_group'])->values();
                 for ($index = 0; $index < $complete->count(); $index++) {
                     for ($otherIndex = $index + 1; $otherIndex < $complete->count(); $otherIndex++) {
+                        // Dos mitades distintas del mismo período son
+                        // secuenciales; no se pisan (ADR-TT-017).
+                        $firstHalf = $complete[$index]['half'] ?? null;
+                        $secondHalf = $complete[$otherIndex]['half'] ?? null;
+                        if ($firstHalf !== null && $secondHalf !== null && $firstHalf !== $secondHalf) {
+                            continue;
+                        }
+
                         $firstGroup = $complete[$index]['grupo_estable_id'];
                         $secondGroup = $complete[$otherIndex]['grupo_estable_id'];
                         if ($firstGroup === null || $secondGroup === null || $firstGroup === $secondGroup) {

@@ -35,6 +35,9 @@ class CargaAcademicaList extends Component
             'lapso',
         ]);
 
+        // Solo pevaluaciones cuyo pensum esté activo.
+        $query->withActivePensum();
+
         if ($this->lapsoId) $query->where('pevaluacions.lapso_id', $this->lapsoId);
         if ($this->peducativoId) {
             $query->whereHas('pensum.pestudio', fn($q) => $q->where('peducativo_id', $this->peducativoId));

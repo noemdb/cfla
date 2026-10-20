@@ -349,6 +349,12 @@ active ──(cierre de lapso / otra alternativa)──▶ archived (terminal, s
 - **Enlace firmado**: `URL::temporarySignedRoute('timetable.public.*', now()->addDays(7))`
   — lectura sin login; expira según TTL.
 - **PDF**: por sección/docente/aula (`Barryvdh\DomPDF`, vistas `pdfs/timetable/*`).
+- **Celdas partidas — mitad de bloque (ADR-TT-017)**: cuando una celda tiene mitades
+  (`timetable_slots.half` = `0` superior / `1` inferior), la vista pública firmada, las
+  lecturas por rol y los PDFs (sección/docente/aula/docentes-todos y los formatos de vista
+  previa) parten la celda en dos sub-franjas («½ sup.» / «½ inf.») usando el parcial compartido
+  `resources/views/timetable/partials/half-cell.blade.php`. Una celda normal (`half = NULL`,
+  bloque completo) no cambia. Ver `ADR-TT-017-HALF-BLOCK.md`.
 - **Lecturas por rol** resuelven el activo del lapso vigente con
   `TimetableCalendar::activeForCurrentLapso()` (fallback: último activo, D-2):
   - Estudiante: su sección vía `Inscripcion` (sin inscripción → 404).
@@ -379,13 +385,14 @@ timetable_periods           por calendario+turno+plan+día+orden (is_break);
                             cada registro conserva su día específico
 timetable_rooms             catálogo global; code único; seccion_id opcional (aula por sección)
 timetable_lessons           1:1 con pevaluacion por calendario; bloques_t/p; room_type_required;
-                            priority; locked; shift_id
+                            priority; locked; shift_id; half_block (mitad de bloque, ADR-TT-017)
 timetable_teacher_availability  por (calendario, profesor, turno, día, bloque)
                             con start_time/end_time del bloque — rejilla de 60 min
                             desde el seeder (M 6 bloques 07:00–13:00, T 2 13:00–15:00)
 timetable_slots             resultado: lesson+period (+profesor/seccion/grupo_estable desnormalizados,
                             room_id nullable); únicos (calendar, period, {teacher|section_key|room});
-                            is_manual_override; locked
+                            is_manual_override; locked; half (0/1 = sub-franja, NULL = bloque
+                            completo, ADR-TT-017)
 timetable_conflicts         auditoría: teacher/room/section_double_booked,
                             availability_violation, shift_mismatch, unassigned
                             (lesson_id/period_id nullable para unassigned)
@@ -465,6 +472,7 @@ La ruta de los CSVs legacy es configurable: `TIMETABLE_LEGACY_CSV_DIR` (default
 | PDFs | `app/Http/Controllers/Timetable/TimetablePdfController.php`, vistas `resources/views/pdfs/timetable/` |
 | PDF del preview | `TimetablePdfController::previewSection()` · ruta `timetable.pdf.preview` |
 | Vistas públicas | `app/Http/Controllers/Timetable/TimetablePublicController.php`, `resources/views/timetable/public.blade.php` |
+| Celda partida por mitad de bloque | `resources/views/timetable/partials/half-cell.blade.php` · ADR `blueprint/school-timetable/ADR-TT-017-HALF-BLOCK.md` |
 | Rutas | `routes/web.php` (`timetable.public.*` firmadas; grupos coordinacion/planning/profesors/student/leadership/director) |
 | Menú navbar | `config/menus.php` (grupo *Herramientas* → *Herramientas* de Planning) |
 | Seeder de prueba | `database/seeders/TimetableTestSeeder.php` (seed fijo 20260818, reproducible) |

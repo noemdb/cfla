@@ -87,23 +87,26 @@
                                                 </td>
                                             @else
                                                 <td class="px-2 py-2 align-top">
-                                                    @forelse ($shiftSchedule['grid']->get($order, collect())->get($day, collect()) as $slot)
-                                                        <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                                                            {{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}
-                                                        </div>
-                                                        <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
-                                                            {{ $slot->lesson?->pevaluacion?->seccion?->grado?->name ?? '' }}
-                                                            · {{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}
-                                                            @if ($slot->grupo_estable_id)
-                                                                · {{ $slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id }}
-                                                            @endif
-                                                            @if ($slot->room?->code)
-                                                                · Aula {{ $slot->room->code }}
-                                                            @endif
-                                                        </div>
-                                                    @empty
-                                                        <span class="text-gray-300 dark:text-white/10">—</span>
-                                                    @endforelse
+                                                    @include('timetable.partials.half-cell', [
+                                                        'slots' => $shiftSchedule['grid']->get($order, collect())->get($day, collect()),
+                                                        'emptyClass' => 'text-gray-300 dark:text-white/10',
+                                                        'emptyText' => '—',
+                                                        'lines' => function ($slot): array {
+                                                            $pev = $slot->lesson?->pevaluacion;
+                                                            $group = $slot->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                                            $meta = trim(
+                                                                (string) ($pev?->seccion?->grado?->name ?? '')
+                                                                .' · '.(string) ($pev?->seccion?->name ?? '')
+                                                                .($group !== '' ? ' · '.$group : '')
+                                                                .($slot->room?->code ? ' · Aula '.$slot->room->code : ''),
+                                                            );
+
+                                                            return [
+                                                                ['class' => 'text-xs font-bold text-emerald-700 dark:text-emerald-300', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
+                                                                ['class' => 'mt-0.5 text-[10px] text-gray-500 dark:text-gray-400', 'text' => $meta],
+                                                            ];
+                                                        },
+                                                    ])
                                                 </td>
                                             @endif
                                         @endforeach

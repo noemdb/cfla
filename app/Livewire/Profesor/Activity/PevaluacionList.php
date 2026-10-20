@@ -169,7 +169,9 @@ class PevaluacionList extends Component
             ->join('lapsos', 'pevaluacions.lapso_id', '=', 'lapsos.id')
             ->where('pevaluacions.profesor_id', $profesor->id)
             ->where('pestudios.planning_module', true)
-            ->where('pestudios.status_active', 'true');
+            ->where('pestudios.status_active', 'true')
+            ->where('pensums.status_active', true)
+            ->where('grados.status_active', 'true');
 
         if ($this->pestudio_id) {
             $pevaluacionsQuery->where('pensums.pestudio_id', $this->pestudio_id);
@@ -223,7 +225,7 @@ class PevaluacionList extends Component
 
         $pevaluacions = $pevaluacionsQuery->with([
             'activities.achievements', 'activities.supplement', 'pensum.asignatura',
-            'pensum.grado.pestudio', 'seccion', 'lapso', 'grupoEstable',
+            'pensum.pestudio', 'pensum.grado.pestudio', 'seccion', 'lapso', 'grupoEstable',
         ])->paginate($this->paginate);
 
         // ── Filter lists ──

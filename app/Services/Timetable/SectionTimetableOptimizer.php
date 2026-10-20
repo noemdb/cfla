@@ -26,7 +26,9 @@ use Illuminate\Support\Collection;
  *
  * Cierra con una validación determinista antes de publicar. NUNCA agrega,
  * quita ni cambia lecciones: solo permuta los períodos de los slots existentes,
- * respetando `timetable_lessons.locked`, `is_half_group` y `allow_shared_teacher`.
+ * respetando `timetable_lessons.locked`, `is_half_group`, `allow_shared_teacher`
+ * y — desde ADR-TT-017 — la **mitad** de cada slot (la ocupación se evalúa por
+ * sub-franja: un bloque completo ocupa ambas mitades, media franja solo la suya).
  */
 class SectionTimetableOptimizer
 {
@@ -54,10 +56,10 @@ class SectionTimetableOptimizer
     /** @var array<int, list<array{day:int, start:int, end:int}>> ocupación externa (otros P.Estudios) */
     private array $externalBusy = [];
 
-    /** @var array<int, array<int, array<int, bool>>> periodId => profesorId => [lessonId => shared] (otras secciones del mismo calendario) */
+    /** @var array<string, array<int, bool>> "periodId:half:profesorId" => [lessonId => shared] (otras secciones del mismo calendario) */
     private array $extTeacher = [];
 
-    /** @var array<int, array<int, bool>> periodId => roomId (otras secciones del mismo calendario) */
+    /** @var array<string, bool> "periodId:half:roomId" (otras secciones del mismo calendario) */
     private array $extRoom = [];
 
     private TimetableAvailabilityService $availability;
@@ -82,9 +84,9 @@ class SectionTimetableOptimizer
     private float $deadline = 0.0;
 
     /**
-     * @param  array<int|string, list<array{period_id:int, room_id?:int|null, is_practical?:bool, locked?:bool}>>  $assignment
+     * @param  array<int|string, list<array{period_id:int, room_id?:int|null, is_practical?:bool, locked?:bool, half?:int|null}>>  $assignment
      * @return array{
-     *     assignment: array<int, list<array{period_id:int, room_id:int|null, is_practical:bool, locked:bool}>>,
+     *     assignment: array<int, list<array{period_id:int, room_id:int|null, is_practical:bool, locked:bool, half:int|null}>>,
      *     moved: int,
      *     collisions_before: int,
      *     collisions_after: int,
@@ -211,6 +213,8 @@ class SectionTimetableOptimizer
                 'room_id' => $node['room_id'],
                 'is_practical' => (bool) $node['is_practical'],
                 'locked' => (bool) $node['locked'],
+                // ADR-TT-017: la mitad del slot se preserva al reubicar.
+                'half' => $node['half'] ?? null,
             ];
         }
 
@@ -228,7 +232,7 @@ class SectionTimetableOptimizer
     }
 
     /**
-     * @param  array<int|string, list<array{period_id:int, room_id?:int|null, is_practical?:bool, locked?:bool}>>  $assignment
+     * @param  array<int|string, list<array{period_id:int, room_id?:int|null, is_practical?:bool, locked?:bool, half?:int|null}>>  $assignment
      */
     private function buildNodes(array $assignment): void
     {
@@ -244,6 +248,8 @@ class SectionTimetableOptimizer
                 }
 
                 $locked = ! empty($slot['locked']) || $meta['lesson_locked'];
+                // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                $half = isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null;
 
                 $this->nodes[] = [
                     'lesson_id' => (int) $lessonId,
@@ -257,6 +263,7 @@ class SectionTimetableOptimizer
                     'period_id' => $periodId,
                     'room_id' => ! empty($slot['room_id']) ? (int) $slot['room_id'] : null,
                     'is_practical' => (bool) ($slot['is_practical'] ?? false),
+                    'half' => $half,
                     'domain' => $this->buildDomain($meta, $periodId, $locked),
                 ];
             }
@@ -353,6 +360,13 @@ class SectionTimetableOptimizer
 
     private function nodesConflict(array $a, array $b): bool
     {
+        // ADR-TT-017: si las sub-franjas no se solapan (una es superior y la otra
+        // inferior), los nodos no comparten tiempo → no hay conflicto de docente,
+        // aula ni sección. Un bloque completo (null) solapa con cualquier mitad.
+        if (! $this->halvesOverlap($a['half'] ?? null, $b['half'] ?? null)) {
+            return false;
+        }
+
         // Docente: choque salvo que AMBOS permitan docente compartido.
         if ($a['profesor_id'] === $b['profesor_id']
             && ! ($a['allow_shared_teacher'] && $b['allow_shared_teacher'])) {
@@ -858,7 +872,7 @@ class SectionTimetableOptimizer
             }
             $this->occupy($state, $node, $periodId);
 
-            if ($this->periodOverlapsExternal($node['profesor_id'], $period)) {
+            if ($this->periodOverlapsExternal($node['profesor_id'], $period, $node['half'])) {
                 $external++;
             }
 
@@ -918,7 +932,7 @@ class SectionTimetableOptimizer
         $w = $this->weights;
         $cost = 0;
 
-        if ($this->periodOverlapsExternal($node['profesor_id'], $period)) {
+        if ($this->periodOverlapsExternal($node['profesor_id'], $period, $node['half'] ?? null)) {
             $cost += $w['external'];
         }
         if ((int) $period->shift_id !== (int) $node['shift_id']) {
@@ -977,7 +991,23 @@ class SectionTimetableOptimizer
      */
     private function isFree(array $node, int $periodId, array $state): bool
     {
-        $teacherKey = $periodId.':'.$node['profesor_id'];
+        foreach ($this->halvesFor($node['half'] ?? null) as $half) {
+            if (! $this->isFreeInHalf($node, $periodId, $half, $state)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Libertad de una sub-franja concreta (ADR-TT-017).
+     *
+     * @param  array<string, mixed>  $state
+     */
+    private function isFreeInHalf(array $node, int $periodId, int $half, array $state): bool
+    {
+        $teacherKey = $periodId.':'.$half.':'.$node['profesor_id'];
         $occupants = $state['teacher'][$teacherKey] ?? [];
 
         if ($occupants !== []) {
@@ -993,24 +1023,24 @@ class SectionTimetableOptimizer
             }
         }
 
-        if ($node['room_id'] !== null && isset($state['room'][$periodId.':'.$node['room_id']])) {
+        if ($node['room_id'] !== null && isset($state['room'][$periodId.':'.$half.':'.$node['room_id']])) {
             return false;
         }
 
-        if (isset($state['whole'][$periodId])) {
+        if (isset($state['whole'][$periodId.':'.$half])) {
             return false;
         }
 
         if ($node['is_half_group']) {
-            return ($state['half'][$periodId] ?? 0) < $this->maxSubjects;
+            return ($state['half'][$periodId.':'.$half] ?? 0) < $this->maxSubjects;
         }
 
         if ($node['grupo_estable_id'] === null) {
-            return ($state['group_count'][$periodId] ?? 0) === 0
-                && ($state['half'][$periodId] ?? 0) === 0;
+            return ($state['group_count'][$periodId.':'.$half] ?? 0) === 0
+                && ($state['half'][$periodId.':'.$half] ?? 0) === 0;
         }
 
-        return ! isset($state['group'][$periodId.':'.$node['grupo_estable_id']]);
+        return ! isset($state['group'][$periodId.':'.$half.':'.$node['grupo_estable_id']]);
     }
 
     /**
@@ -1018,19 +1048,29 @@ class SectionTimetableOptimizer
      */
     private function occupy(array &$state, array $node, int $periodId): void
     {
-        $state['teacher'][$periodId.':'.$node['profesor_id']][$node['lesson_id']] = (bool) $node['allow_shared_teacher'];
+        foreach ($this->halvesFor($node['half'] ?? null) as $half) {
+            $this->occupyInHalf($state, $node, $periodId, $half);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function occupyInHalf(array &$state, array $node, int $periodId, int $half): void
+    {
+        $state['teacher'][$periodId.':'.$half.':'.$node['profesor_id']][$node['lesson_id']] = (bool) $node['allow_shared_teacher'];
 
         if ($node['room_id'] !== null) {
-            $state['room'][$periodId.':'.$node['room_id']] = true;
+            $state['room'][$periodId.':'.$half.':'.$node['room_id']] = true;
         }
 
         if ($node['is_half_group']) {
-            $state['half'][$periodId] = ($state['half'][$periodId] ?? 0) + 1;
+            $state['half'][$periodId.':'.$half] = ($state['half'][$periodId.':'.$half] ?? 0) + 1;
         } elseif ($node['grupo_estable_id'] === null) {
-            $state['whole'][$periodId] = true;
+            $state['whole'][$periodId.':'.$half] = true;
         } else {
-            $state['group'][$periodId.':'.$node['grupo_estable_id']] = true;
-            $state['group_count'][$periodId] = ($state['group_count'][$periodId] ?? 0) + 1;
+            $state['group'][$periodId.':'.$half.':'.$node['grupo_estable_id']] = true;
+            $state['group_count'][$periodId.':'.$half] = ($state['group_count'][$periodId.':'.$half] ?? 0) + 1;
         }
     }
 
@@ -1039,30 +1079,58 @@ class SectionTimetableOptimizer
      */
     private function release(array &$state, array $node, int $periodId): void
     {
-        $teacherKey = $periodId.':'.$node['profesor_id'];
+        foreach ($this->halvesFor($node['half'] ?? null) as $half) {
+            $this->releaseInHalf($state, $node, $periodId, $half);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function releaseInHalf(array &$state, array $node, int $periodId, int $half): void
+    {
+        $teacherKey = $periodId.':'.$half.':'.$node['profesor_id'];
         unset($state['teacher'][$teacherKey][$node['lesson_id']]);
         if (($state['teacher'][$teacherKey] ?? []) === []) {
             unset($state['teacher'][$teacherKey]);
         }
 
         if ($node['room_id'] !== null) {
-            unset($state['room'][$periodId.':'.$node['room_id']]);
+            unset($state['room'][$periodId.':'.$half.':'.$node['room_id']]);
         }
 
         if ($node['is_half_group']) {
-            $state['half'][$periodId] = ($state['half'][$periodId] ?? 1) - 1;
-            if (($state['half'][$periodId] ?? 0) <= 0) {
-                unset($state['half'][$periodId]);
+            $state['half'][$periodId.':'.$half] = ($state['half'][$periodId.':'.$half] ?? 1) - 1;
+            if (($state['half'][$periodId.':'.$half] ?? 0) <= 0) {
+                unset($state['half'][$periodId.':'.$half]);
             }
         } elseif ($node['grupo_estable_id'] === null) {
-            unset($state['whole'][$periodId]);
+            unset($state['whole'][$periodId.':'.$half]);
         } else {
-            unset($state['group'][$periodId.':'.$node['grupo_estable_id']]);
-            $state['group_count'][$periodId] = ($state['group_count'][$periodId] ?? 1) - 1;
-            if (($state['group_count'][$periodId] ?? 0) <= 0) {
-                unset($state['group_count'][$periodId]);
+            unset($state['group'][$periodId.':'.$half.':'.$node['grupo_estable_id']]);
+            $state['group_count'][$periodId.':'.$half] = ($state['group_count'][$periodId.':'.$half] ?? 1) - 1;
+            if (($state['group_count'][$periodId.':'.$half] ?? 0) <= 0) {
+                unset($state['group_count'][$periodId.':'.$half]);
             }
         }
+    }
+
+    /**
+     * Mitades que ocupa un nodo: `null` = ambas (bloque completo), 0/1 = una.
+     *
+     * @return list<int>
+     */
+    private function halvesFor(?int $half): array
+    {
+        return $half === null ? [0, 1] : [$half];
+    }
+
+    /**
+     * ¿Se solapan dos mitades? Una `null` (bloque completo) solapa con todas.
+     */
+    private function halvesOverlap(?int $a, ?int $b): bool
+    {
+        return $a === null || $b === null || $a === $b;
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -1084,14 +1152,20 @@ class SectionTimetableOptimizer
             ->where('calendar_id', $calendar->id)
             ->whereNotIn('lesson_id', $sectionLessonIds)
             ->with('lesson:id,allow_shared_teacher')
-            ->get(['period_id', 'lesson_id', 'profesor_id', 'room_id']);
+            ->get(['period_id', 'lesson_id', 'profesor_id', 'room_id', 'half']);
 
         foreach ($slots as $slot) {
             $periodId = (int) $slot->period_id;
-            $this->extTeacher[$periodId][(int) $slot->profesor_id][(int) $slot->lesson_id] = (bool) ($slot->lesson?->allow_shared_teacher);
+            // ADR-TT-017: la ocupación externa se registra por sub-franja; un
+            // bloque completo (half null) ocupa ambas mitades.
+            $half = $slot->half !== null ? (int) $slot->half : null;
 
-            if ($slot->room_id !== null) {
-                $this->extRoom[$periodId.':'.(int) $slot->room_id] = true;
+            foreach ($this->halvesFor($half) as $currentHalf) {
+                $this->extTeacher[$periodId.':'.$currentHalf.':'.(int) $slot->profesor_id][(int) $slot->lesson_id] = (bool) ($slot->lesson?->allow_shared_teacher);
+
+                if ($slot->room_id !== null) {
+                    $this->extRoom[$periodId.':'.$currentHalf.':'.(int) $slot->room_id] = true;
+                }
             }
         }
     }
@@ -1118,7 +1192,7 @@ class SectionTimetableOptimizer
             ->whereHas('lesson.pevaluacion.seccion', fn ($query) => $query->where('seccions.status_active', 'true'))
             ->whereHas('lesson.pevaluacion.seccion.grado', fn ($query) => $query->where('grados.status_active', 'true'))
             ->with('period:id,day_of_week,start_time,end_time,is_break')
-            ->get(['profesor_id', 'period_id']);
+            ->get(['profesor_id', 'period_id', 'half']);
 
         $map = [];
         foreach ($slots as $slot) {
@@ -1126,27 +1200,55 @@ class SectionTimetableOptimizer
             if (! $period || $period->is_break) {
                 continue;
             }
+            // ADR-TT-017: la ventana ocupada depende de la mitad (una media
+            // franja solo bloquea la mitad del período).
+            $half = $slot->half !== null ? (int) $slot->half : null;
+            $window = $this->periodHalfWindow($period, $half);
             $map[(int) $slot->profesor_id][] = [
                 'day' => (int) $period->day_of_week,
-                'start' => $this->minutes((string) $period->start_time),
-                'end' => $this->minutes((string) $period->end_time),
+                'start' => $window['start'],
+                'end' => $window['end'],
             ];
         }
 
         return $map;
     }
 
-    private function periodOverlapsExternal(int $profesorId, TimetablePeriod $period): bool
+    private function periodOverlapsExternal(int $profesorId, TimetablePeriod $period, ?int $half = null): bool
     {
+        $window = $this->periodHalfWindow($period, $half);
+
         foreach ($this->externalBusy[$profesorId] ?? [] as $busy) {
             if ($busy['day'] === (int) $period->day_of_week
-                && $this->minutes((string) $period->start_time) < $busy['end']
-                && $this->minutes((string) $period->end_time) > $busy['start']) {
+                && $window['start'] < $busy['end']
+                && $window['end'] > $busy['start']) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Ventana horaria (minutos del día) que ocupa un nodo en un período según su
+     * mitad: `null` = período completo; 0 = primera mitad; 1 = segunda mitad.
+     *
+     * @return array{start:int, end:int}
+     */
+    private function periodHalfWindow(TimetablePeriod $period, ?int $half): array
+    {
+        $start = $this->minutes((string) $period->start_time);
+        $end = $this->minutes((string) $period->end_time);
+
+        if ($half === null) {
+            return ['start' => $start, 'end' => $end];
+        }
+
+        $mid = (int) round(($start + $end) / 2);
+
+        return $half === 0
+            ? ['start' => $start, 'end' => $mid]
+            : ['start' => $mid, 'end' => $end];
     }
 
     private function minutes(string $time): int

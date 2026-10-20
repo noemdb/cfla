@@ -1,11 +1,41 @@
 <div class="fade-in"
      x-data="{
-         mode: localStorage.getItem('coord-activities-view-mode') || 'table',
+         mode: localStorage.getItem('activities-view-mode') || 'table',
          toggleObservation: @entangle('filterObservations'),
+         restored: false,
+         init() {
+             if (this.restored) return;
+             this.restored = true;
+             const saved = localStorage.getItem('coord-activities-filters');
+             if (!saved) return;
+             try {
+                 const parsed = JSON.parse(saved);
+                 if ($wire && parsed && typeof parsed === 'object') {
+                     $wire.restoreFilters(parsed);
+                 }
+             } catch (e) {
+                 console.error('Failed to parse coordination activity filters', e);
+             }
+         },
+         saveFilters() {
+             if (!$wire) return;
+             localStorage.setItem('coord-activities-filters', JSON.stringify({
+                 search: $wire.search,
+                 pestudioId: $wire.pestudioId,
+                 gradoId: $wire.gradoId,
+                 seccionId: $wire.seccionId,
+                 profesorId: $wire.profesorId,
+                 lapsoId: $wire.lapsoId,
+                 statusActivities: $wire.statusActivities,
+                 filterStatus: $wire.filterStatus,
+                 filterObservations: $wire.filterObservations,
+                 paginate: $wire.paginate
+             }));
+         }
      }"
-     x-init="$watch('mode', val => {
-         localStorage.setItem('coord-activities-view-mode', val);
-         window.dispatchEvent(new CustomEvent('coord-activities-view-mode-changed', { detail: { mode: val } }))
+     x-init="init(); $watch('mode', val => {
+         localStorage.setItem('activities-view-mode', val);
+         window.dispatchEvent(new CustomEvent('activities-view-mode-changed', { detail: { mode: val } }))
      })">
 
     {{-- Header --}}
@@ -24,6 +54,43 @@
             </button>
         </div>
     </div>
+
+    @php
+        $statusReviewLabels = [
+            'approved' => 'Aprobada',
+            'pending' => 'En revisión',
+        ];
+        $lessonLabels = [
+            'SI_LE' => 'Con lecciones',
+            'NO_LE' => 'Sin lecciones',
+        ];
+        $activeChips = [];
+        if ($search) {
+            $activeChips[] = ['key' => 'search', 'value' => "''", 'label' => 'Buscar: ' . $search];
+        }
+        if ($pestudioId && isset($listPestudio[$pestudioId])) {
+            $activeChips[] = ['key' => 'pestudioId', 'value' => "''", 'label' => 'Plan: ' . $listPestudio[$pestudioId]];
+        }
+        if ($gradoId && isset($listGrado[$gradoId])) {
+            $activeChips[] = ['key' => 'gradoId', 'value' => "''", 'label' => 'Grado: ' . $listGrado[$gradoId]];
+        }
+        if ($seccionId && isset($listSeccion[$seccionId])) {
+            $activeChips[] = ['key' => 'seccionId', 'value' => "''", 'label' => 'Sección: ' . $listSeccion[$seccionId]];
+        }
+        if ($profesorId && isset($listProfesores[$profesorId])) {
+            $activeChips[] = ['key' => 'profesorId', 'value' => "''", 'label' => 'Profesor: ' . $listProfesores[$profesorId]];
+        }
+        if ($statusActivities && isset($lessonLabels[$statusActivities])) {
+            $activeChips[] = ['key' => 'statusActivities', 'value' => "''", 'label' => $lessonLabels[$statusActivities]];
+        }
+        if ($filterStatus && isset($statusReviewLabels[$filterStatus])) {
+            $activeChips[] = ['key' => 'filterStatus', 'value' => "''", 'label' => $statusReviewLabels[$filterStatus]];
+        }
+        if ($filterObservations) {
+            $activeChips[] = ['key' => 'filterObservations', 'value' => 'false', 'label' => 'Con observaciones'];
+        }
+        $hasActiveFilters = count($activeChips) > 0;
+    @endphp
 
     {{-- Lapso NavTabs --}}
     <div class="mb-6 bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
@@ -44,11 +111,25 @@
     </div>
 
     {{-- Filter Bar --}}
-    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-8">
+    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-4"
+         @change.debounce.150ms="saveFilters()">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div class="sm:col-span-2">
+                <label for="coord-activities-search" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Buscar</label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path>
+                    </svg>
+                    <input id="coord-activities-search" type="search" wire:model.live.debounce.300ms="search"
+                        @input.debounce.500ms="saveFilters()"
+                        placeholder="Tema, profesor, asignatura o sección..."
+                        class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                </div>
+            </div>
+
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan Estudio</label>
-                <select wire:model.live="pestudioId"
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan de Estudio</label>
+                <select wire:model.live="pestudioId" aria-label="Filtrar por plan de estudio"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todos</option>
                     @foreach($listPestudio as $id => $name)
@@ -59,7 +140,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Grado/Año</label>
-                <select wire:model.live="gradoId"
+                <select wire:model.live="gradoId" aria-label="Filtrar por grado o año"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todos</option>
                     @foreach($listGrado as $id => $name)
@@ -70,7 +151,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Sección</label>
-                <select wire:model.live="seccionId"
+                <select wire:model.live="seccionId" aria-label="Filtrar por sección"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
                     @foreach($listSeccion as $id => $name)
@@ -81,7 +162,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
-                <select wire:model.live="profesorId"
+                <select wire:model.live="profesorId" aria-label="Filtrar por profesor"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todos</option>
                     @foreach($listProfesores as $id => $name)
@@ -91,12 +172,10 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades/Lecciones</label>
-                <select wire:model.live="statusActivities"
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Lecciones</label>
+                <select wire:model.live="statusActivities" aria-label="Filtrar por lecciones publicadas"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
-                    <option value="SI">Con actividades</option>
-                    <option value="NO">Sin actividades</option>
                     <option value="SI_LE">Con lecciones</option>
                     <option value="NO_LE">Sin lecciones</option>
                 </select>
@@ -104,7 +183,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
-                <select wire:model.live="filterStatus"
+                <select wire:model.live="filterStatus" aria-label="Filtrar por estado de revisión"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
                     <option value="approved">Aprobada</option>
@@ -112,55 +191,120 @@
                 </select>
             </div>
 
-            <div class="flex items-end gap-4 col-span-1 sm:col-span-2 lg:col-span-4 xl:col-span-6">
+            <div class="flex items-end gap-4 sm:col-span-1 lg:col-span-2 xl:col-span-2">
                 {{-- Toggle Observaciones --}}
                 <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
-                    <input type="checkbox" wire:model.live="filterObservations" class="sr-only peer">
+                    <input type="checkbox" wire:model.live="filterObservations" class="sr-only peer" aria-label="Filtrar solo actividades con observaciones">
                     <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
                     <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
-                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                         Observaciones
                     </span>
                     <span wire:loading wire:target="filterObservations" class="w-3 h-3">
-                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
                     </span>
                 </label>
             </div>
+
+            <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
+                <button type="button" wire:click="resetFilters"
+                    @click="localStorage.removeItem('coord-activities-filters')"
+                    class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-xs font-bold uppercase tracking-widest">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Limpiar filtros
+                </button>
+            </div>
         </div>
     </div>
 
-    {{-- Grid/Table Toggle --}}
-    <div class="flex items-center gap-2 mb-4">
-        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mr-1">Vista</span>
-        <button @click="mode = 'grid'"
-            :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-            </svg>
-            <span class="hidden sm:inline">Grid</span>
-        </button>
-        <button @click="mode = 'table'"
-            :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-            </svg>
-            <span class="hidden sm:inline">Tabla</span>
-        </button>
+    @if($hasActiveFilters)
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500">Filtros activos</span>
+            @foreach($activeChips as $chip)
+                <button type="button" wire:click="$set('{{ $chip['key'] }}', {{ $chip['value'] }})"
+                    @click="setTimeout(() => saveFilters(), 400)"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
+                    {{ $chip['label'] }}
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            @endforeach
+            <button type="button" wire:click="resetFilters"
+                @click="localStorage.removeItem('coord-activities-filters')"
+                class="text-xs font-bold text-gray-500 dark:text-gray-400 underline decoration-dotted underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400">
+                Limpiar todo
+            </button>
+        </div>
+    @endif
+
+    {{-- Vista + resumen de resultados --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mr-1">Vista</span>
+            <button type="button" @click="mode = 'grid'"
+                :aria-pressed="mode === 'grid'"
+                :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                <span class="hidden sm:inline">Tarjetas</span>
+            </button>
+            <button type="button" @click="mode = 'table'"
+                :aria-pressed="mode === 'table'"
+                :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                <span class="hidden sm:inline">Tabla</span>
+            </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                Mostrando <span class="font-bold text-gray-700 dark:text-gray-200">{{ $activities->firstItem() ?? 0 }}–{{ $activities->lastItem() ?? 0 }}</span>
+                de <span class="font-bold text-gray-700 dark:text-gray-200">{{ $activities->total() }}</span> actividades
+                @if($lapsoId && isset($listLapso[$lapsoId]))
+                    <span class="text-gray-400 dark:text-gray-600">·</span> {{ $listLapso[$lapsoId] }}
+                @endif
+            </p>
+            <label class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500">
+                Por página
+                <select wire:model.live="paginate" aria-label="Resultados por página"
+                    class="min-h-[36px] rounded-lg border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-emerald-500/50">
+                    @foreach([15, 25, 50, 100] as $size)
+                        <option value="{{ $size }}">{{ $size }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <span wire:loading wire:target="search,pestudioId,gradoId,seccionId,profesorId,statusActivities,filterStatus,filterObservations,paginate,selectLapso"
+                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Actualizando…
+            </span>
+        </div>
     </div>
 
     {{-- ═══ CONTENT: View container ═══ --}}
     <div x-cloak
-         x-data="{ mode: localStorage.getItem('coord-activities-view-mode') || 'table' }"
-         x-init="() => { if (!localStorage.getItem('coord-activities-view-mode')) localStorage.setItem('coord-activities-view-mode', 'table') }"
-         x-on:coord-activities-view-mode-changed.window="mode = $event.detail.mode">
+         wire:loading.class="opacity-50 pointer-events-none"
+         wire:target="search,pestudioId,gradoId,seccionId,profesorId,statusActivities,filterStatus,filterObservations,paginate,selectLapso"
+         x-data="{ mode: localStorage.getItem('activities-view-mode') || 'table' }"
+         x-init="() => { if (!localStorage.getItem('activities-view-mode')) localStorage.setItem('activities-view-mode', 'table') }"
+         x-on:activities-view-mode-changed.window="mode = $event.detail.mode">
 
         {{-- ═══ TABLE VIEW ═══ --}}
         <div x-show="mode === 'table'"
@@ -287,6 +431,16 @@
                         </svg>
                         <p class="text-gray-500 dark:text-gray-400 font-medium">No se encontraron actividades</p>
                         <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Intenta ajustar los filtros de búsqueda.</p>
+                        @if($hasActiveFilters)
+                            <button type="button" wire:click="resetFilters"
+                                @click="localStorage.removeItem('coord-activities-filters')"
+                                class="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Limpiar filtros
+                            </button>
+                        @endif
                     </div>
                 @endforelse
             </div>
@@ -416,6 +570,16 @@
                     </svg>
                     <p class="text-gray-500 dark:text-gray-400 font-medium">No se encontraron actividades</p>
                     <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">Intenta ajustar los filtros de búsqueda.</p>
+                    @if($hasActiveFilters)
+                        <button type="button" wire:click="resetFilters"
+                            @click="localStorage.removeItem('coord-activities-filters')"
+                            class="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Limpiar filtros
+                        </button>
+                    @endif
                 </div>
             @endforelse
 

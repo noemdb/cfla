@@ -25,7 +25,8 @@
             filter_grado: $wire.filter_grado,
             filter_seccion: $wire.filter_seccion,
             filter_asignatura: $wire.filter_asignatura,
-            filter_lapso: $wire.filter_lapso
+            filter_lapso: $wire.filter_lapso,
+            filter_pensum_status: $wire.filter_pensum_status
           };
           localStorage.setItem('pevaluacion_filters', JSON.stringify(data));
         }
@@ -77,37 +78,31 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$filter_pestudio ? 'text-gray-600' : 'text-gray-500' }}">
-                    Grado
+            <div class="sm:col-span-2">
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ (!$filter_pestudio || !$filter_grado) ? 'text-gray-600' : 'text-gray-500' }}">
+                    Grado / Sección
                     @if(!$filter_pestudio)
                         <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Plan</span>
-                    @endif
-                </label>
-                <select wire:model.live="filter_grado" @disabled(!$filter_pestudio)
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ !$filter_pestudio ? 'opacity-60' : '' }}">
-                    <option value="">{{ $filter_pestudio ? 'Todos' : 'Seleccione Plan primero' }}</option>
-                    @foreach($filter_grados as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ (!$filter_pestudio || !$filter_grado) ? 'text-gray-600' : 'text-gray-500' }}">
-                    Sección
-                    @if(!$filter_pestudio)
-                        <span class="normal-case font-normal text-[9px] tracking-normal">— requiere Plan</span>
                     @elseif(!$filter_grado)
                         <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Grado</span>
                     @endif
                 </label>
-                <select wire:model.live="filter_seccion" @disabled(!$filter_pestudio || !$filter_grado)
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ (!$filter_pestudio || !$filter_grado) ? 'opacity-60' : '' }}">
-                    <option value="">{{ !$filter_pestudio ? 'Elija un plan' : ($filter_grado ? 'Todos' : 'Elija un grado') }}</option>
-                    @foreach($filter_secciones as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
+                <div class="flex w-full rounded-lg" role="group">
+                    <select wire:model.live="filter_grado" @disabled(!$filter_pestudio)
+                        class="w-1/2 bg-white/5 border border-white/10 text-gray-300 rounded-l-lg rounded-r-none px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ !$filter_pestudio ? 'opacity-60' : '' }}">
+                        <option value="">{{ $filter_pestudio ? 'Todos' : 'Seleccione Plan primero' }}</option>
+                        @foreach($filter_grados as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    <select wire:model.live="filter_seccion" @disabled(!$filter_pestudio || !$filter_grado)
+                        class="w-1/2 -ml-px bg-white/5 border border-white/10 text-gray-300 rounded-r-lg rounded-l-none px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed {{ (!$filter_pestudio || !$filter_grado) ? 'opacity-60' : '' }}">
+                        <option value="">{{ !$filter_pestudio ? 'Elija un plan' : ($filter_grado ? 'Todos' : 'Elija un grado') }}</option>
+                        @foreach($filter_secciones as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$filter_pestudio ? 'text-gray-600' : 'text-gray-500' }}">
@@ -149,15 +144,24 @@
                     @endforeach
                 </select>
             </div>
-            <div class="flex items-end">
-                <button wire:click="resetFilters"
-                    @click="localStorage.removeItem('pevaluacion_filters')"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/20 transition-all duration-300 text-sm font-bold">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    Limpiar Filtros
-                </button>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Pensum</label>
+                <div class="flex w-full rounded-lg" role="group">
+                    <select wire:model.live="filter_pensum_status"
+                        class="flex-1 min-w-0 bg-white/5 border border-white/10 text-gray-300 rounded-l-lg rounded-r-none px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                        <option value="">Todos</option>
+                        <option value="active">Activos</option>
+                        <option value="inactive">Inactivos</option>
+                    </select>
+                    <button wire:click="resetFilters"
+                        @click="localStorage.removeItem('pevaluacion_filters')"
+                        class="shrink-0 -ml-px inline-flex items-center justify-center gap-2 px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-r-lg rounded-l-none border border-amber-500/20 transition-all duration-300 text-sm font-bold whitespace-nowrap">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Limpiar Filtros
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -252,6 +256,9 @@
                             </td>
                             <td class="px-4 py-2">
                                 <span class="text-sm text-gray-200">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }}</span>
+                                <span class="block text-[10px] text-cyan-400/80 mt-0.5" title="Plan de Estudio">
+                                    {{ $pevaluacion->pensum?->pestudio?->name ?? '—' }}
+                                </span>
                                 <span class="block text-[10px] text-gray-500 mt-0.5">
                                     {{ $pevaluacion->seccion?->grado?->name ?? '?' }} - Secc. {{ $pevaluacion->seccion?->name ?? '?' }}
                                 </span>
@@ -448,6 +455,9 @@
                             {{-- Asignatura + Grado/Sección --}}
                             <div class="min-w-0">
                                 <span class="text-sm text-gray-200">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }}</span>
+                                <span class="block text-[10px] text-cyan-400/80 mt-0.5" title="Plan de Estudio">
+                                    {{ $pevaluacion->pensum?->pestudio?->name ?? '—' }}
+                                </span>
                                 <span class="block text-[10px] text-gray-500 mt-0.5">
                                     {{ $pevaluacion->seccion?->grado?->name ?? '?' }} - Secc. {{ $pevaluacion->seccion?->name ?? '?' }}
                                 </span>

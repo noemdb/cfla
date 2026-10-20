@@ -47,6 +47,11 @@
                         <div class="flex items-start justify-between gap-1.5">
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs font-bold text-white truncate leading-tight">{{ $subjectName }}</p>
+                                @if($pestudio?->name)
+                                    <p class="text-[9px] text-cyan-400/80 truncate mt-0.5" title="Plan de Estudio">
+                                        {{ $pestudio->name }}
+                                    </p>
+                                @endif
                                 <p class="text-[10px] text-gray-500 mt-0.5">
                                     {{ $gradoName }} {{ $seccionName }}
                                     @if($pestudio)

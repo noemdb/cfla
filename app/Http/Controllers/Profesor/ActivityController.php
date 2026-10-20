@@ -65,7 +65,9 @@ class ActivityController extends Controller
             ->join('lapsos', 'pevaluacions.lapso_id', '=', 'lapsos.id')
             ->where('pevaluacions.profesor_id', $profesor->id)
             ->where('pestudios.planning_module', true)
-            ->where('pestudios.status_active', 'true');
+            ->where('pestudios.status_active', 'true')
+            ->where('pensums.status_active', true)
+            ->where('grados.status_active', 'true');
 
         $pevaluacionsQuery = ($pestudio_id) ? $pevaluacionsQuery->where('pensums.pestudio_id', $pestudio_id) : $pevaluacionsQuery;
         $pevaluacionsQuery = ($grado_id) ? $pevaluacionsQuery->where('pensums.grado_id', $grado_id) : $pevaluacionsQuery;

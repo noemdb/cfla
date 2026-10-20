@@ -178,6 +178,32 @@ class Pevaluacion extends Model implements \App\Contracts\Auditable
         });
     }
 
+    /**
+     * Solo pevaluaciones cuyo pensum esté activo.
+     *
+     * `Pensum.status_active` está casteado a boolean, por eso se compara
+     * contra `true` (a diferencia de Pestudio/Grado, que usan 'true').
+     */
+    public function scopeWithActivePensum($query)
+    {
+        return $query->whereHas('pensum', function ($q) {
+            $q->where('pensums.status_active', true);
+        });
+    }
+
+    /**
+     * Solo pevaluaciones cuyo pensum NO esté activo (false o null).
+     */
+    public function scopeWithInactivePensum($query)
+    {
+        return $query->whereHas('pensum', function ($q) {
+            $q->where(function ($q2) {
+                $q2->where('pensums.status_active', false)
+                    ->orWhereNull('pensums.status_active');
+            });
+        });
+    }
+
     // ─── ACCESSORS ───────────────────────────────────────────────
 
     public function getFullNameAttribute()

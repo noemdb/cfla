@@ -97,6 +97,17 @@ snapshot/PDF/exports/import se mantiene bajo.
 - `locked`, `is_manual_override`, badges de colisión, undo.
 - `is_half_group` y `allow_shared_teacher` conservan su semántica.
 
+#### 3.3.1 `locked` en lecciones `half_block` (resuelto, Fase 4)
+
+Un bloqueo **completo** de una lección `half_block` se materializa como
+*preasignación* (`preassignedSlots`) y no vía `lockedPeriodIds`. Motivo:
+`lockedPeriodIds` es una lista de períodos sin mitad, por lo que (a) no puede
+expresar la mitad concreta de cada slot y (b) colapsa dos mitades del mismo
+período en un solo período (`unique()`), desactivando el bloqueo. La
+preasignación conserva `(periodId, half)` y el solver la reserva primero, de
+modo que la mitad bloqueada se respeta y la otra mitad queda libre para otra
+lección. Aplica por igual a estrategia `optimized` y `legacy`.
+
 ## 4. Demanda / sesiones
 
 `weekly_blocks_t` / `weekly_blocks_p` expresan **número de unidades asignables**, y la
@@ -194,7 +205,15 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 - `TimetableCapacityAuditService`: mide en sub-franjas; capacidad = períodos × 2;
   `half_block` pesa 0.5 (1 sub-franja) como hoy pesa el medio-grupo.
 - `TimetablePublicationReadinessService`: nueva verificación cruzada completo↔mitad
-  y advertencia no bloqueante `half_block_isolated` (mitad sin pareja).
+  (claves `periodId:half:` para docente/sección/aula; un `half = null` registra ambas
+  mitades) y advertencia no bloqueante `half_group_isolated` calculada por sub-franja.
+- `TimetableWizard::publish()`: el chequeo de colisiones contra slots preservados y
+  `$internalPublicationConflict` ignoran dos mitades secuenciales distintas; el payload
+  publicado (`$existingAssignment`, `sectionReorderSnapshot()`) conserva `half`.
+- `SectionTimetableOptimizer` (Paso 5, por sección): estado por sub-franja
+  (`halvesFor`/`halvesOverlap`, claves `periodId:half:...`), ocupación externa dura y
+  ventanas horarias blandas (`periodHalfWindow`) por mitad; `half` se preserva al permutar
+  períodos. `max_subjects_per_period` limita medio-grupos **por sub-franja**.
 
 ## 9. UI
 
@@ -216,25 +235,45 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 ## 11. Pruebas de aceptación
 
 ### Esquema y modelo
-- [ ] La migración agrega `half_block` y `half` con los defaults definidos.
-- [ ] Lecciones/slots existentes quedan `false` / `NULL`.
-- [ ] Los índices permiten dos mitades del mismo período (sección/docente/aula) y
+- [x] La migración agrega `half_block` y `half` con los defaults definidos.
+- [x] Lecciones/slots existentes quedan `false` / `NULL`.
+- [x] Los índices permiten dos mitades del mismo período (sección/docente/aula) y
       siguen bloqueando la misma mitad.
-- [ ] `TimetableLesson`/`TimetableSlot` castean y llenan los campos nuevos.
+- [x] `TimetableLesson`/`TimetableSlot` castean y llenan los campos nuevos.
 
 ### Motor (unit, sin Eloquent)
-- [ ] `half_block` coloca 1 sub-franja; normal 2.
-- [ ] H5: un bloque completo rechaza cualquier mitad en el mismo período.
-- [ ] H1/H2/H3 se evalúan por sub-franja (dos mitades secuenciales no chocan).
-- [ ] La excepción `allow_shared_teacher` sigue exigiendo autorización de todas.
+- [x] `half_block` coloca 1 sub-franja; normal 2.
+- [x] H5: un bloque completo rechaza cualquier mitad en el mismo período.
+- [x] H1/H2/H3 se evalúan por sub-franja (dos mitades secuenciales no chocan).
+- [x] La excepción `allow_shared_teacher` sigue exigiendo autorización de todas.
 
 ### Solver
-- [ ] Coverage y soft score no empeoran; B1 agrupa mitades cuando es posible.
-- [ ] `locked` y turno conservan su política.
+- [x] Coverage y soft score no empeoran; B1 agrupa mitades cuando es posible.
+- [x] `locked` y turno conservan su política.
+
+### Persistencia, UI, editor y publicación
+- [x] `half` sobrevive solver → preview → persistencia → snapshot (`HalfBlockPersistenceTest`).
+- [x] Toggle de `half_block` recalcula demanda; grillas con sub-franjas (`HalfBlockUiTest`).
+- [x] El optimizador por sección evalúa por sub-franja y preserva `half`
+      (`HalfBlockOptimizerPublicationTest`).
+- [x] La publicación no marca dos mitades secuenciales como doble reserva, pero sí la
+      misma sub-franja o un bloque completo (`HalfBlockOptimizerPublicationTest`,
+      `TimetablePublicationTest`).
+- [x] La auditoría de capacidad pesa `half_block` como 0.5
+      (`TimetableCapacityAuditTest`).
+
+### Solo-lectura y PDFs (Fase 7)
+- [x] La vista pública firmada, las vistas por rol y los PDFs (sección/docente/aula/
+      docentes-todos y formatos de vista previa) parten la celda en dos sub-franjas
+      («½ sup.» / «½ inf.») cuando hay mitades (`HalfBlockReadOnlyTest`).
+- [x] Una celda normal (bloque completo, `half = NULL`) no altera su layout
+      (`HalfBlockReadOnlyTest`).
+- [x] `docs/timetable/README.md` y `SPEC-TIMETABLE-001-v2.md` (§8, §11) documentan
+      `half_block` con referencia a este ADR.
 
 ### Regresión
-- [ ] `HalfGroupSolverTest`, `TimetableWizardTest`, `TimetableLightTest` verdes.
-- [ ] Snapshot/PDF/export sin cambios para lecciones normales.
+- [x] `HalfGroupSolverTest`, `TimetableWizardTest`, `TimetableLightTest` verdes.
+- [x] Snapshot/PDF/export sin cambios para lecciones normales.
 
 ## 12. Orden de implementación
 
@@ -245,11 +284,11 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 4. **Fase 3** — solver: `buildDomain`, `comboScore`, orquestador, config + tests. ✅
 5. **Fase 4** — persistencia: `persistPreviewLessonSlotsToDatabase`,
    `TimetableLessonPersistenceService`, `syncPreviewPayloadFromSlots`,
-   `GenerateTimetableJob::persist`, snapshot.
-6. **Fase 5** — UI: wizard + light (celdas partidas, drop por mitad, modal).
-7. **Fase 6** — editor + capacidad + publicación/readiness.
+   `GenerateTimetableJob::persist`, snapshot. ✅
+6. **Fase 5** — UI: wizard + light (celdas partidas, drop por mitad, modal). ✅
+7. **Fase 6** — editor + capacidad + publicación/readiness. ✅
 8. **Fase 7** — solo-lectura, PDFs y docs (`docs/timetable/README.md`,
-   `SPEC-TIMETABLE-001-v2.md` §11).
+   `SPEC-TIMETABLE-001-v2.md` §11). ✅
 
 ## 13. Criterio de finalización
 
@@ -262,7 +301,7 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 
 ## 14. Estado de implementación
 
-Avance al 2026-10-19 (Fases 0–3 completas; suite de Timetable en verde):
+Avance al 2026-10-19 (Fases 0–7 completas; suite de Timetable en verde):
 
 - **Migración** `2026_10_19_000001_add_half_block_to_timetable_lessons_and_slots`
   aplicada (`migrate --force`): `timetable_lessons.half_block` (bool, default 0),
@@ -285,11 +324,38 @@ Avance al 2026-10-19 (Fases 0–3 completas; suite de Timetable en verde):
   levers para mantener la suite anti-deriva.
 - **Demanda**: `TimetableWizard::blocksForMinutes()` — una lección `half_block`
   cuenta sub-franjas (`hour*60 / (periodMinutes/2)`), duplicando las unidades.
+- **Persistencia (Fase 4)**: `half` viaja por `persistPreviewLessonSlotsToDatabase`,
+  `TimetableLessonPersistenceService`, `syncPreviewPayloadFromSlots` y el snapshot
+  (`slotSectionKey`/`slotTeacherKey` con sufijo de mitad). El bloqueo de una lección
+  `half_block` se resuelve como preasignación (§3.3.1).
+- **UI (Fase 5)**: toggle `setLessonHalfBlock()` con recálculo de demanda; columna
+  «Mitad ½» en el partial compartido `step3-lessons-table`; `previewSectionGrid` emite
+  `half`/`half_block`; grillas del wizard y del light con sub-franjas apiladas y zónas de
+  drop por mitad; `movePreviewLesson(..., ?int $half)` y `addPreviewLesson(..., ?int $half)`
+  persisten la mitad y `detectCrossSectionCollision(..., ?int $half)` no marca colisión
+  entre dos mitades distintas del mismo período. Tests: `HalfBlockUiTest` (6).
+- **Editor/capacidad/publicación (Fase 6)**: `SectionTimetableOptimizer` evalúa la
+  ocupación por sub-franja (nodos con `half`, claves `"periodId:half:..."` en
+  `isFree/occupy/release`, `halvesOverlap()` en el grafo de conflictos, ocupación externa
+  dura y ventanas horarias blandas con `periodHalfWindow()`), preservando `half` en la
+  salida. `max_subjects_per_period` limita los medio-grupos **por sub-franja**.
+  `TimetablePublicationReadinessService` indexa docente/sección/aula por `periodId:half:`
+  y agrupa medio-grupos por sub-franja; `TimetableWizard::publish()` compara mitades en
+  el chequeo contra slots preservados, en `$internalPublicationConflict` y preserva `half`
+  en `$existingAssignment`/`sectionReorderSnapshot()`. Tests:
+  `HalfBlockOptimizerPublicationTest` (8).
 
-Pendiente (Fases 4–7): persistencia del `half` en
-`persistPreviewLessonSlotsToDatabase` / `TimetableLessonPersistenceService` /
-`syncPreviewPayloadFromSlots` / snapshot; UI (celdas partidas, drop por mitad,
-modal); editor + capacidad + publicación; solo-lectura, PDFs y docs funcionales.
-El detalle accionable de este pendiente vive en
+- **Solo-lectura, PDFs y docs (Fase 7)**: parcial compartido
+  `resources/views/timetable/partials/half-cell.blade.php` que agrupa los slots de una celda
+  por sub-franja y apila las mitades con rótulo «½ sup.» / «½ inf.»; una celda normal no
+  cambia. Se aplica en la vista pública firmada (`timetable/public`), las vistas por rol
+  (`TimetableRoleView` y `MyTimetable`), los PDFs por modelo (sección, docente, aula,
+  docentes-todos) y los PDFs de vista previa (sección, grado, p.eStudio, all-p.eStudios y
+  área). `TimetablePdfController` propaga `half` desde la rama de slots persistidos a los
+  formatos de vista previa. `docs/timetable/README.md` y `SPEC-TIMETABLE-001-v2.md` (§8, §11)
+  documentan `half_block` con referencia a este ADR. Test: `HalfBlockReadOnlyTest` (6).
+
+Implementación completa. El detalle accionable y las decisiones abiertas (migración a
+`bck/`, claves `.env` opcionales) viven en
 `PLAN-TIMETABLE-HALF-BLOCK-001-PENDIENTE.md`.
 

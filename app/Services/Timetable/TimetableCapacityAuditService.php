@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Log;
  * - No se descuentan disponibilidad ni `locked` (capacidad teórica máxima).
  * - Se concede capacidad combinada de todos los turnos que usa la sección/docente.
  * - Medio grupo pesa 0.5 (puede compartir celda en pareja).
+ * - `half_block` pesa 0.5: `weekly_blocks_*` ya cuenta sub-franjas (el doble), y cada
+ *   sub-franja ocupa media celda (ADR-TT-017 §4).
  */
 class TimetableCapacityAuditService
 {
@@ -56,7 +58,7 @@ class TimetableCapacityAuditService
                 }
             })
             ->with(['pevaluacion' => fn ($query) => $query->select('id', 'profesor_id', 'seccion_id')])
-            ->get(['id', 'pevaluacion_id', 'shift_id', 'weekly_blocks_t', 'weekly_blocks_p', 'is_half_group']);
+            ->get(['id', 'pevaluacion_id', 'shift_id', 'weekly_blocks_t', 'weekly_blocks_p', 'is_half_group', 'half_block']);
 
         $sections = [];
         $teachers = [];
@@ -86,7 +88,7 @@ class TimetableCapacityAuditService
                 'load' => 0.0,
                 'lesson_ids' => [],
             ];
-            $sections[$seccionId]['load'] += $blocks * ($lesson->is_half_group ? self::HALF_GROUP_WEIGHT : 1.0);
+            $sections[$seccionId]['load'] += $blocks * (($lesson->is_half_group || $lesson->half_block) ? self::HALF_GROUP_WEIGHT : 1.0);
             $sections[$seccionId]['shift_ids'][$shiftId] = true;
             $sections[$seccionId]['lesson_ids'][] = (int) $lesson->id;
 

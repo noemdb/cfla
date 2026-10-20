@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Estado** | Fases 0–3 ✅ implementadas y con suite verde. Fases 4–7 **pendientes** (este doc). |
+| **Estado** | Fases 0–3 ✅ implementadas y con suite verde. Fase 4 ✅ (persistencia + snapshot + bloqueo con mitad). Fase 5 ✅ (UI wizard + light). Fase 6 ✅ (optimizador por sección + readiness/publicación con mitades). Fase 7 ✅ (solo-lectura + PDFs + docs). **Feature completa.** |
 | **Norma** | `ADR-TT-017-HALF-BLOCK.md` (contrato: sub-franja, invariantes H1–H5, B1–B3, DDL). |
 | **Área** | Timetable — persistencia de slots, UI (wizard + light), editor/capacidad/publicación, docs. |
 | **Contrato base** | `SPEC-TIMETABLE-001-v2.md`; ADR-TT-003/007/010/011/017. |
@@ -66,7 +66,7 @@ ambas mitades), `0`/`1` = media franja. Invariantes y DDL en el ADR.
 
 ---
 
-## 1. Fase 4 — Persistencia y snapshot (SIGUIENTE)
+## 1. Fase 4 — Persistencia y snapshot ✅ (hecha)
 
 Objetivo: que `half` sobreviva al ciclo solver → preview → guardado en BD → snapshot,
 sin cambiar el esquema.
@@ -104,7 +104,7 @@ las claves generadas coinciden con las del snapshot.
 
 ---
 
-## 2. Fase 5 — UI (wizard + light)
+## 2. Fase 5 — UI (wizard + light) ✅ (hecha)
 
 1. **Wizard** `resources/views/livewire/coordinacion/timetable/timetable-wizard.blade.php`
    + componente `TimetableWizard`:
@@ -126,48 +126,138 @@ las claves generadas coinciden con las del snapshot.
 **Verificación Fase 5**: tests Livewire de crear una lección `half_block`, asignar
 mitades y comprobar el render de celdas partidas.
 
+### Implementación (Fase 5)
+
+- **Toggle de lección** — `TimetableWizard::setLessonHalfBlock(int $pevId, ?bool $value = null)`:
+  conmuta `lessons[$pevId]['half_block']`, recalcula `weekly_blocks_t/p` con la duración de
+  período del calendario y avisa si ya hay slots en el preview. La vista usa un checkbox
+  con `wire:click` (no `wire:model`) porque el cambio debe disparar el recálculo; el estado
+  `checked` se refresca incluyendo el flag en el `wire:key`.
+- **Columna «Mitad ½»** — en el partial compartido
+  `partials/step3-lessons-table.blade.php`, por lo que aparece tanto en el wizard como en el
+  light (pestaña Clases). Deshabilitada cuando la sección está bloqueada o la lección no está
+  seleccionada.
+- **Celdas partidas** — `previewSectionGrid()` emite `half` (`0/1/null`) y `half_block`; las
+  grillas del wizard y del light agrupan por mitad y renderizan dos sub-franjas apiladas
+  («½ sup.» / «½ inf.») con borde discontinuo y badge `½`. La mitad inferior de cada celda
+  expone una **zona de drop** propia; el slot del light arrastra `data-half` y suelta con
+  `movePreviewLesson(..., half)`.
+- **Mitades en la persistencia manual** — `movePreviewLesson(..., ?int $half = null)` y
+  `addPreviewLesson(int $lessonId, ?int $half = null)` aceptan la mitad objetivo y la
+  persisten; `detectCrossSectionCollision(..., ?int $half)` ignora la colisión de docente
+  entre dos mitades distintas del mismo período (secuenciales, no solapadas).
+- **Limitación conocida (UX, no de datos)**: en una celda vacía el drop conserva la mitad
+  que ya traía la lección arrastrada (o `null` para bloque completo); para forzar una mitad
+  concreta se suelta sobre la sub-franja correspondiente de una celda que ya tiene mitades.
+  No afecta a la corrección (el solver valida todo), solo a la ergonomía.
+- **Tests** — `tests/Feature/Timetable/HalfBlockUiTest.php` (6): recálculo de demanda al
+  conmutar (3/2 → 6/4), control en la tabla, persistencia de `half_block`, y asignación de
+  mitades explícitas en el light (mover y agregar) + render de la celda partida.
+
 ---
 
-## 3. Fase 6 — Editor, capacidad y publicación
+## 3. Fase 6 — Editor, capacidad y publicación ✅ (hecha)
 
-1. **`app/Services/Timetable/SectionTimetableOptimizer.php`** (tiene su **propio**
-   `isFree/occupy/release` en `$state`, ~L978/L1019/L1040): añadir la dimensión de mitad
-   (`$state['halfBlock'][$periodId]`), con la misma semántica que `SchedulingContext`.
-2. **Capacidad**: `max_subjects_per_period` (en `timetable_calendars`) sigue limitando
-   medios grupos por celda; documentar cómo interactúa con mitades (una celda puede
-   alojar 2 mitades distintas + medios grupos, según H1–H5).
-3. **Readiness/publicación**: revisar los chequeos de unicidad de publicación que usan
-   `slot_section_key`/`slot_teacher_key` (solo `TimetableCalendarSnapshotService`
-   apareció en la búsqueda) y cualquier validación de "doble" para que contemple `half`.
+1. **`app/Services/Timetable/SectionTimetableOptimizer.php`** — ocupación por sub-franja:
+   - Cada nodo lleva `half` (de `$slot['half']`; `null` = bloque completo) y se preserva
+     en la asignación de salida (`'half' => $node['half']`).
+   - `isFree/occupy/release` ahora delegan en variantes `*InHalf` y una ayuda
+     `halvesFor(?int $half)` (null → `[0,1]`). Las claves internas pasan a
+     `"periodId:half:..."` (docente, aula, `whole`, `half`, `group`, `group_count`).
+   - `nodesConflict()` usa `halvesOverlap()`: mitades disjuntas (0 vs 1) no generan arista
+     de conflicto, de modo que el coloreo/CSP pueden compartir el período.
+   - Ocupación externa **dura** (`buildExternalOccupancy`, otras secciones del calendario)
+     y **blanda** (ventanas de `externalTeacherBusyMap`) también por sub-franja: la ventana
+     horaria de un nodo se calcula con `periodHalfWindow()` (media franja bloquea media hora
+     del período). Conserva la equivalencia total cuando todos los nodos son `null`.
+2. **Capacidad** — `max_subjects_per_period` sigue limitando los medio-grupos **por
+   sub-franja** (`isHalfGroup`: `half[period:half] < maxSubjects`). Interacción con mitades:
+   una celda `(período)` puede alojar **2 mitades distintas de la sección** (H1–H3) **más**
+   los medio-grupos admitidos por cada sub-franja (hasta `max_subjects_per_period` por
+   mitad); un bloque completo (`half = null`) monopoliza ambas sub-franjas (H5). El
+   optimizador refleja exactamente la semántica de `SchedulingContext`.
+3. **Readiness/publicación** — se hizo consciente de la mitad:
+   - `TimetablePublicationReadinessService`: `teacher/section/roomPeriods` se indexan por
+     `periodId:half:` (un `null` registra ambas mitades); `isolatedHalfGroups` agrupa por
+     `periodId:half:seccion` (los medio-grupos comparten celda solo en la misma sub-franja).
+   - `TimetableWizard::publish()`: el chequeo de colisiones contra slots preservados compara
+     mitades; `$internalPublicationConflict` ignora dos mitades secuenciales distintas;
+     `$existingAssignment` y `sectionReorderSnapshot()` preservan `half` en el payload.
 
-**Verificación Fase 6**: test del optimizador por sección con dos mitades secuenciales y
-un bloque completo; test de readiness/publicación con mitades.
+**Verificación Fase 6**: `tests/Feature/Timetable/HalfBlockOptimizerPublicationTest.php` (8):
+optimizador con dos mitades secuenciales (0 colisiones), bloque completo vs mitad (resuelve),
+dos mitades sobre la misma sub-franja (conflicto); readiness/publicación con dos mitades
+secuenciales, misma sub-franja, docente compartido en mitades secuenciales vs misma
+sub-franja, y bloque completo vs mitad. Capacidad: `TimetableCapacityAuditTest` suma el
+caso `half_block` (peso 0.5). Suite completa `tests/Unit/Timetable` +
+`tests/Feature/Timetable`: **388 passed (1363 assertions)**; `pint` limpio.
 
 ---
 
-## 4. Fase 7 — Solo-lectura, PDFs y docs
+## 4. Fase 7 — Solo-lectura, PDFs y docs ✅ (hecha)
 
-1. Vistas de solo lectura y PDFs: renderizar la celda partida (dos mitades) cuando
-   corresponda; no romper el layout de una celda normal.
-2. `docs/timetable/README.md` y `SPEC-TIMETABLE-001-v2.md` (§11): documentar `half_block`
-   con referencia a `ADR-TT-017-HALF-BLOCK.md`.
-3. Actualizar este documento/ADR al cerrar (marcar Fases ✅).
+1. **Vistas de solo lectura y PDFs** — ✅ renderizan la celda partida (dos mitades) cuando
+   corresponde, sin alterar el layout de una celda normal.
+2. **`docs/timetable/README.md`** y **`SPEC-TIMETABLE-001-v2.md`** (§8 y §11): documentan
+   `half_block` con referencia a `ADR-TT-017-HALF-BLOCK.md`.
+3. Este documento y el ADR quedan actualizados con las Fases ✅.
+
+### Implementación (Fase 7)
+
+- **Partial compartido** `resources/views/timetable/partials/half-cell.blade.php`: agrupa los
+  slots de una celda por sub-franja (`half` `null` = bloque completo, `0` = superior, `1` =
+  inferior), apila las dos mitades con rótulo «½ sup.» / «½ inf.» y un separador discontinuo, y
+  recibe las líneas de cada asignatura mediante un `callable` `$lines` (así cada vista conserva
+  su propia línea de metadatos: docente, sección, grupo, aula). Una celda normal se renderiza
+  como antes (sin bandas de mitad). El `@empty` conserva su marcador configurable.
+- **Vistas por modelo** (`TimetableSlot`): `timetable/public.blade.php` (enlace firmado por
+  sección/docente/aula), `pdfs/timetable/section.blade.php`, `pdfs/timetable/teacher.blade.php`,
+  `pdfs/timetable/room.blade.php`, `pdfs/timetable/teachers.blade.php`,
+  `pdfs/timetable/teachers-all.blade.php`, `timetable/teachers-all.blade.php`,
+  `livewire/timetable/role-view.blade.php` (estudiante/docente/leadership/dirección) y
+  `livewire/profesor/timetable/my-timetable.blade.php`.
+- **Vistas de vista previa** (arrays de `preview` con `half`): `pdfs/timetable/preview-section`,
+  `preview-grade`, `preview-pestudio`, `preview-all-pestudios` y `preview-area` (esta última
+  conserva año/sección/aula/grupo por línea y el envoltorio `.entry`).
+- **Controlador** `TimetablePdfController`: la rama de **slots persistidos** (que hoy alimenta
+  los PDFs de la vista previa y el formato por área) selecciona `half` y lo propaga a
+  `$assignmentsByPeriod` en las cuatro construcciones (sección, grado, p.eStudio, área), de modo
+  que el `half` llega a las plantillas de preview.
+
+**Verificación Fase 7**: `tests/Feature/Timetable/HalfBlockReadOnlyTest.php` (6): vistas pública
+firmada, PDF de sección, PDF de docente, preview de sección y preview de área parten la celda con
+dos mitades; y una celda normal (bloque completo) **no** muestra bandas de mitad. Suite completa
+`tests/Unit/Timetable` + `tests/Feature/Timetable` verde; `pint` limpio.
+
+**Ajuste posterior (tab Clases de `/light`)**: el resumen del Paso 3 reutilizado en el modo rápido
+ya no muestra el bloque «Dry-run» (el light persiste directo en `timetable_slots`). El partial
+`step3-lessons-summary.blade.php` acepta `summaryMode` (`preview` para el wizard, `persisted` para
+`/light`) y en modo persistido muestra celdas ocupadas, clases ubicadas/sin ubicar y hora del último
+guardado; si la sección no tiene lecciones, muestra una guía en lugar de `0/0`. Para cruzar cada
+Pevaluación con `preview['assignment']` (indexado por `timetable_lessons.id`), `loadLessons()` ahora
+incluye `id` en `$lessons` y `saveLessons()` refresca el estado tras persistir. Cubierto por
+`TimetableLightTest` (resumen con cifras reales y estado vacío).
 
 ---
 
-## 5. Decisiones abiertas
+## 5. Decisiones (estado)
 
-- **Migración**: sigue en `database/migrations/` (top-level) para desarrollo. Al cerrar
+- **Migración**: sin acción por ahora. Sigue en `database/migrations/` (top-level). Al cerrar
   la feature, archivar a `database/migrations/bck/timetable/` (convención del proyecto;
-  los tests NO reconstruyen esquema). Decidir antes del cierre.
-- **`.env`**: las claves `TIMETABLE_SOLVER_HALF_BLOCK_PRIORITY` / `_BONUS` son opcionales
-  (defaults en config). Si se quieren fijar en producción, requiere confirmación.
-- **Lecciones `half_block` + `locked`**: hoy el solver trata un bloque `locked` como
-  completo (`half = null`). Falta decidir cómo fijar la mitad de un bloque bloqueado
-  (p. ej. `lockedPeriodIds` con mitad, o columna aparte). Documentar en Fase 4/5.
-- **Rama `/light`**: la reestructuración de `/light` está sin commitear; el auto-commit
-  `wip <timestamp>` del repo la viene registrando. Coordinar el orden de commits con la
-  UI de media franja.
+  los tests NO reconstruyen esquema). Requiere confirmación.
+- **`.env`**: sin acción por ahora. Las claves `TIMETABLE_SOLVER_HALF_BLOCK_PRIORITY` /
+  `_BONUS` son opcionales (defaults en config); fijarlas en producción requiere confirmación
+  + `config:cache`.
+- **Lecciones `half_block` + `locked`** — ✅ **resuelta (Fase 4, opción A)**: un bloqueo
+  completo de una lección `half_block` ya no se representa con `lockedPeriodIds` (no
+  distingue la mitad ni soporta dos mitades del mismo período). Se resuelve como
+  *preasignación* (`preassignedSlots`, que sí conserva `half`), de modo que el solver fija
+  período **y** mitad exactos. Ver `GenerateTimetableJob::runSolver()` (rama
+  `$isLocked && $lesson->half_block`) y el test
+  `HalfBlockPersistenceTest::test_locked_half_block_lesson_keeps_its_exact_half`.
+- **Rama `/light`** — ✅ **resuelta**: la reestructuración de `/light` ya está commiteada
+  (`TimetableLight` en Planning y Coordinación + `timetable-light.blade.php`). No hay WIP
+  que coordinar; se trabaja sobre `main`.
 
 ---
 
@@ -190,3 +280,18 @@ php8.2 artisan migrate:status | grep half_block
 > Nota de flakiness conocida: `TimetableGlobalPdfTest` falla de forma intermitente en
 > corridas largas (colisión de unicidad de factorías contra la BD de producción); pasa
 > en aislamiento y en la corrida completa. Es previo y ajeno a esta feature.
+
+---
+
+## 7. Riesgos y seguimiento
+
+- **Suplentes**: `SubstituteService::candidateConflict()` considera a un docente ocupado
+  todo el período (no distingue mitad). Es conservador (puede descartar un suplente válido
+  si el docente solo tiene una mitad ocupada), no genera horarios inválidos. Fuera del
+  alcance de Fase 6; candidato a refinamiento.
+- **Solo-lectura / PDFs** — ✅ **resuelto (Fase 7)**: `TimetableViewService` ya alimenta las
+  vistas de solo lectura con `half`, y tanto las vistas por modelo como los PDFs de vista previa
+  renderizan la celda partida mediante `resources/views/timetable/partials/half-cell.blade.php`.
+- **Sin datos en producción**: todavía no existen lecciones `half_block` publicadas, por lo
+  que cualquier brecha residual de publicación es inofensiva hoy; al publicar el primer horario
+  con mitades, validar el render de las celdas partidas (vista pública + PDFs).

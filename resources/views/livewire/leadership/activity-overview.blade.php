@@ -2,26 +2,47 @@
     modeComments: @entangle('modeComments'),
     modePreview: @entangle('modePreview'),
     commentStatus: @entangle('status'),
-    showLessonPreview: @entangle('showLessonPreview')
-}">
-    {{-- Overlay de carga (patrón TimetableWizard: timetable/timetable-light) — cubre filtros, lapsos y paginación --}}
+    showLessonPreview: @entangle('showLessonPreview'),
+    restored: false,
+    init() {
+        if (this.restored) return;
+        this.restored = true;
+        const saved = localStorage.getItem('leadership-activities-filters');
+        if (!saved) return;
+        try {
+            const parsed = JSON.parse(saved);
+            if ($wire && parsed && typeof parsed === 'object') {
+                $wire.restoreFilters(parsed);
+            }
+        } catch (e) {
+            console.error('Failed to parse leadership activity filters', e);
+        }
+    },
+    saveFilters() {
+        if (!$wire) return;
+        localStorage.setItem('leadership-activities-filters', JSON.stringify({
+            search: $wire.search,
+            pestudio_id: $wire.pestudio_id,
+            grado_id: $wire.grado_id,
+            seccion_id: $wire.seccion_id,
+            profesor_id: $wire.profesor_id,
+            lapso_id: $wire.lapso_id,
+            status_activities: $wire.status_activities,
+            filter_status: $wire.filter_status,
+            filter_observations: $wire.filter_observations,
+            paginate: $wire.paginate
+        }));
+    }
+}" x-init="init()">
+    {{-- Indicador de carga no bloqueante (el contenido se atenúa desde el contenedor) --}}
     <div wire:loading.flex
-         wire:target="pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
-         class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-gray-900/90 backdrop-blur-md">
-        <div class="flex flex-col items-center gap-4">
-            <div class="relative w-14 h-14">
-                <svg class="absolute inset-0 w-full h-full animate-spin text-emerald-500/40" viewBox="0 0 64 64" fill="none">
-                    <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="3" stroke-dasharray="44 132" stroke-linecap="round" class="opacity-80"/>
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                </div>
-            </div>
-            <p class="text-sm font-bold text-gray-700 dark:text-gray-200">Cargando actividades…</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Aplicando filtros</p>
-        </div>
+         wire:target="search, pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
+         class="fixed bottom-6 right-6 z-[80] hidden items-center gap-2.5 px-5 py-3 bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-full shadow-2xl shadow-black/10 dark:shadow-black/40">
+        <svg class="w-4 h-4 animate-spin text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span class="text-xs font-bold uppercase tracking-widest text-gray-700 dark:text-gray-200">Cargando…</span>
     </div>
 
     <!-- Header -->
@@ -46,14 +67,67 @@
         </div>
     </div>
 
+    @php
+        $statusActivityLabels = [
+            'SI' => 'Con actividades',
+            'NO' => 'Sin actividades',
+            'SI_LE' => 'Con lecciones',
+            'NO_LE' => 'Sin lecciones',
+        ];
+        $statusReviewLabels = [
+            'approved' => 'Aprobada',
+            'pending' => 'En revisión',
+        ];
+        $activeChips = [];
+        if ($search) {
+            $activeChips[] = ['key' => 'search', 'value' => "''", 'label' => 'Buscar: ' . $search];
+        }
+        if ($pestudio_id && isset($list_pestudio[$pestudio_id])) {
+            $activeChips[] = ['key' => 'pestudio_id', 'value' => "''", 'label' => 'Plan: ' . $list_pestudio[$pestudio_id]];
+        }
+        if ($grado_id && isset($list_grado[$grado_id])) {
+            $activeChips[] = ['key' => 'grado_id', 'value' => "''", 'label' => 'Grado: ' . $list_grado[$grado_id]];
+        }
+        if ($seccion_id && isset($list_seccion[$seccion_id])) {
+            $activeChips[] = ['key' => 'seccion_id', 'value' => "''", 'label' => 'Sección: ' . $list_seccion[$seccion_id]];
+        }
+        if ($profesor_id && isset($list_profesors[$profesor_id])) {
+            $activeChips[] = ['key' => 'profesor_id', 'value' => "''", 'label' => 'Profesor: ' . $list_profesors[$profesor_id]];
+        }
+        if ($status_activities && isset($statusActivityLabels[$status_activities])) {
+            $activeChips[] = ['key' => 'status_activities', 'value' => "''", 'label' => $statusActivityLabels[$status_activities]];
+        }
+        if ($filter_status && isset($statusReviewLabels[$filter_status])) {
+            $activeChips[] = ['key' => 'filter_status', 'value' => "''", 'label' => $statusReviewLabels[$filter_status]];
+        }
+        if ($filter_observations) {
+            $activeChips[] = ['key' => 'filter_observations', 'value' => 'false', 'label' => 'Con observaciones'];
+        }
+        $hasActiveFilters = count($activeChips) > 0;
+    @endphp
+
     <!-- Filter Bar — se atenúa durante wire:loading (patrón timetable-light) -->
     <div wire:loading.class="opacity-60 pointer-events-none"
-         wire:target="pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
-         class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-8">
+         wire:target="search, pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
+         @change.debounce.150ms="saveFilters()"
+         class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div class="sm:col-span-2">
+                <label for="leadership-activities-search" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Buscar</label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path>
+                    </svg>
+                    <input id="leadership-activities-search" type="search" wire:model.live.debounce.300ms="search"
+                        @input.debounce.500ms="saveFilters()"
+                        placeholder="Profesor, asignatura o sección..."
+                        class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                </div>
+            </div>
+
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan Estudio</label>
-                <select wire:model.live="pestudio_id" wire:loading.attr="disabled"
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan de Estudio</label>
+                <select wire:model.live="pestudio_id" wire:loading.attr="disabled" aria-label="Filtrar por plan de estudio"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todos</option>
                     @foreach($list_pestudio as $id => $name)
@@ -64,7 +138,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Grado/Año</label>
-                <select wire:model.live="grado_id" wire:loading.attr="disabled"
+                <select wire:model.live="grado_id" wire:loading.attr="disabled" aria-label="Filtrar por grado o año"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todos</option>
                     @foreach($list_grado as $id => $name)
@@ -75,7 +149,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Sección</label>
-                <select wire:model.live="seccion_id" wire:loading.attr="disabled"
+                <select wire:model.live="seccion_id" wire:loading.attr="disabled" aria-label="Filtrar por sección"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todas</option>
                     @foreach($list_seccion as $id => $name)
@@ -86,7 +160,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
-                <select wire:model.live="profesor_id" wire:loading.attr="disabled"
+                <select wire:model.live="profesor_id" wire:loading.attr="disabled" aria-label="Filtrar por profesor"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todos</option>
                     @foreach($list_profesors as $id => $name)
@@ -96,8 +170,8 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades/Lecciones</label>
-                <select wire:model.live="status_activities" wire:loading.attr="disabled"
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades / Lecciones</label>
+                <select wire:model.live="status_activities" wire:loading.attr="disabled" aria-label="Filtrar por actividades o lecciones"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todas</option>
                     <option value="SI">Con actividades</option>
@@ -109,7 +183,7 @@
 
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
-                <select wire:model.live="filter_status" wire:loading.attr="disabled"
+                <select wire:model.live="filter_status" wire:loading.attr="disabled" aria-label="Filtrar por estado de revisión"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">Todas</option>
                     <option value="approved">Aprobada</option>
@@ -117,28 +191,60 @@
                 </select>
             </div>
 
-            <div class="flex items-end gap-4 col-span-1 sm:col-span-2 lg:col-span-4 xl:col-span-6">
+            <div class="flex items-end gap-4 sm:col-span-1 lg:col-span-2 xl:col-span-2">
                 {{-- Toggle Observaciones --}}
                 <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
-                    <input type="checkbox" wire:model.live="filter_observations" wire:loading.attr="disabled" class="sr-only peer">
+                    <input type="checkbox" wire:model.live="filter_observations" wire:loading.attr="disabled" class="sr-only peer" aria-label="Filtrar solo planes con observaciones">
                     <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
                     <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
-                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                         Observaciones
                     </span>
                     <span wire:loading wire:target="filter_observations" class="w-3 h-3">
-                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
                     </span>
                 </label>
             </div>
+
+            <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
+                <button type="button" wire:click="resetFilters"
+                    @click="localStorage.removeItem('leadership-activities-filters')"
+                    class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-xs font-bold uppercase tracking-widest">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Limpiar filtros
+                </button>
+            </div>
         </div>
     </div>
+
+    @if($hasActiveFilters)
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500">Filtros activos</span>
+            @foreach($activeChips as $chip)
+                <button type="button" wire:click="$set('{{ $chip['key'] }}', {{ $chip['value'] }})"
+                    @click="setTimeout(() => saveFilters(), 400)"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
+                    {{ $chip['label'] }}
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            @endforeach
+            <button type="button" wire:click="resetFilters"
+                @click="localStorage.removeItem('leadership-activities-filters')"
+                class="text-xs font-bold text-gray-500 dark:text-gray-400 underline decoration-dotted underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400">
+                Limpiar todo
+            </button>
+        </div>
+    @endif
 
     <!-- Global Indicator (solo cuando hay profesor seleccionado) -->
     @if($profesor_id && $pevaluacions->total() > 0)
@@ -183,39 +289,67 @@
         </div>
     @endif
 
-    <!-- ===== VIEW MODE TOGGLE (Grid / Table) ===== -->
-    <div class="flex items-center gap-2 mb-4"
-         x-data="{ mode: localStorage.getItem('leadership-activities-view-mode') || 'table' }"
-         x-init="$watch('mode', val => {
-             localStorage.setItem('leadership-activities-view-mode', val);
-             window.dispatchEvent(new CustomEvent('leadership-activities-view-mode-changed', { detail: { mode: val } }))
-         })">
-        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mr-1">Vista</span>
-        <button @click="mode = 'grid'"
-            :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-            </svg>
-            <span class="hidden sm:inline">Grid</span>
-        </button>
-        <button @click="mode = 'table'"
-            :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-            </svg>
-            <span class="hidden sm:inline">Tabla</span>
-        </button>
+    <!-- ===== VIEW MODE + RESULTS SUMMARY ===== -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2"
+             x-data="{ mode: localStorage.getItem('activities-view-mode') || 'table' }"
+             x-init="if (!localStorage.getItem('activities-view-mode')) localStorage.setItem('activities-view-mode', 'table'); $watch('mode', val => { localStorage.setItem('activities-view-mode', val); window.dispatchEvent(new CustomEvent('activities-view-mode-changed', { detail: { mode: val } })) })">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mr-1">Vista</span>
+            <button type="button" @click="mode = 'grid'"
+                :aria-pressed="mode === 'grid'"
+                :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                <span class="hidden sm:inline">Tarjetas</span>
+            </button>
+            <button type="button" @click="mode = 'table'"
+                :aria-pressed="mode === 'table'"
+                :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                <span class="hidden sm:inline">Tabla</span>
+            </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                Mostrando <span class="font-bold text-gray-700 dark:text-gray-200">{{ $pevaluacions->firstItem() ?? 0 }}–{{ $pevaluacions->lastItem() ?? 0 }}</span>
+                de <span class="font-bold text-gray-700 dark:text-gray-200">{{ $pevaluacions->total() }}</span> pevaluaciones
+                @if($lapso_id && isset($list_lapso[$lapso_id]))
+                    <span class="text-gray-400 dark:text-gray-600">·</span> {{ $list_lapso[$lapso_id] }}
+                @endif
+            </p>
+            <label class="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500">
+                Por página
+                <select wire:model.live="paginate" aria-label="Resultados por página"
+                    class="min-h-[36px] rounded-lg border border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-emerald-500/50">
+                    @foreach([10, 25, 50, 100] as $size)
+                        <option value="{{ $size }}">{{ $size }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <span wire:loading wire:target="search,pestudio_id,grado_id,seccion_id,profesor_id,status_activities,filter_status,filter_observations,paginate,selectLapso"
+                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Actualizando…
+            </span>
+        </div>
     </div>
 
     <!-- ===== CONTENT: View container — atenuado durante carga (patrón timetable) ===== -->
     <div wire:loading.class="opacity-40 pointer-events-none"
-         wire:target="pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
+         wire:target="search, pestudio_id, grado_id, seccion_id, profesor_id, status_activities, filter_status, filter_observations, selectLapso, paginate, gotoPage, nextPage, previousPage"
          x-cloak
-         x-data="{ mode: localStorage.getItem('leadership-activities-view-mode') || 'table' }"
-         x-init="() => { if (!localStorage.getItem('leadership-activities-view-mode')) localStorage.setItem('leadership-activities-view-mode', 'table') }"
-         x-on:leadership-activities-view-mode-changed.window="mode = $event.detail.mode">
+         x-data="{ mode: localStorage.getItem('activities-view-mode') || 'table' }"
+         x-init="() => { if (!localStorage.getItem('activities-view-mode')) localStorage.setItem('activities-view-mode', 'table') }"
+         x-on:activities-view-mode-changed.window="mode = $event.detail.mode">
 
         {{-- ═══════════════════════════════════════════════════════════════ --}}
         {{-- BENTO GRID MODE                                                --}}
@@ -236,6 +370,11 @@
                                     <h3 class="text-sm font-bold text-white truncate line-clamp-2" title="{{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}">
                                         {{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}
                                     </h3>
+                                    @if($item->pensum?->pestudio?->name)
+                                        <p class="text-[10px] text-cyan-400/80 truncate mt-0.5" title="Plan de Estudio">
+                                            {{ $item->pensum->pestudio->name }}
+                                        </p>
+                                    @endif
                                 </div>
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/12 text-purple-400 border border-purple-500/20 shrink-0">
                                     {{ $item->pensum?->asignatura?->code ?? '' }}
@@ -397,6 +536,16 @@
                             </svg>
                             <p class="text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
                             <p class="text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación activos en tu área.</p>
+                            @if($hasActiveFilters)
+                                <button type="button" wire:click="resetFilters"
+                                    @click="localStorage.removeItem('leadership-activities-filters')"
+                                    class="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Limpiar filtros
+                                </button>
+                            @endif
                         </div>
                     @endforelse
                 </div>
@@ -462,6 +611,12 @@
                                 </div>
                                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500 mt-1">
                                     <span>{{ $item->seccion?->grado?->name ?? '' }} - Sección {{ $item->seccion?->name ?? '' }}</span>
+                                    @if($item->pensum?->pestudio?->name)
+                                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                                        <span class="text-cyan-600/90 dark:text-cyan-400/90" title="Plan de Estudio">
+                                            {{ $item->pensum->pestudio->name }}
+                                        </span>
+                                    @endif
                                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                                     <span>{{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}</span>
                                 </div>
@@ -790,6 +945,16 @@
                     </svg>
                     <p class="text-gray-500 dark:text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
                     <p class="text-gray-400 dark:text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación activos en tu área.</p>
+                    @if($hasActiveFilters)
+                        <button type="button" wire:click="resetFilters"
+                            @click="localStorage.removeItem('leadership-activities-filters')"
+                            class="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Limpiar filtros
+                        </button>
+                    @endif
                 </div>
             @endforelse
 

@@ -233,6 +233,26 @@ class GenerateTimetableJob implements ShouldQueue
                 if (! $isLocked) {
                     continue;
                 }
+            } elseif ($isLocked && (bool) $lesson->half_block) {
+                // ADR-TT-017 (decisión #3): un bloqueo completo de una lección
+                // `half_block` no puede representarse con `lockedPeriodIds`
+                // (no distingue la mitad ni soporta dos mitades del mismo
+                // período). Se resuelve como preasignación para que el solver
+                // respete el período Y la mitad exactos de cada slot locked.
+                $preassignedSlots = $lesson->slots
+                    ->where('locked', true)
+                    ->map(fn ($slot): SlotCandidate => new SlotCandidate(
+                        periodId: (int) $slot->period_id,
+                        roomId: $slot->room_id ? (int) $slot->room_id : null,
+                        isPractical: (bool) data_get($slot, 'is_practical', false),
+                        half: $slot->half !== null ? (int) $slot->half : null,
+                    ))
+                    ->filter(fn (SlotCandidate $slot): bool => $slot->periodId > 0)
+                    ->values()
+                    ->all();
+
+                $lockedPeriods = [];
+                $isLocked = false;
             }
 
             $dto[] = new LessonToSchedule(
@@ -885,6 +905,8 @@ class GenerateTimetableJob implements ShouldQueue
                             'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
                             'room_id' => $slot->roomId,
                             'locked' => $lesson->locked,
+                            // ADR-TT-017: mitad de bloque del candidato (null = bloque completo).
+                            'half' => $slot->half,
                             'is_manual_override' => false,
                             'created_at' => $now,
                             'updated_at' => $now,
@@ -942,6 +964,8 @@ class GenerateTimetableJob implements ShouldQueue
                     'period_id' => $s->periodId,
                     'room_id' => $s->roomId,
                     'is_practical' => $s->isPractical,
+                    // ADR-TT-017: conservar la mitad en el preview (null = bloque completo).
+                    'half' => $s->half,
                 ],
                 $slots,
             );

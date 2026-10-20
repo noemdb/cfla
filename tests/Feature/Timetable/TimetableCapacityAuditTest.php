@@ -78,6 +78,7 @@ class TimetableCapacityAuditTest extends TestCase
         Seccion $seccion,
         int $blocks,
         bool $halfGroup = false,
+        bool $halfBlock = false,
     ): TimetableLesson {
         $grado = $seccion->grado;
         $pestudioId = $grado?->pestudio_id;
@@ -102,6 +103,7 @@ class TimetableCapacityAuditTest extends TestCase
             'weekly_blocks_t' => $blocks,
             'weekly_blocks_p' => 0,
             'is_half_group' => $halfGroup,
+            'half_block' => $halfBlock,
         ]);
     }
 
@@ -170,6 +172,21 @@ class TimetableCapacityAuditTest extends TestCase
         $this->makeLesson($calendar, $shift, $this->makeProfesor(2), $seccion, 2, true);
         $this->makeLesson($calendar, $shift, $this->makeProfesor(3), $seccion, 2, true);
         $this->makeLesson($calendar, $shift, $this->makeProfesor(4), $seccion, 2, true);
+
+        $report = $this->audit($calendar);
+
+        $this->assertSame(1.0, $report->overflowBlocksSections());
+    }
+
+    public function test_half_block_weighs_half_because_blocks_count_subslots(): void
+    {
+        [$calendar, $shift] = $this->calendarWithPeriods(1, 3); // 3 períodos
+        $seccion = $this->makeSeccion();
+
+        // Cada `half_block` de 2 sub-franjas ocupa media celda: 4×2×0.5 = 4 > 3 → overflow 1.
+        for ($i = 1; $i <= 4; $i++) {
+            $this->makeLesson($calendar, $shift, $this->makeProfesor($i), $seccion, 2, false, true);
+        }
 
         $report = $this->audit($calendar);
 

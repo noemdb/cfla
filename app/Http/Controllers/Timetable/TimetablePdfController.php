@@ -170,11 +170,12 @@ class TimetablePdfController extends Controller
             $assignment = TimetableSlot::query()
                 ->where('calendar_id', $calendar->id)
                 ->where('seccion_id', $seccionId)
-                ->get(['lesson_id', 'period_id', 'room_id'])
+                ->get(['lesson_id', 'period_id', 'room_id', 'half'])
                 ->groupBy('lesson_id')
                 ->map(fn ($slots) => $slots->map(fn ($slot) => [
                     'period_id' => (int) $slot->period_id,
                     'room_id' => (int) ($slot->room_id ?? 0),
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ])->values()->all());
         }
 
@@ -220,6 +221,7 @@ class TimetablePdfController extends Controller
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                     'grupo' => $pev?->grupoEstable?->name,
                     'room_id' => (int) ($slot['room_id'] ?? 0),
+                    'half' => $slot['half'] ?? null,
                 ];
             }
         }
@@ -319,11 +321,12 @@ class TimetablePdfController extends Controller
                 $sectionAssignment = TimetableSlot::query()
                     ->where('calendar_id', $calendar->id)
                     ->where('seccion_id', $section->id)
-                    ->get(['lesson_id', 'period_id', 'room_id'])
+                    ->get(['lesson_id', 'period_id', 'room_id', 'half'])
                     ->groupBy('lesson_id')
                     ->map(fn ($slots) => $slots->map(fn ($slot) => [
                         'period_id' => (int) $slot->period_id,
                         'room_id' => (int) ($slot->room_id ?? 0),
+                        'half' => $slot->half !== null ? (int) $slot->half : null,
                     ])->values()->all());
             }
 
@@ -347,6 +350,7 @@ class TimetablePdfController extends Controller
                     $assignmentsByPeriod[$period->id][] = [
                         'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                         'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
+                        'half' => $slot['half'] ?? null,
                     ];
                 }
             }
@@ -494,10 +498,11 @@ class TimetablePdfController extends Controller
                 $sectionLessons = $lessons->filter(fn (TimetableLesson $lesson): bool => (int) $lesson->pevaluacion?->seccion_id === (int) $section->id);
                 $sectionAssignment = $usePersistedSlots
                     ? TimetableSlot::query()->where('calendar_id', $calendar->id)->where('seccion_id', $section->id)
-                        ->get(['lesson_id', 'period_id', 'room_id'])->groupBy('lesson_id')
+                        ->get(['lesson_id', 'period_id', 'room_id', 'half'])->groupBy('lesson_id')
                         ->map(fn ($slots) => $slots->map(fn ($slot) => [
                             'period_id' => (int) $slot->period_id,
                             'room_id' => (int) ($slot->room_id ?? 0),
+                            'half' => $slot->half !== null ? (int) $slot->half : null,
                         ])->values()->all())
                     : $assignment;
                 $assignmentsByPeriod = [];
@@ -522,6 +527,7 @@ class TimetablePdfController extends Controller
                             'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                             'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                             'grupo' => $pev?->grupo_estable_id ? $pev?->grupoEstable?->name : null,
+                            'half' => $slot['half'] ?? null,
                         ];
                     }
                 }
@@ -1625,11 +1631,12 @@ class TimetablePdfController extends Controller
         if ($usePersistedSlots) {
             $assignment = TimetableSlot::query()
                 ->where('calendar_id', $calendar->id)
-                ->get(['lesson_id', 'period_id', 'room_id'])
+                ->get(['lesson_id', 'period_id', 'room_id', 'half'])
                 ->groupBy('lesson_id')
                 ->map(fn ($slots) => $slots->map(fn ($slot) => [
                     'period_id' => (int) $slot->period_id,
                     'room_id' => (int) ($slot->room_id ?? 0),
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ])->values()->all());
         }
 
@@ -1690,6 +1697,7 @@ class TimetablePdfController extends Controller
                     'seccion' => $pev?->seccion?->name ?? '',
                     'grupo' => $pev?->grupoEstable?->name,
                     'room' => $rooms->get((int) ($slot['room_id'] ?? 0))?->name,
+                    'half' => $slot['half'] ?? null,
                 ];
             }
         }

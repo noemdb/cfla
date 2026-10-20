@@ -103,49 +103,57 @@ class TimetablePublicationReadinessService
                 $teacherId = (int) ($lesson->pevaluacion?->profesor_id ?? 0);
                 $sectionId = (int) ($lesson->pevaluacion?->seccion_id ?? 0);
                 $roomId = (int) ($slot['room_id'] ?? 0);
-                $key = $periodId.':';
 
-                if ($teacherId && ! empty($teacherPeriods[$key.$teacherId] ?? [])) {
-                    $existingTeacherLessons = collect($teacherPeriods[$key.$teacherId])
-                        ->map(fn ($id) => $lessons->get($id))
-                        ->filter();
-                    $allShared = $existingTeacherLessons->every(
-                        fn ($l): bool => (bool) ($l?->allow_shared_teacher ?? false),
-                    );
-                    $bothAllowHalfGroup = $existingTeacherLessons->every(
-                        fn ($l): bool => (bool) ($l?->is_half_group ?? false),
-                    ) && (bool) $lesson->is_half_group;
-                    $candidateShared = (bool) $lesson->allow_shared_teacher;
+                // ADR-TT-017: la ocupación se evalúa por sub-franja; un bloque
+                // completo (half null) ocupa ambas mitades, así que dos mitades
+                // secuenciales del mismo período no son doble reserva.
+                $slotHalf = isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null;
 
-                    if (! ($bothAllowHalfGroup || ($candidateShared && $allShared))) {
-                        $hardConflicts[] = $this->conflict($lesson, 'teacher_double_booked', $period, $periodId);
-                    }
-                }
-                if ($sectionId && isset($sectionPeriods[$key.$sectionId])) {
-                    foreach ($sectionPeriods[$key.$sectionId] as $existingSectionLessonId) {
-                        $existingSectionLesson = $lessons->get($existingSectionLessonId);
-                        $halfGroupPair = (bool) $lesson->is_half_group
-                            && (bool) $existingSectionLesson?->is_half_group;
-                        $sameStableGroup = $lesson->pevaluacion?->grupo_estable_id === null
-                            || $existingSectionLesson?->pevaluacion?->grupo_estable_id === null
-                            || (int) $lesson->pevaluacion?->grupo_estable_id === (int) $existingSectionLesson?->pevaluacion?->grupo_estable_id;
-                        if (! $halfGroupPair && $sameStableGroup) {
-                            $hardConflicts[] = $this->conflict($lesson, 'section_double_booked', $period, $periodId);
+                foreach ($slotHalf === null ? [0, 1] : [$slotHalf] as $half) {
+                    $key = $periodId.':'.$half.':';
+
+                    if ($teacherId && ! empty($teacherPeriods[$key.$teacherId] ?? [])) {
+                        $existingTeacherLessons = collect($teacherPeriods[$key.$teacherId])
+                            ->map(fn ($id) => $lessons->get($id))
+                            ->filter();
+                        $allShared = $existingTeacherLessons->every(
+                            fn ($l): bool => (bool) ($l?->allow_shared_teacher ?? false),
+                        );
+                        $bothAllowHalfGroup = $existingTeacherLessons->every(
+                            fn ($l): bool => (bool) ($l?->is_half_group ?? false),
+                        ) && (bool) $lesson->is_half_group;
+                        $candidateShared = (bool) $lesson->allow_shared_teacher;
+
+                        if (! ($bothAllowHalfGroup || ($candidateShared && $allShared))) {
+                            $hardConflicts[] = $this->conflict($lesson, 'teacher_double_booked', $period, $periodId);
                         }
                     }
-                }
-                if ($roomId && isset($roomPeriods[$key.$roomId])) {
-                    $hardConflicts[] = $this->conflict($lesson, 'room_double_booked', $period, $periodId);
-                }
+                    if ($sectionId && isset($sectionPeriods[$key.$sectionId])) {
+                        foreach ($sectionPeriods[$key.$sectionId] as $existingSectionLessonId) {
+                            $existingSectionLesson = $lessons->get($existingSectionLessonId);
+                            $halfGroupPair = (bool) $lesson->is_half_group
+                                && (bool) $existingSectionLesson?->is_half_group;
+                            $sameStableGroup = $lesson->pevaluacion?->grupo_estable_id === null
+                                || $existingSectionLesson?->pevaluacion?->grupo_estable_id === null
+                                || (int) $lesson->pevaluacion?->grupo_estable_id === (int) $existingSectionLesson?->pevaluacion?->grupo_estable_id;
+                            if (! $halfGroupPair && $sameStableGroup) {
+                                $hardConflicts[] = $this->conflict($lesson, 'section_double_booked', $period, $periodId);
+                            }
+                        }
+                    }
+                    if ($roomId && isset($roomPeriods[$key.$roomId])) {
+                        $hardConflicts[] = $this->conflict($lesson, 'room_double_booked', $period, $periodId);
+                    }
 
-                if ($teacherId) {
-                    $teacherPeriods[$key.$teacherId][] = (int) $lesson->id;
-                }
-                if ($sectionId) {
-                    $sectionPeriods[$key.$sectionId][] = (int) $lesson->id;
-                }
-                if ($roomId) {
-                    $roomPeriods[$key.$roomId] = true;
+                    if ($teacherId) {
+                        $teacherPeriods[$key.$teacherId][] = (int) $lesson->id;
+                    }
+                    if ($sectionId) {
+                        $sectionPeriods[$key.$sectionId][] = (int) $lesson->id;
+                    }
+                    if ($roomId) {
+                        $roomPeriods[$key.$roomId] = true;
+                    }
                 }
             }
         }
@@ -213,7 +221,10 @@ class TimetablePublicationReadinessService
                     continue;
                 }
 
-                $key = $periodId.':'.(int) $lesson->pevaluacion->seccion_id;
+                // ADR-TT-017: los medios grupos comparten celda solo dentro de la
+                // misma sub-franja (half null = bloque completo).
+                $slotHalf = isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : 'F';
+                $key = $periodId.':'.$slotHalf.':'.(int) $lesson->pevaluacion->seccion_id;
                 $cells[$key] = ($cells[$key] ?? 0) + 1;
             }
         }
@@ -233,7 +244,8 @@ class TimetablePublicationReadinessService
         string $type,
         ?TimetablePeriod $period,
         int $periodId = 0,
-    ): array {        $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
+    ): array {
+        $subject = $lesson->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura sin nombre';
         $section = $lesson->pevaluacion?->seccion?->name ?? 'Sección sin nombre';
         $grade = $lesson->pevaluacion?->grado?->name ?? 'Grado sin nombre';
         $teacher = trim(($lesson->pevaluacion?->profesor?->lastname ?? '').' '.($lesson->pevaluacion?->profesor?->name ?? ''));

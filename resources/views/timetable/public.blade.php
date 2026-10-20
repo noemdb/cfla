@@ -48,12 +48,19 @@
                             <td class="time">{{ $order }}º</td>
                             @foreach (range(1, 5) as $day)
                                 <td>
-                                    @forelse ($row->get($day) as $slot)
-                                        <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
-                                        <div class="meta">{{ $slot->lesson?->pevaluacion?->profesor?->lastname ?? '' }}{{ $slot->grupo_estable_id ? ' · '.($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '' }}{{ $slot->room_id ? ' · Aula' : '' }}</div>
-                                    @empty
-                                        <span class="empty">&nbsp;</span>
-                                    @endforelse
+                                    @include('timetable.partials.half-cell', [
+                                        'slots' => $row->get($day),
+                                        'emptyClass' => 'empty',
+                                        'lines' => function ($slot): array {
+                                            $pev = $slot->lesson?->pevaluacion;
+                                            $group = $slot->grupo_estable_id ? ' · '.(string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+
+                                            return [
+                                                ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
+                                                ['class' => 'meta', 'text' => trim((string) ($pev?->profesor?->lastname ?? '').$group.($slot->room_id ? ' · Aula' : ''))],
+                                            ];
+                                        },
+                                    ])
                                 </td>
                             @endforeach
                         </tr>

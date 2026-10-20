@@ -64,22 +64,27 @@
                                     @if ($isBreak)
                                         RECESO
                                     @else
-                                        @forelse ($day['assignments'] as $cell)
-                                            {{-- Una asignatura debajo de la otra conservando profesor, año y sección. --}}
-                                            <div class="entry">
-                                                <div class="subject">{{ $cell['asignatura'] }}</div>
-                                                @if ($cell['profesor'])<div class="teacher">{{ $cell['profesor'] }}</div>@endif
-                                                @if ($cell['grado'] || $cell['seccion'])
-                                                    <div class="section">
-                                                        {{ $cell['grado'] }}@if ($cell['grado'] && $cell['seccion']) · @endif{{ $cell['seccion'] }}
-                                                    </div>
-                                                @endif
-                                                @if ($cell['room'])<div class="room">Aula: {{ $cell['room'] }}</div>@endif
-                                                @if ($cell['grupo'])<div class="teacher">Grupo: {{ $cell['grupo'] }}</div>@endif
-                                            </div>
-                                        @empty
-                                            <span class="teacher">&nbsp;</span>
-                                        @endforelse
+                                        @include('timetable.partials.half-cell', [
+                                            'slots' => $day['assignments'],
+                                            'itemClass' => 'entry',
+                                            'lines' => function ($cell): array {
+                                                $lines = [['class' => 'subject', 'text' => (string) ($cell['asignatura'] ?? '?')]];
+                                                if (! empty($cell['profesor'])) {
+                                                    $lines[] = ['class' => 'teacher', 'text' => (string) $cell['profesor']];
+                                                }
+                                                if (! empty($cell['grado']) || ! empty($cell['seccion'])) {
+                                                    $lines[] = ['class' => 'section', 'text' => trim((string) ($cell['grado'] ?? '').(! empty($cell['grado']) && ! empty($cell['seccion']) ? ' · ' : '').(string) ($cell['seccion'] ?? ''))];
+                                                }
+                                                if (! empty($cell['room'])) {
+                                                    $lines[] = ['class' => 'room', 'text' => 'Aula: '.(string) $cell['room']];
+                                                }
+                                                if (! empty($cell['grupo'])) {
+                                                    $lines[] = ['class' => 'teacher', 'text' => 'Grupo: '.(string) $cell['grupo']];
+                                                }
+
+                                                return $lines;
+                                            },
+                                        ])
                                     @endif
                                 </td>
                             @endforeach

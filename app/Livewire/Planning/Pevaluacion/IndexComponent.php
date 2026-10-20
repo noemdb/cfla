@@ -63,6 +63,10 @@ class IndexComponent extends Component
 
     public $filter_lapso = '';
 
+    // Filtro por estado del pensum: '' = todos (true/false/null),
+    // 'active' = solo pensums activos, 'inactive' = pensums inactivos (false/null).
+    public $filter_pensum_status = '';
+
     // Opciones de los selects de filtro (independientes de las del formulario)
     public $filter_grados = [];
 
@@ -124,6 +128,14 @@ class IndexComponent extends Component
         ])
             ->withCount('activities')
             ->withPlanningModule();
+
+        // Filtro opcional por estado del pensum. Por defecto se muestran todas
+        // las pevaluaciones (pensum activo, inactivo o nulo).
+        if ($this->filter_pensum_status === 'active') {
+            $query->withActivePensum();
+        } elseif ($this->filter_pensum_status === 'inactive') {
+            $query->withInactivePensum();
+        }
 
         // Search across related models
         if ($this->search) {
@@ -259,6 +271,11 @@ class IndexComponent extends Component
         $this->resetPage();
     }
 
+    public function updatingFilterPensumStatus()
+    {
+        $this->resetPage();
+    }
+
     public function updatingPaginate()
     {
         $this->resetPage();
@@ -347,6 +364,11 @@ class IndexComponent extends Component
         $this->filter_seccion = $filters['filter_seccion'] ?? '';
         $this->filter_asignatura = $filters['filter_asignatura'] ?? '';
         $this->filter_lapso = $filters['filter_lapso'] ?? '';
+        $this->filter_pensum_status = in_array(
+            $filters['filter_pensum_status'] ?? '',
+            ['active', 'inactive'],
+            true
+        ) ? $filters['filter_pensum_status'] : '';
 
         $this->filter_grados = $this->filter_pestudio
             ? Grado::where('pestudio_id', $this->filter_pestudio)
@@ -620,6 +642,7 @@ class IndexComponent extends Component
         $this->reset([
             'search', 'filter_pestudio', 'filter_profesor',
             'filter_grado', 'filter_seccion', 'filter_asignatura', 'filter_lapso',
+            'filter_pensum_status',
             'filter_grados', 'filter_secciones', 'filter_asignaturas',
         ]);
     }

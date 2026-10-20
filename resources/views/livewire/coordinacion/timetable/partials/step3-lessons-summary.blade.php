@@ -1,4 +1,7 @@
-{{-- Paso 3 · resumen de capacidad y bloques (wizard completo y tab Clases). --}}
+{{-- Paso 3 · resumen de capacidad y bloques (wizard completo y tab Clases).
+     `summaryMode` = 'preview' (wizard: métricas del dry-run/preview) o
+     'persisted' (modo rápido `/light`: edita `timetable_slots` directamente,
+     sin dry-run → se muestran métricas de la grilla guardada). --}}
                 @php
                     $rows = $rows ?? ($step3ViewMode === 'flat' ? $pevaluaciones : $tabActivePevaluaciones);
                     $sumT = 0;
@@ -46,24 +49,41 @@
                         $usage = $capacidadSemanal > 0 ? min(100, (int) round($required * 100 / $capacidadSemanal)) : 0;
                         $capacityGap = $capacidadSemanal - $required;
                         $maximumCells = $fullGroupBlocks + $selectedHalfBlocks;
-                        $hasDryRunResult = in_array($generationState, ['preview_ready', 'published'], true)
+                        $persistedMode = ($summaryMode ?? 'preview') === 'persisted';
+                        $hasDryRunResult = ! $persistedMode
+                            && in_array($generationState, ['preview_ready', 'published'], true)
+                            && is_array($preview ?? null)
+                            && array_key_exists('assignment', $preview);
+                        $hasPersistedGrid = $persistedMode
                             && is_array($preview ?? null)
                             && array_key_exists('assignment', $preview);
                         $actualAssignment = collect($preview['assignment'] ?? []);
                         $actualPeriodIds = collect();
                         $actualAssignedBlocks = 0;
                         $actualIncompleteLessons = 0;
+                        $actualAssignedLessons = 0;
+                        $actualCountedLessons = 0;
                         foreach ($rows as $pev) {
-                            if (! isset($selectedPevIdsForView[(int) $pev->id])) {
+                            // El wizard evalúa solo la selección; el modo rápido
+                            // refleja la grilla completa de la sección activa.
+                            if ($hasDryRunResult && ! isset($selectedPevIdsForView[(int) $pev->id])) {
                                 continue;
                             }
 
                             $lessonId = (int) ($lessons[$pev->id]['id'] ?? 0);
+                            if ($lessonId <= 0) {
+                                continue;
+                            }
+
+                            $actualCountedLessons++;
                             $slots = collect($actualAssignment->get((string) $lessonId, $actualAssignment->get($lessonId, [])));
                             $assigned = $slots->pluck('period_id')->filter()->unique();
                             $requiredForLesson = (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0)
                                 + (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
                             $actualAssignedBlocks += $assigned->count();
+                            if ($assigned->isNotEmpty()) {
+                                $actualAssignedLessons++;
+                            }
                             $actualPeriodIds = $actualPeriodIds->merge($assigned);
                             if ($requiredForLesson > $assigned->count()) {
                                 $actualIncompleteLessons++;
@@ -87,6 +107,17 @@
                                 $feasibilityClasses = 'border-sky-500/30 bg-sky-500/10 text-sky-800 dark:text-sky-200';
                             } else {
                                 $feasibilityLabel = 'Factible';
+                                $feasibilityClasses = 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200';
+                            }
+                        } elseif ($hasPersistedGrid) {
+                            if ($actualCountedLessons === 0) {
+                                $feasibilityLabel = 'Sin clases';
+                                $feasibilityClasses = 'border-gray-300/80 bg-white/60 text-gray-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-200';
+                            } elseif ($actualIncompleteLessons > 0) {
+                                $feasibilityLabel = 'Grilla incompleta';
+                                $feasibilityClasses = 'border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-200';
+                            } else {
+                                $feasibilityLabel = 'Grilla guardada';
                                 $feasibilityClasses = 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200';
                             }
                         } elseif ($overCapacity) {
@@ -266,8 +297,28 @@
                                         <span class="font-bold">⚠ sin margen real</span>
                                     @endif
                                 </div>
+                            @elseif ($hasPersistedGrid && $actualCountedLessons > 0)
+                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-current/10 pt-2 text-[11px]">
+                                    <span class="font-bold">Grilla: {{ $actualCells }} celdas ocupadas</span>
+                                    <span>{{ $actualAssignedLessons }}/{{ $actualCountedLessons }} clases ubicadas</span>
+                                    @if ($actualIncompleteLessons > 0)
+                                        <span class="font-bold text-amber-700 dark:text-amber-300">
+                                            ⚠ {{ $actualIncompleteLessons }} clase(s) sin ubicar
+                                        </span>
+                                    @else
+                                        <span class="font-bold text-emerald-700 dark:text-emerald-300">✓ todas las clases ubicadas</span>
+                                    @endif
+                                    @if (! empty($lastSavedAt ?? null))
+                                        <span class="opacity-80">Actualizado {{ $lastSavedAt }}</span>
+                                    @endif
+                                </div>
+                            @elseif ($hasPersistedGrid)
+                                <p class="mt-2 border-t border-current/10 pt-2 text-[11px] opacity-80">
+                                    Esta sección aún no tiene clases guardadas. Selecciona asignaturas y pulsa
+                                    <span class="font-bold">Guardar clases</span> para reflejarlas en la grilla.
+                                </p>
                             @endif
-                            @if ($selectedHalfBlocks > 0)
+                            @if ($selectedHalfBlocks > 0 && ! ($persistedMode ?? false))
                                 <p class="mt-1 text-[10px] opacity-80">
                                     La estimación va de ningún emparejamiento al máximo teórico de medios grupos.
                                     El dry-run incorpora profesor, aula, disponibilidad, turno y sección.

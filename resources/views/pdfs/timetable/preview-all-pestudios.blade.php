@@ -73,12 +73,17 @@
                                                 @if ($isBreak)
                                                     RECESO
                                                 @else
-                                                    @forelse ($day['assignments'] as $cell)
-                                                        <div class="subject">{{ $cell['asignatura'] }}</div>
-                                                        @if ($cell['profesor'])<div class="teacher">{{ $cell['profesor'] }}</div>@endif
-                                                    @empty
-                                                        <span class="teacher">&nbsp;</span>
-                                                    @endforelse
+                                                    @include('timetable.partials.half-cell', [
+                                                        'slots' => $day['assignments'],
+                                                        'lines' => function ($cell): array {
+                                                            $lines = [['class' => 'subject', 'text' => (string) ($cell['asignatura'] ?? '?')]];
+                                                            if (! empty($cell['profesor'])) {
+                                                                $lines[] = ['class' => 'teacher', 'text' => (string) $cell['profesor']];
+                                                            }
+
+                                                            return $lines;
+                                                        },
+                                                    ])
                                                 @endif
                                             </td>
                                         @endforeach

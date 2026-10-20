@@ -40,13 +40,23 @@
                     <td class="time">{{ $order }}º</td>
                     @foreach (range(1, 5) as $day)
                         <td>
-                            @forelse ($row->get($day) as $slot)
-                                <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
-                                <div class="section">{{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}{{ $slot->grupo_estable_id ? ' · '.($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '' }}</div>
-                                @if ($slot->room_id)<div class="section">Aula</div>@endif
-                            @empty
-                                <span class="section">&nbsp;</span>
-                            @endforelse
+                            @include('timetable.partials.half-cell', [
+                                'slots' => $row->get($day),
+                                'emptyClass' => 'section',
+                                'lines' => function ($slot): array {
+                                    $pev = $slot->lesson?->pevaluacion;
+                                    $group = $slot->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                    $lines = [
+                                        ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
+                                        ['class' => 'section', 'text' => trim((string) ($pev?->seccion?->name ?? '').($group !== '' ? ' · '.$group : ''))],
+                                    ];
+                                    if ($slot->room_id) {
+                                        $lines[] = ['class' => 'section', 'text' => 'Aula'];
+                                    }
+
+                                    return $lines;
+                                },
+                            ])
                         </td>
                     @endforeach
                 </tr>

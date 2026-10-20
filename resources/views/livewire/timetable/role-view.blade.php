@@ -30,16 +30,20 @@
                             <td class="px-3 py-2 font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $order }}º</td>
                             @foreach (range(1, 5) as $day)
                                 <td class="px-2 py-2 align-top text-center">
-                                    @forelse ($row->get($day) as $slot)
-                                        <div class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                            {{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}
-                                        </div>
-                                        <div class="text-[11px] text-gray-400 mt-0.5">
-                                            {{ $slot->lesson?->pevaluacion?->profesor?->lastname ?? '' }}{{ $slot->grupo_estable_id ? ' · '.($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '' }}{{ $slot->room_id ? ' · Aula' : '' }}
-                                        </div>
-                                    @empty
-                                        <span class="text-gray-200 dark:text-white/5">—</span>
-                                    @endforelse
+                                    @include('timetable.partials.half-cell', [
+                                        'slots' => $row->get($day),
+                                        'emptyClass' => 'text-gray-200 dark:text-white/5',
+                                        'emptyText' => '—',
+                                        'lines' => function ($slot): array {
+                                            $pev = $slot->lesson?->pevaluacion;
+                                            $group = $slot->grupo_estable_id ? ' · '.(string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+
+                                            return [
+                                                ['class' => 'text-xs font-bold text-emerald-600 dark:text-emerald-400', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
+                                                ['class' => 'text-[11px] text-gray-400 mt-0.5', 'text' => trim((string) ($pev?->profesor?->lastname ?? '').$group.($slot->room_id ? ' · Aula' : ''))],
+                                            ];
+                                        },
+                                    ])
                                 </td>
                             @endforeach
                         </tr>

@@ -2634,31 +2634,33 @@
                                                         wire:key="preview-cell-{{ $shiftId }}-{{ $order }}-{{ $day }}"
                                                         class="relative flex min-h-[28px] flex-col items-stretch justify-center gap-px rounded p-px {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:bg-amber-400/5 dark:text-amber-300/70' : ($cellAssignments ? 'bg-emerald-500/5 border border-emerald-500/10' : 'border border-transparent') }}">
                                                         @if ($cellAssignments)
-                                                            @foreach ($cellAssignments as $cell)
-                                                                <div
-                                                                    wire:key="preview-slot-{{ (int) $cell['lesson_id'] }}-{{ (int) $cell['period_id'] }}"
-                                                                    title="{{ !empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
-                                                                    class="relative flex flex-col gap-px rounded p-0.5 text-center leading-tight {{ count($cellAssignments) > 1 ? 'bg-white/5' : '' }} {{ !empty($cell['is_half_group']) ? 'border-2 border-solid border-violet-500/40 bg-violet-500/[0.06]' : '' }}">
-                                                                    <div class="flex min-h-4 items-center justify-center gap-px px-px text-[9px] font-bold text-gray-900 dark:text-white">
-                                                                        <span>{{ $cell['asignatura'] }}</span>
-                                                                    </div>
-                                                                    @if ($cell['profesor'])
-                                                                        <div class="px-px text-[8px] text-gray-500 dark:text-gray-400">{{ $cell['profesor'] }}</div>
-                                                                    @endif
-                                                                    @if ($cell['grupo'])
-                                                                        <div class="px-px text-[8px] text-emerald-600 dark:text-emerald-400">{{ $cell['grupo'] }}</div>
-                                                                    @endif
-                                                                    @if (!empty($cell['collision']))
-                                                                        <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
-                                                                            title="Colisión de horario del docente con: {{ implode(', ', $cell['collision_pestudios']) }}"
-                                                                            aria-label="Colisión de horario del docente con {{ implode(', ', $cell['collision_pestudios']) }}">
-                                                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-                                                                            </svg>
-                                                                        </span>
-                                                                    @endif
-                                                                </div>
+                                                            @php
+                                                                $fullAssignments = collect($cellAssignments)->filter(fn ($c) => ($c['half'] ?? null) === null)->values();
+                                                                $supAssignments = collect($cellAssignments)->filter(fn ($c) => (int) ($c['half'] ?? -1) === 0)->values();
+                                                                $infAssignments = collect($cellAssignments)->filter(fn ($c) => (int) ($c['half'] ?? -1) === 1)->values();
+                                                                $hasHalves = $supAssignments->isNotEmpty() || $infAssignments->isNotEmpty();
+                                                            @endphp
+                                                            @foreach ($fullAssignments as $slotItem)
+                                                                @include('livewire.coordinacion.timetable.partials.wizard-preview-slot', ['cell' => $slotItem, 'multi' => count($cellAssignments) > 1])
                                                             @endforeach
+                                                            @if ($hasHalves)
+                                                                <div class="flex flex-col gap-px">
+                                                                    <div class="rounded border-b border-dashed border-sky-500/40 pt-px">
+                                                                        @forelse ($supAssignments as $slotItem)
+                                                                            @include('livewire.coordinacion.timetable.partials.wizard-preview-slot', ['cell' => $slotItem, 'multi' => count($cellAssignments) > 1])
+                                                                        @empty
+                                                                            <span class="flex items-center justify-center text-[7px] font-bold uppercase tracking-wide text-sky-600/70 dark:text-sky-300/70">½ sup.</span>
+                                                                        @endforelse
+                                                                    </div>
+                                                                    <div class="rounded">
+                                                                        @forelse ($infAssignments as $slotItem)
+                                                                            @include('livewire.coordinacion.timetable.partials.wizard-preview-slot', ['cell' => $slotItem, 'multi' => count($cellAssignments) > 1])
+                                                                        @empty
+                                                                            <span class="flex items-center justify-center text-[7px] font-bold uppercase tracking-wide text-sky-600/70 dark:text-sky-300/70">½ inf.</span>
+                                                                        @endforelse
+                                                                    </div>
+                                                                </div>
+                                                            @endif
                                                         @elseif ($isBreak)
                                                             <div class="w-full text-center text-[9px] font-semibold uppercase tracking-wide opacity-75">Receso</div>
                                                         @else

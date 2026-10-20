@@ -155,15 +155,15 @@ class TimetableLight extends BaseTimetableWizard
     // reconstruye el payload para que el wizard completo y los PDFs por
     // defecto reflejen el horario persistido (no una previsualización vieja).
 
-    public function movePreviewLesson(int $lessonId, int $fromPeriodId, int $newPeriodId): void
+    public function movePreviewLesson(int $lessonId, int $fromPeriodId, int $newPeriodId, ?int $half = null): void
     {
-        parent::movePreviewLesson($lessonId, $fromPeriodId, $newPeriodId);
+        parent::movePreviewLesson($lessonId, $fromPeriodId, $newPeriodId, $half);
         $this->afterEdit();
     }
 
-    public function addPreviewLesson(int $lessonId): void
+    public function addPreviewLesson(int $lessonId, ?int $half = null): void
     {
-        parent::addPreviewLesson($lessonId);
+        parent::addPreviewLesson($lessonId, $half);
         $this->afterEdit();
     }
 

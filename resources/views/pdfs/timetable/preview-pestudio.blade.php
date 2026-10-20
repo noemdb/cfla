@@ -69,16 +69,19 @@
                                                 @if ($isBreak)
                                                     RECESO
                                                 @else
-                                                    @forelse ($day['assignments'] as $cell)
-                                                        <div class="cell-assignment">
-                                                            <div class="subject">{{ $cell['asignatura'] }}</div>
-                                                            @if (!empty($cell['grupo']))
-                                                                <div class="group">{{ $cell['grupo'] }}</div>
-                                                            @endif
-                                                        </div>
-                                                    @empty
-                                                        &nbsp;
-                                                    @endforelse
+                                                    @include('timetable.partials.half-cell', [
+                                                        'slots' => $day['assignments'],
+                                                        'itemClass' => 'cell-assignment',
+                                                        'emptyClass' => '',
+                                                        'lines' => function ($cell): array {
+                                                            $lines = [['class' => 'subject', 'text' => (string) ($cell['asignatura'] ?? '?')]];
+                                                            if (! empty($cell['grupo'])) {
+                                                                $lines[] = ['class' => 'group', 'text' => (string) $cell['grupo']];
+                                                            }
+
+                                                            return $lines;
+                                                        },
+                                                    ])
                                                 @endif
                                             </td>
                                         @endforeach

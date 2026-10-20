@@ -106,6 +106,7 @@ class ActivityOverview extends IndexComponent
 
         $query = Pevaluacion::with([
             'pensum.asignatura',
+            'pensum.pestudio',
             'seccion.grado',
             'profesor',
             'lapso',
@@ -119,6 +120,8 @@ class ActivityOverview extends IndexComponent
                 'activities as activities_lessons_count' => fn ($q) => $q->whereHas('lmsPublication'),
             ])
             ->whereHas('pensum.pestudio', fn ($q) => $q->where('planning_module', true))
+            ->whereHas('pensum.grado', fn ($q) => $q->where('status_active', 'true'))
+            ->withActivePensum()
             ->whereNull('pevaluacions.deleted_at');
 
         // Apply leadership scope before filters
@@ -161,6 +164,19 @@ class ActivityOverview extends IndexComponent
                 $query->has('activities')
                     ->whereDoesntHave('activities', fn ($q) => $q->where('status', 0));
             }
+        }
+        if (! empty($filters['search'])) {
+            $term = trim((string) $filters['search']);
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('pensum.asignatura', fn ($q) => $q
+                    ->where('name', 'like', "%{$term}%")
+                    ->orWhere('code', 'like', "%{$term}%"))
+                    ->orWhereHas('profesor', fn ($q) => $q
+                        ->where('name', 'like', "%{$term}%")
+                        ->orWhere('lastname', 'like', "%{$term}%"))
+                    ->orWhereHas('seccion', fn ($q) => $q->where('name', 'like', "%{$term}%"))
+                    ->orWhere('pevaluacions.id', 'like', "%{$term}%");
+            });
         }
 
         $query->orderBy('created_at', 'desc');
@@ -217,6 +233,7 @@ class ActivityOverview extends IndexComponent
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
             'filter_status' => $this->filter_status ?: null,
+            'search' => $this->search ?: null,
         ], fn ($v) => $v !== null && $v !== '');
 
         $pevaluacions = $this->getPevaluaciones($filters);

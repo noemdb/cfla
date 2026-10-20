@@ -182,6 +182,7 @@ final class TimetableCalendarSnapshotService
                         'room_type_required' => $lesson->room_type_required ?: null,
                         'is_half_group' => (bool) $lesson->is_half_group,
                         'allow_shared_teacher' => (bool) $lesson->allow_shared_teacher,
+                        'half_block' => (bool) $lesson->half_block,
                         'priority' => max(0, (int) $lesson->priority),
                         'locked' => (bool) $lesson->locked,
                     ],
@@ -273,6 +274,7 @@ final class TimetableCalendarSnapshotService
                         'room_type_required' => 'string|null.',
                         'is_half_group' => 'bool. Medio-grupo: la celda de su sección admite hasta max_subjects_per_period mitades.',
                         'allow_shared_teacher' => 'bool. Relaja la unicidad de docente (D-1).',
+                        'half_block' => 'bool. ADR-TT-017: la lección ocupa medias franjas (mitad superior/inferior de un período).',
                         'priority' => 'int>=0.',
                         'locked' => 'bool. Bloqueo a nivel de lección.',
                     ],
@@ -293,6 +295,7 @@ final class TimetableCalendarSnapshotService
                     'is_practical' => 'bool. Solo si la columna existe en el destino (§5.5).',
                     'is_half_group' => 'bool. Afecta la clave generada slot_section_key.',
                     'allow_shared_teacher' => 'bool. Afecta la clave generada slot_teacher_key.',
+                    'half' => 'int|null. ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo. Se refleja en slot_half_key y en el sufijo de slot_section_key/slot_teacher_key.',
                 ],
             ],
         ];
@@ -659,6 +662,7 @@ final class TimetableCalendarSnapshotService
                 'room_type_required' => $configuration['room_type_required'] ?? null,
                 'is_half_group' => (bool) ($configuration['is_half_group'] ?? false),
                 'allow_shared_teacher' => (bool) ($configuration['allow_shared_teacher'] ?? false),
+                'half_block' => (bool) ($configuration['half_block'] ?? false),
                 'priority' => max(0, (int) ($configuration['priority'] ?? 0)),
                 'locked' => (bool) ($configuration['locked'] ?? false),
             ];
@@ -776,6 +780,8 @@ final class TimetableCalendarSnapshotService
             $isHalfGroup = (bool) ($slot['is_half_group'] ?? false);
             $allowShared = (bool) ($slot['allow_shared_teacher'] ?? false);
             $isPractical = $hasPractical ? (bool) ($slot['is_practical'] ?? false) : false;
+            // ADR-TT-017: mitad de bloque; null = bloque completo.
+            $half = $this->normalizeHalf($slot['half'] ?? null);
 
             // §5.3: los denormalizados se derivan SIEMPRE de la pevaluación
             // resuelta; los del snapshot solo se validan (drift = warning).
@@ -795,12 +801,13 @@ final class TimetableCalendarSnapshotService
                 'is_practical' => $isPractical,
                 'is_half_group' => $isHalfGroup,
                 'allow_shared_teacher' => $allowShared,
+                'half' => $half,
             ];
 
             // Dedup por identidad completa (§9.6).
             $identity = implode('|', [
                 $pevId, $periodKey, $seccionId, $grupoEstableId ?? 0, $isPractical ? 1 : 0,
-                $isHalfGroup ? 1 : 0, $roomId ?? 0,
+                $isHalfGroup ? 1 : 0, $roomId ?? 0, $half === null ? 'F' : $half,
             ]);
             if (isset($seenIdentity[$identity])) {
                 $deduplicated++;
@@ -812,11 +819,12 @@ final class TimetableCalendarSnapshotService
             // Colisiones residuales contra los índices únicos (claves generadas).
             $uniqueKeys = [
                 'uq_slot_lesson' => 'L|'.$periodKey.'|'.$pevId,
-                'uq_slot_section' => 'S|'.$periodKey.'|'.$this->slotSectionKey($seccionId, $grupoEstableId, $isHalfGroup, $pevId),
-                'uq_slot_teacher' => 'T|'.$periodKey.'|'.$this->slotTeacherKey($profesorId, $isHalfGroup, $allowShared, $pevId),
+                'uq_slot_section' => 'S|'.$periodKey.'|'.$this->slotSectionKey($seccionId, $grupoEstableId, $isHalfGroup, $pevId, $half),
+                'uq_slot_teacher' => 'T|'.$periodKey.'|'.$this->slotTeacherKey($profesorId, $isHalfGroup, $allowShared, $pevId, $half),
             ];
             if ($roomId !== null) {
-                $uniqueKeys['uq_slot_room'] = 'R|'.$periodKey.'|'.$roomId;
+                // uq_slot_room = (calendar_id, period_id, room_id, slot_half_key).
+                $uniqueKeys['uq_slot_room'] = 'R|'.$periodKey.'|'.$roomId.'|'.$this->halfKey($half);
             }
 
             $collided = null;
@@ -862,24 +870,64 @@ final class TimetableCalendarSnapshotService
         return $shiftCode.'-'.$day.'-'.$order;
     }
 
-    /** Replica la columna generada `slot_section_key` (§9.6, migración 2026_09_09_000001). */
-    private function slotSectionKey(int $seccionId, ?int $grupoEstableId, bool $isHalfGroup, int $lessonProxy): string
-    {
-        if ($isHalfGroup) {
-            return 'S'.$seccionId.':H'.$lessonProxy;
-        }
+    /**
+     * Replica la columna generada `slot_section_key` (§9.6, migración
+     * 2026_09_09_000001; sufijo de mitad por ADR-TT-017).
+     */
+    private function slotSectionKey(
+        int $seccionId,
+        ?int $grupoEstableId,
+        bool $isHalfGroup,
+        int $lessonProxy,
+        ?int $half = null,
+    ): string {
+        $base = $isHalfGroup
+            ? 'S'.$seccionId.':H'.$lessonProxy
+            : ($grupoEstableId === null
+                ? 'S'.$seccionId.':0'
+                : 'S'.$seccionId.':G'.$grupoEstableId);
 
-        return $grupoEstableId === null
-            ? 'S'.$seccionId.':0'
-            : 'S'.$seccionId.':G'.$grupoEstableId;
+        return $base.':'.$this->halfKey($half);
     }
 
-    /** Replica la columna generada `slot_teacher_key` (§9.6, migración 2026_09_13_000002). */
-    private function slotTeacherKey(int $profesorId, bool $isHalfGroup, bool $allowShared, int $lessonProxy): string
-    {
-        return ($isHalfGroup || $allowShared)
+    /**
+     * Replica la columna generada `slot_teacher_key` (§9.6, migración
+     * 2026_09_13_000002; sufijo de mitad por ADR-TT-017).
+     */
+    private function slotTeacherKey(
+        int $profesorId,
+        bool $isHalfGroup,
+        bool $allowShared,
+        int $lessonProxy,
+        ?int $half = null,
+    ): string {
+        $base = ($isHalfGroup || $allowShared)
             ? 'T'.$profesorId.':S'.$lessonProxy
             : 'T'.$profesorId;
+
+        return $base.':'.$this->halfKey($half);
+    }
+
+    /** Réplica de la columna generada `slot_half_key` (ADR-TT-017). */
+    private function halfKey(?int $half): string
+    {
+        return $half === null ? 'F' : 'B'.$half;
+    }
+
+    /**
+     * Normaliza la mitad de un slot del snapshot a 0, 1 o null. Un valor
+     * inválido distinto de 0/1 se degrada a null (bloque completo) para no
+     * persistir una mitad fuera de contrato (ADR-TT-017).
+     */
+    private function normalizeHalf(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $half = (int) $value;
+
+        return in_array($half, [0, 1], true) ? $half : null;
     }
 
     // ─── Escritura ────────────────────────────────────────────────────────
@@ -952,6 +1000,7 @@ final class TimetableCalendarSnapshotService
         array $periodIdsByKey,
     ): int {
         $hasPractical = Schema::hasColumn('timetable_slots', 'is_practical');
+        $hasHalf = Schema::hasColumn('timetable_slots', 'half');
         $now = now();
         $payload = [];
 
@@ -981,6 +1030,10 @@ final class TimetableCalendarSnapshotService
 
             if ($hasPractical) {
                 $attributes['is_practical'] = (bool) $row['is_practical'];
+            }
+
+            if ($hasHalf) {
+                $attributes['half'] = $row['half'] ?? null;
             }
 
             $payload[] = $attributes;
@@ -1182,6 +1235,8 @@ final class TimetableCalendarSnapshotService
                     'locked' => (bool) $slot->locked,
                     'is_half_group' => (bool) $slot->is_half_group,
                     'allow_shared_teacher' => (bool) $slot->allow_shared_teacher,
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => $slot->half !== null ? (int) $slot->half : null,
                 ];
 
                 if ($hasPractical) {
@@ -1251,6 +1306,8 @@ final class TimetableCalendarSnapshotService
                     'locked' => (bool) ($slot['locked'] ?? false),
                     'is_half_group' => (bool) ($slot['is_half_group'] ?? false),
                     'allow_shared_teacher' => (bool) ($slot['allow_shared_teacher'] ?? false),
+                    // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
+                    'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
                 ];
             }
         }

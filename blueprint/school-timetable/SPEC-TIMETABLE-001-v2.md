@@ -693,6 +693,13 @@ solo en el índice.
   activo, sin login.
 - **PDF** por sección/docente/aula con `Barryvdh\DomPDF\Facade\Pdf::loadView(...)`
   (mismo patrón que `BinnaclePdfController` y `CatchmentPDFController`).
+- **Celdas partidas por mitad de bloque** (ADR-TT-017): cuando una celda contiene mitades
+  (`timetable_slots.half` = `0` superior / `1` inferior), la **vista pública firmada**, las
+  **vistas por rol** y los **PDFs** (sección, docente, aula, docentes-todos y los formatos de
+  vista previa sección/grado/p.eStudio/área/all-p.eStudios) parten la celda en dos sub-franjas
+  con rótulo «½ sup.» / «½ inf.» y separador, vía el parcial compartido
+  `resources/views/timetable/partials/half-cell.blade.php`. Una celda **normal** (bloque
+  completo, `half = NULL`) se renderiza sin cambios.
 - **Vista del estudiante** (rol `is_student`): su sección vía
   `Estudiant → inscripcion → seccion → slots`; **docente** (rol `is_profesor`):
   solo sus slots. Ambas vía `App\Livewire\Timetable\TimetableRoleView`
@@ -768,6 +775,7 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 | **TT-014** | Un lapso admite **N calendarios** y cada `pestudio_id` admite como máximo UNO `active`; activar uno archiva el activo anterior del mismo plan. Garantía dura: `active_pestudio_key` + `uq_active_pestudio`. | Permite planes activos simultáneos y evita que un calendario de otro plan sea archivado |
 | **TT-015** | Medio grupo y grupo estable se validan por clave de ocupación de sección | Una sección completa bloquea la sección; grupos estables distintos pueden coexistir cuando la regla de compatibilidad lo permite |
 | **TT-016** | El preview es una representación versionada, no persistencia de slots | Dry-run y propuesta IA no modifican slots; aplicar exige versión/hash vigente y validación completa |
+| **TT-017** | **Mitad de bloque** (`half_block`): un período se subdivide en 2 **sub-franjas** (`half` `0` = superior, `1` = inferior, `NULL` = bloque completo). La ocupación (sección, docente, aula), el solver, la publicación y las vistas de solo lectura/PDF evalúan y muestran por sub-franja; dos mitades secuenciales del mismo período no colisionan. Ortogonal y combinable con medio-grupo (`is_half_group`) | Una asignatura con carga de **1 hora semanal** no llena el bloque de 2 horas: ocupa media franja y permite que otra clase se dicte a continuación. Ver `ADR-TT-017-HALF-BLOCK.md` |
 
 ---
 

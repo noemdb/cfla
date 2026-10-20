@@ -496,7 +496,7 @@
                     </span>
                 </div>
 
-                @include('livewire.coordinacion.timetable.partials.step3-lessons-summary')
+                @include('livewire.coordinacion.timetable.partials.step3-lessons-summary', ['summaryMode' => 'persisted'])
 
                 @include('livewire.coordinacion.timetable.partials.step3-lessons-table')
 
@@ -634,64 +634,45 @@
                                             class="relative flex min-h-[32px] flex-col items-stretch justify-center gap-px rounded p-px {{ $isBreak ? 'bg-amber-500/5 text-amber-700/70 dark:text-amber-300/70' : ($cellAssignments ? 'border border-emerald-500/10 bg-emerald-500/5' : 'border border-transparent') }} {{ ! $isBreak ? 'transition-colors hover:bg-emerald-500/10' : '' }}">
 
                                             @if ($cellAssignments)
-                                                @foreach ($cellAssignments as $cell)
-                                                    @php
-                                                        $cellProfesorId = (int) ($cell['profesor_id'] ?? 0);
-                                                        $cellHighlighted = $highlightProfesorId && $cellProfesorId === (int) $highlightProfesorId;
-                                                        $cellDimmed = $highlightProfesorId && ! $cellHighlighted;
-                                                    @endphp
-                                                    <div
-                                                        id="light-slot-{{ (int) $cell['lesson_id'] }}-{{ (int) $cell['period_id'] }}"
-                                                        wire:key="light-slot-{{ $cell['lesson_id'] }}-{{ $cell['period_id'] }}"
-                                                        draggable="true"
-                                                        x-on:dragstart="$event.dataTransfer.effectAllowed = 'move'; $event.dataTransfer.setData('lesson-id', '{{ (int) $cell['lesson_id'] }}'); $event.dataTransfer.setData('period-id', '{{ (int) $cell['period_id'] }}')"
-                                                        title="{{ ! empty($cell['is_half_group']) ? 'Asignatura de medio grupo' : 'Asignatura de grupo completo' }}"
-                                                        class="relative flex cursor-grab flex-col gap-px rounded p-0.5 text-center leading-tight transition-all active:cursor-grabbing {{ $cellHighlighted ? 'ring-2 ring-fuchsia-500' : '' }} {{ $cellDimmed ? 'opacity-30' : '' }} {{ ! empty($cell['is_half_group']) ? 'border-2 border-solid border-violet-500/40 bg-violet-500/[0.06]' : '' }}">
-                                                        <div class="flex min-h-3.5 items-center justify-between gap-px">
-                                                            <label class="flex shrink-0 items-center" title="{{ ! empty($cell['locked']) ? 'Desbloquear este bloque' : 'Bloquear este bloque' }}">
-                                                                <input type="checkbox"
-                                                                    wire:key="light-slot-lock-{{ (int) $cell['lesson_id'] }}-{{ (int) $cell['period_id'] }}-{{ ! empty($cell['locked']) ? 'l' : 'u' }}"
-                                                                    wire:change="togglePreviewSlotLock({{ (int) $cell['lesson_id'] }}, {{ (int) $cell['period_id'] }})"
-                                                                    @checked(! empty($cell['locked']))
-                                                                    autocomplete="off"
-                                                                    aria-label="Bloquear/desbloquear {{ $cell['asignatura'] }} en este período"
-                                                                    class="h-3 w-3 shrink-0 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                                                            </label>
-                                                            <span class="min-w-0 flex-1"></span>
-                                                            <button type="button"
-                                                                wire:click.stop="confirmRemovePreviewLesson({{ (int) $cell['lesson_id'] }}, {{ (int) $cell['period_id'] }})"
-                                                                title="Retirar esta lección del preview"
-                                                                aria-label="Retirar {{ $cell['asignatura'] }} del preview"
-                                                                class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-gray-300/70 bg-white/80 text-[9px] font-bold leading-none text-gray-500 transition-colors hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 dark:border-white/15 dark:bg-gray-900/50 dark:text-gray-300">
-                                                                <span aria-hidden="true">×</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="flex min-h-4 items-center justify-center gap-px px-px text-[9px] font-bold text-gray-900 dark:text-white">
-                                                            <span>{{ $cell['asignatura'] }}</span>
-                                                        </div>
-                                                        @if ($cell['profesor'])
-                                                            <button type="button"
-                                                                wire:click.stop="toggleHighlightProfesor({{ (int) $cell['profesor_id'] }})"
-                                                                title="Resaltar las clases de {{ $cell['profesor'] }}"
-                                                                aria-label="Resaltar las clases de {{ $cell['profesor'] }}"
-                                                                class="px-px text-[8px] transition-colors {{ $cellHighlighted ? 'font-bold text-fuchsia-700 dark:text-fuchsia-300' : 'text-gray-500 hover:text-fuchsia-600 dark:text-gray-400 dark:hover:text-fuchsia-300' }}">
-                                                                {{ $cell['profesor'] }}
-                                                            </button>
-                                                        @endif
-                                                        @if (! empty($cell['is_half_group']))
-                                                            <div class="flex justify-end">
-                                                                <button type="button"
-                                                                    wire:click.stop="openAddPreviewLessonModal({{ (int) $targetPeriod?->id }})"
-                                                                    @disabled(! $targetPeriod)
-                                                                    title="Agregar una lección a este período"
-                                                                    aria-label="Agregar una lección al período {{ $targetPeriod?->period_label }}"
-                                                                    class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold leading-none text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">
-                                                                    <span aria-hidden="true">+</span>
-                                                                </button>
-                                                            </div>
-                                                        @endif
-                                                    </div>
+                                                @php
+                                                    $fullAssignments = collect($cellAssignments)->filter(fn ($c) => ($c['half'] ?? null) === null)->values();
+                                                    $supAssignments = collect($cellAssignments)->filter(fn ($c) => (int) ($c['half'] ?? -1) === 0)->values();
+                                                    $infAssignments = collect($cellAssignments)->filter(fn ($c) => (int) ($c['half'] ?? -1) === 1)->values();
+                                                    $hasHalves = $supAssignments->isNotEmpty() || $infAssignments->isNotEmpty();
+                                                @endphp
+
+                                                @foreach ($fullAssignments as $slotItem)
+                                                    @include('livewire.planning.timetable.partials.light-slot', ['cell' => $slotItem, 'targetPeriod' => $targetPeriod, 'highlightProfesorId' => $highlightProfesorId])
                                                 @endforeach
+
+                                                @if ($hasHalves)
+                                                    <div class="flex flex-col gap-px" x-data="{ dropSup: false, dropInf: false }">
+                                                        <div
+                                                            x-on:dragover.prevent="dropSup = true"
+                                                            x-on:dragleave="dropSup = false"
+                                                            x-on:drop.prevent.stop="dropSup = false; $wire.movePreviewLesson(parseInt($event.dataTransfer.getData('lesson-id')), parseInt($event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod?->id }}, 0)"
+                                                            :class="dropSup ? 'ring-1 ring-sky-500/80 bg-sky-500/15' : ''"
+                                                            class="rounded border-b border-dashed border-sky-500/40 pt-px">
+                                                            @forelse ($supAssignments as $slotItem)
+                                                                @include('livewire.planning.timetable.partials.light-slot', ['cell' => $slotItem, 'targetPeriod' => $targetPeriod, 'highlightProfesorId' => $highlightProfesorId])
+                                                            @empty
+                                                                <span class="flex items-center justify-center text-[7px] font-bold uppercase tracking-wide text-sky-600/70 dark:text-sky-300/70">½ sup.</span>
+                                                            @endforelse
+                                                        </div>
+                                                        <div
+                                                            x-on:dragover.prevent="dropInf = true"
+                                                            x-on:dragleave="dropInf = false"
+                                                            x-on:drop.prevent.stop="dropInf = false; $wire.movePreviewLesson(parseInt($event.dataTransfer.getData('lesson-id')), parseInt($event.dataTransfer.getData('period-id')), {{ (int) $targetPeriod?->id }}, 1)"
+                                                            :class="dropInf ? 'ring-1 ring-sky-500/80 bg-sky-500/15' : ''"
+                                                            class="rounded">
+                                                            @forelse ($infAssignments as $slotItem)
+                                                                @include('livewire.planning.timetable.partials.light-slot', ['cell' => $slotItem, 'targetPeriod' => $targetPeriod, 'highlightProfesorId' => $highlightProfesorId])
+                                                            @empty
+                                                                <span class="flex items-center justify-center text-[7px] font-bold uppercase tracking-wide text-sky-600/70 dark:text-sky-300/70">½ inf.</span>
+                                                            @endforelse
+                                                        </div>
+                                                    </div>
+                                                @endif
                                                 @php
                                                     $cellCollisionSources = [];
                                                     foreach ($cellAssignments as $cellItem) {

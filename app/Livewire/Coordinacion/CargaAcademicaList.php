@@ -37,6 +37,9 @@ class CargaAcademicaList extends Component
 
         $query = $service->scopePevaluacions($query);
 
+        // Solo pevaluaciones cuyo pensum esté activo.
+        $query->withActivePensum();
+
         if ($this->lapsoId) {
             $query->where('pevaluacions.lapso_id', $this->lapsoId);
         }

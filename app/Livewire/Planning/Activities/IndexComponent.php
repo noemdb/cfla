@@ -2,16 +2,15 @@
 
 namespace App\Livewire\Planning\Activities;
 
+use App\Livewire\Concerns\InteractsWithLmsLessons;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
-use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
-use App\Models\app\Academy\Asignatura;
-use App\Livewire\Concerns\InteractsWithLmsLessons;
 use App\Models\User;
 use App\Services\Planning\ActivityCopyService;
 use Illuminate\Support\Facades\Auth;
@@ -22,31 +21,80 @@ use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WithPagination, WireUiActions, InteractsWithLmsLessons;
+    use InteractsWithLmsLessons, WireUiActions, WithPagination;
 
-    public $activity, $activity_id, $pevaluacion_id, $objetivo, $comments, $status;
+    public $activity;
+
+    public $activity_id;
+
+    public $pevaluacion_id;
+
+    public $objetivo;
+
+    public $comments;
+
+    public $status;
+
     public $previewActivity;
+
     public $supplementActivity = null;
-    public $pevaluacion, $observations, $pestudios;
+
+    public $pevaluacion;
+
+    public $observations;
+
+    public $pestudios;
+
     public $lapso_current;
 
     // Modal modes
     public $modeIndex = true;
+
     public $modeObservation = false;
+
     public $modeComments = false;
+
     public $modePreview = false;
+
     public $modeSupplement = false;
+
     public $modeCopy = false;
 
     // Filters
-    public $pestudio_id, $grado_id, $seccion_id, $lapso_id, $profesor_id;
-    public $status_activities, $search, $paginate = 10;
+    public $pestudio_id;
+
+    public $grado_id;
+
+    public $seccion_id;
+
+    public $lapso_id;
+
+    public $profesor_id;
+
+    public $status_activities;
+
+    public $search;
+
+    public $paginate = 10;
+
     public $filter_observations = false;
+
     public $filter_status = '';
 
     // Select lists
-    public $list_pestudio, $list_grado, $list_seccion, $list_lapso;
-    public $list_profesors, $list_pensum, $list_comment;
+    public $list_pestudio;
+
+    public $list_grado;
+
+    public $list_seccion;
+
+    public $list_lapso;
+
+    public $list_profesors;
+
+    public $list_pensum;
+
+    public $list_comment;
 
     // Tab data (lapsos collection for the Alpine.js tab navigation)
     public $tabsLapsos;
@@ -97,14 +145,15 @@ class IndexComponent extends Component
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
             'filter_status' => $this->filter_status ?: null,
-        ], fn($v) => $v !== null && $v !== '');
+            'search' => $this->search ?: null,
+        ], fn ($v) => $v !== null && $v !== '');
 
         $pevaluacions = $this->getPevaluaciones($filters);
 
         // Compute the active tab index from the current lapso_id
         $activeTabIndex = 1;
         if ($this->tabsLapsos && $this->lapso_id) {
-            $found = $this->tabsLapsos->search(fn($lapso) => $lapso->id == $this->lapso_id);
+            $found = $this->tabsLapsos->search(fn ($lapso) => $lapso->id == $this->lapso_id);
             if ($found !== false) {
                 $activeTabIndex = $found + 1;
             }
@@ -146,7 +195,7 @@ class IndexComponent extends Component
                 ->whereHas('pevaluacions')
                 ->with('asignatura')
                 ->get()
-                ->mapWithKeys(fn($p) => [$p->id => '[' . ($p->asignatura->code ?? '') . '] ' . ($p->asignatura->name ?? '')]);
+                ->mapWithKeys(fn ($p) => [$p->id => '['.($p->asignatura->code ?? '').'] '.($p->asignatura->name ?? '')]);
         } else {
             $this->list_seccion = collect();
             $this->list_pensum = collect();
@@ -154,9 +203,15 @@ class IndexComponent extends Component
         $this->seccion_id = null;
     }
 
-    public function updatedSeccionId($value) { $this->resetPage(); }
+    public function updatedSeccionId($value)
+    {
+        $this->resetPage();
+    }
 
-    public function updatedLapsoId($value) { $this->resetPage(); }
+    public function updatedLapsoId($value)
+    {
+        $this->resetPage();
+    }
 
     public function selectLapso($id)
     {
@@ -164,17 +219,108 @@ class IndexComponent extends Component
         $this->resetPage();
     }
 
-    public function updatedProfesorId($value) { $this->resetPage(); }
+    public function updatedProfesorId($value)
+    {
+        $this->resetPage();
+    }
 
-    public function updatedStatusActivities($value) { $this->resetPage(); }
+    public function updatedStatusActivities($value)
+    {
+        $this->resetPage();
+    }
 
-    public function updatedFilterObservations($value) { $this->resetPage(); }
+    public function updatedFilterObservations($value)
+    {
+        $this->resetPage();
+    }
 
-    public function updatedFilterStatus($value) { $this->resetPage(); }
+    public function updatedFilterStatus($value)
+    {
+        $this->resetPage();
+    }
 
-    public function updatedPaginate($value) { $this->resetPage(); }
+    public function updatedPaginate($value)
+    {
+        $this->resetPage();
+    }
 
-    public function updatingSearch() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Restaura filtros persistidos en localStorage en un único round-trip,
+     * reconstruyendo las listas dependientes (grado, sección, profesor).
+     */
+    public function restoreFilters(array $filters): void
+    {
+        $this->search = trim((string) ($filters['search'] ?? ''));
+        $this->status_activities = in_array($filters['status_activities'] ?? '', ['SI', 'NO', 'SI_LE', 'NO_LE'], true)
+            ? $filters['status_activities']
+            : '';
+        $this->filter_status = in_array($filters['filter_status'] ?? '', ['pending', 'approved'], true)
+            ? $filters['filter_status']
+            : '';
+        $this->filter_observations = (bool) ($filters['filter_observations'] ?? false);
+        $this->paginate = in_array((int) ($filters['paginate'] ?? 10), [10, 25, 50, 100], true)
+            ? (int) $filters['paginate']
+            : 10;
+
+        $lapso = Lapso::find($filters['lapso_id'] ?? null);
+        $this->lapso_id = $lapso?->id ?? Lapso::current()?->id;
+
+        $this->pestudio_id = $filters['pestudio_id'] ?? '';
+        if ($this->pestudio_id) {
+            $this->list_grado = Grado::where('pestudio_id', $this->pestudio_id)
+                ->where('status_active', 'true')
+                ->orderBy('order')
+                ->pluck('name', 'id');
+            $this->list_profesors = Profesor::list_profesors_pestudio($this->pestudio_id);
+        } else {
+            $this->list_grado = collect();
+            $this->setProfesorLists();
+        }
+
+        $this->grado_id = $filters['grado_id'] ?? '';
+        if ($this->grado_id) {
+            $this->list_seccion = Seccion::list_seccion_grado($this->grado_id);
+            $this->list_pensum = Pensum::where('grado_id', $this->grado_id)
+                ->whereHas('pevaluacions')
+                ->with('asignatura')
+                ->get()
+                ->mapWithKeys(fn ($p) => [
+                    $p->id => '['.($p->asignatura->code ?? '').'] '.($p->asignatura->name ?? ''),
+                ]);
+        } else {
+            $this->list_seccion = collect();
+            $this->list_pensum = collect();
+        }
+
+        $this->seccion_id = $filters['seccion_id'] ?? '';
+        $this->profesor_id = $filters['profesor_id'] ?? '';
+
+        $this->resetPage();
+    }
+
+    /**
+     * Limpia todos los filtros y vuelve al lapso actual.
+     */
+    public function resetFilters(): void
+    {
+        $this->reset([
+            'pestudio_id', 'grado_id', 'seccion_id', 'profesor_id',
+            'status_activities', 'search', 'filter_observations', 'filter_status',
+        ]);
+
+        $this->paginate = 10;
+        $this->lapso_id = Lapso::current()?->id;
+        $this->list_grado = collect();
+        $this->list_seccion = collect();
+        $this->list_pensum = collect();
+        $this->setProfesorLists();
+        $this->resetPage();
+    }
 
     // ─── DATA ───────────────────────────────────────────────────
 
@@ -182,28 +328,29 @@ class IndexComponent extends Component
     {
         $query = Pevaluacion::with([
             'pensum.asignatura',
+            'pensum.pestudio',
             'seccion.grado',
             'profesor',
             'lapso',
             'grupoEstable',
         ])
-        ->with('activities.lmsPublication')
-        ->with('activities.lmsSections')
-        ->with('activities.supplement')
-        ->withCount([
-            'activities',
-            'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
-            'activities as activities_approved_count' => fn($q) => $q->where('status', 1),
-            'activities as activities_lessons_count' => fn($q) => $q->whereHas('lmsPublication'),
-        ])
-        ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
-        ->whereNull('pevaluacions.deleted_at');
+            ->with('activities.lmsPublication')
+            ->with('activities.lmsSections')
+            ->with('activities.supplement')
+            ->withCount([
+                'activities',
+                'activities as activities_revision_count' => fn ($q) => $q->where('status', 0),
+                'activities as activities_approved_count' => fn ($q) => $q->where('status', 1),
+                'activities as activities_lessons_count' => fn ($q) => $q->whereHas('lmsPublication'),
+            ])
+            ->whereHas('pensum.pestudio', fn ($q) => $q->where('planning_module', true))
+            ->whereNull('pevaluacions.deleted_at');
 
         if (isset($filters['pestudio_id'])) {
-            $query->whereHas('pensum.pestudio', fn($q) => $q->where('id', $filters['pestudio_id']));
+            $query->whereHas('pensum.pestudio', fn ($q) => $q->where('id', $filters['pestudio_id']));
         }
         if (isset($filters['grado_id'])) {
-            $query->whereHas('seccion.grado', fn($q) => $q->where('id', $filters['grado_id']));
+            $query->whereHas('seccion.grado', fn ($q) => $q->where('id', $filters['grado_id']));
         }
         if (isset($filters['seccion_id'])) {
             $query->where('seccion_id', $filters['seccion_id']);
@@ -225,23 +372,37 @@ class IndexComponent extends Component
                 $query->having('activities_lessons_count', '=', 0);
             }
         }
-        if (!empty($filters['filter_observations'])) {
+        if (! empty($filters['filter_observations'])) {
             $query->whereNotNull('pevaluacions.observations')
-                  ->where('pevaluacions.observations', '!=', '');
+                ->where('pevaluacions.observations', '!=', '');
         }
-        if (!empty($filters['filter_status'])) {
+        if (! empty($filters['filter_status'])) {
             if ($filters['filter_status'] === 'pending') {
-                $query->whereHas('activities', fn($q) => $q->where('status', 0));
+                $query->whereHas('activities', fn ($q) => $q->where('status', 0));
             } elseif ($filters['filter_status'] === 'approved') {
                 $query->has('activities')
-                      ->whereDoesntHave('activities', fn($q) => $q->where('status', 0));
+                    ->whereDoesntHave('activities', fn ($q) => $q->where('status', 0));
             }
+        }
+        if (! empty($filters['search'])) {
+            $term = trim((string) $filters['search']);
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('pensum.asignatura', fn ($q) => $q
+                    ->where('name', 'like', "%{$term}%")
+                    ->orWhere('code', 'like', "%{$term}%"))
+                    ->orWhereHas('profesor', fn ($q) => $q
+                        ->where('name', 'like', "%{$term}%")
+                        ->orWhere('lastname', 'like', "%{$term}%"))
+                    ->orWhereHas('seccion', fn ($q) => $q->where('name', 'like', "%{$term}%"))
+                    ->orWhere('pevaluacions.id', 'like', "%{$term}%");
+            });
         }
 
         $query->orderBy('created_at', 'desc');
 
         if ((int) $this->paginate === 9999) {
             $all = $query->get();
+
             return new \Illuminate\Pagination\LengthAwarePaginator(
                 $all,
                 $all->count(),
@@ -264,7 +425,7 @@ class IndexComponent extends Component
         if ($value) {
             $profesors->where(function ($q) use ($value) {
                 $q->where('profesors.name', 'like', "%{$value}%")
-                  ->orWhere('profesors.lastname', 'like', "%{$value}%");
+                    ->orWhere('profesors.lastname', 'like', "%{$value}%");
             });
         }
 
@@ -614,7 +775,8 @@ class IndexComponent extends Component
     }
 
     protected function refreshCopyFilterLists(ActivityCopyService $service)
-    {        $connection = $service->resolveSourceConnection((string) $this->copySource);
+    {
+        $connection = $service->resolveSourceConnection((string) $this->copySource);
 
         if ($connection === null) {
             $this->copyPestudioOptions = [];

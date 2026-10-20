@@ -70,6 +70,7 @@
                     $achievementsCount = $activities->sum(fn($a) => $a->achievements->count());
                     $pensum            = $pevaluacion->pensum;
                     $grado             = $pensum?->grado;
+                    $pestudio          = $grado?->pestudio ?? $pensum?->pestudio;
                     $subjectName       = $pevaluacion->pensum?->asignatura?->name ?? '—';
                     $seccionName       = $pevaluacion->seccion?->name ?? '—';
                     $gradoName         = $grado->name ?? '—';
@@ -98,6 +99,11 @@
                                 <span class="block text-white text-xs font-semibold max-w-[180px] truncate">
                                     {{ $subjectName }}
                                 </span>
+                                @if($pestudio?->name)
+                                    <span class="block text-[9px] text-cyan-400/80 mt-0.5 truncate max-w-[180px]" title="Plan de Estudio">
+                                        {{ $pestudio->name }}
+                                    </span>
+                                @endif
                                 @if($pevaluacion->grupoEstable)
                                     <span class="block text-[9px] text-gray-500 mt-0.5 truncate max-w-[180px]" title="{{ $pevaluacion->grupoEstable->name }}">
                                         Comp. Formación: {{ $pevaluacion->grupoEstable->name }}
