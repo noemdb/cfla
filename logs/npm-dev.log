@@ -1220,3 +1220,77 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 7:25:38 PM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
 7:27:37 PM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
 7:27:37 PM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 664 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+7:43:23 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:43:23 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:43:36 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:43:36 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:43:56 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:43:56 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:44:17 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:44:17 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:48:02 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:48:02 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:48:14 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:48:14 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:48:31 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:48:31 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:49:18 AM [vite] full reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+7:49:18 AM [vite] page reload resources/views/livewire/coordinacion/timetable/partials/step3-lessons-summary.blade.php
+8:25:35 AM [vite] full reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+8:25:35 AM [vite] page reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+8:25:56 AM [vite] full reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+8:25:56 AM [vite] page reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+8:26:06 AM [vite] full reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+8:26:06 AM [vite] page reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+8:26:42 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:26:42 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:27:21 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:27:21 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:15 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:15 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:25 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:25 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:41 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:41 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:45 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:45 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:59 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:28:59 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:30:14 AM [vite] full reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+8:30:14 AM [vite] page reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+8:30:41 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:30:41 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:49:52 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:49:52 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:50:03 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:50:03 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:50:31 AM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+8:50:31 AM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+9:00:23 AM [vite] full reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+9:00:23 AM [vite] page reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+9:01:53 AM [vite] full reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+9:01:53 AM [vite] page reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+9:02:02 AM [vite] full reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+9:02:02 AM [vite] page reload resources/views/livewire/planning/timetable/partials/light-slot.blade.php
+9:24:28 AM [vite] full reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+9:24:28 AM [vite] page reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+9:34:38 AM [vite] full reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+9:34:38 AM [vite] page reload resources/views/livewire/planning/timetable/timetable-light.blade.php

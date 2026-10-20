@@ -4931,14 +4931,22 @@ class TimetableWizard extends Component
                     continue;
                 }
                 $busySection = $busyPev->seccion;
+                $busyHalf = isset($busySlot['half']) && $busySlot['half'] !== null
+                    ? (int) $busySlot['half']
+                    : null;
+                [$busyStart, $busyEnd] = $this->halfInterval(
+                    $this->minOfDay((string) $busyPeriod->start_time),
+                    $this->minOfDay((string) $busyPeriod->end_time),
+                    $busyHalf,
+                );
                 $previewBusy[$busyTeacherId][] = [
                     'lesson_id' => (int) $busyLesson->id,
                     'pestudio' => $pestudioName,
                     'grado' => (string) ($busySection?->grado?->name ?? ''),
                     'section' => (string) ($busySection?->name ?? ''),
                     'day' => (int) $busyPeriod->day_of_week,
-                    'start' => $this->minOfDay((string) $busyPeriod->start_time),
-                    'end' => $this->minOfDay((string) $busyPeriod->end_time),
+                    'start' => $busyStart,
+                    'end' => $busyEnd,
                 ];
             }
         }
@@ -4964,14 +4972,20 @@ class TimetableWizard extends Component
                 }
                 $pev = $lesson->pevaluacion;
                 $teacherId = (int) ($pev?->profesor_id ?? 0);
+                $slotHalf = isset($slot['half']) && $slot['half'] !== null
+                    ? (int) $slot['half']
+                    : null;
 
                 // Colisión del docente con otros P.Estudios activos del lapso o
                 // con otra sección del mismo calendario: mismo día con
                 // solapamiento de horas. Se excluye la propia lección.
                 $collisionPestudios = [];
                 if ($teacherId > 0) {
-                    $startMin = $this->minOfDay((string) $period->start_time);
-                    $endMin = $this->minOfDay((string) $period->end_time);
+                    [$startMin, $endMin] = $this->halfInterval(
+                        $this->minOfDay((string) $period->start_time),
+                        $this->minOfDay((string) $period->end_time),
+                        $slotHalf,
+                    );
 
                     $busyEntries = array_merge(
                         $externalBusy[$teacherId] ?? [],
@@ -5002,7 +5016,7 @@ class TimetableWizard extends Component
                     'grupo' => $pev?->grupoEstable?->name,
                     'is_half_group' => (bool) $lesson->is_half_group,
                     // ADR-TT-017: 0 = mitad superior, 1 = inferior, null = bloque completo.
-                    'half' => isset($slot['half']) && $slot['half'] !== null ? (int) $slot['half'] : null,
+                    'half' => $slotHalf,
                     'half_block' => (bool) $lesson->half_block,
                     'locked' => (bool) ($slot['locked'] ?? false),
                     'collision' => $collisionPestudios !== [],
@@ -5059,7 +5073,7 @@ class TimetableWizard extends Component
                 'lesson.pevaluacion.seccion:id,name,grado_id',
                 'lesson.pevaluacion.seccion.grado:id,name',
             ])
-            ->get(['profesor_id', 'calendar_id', 'period_id', 'lesson_id']);
+            ->get(['profesor_id', 'calendar_id', 'period_id', 'lesson_id', 'half']);
 
         $map = [];
         foreach ($slots as $slot) {
@@ -5068,13 +5082,19 @@ class TimetableWizard extends Component
                 continue;
             }
             $section = $slot->lesson?->pevaluacion?->seccion;
+            $half = $slot->half !== null ? (int) $slot->half : null;
+            [$start, $end] = $this->halfInterval(
+                $this->minOfDay((string) $period->start_time),
+                $this->minOfDay((string) $period->end_time),
+                $half,
+            );
             $map[(int) $slot->profesor_id][] = [
                 'pestudio' => $pestudioByCalendar->get((int) $slot->calendar_id, 'P.Estudio'),
                 'grado' => (string) ($section?->grado?->name ?? ''),
                 'section' => (string) ($section?->name ?? ''),
                 'day' => (int) $period->day_of_week,
-                'start' => $this->minOfDay((string) $period->start_time),
-                'end' => $this->minOfDay((string) $period->end_time),
+                'start' => $start,
+                'end' => $end,
             ];
         }
 
@@ -5733,6 +5753,75 @@ class TimetableWizard extends Component
             return;
         }
 
+        // ADR-TT-017: la mitad destino debe estar libre en la MISMA sección.
+        // Antes se aceptaba cualquier `half` y dos lecciones podían quedar en
+        // la mitad superior (p. ej. Inglés y Estética), una celda imposible.
+        $occupiedHalfLessonId = null;
+
+        if ($targetHalf !== null) {
+            $sameSectionId = (int) $lesson->pevaluacion->seccion_id;
+            $targetOtherLessons = [];
+
+            foreach ($assignment as $otherLessonId => $otherSlots) {
+                if ((int) $otherLessonId === $lessonId) {
+                    continue;
+                }
+
+                foreach ($otherSlots as $otherSlot) {
+                    if ((int) ($otherSlot['period_id'] ?? 0) === $newPeriodId) {
+                        $targetOtherLessons[(int) $otherLessonId] = $otherSlot;
+                    }
+                }
+            }
+
+            $targetLessons = $targetOtherLessons === []
+                ? collect()
+                : TimetableLesson::query()
+                    ->whereIn('id', array_keys($targetOtherLessons))
+                    ->with('pevaluacion.pensum.asignatura')
+                    ->get()
+                    ->keyBy('id');
+
+            foreach ($targetOtherLessons as $otherLessonId => $otherSlot) {
+                $otherLesson = $targetLessons->get($otherLessonId);
+
+                if (! $otherLesson?->pevaluacion
+                    || (int) $otherLesson->pevaluacion->seccion_id !== $sameSectionId) {
+                    continue;
+                }
+
+                $otherHalf = isset($otherSlot['half']) && $otherSlot['half'] !== null
+                    ? (int) $otherSlot['half']
+                    : null;
+                $otherSubject = $otherLesson->pevaluacion?->pensum?->asignatura?->name ?? 'otra lección';
+
+                if ($otherHalf === null) {
+                    $this->notification()->warning(
+                        'Período con bloque completo',
+                        "La sección ya tiene un bloque completo en ese período ({$otherSubject}); no puedes colocar una media franja.",
+                    );
+
+                    return;
+                }
+
+                if ($otherHalf === $targetHalf) {
+                    if ($fromPeriodId !== $newPeriodId) {
+                        $halfLabel = $targetHalf === 0 ? 'superior' : 'inferior';
+                        $this->notification()->warning(
+                            'Mitad '.$halfLabel.' ocupada',
+                            "La mitad {$halfLabel} del período ya está ocupada por {$otherSubject}. Usa la otra mitad o mueve esa lección.",
+                        );
+
+                        return;
+                    }
+
+                    // Misma celda: el drop sobre la mitad ocupada intercambia
+                    // el orden de las dos lecciones (ver bloque de swap abajo).
+                    $occupiedHalfLessonId = $otherLessonId;
+                }
+            }
+        }
+
         $sourcePeriod = TimetablePeriod::query()->find($fromPeriodId);
         if (! $sourcePeriod) {
             $this->notification()->error(
@@ -5744,6 +5833,67 @@ class TimetableWizard extends Component
         }
         $hasShiftMismatch = $sourcePeriod->shift_id !== $targetPeriod->shift_id
             || $lesson->shift_id !== $targetPeriod->shift_id;
+
+        // ADR-TT-017: reordenar dos medias franjas de la misma celda. Al
+        // soltar una lección sobre la mitad ocupada por otra, se intercambian
+        // las mitades. Si ambas compartían la misma mitad (dato heredado), la
+        // otra se mueve a la mitad opuesta para dejar libre la elegida.
+        if ($occupiedHalfLessonId !== null) {
+            $swapKey = (string) $occupiedHalfLessonId;
+            $swapSlots = $assignment[$swapKey] ?? $assignment[$occupiedHalfLessonId] ?? [];
+            $swapSlotIndex = collect($swapSlots)->search(
+                fn (array $slot): bool => (int) ($slot['period_id'] ?? 0) === $newPeriodId
+                    && isset($slot['half']) && $slot['half'] !== null
+                    && (int) $slot['half'] === $targetHalf,
+            );
+
+            if ($swapSlotIndex === false) {
+                return;
+            }
+
+            $sourceHalf = isset($slots[$slotIndex]['half']) && $slots[$slotIndex]['half'] !== null
+                ? (int) $slots[$slotIndex]['half']
+                : null;
+            $halvesSwapped = $sourceHalf !== null && $sourceHalf !== $targetHalf;
+            $swapOriginalSlots = $swapSlots;
+            $previousPreview = $this->preview;
+
+            $slots[$slotIndex]['half'] = $targetHalf;
+            $swapSlots[$swapSlotIndex]['half'] = $sourceHalf !== null && $sourceHalf !== $targetHalf
+                ? $sourceHalf
+                : ($targetHalf === 0 ? 1 : 0);
+
+            $assignment[$lessonKey] = array_values($slots);
+            $assignment[$swapKey] = array_values($swapSlots);
+            $this->preview['assignment'] = $assignment;
+            $this->preview['manual_override'] = true;
+            $this->preview['assignment_source'] = 'manual_preview';
+
+            if (! $this->persistPreviewLessonSlotsToDatabase([$lessonId, $occupiedHalfLessonId])) {
+                $this->preview = $previousPreview;
+
+                return;
+            }
+
+            $this->recordPreviewChange('swap_preview_halves', $lessonId, [
+                'lesson' => $originalSlots,
+                'swap_lesson_id' => $occupiedHalfLessonId,
+                'swap_slots' => $swapOriginalSlots,
+            ], [
+                'lesson' => $slots,
+                'swap_lesson_id' => $occupiedHalfLessonId,
+                'swap_slots' => $swapSlots,
+            ]);
+
+            $this->notification()->success(
+                'Orden de la celda actualizado',
+                $halvesSwapped
+                    ? 'Las dos lecciones intercambiaron su mitad en el mismo período.'
+                    : 'La otra lección se movió a la mitad opuesta para dejar libre la mitad elegida.',
+            );
+
+            return;
+        }
 
         $swapLessonId = null;
         $swapSlotIndex = null;
@@ -5776,6 +5926,15 @@ class TimetableWizard extends Component
                 // dos lessons de medio grupo o de docente compartido deben
                 // convivir en el destino, incluso si pertenecen al mismo docente.
                 if ($bothAllowHalfGroup || $bothAllowShared) {
+                    continue;
+                }
+
+                // ADR-TT-017: dos medias franjas en mitades opuestas conviven
+                // (secuencial); no deben intercambiar períodos.
+                $otherHalf = isset($otherSlot['half']) && $otherSlot['half'] !== null
+                    ? (int) $otherSlot['half']
+                    : null;
+                if ($targetHalf !== null && $otherHalf !== null && $targetHalf !== $otherHalf) {
                     continue;
                 }
 
@@ -6478,6 +6637,34 @@ class TimetableWizard extends Component
             }
             if ($newHalf !== null && $occupiedHalf !== null && $newHalf !== $occupiedHalf) {
                 continue;
+            }
+
+            // ADR-TT-017: una media franja solo puede convivir con la mitad
+            // opuesta de la MISMA sección. Bloquea duplicados en la misma
+            // mitad (p. ej. Inglés y Estética ambas en la superior) y una
+            // media franja sobre un bloque completo.
+            if ($newHalf !== null
+                && (int) $targetLesson->pevaluacion->seccion_id === (int) $lesson->pevaluacion->seccion_id) {
+                $targetSubject = $targetLesson->pevaluacion?->pensum?->asignatura?->name ?? 'otra lección';
+
+                if ($occupiedHalf === null) {
+                    $this->notification()->warning(
+                        'Período con bloque completo',
+                        "La sección ya tiene un bloque completo en ese período ({$targetSubject}); no puedes colocar una media franja.",
+                    );
+
+                    return;
+                }
+
+                if ($occupiedHalf === $newHalf) {
+                    $halfLabel = $newHalf === 0 ? 'superior' : 'inferior';
+                    $this->notification()->warning(
+                        'Mitad '.$halfLabel.' ocupada',
+                        "La mitad {$halfLabel} del período ya está ocupada por {$targetSubject}. Usa la otra mitad o mueve esa lección.",
+                    );
+
+                    return;
+                }
             }
 
             $sameTeacher = (int) $targetLesson->pevaluacion->profesor_id === (int) $lesson->pevaluacion->profesor_id;
@@ -10267,6 +10454,23 @@ PROMPT;
         [$h, $m] = array_pad(explode(':', (string) $h), 2, '0');
 
         return ((int) $h) * 60 + (int) $m;
+    }
+
+    /**
+     * ADR-TT-017: recorta el intervalo del período a la media franja indicada.
+     * half 0 = primera mitad, 1 = segunda mitad, null = período completo.
+     *
+     * @return array{0:int,1:int}
+     */
+    private function halfInterval(int $start, int $end, ?int $half): array
+    {
+        if ($half === null || $end <= $start) {
+            return [$start, $end];
+        }
+
+        $mid = $start + intdiv($end - $start, 2);
+
+        return $half === 0 ? [$start, $mid] : [$mid, $end];
     }
 
     private function fmtMin(int $min): string

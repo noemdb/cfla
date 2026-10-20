@@ -113,6 +113,11 @@ class HalfBlockUiTest extends TestCase
         // Tras activar, el checkbox queda marcado (checked) en el re-render.
         $component->call('setLessonHalfBlock', $pevId);
         $component->assertSee('setLessonHalfBlock('.$pevId.')', false);
+
+        // La estimación cuenta las 10 medias franjas: la lección necesita 10
+        // períodos (una mitad por período como máximo), así que 10–10 celdas.
+        $component->assertSee('10 medias franjas (mitad ½)');
+        $component->assertSee('Estimación: 10–10 celdas');
     }
 
     public function test_save_lessons_persists_half_block_and_demands(): void
@@ -162,6 +167,155 @@ class HalfBlockUiTest extends TestCase
             'calendar_id' => $calendar->id,
             'lesson_id' => $lesson->id,
             'period_id' => $p1->id,
+        ]);
+    }
+
+    public function test_light_move_rejects_an_occupied_half_and_allows_the_opposite_one(): void
+    {
+        [$user, $calendar, $seccion, $lesson, $p1, $p2, $profesor] = $this->lightContext();
+
+        $otraAsignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+        $otroPensum = Pensum::factory()->create([
+            'pestudio_id' => $seccion->grado->pestudio_id,
+            'grado_id' => $seccion->grado_id,
+            'asignatura_id' => $otraAsignatura->id,
+        ]);
+        $otraPev = Pevaluacion::factory()->create([
+            'profesor_id' => $profesor->id,
+            'seccion_id' => $seccion->id,
+            'pensum_id' => $otroPensum->id,
+            'lapso_id' => $calendar->lapso_id,
+        ]);
+        $otraLeccion = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $otraPev->id,
+            'shift_id' => $lesson->shift_id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+            'half_block' => true,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $otraLeccion->id,
+            'period_id' => $p2->id,
+            'profesor_id' => $profesor->id,
+            'seccion_id' => $seccion->id,
+            'half' => 0,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        // La mitad superior ya está ocupada: no se mueve.
+        $component->call('movePreviewLesson', $lesson->id, $p1->id, $p2->id, 0);
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lesson->id,
+            'period_id' => $p1->id,
+        ]);
+        $this->assertDatabaseMissing('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lesson->id,
+            'period_id' => $p2->id,
+        ]);
+
+        // La mitad inferior está libre: conviven secuencialmente sin intercambio.
+        $component->call('movePreviewLesson', $lesson->id, $p1->id, $p2->id, 1);
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lesson->id,
+            'period_id' => $p2->id,
+            'half' => 1,
+        ]);
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $otraLeccion->id,
+            'period_id' => $p2->id,
+            'half' => 0,
+        ]);
+    }
+
+    public function test_light_drop_on_occupied_half_swaps_the_order_in_the_same_cell(): void
+    {
+        [$user, $calendar, $seccion, $lesson, $p1, $p2, $profesor] = $this->lightContext();
+
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('lesson_id', $lesson->id)
+            ->update(['half' => 0, 'is_half_group' => true]);
+
+        $otraAsignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+        $otroPensum = Pensum::factory()->create([
+            'pestudio_id' => $seccion->grado->pestudio_id,
+            'grado_id' => $seccion->grado_id,
+            'asignatura_id' => $otraAsignatura->id,
+        ]);
+        $otraPev = Pevaluacion::factory()->create([
+            'profesor_id' => $profesor->id,
+            'seccion_id' => $seccion->id,
+            'pensum_id' => $otroPensum->id,
+            'lapso_id' => $calendar->lapso_id,
+        ]);
+        $otraLeccion = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $otraPev->id,
+            'shift_id' => $lesson->shift_id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+            'half_block' => true,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $otraLeccion->id,
+            'period_id' => $p1->id,
+            'profesor_id' => $profesor->id,
+            'seccion_id' => $seccion->id,
+            'half' => 1,
+            'is_half_group' => true,
+        ]);
+
+        // Soltar sobre la mitad ocupada intercambia las mitades.
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $component->call('movePreviewLesson', $lesson->id, $p1->id, $p1->id, 1);
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lesson->id,
+            'period_id' => $p1->id,
+            'half' => 1,
+        ]);
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $otraLeccion->id,
+            'period_id' => $p1->id,
+            'half' => 0,
+        ]);
+
+        // Dato heredado con ambas en la misma mitad: la otra se mueve a la
+        // mitad opuesta y la arrastrada conserva la mitad elegida.
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->whereIn('lesson_id', [$lesson->id, $otraLeccion->id])
+            ->update(['half' => 0, 'allow_shared_teacher' => true, 'is_half_group' => true]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $component->call('movePreviewLesson', $lesson->id, $p1->id, $p1->id, 0);
+
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lesson->id,
+            'period_id' => $p1->id,
+            'half' => 0,
+        ]);
+        $this->assertDatabaseHas('timetable_slots', [
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $otraLeccion->id,
+            'period_id' => $p1->id,
+            'half' => 1,
         ]);
     }
 
@@ -225,6 +379,9 @@ class HalfBlockUiTest extends TestCase
         // Zona de drop de la mitad inferior (0) y superior (1) del período.
         $component->assertSee(', '.$p1->id.', 0)', false);
         $component->assertSee(', '.$p1->id.', 1)', false);
+        // Botón para alternar la mitad de la misma lección en el mismo período.
+        $component->assertSee('movePreviewLesson('.$lesson->id.', '.$p1->id.', '.$p1->id.', 1)', false);
+        $component->assertSee('Cambiar a la mitad inferior');
     }
 
     /**

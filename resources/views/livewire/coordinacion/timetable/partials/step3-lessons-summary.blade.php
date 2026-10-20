@@ -9,15 +9,25 @@
                     $selectedT = 0;
                     $selectedP = 0;
                     $selectedHalfBlocks = 0;
+                    $selectedHalfBlockUnits = 0;
+                    $maxHalfBlocksPerLesson = 0;
+                    $maxHalfBlockUnitsPerLesson = 0;
                     foreach ($rows as $pev) {
                         $sumT += (int) ceil(((int) ($pev->pensum?->asignatura?->hour_t_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
                         $sumP += (int) ceil(((int) ($pev->pensum?->asignatura?->hour_p_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60)));
                         if (isset($lessons[$pev->id])) {
+                            $lessonBlocks = (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0)
+                                + (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
                             $selectedT += (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0);
                             $selectedP += (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
-                            if (! empty($lessons[$pev->id]['is_half_group'])) {
-                                $selectedHalfBlocks += (int) ($lessons[$pev->id]['weekly_blocks_t'] ?? 0)
-                                    + (int) ($lessons[$pev->id]['weekly_blocks_p'] ?? 0);
+                            // Mitad de bloque: cada bloque es media franja.
+                            // Medio grupo: bloque completo que comparte celda.
+                            if (! empty($lessons[$pev->id]['half_block'])) {
+                                $selectedHalfBlockUnits += $lessonBlocks;
+                                $maxHalfBlockUnitsPerLesson = max($maxHalfBlockUnitsPerLesson, $lessonBlocks);
+                            } elseif (! empty($lessons[$pev->id]['is_half_group'])) {
+                                $selectedHalfBlocks += $lessonBlocks;
+                                $maxHalfBlocksPerLesson = max($maxHalfBlocksPerLesson, $lessonBlocks);
                             }
                         }
                     }
@@ -41,14 +51,24 @@
                         $capacidadPorDia = $capacidadesPorTurno->sum();
                         $capacidadSemanal = $capacidadPorDia * 5;
                         $maxSubjectsPerPeriod = max(1, (int) ($maxSubjectsPerPeriod ?? 2));
-                        $fullGroupBlocks = $selectedT + $selectedP - $selectedHalfBlocks;
+                        $fullGroupBlocks = $selectedT + $selectedP - $selectedHalfBlocks - $selectedHalfBlockUnits;
                         $totalBlocks = $selectedT + $selectedP;
-                        $minimumCells = $fullGroupBlocks + (int) ceil($selectedHalfBlocks / $maxSubjectsPerPeriod);
+                        // Mínimo: cada lección necesita sus propios períodos
+                        // (una mitad por período como máximo); el total se
+                        // reparte de a 2 mitades o de a `maxSubjects` medios
+                        // grupos por celda. Máximo: sin compartir celdas.
+                        $halfGroupCellsMin = $selectedHalfBlocks > 0
+                            ? max($maxHalfBlocksPerLesson, (int) ceil($selectedHalfBlocks / $maxSubjectsPerPeriod))
+                            : 0;
+                        $halfBlockCellsMin = $selectedHalfBlockUnits > 0
+                            ? max($maxHalfBlockUnitsPerLesson, (int) ceil($selectedHalfBlockUnits / 2))
+                            : 0;
+                        $minimumCells = $fullGroupBlocks + $halfGroupCellsMin + $halfBlockCellsMin;
                         $required = $minimumCells;
                         $overCapacity = $capacidadSemanal > 0 && $required > $capacidadSemanal;
                         $usage = $capacidadSemanal > 0 ? min(100, (int) round($required * 100 / $capacidadSemanal)) : 0;
                         $capacityGap = $capacidadSemanal - $required;
-                        $maximumCells = $fullGroupBlocks + $selectedHalfBlocks;
+                        $maximumCells = $fullGroupBlocks + $selectedHalfBlocks + $selectedHalfBlockUnits;
                         $persistedMode = ($summaryMode ?? 'preview') === 'persisted';
                         $hasDryRunResult = ! $persistedMode
                             && in_array($generationState, ['preview_ready', 'published'], true)
@@ -139,6 +159,9 @@
                             $capacity = $capacityPerDay * 5;
                             $blocks = 0;
                             $halfBlocks = 0;
+                            $halfBlockUnits = 0;
+                            $maxHalfGroupLesson = 0;
+                            $maxHalfBlockLesson = 0;
 
                             foreach ($rows as $pev) {
                                 if (! isset($selectedPevIdsForView[(int) $pev->id])) {
@@ -153,13 +176,18 @@
                                 $lessonBlocks = (int) ($lesson['weekly_blocks_t'] ?? 0)
                                     + (int) ($lesson['weekly_blocks_p'] ?? 0);
                                 $blocks += $lessonBlocks;
-                                if (! empty($lesson['is_half_group'])) {
+                                if (! empty($lesson['half_block'])) {
+                                    $halfBlockUnits += $lessonBlocks;
+                                    $maxHalfBlockLesson = max($maxHalfBlockLesson, $lessonBlocks);
+                                } elseif (! empty($lesson['is_half_group'])) {
                                     $halfBlocks += $lessonBlocks;
+                                    $maxHalfGroupLesson = max($maxHalfGroupLesson, $lessonBlocks);
                                 }
                             }
 
-                            $required = $blocks - $halfBlocks
-                                + (int) ceil($halfBlocks / max(1, $maxSubjectsPerPeriod));
+                            $required = $blocks - $halfBlocks - $halfBlockUnits
+                                + ($halfBlocks > 0 ? max($maxHalfGroupLesson, (int) ceil($halfBlocks / max(1, $maxSubjectsPerPeriod))) : 0)
+                                + ($halfBlockUnits > 0 ? max($maxHalfBlockLesson, (int) ceil($halfBlockUnits / 2)) : 0);
                             $remaining = $capacity - $required;
 
                             if ($capacity <= 0) {
@@ -263,6 +291,9 @@
                             <span>{{ $totalBlocks }} bloques requeridos ({{ $selectedT }} T · {{ $selectedP }} P)</span>
                             @if ($selectedHalfBlocks > 0)
                                 <span>{{ $selectedHalfBlocks }} bloques de medio grupo</span>
+                            @endif
+                            @if ($selectedHalfBlockUnits > 0)
+                                <span>{{ $selectedHalfBlockUnits }} medias franjas (mitad ½)</span>
                             @endif
                             <span class="font-bold">Estimación: {{ $minimumCells }}–{{ $maximumCells }} celdas</span>
                             <span class="rounded-full border px-2 py-0.5 text-[10px] font-extrabold {{ $feasibilityClasses }}">

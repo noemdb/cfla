@@ -145,7 +145,22 @@ mitades y comprobar el render de celdas partidas.
 - **Mitades en la persistencia manual** — `movePreviewLesson(..., ?int $half = null)` y
   `addPreviewLesson(int $lessonId, ?int $half = null)` aceptan la mitad objetivo y la
   persisten; `detectCrossSectionCollision(..., ?int $half)` ignora la colisión de docente
-  entre dos mitades distintas del mismo período (secuenciales, no solapadas).
+  entre dos mitades distintas del mismo período (secuenciales, no solapadas). La mitad
+  destino se valida contra la **misma sección**: se rechaza si ya hay un bloque completo o
+  la misma mitad ocupada, y dos mitades opuestas conviven sin intercambiar períodos. Si se
+  suelta sobre la mitad ocupada **en la misma celda**, se intercambian las mitades
+  (`swap_preview_halves`); si ambas compartían la misma mitad (dato heredado), la otra se
+  reubica en la mitad opuesta.
+- **Colisión por lección, no por celda** — el badge rojo se renderiza dentro del slot de la
+  lección afectada (`light-slot.blade.php`, igual que `wizard-preview-slot.blade.php`), con
+  `data-collision`/`data-collision-sources`; así no se atribuye a la otra mitad o al otro
+  docente de la celda. La detección de solapamiento usa el intervalo de la sub-franja
+  (`halfInterval()`), por lo que dos mitades opuestas del mismo docente no generan un falso
+  positivo.
+- **Limitación conocida (modelo)**: `half_block` es un flag **por lección**, no por slot. Un
+  caso mixto («la mayoría de la semana medio grupo, una sesión semanal mitad de bloque») no
+  es representable con el flag actual; requiere decidir entre flag por slot/preasignación,
+  dividir la lección o una marca de entrega por slot (ADR nuevo).
 - **Limitación conocida (UX, no de datos)**: en una celda vacía el drop conserva la mitad
   que ya traía la lección arrastrada (o `null` para bloque completo); para forzar una mitad
   concreta se suelta sobre la sub-franja correspondiente de una celda que ya tiene mitades.
@@ -235,8 +250,11 @@ ya no muestra el bloque «Dry-run» (el light persiste directo en `timetable_slo
 `/light`) y en modo persistido muestra celdas ocupadas, clases ubicadas/sin ubicar y hora del último
 guardado; si la sección no tiene lecciones, muestra una guía en lugar de `0/0`. Para cruzar cada
 Pevaluación con `preview['assignment']` (indexado por `timetable_lessons.id`), `loadLessons()` ahora
-incluye `id` en `$lessons` y `saveLessons()` refresca el estado tras persistir. Cubierto por
-`TimetableLightTest` (resumen con cifras reales y estado vacío).
+incluye `id` en `$lessons` y `saveLessons()` refresca el estado tras persistir. La estimación y el
+estado por turno cuentan las medias franjas de `half_block` como celdas (una mitad por período como
+máximo por lección, emparejando mitades de lecciones distintas), igual que la auditoría de capacidad.
+Cubierto por `TimetableLightTest` (resumen con cifras reales y estado vacío) y `HalfBlockUiTest`
+(estimación 10–10 celdas para 10 medias franjas).
 
 ---
 

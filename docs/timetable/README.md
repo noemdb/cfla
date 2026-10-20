@@ -342,6 +342,39 @@ active ──(cierre de lapso / otra alternativa)──▶ archived (terminal, s
   suplente confirma/rechaza desde `SubstituteInbox`; nunca auto-confirmado
   (ADR-TT-012).
 
+### 7.1 Mitad de bloque (`half_block`, ADR-TT-017)
+
+Una lección marcada como **Mitad ½** ocupa solo media franja del período; cada
+unidad de `weekly_blocks_t/p` es media franja y dos mitades (de lecciones
+distintas) pueden compartir el mismo período. No confundir con **Medio grupo**
+(`is_half_group`): allí dos lecciones de bloque completo comparten la celda.
+
+Ejemplo (1ER GRADO · A, «ÁREAS COMPLEMENTARIA INGLES», períodos de 40'):
+3 h T + 1 h P → bloque completo 5 T + 2 P (7 períodos); mitad ½ → 9 T + 3 P
+(12 medias franjas, mínimo 6 períodos al emparejar).
+
+Pasos en el modo rápido (`/app/planning/timetable/light`):
+
+1. Abrir el calendario y seleccionar P.Estudio → Grado → Sección.
+2. En **Clases**, localizar la fila de la asignatura (agregarla si no está).
+3. Marcar **Mitad ½** (los contadores T/P se recalculan en medias franjas).
+   Si la sección está bloqueada (`timetable_locked`), desbloquearla primero.
+4. **Guardar clases**.
+5. En **Grilla**, agregar con `+` (elige la primera mitad libre) o arrastrar
+   la lección a `½ sup.` / `½ inf.`. Dos lecciones de media franja pueden
+   ocupar el mismo período en mitades opuestas; un bloque completo excluye
+   ambas. Para mover una mitad bloqueada, desbloquear el slot. Si la mitad
+   elegida ya está ocupada (o el período tiene un bloque completo), el
+   movimiento se rechaza con un aviso; usa la otra mitad.
+   Para **cambiar el orden** dentro de la misma celda, arrastra una lección
+   sobre la mitad ocupada por la otra: se intercambian las mitades.
+6. Revisar el resumen (clases ubicadas/sin ubicar) y generar el PDF. El icono
+   rojo de colisión de docente aparece **dentro de la lección afectada**, no en
+   la celda, para no confundirlo con la otra mitad o con otro docente.
+
+En el asistente completo el mismo toggle está en el Paso 3; al generar, el
+solver respeta la mitad y prefiere emparejar dos mitades en un período.
+
 ---
 
 ## 8. Publicación y vistas

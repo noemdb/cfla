@@ -644,7 +644,6 @@
                                                 @foreach ($fullAssignments as $slotItem)
                                                     @include('livewire.planning.timetable.partials.light-slot', ['cell' => $slotItem, 'targetPeriod' => $targetPeriod, 'highlightProfesorId' => $highlightProfesorId])
                                                 @endforeach
-
                                                 @if ($hasHalves)
                                                     <div class="flex flex-col gap-px" x-data="{ dropSup: false, dropInf: false }">
                                                         <div
@@ -672,25 +671,6 @@
                                                             @endforelse
                                                         </div>
                                                     </div>
-                                                @endif
-                                                @php
-                                                    $cellCollisionSources = [];
-                                                    foreach ($cellAssignments as $cellItem) {
-                                                        if (! empty($cellItem['collision'])) {
-                                                            foreach ($cellItem['collision_pestudios'] as $collisionSource) {
-                                                                $cellCollisionSources[$collisionSource] = true;
-                                                            }
-                                                        }
-                                                    }
-                                                @endphp
-                                                @if ($cellCollisionSources !== [])
-                                                    <span class="absolute bottom-0 left-0 z-10 inline-flex items-center justify-center rounded-bl-md rounded-tr-md bg-red-500/90 p-0.5 text-white shadow-sm"
-                                                        title="Colisión de horario del docente con: {{ implode(', ', array_keys($cellCollisionSources)) }}"
-                                                        aria-label="Colisión de horario del docente con {{ implode(', ', array_keys($cellCollisionSources)) }}">
-                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-                                                        </svg>
-                                                    </span>
                                                 @endif
                                             @elseif ($isBreak)
                                                 <div class="w-full text-center text-[9px] font-semibold uppercase tracking-wide opacity-75">Receso</div>
@@ -970,4 +950,80 @@
             </div>
         @endif
     @endif
+
+    {{-- State loading global (mismo patrón visual que /app/planning/diagnostico). --}}
+    <div id="timetable-light-global-loading" class="hidden fixed bottom-6 right-6 z-[60]">
+        <div class="flex items-center gap-3 rounded-full border border-emerald-500/20 bg-gray-900/90 py-3 pl-3 pr-5 text-xs font-bold uppercase tracking-widest text-white shadow-2xl shadow-emerald-500/10 ring-1 ring-white/5 backdrop-blur-xl">
+            <span class="relative flex h-7 w-7 items-center justify-center rounded-full border border-emerald-500/20 bg-emerald-500/15">
+                <svg class="h-4 w-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span class="absolute -right-0.5 -top-0.5 h-2 w-2 animate-ping rounded-full bg-emerald-500"></span>
+                <span class="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-500"></span>
+            </span>
+            <span>Cargando</span>
+            <span class="h-3 w-px bg-white/10"></span>
+            <span class="text-[10px] font-normal normal-case tracking-normal text-white/60">Sincronizando…</span>
+        </div>
+    </div>
+    <div id="timetable-light-global-bar" class="pointer-events-none fixed inset-x-0 top-0 z-[61] hidden h-0.5 animate-pulse bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500"></div>
 </div>
+
+@script
+<script>
+    (() => {
+        // El hook es global: se registra una sola vez aunque se navegue con
+        // wire:navigate y se vuelva a montar el componente.
+        if (window.__timetableLightLoadingHooks) return;
+        window.__timetableLightLoadingHooks = true;
+
+        let pending = 0;
+        let safety = null;
+
+        const elements = () => ({
+            pill: document.getElementById('timetable-light-global-loading'),
+            bar: document.getElementById('timetable-light-global-bar'),
+        });
+
+        const show = () => {
+            const { pill, bar } = elements();
+            if (pill) pill.classList.remove('hidden');
+            if (bar) bar.classList.remove('hidden');
+        };
+
+        const hide = () => {
+            const { pill, bar } = elements();
+            if (pill) pill.classList.add('hidden');
+            if (bar) bar.classList.add('hidden');
+        };
+
+        const armSafety = () => {
+            clearTimeout(safety);
+            safety = setTimeout(() => {
+                pending = 0;
+                hide();
+            }, 15000);
+        };
+
+        const release = () => {
+            pending = Math.max(0, pending - 1);
+            if (pending === 0) {
+                clearTimeout(safety);
+                hide();
+            }
+        };
+
+        Livewire.hook('request', ({ fail }) => {
+            pending++;
+            show();
+            armSafety();
+            fail(release);
+        });
+
+        Livewire.hook('commit', ({ succeed }) => {
+            succeed(release);
+        });
+    })();
+</script>
+@endscript

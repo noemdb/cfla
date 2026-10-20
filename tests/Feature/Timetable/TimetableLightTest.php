@@ -64,6 +64,10 @@ class TimetableLightTest extends TestCase
         $this->assertSame(1, $component->get('lightStep'));
         $component->assertSee('Horario · modo rápido');
         $component->assertSee($calendar->name);
+        // Loader global del módulo light (mismo patrón que /app/planning/diagnostico).
+        $component->assertSee('timetable-light-global-loading');
+        $component->assertSee('timetable-light-global-bar');
+        $component->assertSee('Sincronizando…');
     }
 
     public function test_light_groups_calendars_active_and_archived(): void
@@ -278,6 +282,53 @@ class TimetableLightTest extends TestCase
         $component->assertSee('Colisiones (1)');
         $component->assertSee('Ir a la celda');
         $component->assertSee('Resaltar docente');
+
+        // El badge vive dentro del slot de la lección afectada (no en la celda).
+        $this->assertMatchesRegularExpression(
+            '/id="light-slot-'.$lesson->id.'-'.$p1->id.'"[^>]*data-collision="1"/',
+            $component->html(),
+        );
+    }
+
+    public function test_half_block_collision_only_counts_the_overlapping_half(): void
+    {
+        [$user, $calendar, $seccion, $lesson, $p1] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->find($lesson->pevaluacion_id)->profesor_id;
+
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('lesson_id', $lesson->id)
+            ->update(['half' => 0]);
+
+        $pestB = Pestudio::factory()->create(['status_active' => 'true']);
+        $gradoB = Grado::factory()->create(['pestudio_id' => $pestB->id, 'status_active' => 'true']);
+        $secB = Seccion::factory()->create(['grado_id' => $gradoB->id, 'status_active' => 'true']);
+        $calB = TimetableCalendar::factory()->create(['lapso_id' => $calendar->lapso_id, 'pestudio_id' => $pestB->id, 'status' => 'active']);
+        $shiftB = $this->makeShift();
+        $pB = TimetablePeriod::factory()->create([
+            'calendar_id' => $calB->id, 'shift_id' => $shiftB->id, 'day_of_week' => 1, 'order_in_day' => 1,
+            'start_time' => $p1->start_time, 'end_time' => $p1->end_time, 'is_break' => false,
+        ]);
+
+        $asigB = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+        $pensumB = Pensum::factory()->create(['pestudio_id' => $pestB->id, 'grado_id' => $gradoB->id, 'asignatura_id' => $asigB->id]);
+        $pevB = Pevaluacion::factory()->create(['profesor_id' => $profesorId, 'seccion_id' => $secB->id, 'pensum_id' => $pensumB->id, 'lapso_id' => $calendar->lapso_id]);
+        $lessonB = TimetableLesson::factory()->create(['calendar_id' => $calB->id, 'pevaluacion_id' => $pevB->id, 'shift_id' => $shiftB->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0]);
+        $slotB = TimetableSlot::factory()->create([
+            'calendar_id' => $calB->id, 'lesson_id' => $lessonB->id, 'period_id' => $pB->id,
+            'profesor_id' => $profesorId, 'seccion_id' => $secB->id, 'half' => 1,
+        ]);
+
+        // Mitades opuestas: no hay solapamiento real del docente.
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $component->assertSee('Colisiones (0)');
+
+        // La misma mitad sí colisiona.
+        $slotB->update(['half' => 0]);
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+        $component->assertSee('Colisiones (1)');
     }
 
     public function test_light_shows_saved_indicator_and_updates_after_edit(): void
