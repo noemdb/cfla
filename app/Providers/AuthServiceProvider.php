@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -14,6 +15,8 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         \App\Models\app\Academy\Activity::class => \App\Policies\LmsActivityPolicy::class,
         \App\Models\app\Academy\Lms\LmsMediaLibrary::class => \App\Policies\LmsMediaPolicy::class,
+        \App\Models\app\Inicial\Eiplanningwk::class => \App\Policies\EiplanningwkPolicy::class,
+        \App\Models\app\Inicial\Eiplanningwsummary::class => \App\Policies\EiplanningwsummaryPolicy::class,
     ];
 
     /**

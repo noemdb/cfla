@@ -14,6 +14,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
+use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
@@ -131,6 +132,32 @@ class HalfBlockReadOnlyTest extends TestCase
         $inf = $this->makeHalfSlot($this->makeProfesor('7002'), 1);
 
         return [$sup, $inf];
+    }
+
+    /**
+     * Estructura mínima de una grilla de preview con dos mitades el lunes.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function previewShiftGrids(): array
+    {
+        return [[
+            'shift' => $this->shift,
+            'rows' => [[
+                'period' => $this->period,
+                'days' => collect(range(1, 5))->mapWithKeys(fn (int $day): array => [
+                    $day => [
+                        'period' => $this->period,
+                        'assignments' => $day === 1
+                            ? [
+                                ['asignatura' => 'Matemática', 'profesor' => 'Pérez', 'grupo' => null, 'half' => 0],
+                                ['asignatura' => 'Física', 'profesor' => 'Gómez', 'grupo' => null, 'half' => 1],
+                            ]
+                            : [],
+                    ],
+                ])->all(),
+            ]],
+        ]];
     }
 
     // ─── Vista pública firmada (modelos) ────────────────────────────────────
@@ -291,5 +318,133 @@ class HalfBlockReadOnlyTest extends TestCase
         $this->assertStringContainsString('½ inf.', $html);
         $this->assertStringContainsString('Biología', $html);
         $this->assertStringContainsString('Química', $html);
+    }
+
+    public function test_preview_grade_pdf_renders_both_halves_and_fractional_summary(): void
+    {
+        $html = view('pdfs.timetable.preview-grade', [
+            'calendar' => $this->calendar,
+            'grado' => $this->grado,
+            'sectionSchedules' => [[
+                'section' => $this->seccion,
+                'shiftGrids' => $this->previewShiftGrids(),
+                'teacherSummary' => [['name' => 'Docente Media', 'blocks' => 0.5]],
+            ]],
+            'institucion' => null,
+            'fecha' => 'hoy',
+            'isPublishedSchedule' => false,
+        ])->render();
+
+        $this->assertStringContainsString('½ sup.', $html);
+        $this->assertStringContainsString('½ inf.', $html);
+        $this->assertStringContainsString('Matemática', $html);
+        $this->assertStringContainsString('Física', $html);
+        $this->assertStringContainsString('<td>0.5</td>', $html);
+    }
+
+    public function test_preview_pestudio_pdf_renders_both_halves(): void
+    {
+        $html = view('pdfs.timetable.preview-pestudio', [
+            'calendar' => $this->calendar,
+            'pestudio' => $this->pestudio,
+            'gradeSchedules' => [[
+                'grado' => $this->grado,
+                'sectionSchedules' => [[
+                    'section' => $this->seccion,
+                    'shiftGrids' => $this->previewShiftGrids(),
+                    'teacherSummary' => [],
+                ]],
+            ]],
+            'institucion' => null,
+            'fecha' => 'hoy',
+            'isPublishedSchedule' => false,
+        ])->render();
+
+        $this->assertStringContainsString('½ sup.', $html);
+        $this->assertStringContainsString('½ inf.', $html);
+        $this->assertStringContainsString('Matemática', $html);
+        $this->assertStringContainsString('Física', $html);
+    }
+
+    public function test_preview_all_pestudios_pdf_renders_both_halves_and_fractional_summary(): void
+    {
+        $html = view('pdfs.timetable.preview-all-pestudios', [
+            'lapso' => $this->lapso,
+            'pestudiosData' => [[
+                'calendar' => $this->calendar,
+                'pestudio' => $this->pestudio,
+                'isPublishedSchedule' => false,
+                'gradeSchedules' => [[
+                    'grado' => $this->grado,
+                    'sectionSchedules' => [[
+                        'section' => $this->seccion,
+                        'shiftGrids' => $this->previewShiftGrids(),
+                        'teacherSummary' => [['name' => 'Docente Media', 'blocks' => 0.5]],
+                    ]],
+                ]],
+            ]],
+            'institucion' => null,
+            'fecha' => 'hoy',
+        ])->render();
+
+        $this->assertStringContainsString('½ sup.', $html);
+        $this->assertStringContainsString('½ inf.', $html);
+        $this->assertStringContainsString('Matemática', $html);
+        $this->assertStringContainsString('Física', $html);
+        $this->assertStringContainsString('<td class="blq">0.5</td>', $html);
+    }
+
+    public function test_room_pdf_view_renders_both_halves(): void
+    {
+        $room = TimetableRoom::factory()->create();
+        [$sup, $inf] = $this->makeTwoHalves();
+        $sup['slot']->update(['room_id' => $room->id]);
+        $inf['slot']->update(['room_id' => $room->id]);
+
+        $grid = app(TimetableViewService::class)->gridForRoom($this->calendar, (int) $room->id);
+
+        $html = view('pdfs.timetable.room', [
+            'calendar' => $this->calendar,
+            'room' => $room,
+            'grid' => $grid,
+            'institucion' => null,
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+        ])->render();
+
+        $this->assertStringContainsString('½ sup.', $html);
+        $this->assertStringContainsString('½ inf.', $html);
+        $this->assertStringContainsString($sup['asignatura']->name, $html);
+        $this->assertStringContainsString($inf['asignatura']->name, $html);
+    }
+
+    public function test_all_grid_timetable_reports_use_the_shared_half_cell_partial(): void
+    {
+        $views = [
+            'pdfs.timetable.section',
+            'pdfs.timetable.teacher',
+            'pdfs.timetable.room',
+            'pdfs.timetable.teachers',
+            'pdfs.timetable.teachers-all',
+            'pdfs.timetable.preview-section',
+            'pdfs.timetable.preview-grade',
+            'pdfs.timetable.preview-pestudio',
+            'pdfs.timetable.preview-area',
+            'pdfs.timetable.preview-all-pestudios',
+            'timetable.public',
+            'timetable.teachers-all',
+            'livewire.timetable.role-view',
+            'livewire.profesor.timetable.my-timetable',
+        ];
+
+        foreach ($views as $view) {
+            $path = resource_path('views/'.str_replace('.', '/', $view).'.blade.php');
+
+            $this->assertFileExists($path);
+            $this->assertStringContainsString(
+                'timetable.partials.half-cell',
+                (string) file_get_contents($path),
+                "{$view} debe usar la celda compartida de medias franjas.",
+            );
+        }
     }
 }

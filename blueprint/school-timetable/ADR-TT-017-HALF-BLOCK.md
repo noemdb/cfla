@@ -7,7 +7,7 @@
 | **Autor** | Staff Engineer |
 | **Fecha** | 2026-10-19 |
 | **Documento base** | `SPEC-TIMETABLE-001-v2.md`, `SPEC-TIMETABLE-MEJORAS-001.md` (ADR-TT-IMP-007/008) |
-| **Alcance** | Esquema, solver, validación manual, preview, persistencia, snapshot, capacidad, publicación, UI (wizard/light/editor), solo-lectura y PDFs |
+| **Alcance** | Esquema, solver, validación manual, preview, persistencia, snapshot, capacidad, publicación, UI (wizard/light/editor), solo-lectura, PDFs, XLS y totalizaciones |
 | **Relacionados** | `ADR-TT-012-08` (medio-grupos), `SPEC-TIMETABLE-SHARED-TEACHER-001.md` |
 
 ---
@@ -262,12 +262,19 @@ sub-franja** permite que la mitad superior y la inferior tengan ocupaciones dist
 - [x] La auditoría de capacidad pesa `half_block` como 0.5
       (`TimetableCapacityAuditTest`).
 
-### Solo-lectura y PDFs (Fase 7)
+### Solo-lectura, PDFs, XLS y totalizaciones (Fase 7)
 - [x] La vista pública firmada, las vistas por rol y los PDFs (sección/docente/aula/
       docentes-todos y formatos de vista previa) parten la celda en dos sub-franjas
       («½ sup.» / «½ inf.») cuando hay mitades (`HalfBlockReadOnlyTest`).
 - [x] Una celda normal (bloque completo, `half = NULL`) no altera su layout
       (`HalfBlockReadOnlyTest`).
+- [x] Los XLS consolidados de todos los P.Estudios y todos los docentes replican las
+      bandas «½ sup.» / «½ inf.» dentro de la celda y ajustan la altura de la fila
+      (`TimetableGlobalPdfTest`).
+- [x] Los resúmenes de profesores y la totalización de bloques por docente cuentan
+      cada media franja como 0.5 bloque; dos mitades del mismo docente en una celda
+      visual suman como máximo 1 bloque y las horas académicas siguen siendo
+      `2 × bloques` (`TimetableGlobalPdfTest`).
 - [x] `docs/timetable/README.md` y `SPEC-TIMETABLE-001-v2.md` (§8, §11) documentan
       `half_block` con referencia a este ADR.
 
@@ -345,15 +352,19 @@ Avance al 2026-10-19 (Fases 0–7 completas; suite de Timetable en verde):
   en `$existingAssignment`/`sectionReorderSnapshot()`. Tests:
   `HalfBlockOptimizerPublicationTest` (8).
 
-- **Solo-lectura, PDFs y docs (Fase 7)**: parcial compartido
+- **Solo-lectura, PDFs, XLS y docs (Fase 7)**: parcial compartido
   `resources/views/timetable/partials/half-cell.blade.php` que agrupa los slots de una celda
   por sub-franja y apila las mitades con rótulo «½ sup.» / «½ inf.»; una celda normal no
   cambia. Se aplica en la vista pública firmada (`timetable/public`), las vistas por rol
   (`TimetableRoleView` y `MyTimetable`), los PDFs por modelo (sección, docente, aula,
-  docentes-todos) y los PDFs de vista previa (sección, grado, p.eStudio, all-p.eStudios y
-  área). `TimetablePdfController` propaga `half` desde la rama de slots persistidos a los
-  formatos de vista previa. `docs/timetable/README.md` y `SPEC-TIMETABLE-001-v2.md` (§8, §11)
-  documentan `half_block` con referencia a este ADR. Test: `HalfBlockReadOnlyTest` (6).
+  docentes-todos), los PDFs de vista previa (sección, grado, p.eStudio, all-p.eStudios y
+  área) y los consolidados XLS. `TimetablePdfController` propaga `half` desde la rama de
+  slots persistidos a los formatos de vista previa y usa `xlsHalfAwareLines()` para las
+  celdas XLS. Los resúmenes de profesores y `teacherBlockTotalsRows()` ponderan la media
+  franja como 0.5 bloque (tope 1 por celda visual) y mantienen `horas = 2 × bloques`.
+  `docs/timetable/README.md` y `SPEC-TIMETABLE-001-v2.md` (§8, §11) documentan `half_block`
+  con referencia a este ADR. Tests: `HalfBlockReadOnlyTest` (11) y
+  `TimetableGlobalPdfTest`.
 
 Implementación completa. El detalle accionable y las decisiones abiertas (migración a
 `bck/`, claves `.env` opcionales) viven en

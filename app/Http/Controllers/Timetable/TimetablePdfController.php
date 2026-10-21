@@ -42,6 +42,80 @@ class TimetablePdfController extends Controller
         @set_time_limit(300);
     }
 
+    /**
+     * ADR-TT-017: una media franja pesa 0.5 bloque; un bloque completo, 1.
+     */
+    private function halfBlockWeight(mixed $half): float
+    {
+        return $half === null || $half === '' ? 1.0 : 0.5;
+    }
+
+    /**
+     * Conserva el tipo entero cuando el total no tiene fracción (compatibilidad
+     * con reportes y pruebas existentes) y devuelve float para las medias.
+     */
+    private function normalizeBlockValue(float $value): int|float
+    {
+        $rounded = round($value, 2);
+
+        return floor($rounded) == $rounded ? (int) $rounded : $rounded;
+    }
+
+    /**
+     * Líneas de una celda XLS con el mismo criterio que
+     * timetable.partials.half-cell: primero los bloques completos y luego las
+     * bandas ½ sup. / ½ inf. (con «—» cuando una banda está vacía).
+     *
+     * @param  iterable<int, mixed>  $entries
+     * @return list<string>
+     */
+    private function xlsHalfAwareLines(iterable $entries, callable $line): array
+    {
+        $full = [];
+        $sup = [];
+        $inf = [];
+
+        foreach ($entries as $entry) {
+            $half = data_get($entry, 'half');
+
+            if ($half === null) {
+                $full[] = (string) $line($entry);
+            } elseif ((int) $half === 0) {
+                $sup[] = (string) $line($entry);
+            } else {
+                $inf[] = (string) $line($entry);
+            }
+        }
+
+        if ($sup === [] && $inf === []) {
+            return $full;
+        }
+
+        return array_merge(
+            $full,
+            ['½ sup.'],
+            $sup !== [] ? $sup : ['—'],
+            ['½ inf.'],
+            $inf !== [] ? $inf : ['—'],
+        );
+    }
+
+    /**
+     * Altura necesaria para que Excel no recorte las líneas de una celda.
+     *
+     * @param  list<string>  $lines
+     */
+    private function xlsLinesHeight(array $lines, float $base = 28.0): float
+    {
+        $lineCount = 0;
+
+        foreach ($lines as $line) {
+            $lineCount += substr_count((string) $line, "\n") + 1;
+        }
+
+        return min(120.0, max($base, 9.0 * max(1, $lineCount)));
+    }
+
     public function section(Request $request, $calendarId, $seccionId)
     {
         $calendar = $this->viewService->activeCalendarOrFail($calendarId);
@@ -214,7 +288,7 @@ class TimetablePdfController extends Controller
                             'blocks' => 0,
                         ];
                     }
-                    $teacherSummary[$teacherId]['blocks']++;
+                    $teacherSummary[$teacherId]['blocks'] += $this->halfBlockWeight($slot['half'] ?? null);
                 }
                 $assignmentsByPeriod[$period->id][] = [
                     'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
@@ -254,6 +328,11 @@ class TimetablePdfController extends Controller
 
         $teacherSummary = collect($teacherSummary)
             ->filter(fn (array $teacher): bool => $teacher['blocks'] > 0)
+            ->map(function (array $teacher): array {
+                $teacher['blocks'] = $this->normalizeBlockValue((float) $teacher['blocks']);
+
+                return $teacher;
+            })
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values()
             ->all();
@@ -345,7 +424,7 @@ class TimetablePdfController extends Controller
                             'name' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                             'blocks' => 0,
                         ];
-                        $teacherSummary[$teacherId]['blocks']++;
+                        $teacherSummary[$teacherId]['blocks'] += $this->halfBlockWeight($slot['half'] ?? null);
                     }
                     $assignmentsByPeriod[$period->id][] = [
                         'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
@@ -356,6 +435,11 @@ class TimetablePdfController extends Controller
             }
             $teacherSummary = collect($teacherSummary)
                 ->filter(fn (array $teacher): bool => $teacher['blocks'] > 0)
+                ->map(function (array $teacher): array {
+                    $teacher['blocks'] = $this->normalizeBlockValue((float) $teacher['blocks']);
+
+                    return $teacher;
+                })
                 ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
                 ->values()
                 ->all();
@@ -521,7 +605,7 @@ class TimetablePdfController extends Controller
                                 'name' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                                 'blocks' => 0,
                             ];
-                            $teacherSummary[$teacherId]['blocks']++;
+                            $teacherSummary[$teacherId]['blocks'] += $this->halfBlockWeight($slot['half'] ?? null);
                         }
                         $assignmentsByPeriod[$period->id][] = [
                             'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
@@ -556,7 +640,15 @@ class TimetablePdfController extends Controller
                 return [
                     'section' => $section,
                     'shiftGrids' => $shiftGrids,
-                    'teacherSummary' => collect($teacherSummary)->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values()->all(),
+                    'teacherSummary' => collect($teacherSummary)
+                        ->map(function (array $teacher): array {
+                            $teacher['blocks'] = $this->normalizeBlockValue((float) $teacher['blocks']);
+
+                            return $teacher;
+                        })
+                        ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                        ->values()
+                        ->all(),
                 ];
             })->filter(fn (array $schedule): bool => collect($schedule['shiftGrids'])->flatMap(fn ($grid) => $grid['rows'])->contains(
                 fn (array $row): bool => collect($row['days'])->contains(fn (array $day): bool => $day['assignments'] !== [])
@@ -848,6 +940,8 @@ class TimetablePdfController extends Controller
                             'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
                         ]);
 
+                        $rowHeight = 28;
+
                         foreach ($gridRow['days'] as $day) {
                             if (! $day['period']) {
                                 continue;
@@ -870,10 +964,13 @@ class TimetablePdfController extends Controller
                                 continue;
                             }
 
-                            $lines = [];
-                            foreach ($day['assignments'] as $cell) {
-                                $lines[] = $cell['asignatura'].($cell['profesor'] ? ' · '.$cell['profesor'] : '');
-                            }
+                            $lines = $this->xlsHalfAwareLines(
+                                $day['assignments'],
+                                fn (array $cell): string => (string) ($cell['asignatura'] ?? '?')
+                                    .(! empty($cell['profesor']) ? ' · '.$cell['profesor'] : ''),
+                            );
+                            $rowHeight = max($rowHeight, $this->xlsLinesHeight($lines, 28));
+
                             $sheet->setCellValue([$cellCol, $row], implode("\n", $lines) ?: null);
                             $sheet->getStyle([$cellCol, $row])->applyFromArray([
                                 'font' => ['size' => 8, 'color' => ['argb' => $ink]],
@@ -882,7 +979,7 @@ class TimetablePdfController extends Controller
                             ]);
                         }
 
-                        $sheet->getRowDimension($row)->setRowHeight(28);
+                        $sheet->getRowDimension($row)->setRowHeight($rowHeight);
                         $row++;
                     }
 
@@ -900,7 +997,7 @@ class TimetablePdfController extends Controller
                     // contador de bloques va en la columna D.
                     $sheet->mergeCellsByColumnAndRow($col, $row, $col + 2, $row);
                     $sheet->setCellValue([$col, $row], 'Profesor');
-                    $sheet->setCellValue([$col + 3, $row], 'Bloques asignados');
+                    $sheet->setCellValue([$col + 3, $row], 'Bloques (½=0.5)');
                     $sheet->getStyle([$col, $row, $col + 3, $row])->applyFromArray([
                         'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF'], 'size' => 8],
                         'fill' => ['fillType' => 'solid', 'startColor' => ['argb' => $summaryHeader]],
@@ -928,9 +1025,10 @@ class TimetablePdfController extends Controller
 
         // Pie.
         $sheet->mergeCellsByColumnAndRow($col, $row, $col + 5, $row);
-        $sheet->setCellValue([$col, $row], 'Generado el '.$fecha.' · '.($institucion?->name ?? ''));
+        $sheet->setCellValue([$col, $row], 'Generado el '.$fecha.' · '.($institucion?->name ?? '').' · Media franja (½ sup./½ inf.) = 0.5 bloque');
         $sheet->getStyle([$col, $row])->getFont()->setSize(8)->getColor()->setARGB($grayText);
-        $sheet->getStyle([$col, $row])->getAlignment()->setHorizontal('center');
+        $sheet->getStyle([$col, $row])->getAlignment()->setHorizontal('center')->setWrapText(true);
+        $sheet->getRowDimension($row)->setRowHeight(20);
     }
 
     /**
@@ -1326,6 +1424,8 @@ class TimetablePdfController extends Controller
                         'borders' => ['allBorders' => ['borderStyle' => 'thin', 'color' => ['argb' => $gridBorder]]],
                     ]);
 
+                    $rowHeight = 30;
+
                     foreach (range(1, 5) as $day) {
                         $cellCol = $col + $day;
                         $period = $dayPeriods->get($day);
@@ -1342,20 +1442,23 @@ class TimetablePdfController extends Controller
                             continue;
                         }
 
-                        $lines = [];
-                        foreach ($shiftSchedule['grid']->get($order, collect())->get($day, collect()) as $slot) {
-                            $subject = $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?';
-                            $metaParts = array_filter([
-                                $slot->lesson?->pevaluacion?->seccion?->grado?->name,
-                                $slot->lesson?->pevaluacion?->seccion?->name,
-                                $slot->grupo_estable_id
-                                    ? ($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id)
-                                    : null,
-                                $slot->room?->code ? 'Aula '.$slot->room->code : null,
-                            ]);
+                        $lines = $this->xlsHalfAwareLines(
+                            $shiftSchedule['grid']->get($order, collect())->get($day, collect()),
+                            function (TimetableSlot $slot): string {
+                                $subject = $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?';
+                                $metaParts = array_filter([
+                                    $slot->lesson?->pevaluacion?->seccion?->grado?->name,
+                                    $slot->lesson?->pevaluacion?->seccion?->name,
+                                    $slot->grupo_estable_id
+                                        ? ($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id)
+                                        : null,
+                                    $slot->room?->code ? 'Aula '.$slot->room->code : null,
+                                ]);
 
-                            $lines[] = $subject.($metaParts !== [] ? "\n".implode(' · ', $metaParts) : '');
-                        }
+                                return $subject.($metaParts !== [] ? "\n".implode(' · ', $metaParts) : '');
+                            },
+                        );
+                        $rowHeight = max($rowHeight, $this->xlsLinesHeight($lines, 30));
 
                         $sheet->setCellValue([$cellCol, $row], implode("\n", $lines) ?: null);
                         $sheet->getStyle([$cellCol, $row])->applyFromArray([
@@ -1365,7 +1468,7 @@ class TimetablePdfController extends Controller
                         ]);
                     }
 
-                    $sheet->getRowDimension($row)->setRowHeight(30);
+                    $sheet->getRowDimension($row)->setRowHeight($rowHeight);
                     $row++;
                 }
 
@@ -1377,9 +1480,10 @@ class TimetablePdfController extends Controller
 
         // Pie.
         $sheet->mergeCellsByColumnAndRow($col, $row, $col + $cols - 1, $row);
-        $sheet->setCellValue([$col, $row], 'Horarios de docentes · '.($institucion?->name ?? '').' · Generado el '.$fecha);
+        $sheet->setCellValue([$col, $row], 'Horarios de docentes · '.($institucion?->name ?? '').' · Generado el '.$fecha.' · Media franja (½ sup./½ inf.) = 0.5 bloque');
         $sheet->getStyle([$col, $row])->getFont()->setSize(8)->getColor()->setARGB($grayText);
-        $sheet->getStyle([$col, $row])->getAlignment()->setHorizontal('center');
+        $sheet->getStyle([$col, $row])->getAlignment()->setHorizontal('center')->setWrapText(true);
+        $sheet->getRowDimension($row)->setRowHeight(20);
     }
 
     /**
@@ -1441,7 +1545,7 @@ class TimetablePdfController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>  $rows
+     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int|float, hours:int|float}>  $rows
      */
     private function teacherBlockTotalsPdf(\Illuminate\Support\Collection $rows, Lapso $lapso)
     {
@@ -1463,7 +1567,7 @@ class TimetablePdfController extends Controller
      * XLS (CSV UTF-8 con BOM, abre en Excel). Incluye las columnas
      * «Horas Administrativa» y «Horas Formativas» (vacías, para llenado manual).
      *
-     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>  $rows
+     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int|float, hours:int|float}>  $rows
      */
     private function teacherBlockTotalsCsv(\Illuminate\Support\Collection $rows, Lapso $lapso)
     {
@@ -1507,7 +1611,7 @@ class TimetablePdfController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>  $rows
+     * @param  \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int|float, hours:int|float}>  $rows
      */
     private function teacherBlockTotalsHtml(\Illuminate\Support\Collection $rows, Lapso $lapso)
     {
@@ -1536,10 +1640,12 @@ class TimetablePdfController extends Controller
      * - Docente canónico: `pevaluacion.profesor_id`, con respaldo en
      *   `timetable_slots.profesor_id` cuando la lección no tiene Pevaluación.
      * - Los recreos no cuentan.
+     * - ADR-TT-017: una media franja pesa 0.5 bloque. Si el docente cubre las
+     *   dos mitades de la misma celda, el peso se topa en 1 bloque.
      * - Horas académicas = 2 × bloques (regla institucional).
      *
      * @param  \Illuminate\Support\Collection<int, int|string>  $calendarIds
-     * @return \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int, hours:int}>
+     * @return \Illuminate\Support\Collection<int, array{name:string, ci:string, blocks:int|float, hours:int|float}>
      */
     public function teacherBlockTotalsRows($calendarIds): \Illuminate\Support\Collection
     {
@@ -1555,7 +1661,7 @@ class TimetablePdfController extends Controller
                 'calendar:id,pestudio_id',
                 'calendar.pestudio:id,peducativo_id',
             ])
-            ->get(['id', 'calendar_id', 'period_id', 'profesor_id', 'lesson_id']);
+            ->get(['id', 'calendar_id', 'period_id', 'profesor_id', 'lesson_id', 'half']);
 
         $byTeacher = [];
 
@@ -1590,18 +1696,22 @@ class TimetablePdfController extends Controller
                 (int) ($slot->period?->order_in_day ?? 0),
             ]);
 
-            $byTeacher[$profesorId]['cells'][$key] = true;
+            $byTeacher[$profesorId]['cells'][$key] = min(
+                1.0,
+                ($byTeacher[$profesorId]['cells'][$key] ?? 0.0)
+                    + $this->halfBlockWeight($slot->half),
+            );
         }
 
         return collect($byTeacher)
             ->map(function (array $row): array {
-                $blocks = count($row['cells']);
+                $blocks = $this->normalizeBlockValue(array_sum($row['cells']));
 
                 return [
                     'name' => $row['name'],
                     'ci' => $row['ci'],
                     'blocks' => $blocks,
-                    'hours' => $blocks * 2,
+                    'hours' => $this->normalizeBlockValue($blocks * 2),
                 ];
             })
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)

@@ -189,8 +189,18 @@ class MigracionLegacyInicialTest extends TestCase
         // una tabla vacía.
         $baseDestino = DB::table($tabla)->count();
 
-        $antes = $migrador->planificar(solo: [$tabla])['total_nuevos'];
+        $planInicial = $migrador->planificar(solo: [$tabla]);
+        $antes = $planInicial['total_nuevos'];
         $this->assertGreaterThan(0, $antes);
+
+        // La fuente legacy tiene planes que repiten docente + nivel + sección +
+        // semana. El migrador debe contarlos y omitirlos, no reventar contra la
+        // restricción única del destino.
+        $this->assertGreaterThan(
+            0,
+            $planInicial['conflictos_unicos'][$tabla] ?? 0,
+            'La fuente debería tener duplicados de semana para que esta prueba signifique algo.'
+        );
 
         // Se inserta tal cual la primera fila del origen.
         $origen = DB::connection('s2526')->table($tabla)->orderBy('id')->first();
@@ -205,10 +215,18 @@ class MigracionLegacyInicialTest extends TestCase
             'Una fila ya presente debe salirse del recuento de nuevas.'
         );
 
-        // Al ejecutar se insertan solo las que faltan.
+        // Al ejecutar se insertan solo las que faltan (sin los duplicados de
+        // semana que el plan ya descontó).
+        $planEjecucion = $migrador->planificar(solo: [$tabla]);
         $insertadas = $migrador->ejecutar(solo: [$tabla]);
 
+        $this->assertSame($planEjecucion['total_nuevos'], $insertadas[$tabla]);
         $this->assertSame($antes - 1, $insertadas[$tabla]);
+        $this->assertCount(
+            $planEjecucion['conflictos_unicos'][$tabla] ?? 0,
+            $migrador->omitidasPorConflicto()[$tabla] ?? [],
+            'Cada conflicto del informe debe corresponder a un id omitido en la ejecución.'
+        );
         $this->assertSame(
             $baseDestino + $antes,
             DB::table($tabla)->count(),

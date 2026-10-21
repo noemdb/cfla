@@ -2,22 +2,26 @@
 
 namespace App\Livewire\Inicial;
 
+use App\Exceptions\SemanaLibreNoDisponibleException;
 use App\Http\Requests\Inicial\EiplanningwkRequest;
 use App\Http\Requests\Inicial\EiplanningwsummaryRequest;
 use App\Livewire\Inicial\Concerns\ImportaDocumento;
 use App\Livewire\Inicial\Concerns\PensumCabecera;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Inicial\Eiplanningwk;
 use App\Models\app\Inicial\Eiplanningwstrategy;
 use App\Models\app\Inicial\Eiplanningwsummary;
 use App\Models\app\Inicial\Eiprojectk;
+use App\Services\Inicial\ClonadorEiplanningwk;
 use App\Services\Inicial\ImportadorEiplanningwk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -210,7 +214,19 @@ class EiplanningwkComponent extends Component
     public function render()
     {
         $query = Eiplanningwk::where('profesor_id', $this->profesor_id)
-            ->with(['grado', 'seccion', 'eiprojectk']);
+            ->with(['grado', 'seccion', 'eiprojectk'])
+            // Los conteos del listado se resuelven en la MISMA consulta. Antes
+            // cada tarjeta/fila ejecutaba dos `count()` (estrategias y
+            // resúmenes), así que una página de 10 planes hacía 20 consultas
+            // extra.
+            ->withCount([
+                // Solo las celdas con texto cuentan como escritas; una fila
+                // legada con `lunes` vacío no debe inflar el progreso.
+                'eiplanningwstrategies as eiplanningwstrategies_count' => fn ($q) => $q
+                    ->whereNotNull('lunes')
+                    ->where('lunes', '<>', ''),
+                'eiplanningwsummaries as eiplanningwsummaries_count',
+            ]);
 
         if ($this->search !== '') {
             $query->where(function ($q) {
@@ -233,6 +249,8 @@ class EiplanningwkComponent extends Component
 
         $eiplanningwks = $query->orderByDesc('created_at')->paginate($this->paginate);
 
+        $this->attachCompletion($eiplanningwks);
+
         // Conteos para el encabezado del wizard (estrategias ya escritas).
         $planEstrategias = $this->modalType === 'strategy' && $this->eiplanningwk_id
             ? Eiplanningwstrategy::where('eiplanningwk_id', $this->eiplanningwk_id)->count()
@@ -249,6 +267,53 @@ class EiplanningwkComponent extends Component
         ]);
     }
 
+    /**
+     * Añade a cada plan los indicadores de completitud del listado.
+     *
+     * Se resuelven con DOS consultas agrupadas para toda la página (días con
+     * contenido y áreas esperadas), no una por plan. Los conteos de estrategias
+     * y resúmenes ya vienen en el `withCount()` del render.
+     */
+    private function attachCompletion($paginator): void
+    {
+        $planes = $paginator->getCollection();
+
+        if ($planes->isEmpty()) {
+            return;
+        }
+
+        $diasPorPlan = Eiplanningwstrategy::query()
+            ->whereIn('eiplanningwk_id', $planes->pluck('id'))
+            ->whereNotNull('lunes')
+            ->where('lunes', '<>', '')
+            ->selectRaw('eiplanningwk_id, COUNT(DISTINCT day_of_week) as dias')
+            ->groupBy('eiplanningwk_id')
+            ->pluck('dias', 'eiplanningwk_id');
+
+        $seccionIds = $planes->pluck('seccion_id')->filter()->unique();
+
+        $areasPorSeccion = $seccionIds->isEmpty()
+            ? collect()
+            : Pevaluacion::query()
+                ->join('pensums', 'pensums.id', '=', 'pevaluacions.pensum_id')
+                ->where('pevaluacions.profesor_id', $this->profesor_id)
+                ->whereIn('pevaluacions.seccion_id', $seccionIds)
+                ->whereNull('pevaluacions.deleted_at')
+                ->whereNull('pensums.deleted_at')
+                ->selectRaw('pevaluacions.seccion_id, COUNT(DISTINCT pevaluacions.pensum_id) as total')
+                ->groupBy('pevaluacions.seccion_id')
+                ->pluck('total', 'pevaluacions.seccion_id');
+
+        foreach ($planes as $plan) {
+            $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
+            $esperados = (int) ($areasPorSeccion[$plan->seccion_id] ?? 0);
+
+            $plan->setAttribute('dias_con_contenido', (int) ($diasPorPlan[$plan->id] ?? 0));
+            $plan->setAttribute('resumenes_esperados', $esperados);
+            $plan->setAttribute('resumenes_pendientes', max(0, $esperados - $resumenes));
+        }
+    }
+
     // ─── Modal ───────────────────────────────────────────────────
 
     public function openModal(string $type, ?int $id = null): void
@@ -261,8 +326,8 @@ class EiplanningwkComponent extends Component
         try {
             match ($type) {
                 'create' => $this->resetModels(),
-                'edit' => $this->loadPlan($id),
-                'view' => $this->loadPlan($id),
+                'edit' => $this->loadPlan($id, 'update'),
+                'view' => $this->loadPlan($id, 'view'),
                 'strategy' => $this->loadPlanForStrategy($id),
                 'summary' => $this->loadPlanForSummary($id),
                 'edit-summary' => $this->loadSummary($id),
@@ -300,9 +365,9 @@ class EiplanningwkComponent extends Component
 
     // ─── Carga de datos ──────────────────────────────────────────
 
-    private function loadPlan(?int $id): void
+    private function loadPlan(?int $id, string $ability = 'view'): void
     {
-        $plan = $this->findPlan($id);
+        $plan = $this->findPlan($id, $ability);
 
         $this->eiplanningwk_id = $plan->id;
         $this->eiplanningwk = $plan->only([
@@ -322,14 +387,14 @@ class EiplanningwkComponent extends Component
 
     private function loadPlanForStrategy(?int $id): void
     {
-        $plan = $this->findPlan($id);
+        $plan = $this->findPlan($id, 'update');
         $this->eiplanningwk_id = $plan->id;
         $this->loadStrategiesForPlan($plan->id);
     }
 
     private function loadPlanForSummary(?int $id): void
     {
-        $plan = $this->findPlan($id);
+        $plan = $this->findPlan($id, 'update');
         $this->eiplanningwk_id = $plan->id;
         // `collect()` a la fuerza: `$listPevaluacion` está tipeada como
         // Collection y cualquier retorno array provocaba un TypeError dentro
@@ -399,10 +464,10 @@ class EiplanningwkComponent extends Component
             return;
         }
 
-        // Con alcance por `findSummary()`: `Eiplanningwsummary::find($id)` —como
-        // en el legacy— cargaba el resumen de otro docente con solo conocer su
-        // id, y `saveSummary()` lo escribía encima.
-        $summary = $this->findSummary($id);
+        // Autorizado por `EiplanningwsummaryPolicy`: `Eiplanningwsummary::find($id)`
+        // —como en el legacy— cargaba el resumen de otro docente con solo
+        // conocer su id, y `saveSummary()` lo escribía encima.
+        $summary = $this->findSummary($id, 'update');
 
         $this->eiplanningwsummary_id = $summary->id;
         $this->eiplanningwk_id = $summary->eiplanningwk_id;
@@ -414,12 +479,15 @@ class EiplanningwkComponent extends Component
     }
 
     /**
-     * Busca un plan por id garantizando que sea del docente autenticado.
+     * Busca un plan por id y delega la pertenencia en
+     * {@see \App\Policies\EiplanningwkPolicy}.
      *
-     * Sin esta comprobación, un `id` ajeno traería el plan de otro docente
-     * tanto al listado de estrategias como a los resúmenes.
+     * Se mantiene el 404 (en vez del 403 de `authorize()`) para no confirmar
+     * que el id existe a quien no es su dueño. La regla de autorización ya no
+     * vive aquí: cualquier `ability` de la política (view, update, delete,
+     * duplicate) se consulta con `Gate::allows()`.
      */
-    private function findPlan(?int $id): Eiplanningwk
+    private function findPlan(?int $id, string $ability = 'view'): Eiplanningwk
     {
         abort_if(! $id, 404, 'Plan no especificado.');
 
@@ -427,32 +495,39 @@ class EiplanningwkComponent extends Component
         // `ModelNotFoundException`, que NO es un `HttpExceptionInterface` y
         // caería en el `catch (\Throwable)` genérico de `openModal()`,
         // convirtiéndose en una notificación silenciosa en lugar de un 404.
-        $plan = Eiplanningwk::where('profesor_id', $this->profesor_id)
-            ->whereKey($id)
-            ->first();
+        $plan = Eiplanningwk::whereKey($id)->first();
 
         abort_if(! $plan, 404, 'Este plan no existe o pertenece a otro docente.');
+
+        abort_unless(
+            Gate::allows($ability, $plan),
+            404,
+            'Este plan no existe o pertenece a otro docente.'
+        );
 
         return $plan;
     }
 
     /**
-     * Busca un resumen garantizando que su plan sea del docente autenticado.
+     * Busca un resumen y delega su autorización en
+     * {@see \App\Policies\EiplanningwsummaryPolicy}.
      *
-     * El alcance se aplica en la query, así que la respuesta es 404 en vez de
-     * un 403 que confirmaría que el id existe. Es el mismo Arrangement que en
-     * {@see EiplanningbwkComponent::findSummary()}.
+     * Igual que en los planes, el 404 oculta la existencia del recurso a quien
+     * no es su dueño.
      */
-    private function findSummary(?int $id): Eiplanningwsummary
+    private function findSummary(?int $id, string $ability = 'view'): Eiplanningwsummary
     {
         abort_if(! $id, 404, 'Resumen no especificado.');
 
-        $summary = Eiplanningwsummary::query()
-            ->whereKey($id)
-            ->whereHas('eiplanningwk', fn ($q) => $q->where('profesor_id', $this->profesor_id))
-            ->first();
+        $summary = Eiplanningwsummary::query()->whereKey($id)->first();
 
         abort_if(! $summary, 404, 'Este resumen no existe o pertenece a otro docente.');
+
+        abort_unless(
+            Gate::allows($ability, $summary),
+            404,
+            'Este resumen no existe o pertenece a otro docente.'
+        );
 
         return $summary;
     }
@@ -588,9 +663,9 @@ class EiplanningwkComponent extends Component
             return;
         }
 
-        $plan = Eiplanningwk::find($this->eiplanningwk_id);
+        $plan = $this->findPlan($this->eiplanningwk_id, 'update');
         $this->listPevaluacion = collect(
-            $plan ? $plan->getPevaluacionsList($this->profesor_id, $lapso_id) : []
+            $plan->getPevaluacionsList($this->profesor_id, $lapso_id)
         );
     }
 
@@ -621,8 +696,31 @@ class EiplanningwkComponent extends Component
             return;
         }
 
+        // La restricción única de la tabla es el último cinturón de seguridad;
+        // esta comprobación devuelve un error de formulario comprensible en vez
+        // de dejar que el INSERT reviente con un SQLSTATE.
+        $duplicado = Eiplanningwk::query()
+            ->where('profesor_id', $validated['profesor_id'])
+            ->where('grado_id', $validated['grado_id'])
+            ->where('seccion_id', $validated['seccion_id'])
+            ->whereDate('finicial', $validated['finicial'])
+            ->when(
+                $this->eiplanningwk_id,
+                fn ($q) => $q->where('id', '!=', $this->eiplanningwk_id)
+            )
+            ->exists();
+
+        if ($duplicado) {
+            $this->addError(
+                'eiplanningwk.finicial',
+                'Ya existe un plan para este nivel, sección y semana. Edita el plan existente o elige otra fecha de inicio.'
+            );
+
+            return;
+        }
+
         $plan = $this->eiplanningwk_id
-            ? $this->findPlan($this->eiplanningwk_id)
+            ? $this->findPlan($this->eiplanningwk_id, 'update')
             : new Eiplanningwk;
 
         $plan->fill($validated);
@@ -648,16 +746,20 @@ class EiplanningwkComponent extends Component
             return;
         }
 
+        // Un resumen nuevo también debe pertenecer a un plan del docente: el
+        // `eiplanningwk_id` es una propiedad pública y no se confía en ella.
+        $plan = $this->findPlan($this->eiplanningwk_id, 'update');
+
         $this->resetValidation();
 
-        $this->eiplanningwsummary['eiplanningwk_id'] = $this->eiplanningwk_id;
+        $this->eiplanningwsummary['eiplanningwk_id'] = $plan->id;
 
         $request = EiplanningwsummaryRequest::fromInput($this->eiplanningwsummary);
         $request->validateResolved();
         $data = $request->summaryData();
 
         $summary = $this->eiplanningwsummary_id
-            ? $this->findSummary($this->eiplanningwsummary_id)
+            ? $this->findSummary($this->eiplanningwsummary_id, 'update')
             : new Eiplanningwsummary;
 
         $summary->fill($data);
@@ -688,6 +790,8 @@ class EiplanningwkComponent extends Component
 
             return;
         }
+
+        $this->findPlan($this->eiplanningwk_id, 'update');
 
         $i = $this->activeMomentIndex;
         $celda = $this->strategies[$this->activeDay][$i] ?? null;
@@ -726,6 +830,8 @@ class EiplanningwkComponent extends Component
 
             return;
         }
+
+        $this->findPlan($this->eiplanningwk_id, 'update');
 
         $guardadas = 0;
 
@@ -810,6 +916,8 @@ class EiplanningwkComponent extends Component
             return;
         }
 
+        $this->findPlan($this->eiplanningwk_id, 'update');
+
         if (! array_key_exists($day, $this->weekDays)) {
             return;
         }
@@ -849,6 +957,10 @@ class EiplanningwkComponent extends Component
      */
     public function confirmDeleteStrategy(string $day, int|string $momentIndex): void
     {
+        if ($this->eiplanningwk_id) {
+            $this->findPlan($this->eiplanningwk_id, 'update');
+        }
+
         $celda = $this->strategies[$day][(int) $momentIndex] ?? null;
 
         if (! $celda || ! $celda['id']) {
@@ -884,7 +996,7 @@ class EiplanningwkComponent extends Component
             return;
         }
 
-        $this->findPlan($this->eiplanningwk_id);
+        $this->findPlan($this->eiplanningwk_id, 'update');
 
         $total = Eiplanningwstrategy::where('eiplanningwk_id', $this->eiplanningwk_id)->count();
 
@@ -917,7 +1029,7 @@ class EiplanningwkComponent extends Component
             return;
         }
 
-        $plan = $this->findPlan($this->eiplanningwk_id);
+        $plan = $this->findPlan($this->eiplanningwk_id, 'update');
 
         try {
             $deleted = DB::transaction(
@@ -947,6 +1059,8 @@ class EiplanningwkComponent extends Component
 
     public function confirmDeletePlan(int $id): void
     {
+        $this->findPlan($id, 'delete');
+
         $this->dialog()->confirm([
             'title' => 'Eliminar plan semanal',
             'description' => 'Se eliminará el plan junto con sus estrategias y resúmenes. Esta acción no se puede deshacer.',
@@ -963,7 +1077,7 @@ class EiplanningwkComponent extends Component
 
     public function deletePlan(int $id): void
     {
-        $plan = $this->findPlan($id);
+        $plan = $this->findPlan($id, 'delete');
 
         // Las hijas caen por ON DELETE CASCADE del DDL clonado; los resúmenes
         // y estrategias de la semanal no tienen FK declarada, se borran aquí.
@@ -979,14 +1093,37 @@ class EiplanningwkComponent extends Component
 
     public function confirmClonePlan(int $id): void
     {
-        $plan = $this->findPlan($id);
+        $plan = $this->findPlan($id, 'duplicate');
 
         $estrategias = $plan->eiplanningwstrategies()->count();
         $resumenes = $plan->eiplanningwsummaries()->count();
 
+        if (! $this->profesor_id) {
+            $this->notification()->error(
+                title: 'No se pudo clonar',
+                description: 'El usuario no tiene una ficha de docente asociada.'
+            );
+
+            return;
+        }
+
+        try {
+            $fechas = app(ClonadorEiplanningwk::class)
+                ->proximaSemanaLibre($plan, $this->profesor_id);
+        } catch (SemanaLibreNoDisponibleException $e) {
+            $this->notification()->error(
+                title: 'No se pudo clonar',
+                description: $e->getMessage()
+            );
+
+            return;
+        }
+
+        $rango = $fechas['finicial']->format('d/m/Y').' al '.$fechas['ffinal']->format('d/m/Y');
+
         $this->dialog()->confirm([
             'title' => 'Clonar plan semanal',
-            'description' => "Se creará una copia del plan con {$estrategias} estrategias y {$resumenes} resúmenes. La copia conserva el nivel, la sección, las fechas y el contenido del original.",
+            'description' => "Se creará una copia con {$estrategias} estrategias y {$resumenes} resúmenes en la primera semana libre ({$rango}). Conserva el nivel, la sección, el contenido y el diagnóstico del original.",
             'icon' => 'question',
             'accept' => [
                 'label' => 'Clonar',
@@ -999,60 +1136,29 @@ class EiplanningwkComponent extends Component
     }
 
     /**
-     * Clona cabecera + estrategias + resúmenes en una sola transacción.
+     * Clona cabecera + estrategias + resúmenes.
      *
-     * Si falla cualquier inserción, no queda un plan a medias. La copia se
-     * asigna SIEMPRE al docente autenticado: el `findPlan()` de origen ya
-     * garantiza que el plan sea suyo, pero nunca se copia el `profesor_id`
-     * crudo del registro.
+     * La transacción y las copias viven en {@see ClonadorEiplanningwk}; aquí
+     * solo se autoriza el origen y se informa del resultado. La copia se asigna
+     * SIEMPRE al docente autenticado: el `findPlan()` de origen garantiza que
+     * el plan sea suyo, pero nunca se copia el `profesor_id` crudo.
      */
     public function clonePlan(int $id): void
     {
-        $source = $this->findPlan($id);
+        $source = $this->findPlan($id, 'duplicate');
+
+        if (! $this->profesor_id) {
+            $this->notification()->error(
+                title: 'No se pudo clonar',
+                description: 'El usuario no tiene una ficha de docente asociada.'
+            );
+
+            return;
+        }
 
         try {
-            $resultado = DB::transaction(function () use ($source) {
-                $copy = Eiplanningwk::create([
-                    'profesor_id' => $this->profesor_id,
-                    'grado_id' => $source->grado_id,
-                    'seccion_id' => $source->seccion_id,
-                    'pensum_id' => $source->pensum_id,
-                    'eiprojectk_id' => $source->eiprojectk_id,
-                    'finicial' => $source->finicial,
-                    'ffinal' => $source->ffinal,
-                    'tiempo_ejecucion' => $source->tiempo_ejecucion,
-                    'diagnostico' => $source->diagnostico,
-                    'observacion' => $source->observacion,
-                ]);
-
-                $estrategias = 0;
-
-                foreach ($source->eiplanningwstrategies()->get() as $strategy) {
-                    $data = $strategy->only([
-                        'day_of_week', 'momento_rutina_diaria',
-                        'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'order',
-                    ]);
-                    $data['eiplanningwk_id'] = $copy->id;
-
-                    Eiplanningwstrategy::create($data);
-                    $estrategias++;
-                }
-
-                $resumenes = 0;
-
-                foreach ($source->eiplanningwsummaries()->get() as $summary) {
-                    $data = $summary->only([
-                        'pevaluacion_id', 'componente', 'objetivo', 'aprendizaje_esperado',
-                        'indicadores', 'linea_investigacion', 'enfasis_curriculares', 'order',
-                    ]);
-                    $data['eiplanningwk_id'] = $copy->id;
-
-                    Eiplanningwsummary::create($data);
-                    $resumenes++;
-                }
-
-                return compact('copy', 'estrategias', 'resumenes');
-            });
+            $resultado = app(ClonadorEiplanningwk::class)
+                ->clonar($source, $this->profesor_id);
 
             $this->resetPage();
 
@@ -1069,6 +1175,11 @@ class EiplanningwkComponent extends Component
                 title: 'Plan clonado',
                 description: "Se copiaron {$resultado['estrategias']} estrategias y {$resultado['resumenes']} resúmenes."
             );
+        } catch (SemanaLibreNoDisponibleException $e) {
+            $this->notification()->error(
+                title: 'No se pudo clonar',
+                description: $e->getMessage()
+            );
         } catch (\Throwable $e) {
             report($e);
 
@@ -1081,6 +1192,8 @@ class EiplanningwkComponent extends Component
 
     public function confirmDeleteSummary(int $id): void
     {
+        $this->findSummary($id, 'delete');
+
         $this->dialog()->confirm([
             'title' => 'Eliminar resumen',
             'description' => 'Se eliminará el resumen de este área de aprendizaje.',
@@ -1100,7 +1213,7 @@ class EiplanningwkComponent extends Component
         // Mismo alcance que en `findPlan()`/`findSummary()`: `abort(404)`
         // explícito para que el 404 llegue como HttpException y no se coma en
         // el catch genérico de `openModal()`.
-        $summary = $this->findSummary($id);
+        $summary = $this->findSummary($id, 'delete');
 
         abort_if(
             (int) $summary->eiplanningwk_id !== (int) $this->eiplanningwk_id,

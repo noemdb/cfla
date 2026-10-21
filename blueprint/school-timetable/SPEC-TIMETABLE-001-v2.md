@@ -79,7 +79,7 @@ ubica en un turno y sus períodos se asignan a docentes y aulas sin conflictos.
 | 4 | Generar automáticamente el horario libre de conflictos (motor CSP + backtracking) |
 | 5 | Editar manualmente el resultado con validación de conflictos en tiempo real |
 | 6 | Gestionar ausencias de docentes y suplentes con recálculo |
-| 7 | Publicar/exportar por sección, docente y aula (PDF + vista pública por enlace firmado) |
+| 7 | Publicar/exportar por sección, docente y aula (PDF, XLS + vista pública por enlace firmado) |
 | 8 | Notificar cambios a los actores afectados |
 
 **Fuera de alcance v1:** horarios individuales por estudiante (electivas/IB),
@@ -700,6 +700,12 @@ solo en el índice.
   con rótulo «½ sup.» / «½ inf.» y separador, vía el parcial compartido
   `resources/views/timetable/partials/half-cell.blade.php`. Una celda **normal** (bloque
   completo, `half = NULL`) se renderiza sin cambios.
+- **XLS y totalizaciones** (ADR-TT-017): los consolidados XLS de todos los P.Estudios y
+  todos los docentes replican las bandas «½ sup.» / «½ inf.» en la celda y ajustan la
+  altura de la fila. Los resúmenes de profesores y la totalización de bloques por docente
+  ponderan cada media franja como **0.5 bloque** (dos mitades del mismo docente en una
+  celda visual suman como máximo 1 bloque); las horas académicas se mantienen en
+  `2 × bloques`.
 - **Vista del estudiante** (rol `is_student`): su sección vía
   `Estudiant → inscripcion → seccion → slots`; **docente** (rol `is_profesor`):
   solo sus slots. Ambas vía `App\Livewire\Timetable\TimetableRoleView`

@@ -117,6 +117,16 @@ class MigrateLegacyInicial extends Command
         $this->info('Migración terminada.');
         $this->table(['Tabla', 'Filas insertadas'], collect($insertadas)->map(fn ($n, $t) => [$t, (string) $n])->values()->all());
 
+        $omitidas = $migrador->omitidasPorConflicto();
+
+        if ($omitidas !== []) {
+            $this->newLine();
+            $this->warn('Filas omitidas por conflicto de unicidad (no se insertaron ni se borraron):');
+            foreach ($omitidas as $tabla => $ids) {
+                $this->line("  {$tabla}: ids ".implode(', ', $ids));
+            }
+        }
+
         return self::SUCCESS;
     }
 
@@ -149,6 +159,14 @@ class MigrateLegacyInicial extends Command
         );
 
         $this->line('  <info>Total a insertar: '.$plan['total_nuevos'].'</info>');
+
+        if (($plan['conflictos_unicos'] ?? []) !== []) {
+            $this->newLine();
+            $this->line('  <comment>Filas nuevas que se omitirán por conflicto de semana única:</comment>');
+            foreach ($plan['conflictos_unicos'] as $tabla => $cuantas) {
+                $this->line("    {$tabla}: {$cuantas}");
+            }
+        }
 
         if ($plan['columnas_faltantes'] !== []) {
             $this->newLine();

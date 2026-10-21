@@ -84,6 +84,16 @@ class MigradorLegacyInicial
         return array_column(self::ORDEN, 'tabla');
     }
 
+    /**
+     * IDs omitidos por chocar con una restricción única del destino.
+     *
+     * Se guardan por tabla porque las hijas de un plan omitido tampoco deben
+     * insertarse: quedarían huérfanas aunque su padre exista en el origen.
+     *
+     * @var array<string, array<int, int>>
+     */
+    private array $idsOmitidos = [];
+
     public function __construct(
         private string $origen = 's2526',
         private int $chunks = 500,
@@ -118,6 +128,7 @@ class MigradorLegacyInicial
      *     huerfanas: array<string, array{tabla: string, filas: int, ids: array<int, int>}>,
      *     claves_roto: array<string, int>,
      *     columnas_faltantes: array<string, array<int, string>>,
+     *     conflictos_unicos: array<string, int>,
      *     total_nuevos: int
      * }
      */
@@ -130,6 +141,7 @@ class MigradorLegacyInicial
             'huerfanas' => [],
             'claves_roto' => [],
             'columnas_faltantes' => [],
+            'conflictos_unicos' => [],
             'total_nuevos' => 0,
         ];
 
@@ -161,9 +173,19 @@ class MigradorLegacyInicial
             // Filas cuya `id` ya está en el destino: no se tocan. Es lo que hace
             // el comando idempotente y reejecutable.
             $idsEnDestino = $destino->pluck('id')->all();
-            $nuevos = $idsEnDestino
+            $nuevosPorId = $idsEnDestino
                 ? $origen->whereNotIn('id', $idsEnDestino)->count()
                 : $totalOrigen;
+
+            // Una fila puede ser nueva por id y, aun así, no poder insertarse
+            // porque su semana ya está ocupada (restricción única). Se descuenta
+            // del informe para no anunciar filas que la base rechazará.
+            $conflictos = $this->contarConflictosUnicos($tabla, $idsEnDestino);
+            $nuevos = max(0, $nuevosPorId - $conflictos);
+
+            if ($conflictos > 0) {
+                $resultado['conflictos_unicos'][$tabla] = $conflictos;
+            }
 
             $huerfanas = $this->contarHuerfanas($entrada);
 
@@ -175,9 +197,10 @@ class MigradorLegacyInicial
                 'origen' => $totalOrigen,
                 'destino' => $existentes,
                 'nuevos' => $nuevos,
-                // Filas del origen que ya están en el destino (las que el
-                // comando se va a saltar).
-                'existentes' => $totalOrigen - $nuevos,
+                // Filas del origen que ya están en el destino por id (las que
+                // el comando se va a saltar). Los conflictos de unicidad no son
+                // «existentes»: son filas nuevas que no se pueden insertar.
+                'existentes' => $totalOrigen - $nuevosPorId,
                 'columnas' => count($comunes),
                 'columnas_ignoradas' => $ignoradas,
             ];
@@ -225,12 +248,31 @@ class MigradorLegacyInicial
         }
 
         $insertadas = [];
+        $this->idsOmitidos = [];
 
         foreach ($plan['tablas'] as $tabla => $info) {
             $insertadas[$tabla] = $this->migrarTabla($tabla, $info['columnas'], $progreso);
         }
 
+        if ($this->idsOmitidos !== []) {
+            Log::warning('inicial:migrate-legacy — filas omitidas por conflicto de unicidad', [
+                'tablas' => $this->idsOmitidos,
+            ]);
+        }
+
         return $insertadas;
+    }
+
+    /**
+     * IDs que no se insertaron por chocar con una restricción única.
+     *
+     * Las hijas de estos IDs se omiten también para no dejar huérfanas.
+     *
+     * @return array<string, array<int, int>>
+     */
+    public function omitidasPorConflicto(): array
+    {
+        return $this->idsOmitidos;
     }
 
     /**
@@ -257,6 +299,69 @@ class MigradorLegacyInicial
         }
 
         return $problemas;
+    }
+
+    /**
+     * Cuántas filas nuevas chocarían con la restricción única de la semana.
+     *
+     * Solo `eiplanningwks` tiene hoy una restricción de este tipo. Se cuentan
+     * tanto los choques contra el destino como los duplicados dentro del propio
+     * origen; el primero que aparece (por id) gana y los siguientes se omiten.
+     *
+     * @param  array<int, int|string>  $idsExistentes
+     */
+    private function contarConflictosUnicos(string $tabla, array $idsExistentes): int
+    {
+        if ($tabla !== 'eiplanningwks') {
+            return 0;
+        }
+
+        foreach (['profesor_id', 'grado_id', 'seccion_id', 'finicial'] as $columna) {
+            if (! $this->tieneColumna($this->origen, $tabla, $columna)) {
+                return 0;
+            }
+        }
+
+        $ocupadas = DB::table($tabla)
+            ->select(['profesor_id', 'grado_id', 'seccion_id', 'finicial'])
+            ->get()
+            ->mapWithKeys(fn ($fila) => [$this->claveSemana($fila) => true])
+            ->all();
+
+        $consulta = DB::connection($this->origen)->table($tabla)->orderBy('id');
+
+        if ($idsExistentes) {
+            $consulta->whereNotIn('id', $idsExistentes);
+        }
+
+        $conflictos = 0;
+
+        foreach ($consulta->cursor() as $fila) {
+            $clave = $this->claveSemana($fila);
+
+            if (isset($ocupadas[$clave])) {
+                $conflictos++;
+
+                continue;
+            }
+
+            $ocupadas[$clave] = true;
+        }
+
+        return $conflictos;
+    }
+
+    /**
+     * Clave de la restricción única semanal.
+     */
+    private function claveSemana(object $fila): string
+    {
+        return implode('|', [
+            (int) $fila->profesor_id,
+            (int) $fila->grado_id,
+            (int) $fila->seccion_id,
+            substr((string) $fila->finicial, 0, 10),
+        ]);
     }
 
     /**
@@ -294,14 +399,38 @@ class MigradorLegacyInicial
         // Filas cuyo padre no se va a migrar: no pueden entrar.
         $idsHuerfanos = $this->idsHuerfanosDe($tabla);
 
+        // Claves de semana ya ocupadas en el destino. Se amplía con cada fila
+        // aceptada para detectar también duplicados dentro del propio origen.
+        $clavesOcupadas = [];
+
+        if ($tabla === 'eiplanningwks') {
+            $clavesOcupadas = DB::table($tabla)
+                ->select(['profesor_id', 'grado_id', 'seccion_id', 'finicial'])
+                ->get()
+                ->mapWithKeys(fn ($fila) => [$this->claveSemana($fila) => true])
+                ->all();
+        }
+
         $total = 0;
 
-        $consulta->chunk($this->chunks, function ($filas) use ($tabla, $columnasFila, $idsHuerfanos, &$total, $progreso) {
+        $consulta->chunk($this->chunks, function ($filas) use ($tabla, $columnasFila, $idsHuerfanos, &$clavesOcupadas, &$total, $progreso) {
             $lote = [];
 
             foreach ($filas as $fila) {
                 if (in_array((int) $fila->id, $idsHuerfanos, true)) {
                     continue;
+                }
+
+                if ($tabla === 'eiplanningwks') {
+                    $clave = $this->claveSemana($fila);
+
+                    if (isset($clavesOcupadas[$clave])) {
+                        $this->idsOmitidos[$tabla][] = (int) $fila->id;
+
+                        continue;
+                    }
+
+                    $clavesOcupadas[$clave] = true;
                 }
 
                 $datos = [];
@@ -375,7 +504,12 @@ class MigradorLegacyInicial
 
             $info = $this->contarHuerfanas($entrada);
 
-            return $info['ids'];
+            // Un padre omitido por conflicto de unicidad deja a sus hijas sin
+            // destino: se suman sus ids a los huérfanos reales del origen.
+            $padre = $entrada['padre'];
+            $omitidos = $padre ? ($this->idsOmitidos[$padre] ?? []) : [];
+
+            return array_values(array_unique(array_merge($info['ids'], $omitidos)));
         }
 
         return [];

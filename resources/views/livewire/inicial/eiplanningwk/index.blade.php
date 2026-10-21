@@ -82,6 +82,15 @@
                 Importar de s2526
             </button>
 
+            <div wire:loading.flex wire:target="clonePlan,deletePlan,deleteAllStrategies"
+                class="hidden items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-200">
+                <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Procesando…
+            </div>
+
             <button wire:click="toggleView" type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 text-sm font-medium text-gray-300 transition-colors"
                 title="{{ $viewMode === 'grid' ? 'Ver como tabla' : 'Ver como tarjetas' }}">
@@ -115,9 +124,14 @@
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             @foreach ($eiplanningwks as $plan)
                 @php
-                    $total = 50;
-                    $escritas = $plan->eiplanningwstrategies()->count();
-                    $resumenes = $plan->eiplanningwsummaries()->count();
+                    $total = count($weekDays) * count($moments);
+                    $totalDias = count($weekDays);
+                    $escritas = (int) ($plan->eiplanningwstrategies_count ?? 0);
+                    $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
+                    $diasContenido = (int) ($plan->dias_con_contenido ?? 0);
+                    $resumenesEsperados = (int) ($plan->resumenes_esperados ?? 0);
+                    $resumenesPendientes = (int) ($plan->resumenes_pendientes ?? 0);
+                    $vacias = max(0, $total - $escritas);
                 @endphp
                 <article
                     class="rounded-xl border border-white/10 bg-gray-900/60 hover:border-cyan-500/30 transition-colors flex flex-col">
@@ -160,6 +174,41 @@
                                 aria-valuenow="{{ $escritas }}" aria-valuemin="0" aria-valuemax="{{ $total }}">
                                 <div class="h-full bg-cyan-500 rounded-full"
                                     style="width: {{ $total > 0 ? round($escritas / $total * 100) : 0 }}%"></div>
+                            </div>
+
+                            {{-- Completitud: días trabajados, celdas vacías y resúmenes por área. --}}
+                            <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-medium">
+                                <span title="Días con al menos una estrategia guardada"
+                                    class="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5
+                                        {{ $diasContenido >= $totalDias
+                                            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                                            : 'border-amber-500/20 bg-amber-500/10 text-amber-300' }}">
+                                    {{ $diasContenido }}/{{ $totalDias }} días
+                                </span>
+                                <span title="Celdas de la semana sin estrategia guardada"
+                                    class="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5
+                                        {{ $vacias === 0
+                                            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                                            : 'border-white/10 bg-white/5 text-gray-400' }}">
+                                    {{ $vacias }} vacías
+                                </span>
+                                <span title="{{ $resumenesEsperados > 0
+                                        ? ($resumenesPendientes > 0
+                                            ? 'Faltan '.$resumenesPendientes.' resúmenes por área'
+                                            : 'Resúmenes completos')
+                                        : 'Resúmenes guardados' }}"
+                                    class="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5
+                                        {{ $resumenesEsperados > 0
+                                            ? ($resumenesPendientes === 0
+                                                ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                                                : 'border-amber-500/20 bg-amber-500/10 text-amber-300')
+                                            : 'border-white/10 bg-white/5 text-gray-400' }}">
+                                    @if ($resumenesEsperados > 0)
+                                        {{ $resumenes }}/{{ $resumenesEsperados }} resúmenes
+                                    @else
+                                        {{ $resumenes }} resúmenes
+                                    @endif
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -231,8 +280,9 @@
                                 </a>
 
                                 <button wire:click="confirmClonePlan({{ $plan->id }})" type="button"
+                                    wire:loading.attr="disabled" wire:target="clonePlan"
                                     @click="open = false" role="menuitem"
-                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-50">
                                     <svg class="w-4 h-4 shrink-0 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -243,8 +293,9 @@
                                 <div class="my-1 border-t border-white/5" role="separator"></div>
 
                                 <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
+                                    wire:loading.attr="disabled" wire:target="deletePlan"
                                     @click="open = false" role="menuitem"
-                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-300 hover:bg-red-500/10 transition-colors">
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-300 hover:bg-red-500/10 transition-colors disabled:opacity-50">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -274,8 +325,14 @@
                 <tbody class="divide-y divide-white/5">
                     @foreach ($eiplanningwks as $plan)
                         @php
-                            $escritas = $plan->eiplanningwstrategies()->count();
-                            $resumenes = $plan->eiplanningwsummaries()->count();
+                            $total = count($weekDays) * count($moments);
+                            $totalDias = count($weekDays);
+                            $escritas = (int) ($plan->eiplanningwstrategies_count ?? 0);
+                            $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
+                            $diasContenido = (int) ($plan->dias_con_contenido ?? 0);
+                            $resumenesEsperados = (int) ($plan->resumenes_esperados ?? 0);
+                            $resumenesPendientes = (int) ($plan->resumenes_pendientes ?? 0);
+                            $vacias = max(0, $total - $escritas);
                         @endphp
                         <tr class="align-top hover:bg-white/[0.02]">
                             <td class="px-3 py-2.5 text-gray-200 whitespace-nowrap font-medium">
@@ -284,25 +341,36 @@
                             <td class="px-3 py-2.5 text-gray-300 whitespace-nowrap">
                                 {{ $plan->finicial->format('d/m/Y') }} → {{ $plan->ffinal->format('d/m/Y') }}
                             </td>
-                            <td class="px-3 py-2.5 text-gray-300 text-right whitespace-nowrap tabular-nums">{{ $escritas }}/50</td>
-                            <td class="px-3 py-2.5 text-gray-300 text-right whitespace-nowrap tabular-nums">{{ $resumenes }}</td>
+                            <td class="px-3 py-2.5 text-right whitespace-nowrap tabular-nums">
+                                <p class="text-gray-300">{{ $escritas }}/{{ $total }}</p>
+                                <p class="text-[10px] {{ $diasContenido >= $totalDias ? 'text-emerald-400' : 'text-amber-400' }}">
+                                    {{ $diasContenido }}/{{ $totalDias }} días · {{ $vacias }} vacías
+                                </p>
+                            </td>
+                            <td class="px-3 py-2.5 text-right whitespace-nowrap tabular-nums">
+                                <p class="text-gray-300">
+                                    {{ $resumenes }}@if ($resumenesEsperados > 0)<span class="text-gray-500">/{{ $resumenesEsperados }}</span>@endif
+                                </p>
+                                @if ($resumenesEsperados > 0)
+                                    <p class="text-[10px] {{ $resumenesPendientes === 0 ? 'text-emerald-400' : 'text-amber-400' }}">
+                                        {{ $resumenesPendientes === 0 ? 'completos' : 'faltan '.$resumenesPendientes }}
+                                    </p>
+                                @endif
+                            </td>
                             <td class="px-3 py-2.5 text-gray-400 min-w-48 max-w-xs truncate"
                                 title="{{ $plan->diagnostico }}">
                                 {{ $plan->diagnostico ?: '—' }}
                             </td>
                             <td class="px-3 py-2.5 text-right whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1">
-                                    <button wire:click="openModal('edit', {{ $plan->id }})" type="button"
-                                        class="p-1.5 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/20 text-amber-300 transition-colors"
-                                        title="Editar plan">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
+                                <div wire:key="table-actions-{{ $plan->id }}"
+                                    x-data="{ open: false, top: 0, left: 0 }"
+                                    @keydown.escape.window="open = false"
+                                    @scroll.window="open = false"
+                                    @resize.window="open = false"
+                                    class="inline-flex items-center gap-1">
                                     <button wire:click="openModal('strategy', {{ $plan->id }})" type="button"
                                         class="p-1.5 rounded-md bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/20 text-cyan-300 transition-colors"
-                                        title="Editar estrategias día × momento">
+                                        title="Editar estrategias día × momento" aria-label="Editar estrategias">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 6h16M4 12h16M4 18h16" />
@@ -310,47 +378,103 @@
                                     </button>
                                     <button wire:click="openModal('summary', {{ $plan->id }})" type="button"
                                         class="p-1.5 rounded-md bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/20 text-purple-300 transition-colors"
-                                        title="Resúmenes por área de aprendizaje">
+                                        title="Resúmenes por área de aprendizaje" aria-label="Editar resúmenes">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </button>
-                                    <button wire:click="openModal('view', {{ $plan->id }})" type="button"
-                                        class="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
-                                        title="Ver detalle">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+
+                                    {{-- Mismo menú que la tarjeta. Se teletransporta al body
+                                         para que el `overflow-x-auto` de la tabla no lo recorte. --}}
+                                    <button type="button" x-ref="trigger"
+                                        @click="
+                                            const r = $refs.trigger.getBoundingClientRect();
+                                            const alto = 238;
+                                            top = (window.innerHeight - r.bottom) > alto
+                                                ? r.bottom + 6
+                                                : Math.max(8, r.top - alto - 6);
+                                            left = Math.max(8, Math.min(window.innerWidth - 200, r.right - 192));
+                                            open = !open;
+                                        "
+                                        :aria-expanded="open.toString()"
+                                        aria-haspopup="menu" aria-label="Más acciones" title="Más acciones"
+                                        class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <circle cx="12" cy="5" r="1.75" />
+                                            <circle cx="12" cy="12" r="1.75" />
+                                            <circle cx="12" cy="19" r="1.75" />
                                         </svg>
                                     </button>
-                                    <a href="{{ route('inicials.eiplanningwks.format', $plan->id) }}" target="_blank"
-                                        class="p-1.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
-                                        title="Formato imprimible">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" />
-                                        </svg>
-                                    </a>
-                                    <button wire:click="confirmClonePlan({{ $plan->id }})" type="button"
-                                        class="p-1.5 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 text-emerald-300 transition-colors"
-                                        title="Clonar plan (registro, estrategias y resúmenes)"
-                                        aria-label="Clonar plan">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
-                                    </button>
-                                    <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
-                                        class="p-1.5 rounded-md bg-white/5 hover:bg-red-500/20 border border-white/5 text-gray-400 hover:text-red-400 transition-colors"
-                                        title="Eliminar plan">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+
+                                    <template x-teleport="body">
+                                        <div x-show="open" x-cloak @click.outside="open = false"
+                                            x-transition:enter="ease-out duration-100"
+                                            x-transition:enter-start="opacity-0 scale-95"
+                                            x-transition:enter-end="opacity-100 scale-100"
+                                            x-transition:leave="ease-in duration-75"
+                                            x-transition:leave-start="opacity-100 scale-100"
+                                            x-transition:leave-end="opacity-0 scale-95"
+                                            :style="{ top: top + 'px', left: left + 'px' }"
+                                            class="fixed z-50 w-48 origin-top-right rounded-lg border border-white/10 bg-gray-900 py-1 shadow-2xl"
+                                            role="menu">
+                                            <button wire:click="openModal('edit', {{ $plan->id }})" type="button"
+                                                @click="open = false" role="menuitem"
+                                                class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                                <svg class="w-4 h-4 shrink-0 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                Editar plan
+                                            </button>
+
+                                            <button wire:click="openModal('view', {{ $plan->id }})" type="button"
+                                                @click="open = false" role="menuitem"
+                                                class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                                <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                Ver detalle
+                                            </button>
+
+                                            <a href="{{ route('inicials.eiplanningwks.format', $plan->id) }}" target="_blank"
+                                                rel="noopener" @click="open = false" role="menuitem"
+                                                class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                                <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" />
+                                                </svg>
+                                                Formato imprimible
+                                            </a>
+
+                                            <button wire:click="confirmClonePlan({{ $plan->id }})" type="button"
+                                                wire:loading.attr="disabled" wire:target="clonePlan"
+                                                @click="open = false" role="menuitem"
+                                                class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-50">
+                                                <svg class="w-4 h-4 shrink-0 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                                Clonar plan
+                                            </button>
+
+                                            <div class="my-1 border-t border-white/5" role="separator"></div>
+
+                                            <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
+                                                wire:loading.attr="disabled" wire:target="deletePlan"
+                                                @click="open = false" role="menuitem"
+                                                class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-300 hover:bg-red-500/10 transition-colors disabled:opacity-50">
+                                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Eliminar plan
+                                            </button>
+                                        </div>
+                                    </template>
                                 </div>
                             </td>
                         </tr>
@@ -444,8 +568,20 @@
 
                         @if ($modalType === 'strategy')
                             <button wire:click="confirmDeleteAllStrategies" type="button"
-                                class="rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 px-4 py-2 text-sm font-medium text-red-300 transition-colors">
-                                Eliminar todas
+                                wire:loading.attr="disabled" wire:target="deleteAllStrategies"
+                                class="inline-flex items-center gap-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 px-4 py-2 text-sm font-medium text-red-300 transition-colors disabled:opacity-50">
+                                <svg wire:loading.remove wire:target="deleteAllStrategies"
+                                    class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <svg wire:loading wire:target="deleteAllStrategies"
+                                    class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                </svg>
+                                <span wire:loading.remove wire:target="deleteAllStrategies">Eliminar todas</span>
+                                <span wire:loading wire:target="deleteAllStrategies">Eliminando…</span>
                             </button>
                             <button wire:click="saveStrategies" type="button"
                                 class="rounded-lg bg-gray-700 hover:bg-gray-600 px-4 py-2 text-sm font-medium text-gray-100 transition-colors">

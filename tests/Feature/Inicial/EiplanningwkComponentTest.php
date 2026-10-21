@@ -167,12 +167,23 @@ class EiplanningwkComponentTest extends TestCase
             ->all();
     }
 
-    /** Crea un plan directamente en BD (fixtures). */
-    private function makePlan(int $profesorId): Eiplanningwk
+    /**
+     * Crea un plan directamente en BD (fixtures).
+     *
+     * La fecha es parametrizable porque la tabla tiene una restricción única
+     * por docente + nivel + sección + semana: dos planes del mismo grupo no
+     * pueden compartir `finicial`.
+     */
+    private function makePlan(int $profesorId, string $finicial = '2026-10-05'): Eiplanningwk
     {
-        return Eiplanningwk::create(
-            array_merge($this->planAttributes(), ['profesor_id' => $profesorId])
-        );
+        $inicio = \Carbon\Carbon::parse($finicial);
+        $atributos = array_merge($this->planAttributes(), [
+            'profesor_id' => $profesorId,
+            'finicial' => $inicio->toDateString(),
+            'ffinal' => $inicio->copy()->addDays(4)->toDateString(),
+        ]);
+
+        return Eiplanningwk::create($atributos);
     }
 
     // ─── Listado y carga en cascada ──────────────────────────────
@@ -302,6 +313,97 @@ class EiplanningwkComponentTest extends TestCase
         $grid->call('toggleView');
         $grid->assertSet('viewMode', 'table');
         $grid->assertSee('Editar plan');
+        // La tabla usa el MISMO menú de acciones que la tarjeta y lo
+        // teletransporta al body para que el `overflow-x-auto` no lo recorte.
+        $grid->assertSee('Más acciones');
+        $grid->assertSee('Clonar plan');
+        $grid->assertSee('Eliminar plan');
+        $grid->assertSee('x-teleport="body"', false);
+    }
+
+    /** @test */
+    public function el_listado_muestra_dias_con_contenido_celdas_vacias_y_resumenes_pendientes(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        foreach (['lunes', 'martes', 'miercoles'] as $i => $dia) {
+            Eiplanningwstrategy::create([
+                'eiplanningwk_id' => $plan->id,
+                'day_of_week' => $dia,
+                'momento_rutina_diaria' => 'Recibimiento',
+                'lunes' => 'Estrategia del '.$dia,
+                'order' => $i + 1,
+            ]);
+        }
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class);
+
+        // 3 de 5 días con contenido y 47 celdas vacías de 50.
+        $component->assertSee('3/5 días');
+        $component->assertSee('47 vacías');
+        // La fixture tiene una carga/área para la sección; sin resúmenes
+        // guardados, el indicador debe avisar que falta uno.
+        $component->assertSee('0/1 resúmenes');
+        $component->assertSee('Faltan 1 resúmenes por área');
+
+        $component->call('toggleView')
+            ->assertSee('3/5 días')
+            ->assertSee('47 vacías')
+            ->assertSee('faltan 1');
+    }
+
+    /** @test */
+    public function el_listado_no_ejecuta_un_conteo_por_plan(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        // Tres planes para que un N+1 se note: el patrón anterior hacía dos
+        // `count()` por tarjeta, es decir, seis consultas extra. Cada uno va en
+        // una semana distinta para respetar la restricción única.
+        foreach (['2026-10-05', '2026-10-12', '2026-10-19'] as $i => $semana) {
+            $plan = $this->makePlan($docente['profesor_id'], $semana);
+            $plan->update(['diagnostico' => 'Plan '.($i + 1).' con suficiente diagnóstico.']);
+        }
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class);
+
+        $conteosPorPlan = collect(DB::getQueryLog())
+            ->pluck('query')
+            ->filter(fn (string $sql) => str_contains($sql, 'eiplanningwstrategies')
+                && str_contains($sql, 'count(*)')
+                && str_contains($sql, 'as aggregate'));
+
+        $this->assertCount(
+            0,
+            $conteosPorPlan,
+            'El listado debe resolver los conteos con withCount, no con una consulta por plan.'
+        );
+
+        DB::disableQueryLog();
+    }
+
+    /** @test */
+    public function el_listado_muestra_estado_de_carga_en_las_acciones_masivas(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $this->makePlan($docente['profesor_id']);
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class);
+
+        // Indicador global y botones deshabilitados mientras corre el clonado,
+        // el borrado del plan o el borrado masivo de estrategias.
+        $component->assertSee('Procesando…');
+        $component->assertSee('wire:loading.attr="disabled"', false);
+
+        $component->call('toggleView')
+            ->assertSee('wire:loading.attr="disabled"', false);
     }
 
     /**
@@ -441,7 +543,7 @@ class EiplanningwkComponentTest extends TestCase
 
         $conArea = $this->makePlan($docente['profesor_id']);
         $conArea->update(['pensum_id' => $docente['pensum_id']]);
-        $this->makePlan($docente['profesor_id']);
+        $this->makePlan($docente['profesor_id'], '2026-10-12');
 
         $ids = Livewire::actingAs($docente['user'])
             ->test(EiplanningwkComponent::class)
@@ -563,6 +665,30 @@ class EiplanningwkComponentTest extends TestCase
             ->test(EiplanningwkComponent::class)
             ->call('openModal', 'strategy', $plan->id)
             ->assertStatus(404);
+    }
+
+    /** @test */
+    public function clonar_o_eliminar_el_plan_de_otro_docente_da_404(): void
+    {
+        $dueno = $this->makeDocenteInicial();
+        $invasor = $this->makeDocenteInicial();
+        $ajeno = $this->makePlan($dueno['profesor_id']);
+
+        Livewire::actingAs($invasor['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('clonePlan', $ajeno->id)
+            ->assertStatus(404);
+
+        Livewire::actingAs($invasor['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('deletePlan', $ajeno->id)
+            ->assertStatus(404);
+
+        $this->assertSame(
+            1,
+            Eiplanningwk::where('profesor_id', $dueno['profesor_id'])->count(),
+            'El plan ajeno debe conservarse.'
+        );
     }
 
     // ─── Wizard de estrategias (5 × 10) ──────────────────────────
@@ -855,8 +981,9 @@ class EiplanningwkComponentTest extends TestCase
         $this->assertSame($plan->grado_id, $copia->grado_id);
         $this->assertSame($plan->seccion_id, $copia->seccion_id);
         $this->assertSame($plan->pensum_id, $copia->pensum_id);
-        $this->assertSame($plan->finicial->toDateString(), $copia->finicial->toDateString());
-        $this->assertSame($plan->ffinal->toDateString(), $copia->ffinal->toDateString());
+        // La copia no puede repetir la semana: se coloca en la primera libre.
+        $this->assertSame('2026-10-12', $copia->finicial->toDateString());
+        $this->assertSame('2026-10-16', $copia->ffinal->toDateString());
         $this->assertSame($plan->diagnostico, $copia->diagnostico);
         $this->assertSame($plan->observacion, $copia->observacion);
 
@@ -879,6 +1006,53 @@ class EiplanningwkComponentTest extends TestCase
         // El original no se modifica ni pierde hijos.
         $this->assertSame(1, Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->count());
         $this->assertSame(1, Eiplanningwsummary::where('eiplanningwk_id', $plan->id)->count());
+    }
+
+    /** @test */
+    public function clona_en_la_siguiente_semana_libre_si_la_inmediata_esta_ocupada(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $origen = $this->makePlan($docente['profesor_id'], '2026-10-05');
+
+        // La semana siguiente ya tiene plan para el mismo grupo.
+        $this->makePlan($docente['profesor_id'], '2026-10-12');
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('clonePlan', $origen->id)
+            ->assertHasNoErrors();
+
+        $copia = Eiplanningwk::where('profesor_id', $docente['profesor_id'])
+            ->whereKeyNot($origen->id)
+            ->whereDate('finicial', '2026-10-19')
+            ->first();
+
+        $this->assertNotNull($copia, 'La copia debe saltar a la primera semana libre.');
+        $this->assertSame('2026-10-23', $copia->ffinal->toDateString());
+    }
+
+    /** @test */
+    public function no_guarda_dos_planes_para_el_mismo_docente_nivel_seccion_y_semana(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $this->makePlan($docente['profesor_id']);
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'create')
+            ->set($this->planForm())
+            ->call('save');
+
+        $component->assertHasErrors('eiplanningwk.finicial');
+        $this->assertStringContainsString(
+            'Ya existe un plan para este nivel, sección y semana',
+            $component->errors()->first('eiplanningwk.finicial')
+        );
+        $this->assertSame(
+            1,
+            Eiplanningwk::where('profesor_id', $docente['profesor_id'])->count(),
+            'El duplicado no debe persistirse.'
+        );
     }
 
     // ─── Resúmenes por área ──────────────────────────────────────

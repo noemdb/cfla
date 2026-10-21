@@ -30,7 +30,7 @@
             <tr>
                 <th style="width:42%;">Docente</th>
                 <th style="width:18%;">C.I.</th>
-                <th style="width:20%;">Bloques asignados</th>
+                <th style="width:20%;">Bloques (½=0.5)</th>
                 <th style="width:20%;">Horas académicas</th>
             </tr>
         </thead>
@@ -55,8 +55,9 @@
 
     <div class="footer">
         {{ $institucion?->name ?? '' }} · Totalización de bloques por docente
-        · Horas académicas = 2 × bloques · Un docente atendiendo varios
-        grupos/sub-grupos en el mismo bloque cuenta como uno · Generado el {{ $fecha }}
+        · Horas académicas = 2 × bloques · Una media franja (½ sup./½ inf.)
+        cuenta como 0.5 bloque · Un docente atendiendo varios grupos/sub-grupos
+        en el mismo bloque cuenta como uno · Generado el {{ $fecha }}
     </div>
 </body>
 </html>

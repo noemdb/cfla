@@ -93,12 +93,12 @@
 
     @if (!empty($teacherSummary))
         <div class="summary">
-            <div class="summary-title">Profesores asociados al horario ({{ count($teacherSummary) }})</div>
+            <div class="summary-title">Profesores asociados al horario ({{ count($teacherSummary) }}) · ½ = 0.5 bloque</div>
             <table>
                 <thead>
                     <tr>
                         <th>Profesor</th>
-                        <th>Bloques asignados</th>
+                        <th>Bloques (½=0.5)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -113,6 +113,6 @@
         </div>
     @endif
 
-    <div class="footer">Vista previa generada el {{ $fecha }} · {{ $institucion?->name ?? '' }}</div>
+    <div class="footer">Vista previa generada el {{ $fecha }} · {{ $institucion?->name ?? '' }} · Media franja (½ sup./½ inf.) = 0.5 bloque</div>
 </body>
 </html>

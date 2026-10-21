@@ -388,6 +388,12 @@ solver respeta la mitad y prefiere emparejar dos mitades en un período.
   previa) parten la celda en dos sub-franjas («½ sup.» / «½ inf.») usando el parcial compartido
   `resources/views/timetable/partials/half-cell.blade.php`. Una celda normal (`half = NULL`,
   bloque completo) no cambia. Ver `ADR-TT-017-HALF-BLOCK.md`.
+- **XLS y totalizaciones**: los consolidados XLS de todos los P.Estudios y todos los
+  docentes replican las bandas «½ sup.» / «½ inf.» dentro de la celda y ajustan la
+  altura de la fila. Los resúmenes de profesores y la totalización de bloques por
+  docente cuentan cada media franja como **0.5 bloque** (dos mitades del mismo docente
+  en una celda visual suman como máximo 1 bloque); las horas académicas siguen siendo
+  `2 × bloques`.
 - **Lecturas por rol** resuelven el activo del lapso vigente con
   `TimetableCalendar::activeForCurrentLapso()` (fallback: último activo, D-2):
   - Estudiante: su sección vía `Inscripcion` (sin inscripción → 404).

@@ -179,6 +179,48 @@ class EiplanningwkImportTest extends TestCase
         $this->assertSame(1, Eiplanningwk::where('profesor_id', $docente['profesor_id'])->count());
     }
 
+    /**
+     * La restricción única semanal también manda en la importación: si el
+     * legacy trae dos planes de la misma semana (aunque el diagnóstico cambie),
+     * solo entra el primero y el segundo se reporta como omitido.
+     *
+     * @test
+     */
+    public function importar_dos_planes_legacy_de_la_misma_semana_solo_crea_uno(): void
+    {
+        $this->saltarSiNoHayLegacy();
+
+        $duplicado = DB::connection('s2526')->table('eiplanningwks')
+            ->select('profesor_id', 'grado_id', 'seccion_id')
+            ->selectRaw('MIN(id) as primero, MAX(id) as segundo, DATE(finicial) as semana')
+            ->groupBy('profesor_id', 'grado_id', 'seccion_id', DB::raw('DATE(finicial)'))
+            ->havingRaw('COUNT(*) > 1')
+            ->first();
+
+        if (! $duplicado) {
+            $this->markTestSkipped('La fuente legacy no tiene semanas duplicadas para probar.');
+        }
+
+        $docente = $this->makeDocenteConCarga(
+            (int) $duplicado->grado_id,
+            (int) $duplicado->seccion_id
+        );
+
+        $reporte = (new ImportadorEiplanningwk)->importar(
+            [(int) $duplicado->primero, (int) $duplicado->segundo],
+            $docente['profesor_id']
+        );
+
+        $this->assertCount(1, $reporte['creados']);
+        $this->assertCount(1, $reporte['omitidos']);
+        $this->assertStringContainsString('duplicado', strtolower($reporte['omitidos'][0]['motivo']));
+        $this->assertSame(
+            1,
+            Eiplanningwk::where('profesor_id', $docente['profesor_id'])->count(),
+            'La segunda fila de la misma semana no debe persistirse.'
+        );
+    }
+
     /** @test */
     public function un_plan_fuera_de_la_carga_vigente_se_omite_sin_escribir(): void
     {

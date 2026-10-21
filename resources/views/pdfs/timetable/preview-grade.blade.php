@@ -78,12 +78,12 @@
             @endforeach
             @if (!empty($schedule['teacherSummary']))
                 <div class="summary">
-                    <div class="summary-title">Profesores asociados a la sección ({{ count($schedule['teacherSummary']) }})</div>
+                    <div class="summary-title">Profesores asociados a la sección ({{ count($schedule['teacherSummary']) }}) · ½ = 0.5 bloque</div>
                     <table>
                         <thead>
                             <tr>
                                 <th>Profesor</th>
-                                <th>Bloques asignados</th>
+                                <th>Bloques (½=0.5)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,6 +102,6 @@
         <div class="subhead">No hay horarios asignados para las secciones de este grado.</div>
     @endforelse
 
-    <div class="footer">Generado el {{ $fecha }} · {{ $institucion?->name ?? '' }}</div>
+    <div class="footer">Generado el {{ $fecha }} · {{ $institucion?->name ?? '' }} · Media franja (½ sup./½ inf.) = 0.5 bloque</div>
 </body>
 </html>

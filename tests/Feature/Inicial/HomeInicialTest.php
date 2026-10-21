@@ -223,6 +223,14 @@ class HomeInicialTest extends TestCase
             ->assertSee('Relación con el ambiente')
             ->assertDontSee('Comunicación y Representación')
             ->assertDontSee('Ciencias de la Naturaleza')
+            // El manual documenta las acciones masivas y la copia de planes.
+            ->assertSee('Cómo clonar un plan')
+            ->assertSee('Clonar plan')
+            ->assertSee('la copia es independiente')
+            ->assertSee('primera semana libre')
+            ->assertSee('Cómo eliminar todas las estrategias')
+            ->assertSee('Eliminar todas')
+            ->assertSee('conserva el nivel, la sección')
             // La leyenda A/B identifica los dos elementos del diagrama de resúmenes.
             ->assertSee('Resúmenes guardados')
             ->assertSee('+ Nuevo resumen')

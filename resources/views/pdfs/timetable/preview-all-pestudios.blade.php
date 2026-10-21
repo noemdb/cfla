@@ -94,7 +94,7 @@
                     @endforeach
                     @if (!empty($schedule['teacherSummary']))
                         <div class="summary">
-                            <div class="summary-title">Profesores de la sección ({{ count($schedule['teacherSummary']) }})</div>
+                            <div class="summary-title">Profesores de la sección ({{ count($schedule['teacherSummary']) }}) · ½ = 0.5 bloque</div>
                             <table>
                                 <thead><tr><th>Profesor</th><th class="blq">Blq.</th><th>Profesor</th><th class="blq">Blq.</th></tr></thead>
                                 <tbody>
@@ -112,6 +112,6 @@
         <div class="subhead">No hay horarios disponibles para los P.Estudios del lapso vigente.</div>
     @endforelse
 
-    <div class="footer">Generado el {{ $fecha }} · {{ $institucion?->name ?? '' }}</div>
+    <div class="footer">Generado el {{ $fecha }} · {{ $institucion?->name ?? '' }} · Media franja (½ sup./½ inf.) = 0.5 bloque</div>
 </body>
 </html>

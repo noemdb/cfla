@@ -829,6 +829,36 @@
                                 usa <strong>Importar de s2526</strong> y edítalo. Así no empiezas de cero.
                             </p>
                         </div>
+
+                        <h3 class="mt-6 text-sm font-bold uppercase tracking-widest text-gray-500">Cómo clonar un plan</h3>
+                        <p class="mt-2 text-sm leading-6 text-gray-400">
+                            Clonar sirve para repetir una semana que ya tienes armada, por ejemplo para la
+                            semana siguiente o para ajustar el grupo después. La copia conserva el nivel, la sección,
+                            el diagnóstico, las estrategias y los resúmenes del plan original. Las fechas se mueven
+                            a la primera semana libre posterior para no duplicar la semana del grupo.
+                        </p>
+                        <ol class="mt-3 space-y-2 text-sm leading-6 text-gray-300">
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center justify-center text-[11px] font-bold">1</span>
+                                <span>En la tarjeta o en la tabla del plan, abre el menú <strong class="text-white">Más acciones</strong>.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center justify-center text-[11px] font-bold">2</span>
+                                <span>Pulsa <strong class="text-emerald-300">Clonar plan</strong> y revisa cuántas estrategias y resúmenes se copiarán, además de la semana libre que se asignará.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center justify-center text-[11px] font-bold">3</span>
+                                <span>Confirma con <strong class="text-white">Clonar</strong>. La copia aparece en tu listado y queda asignada a tu usuario.</span>
+                            </li>
+                        </ol>
+                        <div class="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
+                            <p class="text-sm leading-6 text-emerald-100/90">
+                                <strong class="text-emerald-300">Importante:</strong> la copia es independiente y
+                                se coloca en la primera semana libre. Si después editas la copia, el plan original
+                                no cambia. El sistema guarda la copia completa en una sola operación: si algo falla,
+                                no queda un plan a medias.
+                            </p>
+                        </div>
                         </div>
                     </section>
 
@@ -992,6 +1022,7 @@
 
                                 {{-- Pie del modal --}}
                                 <div class="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-white/10 pt-3">
+                                    <span class="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-[11px] text-red-300">Eliminar todas</span>
                                     <span class="rounded-lg px-3 py-1.5 text-[11px] text-gray-400">Cancelar</span>
                                     <span class="rounded-lg bg-gray-700 px-3 py-1.5 text-[11px] font-medium text-gray-100">Guardar todas</span>
                                 </div>
@@ -1025,6 +1056,7 @@
                                     <dl class="mt-2 space-y-2.5 text-[11px] leading-5">
                                         @foreach ([
                                             ['Eliminar', 'Borra la celda guardada.'],
+                                            ['Eliminar todas', 'Vacía las 50 celdas del plan; conserva cabecera y resúmenes.'],
                                             ['Guardar y continuar', 'Guarda la celda y avanza.'],
                                             ['Guardar todas', 'Guarda todas las celdas.'],
                                             ['Cancelar', 'Cierra sin guardar cambios.'],
@@ -1241,6 +1273,35 @@
                             Abre la celda que ya tiene texto. Aparecerá el botón <strong class="text-rose-300">Eliminar</strong>.
                             Púlsalo y confirma. Esa celda quedará vacía y <strong>no se puede deshacer</strong>.
                         </p>
+
+                        <h3 class="mt-6 text-sm font-bold uppercase tracking-widest text-gray-500">Cómo eliminar todas las estrategias</h3>
+                        <p class="mt-2 text-sm leading-6 text-gray-400">
+                            Si quieres empezar la semana de nuevo sin perder la cabecera ni los resúmenes, usa el
+                            borrado masivo. Esta acción elimina <strong class="text-white">todas las celdas guardadas</strong>
+                            del plan abierto, pero conserva el nivel, la sección, las fechas, el diagnóstico y los
+                            resúmenes por área.
+                        </p>
+                        <ol class="mt-3 space-y-2 text-sm leading-6 text-gray-300">
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 flex items-center justify-center text-[11px] font-bold">1</span>
+                                <span>Abre <strong class="text-white">Estrategias</strong> en el plan que quieres vaciar.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 flex items-center justify-center text-[11px] font-bold">2</span>
+                                <span>En el pie de la ventana, pulsa <strong class="text-rose-300">Eliminar todas</strong>.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 flex items-center justify-center text-[11px] font-bold">3</span>
+                                <span>Lee cuántas estrategias se eliminarán y confirma. La rejilla queda vacía y lista para volver a escribir.</span>
+                            </li>
+                        </ol>
+                        <div class="mt-4 rounded-xl border border-rose-500/25 bg-rose-500/5 p-4">
+                            <p class="text-sm leading-6 text-rose-100/90">
+                                <strong class="text-rose-300">No se puede deshacer.</strong> Si solo quieres corregir
+                                una celda, usa el botón <strong>Eliminar</strong> de esa celda. El borrado masivo es para
+                                reiniciar la semana completa.
+                            </p>
+                        </div>
 
                         <details class="group mt-5 rounded-xl border border-white/10 bg-white/5">
                             <summary class="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-200 flex items-center justify-between gap-3">

@@ -155,8 +155,9 @@ abstract class ImportadorDocumento
     /**
      * ¿Ya existe un plan idéntico en el período actual?
      *
-     * El criterio de duplicidad es la cabecera completa declarada por
-     * {@see camposDuplicidad()}: profesor, grado, sección, fechas y diagnóstico.
+     * Por defecto el criterio es la cabecera completa: profesor, grado,
+     * sección, fechas y diagnóstico. Un documento con restricción única puede
+     * sobrescribirlo para comparar solo su clave real.
      */
     protected function existeIdentico(int $profesorId, array $carga, object $legacy): bool
     {

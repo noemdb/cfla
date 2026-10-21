@@ -104,6 +104,24 @@ class ImportadorEiplanningwk extends ImportadorDocumento
         return 'diagnostico';
     }
 
+    /**
+     * Anti-duplicado por SEMANA, no por cabecera completa.
+     *
+     * `eiplanningwks` tiene una restricción única
+     * (profesor + nivel + sección + finicial). Si el legacy trae dos planes de
+     * la misma semana con diagnósticos distintos, el segundo no puede entrar:
+     * se omite con el mismo reporte que un duplicado exacto.
+     */
+    protected function existeIdentico(int $profesorId, array $carga, object $legacy): bool
+    {
+        return Eiplanningwk::query()
+            ->where('profesor_id', $profesorId)
+            ->where('grado_id', $carga['grado_id'])
+            ->where('seccion_id', $carga['seccion_id'])
+            ->whereDate('finicial', substr((string) $legacy->finicial, 0, 10))
+            ->exists();
+    }
+
     protected function coincideConCarga(Collection $cargas, object $legacy): ?array
     {
         return $cargas->first(fn ($c) => $c['grado_id'] === (int) $legacy->grado_id

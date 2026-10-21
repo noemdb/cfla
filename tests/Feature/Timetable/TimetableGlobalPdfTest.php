@@ -72,6 +72,60 @@ class TimetableGlobalPdfTest extends TestCase
         return compact('user', 'lapso', 'pestudio', 'grado', 'seccion', 'profesor', 'calendar');
     }
 
+    /**
+     * Agrega una lección de media franja al fixture y devuelve sus modelos.
+     *
+     * @param  array<string, mixed>  $fixture
+     * @return array{lesson: TimetableLesson, slot: TimetableSlot, asignatura: Asignatura, period: TimetablePeriod}
+     */
+    private function addHalfSlot(array $fixture, int $half, ?TimetablePeriod $period = null, string $name = 'Media franja'): array
+    {
+        $calendar = $fixture['calendar'];
+        $period ??= TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id,
+            'shift_id' => TimetablePeriod::query()->where('calendar_id', $calendar->id)->value('shift_id'),
+            'day_of_week' => 2,
+            'order_in_day' => 1,
+            'is_break' => false,
+        ]);
+
+        $asignatura = Asignatura::factory()->create([
+            'pestudio_id' => $fixture['pestudio']->id,
+            'name' => $name,
+            'hour_t_week' => 1,
+            'hour_p_week' => 0,
+        ]);
+        $pensum = Pensum::factory()->create([
+            'pestudio_id' => $fixture['pestudio']->id,
+            'grado_id' => $fixture['grado']->id,
+            'asignatura_id' => $asignatura->id,
+        ]);
+        $pev = Pevaluacion::factory()->create([
+            'profesor_id' => $fixture['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'pensum_id' => $pensum->id,
+            'lapso_id' => $fixture['lapso']->id,
+        ]);
+        $lesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pev->id,
+            'shift_id' => $period->shift_id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+            'half_block' => true,
+        ]);
+        $slot = TimetableSlot::factory()->create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lesson->id,
+            'period_id' => $period->id,
+            'profesor_id' => $fixture['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'half' => $half,
+        ]);
+
+        return compact('lesson', 'slot', 'asignatura', 'period');
+    }
+
     public function test_all_pestudios_pdf_streams(): void
     {
         $fixture = $this->fixture();
@@ -161,6 +215,168 @@ class TimetableGlobalPdfTest extends TestCase
         } finally {
             @unlink($tmp);
         }
+    }
+
+    public function test_all_teachers_html_renders_half_bands(): void
+    {
+        $fixture = $this->fixture();
+        $this->addHalfSlot($fixture, 0, name: 'Música');
+
+        $html = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['format' => 'html']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('½ sup.', $html);
+        $this->assertStringContainsString('½ inf.', $html);
+        $this->assertStringContainsString('Música', $html);
+    }
+
+    public function test_all_pestudios_html_renders_half_bands_and_fractional_summary(): void
+    {
+        $fixture = $this->fixture();
+        $this->addHalfSlot($fixture, 0, name: 'Música');
+
+        $html = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-pestudios', ['format' => 'html']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('½ sup.', $html);
+        $this->assertStringContainsString('½ inf.', $html);
+        $this->assertStringContainsString('Música', $html);
+        // 1 bloque completo + 1 media franja = 1.5 (celda del resumen).
+        $this->assertStringContainsString('>1.5</td>', $html);
+    }
+
+    public function test_all_pestudios_xls_renders_half_bands_and_counts_half_as_half_block(): void
+    {
+        $fixture = $this->fixture();
+        $this->addHalfSlot($fixture, 0, name: 'Música');
+
+        $response = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-pestudios', ['format' => 'xls']))
+            ->assertOk();
+
+        $tmp = tempnam(sys_get_temp_dir(), 'ttxls').'.xlsx';
+        file_put_contents($tmp, $response->streamedContent());
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+            $sheet = null;
+            $flat = '';
+
+            foreach ($spreadsheet->getAllSheets() as $candidate) {
+                $candidateFlat = collect($candidate->rangeToArray('A1:F500'))->flatten()->filter()->implode(' | ');
+                if (str_contains($candidateFlat, 'Música')) {
+                    $sheet = $candidate;
+                    $flat = $candidateFlat;
+                    break;
+                }
+            }
+
+            $this->assertNotNull($sheet, 'debe existir la hoja del P.Estudio con la media franja');
+            $this->assertStringContainsString('½ sup.', $flat);
+            $this->assertStringContainsString('½ inf.', $flat);
+
+            // 1 bloque completo + 1 media franja = 1.5 bloques.
+            $teacherName = trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name);
+            $summaryRow = null;
+            foreach ($sheet->rangeToArray('A1:F500') as $row) {
+                if (($row[0] ?? null) === $teacherName) {
+                    $summaryRow = $row;
+                    break;
+                }
+            }
+
+            $this->assertNotNull($summaryRow, 'el resumen del docente debe aparecer en el XLS');
+            $this->assertEqualsWithDelta(1.5, (float) ($summaryRow[3] ?? 0), 0.001);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    public function test_all_teachers_xls_renders_half_bands(): void
+    {
+        $fixture = $this->fixture();
+        $this->addHalfSlot($fixture, 1, name: 'Arte');
+
+        $response = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.all-teachers', ['format' => 'xls']))
+            ->assertOk();
+
+        $tmp = tempnam(sys_get_temp_dir(), 'ttxls').'.xlsx';
+        file_put_contents($tmp, $response->streamedContent());
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp);
+
+            $flat = collect($spreadsheet->getAllSheets())
+                ->flatMap(fn ($sheet) => $sheet->rangeToArray('A1:F500'))
+                ->flatten()
+                ->filter()
+                ->implode(' | ');
+
+            $this->assertStringContainsString('½ sup.', $flat);
+            $this->assertStringContainsString('½ inf.', $flat);
+            $this->assertStringContainsString('Arte', $flat);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    public function test_teacher_block_totals_counts_half_as_half_block(): void
+    {
+        $fixture = $this->fixture();
+
+        TimetableSlot::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->update(['half' => 0]);
+
+        $rows = app(\App\Http\Controllers\Timetable\TimetablePdfController::class)
+            ->teacherBlockTotalsRows(collect([$fixture['calendar']->id]));
+
+        $profesor = $rows->firstWhere('name', trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name));
+
+        $this->assertNotNull($profesor);
+        $this->assertSame(0.5, $profesor['blocks']);
+        $this->assertSame(1, $profesor['hours']);
+
+        $csv = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.teacher-block-totals', ['format' => 'xls']))
+            ->assertOk()
+            ->streamedContent();
+
+        $this->assertMatchesRegularExpression('/^.*,8801,0\.5,1,,$/m', $csv);
+
+        $html = $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.teacher-block-totals', ['format' => 'html']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('<td class="center">0.5</td>', $html);
+        $this->assertStringContainsString('<td class="center">1</td>', $html);
+    }
+
+    public function test_teacher_block_totals_counts_two_halves_in_same_cell_as_one_block(): void
+    {
+        $fixture = $this->fixture();
+        $period = TimetablePeriod::query()->where('calendar_id', $fixture['calendar']->id)->firstOrFail();
+
+        TimetableSlot::query()
+            ->where('calendar_id', $fixture['calendar']->id)
+            ->update(['half' => 0]);
+        $this->addHalfSlot($fixture, 1, period: $period, name: 'Segunda mitad');
+
+        $rows = app(\App\Http\Controllers\Timetable\TimetablePdfController::class)
+            ->teacherBlockTotalsRows(collect([$fixture['calendar']->id]));
+
+        $profesor = $rows->firstWhere('name', trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name));
+
+        $this->assertNotNull($profesor);
+        // Dos mitades del mismo docente en la misma celda visual = 1 bloque.
+        $this->assertSame(1, $profesor['blocks']);
+        $this->assertSame(2, $profesor['hours']);
     }
 
     /**
