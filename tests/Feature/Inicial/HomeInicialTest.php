@@ -159,7 +159,84 @@ class HomeInicialTest extends TestCase
             ->assertSee('Proyectos de aula')
             ->assertSee('Planes de evaluación')
             ->assertSee('Planes especiales')
-            ->assertSee('Informes finales por estudiante');
+            ->assertSee('Informes finales por estudiante')
+            // La tarjeta semanal es la portada del manual de tres registros.
+            ->assertSee(route('inicials.manual.eiplanningwks'), false)
+            ->assertSee('Manual de usuario · 3 registros');
+    }
+
+    /** @test */
+    public function el_manual_de_planificacion_semanal_explica_los_tres_registros(): void
+    {
+        $this->saltarSiFaltaLaMigracion();
+
+        $this->actingAs($this->makeDocenteInicial()['user'])
+            ->get(route('inicials.manual.eiplanningwks'))
+            ->assertOk()
+            ->assertSee('Manual de usuario')
+            ->assertSee('Registro del plan semanal')
+            ->assertSee('Registro de las estrategias')
+            ->assertSee('Registro de resúmenes por área de aprendizaje')
+            // Contenedor full width y diagramas con el ancho de la columna anterior.
+            ->assertSee('w-full mx-4', false)
+            ->assertSee('manual-figure', false)
+            // El índice lateral se puede ocultar y mostrar.
+            ->assertSee('Ocultar índice')
+            ->assertSee('manual-toc', false)
+            // En Educación Inicial se dice "Nivel", no "Grado".
+            ->assertSee('Nivel')
+            ->assertDontSee('Grado')
+            // Los tres botones que el docente debe reconocer en la pantalla.
+            ->assertSee('Guardar plan')
+            ->assertSee('Guardar y continuar')
+            ->assertSee('Guardar resumen')
+            // La ventana de estrategias se ilustra con datos de ejemplo.
+            ->assertSee('Así se ve la ventana con datos de ejemplo')
+            ->assertSee('50 celdas guardadas')
+            ->assertSee('Saludo con la canción de los animales')
+            // Cada formulario tiene una leyenda a la derecha que identifica sus campos.
+            ->assertSee('Leyenda de la ventana')
+            ->assertSee('Las letras señalan cada campo.')
+            ->assertSee('H, I y J son opcionales.')
+            // Cada paso del plan incluye una pequeña vista del componente real.
+            ->assertSee('manual-step-visual', false)
+            ->assertSee('Aún no hay planes')
+            ->assertSee('Mín. 10')
+            // El recorrido se presenta como una línea de tiempo vertical completa.
+            ->assertSee('Recorrido completo')
+            ->assertSee('10 pasos')
+            ->assertSee('8 pasos')
+            ->assertSee('11 pasos')
+            ->assertSee('manual-timeline', false)
+            ->assertSee('manual-timeline--amber', false)
+            ->assertSee('manual-timeline--purple', false)
+            ->assertSee('manual-timeline-item', false)
+            ->assertSee('manual-timeline-marker', false)
+            ->assertSee('manual-timeline-dot', false)
+            // Cada paso muestra un fragmento propio de la funcionalidad.
+            ->assertSee('manual-fn', false)
+            ->assertSee('El contador indica cuántas celdas')
+            ->assertSee('Campos obligatorios completos')
+            // Los ejemplos usan las áreas reales de Educación Inicial.
+            ->assertSee('Lenguaje oral y escrito')
+            ->assertSee('Procesos lógico-matemáticos')
+            ->assertSee('Relación con el ambiente')
+            ->assertDontSee('Comunicación y Representación')
+            ->assertDontSee('Ciencias de la Naturaleza')
+            // La leyenda A/B identifica los dos elementos del diagrama de resúmenes.
+            ->assertSee('Resúmenes guardados')
+            ->assertSee('+ Nuevo resumen')
+            ->assertSee('>A</text>', false)
+            ->assertSee('>B</text>', false)
+            ->assertDontSee('manual-wizard', false);
+    }
+
+    /** @test */
+    public function el_manual_de_planificacion_semanal_exige_el_flag_de_inicial(): void
+    {
+        $this->actingAs(User::factory()->create(['is_profesor' => false, 'is_admin' => false]))
+            ->get(route('inicials.manual.eiplanningwks'))
+            ->assertForbidden();
     }
 
     /**

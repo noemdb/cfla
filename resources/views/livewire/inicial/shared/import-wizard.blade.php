@@ -8,7 +8,7 @@
     ─────────────────────────────────────────────────────────────────────────────
     QUÉ HACE Y QUÉ NO
     ─────────────────────────────────────────────────────────────────────────────
-    Lista los planes legacy cuyo (grado, sección) coincide con la carga VIGENTE
+    Lista los planes legacy cuyo (nivel, sección) coincide con la carga VIGENTE
     del docente (lapso en curso) y los importa con ID NUEVO: las estrategias se
     copian íntegras y los resúmenes se remapean a la pevaluación actual (misma
     asignatura+sección) o se saltan y se cuentan en el reporte. El proyecto
@@ -92,7 +92,7 @@
                                 No hay planes del período anterior para su carga vigente.
                             </p>
                             <p class="mt-1 text-xs text-gray-600">
-                                Se listan los planes de s2526 cuyo grado y sección coinciden con
+                                Se listan los planes de s2526 cuyo nivel y sección coinciden con
                                 sus pevaluaciones del lapso en curso.
                             </p>
                         </div>
@@ -114,9 +114,9 @@
                                     class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all duration-200">
                             </div>
 
-                            <select wire:model.live="importGrado" aria-label="Filtrar por grado"
+                            <select wire:model.live="importGrado" aria-label="Filtrar por nivel"
                                 class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all duration-200">
-                                <option value="">Todos los grados</option>
+                                <option value="">Todos los niveles</option>
                                 @foreach ($this->importGradosOpciones() as $grado)
                                     <option value="{{ $grado }}">{{ $grado }}</option>
                                 @endforeach
@@ -131,7 +131,7 @@
                             </select>
 
                             <div class="flex items-center gap-1">
-                                @foreach (['finicial' => 'Fecha', 'grado' => 'Grado'] as $campo => $etiqueta)
+                                @foreach (['finicial' => 'Fecha', 'grado' => 'Nivel'] as $campo => $etiqueta)
                                     <button wire:click="sortImport('{{ $campo }}')" type="button"
                                         class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
                                             {{ $importSort === $campo ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10' }}">
@@ -288,7 +288,7 @@
                                         <tr>
                                             <th scope="col" class="px-3 py-2.5 text-left font-medium w-10"></th>
                                             <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Plan</th>
-                                            <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Grado · Sección</th>
+                                            <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Nivel · Sección</th>
                                             <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Período</th>
                                             <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Origen</th>
                                             <th scope="col" class="px-3 py-2.5 text-right font-medium whitespace-nowrap" title="Estrategias copiadas de 50 celdas">Estrategias</th>

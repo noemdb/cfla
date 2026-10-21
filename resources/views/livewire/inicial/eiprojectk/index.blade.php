@@ -33,7 +33,7 @@
             </div>
 
             <div class="w-full sm:w-44">
-                <label for="f-grado" class="block text-xs font-medium text-gray-400 mb-1">Grado</label>
+                <label for="f-grado" class="block text-xs font-medium text-gray-400 mb-1">Nivel</label>
                 <select id="f-grado" wire:model.live="filterGrado"
                     class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
                     <option value="">Todos</option>
@@ -109,7 +109,7 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-gray-100 truncate">
-                                    {{ $plan->grado?->name ?? 'Sin grado' }} · {{ $plan->seccion?->name ?? 'Sin sección' }}
+                                    {{ $plan->grado?->name ?? 'Sin nivel' }} · {{ $plan->seccion?->name ?? 'Sin sección' }}
                                 </p>
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     {{ $plan->finicial->format('d/m/Y') }}

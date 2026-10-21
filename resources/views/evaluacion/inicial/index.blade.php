@@ -65,7 +65,7 @@
 
                 <div>
                     <label for="filtro-grado" class="block text-xs font-medium text-gray-400 mb-1">
-                        Grado
+                        Nivel
                     </label>
                     <select id="filtro-grado" name="grado_id"
                         class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 outline-none">
@@ -80,14 +80,14 @@
                     <label for="filtro-seccion" class="block text-xs font-medium text-gray-400 mb-1">
                         Sección
                     </label>
-                    {{-- Las secciones se calculan en el servidor para el grado
+                    {{-- Las secciones se calculan en el servidor para el nivel
                          recibido; cambiarlos sin recargar dejaría la lista
                          desfasada. Es el precio de no meter Livewire aquí, que es
                          lo que pedía el legacy. --}}
                     <select id="filtro-seccion" name="seccion_id"
                         class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 outline-none"
                         @disabled($listSecciones->isEmpty())>
-                        <option value="">{{ $listSecciones->isEmpty() ? 'Elija primero un grado' : 'Todas' }}</option>
+                        <option value="">{{ $listSecciones->isEmpty() ? 'Elija primero un nivel' : 'Todas' }}</option>
                         @foreach ($listSecciones as $id => $nombre)
                             <option value="{{ $id }}" @selected((int) $seccion_id === (int) $id)>{{ $nombre }}</option>
                         @endforeach

@@ -8,7 +8,7 @@ namespace App\Http\Requests\Inicial;
  * ─────────────────────────────────────────────────────────────────────────────
  * EL ÚNICO INFORME "POR PERSONA" DEL MÓDULO
  * ─────────────────────────────────────────────────────────────────────────────
- * Los otros cinco documentos son del grupo (grado · sección · periodo). Este es
+ * Los otros cinco documentos son del grupo (nivel · sección · periodo). Este es
  * por ESTUDIANTE: un informe por alumno y área. De ahí sus particularidades:
  *
  *  · NO tiene `profesor_id`, `grado_id`, `seccion_id` ni `lapso_id`: todo se
@@ -38,7 +38,7 @@ class EifinalkRequest extends InicialRequest
         return [
             'eifinalk.order' => ['required', 'integer', 'min:1'],
 
-            // La carga académica ancla grado, sección, lapso, asignatura y
+            // La carga académica ancla nivel, sección, lapso, asignatura y
             // profesor: es obligatoria y no redundante.
             'eifinalk.pevaluacion_id' => ['required', 'integer', 'exists:pevaluacions,id'],
 
@@ -73,7 +73,7 @@ class EifinalkRequest extends InicialRequest
         return [
             'eifinalk.order.required' => 'Indica el orden en que se imprimirá el informe.',
             'eifinalk.order.min' => 'El orden debe ser 1 o mayor.',
-            'eifinalk.pevaluacion_id.required' => 'Elige la carga académica: de ella dependen el grado, la sección y el lapso del informe.',
+            'eifinalk.pevaluacion_id.required' => 'Elige la carga académica: de ella dependen el nivel, la sección y el lapso del informe.',
             'eifinalk.estudiant_id.required' => 'Elige el estudiante al que corresponde el informe.',
             'eifinalk.title.required' => 'Ponle un título al informe.',
             'eifinalk.title.max' => 'El título no puede pasar de 191 caracteres.',

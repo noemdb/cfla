@@ -20,7 +20,7 @@
         {{-- ═══ Cabecera ═══ --}}
         <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-                <dt class="text-xs font-medium text-gray-500">Grado · Sección</dt>
+                <dt class="text-xs font-medium text-gray-500">Nivel · Sección</dt>
                 <dd class="text-sm text-gray-200 mt-0.5">
                     {{ $plan->grado?->name ?? '—' }} · {{ $plan->seccion?->name ?? '—' }}
                 </dd>

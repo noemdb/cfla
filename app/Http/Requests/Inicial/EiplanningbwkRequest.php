@@ -50,7 +50,7 @@ class EiplanningbwkRequest extends InicialRequest
     {
         return [
             'eiplanningbwk.profesor_id' => 'profesor',
-            'eiplanningbwk.grado_id' => 'grado',
+            'eiplanningbwk.grado_id' => 'nivel',
             'eiplanningbwk.seccion_id' => 'sección',
             'eiplanningbwk.pensum_id' => 'área de aprendizaje',
             'eiplanningbwk.eiprojectk_id' => 'proyecto vinculado',
@@ -66,7 +66,7 @@ class EiplanningbwkRequest extends InicialRequest
     {
         return [
             'eiplanningbwk.profesor_id.required' => 'No se pudo identificar al docente.',
-            'eiplanningbwk.grado_id.required' => 'Debes elegir el grado.',
+            'eiplanningbwk.grado_id.required' => 'Debes elegir el nivel.',
             'eiplanningbwk.seccion_id.required' => 'Debes elegir la sección.',
             'eiplanningbwk.finicial.required' => 'Debes indicar la fecha de inicio de la quincena.',
             'eiplanningbwk.ffinal.required' => 'Debes indicar la fecha de culminación.',

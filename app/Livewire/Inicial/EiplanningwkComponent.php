@@ -17,6 +17,7 @@ use App\Models\app\Inicial\Eiprojectk;
 use App\Services\Inicial\ImportadorEiplanningwk;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -870,6 +871,78 @@ class EiplanningwkComponent extends Component
         ]);
     }
 
+    /**
+     * Borra TODAS las estrategias guardadas del plan abierto.
+     *
+     * No toca los resúmenes ni la cabecera. Se confirma aparte porque es una
+     * acción masiva e irreversible: el docente puede haber llenado varias
+     * celdas de la rejilla y perderlas de golpe.
+     */
+    public function confirmDeleteAllStrategies(): void
+    {
+        if (! $this->eiplanningwk_id) {
+            return;
+        }
+
+        $this->findPlan($this->eiplanningwk_id);
+
+        $total = Eiplanningwstrategy::where('eiplanningwk_id', $this->eiplanningwk_id)->count();
+
+        if ($total === 0) {
+            $this->notification()->warning(
+                title: 'Sin estrategias guardadas',
+                description: 'Este plan todavía no tiene estrategias para eliminar.'
+            );
+
+            return;
+        }
+
+        $this->dialog()->confirm([
+            'title' => 'Eliminar todas las estrategias',
+            'description' => "Se eliminarán las {$total} estrategias guardadas de este plan. Los resúmenes y la cabecera se conservan. Esta acción no se puede deshacer.",
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Eliminar todas',
+                'method' => 'deleteAllStrategies',
+                'params' => [],
+                'color' => 'red',
+            ],
+            'reject' => ['label' => 'Cancelar'],
+        ]);
+    }
+
+    public function deleteAllStrategies(): void
+    {
+        if (! $this->eiplanningwk_id) {
+            return;
+        }
+
+        $plan = $this->findPlan($this->eiplanningwk_id);
+
+        try {
+            $deleted = DB::transaction(
+                fn () => Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->delete()
+            );
+
+            // La rejilla en memoria conserva los ids y textos hasta recargarla.
+            // Sin esto, el docente seguiría viendo las celdas "guardadas"
+            // aunque la BD ya esté vacía.
+            $this->loadStrategiesForPlan($plan->id);
+
+            $this->notification()->success(
+                title: 'Estrategias eliminadas',
+                description: "Se eliminaron {$deleted} estrategias del plan. Los resúmenes se conservan."
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            $this->notification()->error(
+                title: 'No se pudieron eliminar',
+                description: 'Ocurrió un error al borrar las estrategias. Inténtalo de nuevo.'
+            );
+        }
+    }
+
     // ─── Borrados ────────────────────────────────────────────────
 
     public function confirmDeletePlan(int $id): void
@@ -902,6 +975,108 @@ class EiplanningwkComponent extends Component
             title: 'Plan eliminado',
             description: 'El plan semanal se eliminó correctamente.'
         );
+    }
+
+    public function confirmClonePlan(int $id): void
+    {
+        $plan = $this->findPlan($id);
+
+        $estrategias = $plan->eiplanningwstrategies()->count();
+        $resumenes = $plan->eiplanningwsummaries()->count();
+
+        $this->dialog()->confirm([
+            'title' => 'Clonar plan semanal',
+            'description' => "Se creará una copia del plan con {$estrategias} estrategias y {$resumenes} resúmenes. La copia conserva el nivel, la sección, las fechas y el contenido del original.",
+            'icon' => 'question',
+            'accept' => [
+                'label' => 'Clonar',
+                'method' => 'clonePlan',
+                'params' => [$id],
+                'color' => 'positive',
+            ],
+            'reject' => ['label' => 'Cancelar'],
+        ]);
+    }
+
+    /**
+     * Clona cabecera + estrategias + resúmenes en una sola transacción.
+     *
+     * Si falla cualquier inserción, no queda un plan a medias. La copia se
+     * asigna SIEMPRE al docente autenticado: el `findPlan()` de origen ya
+     * garantiza que el plan sea suyo, pero nunca se copia el `profesor_id`
+     * crudo del registro.
+     */
+    public function clonePlan(int $id): void
+    {
+        $source = $this->findPlan($id);
+
+        try {
+            $resultado = DB::transaction(function () use ($source) {
+                $copy = Eiplanningwk::create([
+                    'profesor_id' => $this->profesor_id,
+                    'grado_id' => $source->grado_id,
+                    'seccion_id' => $source->seccion_id,
+                    'pensum_id' => $source->pensum_id,
+                    'eiprojectk_id' => $source->eiprojectk_id,
+                    'finicial' => $source->finicial,
+                    'ffinal' => $source->ffinal,
+                    'tiempo_ejecucion' => $source->tiempo_ejecucion,
+                    'diagnostico' => $source->diagnostico,
+                    'observacion' => $source->observacion,
+                ]);
+
+                $estrategias = 0;
+
+                foreach ($source->eiplanningwstrategies()->get() as $strategy) {
+                    $data = $strategy->only([
+                        'day_of_week', 'momento_rutina_diaria',
+                        'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'order',
+                    ]);
+                    $data['eiplanningwk_id'] = $copy->id;
+
+                    Eiplanningwstrategy::create($data);
+                    $estrategias++;
+                }
+
+                $resumenes = 0;
+
+                foreach ($source->eiplanningwsummaries()->get() as $summary) {
+                    $data = $summary->only([
+                        'pevaluacion_id', 'componente', 'objetivo', 'aprendizaje_esperado',
+                        'indicadores', 'linea_investigacion', 'enfasis_curriculares', 'order',
+                    ]);
+                    $data['eiplanningwk_id'] = $copy->id;
+
+                    Eiplanningwsummary::create($data);
+                    $resumenes++;
+                }
+
+                return compact('copy', 'estrategias', 'resumenes');
+            });
+
+            $this->resetPage();
+
+            if ($resultado['estrategias'] === 0 && $resultado['resumenes'] === 0) {
+                $this->notification()->warning(
+                    title: 'Plan clonado sin contenido',
+                    description: 'Se copió la cabecera, pero el plan original no tenía estrategias ni resúmenes.'
+                );
+
+                return;
+            }
+
+            $this->notification()->success(
+                title: 'Plan clonado',
+                description: "Se copiaron {$resultado['estrategias']} estrategias y {$resultado['resumenes']} resúmenes."
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            $this->notification()->error(
+                title: 'No se pudo clonar',
+                description: 'Ocurrió un error al copiar el plan. No se guardó ninguna copia.'
+            );
+        }
     }
 
     public function confirmDeleteSummary(int $id): void

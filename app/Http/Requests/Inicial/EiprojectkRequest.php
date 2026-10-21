@@ -62,7 +62,7 @@ class EiprojectkRequest extends InicialRequest
     {
         return [
             'eiprojectk.profesor_id' => 'profesor',
-            'eiprojectk.grado_id' => 'grado',
+            'eiprojectk.grado_id' => 'nivel',
             'eiprojectk.seccion_id' => 'sección',
             'eiprojectk.pensum_id' => 'área de aprendizaje',
             'eiprojectk.finicial' => 'fecha de inicio',
@@ -77,7 +77,7 @@ class EiprojectkRequest extends InicialRequest
     {
         return [
             'eiprojectk.profesor_id.required' => 'No se pudo identificar al docente.',
-            'eiprojectk.grado_id.required' => 'Debes elegir el grado.',
+            'eiprojectk.grado_id.required' => 'Debes elegir el nivel.',
             'eiprojectk.seccion_id.required' => 'Debes elegir la sección.',
             'eiprojectk.finicial.required' => 'Debes indicar la fecha de inicio del proyecto.',
             'eiprojectk.ffinal.required' => 'Debes indicar la fecha de culminación.',

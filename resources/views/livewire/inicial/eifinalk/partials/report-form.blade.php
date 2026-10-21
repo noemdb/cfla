@@ -5,14 +5,14 @@
     ─────────────────────────────────────────────────────────────────────────────
     TRES COSAS QUE NO TIENEN EQUIVALENTE EN LOS OTROS DOCUMENTOS
     ─────────────────────────────────────────────────────────────────────────────
-    1. La carga académica es OBLIGATORIA y de ella se derivan grado, sección,
+    1. La carga académica es OBLIGATORIA y de ella se derivan nivel, sección,
        lapso y asignatura: el informe no repite esos datos.
     2. Los CAMPOS CONDICIONALES según `status_official`: un informe oficial pide
        logros, observaciones individuales y aprendizajes esperados; uno de
        componente pide la observación del especialista. El legacy lo tenía
        cableado con dos `@if` dentro del markup; aquí la condición sale de
        `$this->esOficial()` y las etiquetas de {@see camposOficiales()}.
-    3. El ACORDEÓN DE EXPECTATIVAS, agrupado por área de aprendizaje del grado.
+    3. El ACORDEÓN DE EXPECTATIVAS, agrupado por área de aprendizaje del nivel.
 
     Reglas: App\Http\Requests\Inicial\EifinalkRequest
 --}}
@@ -37,7 +37,7 @@
                 <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
             @enderror
             <p class="mt-1 text-[11px] text-gray-600">
-                De esta carga se derivan el grado, la sección y el lapso del informe.
+                De esta carga se derivan el nivel, la sección y el lapso del informe.
             </p>
         </div>
 
@@ -187,7 +187,7 @@
             </p>
         @elseif ($learningAreas->isEmpty())
             <p class="text-sm text-gray-500 rounded-lg border border-dashed border-white/10 px-4 py-6 text-center">
-                No hay áreas de aprendizaje registradas para el grado de esta carga.
+                No hay áreas de aprendizaje registradas para el nivel de esta carga.
             </p>
         @else
             <div class="space-y-2" x-data="{ abierto: {} }">

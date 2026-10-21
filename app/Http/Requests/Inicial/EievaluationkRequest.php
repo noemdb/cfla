@@ -66,7 +66,7 @@ class EievaluationkRequest extends InicialRequest
     {
         return [
             'eievaluationk.profesor_id' => 'profesor',
-            'eievaluationk.grado_id' => 'grado',
+            'eievaluationk.grado_id' => 'nivel',
             'eievaluationk.lapso_id' => 'lapso',
             'eievaluationk.seccion_id' => 'sección',
             'eievaluationk.pensum_id' => 'área de aprendizaje',
@@ -83,7 +83,7 @@ class EievaluationkRequest extends InicialRequest
     {
         return [
             'eievaluationk.profesor_id.required' => 'No se pudo identificar al docente.',
-            'eievaluationk.grado_id.required' => 'Debes elegir el grado.',
+            'eievaluationk.grado_id.required' => 'Debes elegir el nivel.',
             'eievaluationk.lapso_id.required' => 'Debes elegir el lapso: este plan se ancla a un periodo.',
             'eievaluationk.seccion_id.required' => 'Debes elegir la sección.',
             'eievaluationk.finicial.required' => 'Debes indicar la fecha de inicio.',

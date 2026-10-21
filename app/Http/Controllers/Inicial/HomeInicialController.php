@@ -88,6 +88,22 @@ class HomeInicialController extends AbstractInicialController
     }
 
     /**
+     * Manual de usuario de la planificación semanal.
+     *
+     * La tarjeta de `use-cases` enlaza aquí: el manual es largo (tres registros
+     * con diagramas, ejemplos y solución de problemas) y merece una página
+     * propia para que se pueda leer sin el ruido del resto de casos de uso.
+     */
+    public function manualPlanificacionSemanal()
+    {
+        $user = Auth::user();
+
+        abort_if(! $user || (! $user->isInicial() && ! $user->is_admin), 403, 'Acceso denegado al módulo de Educación Inicial.');
+
+        return view('inicial.manual-planificacion-semanal');
+    }
+
+    /**
      * Perfil del docente dentro del módulo.
      *
      * Equivalente a `app.profesors.users.index`: la misma ficha (`profesors`
@@ -110,7 +126,7 @@ class HomeInicialController extends AbstractInicialController
     /**
      * Los 7 casos de uso del módulo.
      *
-     * @return array<int, array{titulo: string, descripcion: string, icono: string, color: string}>
+     * @return array<int, array{titulo: string, descripcion: string, icono: string, color: string, manual?: array{ruta: string, pasos: array<int, string>}}>
      */
     public function casosDeUso(): array
     {
@@ -123,9 +139,17 @@ class HomeInicialController extends AbstractInicialController
             ],
             [
                 'titulo' => 'Planificación semanal',
-                'descripcion' => 'Crea el plan de la semana, completa la rejilla de estrategias por momento de la rutina diaria y lo reimprime.',
+                'descripcion' => 'Manual en tres registros: el plan de la semana, las estrategias de cada momento y los resúmenes por área.',
                 'icono' => 'calendar',
                 'color' => 'cyan',
+                'manual' => [
+                    'ruta' => 'inicials.manual.eiplanningwks',
+                    'pasos' => [
+                        'Registra el plan de la semana',
+                        'Escribe las estrategias',
+                        'Crea los resúmenes por área',
+                    ],
+                ],
             ],
             [
                 'titulo' => 'Planificación quincenal',

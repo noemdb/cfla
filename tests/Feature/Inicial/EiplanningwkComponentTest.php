@@ -294,6 +294,10 @@ class EiplanningwkComponentTest extends TestCase
             ->test(EiplanningwkComponent::class);
 
         $grid->assertSee('Editar plan');
+        // Las acciones secundarias de la tarjeta viven en un menú desplegable.
+        $grid->assertSee('Más acciones');
+        $grid->assertSee('Clonar plan');
+        $grid->assertSee('Eliminar plan');
 
         $grid->call('toggleView');
         $grid->assertSet('viewMode', 'table');
@@ -700,6 +704,181 @@ class EiplanningwkComponentTest extends TestCase
         $this->assertSame('Puesta en común final.', $celda['estrategia']);
         $this->assertNotNull($celda['id']);
         $this->assertSame(2, $celda['order']);
+    }
+
+    /** @test */
+    public function guardar_y_continuar_pinta_la_celda_del_momento_siguiente(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $plan->id,
+            'day_of_week' => 'lunes',
+            'momento_rutina_diaria' => 'Periodo: Planificación',
+            'lunes' => 'Texto anterior del momento 3.',
+            'order' => 3,
+        ]);
+
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $plan->id,
+            'day_of_week' => 'lunes',
+            'momento_rutina_diaria' => 'Periodo: Trabajo Libre',
+            'lunes' => 'Texto del momento 4.',
+            'order' => 4,
+        ]);
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'strategy', $plan->id)
+            ->call('setActiveMoment', 3)
+            ->assertSet('strategies.lunes.3.estrategia', 'Texto anterior del momento 3.')
+            ->assertSee('strategy-editor-lunes-3', false)
+            ->assertSee('Texto anterior del momento 3.');
+
+        $component
+            ->set('strategies.lunes.3.estrategia', 'Texto nuevo del momento 3.')
+            ->call('saveCurrentStrategy')
+            ->assertSet('activeMomentIndex', 4)
+            ->assertSet('strategies.lunes.4.estrategia', 'Texto del momento 4.')
+            ->assertSee('strategy-editor-lunes-4', false)
+            ->assertDontSee('strategy-editor-lunes-3', false)
+            ->assertSee('Texto del momento 4.');
+
+        $this->assertSame(
+            'Texto nuevo del momento 3.',
+            Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)
+                ->where('day_of_week', 'lunes')
+                ->where('momento_rutina_diaria', 'Periodo: Planificación')
+                ->value('lunes')
+        );
+    }
+
+    /** @test */
+    public function elimina_todas_las_estrategias_sin_tocar_cabecera_ni_resumenes(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $plan->id,
+            'day_of_week' => 'lunes',
+            'momento_rutina_diaria' => 'Recibimiento',
+            'lunes' => 'Canción de bienvenida.',
+            'order' => 1,
+        ]);
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $plan->id,
+            'day_of_week' => 'martes',
+            'momento_rutina_diaria' => 'Periodo: Despedida',
+            'lunes' => 'Cierre y reflexión.',
+            'order' => 2,
+        ]);
+        Eiplanningwsummary::create([
+            'eiplanningwk_id' => $plan->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'componente' => 'Lenguaje oral',
+            'objetivo' => 'Conversar sobre la rutina.',
+            'aprendizaje_esperado' => 'Participa en conversaciones.',
+            'indicadores' => 'Interviene y escucha.',
+            'order' => 1,
+        ]);
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'strategy', $plan->id)
+            ->call('deleteAllStrategies');
+
+        $this->assertSame(
+            0,
+            Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->count(),
+            'Deben desaparecer todas las estrategias del plan.'
+        );
+        $this->assertNotNull(Eiplanningwk::find($plan->id), 'La cabecera no se elimina.');
+        $this->assertSame(
+            1,
+            Eiplanningwsummary::where('eiplanningwk_id', $plan->id)->count(),
+            'Los resúmenes no se tocan.'
+        );
+
+        foreach ($component->get('strategies') as $momentos) {
+            foreach ($momentos as $celda) {
+                $this->assertNull($celda['id']);
+                $this->assertSame('', $celda['estrategia']);
+            }
+        }
+    }
+
+    /** @test */
+    public function clona_cabecera_estrategias_y_resumenes_en_una_sola_copia(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $plan = $this->makePlan($docente['profesor_id']);
+        $plan->update(['pensum_id' => $docente['pensum_id']]);
+
+        $estrategia = Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $plan->id,
+            'day_of_week' => 'jueves',
+            'momento_rutina_diaria' => 'Periodo: Trabajos en Pequeños Grupos',
+            'lunes' => 'Trabajo por estaciones con material concreto.',
+            'order' => 5,
+        ]);
+
+        $resumen = Eiplanningwsummary::create([
+            'eiplanningwk_id' => $plan->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'componente' => 'Procesos lógico-matemáticos',
+            'objetivo' => 'Clasificar por color y forma.',
+            'aprendizaje_esperado' => 'Agrupa objetos según un criterio.',
+            'indicadores' => 'Clasifica y explica su criterio.',
+            'linea_investigacion' => 'Juego y aprendizaje.',
+            'enfasis_curriculares' => 'Pensamiento matemático.',
+            'order' => 1,
+        ]);
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('clonePlan', $plan->id)
+            ->assertHasNoErrors();
+
+        $copias = Eiplanningwk::where('profesor_id', $docente['profesor_id'])
+            ->where('id', '!=', $plan->id)
+            ->get();
+
+        $this->assertCount(1, $copias, 'Debe existir exactamente una copia.');
+
+        $copia = $copias->first();
+
+        $this->assertSame($plan->grado_id, $copia->grado_id);
+        $this->assertSame($plan->seccion_id, $copia->seccion_id);
+        $this->assertSame($plan->pensum_id, $copia->pensum_id);
+        $this->assertSame($plan->finicial->toDateString(), $copia->finicial->toDateString());
+        $this->assertSame($plan->ffinal->toDateString(), $copia->ffinal->toDateString());
+        $this->assertSame($plan->diagnostico, $copia->diagnostico);
+        $this->assertSame($plan->observacion, $copia->observacion);
+
+        $copiaEstrategia = Eiplanningwstrategy::where('eiplanningwk_id', $copia->id)->first();
+        $this->assertNotNull($copiaEstrategia);
+        $this->assertNotSame($estrategia->id, $copiaEstrategia->id);
+        $this->assertSame('jueves', $copiaEstrategia->day_of_week);
+        $this->assertSame('Periodo: Trabajos en Pequeños Grupos', $copiaEstrategia->momento_rutina_diaria);
+        $this->assertSame('Trabajo por estaciones con material concreto.', $copiaEstrategia->getRawOriginal('lunes'));
+        $this->assertSame(5, $copiaEstrategia->order);
+
+        $copiaResumen = Eiplanningwsummary::where('eiplanningwk_id', $copia->id)->first();
+        $this->assertNotNull($copiaResumen);
+        $this->assertNotSame($resumen->id, $copiaResumen->id);
+        $this->assertSame($resumen->pevaluacion_id, $copiaResumen->pevaluacion_id);
+        $this->assertSame($resumen->componente, $copiaResumen->componente);
+        $this->assertSame($resumen->objetivo, $copiaResumen->objetivo);
+        $this->assertSame($resumen->linea_investigacion, $copiaResumen->linea_investigacion);
+
+        // El original no se modifica ni pierde hijos.
+        $this->assertSame(1, Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->count());
+        $this->assertSame(1, Eiplanningwsummary::where('eiplanningwk_id', $plan->id)->count());
     }
 
     // ─── Resúmenes por área ──────────────────────────────────────

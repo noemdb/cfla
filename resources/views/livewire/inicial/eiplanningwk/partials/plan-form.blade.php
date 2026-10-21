@@ -10,14 +10,14 @@
 <div class="space-y-5">
 
     <div class="grid gap-4 sm:grid-cols-2">
-        {{-- Grado → dispara la carga en cascada de secciones --}}
+        {{-- Nivel → dispara la carga en cascada de secciones --}}
         <div>
             <label for="p-grado" class="block text-xs font-medium text-gray-400 mb-1.5">
-                Grado <span class="text-red-400">*</span>
+                Nivel <span class="text-red-400">*</span>
             </label>
             <select id="p-grado" wire:model.live="eiplanningwk.grado_id"
                 class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
-                <option value="">Seleccione un grado</option>
+                <option value="">Seleccione un nivel</option>
                 @foreach ($listGrado as $id => $nombre)
                     <option value="{{ $id }}">{{ $nombre }}</option>
                 @endforeach

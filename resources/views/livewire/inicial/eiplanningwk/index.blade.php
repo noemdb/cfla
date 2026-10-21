@@ -33,7 +33,7 @@
             </div>
 
             <div class="w-full sm:w-44">
-                <label for="f-grado" class="block text-xs font-medium text-gray-400 mb-1">Grado</label>
+                <label for="f-grado" class="block text-xs font-medium text-gray-400 mb-1">Nivel</label>
                 <select id="f-grado" wire:model.live="filterGrado"
                     class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
                     <option value="">Todos</option>
@@ -125,7 +125,7 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-gray-100 truncate">
-                                    {{ $plan->grado?->name ?? 'Sin grado' }} · {{ $plan->seccion?->name ?? 'Sin sección' }}
+                                    {{ $plan->grado?->name ?? 'Sin nivel' }} · {{ $plan->seccion?->name ?? 'Sin sección' }}
                                 </p>
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     {{ $plan->finicial->format('d/m/Y') }}
@@ -176,40 +176,83 @@
                             title="Resúmenes por área de aprendizaje">
                             Resúmenes ({{ $resumenes }})
                         </button>
-                        <button wire:click="openModal('edit', {{ $plan->id }})" type="button"
-                            class="p-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/20 text-amber-300 transition-colors"
-                            title="Editar plan">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-                        <button wire:click="openModal('view', {{ $plan->id }})" type="button"
-                            class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
-                            title="Ver detalle">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
-                        <a href="{{ route('inicials.eiplanningwks.format', $plan->id) }}" target="_blank"
-                            class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors"
-                            title="Formato imprimible">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" />
-                            </svg>
-                        </a>
-                        <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
-                            class="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/5 text-gray-400 hover:text-red-400 transition-colors"
-                            title="Eliminar plan">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
+                        {{-- Las acciones secundarias se agrupan para no saturar la tarjeta. --}}
+                        <div class="relative ml-auto" x-data="{ open: false }"
+                            @click.outside="open = false" @keydown.escape.window="open = false">
+                            <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                                aria-haspopup="menu" aria-label="Más acciones" title="Más acciones"
+                                class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-400 hover:text-gray-200 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="5" r="1.75" />
+                                    <circle cx="12" cy="12" r="1.75" />
+                                    <circle cx="12" cy="19" r="1.75" />
+                                </svg>
+                            </button>
+
+                            <div x-show="open" x-cloak
+                                x-transition:enter="ease-out duration-100"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="ease-in duration-75"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute right-0 top-full z-40 mt-2 w-48 origin-top-right rounded-lg border border-white/10 bg-gray-900 py-1 shadow-2xl"
+                                role="menu">
+                                <button wire:click="openModal('edit', {{ $plan->id }})" type="button"
+                                    @click="open = false" role="menuitem"
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                    <svg class="w-4 h-4 shrink-0 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Editar plan
+                                </button>
+
+                                <button wire:click="openModal('view', {{ $plan->id }})" type="button"
+                                    @click="open = false" role="menuitem"
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Ver detalle
+                                </button>
+
+                                <a href="{{ route('inicials.eiplanningwks.format', $plan->id) }}" target="_blank"
+                                    rel="noopener" @click="open = false" role="menuitem"
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" />
+                                    </svg>
+                                    Formato imprimible
+                                </a>
+
+                                <button wire:click="confirmClonePlan({{ $plan->id }})" type="button"
+                                    @click="open = false" role="menuitem"
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-gray-300 hover:bg-white/5 transition-colors">
+                                    <svg class="w-4 h-4 shrink-0 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    Clonar plan
+                                </button>
+
+                                <div class="my-1 border-t border-white/5" role="separator"></div>
+
+                                <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
+                                    @click="open = false" role="menuitem"
+                                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-300 hover:bg-red-500/10 transition-colors">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Eliminar plan
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </article>
             @endforeach
@@ -220,7 +263,7 @@
             <table class="min-w-full text-sm">
                 <thead class="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
                     <tr>
-                        <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Grado · Sección</th>
+                        <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Nivel · Sección</th>
                         <th scope="col" class="px-3 py-2.5 text-left font-medium whitespace-nowrap">Período</th>
                         <th scope="col" class="px-3 py-2.5 text-right font-medium whitespace-nowrap">Estrategias</th>
                         <th scope="col" class="px-3 py-2.5 text-right font-medium whitespace-nowrap">Resúmenes</th>
@@ -291,6 +334,15 @@
                                                 d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z" />
                                         </svg>
                                     </a>
+                                    <button wire:click="confirmClonePlan({{ $plan->id }})" type="button"
+                                        class="p-1.5 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 text-emerald-300 transition-colors"
+                                        title="Clonar plan (registro, estrategias y resúmenes)"
+                                        aria-label="Clonar plan">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
                                     <button wire:click="confirmDeletePlan({{ $plan->id }})" type="button"
                                         class="p-1.5 rounded-md bg-white/5 hover:bg-red-500/20 border border-white/5 text-gray-400 hover:text-red-400 transition-colors"
                                         title="Eliminar plan">
@@ -391,6 +443,10 @@
                         @endif
 
                         @if ($modalType === 'strategy')
+                            <button wire:click="confirmDeleteAllStrategies" type="button"
+                                class="rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 px-4 py-2 text-sm font-medium text-red-300 transition-colors">
+                                Eliminar todas
+                            </button>
                             <button wire:click="saveStrategies" type="button"
                                 class="rounded-lg bg-gray-700 hover:bg-gray-600 px-4 py-2 text-sm font-medium text-gray-100 transition-colors">
                                 Guardar todas

@@ -75,7 +75,7 @@ class EiplanningwkRequest extends InicialRequest
     {
         return [
             'eiplanningwk.profesor_id' => 'profesor',
-            'eiplanningwk.grado_id' => 'grado',
+            'eiplanningwk.grado_id' => 'nivel',
             'eiplanningwk.seccion_id' => 'sección',
             'eiplanningwk.pensum_id' => 'área de aprendizaje',
             'eiplanningwk.eiprojectk_id' => 'proyecto vinculado',
@@ -91,7 +91,7 @@ class EiplanningwkRequest extends InicialRequest
     {
         return [
             'eiplanningwk.profesor_id.required' => 'No se pudo identificar al docente.',
-            'eiplanningwk.grado_id.required' => 'Debes elegir el grado.',
+            'eiplanningwk.grado_id.required' => 'Debes elegir el nivel.',
             'eiplanningwk.seccion_id.required' => 'Debes elegir la sección.',
             'eiplanningwk.finicial.required' => 'Debes indicar la fecha de inicio de la semana.',
             'eiplanningwk.ffinal.required' => 'Debes indicar la fecha de culminación.',

@@ -12,10 +12,10 @@
     desplegables. Con GET el filtro sobrevive a un F5 y la URL se puede compartir o
     mandar por correo.
 
-    El precio conocido: las secciones se calculan en el servidor para el grado
-    recibido, así que cambiar de grado obliga a pulsar «Buscar». Es lo que hacía el
+    El precio conocido: las secciones se calculan en el servidor para el nivel
+    recibido, así que cambiar de nivel obliga a pulsar «Buscar». Es lo que hacía el
     legacy y evita que el desplegable de secciones muestre secciones de otro
-    grado.
+    nivel.
 --}}
 @php
     // Un mismo parcial para las dos perspectivas: solo cambia el action y, en
@@ -38,7 +38,7 @@
     </div>
 
     <div>
-        <label for="filtro-grado" class="block text-xs font-medium text-gray-400 mb-1">Grado</label>
+        <label for="filtro-grado" class="block text-xs font-medium text-gray-400 mb-1">Nivel</label>
         <select id="filtro-grado" name="grado_id"
             class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 outline-none">
             <option value="">Todos</option>
@@ -53,7 +53,7 @@
         <select id="filtro-seccion" name="seccion_id"
             class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 outline-none"
             @disabled($listSecciones->isEmpty())>
-            <option value="">{{ $listSecciones->isEmpty() ? 'Elija primero un grado' : 'Todas' }}</option>
+            <option value="">{{ $listSecciones->isEmpty() ? 'Elija primero un nivel' : 'Todas' }}</option>
             @foreach ($listSecciones as $id => $nombre)
                 <option value="{{ $id }}" @selected((int) $seccion_id === (int) $id)>{{ $nombre }}</option>
             @endforeach

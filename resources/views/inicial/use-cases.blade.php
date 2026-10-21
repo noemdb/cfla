@@ -14,7 +14,7 @@
 --}}
 <x-layouts.role>
     <div class="py-6">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="w-full mx-4 px-4 sm:px-6 lg:px-8 space-y-6">
 
             <header>
                 <nav class="text-xs text-gray-500 mb-1" aria-label="Migas de pan">
@@ -49,6 +49,33 @@
                         <div class="min-w-0">
                             <h2 class="text-sm font-semibold text-gray-100">{{ $caso['titulo'] }}</h2>
                             <p class="mt-1 text-xs text-gray-400 leading-relaxed">{{ $caso['descripcion'] }}</p>
+
+                            @if (! empty($caso['manual']))
+                                <div class="mt-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-cyan-300/80">
+                                        Manual de usuario · 3 registros
+                                    </p>
+
+                                    <ol class="mt-2 grid gap-2 sm:grid-cols-3">
+                                        @foreach ($caso['manual']['pasos'] as $paso)
+                                            <li class="flex items-start gap-2 text-[11px] leading-snug text-cyan-100/90">
+                                                <span class="shrink-0 w-5 h-5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center text-[10px] font-bold">
+                                                    {{ $loop->iteration }}
+                                                </span>
+                                                <span>{{ $paso }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ol>
+
+                                    <a href="{{ route($caso['manual']['ruta']) }}"
+                                        class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/25 px-3 py-1.5 text-[11px] font-semibold text-cyan-200 transition-colors">
+                                        Abrir el manual paso a paso
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </li>
                 @endforeach

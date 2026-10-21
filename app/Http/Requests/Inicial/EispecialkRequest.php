@@ -55,7 +55,7 @@ class EispecialkRequest extends InicialRequest
     {
         return [
             'eispecialk.profesor_id' => 'profesor',
-            'eispecialk.grado_id' => 'grado',
+            'eispecialk.grado_id' => 'nivel',
             'eispecialk.seccion_id' => 'sección',
             'eispecialk.pensum_id' => 'área de aprendizaje',
             'eispecialk.finicial' => 'fecha de inicio',
@@ -70,7 +70,7 @@ class EispecialkRequest extends InicialRequest
     {
         return [
             'eispecialk.profesor_id.required' => 'No se pudo identificar al docente.',
-            'eispecialk.grado_id.required' => 'Debes elegir el grado.',
+            'eispecialk.grado_id.required' => 'Debes elegir el nivel.',
             'eispecialk.seccion_id.required' => 'Debes elegir la sección.',
             'eispecialk.finicial.required' => 'Debes indicar la fecha de inicio del plan.',
             'eispecialk.ffinal.required' => 'Debes indicar la fecha de culminación.',
