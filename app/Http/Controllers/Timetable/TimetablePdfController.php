@@ -1872,6 +1872,8 @@ class TimetablePdfController extends Controller
         $response = $pdf->stream('formato-area-'.Str::slug((string) $area->name).'.pdf');
         $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s').' GMT');
 
         return $response;
     }
