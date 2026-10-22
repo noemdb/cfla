@@ -1567,3 +1567,5 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 3:13:58 PM [vite] page reload app/Livewire/Planning/Timetable/TimetableLight.php
 3:14:07 PM [vite] full reload resources/views/livewire/planning/timetable/timetable-light.blade.php
 3:14:07 PM [vite] page reload resources/views/livewire/planning/timetable/timetable-light.blade.php
+4:23:31 PM [vite] full reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php
+4:23:31 PM [vite] page reload app/Livewire/Coordinacion/Timetable/TimetableWizard.php

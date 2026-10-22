@@ -930,6 +930,36 @@ class TimetableWizard extends Component
         session()->flash('message', 'Calendario «'.$calendar->name.'» pasado a borrador. El plan de estudio quedó sin calendario activo.');
     }
 
+    /**
+     * Cambia la visibilidad de los nombres de docentes en los reportes
+     * imprimibles del calendario, sin abrir el modal de edición.
+     *
+     * No altera el estado del calendario (draft/active/archived), solo el flag
+     * `status_profesor_show`. Los reportes por docente, consolidado y
+     * totalización conservan los nombres en ambos casos.
+     */
+    public function toggleCalendarTeacherVisibility($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar) {
+            session()->flash('error', 'El calendario seleccionado no existe.');
+
+            return;
+        }
+
+        $showNow = ! (bool) $calendar->status_profesor_show;
+        $calendar->update(['status_profesor_show' => $showNow]);
+
+        $this->loadCalendars();
+        session()->flash(
+            'message',
+            ($showNow
+                ? 'Docentes visibles en «'.$calendar->name.'»: las grillas y vistas públicas vuelven a mostrar los nombres.'
+                : 'Docentes ocultos en «'.$calendar->name.'»: las grillas y vistas públicas no mostrarán los nombres.')
+            .' Los reportes por docente, consolidado y totalización los conservan.',
+        );
+    }
+
     public function createShift(): void
     {
         $this->validate([
