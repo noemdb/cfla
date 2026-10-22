@@ -19,6 +19,7 @@
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
         .subject{font-weight:700;font-size:6.5pt;}
         .teacher{font-size:5.5pt;color:#4b5563;}
+        .group{font-size:5.5pt;color:#0d9488;font-weight:700;}
         tr.break-row td{background:#fffbeb;color:#a16207;}
         td.break-cell{text-align:center;font-size:6pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
         .summary{margin:5px 0 6px;border:1px solid #cbd5e1;padding:4px 6px;}
@@ -59,9 +60,12 @@
                                         @else
                                             @include('timetable.partials.half-cell', [
                                                 'slots' => $day['assignments'],
-                                                'lines' => function ($cell): array {
+                                                'lines' => function ($cell) use ($calendar): array {
                                                     $lines = [['class' => 'subject', 'text' => (string) ($cell['asignatura'] ?? '?')]];
-                                                    if (! empty($cell['profesor'])) {
+                                                    if (! empty($cell['grupo'])) {
+                                                        $lines[] = ['class' => 'group', 'text' => (string) $cell['grupo']];
+                                                    }
+                                                    if ($calendar->status_profesor_show && ! empty($cell['profesor'])) {
                                                         $lines[] = ['class' => 'teacher', 'text' => (string) $cell['profesor']];
                                                     }
 

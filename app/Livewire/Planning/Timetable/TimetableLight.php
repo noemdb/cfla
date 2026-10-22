@@ -97,6 +97,37 @@ class TimetableLight extends BaseTimetableWizard
     }
 
     /**
+     * Abre el modal de edición de un calendario desde su tarjeta del paso 1.
+     *
+     * Usa `editingCalendarId` como contexto aislado: NO cambia `$calendarId`,
+     * no altera la URL y no recarga el calendario activo del light.
+     */
+    public function editCalendar(int $calendarId): void
+    {
+        $calendar = TimetableCalendar::query()->find($calendarId);
+
+        if (! $calendar) {
+            $this->notification()->error(
+                'Calendario no encontrado',
+                'No se pudo abrir la edición del calendario seleccionado.',
+            );
+
+            return;
+        }
+
+        $this->resetValidation();
+        $this->editingCalendarId = (int) $calendar->id;
+        $this->calendarName = (string) $calendar->name;
+        $this->periodMinutes = (int) $calendar->period_minutes;
+        $this->maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
+        $this->statusProfesorShow = (bool) ($calendar->status_profesor_show ?? true);
+        $this->strategy = in_array($calendar->strategy, TimetableCalendar::STRATEGIES, true)
+            ? $calendar->strategy
+            : TimetableCalendar::DEFAULT_STRATEGY;
+        $this->showEditCalendarForm = true;
+    }
+
+    /**
      * Paso 2: cambia el calendario desde el selector de la cabecera. Solo
      * permite calendarios activos para no abrir borradores o archivados por
      * accidente.
@@ -725,7 +756,7 @@ class TimetableLight extends BaseTimetableWizard
     /**
      * Calendarios disponibles para el Paso 1, con metadatos para la tarjeta.
      *
-     * @return list<array{id:int, name:string, status:string, lapso:string, pestudio:string, slots:int, lessons:int, sync:array{active:int, missing:int, missing_locked:int, orphaned:int, in_sync:bool}}>
+     * @return list<array{id:int, name:string, status:string, lapso:string, pestudio:string, slots:int, lessons:int, status_profesor_show:bool, sync:array{active:int, missing:int, missing_locked:int, orphaned:int, in_sync:bool}}>
      */
     public function lightCalendars(): array
     {
@@ -742,6 +773,7 @@ class TimetableLight extends BaseTimetableWizard
                 'pestudio' => (string) ($calendar->pestudio?->name ?? ''),
                 'slots' => (int) $calendar->slots_count,
                 'lessons' => (int) $calendar->lessons_count,
+                'status_profesor_show' => (bool) $calendar->status_profesor_show,
                 'sync' => $this->academicSyncStatusForCalendar($calendar),
             ])
             ->all();

@@ -8,6 +8,7 @@ use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
@@ -40,6 +41,19 @@ class TimetablePdfController extends Controller
     {
         @ini_set('memory_limit', '1024M');
         @set_time_limit(300);
+    }
+
+    /**
+     * Nombre del grupo estable de la Pevaluación, solo cuando está definido.
+     * Si el id existe pero no la relación, se usa un identificador legible.
+     */
+    private function grupoEstableName(?Pevaluacion $pev): ?string
+    {
+        if (! $pev || ! $pev->grupo_estable_id) {
+            return null;
+        }
+
+        return (string) ($pev->grupoEstable?->name ?? 'G'.$pev->grupo_estable_id);
     }
 
     /**
@@ -293,7 +307,7 @@ class TimetablePdfController extends Controller
                 $assignmentsByPeriod[$period->id][] = [
                     'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
-                    'grupo' => $pev?->grupoEstable?->name,
+                    'grupo' => $this->grupoEstableName($pev),
                     'room_id' => (int) ($slot['room_id'] ?? 0),
                     'half' => $slot['half'] ?? null,
                 ];
@@ -384,7 +398,7 @@ class TimetablePdfController extends Controller
             ->where('calendar_id', $calendar->id)
             ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('status_active', 'true'))
             ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('status_active', 'true'))
-            ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion'])
+            ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion', 'pevaluacion.grupoEstable'])
             ->get();
 
         $sectionSchedules = $sections->map(function (Seccion $section) use (
@@ -429,6 +443,7 @@ class TimetablePdfController extends Controller
                     $assignmentsByPeriod[$period->id][] = [
                         'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                         'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
+                        'grupo' => $this->grupoEstableName($pev),
                         'half' => $slot['half'] ?? null,
                     ];
                 }
@@ -610,7 +625,7 @@ class TimetablePdfController extends Controller
                         $assignmentsByPeriod[$period->id][] = [
                             'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
                             'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
-                            'grupo' => $pev?->grupo_estable_id ? $pev?->grupoEstable?->name : null,
+                            'grupo' => $this->grupoEstableName($pev),
                             'half' => $slot['half'] ?? null,
                         ];
                     }
@@ -1731,8 +1746,11 @@ class TimetablePdfController extends Controller
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $area = AreaConocimiento::query()->with('pestudio')->findOrFail($areaId);
 
-        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
-        $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
+        // El formato por área es un reporte del calendario. Si ya está
+        // publicado, se construye desde los slots persistidos y no desde un
+        // preview_payload que puede ser de una simulación anterior.
+        $isPublishedSchedule = $calendar->status === TimetableCalendar::STATUS_ACTIVE;
+        $usePersistedSlots = $isPublishedSchedule || $this->shouldUsePersistedSlots($calendar);
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
@@ -1805,7 +1823,7 @@ class TimetablePdfController extends Controller
                     'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
                     'grado' => $pev?->seccion?->grado?->name ?? '',
                     'seccion' => $pev?->seccion?->name ?? '',
-                    'grupo' => $pev?->grupoEstable?->name,
+                    'grupo' => $this->grupoEstableName($pev),
                     'room' => $rooms->get((int) ($slot['room_id'] ?? 0))?->name,
                     'half' => $slot['half'] ?? null,
                 ];
@@ -1851,6 +1869,10 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream('formato-area-'.Str::slug((string) $area->name).'.pdf');
+        $response = $pdf->stream('formato-area-'.Str::slug((string) $area->name).'.pdf');
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+
+        return $response;
     }
 }

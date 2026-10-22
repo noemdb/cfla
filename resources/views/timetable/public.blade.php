@@ -18,6 +18,7 @@
         td{border-bottom:1px solid #f3f4f6;padding:8px;vertical-align:top;font-size:0.85rem;}
         td.time{text-align:center;font-weight:700;color:#374151;white-space:nowrap;width:48px;background:#f0fdf4;}
         .subject{font-weight:700;color:#0d9488;font-size:0.82rem;}
+        .group{color:#0f766e;font-size:0.72rem;font-weight:700;margin-top:1px;}
         .meta{color:#6b7280;font-size:0.72rem;margin-top:2px;}
         footer{text-align:center;font-size:0.75rem;color:#6b7280;margin-top:20px;}
         .empty{color:#9ca3af;text-align:center;padding:12px;}
@@ -51,14 +52,31 @@
                                     @include('timetable.partials.half-cell', [
                                         'slots' => $row->get($day),
                                         'emptyClass' => 'empty',
-                                        'lines' => function ($slot): array {
+                                        'lines' => function ($slot) use ($calendar): array {
                                             $pev = $slot->lesson?->pevaluacion;
-                                            $group = $slot->grupo_estable_id ? ' · '.(string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                            $group = $pev?->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$pev->grupo_estable_id) : '';
 
-                                            return [
+                                            $lines = [
                                                 ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
-                                                ['class' => 'meta', 'text' => trim((string) ($pev?->profesor?->lastname ?? '').$group.($slot->room_id ? ' · Aula' : ''))],
                                             ];
+                                            if ($group !== '') {
+                                                $lines[] = ['class' => 'group', 'text' => $group];
+                                            }
+                                            $meta = [];
+                                            if ($calendar->status_profesor_show) {
+                                                $teacher = trim((string) ($pev?->profesor?->lastname ?? ''));
+                                                if ($teacher !== '') {
+                                                    $meta[] = $teacher;
+                                                }
+                                            }
+                                            if ($slot->room_id) {
+                                                $meta[] = 'Aula';
+                                            }
+                                            if ($meta !== []) {
+                                                $lines[] = ['class' => 'meta', 'text' => implode(' · ', $meta)];
+                                            }
+
+                                            return $lines;
                                         },
                                     ])
                                 </td>

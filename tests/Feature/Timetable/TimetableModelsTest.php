@@ -18,8 +18,8 @@ use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
-use App\Services\Timetable\TimetableLessonPersistenceService;
 use App\Models\User;
+use App\Services\Timetable\TimetableLessonPersistenceService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Validation\ValidationException;
 use Tests\Concerns\TimetableShiftHelper;
@@ -46,6 +46,20 @@ class TimetableModelsTest extends TestCase
 
         $this->assertTrue($calendar->is_editable);
         $this->assertNotNull($calendar->lapso);
+    }
+
+    public function test_calendar_shows_teachers_by_default_and_can_hide_them(): void
+    {
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => Lapso::factory(),
+        ]);
+
+        $this->assertTrue($calendar->status_profesor_show);
+        $this->assertTrue((bool) $calendar->fresh()->status_profesor_show);
+
+        $calendar->update(['status_profesor_show' => false]);
+
+        $this->assertFalse($calendar->fresh()->status_profesor_show);
     }
 
     public function test_shift_factory_creates_morning_and_afternoon(): void

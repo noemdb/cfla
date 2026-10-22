@@ -222,11 +222,33 @@ valores no válidos caen en `grid`.
 
 Las tarjetas del paso 1 muestran el estado de sincronización de cada calendario
 (**En sincronía**, **Sin sincronizar** con el número de pendientes/huérfanas, o
-**Sin carga vigente**). Sobre la cabecera, alineado a la derecha, hay un selector
-WireUI de **calendario activo** que permite cambiar de calendario sin volver al
-paso 1. El selector solo lista calendarios con estado `active`; si el calendario
-abierto no está activo se muestra como opción deshabilitada para conservar el
-contexto.
+**Sin carga vigente**). Los calendarios **Archivados** se agrupan en un acordeón
+cerrado por defecto para no competir con los activos. Cada tarjeta incluye un
+menú de tres puntos (WireUI) con **Editar**, **Duplicar** y las acciones de
+estado disponibles según corresponda: **Activar**, **Pasar a borrador**,
+**Archivar**, **Desarchivar** o **Eliminar**. Sobre la cabecera, alineado
+a la derecha, hay un selector WireUI de **calendario activo** que permite cambiar
+de calendario sin volver al paso 1. El selector solo lista calendarios con estado
+`active`; si el calendario abierto no está activo se muestra como opción
+deshabilitada para conservar el contexto.
+
+El menú **Formatos** está disponible tanto en el paso 1 como en el espacio de
+trabajo, con las mismas acciones del wizard completo: **Formato por área**,
+**Exportar P.Estudios (PDF / HTML / XLS)**, **Consolidado de docentes** y
+**Totalización por docente**. Las exportaciones globales no requieren abrir un
+calendario; el formato por área resuelve el calendario activo del P.Estudio del
+área seleccionada.
+
+Cada calendario tiene el flag **`status_profesor_show`** (por defecto `true`).
+Cuando está activo, las grillas imprimibles muestran el nombre del docente en
+cada celda; al desactivarlo, esos nombres se ocultan en los PDFs y vistas
+públicas de sección, aula, área y vistas previas. Los reportes cuyo propósito es
+identificar al docente (horario individual, consolidado de docentes y
+totalización por docente) conservan sus nombres. El flag se configura al crear
+o editar el calendario, se duplica con el calendario y se incluye en los
+snapshots/respaldos. En el paso 1 del modo rápido, cada tarjeta del grupo
+**Activos** muestra el distintivo **Docentes visibles** o **Docentes ocultos**
+para que el estado del flag sea evidente antes de abrir la grilla.
 
 La sincronización compara las Pevaluaciones vigentes (lapso + P.Estudio, con
 sección, grado, P.Estudio, pensum y asignatura vigentes) con

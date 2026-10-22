@@ -6,7 +6,22 @@
 
 <div class="mx-auto w-full max-w-[1600px] px-4 py-6">
     @if ($lightStep === 2 && $lightCalendar)
-        <div class="mb-3 flex justify-end">
+        <div class="mb-3 flex items-center justify-end gap-2">
+            {{-- Vuelve al paso 1 y deja la URL sin calendarId, igual que al
+                 entrar por primera vez al modo rápido. --}}
+            <button type="button"
+                wire:click="changeCalendar"
+                wire:loading.attr="disabled"
+                wire:target="changeCalendar"
+                title="Volver al inicio"
+                aria-label="Volver al inicio"
+                class="inline-flex h-[42px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs font-bold text-gray-600 transition-colors hover:border-emerald-500/40 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:cursor-wait disabled:opacity-70 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+                </svg>
+                <span class="hidden sm:inline">Inicio</span>
+            </button>
+
             {{-- Selector WireUI de calendario activo, justo encima del header
                  y alineado a la derecha. Solo permite calendarios «active». --}}
             <x-dropdown position="bottom-end" width="7xl" height="auto">
@@ -129,8 +144,11 @@
                     Horario docente
                 </button>
 
-                {{-- Dropdown: formatos y reportes PDF --}}
-                <x-dropdown position="bottom-end" width="3xl" height="auto">
+                @endif
+
+                {{-- Dropdown: formatos y reportes PDF. Visible en ambos pasos:
+                     en el paso 1 permite exportar sin abrir un calendario. --}}
+                <x-dropdown position="bottom-end" width="7xl" height="auto">
                     <x-slot name="trigger">
                         <x-button
                             label="Formatos"
@@ -142,28 +160,37 @@
                     </x-slot>
 
                     <x-dropdown.item
+                        wire:click="openAreaFormatModal"
+                        wire:loading.attr="disabled"
+                        wire:target="openAreaFormatModal"
+                        icon="document-text">
+                        <span wire:loading.remove wire:target="openAreaFormatModal">Formato por área</span>
+                        <span wire:loading wire:target="openAreaFormatModal">Abriendo…</span>
+                    </x-dropdown.item>
+
+                    <x-dropdown.item
                         href="#"
                         wire:click="openPestudiosExport"
                         wire:loading.attr="disabled"
                         wire:target="openPestudiosExport"
                         icon="arrow-down-tray"
                         label="Exportar P.Estudios (PDF / HTML / XLS)"
-                        class="w-full" />
+                        class="w-full !whitespace-nowrap"
+                        separator />
 
                     <x-dropdown.item
                         href="#"
                         x-on:click.prevent="$dispatch('open-teachers-pdf')"
                         icon="document-arrow-down"
-                        label="Consolidado de docentes"
-                        separator />
+                        label="Consolidado de docentes" />
 
                     <x-dropdown.item
                         href="#"
                         x-on:click.prevent="$dispatch('open-teacher-totals')"
                         icon="table-cells"
-                        label="Totalización por docente" />
+                        label="Totalización por docente"
+                        separator />
                 </x-dropdown>
-                @endif
             </div>
     </header>
 
@@ -454,14 +481,19 @@
 
             @foreach ($calendarGroups as $group)
                 @if ($group['calendars'] !== [])
-                    <section class="{{ $calendarGroupRendered ? 'mt-8 border-t-2 border-gray-300 pt-6 dark:border-white/20' : '' }}">
-                        <div class="mb-2 flex flex-wrap items-center gap-2">
-                            <h2 class="text-[11px] font-extrabold uppercase tracking-widest {{ $group['label'] === 'Archivados' ? 'text-gray-400 dark:text-gray-500' : 'text-emerald-700 dark:text-emerald-300' }}">
+                    @php $isArchivedGroup = $group['label'] === 'Archivados'; @endphp
+                    <details @if (! $isArchivedGroup) open @endif
+                        class="group {{ $calendarGroupRendered ? 'mt-8 border-t-2 border-gray-300 pt-6 dark:border-white/20' : '' }}">
+                        <summary class="mb-2 flex cursor-pointer list-none flex-wrap items-center gap-2 [&::-webkit-details-marker]:hidden">
+                            <h2 class="text-[11px] font-extrabold uppercase tracking-widest {{ $isArchivedGroup ? 'text-gray-400 dark:text-gray-500' : 'text-emerald-700 dark:text-emerald-300' }}">
                                 {{ $group['label'] }}
                             </h2>
                             <span class="rounded-full bg-gray-500/10 px-2 py-0.5 text-[10px] font-bold text-gray-500 dark:text-gray-400">{{ count($group['calendars']) }}</span>
                             <span class="text-[10px] text-gray-400 dark:text-gray-500">{{ $group['description'] }}</span>
-                        </div>
+                            <svg class="ml-auto h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform group-open:rotate-180 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                            </svg>
+                        </summary>
 
                         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach ($group['calendars'] as $calendar)
@@ -479,10 +511,18 @@
                                         'generating' => 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
                                         default => 'bg-gray-500/10 text-gray-600 dark:text-gray-300',
                                     };
+                                    $calendarCanActivate = $calendar['status'] === 'draft';
+                                    $calendarCanDraft = $calendar['status'] === 'active';
+                                    $calendarCanArchive = in_array($calendar['status'], ['draft', 'active'], true);
+                                    $calendarCanUnarchive = $calendar['status'] === 'archived';
+                                    $calendarCanDelete = $calendar['status'] === 'draft';
+                                    $calendarHasStateActions = $calendarCanActivate || $calendarCanDraft || $calendarCanArchive || $calendarCanUnarchive || $calendarCanDelete;
                                 @endphp
-                                <button type="button" wire:click="chooseCalendar({{ $calendar['id'] }})"
-                                    wire:loading.attr="disabled" wire:target="chooseCalendar"
-                                    class="group flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4 text-left transition-all hover:border-emerald-500/50 hover:bg-emerald-50/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-emerald-500/5">
+                                <div wire:key="light-calendar-card-{{ $calendar['id'] }}"
+                                    class="group flex flex-col rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-emerald-500/50 hover:bg-emerald-50/40 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-emerald-500/5">
+                                    <button type="button" wire:click="chooseCalendar({{ $calendar['id'] }})"
+                                        wire:loading.attr="disabled" wire:target="chooseCalendar"
+                                        class="flex flex-1 flex-col gap-2 text-left focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60">
                                     <div class="flex items-start justify-between gap-2">
                                         <span class="min-w-0 break-words text-sm font-extrabold leading-snug text-gray-900 dark:text-white">{{ $calendar['name'] }}</span>
                                         <span class="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $statusClass }}">
@@ -493,6 +533,25 @@
                                         {{ $calendar['pestudio'] ?: 'Sin P.Estudio' }}
                                         @if ($calendar['lapso']) · {{ $calendar['lapso'] }} @endif
                                     </div>
+                                    @if ($calendar['status'] !== 'archived')
+                                        <div>
+                                            <span class="inline-flex w-fit items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider {{ $calendar['status_profesor_show'] ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300' }}"
+                                                title="{{ $calendar['status_profesor_show'] ? 'Los nombres de docentes se muestran en las grillas y reportes imprimibles.' : 'Los nombres de docentes se ocultan en las grillas y vistas públicas; se conservan en los reportes por docente, consolidado y totalización.' }}">
+                                                @if ($calendar['status_profesor_show'])
+                                                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                                                    </svg>
+                                                    Docentes visibles
+                                                @else
+                                                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.243 4.243-4.243-4.243"/>
+                                                    </svg>
+                                                    Docentes ocultos
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @endif
                                     <div class="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
                                         @if ($calendar['sync']['in_sync'] && (int) $calendar['sync']['active'] === 0)
                                             <span class="inline-flex items-center gap-1 rounded-md bg-gray-500/10 px-2 py-0.5 text-gray-500 dark:text-gray-400"
@@ -528,10 +587,58 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                         </svg>
                                     </span>
-                                </button>
+                                    </button>
+
+                                    {{-- Acciones del calendario en un menú de tres puntos
+                                         (WireUI), equivalentes al detalle del wizard. --}}
+                                    <div class="mt-3 flex items-center justify-end border-t border-gray-200/80 pt-2 dark:border-white/10">
+                                        <x-dropdown position="bottom-end" height="auto">
+                                            <x-slot name="trigger">
+                                                <button type="button"
+                                                    title="Acciones del calendario"
+                                                    aria-label="Acciones del calendario"
+                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white/5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"/>
+                                                    </svg>
+                                                </button>
+                                            </x-slot>
+
+                                            <x-dropdown.item wire:click="editCalendar({{ $calendar['id'] }})"
+                                                icon="pencil-square" label="Editar" class="w-full" />
+                                            <x-dropdown.item wire:click="duplicateCalendar({{ $calendar['id'] }})"
+                                                icon="document-duplicate" label="Duplicar" class="w-full" />
+
+                                            @if ($calendarHasStateActions)
+                                                <x-dropdown.item separator />
+                                            @endif
+                                            @if ($calendarCanActivate)
+                                                <x-dropdown.item wire:click="activateCalendar({{ $calendar['id'] }})"
+                                                    icon="check-circle" label="Activar" class="w-full" />
+                                            @endif
+                                            @if ($calendarCanDraft)
+                                                <x-dropdown.item wire:click="markDraftCalendar({{ $calendar['id'] }})"
+                                                    icon="pencil-square" label="Pasar a borrador" class="w-full" />
+                                            @endif
+                                            @if ($calendarCanArchive)
+                                                <x-dropdown.item wire:click="archiveCalendar({{ $calendar['id'] }})"
+                                                    icon="archive-box" label="Archivar" class="w-full" />
+                                            @endif
+                                            @if ($calendarCanUnarchive)
+                                                <x-dropdown.item wire:click="unarchiveCalendar({{ $calendar['id'] }})"
+                                                    icon="arrow-uturn-left" label="Desarchivar" class="w-full" />
+                                            @endif
+                                            @if ($calendarCanDelete)
+                                                <x-dropdown.item separator />
+                                                <x-dropdown.item wire:click="deleteCalendar({{ $calendar['id'] }})"
+                                                    icon="trash" label="Eliminar" class="w-full !text-red-500 dark:!text-red-400" />
+                                            @endif
+                                        </x-dropdown>
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
-                    </section>
+                    </details>
                     @php $calendarGroupRendered = true; @endphp
                 @endif
             @endforeach
@@ -1087,6 +1194,203 @@
             </div>
         @endif
     @endif
+
+    {{-- Modal: formato por área de conocimiento (mismo flujo que el wizard). --}}
+    @if ($showAreaFormatModal)
+        @php
+            $areaOptions = $this->areaFormatOptions();
+            $areaFormatCalendar = $this->areaFormatCalendar();
+            $areaFormatUrl = $this->areaFormatUrl();
+        @endphp
+        <x-modal-card title="Formato por área de conocimiento" blur="lg" wire:model="showAreaFormatModal" align="center" max-width="md">
+            <div class="space-y-3">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Genera un formato tipo horario (grilla días × bloques) por cada asignatura asociada al área de conocimiento, cruzando todas las secciones activas del calendario.
+                </p>
+
+                @if ($areaOptions->isEmpty())
+                    <div class="rounded-lg border border-dashed border-gray-300 px-3 py-6 text-center text-xs text-gray-400 dark:border-white/10">
+                        No hay áreas de conocimiento activas.
+                    </div>
+                @else
+                    @php $selectedArea = $areaFormatId ? $areaOptions->firstWhere('id', (int) $areaFormatId) : null; @endphp
+                    <div class="relative" x-data="{ open: false, q: '' }"
+                         x-on:keydown.escape.window="open = false"
+                         @click.outside="open = false">
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">Área de conocimiento</label>
+
+                        {{-- Trigger --}}
+                        <button type="button" x-on:click="open = !open"
+                            class="flex w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left outline-none transition-colors focus:border-teal-500 focus:ring-2 focus:ring-teal-500/50 dark:border-white/10 dark:bg-white/5">
+                            @if ($selectedArea)
+                                <span class="min-w-0">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $selectedArea->name }}</span>
+                                        @if ($selectedArea->code)
+                                            <span class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-white/10 dark:text-gray-300">{{ $selectedArea->code }}</span>
+                                        @endif
+                                    </span>
+                                    <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                                        {{ $selectedArea->pestudio?->name ?? 'Sin P.Estudio' }} · {{ $selectedArea->campo_conocimientos_count }} asignatura(s)
+                                    </span>
+                                </span>
+                            @else
+                                <span class="text-sm text-gray-400">Seleccionar área…</span>
+                            @endif
+                            <svg class="h-4 w-4 shrink-0 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        {{-- Panel --}}
+                        <div x-show="open" x-cloak x-transition.origin.top
+                            class="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-gray-900">
+                            <div class="border-b border-gray-100 p-2 dark:border-white/5">
+                                <input type="text" x-model="q" placeholder="Buscar área, código o P.Estudio…"
+                                    class="w-full rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 placeholder-gray-400 outline-none focus:border-teal-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                            </div>
+                            <div class="max-h-64 overflow-y-auto">
+                                @foreach ($areaOptions as $areaOption)
+                                    @php
+                                        $isSelected = (string) $areaFormatId === (string) $areaOption->id;
+                                        $haystack = mb_strtolower(implode(' ', array_filter([
+                                            $areaOption->name, $areaOption->code, $areaOption->code_sm,
+                                            $areaOption->pestudio?->name, $areaOption->peducativo?->name,
+                                        ])));
+                                    @endphp
+                                    <button type="button"
+                                        wire:key="light-area-opt-{{ $areaOption->id }}"
+                                        wire:click="$set('areaFormatId', '{{ $areaOption->id }}')"
+                                        x-on:click="open = false"
+                                        x-show="q === '' || @js($haystack).includes(q.toLowerCase())"
+                                        class="flex w-full items-start justify-between gap-2 px-3 py-2 text-left transition-colors {{ $isSelected ? 'bg-teal-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
+                                        <span class="min-w-0">
+                                            <span class="flex items-center gap-1.5">
+                                                <span class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $areaOption->name }}</span>
+                                                @if ($areaOption->code)
+                                                    <span class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-white/10 dark:text-gray-300">{{ $areaOption->code }}</span>
+                                                @endif
+                                            </span>
+                                            <span class="mt-0.5 block truncate text-[11px] text-gray-500 dark:text-gray-400">
+                                                {{ $areaOption->pestudio?->name ?? 'Sin P.Estudio' }}
+                                                @if ($areaOption->peducativo?->name) · {{ $areaOption->peducativo->name }} @endif
+                                            </span>
+                                            <span class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                                <span class="inline-flex items-center gap-1 rounded bg-teal-500/10 px-1.5 py-0.5 font-bold text-teal-700 dark:text-teal-300">
+                                                    {{ $areaOption->campo_conocimientos_count }} asignatura(s)
+                                                </span>
+                                                @if ($areaOption->leader)
+                                                    <span class="truncate">Líder: {{ $areaOption->leader->username }}</span>
+                                                @endif
+                                            </span>
+                                        </span>
+                                        @if ($isSelected)
+                                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-teal-600 dark:text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    @if ($selectedArea)
+                        @if ($areaFormatCalendar)
+                            <div class="rounded-lg border border-teal-500/20 bg-teal-500/5 px-3 py-2.5 text-[11px] text-teal-700 dark:text-teal-300">
+                                Se generará el formato de <strong>{{ $selectedArea->name }}</strong>
+                                ({{ $selectedArea->campo_conocimientos_count }} asignatura(s)) usando el horario
+                                <strong>{{ $areaFormatCalendar->name }}</strong> en una nueva pestaña.
+                            </div>
+                        @else
+                            <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300">
+                                No hay un calendario activo para el P.Estudio de <strong>{{ $selectedArea->name }}</strong>.
+                                Genera o activa un horario para ese P.Estudio.
+                            </div>
+                        @endif
+                    @endif
+                @endif
+            </div>
+            <x-slot name="footer">
+                <div class="flex items-center justify-between gap-3">
+                    <button type="button" wire:click="closeAreaFormatModal"
+                        class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">
+                        Cancelar
+                    </button>
+                    @if ($areaFormatUrl)
+                        <a href="{{ $areaFormatUrl }}" target="_blank" rel="noopener"
+                            x-on:click="$wire.closeAreaFormatModal()"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-bold text-white hover:bg-teal-700">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Generar formato
+                        </a>
+                    @else
+                        <button type="button" disabled
+                            class="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg bg-teal-600/40 px-4 py-2 text-sm font-bold text-white/70">
+                            Generar formato
+                        </button>
+                    @endif
+                </div>
+            </x-slot>
+        </x-modal-card>
+    @endif
+
+    {{-- Modal · Editar calendario desde la tarjeta del paso 1. --}}
+    <x-modal-card title="Editar calendario" blur="lg" wire:model="showEditCalendarForm" max-width="md" persistent>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre del calendario</label>
+                <input type="text" wire:model.live="calendarName" placeholder="Horario 2025-2026 · Lapso I"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('calendarName') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Duración del bloque (min)</label>
+                <input type="number" wire:model="periodMinutes" min="30" max="120"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('periodMinutes') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Asignaturas por período</label>
+                <input type="number" wire:model="maxSubjectsPerPeriod" min="1" max="10"
+                    class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                @error('maxSubjectsPerPeriod') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Por defecto: 2. Aplica a las asignaturas marcadas como medio grupo.</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 bg-white/5 p-3 dark:border-white/10">
+                <label class="flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" wire:model="statusProfesorShow"
+                        class="mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                    <span>
+                        <span class="block text-sm font-bold text-gray-900 dark:text-white">Mostrar nombres de docentes en los reportes</span>
+                        <span class="mt-1 block text-[11px] text-gray-500 dark:text-gray-400">
+                            Si se desactiva, los nombres se ocultan en las grillas y vistas públicas. Se conservan en los reportes por docente, consolidado y totalización.
+                        </span>
+                    </span>
+                </label>
+                @error('statusProfesorShow') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Estrategia de generación</label>
+                <select wire:model="strategy" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="optimized">Optimizado</option>
+                    <option value="legacy">Legacy</option>
+                </select>
+                @error('strategy') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Optimizado permite reacomodar medio grupo; Legacy conserva las asignaciones legacy bloqueadas.</p>
+            </div>
+        </div>
+        <x-slot name="footer">
+            <div class="flex items-center gap-3 justify-end">
+                <button wire:click="$set('showEditCalendarForm', false)"
+                    class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">Cancelar</button>
+                <button wire:click="updateCalendar"
+                    class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Guardar cambios</button>
+            </div>
+        </x-slot>
+    </x-modal-card>
 
     {{-- State loading global (mismo patrón visual que /app/planning/diagnostico). --}}
     <div id="timetable-light-global-loading" class="hidden fixed bottom-6 right-6 z-[60]">

@@ -7,6 +7,7 @@ use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
@@ -16,6 +17,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
+use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -64,7 +66,7 @@ class TimetableAreaFormatTest extends TestCase
             'calendar_id' => $calendar->id, 'pevaluacion_id' => $pev->id,
             'shift_id' => $shift->id, 'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
         ]);
-        TimetableSlot::factory()->create([
+        $slot = TimetableSlot::factory()->create([
             'calendar_id' => $calendar->id, 'lesson_id' => $lesson->id,
             'period_id' => $period->id, 'profesor_id' => $profesor->id,
             'seccion_id' => $seccion->id,
@@ -79,7 +81,7 @@ class TimetableAreaFormatTest extends TestCase
 
         return compact(
             'user', 'profesor', 'pestudio', 'grado', 'seccion', 'asignatura',
-            'pensum', 'lapso', 'pev', 'calendar', 'shift', 'period', 'lesson', 'area',
+            'pensum', 'lapso', 'pev', 'calendar', 'shift', 'period', 'lesson', 'slot', 'area',
         );
     }
 
@@ -93,6 +95,52 @@ class TimetableAreaFormatTest extends TestCase
                 $fixture['area']->id,
             ]))
             ->assertOk();
+    }
+
+    public function test_area_preview_uses_published_slots_and_badge_for_active_calendar(): void
+    {
+        $fixture = $this->fixture();
+
+        // Un preview_payload viejo no debe convertir en borrador un calendario
+        // que ya está activo ni sustituir los slots publicados.
+        $fixture['calendar']->update([
+            'preview_payload' => [
+                'dry_run' => true,
+                'assignment' => [
+                    '999999' => [[
+                        'period_id' => (int) $fixture['period']->id,
+                        'room_id' => 0,
+                        'half' => null,
+                    ]],
+                ],
+                'unassigned' => [],
+                'assignment_source' => 'manual_preview',
+            ],
+        ]);
+
+        $captured = null;
+        $pdfMock = \Mockery::mock(\Barryvdh\DomPDF\PDF::class);
+        $pdfMock->shouldReceive('setPaper')->andReturnSelf();
+        $pdfMock->shouldReceive('stream')->andReturn(response('pdf', 200, ['Content-Type' => 'application/pdf']));
+        Pdf::shouldReceive('loadView')->once()->andReturnUsing(function ($view, $data) use (&$captured, $pdfMock) {
+            $captured = $data;
+
+            return $pdfMock;
+        });
+
+        $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.area-preview', [
+                $fixture['calendar']->id,
+                $fixture['area']->id,
+            ]))
+            ->assertOk();
+
+        $this->assertTrue($captured['isPublishedSchedule']);
+
+        $html = view('pdfs.timetable.preview-area', $captured)->render();
+        $this->assertStringContainsString('HORARIO PUBLICADO', $html);
+        $this->assertStringNotContainsString('BORRADOR — NO PUBLICADO', $html);
+        $this->assertStringContainsString($fixture['asignatura']->name, $html);
     }
 
     public function test_area_format_options_and_url(): void
@@ -214,6 +262,252 @@ class TimetableAreaFormatTest extends TestCase
         $this->assertContains($profesorB->lastname.' '.$profesorB->name, $profesores);
         $this->assertNotSame('', $cell[0]['grado']);
         $this->assertNotSame('', $cell[0]['seccion']);
+    }
+
+    public function test_preview_area_shows_grupo_estable_below_subject(): void
+    {
+        $fixture = $this->fixture();
+        $grupo = GrupoEstable::factory()->create(['name' => 'Grupo Azul']);
+        $fixture['pev']->update(['grupo_estable_id' => $grupo->id]);
+
+        $captured = null;
+        $pdfMock = \Mockery::mock(\Barryvdh\DomPDF\PDF::class);
+        $pdfMock->shouldReceive('setPaper')->andReturnSelf();
+        $pdfMock->shouldReceive('stream')->andReturn(response('pdf', 200, ['Content-Type' => 'application/pdf']));
+        Pdf::shouldReceive('loadView')->once()->andReturnUsing(function ($view, $data) use (&$captured, $pdfMock) {
+            $captured = $data;
+
+            return $pdfMock;
+        });
+
+        $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.area-preview', [
+                $fixture['calendar']->id,
+                $fixture['area']->id,
+            ]))
+            ->assertOk();
+
+        $cell = $captured['shiftGrids'][0]['rows'][0]['days'][1]['assignments'];
+        $this->assertCount(1, $cell);
+        $this->assertSame('Grupo Azul', $cell[0]['grupo']);
+
+        $html = view('pdfs.timetable.preview-area', [
+            'calendar' => $fixture['calendar'],
+            'area' => $fixture['area'],
+            'shiftGrids' => $captured['shiftGrids'],
+            'asignaturasCount' => 1,
+            'institucion' => null,
+            'fecha' => 'hoy',
+            'isPublishedSchedule' => false,
+        ])->render();
+
+        $subject = preg_quote(e($fixture['asignatura']->name), '/');
+        $this->assertMatchesRegularExpression(
+            '/<div class="subject">'.$subject.'<\/div>\s*<div class="group">Grupo Azul<\/div>/',
+            $html,
+        );
+    }
+
+    public function test_section_pdf_shows_grupo_estable_below_subject(): void
+    {
+        $fixture = $this->fixture();
+        $grupo = GrupoEstable::factory()->create(['name' => 'Grupo Azul']);
+        $fixture['pev']->update(['grupo_estable_id' => $grupo->id]);
+
+        $slot = $fixture['slot']->fresh([
+            'lesson.pevaluacion.pensum.asignatura',
+            'lesson.pevaluacion.profesor',
+            'lesson.pevaluacion.grupoEstable',
+        ]);
+
+        $grid = collect([
+            1 => collect([
+                1 => collect([$slot]),
+                2 => collect(),
+                3 => collect(),
+                4 => collect(),
+                5 => collect(),
+            ]),
+        ]);
+
+        $html = view('pdfs.timetable.section', [
+            'calendar' => $fixture['calendar'],
+            'seccion' => $fixture['seccion'],
+            'grid' => $grid,
+            'institucion' => null,
+            'fecha' => 'hoy',
+        ])->render();
+
+        $subject = preg_quote(e($fixture['asignatura']->name), '/');
+        $this->assertMatchesRegularExpression(
+            '/<div class="subject">'.$subject.'<\/div>\s*<div class="group">Grupo Azul<\/div>/',
+            $html,
+        );
+    }
+
+    public function test_area_preview_route_hides_teacher_names_when_calendar_flag_is_false(): void
+    {
+        $fixture = $this->fixture();
+        $fixture['calendar']->update(['status_profesor_show' => false]);
+
+        $captured = null;
+        $pdfMock = \Mockery::mock(\Barryvdh\DomPDF\PDF::class);
+        $pdfMock->shouldReceive('setPaper')->andReturnSelf();
+        $pdfMock->shouldReceive('stream')->andReturn(response('pdf', 200, ['Content-Type' => 'application/pdf']));
+        Pdf::shouldReceive('loadView')->once()->andReturnUsing(function ($view, $data) use (&$captured, $pdfMock) {
+            $captured = $data;
+
+            return $pdfMock;
+        });
+
+        $this->actingAs($fixture['user'])
+            ->get(route('app.coordinacion.timetable.pdf.area-preview', [
+                $fixture['calendar']->id,
+                $fixture['area']->id,
+            ]))
+            ->assertOk();
+
+        $this->assertNotNull($captured);
+        $this->assertFalse($captured['calendar']->status_profesor_show);
+
+        $html = view('pdfs.timetable.preview-area', $captured)->render();
+        $this->assertStringNotContainsString($fixture['profesor']->lastname, $html);
+    }
+
+    public function test_printable_grids_hide_teacher_names_when_calendar_flag_is_false(): void
+    {
+        $fixture = $this->fixture();
+        $fixture['calendar']->update(['status_profesor_show' => false]);
+        $fixture['calendar']->refresh();
+
+        $slot = $fixture['slot']->fresh([
+            'lesson.pevaluacion.pensum.asignatura',
+            'lesson.pevaluacion.profesor',
+            'lesson.pevaluacion.grupoEstable',
+            'lesson.pevaluacion.seccion',
+        ]);
+
+        $grid = collect([
+            1 => collect([
+                1 => collect([$slot]),
+                2 => collect(),
+                3 => collect(),
+                4 => collect(),
+                5 => collect(),
+            ]),
+        ]);
+
+        $teacherLastname = $fixture['profesor']->lastname;
+        $sectionView = fn () => view('pdfs.timetable.section', [
+            'calendar' => $fixture['calendar'],
+            'seccion' => $fixture['seccion'],
+            'grid' => $grid,
+            'institucion' => null,
+            'fecha' => 'hoy',
+        ])->render();
+
+        $this->assertStringNotContainsString($teacherLastname, $sectionView());
+
+        $roomHtml = view('pdfs.timetable.room', [
+            'calendar' => $fixture['calendar'],
+            'room' => TimetableRoom::factory()->create(),
+            'grid' => $grid,
+            'institucion' => null,
+            'fecha' => 'hoy',
+        ])->render();
+        $this->assertStringNotContainsString($teacherLastname, $roomHtml);
+
+        $publicHtml = view('timetable.public', [
+            'calendar' => $fixture['calendar'],
+            'subjectLabel' => 'Sección '.$fixture['seccion']->name,
+            'grid' => $grid,
+        ])->render();
+        $this->assertStringNotContainsString($teacherLastname, $publicHtml);
+
+        $days = collect(range(1, 5))->mapWithKeys(fn (int $day): array => [
+            $day => [
+                'period' => $day === 1 ? $fixture['period'] : null,
+                'assignments' => $day === 1 ? [[
+                    'asignatura' => $fixture['asignatura']->name,
+                    'profesor' => $fixture['profesor']->lastname.' '.$fixture['profesor']->name,
+                    'grupo' => null,
+                    'grado' => $fixture['grado']->name,
+                    'seccion' => $fixture['seccion']->name,
+                    'room' => null,
+                    'half' => null,
+                ]] : [],
+            ],
+        ])->all();
+
+        $shiftGrids = [[
+            'shift' => $fixture['shift'],
+            'rows' => [[
+                'period' => $fixture['period'],
+                'days' => $days,
+            ]],
+        ]];
+
+        $areaHtml = view('pdfs.timetable.preview-area', [
+            'calendar' => $fixture['calendar'],
+            'area' => $fixture['area'],
+            'shiftGrids' => $shiftGrids,
+            'asignaturasCount' => 1,
+            'institucion' => null,
+            'fecha' => 'hoy',
+            'isPublishedSchedule' => false,
+        ])->render();
+        $this->assertStringNotContainsString($teacherLastname, $areaHtml);
+
+        $previewSectionHtml = view('pdfs.timetable.preview-section', [
+            'calendar' => $fixture['calendar'],
+            'seccion' => $fixture['seccion'],
+            'shiftGrids' => $shiftGrids,
+            'institucion' => null,
+            'fecha' => 'hoy',
+            'isPublishedSchedule' => false,
+            'teacherSummary' => [],
+        ])->render();
+        $this->assertStringNotContainsString($teacherLastname, $previewSectionHtml);
+
+        $previewGradeHtml = view('pdfs.timetable.preview-grade', [
+            'calendar' => $fixture['calendar'],
+            'grado' => $fixture['grado'],
+            'sectionSchedules' => [[
+                'section' => $fixture['seccion'],
+                'shiftGrids' => $shiftGrids,
+                'teacherSummary' => [],
+            ]],
+            'institucion' => null,
+            'fecha' => 'hoy',
+            'isPublishedSchedule' => false,
+        ])->render();
+        $this->assertStringNotContainsString($teacherLastname, $previewGradeHtml);
+
+        $allPestudiosHtml = view('pdfs.timetable.preview-all-pestudios', [
+            'lapso' => $fixture['lapso'],
+            'pestudiosData' => [[
+                'calendar' => $fixture['calendar'],
+                'pestudio' => $fixture['pestudio'],
+                'isPublishedSchedule' => false,
+                'gradeSchedules' => [[
+                    'grado' => $fixture['grado'],
+                    'sectionSchedules' => [[
+                        'section' => $fixture['seccion'],
+                        'shiftGrids' => $shiftGrids,
+                        'teacherSummary' => [],
+                    ]],
+                ]],
+            ]],
+            'institucion' => null,
+            'fecha' => 'hoy',
+        ])->render();
+        $this->assertStringNotContainsString($teacherLastname, $allPestudiosHtml);
+
+        // Al reactivar el flag, la grilla vuelve a mostrar el apellido.
+        $fixture['calendar']->update(['status_profesor_show' => true]);
+        $fixture['calendar']->refresh();
+
+        $this->assertStringContainsString($teacherLastname, $sectionView());
     }
 
     public function test_area_format_resolves_calendar_without_wizard_selection(): void

@@ -71,6 +71,18 @@ class TimetableLightTest extends TestCase
         $component->assertSee('Sincronizar carga');
         $component->assertSee('Selecciona un calendario para sincronizar la carga académica');
         $component->assertSeeHtml('aria-disabled="true"');
+
+        // El menú de formatos también está disponible antes de abrir un
+        // calendario, con las mismas opciones del wizard completo.
+        $component->assertSee('Formatos');
+        $component->assertSee('Formato por área');
+        $component->assertSee('Exportar P.Estudios');
+        $component->assertSee('Consolidado de docentes');
+        $component->assertSee('Totalización por docente');
+
+        $component->call('openAreaFormatModal')
+            ->assertSet('showAreaFormatModal', true)
+            ->assertSee('Formato por área de conocimiento');
     }
 
     public function test_light_groups_calendars_active_and_archived(): void
@@ -92,6 +104,94 @@ class TimetableLightTest extends TestCase
         $component->assertSee('Horario Archivado');
         $component->assertSee('En sincronía');
         $component->assertSee('Sin sincronizar');
+        // Cada grupo es un acordeón; «Archivados» queda cerrado por defecto
+        // (sin el atributo `open`).
+        $component->assertSeeHtml('<details');
+        $component->assertSeeHtml('group-open:rotate-180');
+
+        $html = $component->html();
+        $archivedPos = strrpos($html, 'Horario Archivado');
+        $this->assertNotFalse($archivedPos);
+        $detailsPos = strrpos(substr($html, 0, $archivedPos), '<details');
+        $this->assertNotFalse($detailsPos);
+        $detailsTag = substr($html, $detailsPos, strpos($html, '>', $detailsPos) - $detailsPos + 1);
+        $this->assertStringNotContainsString(' open', $detailsTag);
+    }
+
+    public function test_light_calendar_cards_expose_edit_duplicate_and_status_actions(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $component = Livewire::actingAs($user)->test(TimetableLight::class);
+
+        $component->assertSeeHtml('aria-label="Acciones del calendario"');
+        $component->assertSeeHtml('wire:click="editCalendar('.$calendar->id.')"');
+        $component->assertSeeHtml('wire:click="duplicateCalendar('.$calendar->id.')"');
+        $component->assertSeeHtml('wire:click="markDraftCalendar('.$calendar->id.')"');
+        $component->assertSeeHtml('wire:click="archiveCalendar('.$calendar->id.')"');
+        $component->assertSee('Editar');
+        $component->assertSee('Duplicar');
+        $component->assertSee('Pasar a borrador');
+        $component->assertSee('Archivar');
+
+        $component->call('editCalendar', $calendar->id)
+            ->assertSet('showEditCalendarForm', true)
+            ->assertSet('calendarName', $calendar->name)
+            ->assertSet('editingCalendarId', $calendar->id)
+            ->assertSet('calendarId', null)
+            ->assertSee('Editar calendario');
+    }
+
+    public function test_light_cards_show_teacher_visibility_flag_status(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $html = Livewire::actingAs($user)->test(TimetableLight::class)->html();
+        $cardHtml = $this->lightCardHtml($html, (int) $calendar->id);
+        $this->assertStringContainsString('Docentes visibles', $cardHtml);
+        $this->assertStringNotContainsString('Docentes ocultos', $cardHtml);
+
+        $calendar->update(['status_profesor_show' => false]);
+
+        $html = Livewire::actingAs($user)->test(TimetableLight::class)->html();
+        $cardHtml = $this->lightCardHtml($html, (int) $calendar->id);
+        $this->assertStringContainsString('Docentes ocultos', $cardHtml);
+        $this->assertStringNotContainsString('Docentes visibles', $cardHtml);
+    }
+
+    /** Aísla el HTML de una tarjeta del paso 1 por su `wire:key`. */
+    private function lightCardHtml(string $html, int $calendarId): string
+    {
+        $marker = 'wire:key="light-calendar-card-'.$calendarId.'"';
+        $start = strpos($html, $marker);
+        $this->assertNotFalse($start, 'No se encontró la tarjeta del calendario en el HTML.');
+
+        $next = strpos($html, 'wire:key="light-calendar-card-', $start + strlen($marker));
+
+        return substr($html, $start, $next === false ? null : $next - $start);
+    }
+
+    public function test_editing_a_card_does_not_change_active_calendar_or_url(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $component = Livewire::actingAs($user)->test(TimetableLight::class);
+        $component->call('editCalendar', $calendar->id)
+            ->assertSee('Mostrar nombres de docentes en los reportes')
+            ->assertSet('statusProfesorShow', true)
+            ->set('calendarName', 'Horario editado desde tarjeta')
+            ->set('statusProfesorShow', false)
+            ->call('updateCalendar')
+            ->assertHasNoErrors()
+            ->assertSet('calendarId', null)
+            ->assertSet('editingCalendarId', null)
+            ->assertSet('showEditCalendarForm', false);
+
+        $this->assertDatabaseHas('timetable_calendars', [
+            'id' => $calendar->id,
+            'name' => 'Horario editado desde tarjeta',
+            'status_profesor_show' => false,
+        ]);
     }
 
     public function test_choose_calendar_opens_grid_and_persists_moves(): void
@@ -468,6 +568,8 @@ class TimetableLightTest extends TestCase
         $component = Livewire::actingAs($user)->test(TimetableLight::class);
 
         $component->call('chooseCalendar', $calendar->id);
+        $component->assertSeeHtml('wire:click="changeCalendar"');
+        $component->assertSeeHtml('aria-label="Volver al inicio"');
         $component->call('changeCalendar');
 
         $this->assertSame(1, $component->get('lightStep'));

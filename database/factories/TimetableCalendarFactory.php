@@ -14,9 +14,10 @@ class TimetableCalendarFactory extends Factory
     {
         return [
             'lapso_id' => Lapso::factory(),
-            'name' => 'Horario ' . fake()->year(),
+            'name' => 'Horario '.fake()->year(),
             'status' => TimetableCalendar::STATUS_DRAFT,
             'period_minutes' => 45,
+            'status_profesor_show' => true,
             'strategy' => TimetableCalendar::STRATEGY_OPTIMIZED,
             'version' => 0,
         ];

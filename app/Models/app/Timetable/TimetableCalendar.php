@@ -16,13 +16,14 @@ class TimetableCalendar extends Model
 
     protected $fillable = [
         'lapso_id', 'pescolar_id', 'pestudio_id', 'name', 'status', 'period_minutes',
-        'max_subjects_per_period', 'strategy', 'version', 'quality_score', 'preview_payload', 'active_job_id',
+        'max_subjects_per_period', 'status_profesor_show', 'strategy', 'version', 'quality_score', 'preview_payload', 'active_job_id',
     ];
 
     protected $casts = [
         'pestudio_id' => 'integer',
         'period_minutes' => 'integer',
         'max_subjects_per_period' => 'integer',
+        'status_profesor_show' => 'boolean',
         'version' => 'integer',
         'quality_score' => 'decimal:2',
         'preview_payload' => 'array',
@@ -54,6 +55,7 @@ class TimetableCalendar extends Model
 
     protected $attributes = [
         'strategy' => self::DEFAULT_STRATEGY,
+        'status_profesor_show' => true,
     ];
 
     public function lapso()

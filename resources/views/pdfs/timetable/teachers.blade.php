@@ -17,6 +17,7 @@
         td.time{text-align:center;font-weight:700;width:50px;background:#f0fdf4;font-size:7.5pt;}
         .subject{font-weight:700;font-size:7.5pt;}
         .section{font-size:6.5pt;color:#4b5563;}
+        .group{font-size:6.5pt;color:#0d9488;font-weight:700;}
         .break{background:#fef3c7;color:#b45309;text-align:center;font-weight:800;font-size:8pt;letter-spacing:0.5px;}
         .footer{text-align:center;font-size:6pt;color:#6b7280;margin-top:2px;padding-top:2px;border-top:1px solid #ccc;}
     </style>
@@ -77,15 +78,19 @@
                                                         'lines' => function ($slot): array {
                                                             $pev = $slot->lesson?->pevaluacion;
                                                             $grado = (string) ($pev?->seccion?->grado?->code_sm ?? $pev?->seccion?->grado?->code ?? $pev?->seccion?->grado?->name ?? '');
-                                                            $group = $slot->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                                            $group = $pev?->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$pev->grupo_estable_id) : '';
                                                             $meta = trim(trim($grado.' '.(string) ($pev?->seccion?->name ?? ''))
-                                                                .($group !== '' ? ' · '.$group : '')
                                                                 .($slot->room?->code ? ' · Aula '.$slot->room->code : ''));
 
-                                                            return [
+                                                            $lines = [
                                                                 ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
-                                                                ['class' => 'section', 'text' => $meta],
                                                             ];
+                                                            if ($group !== '') {
+                                                                $lines[] = ['class' => 'group', 'text' => $group];
+                                                            }
+                                                            $lines[] = ['class' => 'section', 'text' => $meta];
+
+                                                            return $lines;
                                                         },
                                                     ])
                                                 @endif

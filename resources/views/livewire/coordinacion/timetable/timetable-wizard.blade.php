@@ -861,6 +861,7 @@
                                 'Plan de estudio' => $selectedCalendarDetail['pestudio_name'] ?? '—',
                                 'Bloque (min)' => (string) $selectedCalendarDetail['period_minutes'],
                                 'Asignaturas por período' => (string) ($selectedCalendarDetail['max_subjects_per_period'] ?? 2),
+                                'Docentes en reportes' => ($selectedCalendarDetail['status_profesor_show'] ?? true) ? 'Visibles' : 'Ocultos',
                                 'Estrategia' => ($selectedCalendarDetail['strategy'] ?? 'optimized') === 'legacy' ? 'Legacy' : 'Optimizado',
                                 'Versión' => 'v'.$selectedCalendarDetail['version'],
                                 'Calidad' => $selectedCalendarDetail['quality_score'] !== null ? $selectedCalendarDetail['quality_score'].'%' : '—',
@@ -2867,6 +2868,19 @@
                 @error('maxSubjectsPerPeriod') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
                 <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Por defecto: 2. Aplica a las asignaturas marcadas como medio grupo.</p>
             </div>
+            <div class="rounded-lg border border-gray-200 bg-white/5 p-3 dark:border-white/10">
+                <label class="flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" wire:model="statusProfesorShow"
+                        class="mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                    <span>
+                        <span class="block text-sm font-bold text-gray-900 dark:text-white">Mostrar nombres de docentes en los reportes</span>
+                        <span class="mt-1 block text-[11px] text-gray-500 dark:text-gray-400">
+                            Si se desactiva, los nombres se ocultan en las grillas y vistas públicas. Se conservan en los reportes por docente, consolidado y totalización.
+                        </span>
+                    </span>
+                </label>
+                @error('statusProfesorShow') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+            </div>
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Estrategia de generación</label>
                 <select wire:model="strategy" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
@@ -2909,6 +2923,19 @@
                     class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                 @error('maxSubjectsPerPeriod') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
                 <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Por defecto: 2. Aplica a las asignaturas marcadas como medio grupo.</p>
+            </div>
+            <div class="rounded-lg border border-gray-200 bg-white/5 p-3 dark:border-white/10">
+                <label class="flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" wire:model="statusProfesorShow"
+                        class="mt-0.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                    <span>
+                        <span class="block text-sm font-bold text-gray-900 dark:text-white">Mostrar nombres de docentes en los reportes</span>
+                        <span class="mt-1 block text-[11px] text-gray-500 dark:text-gray-400">
+                            Si se desactiva, los nombres se ocultan en las grillas y vistas públicas. Se conservan en los reportes por docente, consolidado y totalización.
+                        </span>
+                    </span>
+                </label>
+                @error('statusProfesorShow') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
             </div>
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Estrategia de generación</label>
@@ -3167,6 +3194,9 @@
                             Se generará el formato de <strong>{{ $selectedArea->name }}</strong>
                             ({{ $selectedArea->campo_conocimientos_count }} asignatura(s)) usando el horario
                             <strong>{{ $areaFormatCalendar->name }}</strong> en una nueva pestaña.
+                            <span class="mt-1 block font-bold">
+                                Docentes en el PDF: {{ $areaFormatCalendar->status_profesor_show ? 'visibles' : 'ocultos' }}.
+                            </span>
                         </div>
                     @else
                         <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300">

@@ -69,13 +69,13 @@
                                     @else
                                         @include('timetable.partials.half-cell', [
                                             'slots' => $day['assignments'],
-                                            'lines' => function ($cell): array {
+                                            'lines' => function ($cell) use ($calendar): array {
                                                 $lines = [['class' => 'subject', 'text' => (string) ($cell['asignatura'] ?? '?')]];
-                                                if (! empty($cell['profesor'])) {
-                                                    $lines[] = ['class' => 'teacher', 'text' => (string) $cell['profesor']];
-                                                }
                                                 if (! empty($cell['grupo'])) {
                                                     $lines[] = ['class' => 'group', 'text' => (string) $cell['grupo']];
+                                                }
+                                                if ($calendar->status_profesor_show && ! empty($cell['profesor'])) {
+                                                    $lines[] = ['class' => 'teacher', 'text' => (string) $cell['profesor']];
                                                 }
 
                                                 return $lines;

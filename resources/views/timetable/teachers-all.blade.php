@@ -37,6 +37,7 @@
         td.time{text-align:center;font-weight:700;color:#374151;white-space:nowrap;width:84px;background:#f0fdf4;}
         td.break{background:#fef3c7;color:#b45309;text-align:left;font-weight:800;font-size:0.8rem;}
         .subject{font-weight:700;color:#0d9488;font-size:0.82rem;}
+        .group{color:#0f766e;font-size:0.72rem;font-weight:700;margin-top:1px;}
         .meta{color:#6b7280;font-size:0.72rem;margin-top:2px;}
         .empty{color:#9ca3af;text-align:center;padding:8px;}
         footer{text-align:center;font-size:0.75rem;color:#6b7280;margin-top:24px;}
@@ -70,6 +71,7 @@
             td.time{width:72px;font-size:0.68rem;line-height:1.15;}
             td.break{font-size:0.66rem;padding:2px 4px;}
             .subject{font-size:0.8rem;line-height:1.15;}
+            .group{font-size:0.6rem;margin-top:0;line-height:1.15;}
             .meta{font-size:0.6rem;margin-top:0;line-height:1.15;}
             .empty{padding:1px;line-height:1;}
             footer{font-size:0.68rem;margin-top:8px;}
@@ -148,15 +150,19 @@
                                                             'lines' => function ($slot): array {
                                                                 $pev = $slot->lesson?->pevaluacion;
                                                                 $grado = (string) ($pev?->seccion?->grado?->code_sm ?? $pev?->seccion?->grado?->code ?? $pev?->seccion?->grado?->name ?? '');
-                                                                $group = $slot->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                                                $group = $pev?->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$pev->grupo_estable_id) : '';
                                                                 $meta = trim(trim($grado.' '.(string) ($pev?->seccion?->name ?? ''))
-                                                                    .($group !== '' ? ' · '.$group : '')
                                                                     .($slot->room?->code ? ' · Aula '.$slot->room->code : ''));
 
-                                                                return [
+                                                                $lines = [
                                                                     ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
-                                                                    ['class' => 'meta', 'text' => $meta],
                                                                 ];
+                                                                if ($group !== '') {
+                                                                    $lines[] = ['class' => 'group', 'text' => $group];
+                                                                }
+                                                                $lines[] = ['class' => 'meta', 'text' => $meta];
+
+                                                                return $lines;
                                                             },
                                                         ])
                                                     </td>

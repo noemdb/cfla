@@ -328,6 +328,7 @@ class TimetableCalendarBackupTest extends TestCase
         $this->assertSame('calendar', $snapshot['scope']);
         $this->assertSame('sha256-semantic-v1', $snapshot['checksum_algo']);
         $this->assertSame((int) $f['calendar']->id, $snapshot['calendar']['id']);
+        $this->assertTrue($snapshot['calendar']['status_profesor_show']);
 
         // Contenido del calendario: 4 períodos, 2 lessons, 2 slots, 1
         // disponibilidad y un bloqueo por cada sección presente.

@@ -81,6 +81,12 @@ class TimetableWizard extends Component
     /** Abre/cierra el modal de edición del calendario seleccionado. */
     public bool $showEditCalendarForm = false;
 
+    /**
+     * Calendario que se está editando en el modal. Permite abrir la edición
+     * de una tarjeta sin cambiar el calendario activo ni la URL del light.
+     */
+    public ?int $editingCalendarId = null;
+
     public array $calendars = [];
 
     public $lapsoId = null;
@@ -94,6 +100,9 @@ class TimetableWizard extends Component
     public int $periodMinutes = 60;
 
     public int $maxSubjectsPerPeriod = 2;
+
+    /** Mostrar los nombres de docentes en los reportes imprimibles. */
+    public bool $statusProfesorShow = true;
 
     public string $strategy = TimetableCalendar::DEFAULT_STRATEGY;
 
@@ -493,6 +502,7 @@ class TimetableWizard extends Component
             'calendarName' => 'required|string|max:255',
             'periodMinutes' => 'required|integer|min:30|max:120',
             'maxSubjectsPerPeriod' => 'required|integer|min:1|max:10',
+            'statusProfesorShow' => 'boolean',
             'strategy' => 'required|string|in:optimized,legacy',
         ]);
 
@@ -516,6 +526,7 @@ class TimetableWizard extends Component
             'name' => $this->calendarName,
             'period_minutes' => $this->periodMinutes,
             'max_subjects_per_period' => $this->maxSubjectsPerPeriod,
+            'status_profesor_show' => $this->statusProfesorShow,
             'strategy' => $this->strategy,
             'status' => 'draft',
             'version' => 0,
@@ -541,6 +552,7 @@ class TimetableWizard extends Component
             return;
         }
 
+        $this->editingCalendarId = (int) $calendar->id;
         $this->loadCalendar($calendar);
         $this->showEditCalendarForm = true;
     }
@@ -552,11 +564,12 @@ class TimetableWizard extends Component
      */
     public function updateCalendar(): void
     {
-        if (! $this->calendarId) {
+        $targetId = $this->editingCalendarId ?: $this->calendarId;
+        if (! $targetId) {
             return;
         }
 
-        $calendar = TimetableCalendar::find((int) $this->calendarId);
+        $calendar = TimetableCalendar::find((int) $targetId);
         if (! $calendar) {
             return;
         }
@@ -565,6 +578,7 @@ class TimetableWizard extends Component
             'calendarName' => 'required|string|max:255',
             'periodMinutes' => 'required|integer|min:30|max:120',
             'maxSubjectsPerPeriod' => 'required|integer|min:1|max:10',
+            'statusProfesorShow' => 'boolean',
             'strategy' => 'required|string|in:optimized,legacy',
         ]);
 
@@ -585,11 +599,13 @@ class TimetableWizard extends Component
             'name' => $this->calendarName,
             'period_minutes' => $this->periodMinutes,
             'max_subjects_per_period' => $this->maxSubjectsPerPeriod,
+            'status_profesor_show' => $this->statusProfesorShow,
             'strategy' => $this->strategy,
         ]);
 
         $this->loadCalendars();
         $this->showEditCalendarForm = false;
+        $this->editingCalendarId = null;
         session()->flash('message', 'Calendario actualizado.');
     }
 
@@ -749,6 +765,7 @@ class TimetableWizard extends Component
             'name' => $copyName,
             'period_minutes' => $source->period_minutes,
             'max_subjects_per_period' => $source->max_subjects_per_period,
+            'status_profesor_show' => (bool) $source->status_profesor_show,
             'strategy' => $source->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
             'status' => TimetableCalendar::STATUS_DRAFT,
             'version' => 0,
@@ -3366,6 +3383,7 @@ class TimetableWizard extends Component
                 'pestudio' => $calendar->pestudio?->name,
                 'period_minutes' => (int) $calendar->period_minutes,
                 'max_subjects_per_period' => (int) $calendar->max_subjects_per_period,
+                'status_profesor_show' => (bool) $calendar->status_profesor_show,
             ],
             'section' => [
                 'id' => $seccionId,
@@ -3428,6 +3446,7 @@ class TimetableWizard extends Component
                     'pestudio' => 'string. Etiqueta.',
                     'period_minutes' => 'int. Duracion del slot en minutos.',
                     'max_subjects_per_period' => 'int. Maximo de asignaturas por slot.',
+                    'status_profesor_show' => 'bool. Muestra los nombres de docentes en los reportes imprimibles.',
                 ],
             ],
             'calendars' => [
@@ -6474,6 +6493,9 @@ class TimetableWizard extends Component
         return route($this->moduleRoutePrefix().'.timetable.pdf.area-preview', [
             'calendar' => (int) $calendar->id,
             'area' => (int) $this->areaFormatId,
+            // Invalida PDFs cacheados por el navegador cuando se edita el
+            // calendario (por ejemplo, al cambiar status_profesor_show).
+            'v' => (int) ($calendar->updated_at?->getTimestamp() ?? now()->timestamp),
         ]);
     }
 
@@ -10439,6 +10461,7 @@ PROMPT;
         $this->calendarName = $calendar->name;
         $this->periodMinutes = (int) $calendar->period_minutes;
         $this->maxSubjectsPerPeriod = max(1, (int) ($calendar->max_subjects_per_period ?? 2));
+        $this->statusProfesorShow = (bool) ($calendar->status_profesor_show ?? true);
         $this->strategy = in_array($calendar->strategy, TimetableCalendar::STRATEGIES, true)
             ? $calendar->strategy
             : TimetableCalendar::DEFAULT_STRATEGY;
@@ -10655,6 +10678,7 @@ PROMPT;
                 'quality_score' => $selectedCalendar->quality_score !== null ? (float) $selectedCalendar->quality_score : null,
                 'period_minutes' => (int) $selectedCalendar->period_minutes,
                 'max_subjects_per_period' => (int) ($selectedCalendar->max_subjects_per_period ?? 2),
+                'status_profesor_show' => (bool) $selectedCalendar->status_profesor_show,
                 'strategy' => $selectedCalendar->strategy ?: TimetableCalendar::DEFAULT_STRATEGY,
                 'lapso_name' => $selectedCalendar->lapso?->name,
                 'pestudio_name' => $selectedCalendar->pestudio?->name,

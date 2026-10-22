@@ -15,6 +15,7 @@
         .footer{text-align:center;font-size:5.5pt;color:#6b7280;margin-top:3px;padding-top:2px;border-top:1px solid #ccc;}
         .subject{font-weight:700;font-size:6.5pt;}
         .section{font-size:5.5pt;color:#4b5563;}
+        .group{font-size:5.5pt;color:#0d9488;font-weight:700;}
     </style>
 </head>
 <body>
@@ -45,11 +46,14 @@
                                 'emptyClass' => 'section',
                                 'lines' => function ($slot): array {
                                     $pev = $slot->lesson?->pevaluacion;
-                                    $group = $slot->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '';
+                                    $group = $pev?->grupo_estable_id ? (string) ($pev?->grupoEstable?->name ?? 'G'.$pev->grupo_estable_id) : '';
                                     $lines = [
                                         ['class' => 'subject', 'text' => (string) ($pev?->pensum?->asignatura?->name ?? '?')],
-                                        ['class' => 'section', 'text' => trim((string) ($pev?->seccion?->name ?? '').($group !== '' ? ' · '.$group : ''))],
                                     ];
+                                    if ($group !== '') {
+                                        $lines[] = ['class' => 'group', 'text' => $group];
+                                    }
+                                    $lines[] = ['class' => 'section', 'text' => (string) ($pev?->seccion?->name ?? '')];
                                     if ($slot->room_id) {
                                         $lines[] = ['class' => 'section', 'text' => 'Aula'];
                                     }

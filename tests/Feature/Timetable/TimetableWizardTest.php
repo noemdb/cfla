@@ -299,6 +299,36 @@ class TimetableWizardTest extends TestCase
         ]);
     }
 
+    public function test_calendar_can_hide_teacher_names_in_printable_reports(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $pestudio = Pestudio::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('lapsoId', $lapso->id)
+            ->set('pestudioId', $pestudio->id)
+            ->set('calendarName', 'Horario sin docentes')
+            ->set('statusProfesorShow', false)
+            ->call('createCalendar')
+            ->assertHasNoErrors();
+
+        $calendar = TimetableCalendar::query()->where('name', 'Horario sin docentes')->firstOrFail();
+        $this->assertFalse($calendar->status_profesor_show);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('openEditCalendarForm')
+            ->assertSet('statusProfesorShow', false)
+            ->set('statusProfesorShow', true)
+            ->call('updateCalendar')
+            ->assertHasNoErrors();
+
+        $this->assertTrue($calendar->fresh()->status_profesor_show);
+    }
+
     public function test_calendar_subjects_per_period_can_be_updated(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
@@ -342,7 +372,11 @@ class TimetableWizardTest extends TestCase
 
         $pestudio = \App\Models\app\Academy\Pestudio::factory()->create();
         $lapso2 = Lapso::factory()->create();
-        $src = TimetableCalendar::factory()->create(['lapso_id' => $lapso2->id, 'pestudio_id' => $pestudio->id]);
+        $src = TimetableCalendar::factory()->create([
+            'lapso_id' => $lapso2->id,
+            'pestudio_id' => $pestudio->id,
+            'status_profesor_show' => false,
+        ]);
         $shift = $this->shift('M', 'Mañana');
         TimetablePeriod::factory()->create(['calendar_id' => $src->id, 'shift_id' => $shift->id, 'start_time' => '08:00:00', 'end_time' => '09:00:00']);
         $fixture = $this->pevaluacionFixture($lapso2->id);
@@ -365,6 +399,7 @@ class TimetableWizardTest extends TestCase
         $this->assertSame(2, TimetableCalendar::query()->where('lapso_id', $lapso2->id)->count());
         $copy = TimetableCalendar::where('lapso_id', $lapso2->id)->orderByDesc('id')->first();
         $this->assertSame($src->pestudio_id, $copy->pestudio_id);
+        $this->assertFalse($copy->status_profesor_show);
         $this->assertSame(TimetablePeriod::where('calendar_id', $src->id)->count(), TimetablePeriod::where('calendar_id', $copy->id)->count());
         $this->assertSame(TimetableLesson::where('calendar_id', $src->id)->count(), TimetableLesson::where('calendar_id', $copy->id)->count());
     }
