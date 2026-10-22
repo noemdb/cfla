@@ -68,6 +68,9 @@ class TimetableLightTest extends TestCase
         $component->assertSee('timetable-light-global-loading');
         $component->assertSee('timetable-light-global-bar');
         $component->assertSee('Sincronizando…');
+        $component->assertSee('Sincronizar carga');
+        $component->assertSee('Selecciona un calendario para sincronizar la carga académica');
+        $component->assertSeeHtml('aria-disabled="true"');
     }
 
     public function test_light_groups_calendars_active_and_archived(): void
@@ -87,6 +90,8 @@ class TimetableLightTest extends TestCase
         $component->assertSee('Archivados');
         $component->assertSee($calendar->name);
         $component->assertSee('Horario Archivado');
+        $component->assertSee('En sincronía');
+        $component->assertSee('Sin sincronizar');
     }
 
     public function test_choose_calendar_opens_grid_and_persists_moves(): void
@@ -100,7 +105,8 @@ class TimetableLightTest extends TestCase
         $this->assertSame(2, $component->get('lightStep'));
         $this->assertSame($calendar->id, (int) $component->get('calendarId'));
         $this->assertSame((int) $seccion->id, (int) $component->get('activeSeccionId'));
-        $component->assertSee('Cambiar P.Estudio / calendario');
+        $component->assertSeeHtml('aria-label="Cambiar calendario activo"');
+        $component->assertDontSee('Cambiar P.Estudio / calendario');
 
         // Dropdown de formatos/reportes.
         $component->assertSee('Formatos');
@@ -290,6 +296,54 @@ class TimetableLightTest extends TestCase
         );
     }
 
+    public function test_light_collisions_ignore_lessons_from_the_same_section(): void
+    {
+        [$user, $calendar, $seccion, $lesson, $p1] = $this->makeContext();
+        $firstPev = Pevaluacion::query()->findOrFail($lesson->pevaluacion_id);
+        $lesson->update(['is_half_group' => true]);
+        TimetableSlot::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('lesson_id', $lesson->id)
+            ->update(['is_half_group' => true]);
+
+        // Segundo medio grupo de la misma sección, con el mismo docente y en el
+        // mismo período: la celda compartida es válida y no es una colisión
+        // entre secciones/P.Estudios.
+        $asignaturaB = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+        $pensumB = Pensum::factory()->create([
+            'pestudio_id' => $calendar->pestudio_id,
+            'grado_id' => $seccion->grado_id,
+            'asignatura_id' => $asignaturaB->id,
+        ]);
+        $pevB = Pevaluacion::factory()->create([
+            'profesor_id' => $firstPev->profesor_id,
+            'seccion_id' => $seccion->id,
+            'pensum_id' => $pensumB->id,
+            'lapso_id' => $calendar->lapso_id,
+        ]);
+        $lessonB = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pevB->id,
+            'shift_id' => $lesson->shift_id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+            'is_half_group' => true,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $lessonB->id,
+            'period_id' => $p1->id,
+            'profesor_id' => $firstPev->profesor_id,
+            'seccion_id' => $seccion->id,
+            'is_half_group' => true,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->assertSee('Colisiones (0)');
+    }
+
     public function test_half_block_collision_only_counts_the_overlapping_half(): void
     {
         [$user, $calendar, $seccion, $lesson, $p1] = $this->makeContext();
@@ -363,6 +417,48 @@ class TimetableLightTest extends TestCase
         $component->call('toggleSectionTimetableLock', $seccion->id);
 
         $this->assertFalse((bool) $seccion->fresh()->timetable_locked);
+    }
+
+    public function test_light_calendar_switcher_lists_only_active_calendars_and_switches(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $otherPestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $otherLapso = Lapso::factory()->create();
+        $otherActive = TimetableCalendar::factory()->create([
+            'lapso_id' => $otherLapso->id,
+            'pestudio_id' => $otherPestudio->id,
+            'name' => 'Horario Activo Secundario',
+            'status' => 'active',
+        ]);
+        $draft = TimetableCalendar::factory()->create([
+            'lapso_id' => $calendar->lapso_id,
+            'pestudio_id' => $calendar->pestudio_id,
+            'name' => 'Horario Borrador Oculto',
+            'status' => 'draft',
+        ]);
+        $archived = TimetableCalendar::factory()->create([
+            'lapso_id' => $calendar->lapso_id,
+            'pestudio_id' => $calendar->pestudio_id,
+            'name' => 'Horario Archivado Oculto',
+            'status' => 'archived',
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->assertSeeHtml('aria-label="Cambiar calendario activo"');
+        $component->assertSee($otherActive->name);
+        $component->assertDontSee($draft->name);
+        $component->assertDontSee($archived->name);
+
+        // El selector no permite abrir borradores/archivados.
+        $component->call('switchCalendar', $draft->id)->assertDispatched('wireui:notification');
+        $this->assertSame($calendar->id, (int) $component->get('calendarId'));
+
+        $component->call('switchCalendar', $otherActive->id);
+        $this->assertSame($otherActive->id, (int) $component->get('calendarId'));
+        $this->assertSame(2, $component->get('lightStep'));
     }
 
     public function test_change_calendar_returns_to_selection(): void
@@ -523,6 +619,187 @@ class TimetableLightTest extends TestCase
             'calendar_id' => $calendar->id,
             'pevaluacion_id' => $pevWithoutLesson->id,
         ]);
+    }
+
+    public function test_light_header_shows_sync_button_and_notice_when_academic_load_has_missing_lessons(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+        $this->makeExtraPevaluacion($seccion, (int) $calendar->lapso_id, $profesorId, 'Historia sin clase');
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->assertSee('Sincronizar carga');
+        $component->assertSee('No hay sincronía con la carga académica');
+        $component->assertSee('1 asignatura(s) con carga vigente');
+
+        $status = $component->instance()->academicSyncStatus();
+
+        $this->assertSame(1, $status['missing']);
+        $this->assertSame(0, $status['missing_locked']);
+        $this->assertFalse($status['in_sync']);
+    }
+
+    public function test_light_sync_academic_load_creates_missing_lessons_and_refreshes_preview(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+        $extra = $this->makeExtraPevaluacion($seccion, (int) $calendar->lapso_id, $profesorId, 'Historia por sincronizar');
+        $lesson->update(['weekly_blocks_t' => 3, 'priority' => 7, 'locked' => true]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->call('syncAcademicLoad')->assertDispatched('wireui:notification');
+
+        $lesson->refresh();
+        $this->assertSame(3, (int) $lesson->weekly_blocks_t);
+        $this->assertSame(7, (int) $lesson->priority);
+        $this->assertTrue((bool) $lesson->locked);
+
+        $newLesson = TimetableLesson::query()
+            ->where('calendar_id', $calendar->id)
+            ->where('pevaluacion_id', $extra->id)
+            ->first();
+
+        $this->assertNotNull($newLesson);
+        $this->assertSame((int) $lesson->shift_id, (int) $newLesson->shift_id);
+        $this->assertSame(
+            (int) ceil(60 / max(1, (int) $calendar->period_minutes)),
+            (int) $newLesson->weekly_blocks_t,
+        );
+        $this->assertSame(0, (int) $newLesson->weekly_blocks_p);
+
+        $status = $component->instance()->academicSyncStatus();
+        $this->assertSame(0, $status['missing']);
+        $this->assertTrue($status['in_sync']);
+        $this->assertSame(2, $status['active']);
+        $component->assertDontSee('No hay sincronía con la carga académica');
+        $component->assertSee('Sincronizado con la carga académica');
+        $component->assertSee('2 cargas vigentes');
+
+        $calendar->refresh();
+        $this->assertContains((int) $newLesson->id, $calendar->preview_payload['unassigned'] ?? []);
+    }
+
+    public function test_light_sync_academic_load_skips_locked_sections(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+        $extra = $this->makeExtraPevaluacion($seccion, (int) $calendar->lapso_id, $profesorId, 'Historia bloqueada');
+        $seccion->update(['timetable_locked' => true]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->call('syncAcademicLoad')->assertDispatched('wireui:notification');
+
+        $this->assertDatabaseMissing('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $extra->id,
+        ]);
+
+        $status = $component->instance()->academicSyncStatus();
+        $this->assertSame(1, $status['missing']);
+        $this->assertSame(1, $status['missing_locked']);
+        $this->assertFalse($status['in_sync']);
+        $component->assertSee('1 de ellas están en secciones con el horario bloqueado');
+    }
+
+    public function test_light_sync_academic_load_refreshes_current_profesor_in_memory(): void
+    {
+        [$user, $calendar, $seccion, $lesson] = $this->makeContext();
+        $pev = Pevaluacion::query()->findOrFail($lesson->pevaluacion_id);
+        $replacementUser = User::factory()->create();
+        $replacement = Profesor::create([
+            'user_id' => $replacementUser->id,
+            'name' => 'Luis',
+            'lastname' => 'Actualizado',
+            'ci_profesor' => '2999',
+            'status_active' => 'true',
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $pev->update(['profesor_id' => $replacement->id]);
+        $component->call('syncAcademicLoad');
+
+        $this->assertSame(
+            (int) $replacement->id,
+            (int) $component->get('lessons.'.$pev->id.'.profesor_id'),
+        );
+    }
+
+    public function test_light_notice_cleans_orphan_lessons_and_their_slots(): void
+    {
+        [$user, $calendar, $seccion, $lesson, $p1, $p2] = $this->makeContext();
+        $profesorId = (int) Pevaluacion::query()->findOrFail($lesson->pevaluacion_id)->profesor_id;
+
+        // Carga vigente sin clase: la limpieza debe sincronizarla antes de
+        // eliminar las clases huérfanas.
+        $pendingPev = $this->makeExtraPevaluacion(
+            $seccion,
+            (int) $calendar->lapso_id,
+            $profesorId,
+            'Biología pendiente',
+        );
+
+        $orphanSection = Seccion::factory()->create([
+            'grado_id' => $seccion->grado_id,
+            'status_active' => 'true',
+        ]);
+        $orphanPev = $this->makeExtraPevaluacion(
+            $orphanSection,
+            (int) $calendar->lapso_id,
+            $profesorId,
+            'Historia huérfana',
+        );
+        $orphanLesson = TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $orphanPev->id,
+            'shift_id' => $lesson->shift_id,
+            'weekly_blocks_t' => 1,
+            'weekly_blocks_p' => 0,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $calendar->id,
+            'lesson_id' => $orphanLesson->id,
+            'period_id' => $p2->id,
+            'profesor_id' => $profesorId,
+            'seccion_id' => $orphanSection->id,
+        ]);
+
+        // La fuente de verdad es la Pevaluación con sección activa: al
+        // desactivarla, la clase queda fuera de la carga vigente.
+        $orphanSection->update(['status_active' => 'false']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableLight::class, ['calendar' => $calendar->id]);
+
+        $component->assertSee('Limpiar huérfanas (1)');
+        $statusBefore = $component->instance()->academicSyncStatus();
+        $this->assertSame(1, $statusBefore['orphaned']);
+        $this->assertSame(1, $statusBefore['missing']);
+
+        $component->call('confirmRemoveOrphanLessons')->assertDispatched('wireui:confirm-dialog');
+        $component->call('removeOrphanLessons')->assertDispatched('wireui:notification');
+
+        $this->assertDatabaseMissing('timetable_lessons', ['id' => $orphanLesson->id]);
+        $this->assertDatabaseMissing('timetable_slots', ['lesson_id' => $orphanLesson->id]);
+        $this->assertDatabaseHas('timetable_lessons', ['id' => $lesson->id]);
+        $this->assertDatabaseHas('timetable_lessons', [
+            'calendar_id' => $calendar->id,
+            'pevaluacion_id' => $pendingPev->id,
+        ]);
+
+        $statusAfter = $component->instance()->academicSyncStatus();
+        $this->assertSame(0, $statusAfter['missing']);
+        $this->assertSame(0, $statusAfter['orphaned']);
+        $this->assertTrue($statusAfter['in_sync']);
+        $component->assertDontSee('No hay sincronía con la carga académica');
+        $component->assertSee('Sincronizado con la carga académica');
     }
 
     public function test_light_save_lessons_from_classes_returns_to_grid_and_persists(): void

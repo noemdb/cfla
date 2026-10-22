@@ -214,11 +214,34 @@ Espacio de trabajo reducido sobre el mismo `TimetableWizard` (subclase
      **Guardar clases**. Al guardar, vuelve a la Grilla con el preview
      reconstruido desde los slots persistidos.
 
-El selector **P.Estudio → Grado → Sección** es común a ambos tabs y se construye
-desde **todas las Pevaluaciones del P.Estudio del lapso** (no solo desde las
+El selector **Grado → Sección** es común a ambos tabs y se construye desde
+**todas las Pevaluaciones del P.Estudio del lapso** (no solo desde las
 secciones que ya tienen lessons), así que se pueden crear clases desde cero para
 cualquier grado/sección. El tab activo se refleja en la URL con `?tab=classes`;
 valores no válidos caen en `grid`.
+
+Las tarjetas del paso 1 muestran el estado de sincronización de cada calendario
+(**En sincronía**, **Sin sincronizar** con el número de pendientes/huérfanas, o
+**Sin carga vigente**). Sobre la cabecera, alineado a la derecha, hay un selector
+WireUI de **calendario activo** que permite cambiar de calendario sin volver al
+paso 1. El selector solo lista calendarios con estado `active`; si el calendario
+abierto no está activo se muestra como opción deshabilitada para conservar el
+contexto.
+
+La sincronización compara las Pevaluaciones vigentes (lapso + P.Estudio, con
+sección, grado, P.Estudio, pensum y asignatura vigentes) con
+`timetable_lessons`: crea las clases faltantes, omite las secciones con
+`timetable_locked` y refresca la selección, las clases en memoria y
+`preview_payload`. No sobrescribe bloques ya configurados.
+
+El aviso «No hay sincronía con la carga académica» aparece cuando faltan clases
+o hay clases huérfanas e incluye **Limpiar huérfanas (N)**. La limpieza pide
+confirmación, **sincroniza primero** la carga académica y solo entonces elimina
+las clases cuya Pevaluación ya no es vigente junto con sus `timetable_slots`. Si
+la sincronización falla (sin Pevaluaciones activas o sin turnos) no se elimina
+ningún registro. La acción nunca modifica `Pevaluaciones`. Cuando todo está
+sincronizado se muestra el aviso informativo «Sincronizado con la carga
+académica».
 
 El modo rápido reutiliza los parciales compartidos del Paso 3
 (`resources/views/livewire/coordinacion/timetable/partials/step3-lessons*.blade.php`),
@@ -355,7 +378,7 @@ Ejemplo (1ER GRADO · A, «ÁREAS COMPLEMENTARIA INGLES», períodos de 40'):
 
 Pasos en el modo rápido (`/app/planning/timetable/light`):
 
-1. Abrir el calendario y seleccionar P.Estudio → Grado → Sección.
+1. Abrir el calendario y seleccionar Grado → Sección.
 2. En **Clases**, localizar la fila de la asignatura (agregarla si no está).
 3. Marcar **Mitad ½** (los contadores T/P se recalculan en medias franjas).
    Si la sección está bloqueada (`timetable_locked`), desbloquearla primero.
@@ -370,7 +393,10 @@ Pasos en el modo rápido (`/app/planning/timetable/light`):
    sobre la mitad ocupada por la otra: se intercambian las mitades.
 6. Revisar el resumen (clases ubicadas/sin ubicar) y generar el PDF. El icono
    rojo de colisión de docente aparece **dentro de la lección afectada**, no en
-   la celda, para no confundirlo con la otra mitad o con otro docente.
+   la celda, para no confundirlo con la otra mitad o con otro docente. Las
+   lecciones que comparten celda dentro de la **misma sección** (medio grupo)
+   no se reportan como colisión: el panel compara contra otras secciones y
+   P.Estudios.
 
 En el asistente completo el mismo toggle está en el Paso 3; al generar, el
 solver respeta la mitad y prefiere emparejar dos mitades en un período.

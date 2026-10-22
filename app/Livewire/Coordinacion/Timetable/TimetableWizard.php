@@ -2497,6 +2497,33 @@ class TimetableWizard extends Component
     }
 
     /**
+     * Carga académica vigente del calendario: Pevaluaciones del lapso en
+     * secciones/grados activos y, cuando el calendario tiene P.Estudio, solo
+     * las de ese plan de estudio. Es la base compartida por la tabla del Paso 3
+     * y por la sincronización del asistente rápido.
+     */
+    protected function pevaluacionesForCalendar(TimetableCalendar $calendar)
+    {
+        $query = Pevaluacion::query()
+            ->with(['pensum.asignatura', 'seccion.grado.pestudio', 'profesor', 'grupoEstable'])
+            ->where('lapso_id', $calendar->lapso_id)
+            ->whereHas('seccion', fn ($q) => $q->where('seccions.status_active', 'true'))
+            ->whereHas('seccion.grado', fn ($q) => $q->where('grados.status_active', 'true'))
+            ->whereHas('seccion.grado.pestudio', fn ($q) => $q->where('pestudios.status_active', 'true'))
+            ->whereHas('pensum', fn ($q) => $q->where('pensums.status_active', true))
+            // `asignaturas` no tiene status_active; su vigencia se controla
+            // con SoftDeletes. El whereHas excluye las asignaturas eliminadas.
+            ->whereHas('pensum.asignatura');
+
+        // Paso 3: solo las lecciones del plan de estudio (pestudio) del calendario.
+        if ($calendar->pestudio_id) {
+            $query->whereHas('seccion.grado.pestudio', fn ($q) => $q->where('pestudios.id', $calendar->pestudio_id));
+        }
+
+        return $query;
+    }
+
+    /**
      * Todas las pevaluaciones del lapso del calendario (grados activos), con
      * búsqueda (asignatura/profesor) y orden aplicados.
      */
@@ -2511,16 +2538,7 @@ class TimetableWizard extends Component
             return collect();
         }
 
-        $query = Pevaluacion::query()
-            ->with(['pensum.asignatura', 'seccion.grado.pestudio', 'profesor', 'grupoEstable'])
-            ->where('lapso_id', $calendar->lapso_id)
-            ->whereHas('seccion', fn ($q) => $q->where('seccions.status_active', 'true'))
-            ->whereHas('seccion.grado', fn ($q) => $q->where('grados.status_active', 'true'));
-
-        // Paso 3: solo las lecciones del plan de estudio (pestudio) del calendario.
-        if ($calendar->pestudio_id) {
-            $query->whereHas('seccion.grado.pestudio', fn ($q) => $q->where('pestudios.id', $calendar->pestudio_id));
-        }
+        $query = $this->pevaluacionesForCalendar($calendar);
 
         if ($this->step3Search !== '') {
             $search = '%'.$this->step3Search.'%';
@@ -2758,7 +2776,7 @@ class TimetableWizard extends Component
      *
      * @return array<string, mixed>
      */
-    private function buildLesson(Pevaluacion $pev, int $periodMinutes): array
+    protected function buildLesson(Pevaluacion $pev, int $periodMinutes): array
     {
         $asignatura = $pev->pensum?->asignatura;
         $grupo = $pev->grupoEstable?->name;
@@ -4931,6 +4949,14 @@ class TimetableWizard extends Component
                     continue;
                 }
                 $busySection = $busyPev->seccion;
+
+                // La propia sección no colisiona consigo misma: dos lecciones
+                // pueden compartir la celda como medio grupo. El panel de
+                // colisiones solo compara contra otras secciones/P.Estudios.
+                if ((int) ($busySection?->id ?? 0) === (int) $seccionId) {
+                    continue;
+                }
+
                 $busyHalf = isset($busySlot['half']) && $busySlot['half'] !== null
                     ? (int) $busySlot['half']
                     : null;
@@ -4942,8 +4968,11 @@ class TimetableWizard extends Component
                 $previewBusy[$busyTeacherId][] = [
                     'lesson_id' => (int) $busyLesson->id,
                     'pestudio' => $pestudioName,
+                    'seccion_id' => (int) ($busySection?->id ?? 0),
                     'grado' => (string) ($busySection?->grado?->name ?? ''),
                     'section' => (string) ($busySection?->name ?? ''),
+                    'is_half_group' => (bool) $busyLesson->is_half_group,
+                    'allow_shared_teacher' => (bool) $busyLesson->allow_shared_teacher,
                     'day' => (int) $busyPeriod->day_of_week,
                     'start' => $busyStart,
                     'end' => $busyEnd,
@@ -4995,6 +5024,15 @@ class TimetableWizard extends Component
                         if ((int) ($busy['lesson_id'] ?? 0) === (int) $lesson->id) {
                             continue;
                         }
+                        if ((int) ($busy['seccion_id'] ?? 0) === (int) $pev->seccion_id) {
+                            continue;
+                        }
+                        if ($lesson->is_half_group && (bool) ($busy['is_half_group'] ?? false)) {
+                            continue;
+                        }
+                        if ($lesson->allow_shared_teacher && (bool) ($busy['allow_shared_teacher'] ?? false)) {
+                            continue;
+                        }
                         if ($busy['day'] === (int) $period->day_of_week
                             && $startMin < $busy['end']
                             && $endMin > $busy['start']) {
@@ -5034,7 +5072,7 @@ class TimetableWizard extends Component
      * lapso (excluye el P.Estudio del calendario en edición). Permite detectar
      * colisiones de horario del docente entre P.Estudios.
      *
-     * @return array<int, list<array{pestudio:string, grado:string, section:string, day:int, start:int, end:int}>>
+     * @return array<int, list<array{pestudio:string, seccion_id:int, grado:string, section:string, is_half_group:bool, allow_shared_teacher:bool, day:int, start:int, end:int}>>
      */
     private function teacherExternalBusyMap(): array
     {
@@ -5090,8 +5128,11 @@ class TimetableWizard extends Component
             );
             $map[(int) $slot->profesor_id][] = [
                 'pestudio' => $pestudioByCalendar->get((int) $slot->calendar_id, 'P.Estudio'),
+                'seccion_id' => (int) ($section?->id ?? 0),
                 'grado' => (string) ($section?->grado?->name ?? ''),
                 'section' => (string) ($section?->name ?? ''),
+                'is_half_group' => (bool) ($slot->lesson?->is_half_group ?? false),
+                'allow_shared_teacher' => (bool) ($slot->lesson?->allow_shared_teacher ?? false),
                 'day' => (int) $period->day_of_week,
                 'start' => $start,
                 'end' => $end,

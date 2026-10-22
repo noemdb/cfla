@@ -279,6 +279,17 @@ class TimetableGlobalPdfTest extends TestCase
             $this->assertStringContainsString('½ sup.', $flat);
             $this->assertStringContainsString('½ inf.', $flat);
 
+            $halfRowHeight = null;
+            foreach ($sheet->rangeToArray('A1:F500') as $index => $row) {
+                if (str_contains(collect($row)->filter()->implode(' | '), '½ sup.')) {
+                    $halfRowHeight = $sheet->getRowDimension($index + 1)->getRowHeight();
+                    break;
+                }
+            }
+
+            $this->assertNotNull($halfRowHeight, 'la fila con media franja debe existir');
+            $this->assertGreaterThan(28, $halfRowHeight, 'la fila debe crecer para mostrar las dos bandas');
+
             // 1 bloque completo + 1 media franja = 1.5 bloques.
             $teacherName = trim($fixture['profesor']->lastname.' '.$fixture['profesor']->name);
             $summaryRow = null;
@@ -320,6 +331,19 @@ class TimetableGlobalPdfTest extends TestCase
             $this->assertStringContainsString('½ sup.', $flat);
             $this->assertStringContainsString('½ inf.', $flat);
             $this->assertStringContainsString('Arte', $flat);
+
+            $halfRowHeight = null;
+            foreach ($spreadsheet->getAllSheets() as $sheet) {
+                foreach ($sheet->rangeToArray('A1:F500') as $index => $row) {
+                    if (str_contains(collect($row)->filter()->implode(' | '), '½ sup.')) {
+                        $halfRowHeight = $sheet->getRowDimension($index + 1)->getRowHeight();
+                        break 2;
+                    }
+                }
+            }
+
+            $this->assertNotNull($halfRowHeight, 'la fila con media franja debe existir');
+            $this->assertGreaterThan(30, $halfRowHeight, 'la fila debe crecer para mostrar las dos bandas');
         } finally {
             @unlink($tmp);
         }

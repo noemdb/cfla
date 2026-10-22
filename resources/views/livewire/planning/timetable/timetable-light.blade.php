@@ -5,29 +5,64 @@
 @endphp
 
 <div class="mx-auto w-full max-w-[1600px] px-4 py-6">
-    @if ($lightStep === 2)
+    @if ($lightStep === 2 && $lightCalendar)
         <div class="mb-3 flex justify-end">
-            <button type="button" wire:click="changeCalendar"
-                wire:loading.attr="disabled" wire:target="changeCalendar"
-                title="Volver a la pantalla inicial para elegir otro calendario (P.Estudio)"
-                aria-label="Volver a la selección de calendario"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
-                <span wire:loading.remove wire:target="changeCalendar" class="inline-flex items-center gap-1.5">
-                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Cambiar P.Estudio / calendario
-                </span>
-                <span wire:loading wire:target="changeCalendar" class="inline-flex items-center gap-1.5">
-                    <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    Volviendo…
-                </span>
-            </button>
+            {{-- Selector WireUI de calendario activo, justo encima del header
+                 y alineado a la derecha. Solo permite calendarios «active». --}}
+            <x-dropdown position="bottom-end" width="7xl" height="auto">
+                <x-slot name="trigger">
+                    <button type="button"
+                        wire:loading.attr="disabled"
+                        wire:target="switchCalendar"
+                        title="Cambiar calendario activo"
+                        aria-label="Cambiar calendario activo"
+                        aria-haspopup="menu"
+                        class="inline-flex max-w-[22rem] items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.07] px-3 py-2 text-left text-emerald-800 transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:cursor-wait disabled:opacity-70 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+                        </svg>
+                        <span class="min-w-0">
+                            <span class="block truncate text-xs font-extrabold leading-tight">{{ $lightCalendar->name }}</span>
+                            @if ($lightCalendar->pestudio?->name)
+                                <span class="block truncate text-[10px] font-semibold leading-tight text-emerald-600/70 dark:text-emerald-300/70">{{ $lightCalendar->pestudio->name }}</span>
+                            @endif
+                        </span>
+                        <svg class="ml-1 h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                        </svg>
+                    </button>
+                </x-slot>
+
+                @if ($lightCalendar->status !== 'active')
+                    <x-dropdown.header label="Calendario abierto ({{ $lightCalendar->status }})" />
+                    <x-dropdown.item icon="exclamation-triangle">
+                        <span class="min-w-0 flex-1 truncate text-xs font-semibold">{{ $lightCalendar->name }}</span>
+                    </x-dropdown.item>
+                    <div class="my-1 border-t border-secondary-200 dark:border-secondary-600"></div>
+                @endif
+
+                <x-dropdown.header label="Calendarios activos" />
+                @forelse ($calendarSwitcher as $calendarOption)
+                    <x-dropdown.item
+                        wire:key="light-calendar-option-{{ $calendarOption['id'] }}"
+                        wire:click="switchCalendar({{ $calendarOption['id'] }})"
+                        :icon="$calendarOption['id'] === (int) $lightCalendar->id ? 'check' : 'calendar-days'">
+                        <span class="min-w-0 flex-1">
+                            <span class="block truncate text-xs font-semibold">{{ $calendarOption['name'] }}</span>
+                            <span class="block truncate text-[10px] text-secondary-400 dark:text-secondary-500">
+                                {{ $calendarOption['pestudio'] }}@if ($calendarOption['lapso'] !== '') · {{ $calendarOption['lapso'] }}@endif
+                            </span>
+                        </span>
+                    </x-dropdown.item>
+                @empty
+                    <div class="px-4 py-3 text-xs text-secondary-500 dark:text-secondary-400">
+                        No hay calendarios activos.
+                    </div>
+                @endforelse
+            </x-dropdown>
         </div>
     @endif
+
     <header class="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
             <h1 class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">Horario · modo rápido</h1>
@@ -40,28 +75,48 @@
             </p>
         </div>
 
-        @if ($lightStep === 2 && $lightCalendar)
-            <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- Sincronización con la carga académica asignada. Visible desde el
+                 paso 1 para que la acción sea descubrible; se habilita al abrir
+                 un calendario. --}}
+            <button type="button" wire:click="syncAcademicLoad"
+                wire:loading.attr="disabled"
+                wire:target="syncAcademicLoad"
+                @disabled(! $lightCalendar)
+                title="{{ $lightCalendar ? 'Crear las clases faltantes desde las Pevaluaciones vigentes del lapso y P.Estudio' : 'Selecciona un calendario para sincronizar la carga académica' }}"
+                aria-label="Sincronizar carga académica"
+                aria-disabled="{{ $lightCalendar ? 'false' : 'true' }}"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300">
+                    <span wire:loading.remove wire:target="syncAcademicLoad" class="inline-flex items-center gap-1.5">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Sincronizar carga
+                    </span>
+                    <span wire:loading wire:target="syncAcademicLoad" class="inline-flex items-center gap-1.5">
+                        <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Sincronizando…
+                    </span>
+                </button>
+
+                @if ($lightStep === 2 && $lightCalendar)
                 {{-- Indicador guardado / guardando --}}
                 <span class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider dark:border-white/10">
-                    <span wire:loading.remove wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock,saveLessons"
+                    <span wire:loading.remove wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock,saveLessons,syncAcademicLoad,confirmRemoveOrphanLessons,removeOrphanLessons"
                         class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                         Guardado{{ $lastSavedAt ? ' · '.$lastSavedAt : '' }}
                     </span>
-                    <span wire:loading wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock,saveLessons"
+                    <span wire:loading wire:target="movePreviewLesson,addPreviewLesson,addPreviewPevaluacion,removePreviewLesson,togglePreviewSlotLock,toggleSectionPreviewSlotsLock,saveLessons,syncAcademicLoad,confirmRemoveOrphanLessons,removeOrphanLessons"
                         class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-300">
                         <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500"></span>
                         Guardando…
                     </span>
                 </span>
 
-                <span class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                    {{ $lightCalendar->name }}
-                    @if ($lightCalendar->pestudio?->name)
-                        · {{ $lightCalendar->pestudio->name }}
-                    @endif
-                </span>
                 <button type="button" wire:click="openTeacherScheduleDialog"
                     title="Consultar las lessons asignadas por profesor"
                     aria-label="Consultar horario por profesor"
@@ -93,7 +148,7 @@
                         wire:target="openPestudiosExport"
                         icon="arrow-down-tray"
                         label="Exportar P.Estudios (PDF / HTML / XLS)"
-                        class="w-full !whitespace-nowrap" />
+                        class="w-full" />
 
                     <x-dropdown.item
                         href="#"
@@ -108,9 +163,78 @@
                         icon="table-cells"
                         label="Totalización por docente" />
                 </x-dropdown>
+                @endif
             </div>
-        @endif
     </header>
+
+    @if ($lightStep === 2 && $lightCalendar && ! $academicSync['in_sync'])
+        @php
+            $pendingSync = max(0, (int) $academicSync['missing'] - (int) $academicSync['missing_locked']);
+        @endphp
+        <div class="mb-5 flex flex-wrap items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] px-4 py-3 text-amber-800 dark:text-amber-200"
+            role="status" aria-live="polite">
+            <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+            </svg>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-extrabold uppercase tracking-wide">No hay sincronía con la carga académica</p>
+                <p class="mt-1 text-[11px] leading-relaxed text-amber-700/90 dark:text-amber-200/80">
+                    @if ((int) $academicSync['missing'] > 0)
+                        {{ (int) $academicSync['missing'] }} asignatura(s) con carga vigente aún no tienen clase en este calendario.
+                    @endif
+                    @if ((int) $academicSync['missing_locked'] > 0)
+                        {{ (int) $academicSync['missing_locked'] }} de ellas están en secciones con el horario bloqueado.
+                    @endif
+                    @if ((int) $academicSync['orphaned'] > 0)
+                        {{ (int) $academicSync['orphaned'] }} clase(s) ya no corresponden a la carga vigente del lapso/P.Estudio. Puedes retirarlas con «Limpiar huérfanas».
+                    @endif
+                </p>
+            </div>
+            @if ($pendingSync > 0)
+                <button type="button" wire:click="syncAcademicLoad"
+                    wire:loading.attr="disabled"
+                    wire:target="syncAcademicLoad"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50">
+                    <span wire:loading.remove wire:target="syncAcademicLoad">Sincronizar ahora</span>
+                    <span wire:loading wire:target="syncAcademicLoad">Sincronizando…</span>
+                </button>
+            @endif
+            @if ((int) $academicSync['orphaned'] > 0)
+                <button type="button" wire:click="confirmRemoveOrphanLessons"
+                    wire:loading.attr="disabled"
+                    wire:target="confirmRemoveOrphanLessons,removeOrphanLessons"
+                    title="Eliminar las clases que ya no pertenecen a la carga académica vigente"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-700 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300">
+                    <span wire:loading.remove wire:target="removeOrphanLessons">Limpiar huérfanas ({{ (int) $academicSync['orphaned'] }})</span>
+                    <span wire:loading wire:target="removeOrphanLessons">Limpiando…</span>
+                </button>
+            @endif
+        </div>
+    @endif
+
+    @if ($lightStep === 2 && $lightCalendar && $academicSync['in_sync'])
+        <div class="mb-5 flex flex-wrap items-start gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] px-4 py-3 text-emerald-800 dark:text-emerald-200"
+            role="status" aria-live="polite">
+            <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-extrabold uppercase tracking-wide">Sincronizado con la carga académica</p>
+                <p class="mt-1 text-[11px] leading-relaxed text-emerald-700/90 dark:text-emerald-200/80">
+                    @if ((int) $academicSync['active'] > 0)
+                        La carga vigente del lapso/P.Estudio tiene clase en este calendario y no hay clases huérfanas.
+                    @else
+                        No hay cargas académicas vigentes para el lapso/P.Estudio de este calendario.
+                    @endif
+                </p>
+            </div>
+            @if ((int) $academicSync['active'] > 0)
+                <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide">
+                    {{ (int) $academicSync['active'] }} {{ (int) $academicSync['active'] === 1 ? 'carga vigente' : 'cargas vigentes' }}
+                </span>
+            @endif
+        </div>
+    @endif
 
     {{-- Diálogo: configuración del consolidado de docentes (PDF / HTML / XLS). --}}
     <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2 }"
@@ -369,9 +493,34 @@
                                         {{ $calendar['pestudio'] ?: 'Sin P.Estudio' }}
                                         @if ($calendar['lapso']) · {{ $calendar['lapso'] }} @endif
                                     </div>
-                                    <div class="mt-1 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                        <span>{{ $calendar['lessons'] }} lesson(s)</span>
-                                        <span>{{ $calendar['slots'] }} slot(s)</span>
+                                    <div class="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
+                                        @if ($calendar['sync']['in_sync'] && (int) $calendar['sync']['active'] === 0)
+                                            <span class="inline-flex items-center gap-1 rounded-md bg-gray-500/10 px-2 py-0.5 text-gray-500 dark:text-gray-400"
+                                                title="Este calendario no tiene carga académica vigente ni clases huérfanas.">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                                                Sin carga vigente
+                                            </span>
+                                        @elseif ($calendar['sync']['in_sync'])
+                                            <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-300"
+                                                title="Todas las Pevaluaciones vigentes tienen clase y no hay clases huérfanas.">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                                En sincronía
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-300"
+                                                title="{{ (int) $calendar['sync']['missing'] }} asignatura(s) pendiente(s) y {{ (int) $calendar['sync']['orphaned'] }} clase(s) huérfana(s).">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                                Sin sincronizar
+                                                @if ((int) $calendar['sync']['missing'] > 0)
+                                                    <span>· {{ (int) $calendar['sync']['missing'] }} pend.</span>
+                                                @endif
+                                                @if ((int) $calendar['sync']['orphaned'] > 0)
+                                                    <span>· {{ (int) $calendar['sync']['orphaned'] }} huérf.</span>
+                                                @endif
+                                            </span>
+                                        @endif
+                                        <span class="text-gray-400 dark:text-gray-500">{{ $calendar['lessons'] }} lesson(s)</span>
+                                        <span class="text-gray-400 dark:text-gray-500">{{ $calendar['slots'] }} slot(s)</span>
                                     </div>
                                     <span class="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-emerald-300">
                                         Abrir grilla
@@ -392,20 +541,8 @@
             $sectionLockedGrid = is_numeric($activeSeccionId) && (int) $activeSeccionId > 0 ? $activeSectionLocked : false;
         @endphp
 
-        {{-- Encabezado común: selección P.Estudio · Grado · Sección --}}
-        <div class="mb-4 grid grid-cols-1 items-end gap-2 sm:grid-cols-3">
-            @if (! empty($tabPestudioOptions))
-                <label class="flex flex-col gap-1">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Estudio</span>
-                    <select wire:change="selectStep5Pestudio($event.target.value)"
-                        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-emerald-500/50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
-                        @foreach ($tabPestudioOptions as $opt)
-                            <option value="{{ $opt['id'] }}" @selected((string) $activePestudioId === (string) $opt['id'])>{{ $opt['name'] }}</option>
-                        @endforeach
-                    </select>
-                </label>
-            @endif
-
+        {{-- Encabezado común: selección Grado · Sección --}}
+        <div class="mb-4 grid grid-cols-1 items-end gap-2 sm:grid-cols-2">
             @if (! empty($tabGradoOptions))
                 <label class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Grado</span>
