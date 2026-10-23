@@ -63,17 +63,90 @@
                     </div>
                     @foreach ($schedule['shiftGrids'] as $shiftGrid)
                         @php
-                            $gridHasHalves = collect($shiftGrid['rows'])
+                            $showTeachers = (bool) ($pestudioData['calendar']->status_profesor_show ?? true);
+
+                            // Líneas estimadas de un texto en una columna de ~133px,
+                            // simulando el corte por palabra de DomPDF.
+                            $wrapLines = static function (string $text, int $cpl): int {
+                                $text = trim(preg_replace('/\s+/', ' ', (string) $text));
+                                if ($text === '') {
+                                    return 0;
+                                }
+                                $lines = 1;
+                                $used = 0;
+                                foreach (preg_split('/\s+/', $text) as $word) {
+                                    $len = mb_strlen($word);
+                                    if ($len >= $cpl) {
+                                        if ($used > 0) {
+                                            $lines++;
+                                        }
+                                        $lines += (int) floor($len / $cpl);
+                                        $used = $len % $cpl;
+                                        continue;
+                                    }
+                                    if ($used === 0) {
+                                        $used = $len;
+                                    } elseif ($used + 1 + $len <= $cpl) {
+                                        $used += 1 + $len;
+                                    } else {
+                                        $lines++;
+                                        $used = $len;
+                                    }
+                                }
+
+                                return $lines;
+                            };
+
+                            // Pixeles verticales de una asignatura (+ grupo y docente si corresponden).
+                            $entryPx = static function ($cell) use ($wrapLines, $showTeachers): float {
+                                $px = $wrapLines((string) ($cell['asignatura'] ?? '?'), 21) * 14.0;
+                                if (! empty($cell['grupo'])) {
+                                    $px += $wrapLines((string) $cell['grupo'], 25) * 8.7;
+                                }
+                                if ($showTeachers && ! empty($cell['profesor'])) {
+                                    $px += $wrapLines((string) $cell['profesor'], 25) * 8.7;
+                                }
+
+                                return $px;
+                            };
+
+                            // Pixeles de una celda completa, incluidas las medias franjas.
+                            $cellPx = static function ($slots) use ($entryPx): float {
+                                $entries = collect($slots ?? [])->values();
+                                $entryPxOf = static fn ($entry) => $entryPx($entry);
+                                $full = $entries->filter(static fn ($entry) => data_get($entry, 'half') === null);
+                                $sup = $entries->filter(static fn ($entry) => data_get($entry, 'half') !== null && (int) data_get($entry, 'half') === 0);
+                                $inf = $entries->filter(static fn ($entry) => data_get($entry, 'half') !== null && (int) data_get($entry, 'half') === 1);
+                                $px = $full->sum($entryPxOf);
+                                if ($sup->isNotEmpty() || $inf->isNotEmpty()) {
+                                    $px += 26.6; // rótulos «½ sup./½ inf.» + separador y márgenes
+                                    $px += $sup->sum($entryPxOf);
+                                    $px += $inf->sum($entryPxOf);
+                                }
+
+                                return $px;
+                            };
+
+                            // Id único de grilla: DomPDF solo respeta height en td
+                            // desde una regla del stylesheet (lo ignora inline).
+                            $gridUidCounter = ($gridUidCounter ?? 0) + 1;
+                            $gridUid = 'rh-g'.$gridUidCounter;
+
+                            // Altura uniforme de TODAS las filas de esta grilla: la de
+                            // su celda más cargada (+ padding). Los recesos no aportan.
+                            $rowHeight = max(24, (int) ceil(collect($shiftGrid['rows'])
+                                ->reject(static fn ($row) => $row['period']->is_break)
                                 ->flatMap(static fn ($row) => $row['days'])
-                                ->flatMap(static fn ($day) => $day['assignments'] ?? [])
-                                ->contains(static fn ($slot) => data_get($slot, 'half') !== null);
+                                ->map(static fn ($day) => $cellPx($day['assignments'] ?? []))
+                                ->max() + 3.0));
                         @endphp
-                        <table class="grid {{ ($pestudioData['calendar']->status_profesor_show ?? true) ? 'teachers' : '' }} {{ $gridHasHalves ? 'with-halves' : '' }}">
+                        <style>.{{ $gridUid }} td{height:{{ $rowHeight }}px;}</style>
+                        <table>
                             <thead><tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr></thead>
                             <tbody>
                                 @foreach ($shiftGrid['rows'] as $row)
                                     @php $period = $row['period']; $isBreak = (bool) $period->is_break; @endphp
-                                    <tr class="{{ $isBreak ? 'break-row' : '' }}">
+                                    <tr class="{{ $gridUid }} {{ $isBreak ? 'break-row' : '' }}">
                                         <td class="time">{{ substr((string) $period->start_time, 0, 5) }}–{{ substr((string) $period->end_time, 0, 5) }}</td>
                                         @foreach ($row['days'] as $day)
                                             <td class="{{ $isBreak ? 'break-cell' : '' }}">
