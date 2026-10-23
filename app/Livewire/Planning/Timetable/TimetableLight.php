@@ -894,9 +894,27 @@ class TimetableLight extends BaseTimetableWizard
             $teacherScheduleHasAssignments = (bool) ($activeBlock['has_assignments'] ?? false);
         }
 
+        // URL del PDF de previsualización del P.Estudio del calendario abierto:
+        // alimenta el ítem «Exportar P.Estudios» del dropdown Formatos.
+        $pestudioExportUrl = null;
+
+        if ($this->calendarId) {
+            $openCalendar = TimetableCalendar::query()->find($this->calendarId);
+            $pestudioId = (int) ($openCalendar?->pestudio_id ?? 0)
+                ?: (int) ($this->activePestudioId ?? 0);
+
+            if ($pestudioId > 0) {
+                $pestudioExportUrl = route($this->moduleRoutePrefix().'.timetable.pdf.pestudio-preview', [
+                    'calendar' => (int) $this->calendarId,
+                    'pestudio' => $pestudioId,
+                ]);
+            }
+        }
+
         return view('livewire.planning.timetable.timetable-light', array_merge([
             'lightCalendars' => $lightCalendars,
             'calendarSwitcher' => $calendarSwitcher,
+            'pestudioExportUrl' => $pestudioExportUrl,
             'shifts' => $shifts,
             'periodsList' => $periodsList,
             'sectionPreviewGrid' => $sectionPreviewGrid,

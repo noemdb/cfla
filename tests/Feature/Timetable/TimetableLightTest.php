@@ -72,13 +72,14 @@ class TimetableLightTest extends TestCase
         $component->assertSee('Selecciona un calendario para sincronizar la carga académica');
         $component->assertSeeHtml('aria-disabled="true"');
 
-        // El menú de formatos también está disponible antes de abrir un
-        // calendario, con las mismas opciones del wizard completo.
+        // El menú de formatos en el paso 1 (sin calendario abierto) solo
+        // muestra exportaciones globales; los formatos que dependen del
+        // calendario abierto aparecen en el dropdown del paso 2.
         $component->assertSee('Formatos');
-        $component->assertSee('Formato por área');
-        $component->assertSee('Exportar P.Estudios');
+        $component->assertSee('Exportar todos los P.Estudios (PDF)');
         $component->assertSee('Consolidado de docentes');
         $component->assertSee('Totalización por docente');
+        $component->assertDontSee('Formato por área');
 
         $component->call('openAreaFormatModal')
             ->assertSet('showAreaFormatModal', true)
@@ -242,9 +243,13 @@ class TimetableLightTest extends TestCase
         $component->assertSeeHtml('aria-label="Cambiar calendario activo"');
         $component->assertDontSee('Cambiar P.Estudio / calendario');
 
-        // Dropdown de formatos/reportes.
+        // Dropdown de formatos/reportes (con calendario abierto): PDF del
+        // P.Estudio de este calendario y reportes acotados a él.
         $component->assertSee('Formatos');
-        $component->assertSee('Exportar P.Estudios');
+        $component->assertSee('PDF P.Estudio');
+        $component->assertSee('Consolidado de docentes');
+        $component->assertSee('Totalización por docente');
+        $component->assertDontSee('Formato por área');
 
         // La grilla debe ser arrastrable (drag & drop).
         $component->assertSee('x-on:drop.prevent', false);
@@ -341,8 +346,6 @@ class TimetableLightTest extends TestCase
 
         $component = Livewire::actingAs($user)
             ->test(TimetableLight::class, ['calendar' => $calendar->id]);
-
-        $component->assertSee('Horario docente');
 
         $component->call('openTeacherScheduleDialog');
 

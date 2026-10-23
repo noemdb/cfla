@@ -132,65 +132,80 @@
                     </span>
                 </span>
 
-                <button type="button" wire:click="openTeacherScheduleDialog"
-                    title="Consultar las lessons asignadas por profesor"
-                    aria-label="Consultar horario por profesor"
-                    class="inline-flex items-center gap-1.5 rounded-lg bg-fuchsia-500/10 px-3 py-1.5 text-xs font-bold text-fuchsia-700 transition-colors hover:bg-fuchsia-500/20 dark:text-fuchsia-300">
-                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    Horario docente
-                </button>
-
                 @endif
 
-                {{-- Dropdown: formatos y reportes PDF. Visible en ambos pasos:
-                     en el paso 1 permite exportar sin abrir un calendario. --}}
-                <x-dropdown position="bottom-end" width="7xl" height="auto">
-                    <x-slot name="trigger">
-                        <x-button
-                            label="Formatos"
+                {{-- Dropdown: formatos y reportes PDF. Dos variantes: con
+                     calendario abierto exporta el pestudio-preview de este
+                     calendario y los reportes acotados a él; sin calendario,
+                     exportaciones globales del lapso. --}}
+                @if ($calendarId)
+                    <x-dropdown position="bottom-end" width="7xl" height="auto">
+                        <x-slot name="trigger">
+                            <x-button
+                                label="Formatos"
+                                icon="document-text"
+                                right-icon="chevron-down"
+                                color="base"
+                                variant="outline"
+                                class="font-bold" />
+                        </x-slot>
+
+                        @if ($pestudioExportUrl)
+                            <x-dropdown.item
+                                href="{{ $pestudioExportUrl }}"
+                                target="_blank"
+                                rel="noopener"
+                                icon="folder"
+                                label="PDF P.Estudio"
+                                class="w-full !whitespace-nowrap" />
+                        @endif
+
+                        <x-dropdown.item
+                            href="#"
+                            x-on:click.prevent="$dispatch('open-teachers-pdf')"
+                            icon="document-arrow-down"
+                            label="Consolidado de docentes" />
+
+                        <x-dropdown.item
+                            href="#"
+                            x-on:click.prevent="$dispatch('open-teacher-totals')"
+                            icon="table-cells"
+                            label="Totalización por docente"
+                            separator />
+                    </x-dropdown>
+                @else
+                    <x-dropdown position="bottom-end" width="5xl" height="auto">
+                        <x-slot name="trigger">
+                            <x-button
+                                label="Formatos"
+                                icon="document-text"
+                                right-icon="chevron-down"
+                                color="base"
+                                variant="outline"
+                                class="font-bold" />
+                        </x-slot>
+
+                        <x-dropdown.item
+                            href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
+                            target="_blank"
                             icon="document-text"
-                            right-icon="chevron-down"
-                            color="base"
-                            variant="outline"
-                            class="font-bold" />
-                    </x-slot>
+                            label="Exportar todos los P.Estudios (PDF)"
+                            class="w-full !whitespace-nowrap" />
 
-                    <x-dropdown.item
-                        wire:click="openAreaFormatModal"
-                        wire:loading.attr="disabled"
-                        wire:target="openAreaFormatModal"
-                        icon="document-text">
-                        <span wire:loading.remove wire:target="openAreaFormatModal">Formato por área</span>
-                        <span wire:loading wire:target="openAreaFormatModal">Abriendo…</span>
-                    </x-dropdown.item>
+                        <x-dropdown.item
+                            href="#"
+                            x-on:click.prevent="$dispatch('open-teachers-pdf')"
+                            icon="document-arrow-down"
+                            label="Consolidado de docentes" />
 
-                    <x-dropdown.item
-                        href="#"
-                        wire:click="openPestudiosExport"
-                        wire:loading.attr="disabled"
-                        wire:target="openPestudiosExport"
-                        icon="arrow-down-tray"
-                        label="Exportar P.Estudios (PDF / HTML / XLS)"
-                        class="w-full !whitespace-nowrap"
-                        separator />
-
-                    <x-dropdown.item
-                        href="#"
-                        x-on:click.prevent="$dispatch('open-teachers-pdf')"
-                        icon="document-arrow-down"
-                        label="Consolidado de docentes" />
-
-                    <x-dropdown.item
-                        href="#"
-                        x-on:click.prevent="$dispatch('open-teacher-totals')"
-                        icon="table-cells"
-                        label="Totalización por docente"
-                        separator />
-                </x-dropdown>
+                        <x-dropdown.item
+                            href="#"
+                            x-on:click.prevent="$dispatch('open-teacher-totals')"
+                            icon="table-cells"
+                            label="Totalización por docente"
+                            separator />
+                    </x-dropdown>
+                @endif
             </div>
     </header>
 
@@ -342,7 +357,8 @@
                     class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
                     Cancelar
                 </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage"
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage @if ($calendarId)+ '&calendar={{ (int) $calendarId }}' @endif"
+
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
                     Generar
@@ -401,7 +417,7 @@
                     class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
                     Cancelar
                 </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.teacher-block-totals') }}?format=' + format"
+                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.teacher-block-totals') }}?format=' + format @if ($calendarId)+ '&calendar={{ (int) $calendarId }}' @endif"
                     target="_blank" rel="noopener" x-on:click="open = false"
                     class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
                     Generar

@@ -1096,6 +1096,18 @@ class TimetablePdfController extends Controller
             ->orderBy('pestudio_id')
             ->get();
 
+        // Filtro opcional por calendario (?calendar=N): acota el consolidado
+        // al calendario abierto en el asistente (p. ej. el modo fast light).
+        $requestedCalendarId = (int) $request->query('calendar', 0);
+
+        if ($requestedCalendarId > 0) {
+            $calendars = $calendars->where('id', $requestedCalendarId)->values();
+
+            if ($calendars->isEmpty()) {
+                abort(404, 'El calendario indicado no existe o no está activo en el lapso vigente.');
+            }
+        }
+
         // Agrupado por docente y luego por P.Educativo, en un ÚNICO horario por
         // P.Educativo (los P.Estudios que lo componen se fusionan, sin
         // subdividir). Cada profesor aparece una sola vez y todos sus horarios
@@ -1546,6 +1558,16 @@ class TimetablePdfController extends Controller
         }
 
         $calendarIds = $this->activeCalendarIdsForLapso($lapso->id, $request->query('peducativo'));
+
+        // Filtro opcional por calendario (?calendar=N): acota la totalización
+        // al calendario abierto en el asistente (p. ej. el modo fast light).
+        $requestedCalendarId = (int) $request->query('calendar', 0);
+
+        if ($requestedCalendarId > 0) {
+            $calendarIds = $calendarIds
+                ->filter(fn ($calendarId) => (int) $calendarId === $requestedCalendarId)
+                ->values();
+        }
 
         if ($calendarIds->isEmpty()) {
             abort(404, 'No hay calendarios activos en el lapso vigente.');
