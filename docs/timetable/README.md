@@ -248,7 +248,26 @@ totalización por docente) conservan sus nombres. El flag se configura al crear
 o editar el calendario, se duplica con el calendario y se incluye en los
 snapshots/respaldos. En el paso 1 del modo rápido, cada tarjeta del grupo
 **Activos** muestra el distintivo **Docentes visibles** o **Docentes ocultos**
-para que el estado del flag sea evidente antes de abrir la grilla.
+para que el estado del flag sea evidente antes de abrir la grilla. El mismo
+dropdown de tres puntos expone la acción **Mostrar/Ocultar docentes** para
+alternar el flag en un clic sin abrir el modal de edición.
+
+El modal de **Formato por área** indica qué calendario resolverá el PDF
+(rol activo del P.Estudio del área) y si los docentes estarán visibles u
+ocultos en ese PDF en concreto; cuando ese calendario resuelto no coincide con
+el horario que tienes abierto, el modal muestra una advertencia explícita.
+Todos los streams de PDF del controlador envían cabeceras `no-store/no-cache`.
+
+### Semántica del badge «publicado / borrador» en los PDFs
+
+El badge refleja la **fuente real de los datos** del documento. Un calendario
+ACTIVO con slots publicados se rotula **HORARIO PUBLICADO**. Si aún existe una
+simulación vigente en `preview_payload` y el PDF la usa (paso 5, vista previa
+de sección/grado/P.Estudio), se rotula **BORRADOR** aunque el calendario esté
+activo; el formato por área fuerza los slots persistidos para calendarios
+activos y por eso rotula publicado. La lógica vive en el helper
+`TimetablePdfController::isPublishedSchedule()` compartido por los formatos
+sección, aula, docente, grado, P.Estudio, área y consolidados.
 
 La sincronización compara las Pevaluaciones vigentes (lapso + P.Estudio, con
 sección, grado, P.Estudio, pensum y asignatura vigentes) con

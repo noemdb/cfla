@@ -149,7 +149,7 @@ class TimetablePdfController extends Controller
 
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("horario-{$seccion->name}.pdf");
+        return $this->pdfResponse($pdf, "horario-{$seccion->name}.pdf");
     }
 
     public function teacher(Request $request, $calendarId, $profesorId)
@@ -171,7 +171,7 @@ class TimetablePdfController extends Controller
 
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("horario-{$profesor->lastname}-{$profesor->name}.pdf");
+        return $this->pdfResponse($pdf, "horario-{$profesor->lastname}-{$profesor->name}.pdf");
     }
 
     public function teachers(Request $request, $calendarId)
@@ -204,7 +204,7 @@ class TimetablePdfController extends Controller
 
         $pdf->setPaper('letter', 'portrait');
 
-        return $pdf->stream("horarios-docentes-{$calendar->id}.pdf");
+        return $this->pdfResponse($pdf, "horarios-docentes-{$calendar->id}.pdf");
     }
 
     public function room(Request $request, $calendarId, $roomId)
@@ -226,7 +226,7 @@ class TimetablePdfController extends Controller
 
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("horario-aula-{$room->code}.pdf");
+        return $this->pdfResponse($pdf, "horario-aula-{$room->code}.pdf");
     }
 
     /**
@@ -242,8 +242,8 @@ class TimetablePdfController extends Controller
         // preview_payload): con `?source=persisted` el PDF refleja esos slots.
         $forcePersisted = $request->query('source') === 'persisted';
 
-        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
         $usePersistedSlots = $forcePersisted || $this->shouldUsePersistedSlots($calendar);
+        $isPublishedSchedule = $this->isPublishedSchedule($calendar, $usePersistedSlots);
 
         if ($forcePersisted) {
             if (! $calendar->slots()->exists()) {
@@ -364,7 +364,7 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("preview-horario-{$seccion->name}.pdf");
+        return $this->pdfResponse($pdf, "preview-horario-{$seccion->name}.pdf");
     }
 
     public function previewGrade(Request $request, $calendarId, $gradoId)
@@ -379,8 +379,8 @@ class TimetablePdfController extends Controller
             ->where('status_active', 'true')
             ->orderBy('name')
             ->get();
-        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
         $usePersistedSlots = $this->shouldUsePersistedSlots($calendar);
+        $isPublishedSchedule = $this->isPublishedSchedule($calendar, $usePersistedSlots);
 
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
@@ -500,7 +500,7 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("horarios-{$grado->name}.pdf");
+        return $this->pdfResponse($pdf, "horarios-{$grado->name}.pdf");
     }
 
     public function previewPestudio(Request $request, $calendarId, $pestudioId)
@@ -523,7 +523,7 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream("horarios-{$pestudio->name}.pdf");
+        return $this->pdfResponse($pdf, "horarios-{$pestudio->name}.pdf");
     }
 
     /**
@@ -537,6 +537,36 @@ class TimetablePdfController extends Controller
     }
 
     /**
+     * Semántica compartida del badge «HORARIO PUBLICADO / BORRADOR» en todos
+     * los PDFs: el badge debe reflejar la FUENTE real de los datos.
+     *
+     * Un calendario activo publicado se lee desde `timetable_slots` y se
+     * rotula HORARIO PUBLICADO. Un calendario activo pero con una simulación
+     * vigente en `preview_payload` se lee desde esa simulación y se rotula
+     * BORRADOR (es una vista previa). Los borradores siempre son «preview».
+     */
+    private function isPublishedSchedule(TimetableCalendar $calendar, bool $usePersistedSlots): bool
+    {
+        return $calendar->status === TimetableCalendar::STATUS_ACTIVE && $usePersistedSlots;
+    }
+
+    /**
+     * Stream de PDF con cabeceras anti-caché: los reportes reflejan el estado
+     * vigente del calendario, así que el navegador no debe reutilizar versiones
+     * anteriores de la misma URL (badge/nombres desactualizados).
+     */
+    private function pdfResponse($pdf, string $filename)
+    {
+        $response = $pdf->stream($filename);
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s').' GMT');
+
+        return $response;
+    }
+
+    /**
      * Horarios por grado/sección de un P.ESTUDIO para un calendario (compartido
      * por el PDF de un P.Estudio y el consolidado de todos los P.Estudios).
      *
@@ -544,8 +574,8 @@ class TimetablePdfController extends Controller
      */
     private function buildPestudioSchedules(TimetableCalendar $calendar, Pestudio $pestudio, bool $forcePersistedSlots = false): array
     {
-        $isPublishedSchedule = ! $calendar->preview_payload && $calendar->status === TimetableCalendar::STATUS_ACTIVE;
         $usePersistedSlots = $forcePersistedSlots || $this->shouldUsePersistedSlots($calendar);
+        $isPublishedSchedule = $this->isPublishedSchedule($calendar, $usePersistedSlots);
 
         if ($forcePersistedSlots) {
             // El consolidado de todos los P.Estudios solo incluye calendarios
@@ -749,7 +779,7 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        return $pdf->stream('horarios-todos-pestudios.pdf');
+        return $this->pdfResponse($pdf, 'horarios-todos-pestudios.pdf');
     }
 
     /**
@@ -1575,7 +1605,7 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'portrait');
 
-        return $pdf->stream('totalizacion-bloques-docentes.pdf');
+        return $this->pdfResponse($pdf, 'totalizacion-bloques-docentes.pdf');
     }
 
     /**
@@ -1749,8 +1779,8 @@ class TimetablePdfController extends Controller
         // El formato por área es un reporte del calendario. Si ya está
         // publicado, se construye desde los slots persistidos y no desde un
         // preview_payload que puede ser de una simulación anterior.
-        $isPublishedSchedule = $calendar->status === TimetableCalendar::STATUS_ACTIVE;
-        $usePersistedSlots = $isPublishedSchedule || $this->shouldUsePersistedSlots($calendar);
+        $usePersistedSlots = $calendar->status === TimetableCalendar::STATUS_ACTIVE || $this->shouldUsePersistedSlots($calendar);
+        $isPublishedSchedule = $this->isPublishedSchedule($calendar, $usePersistedSlots);
         if (! $calendar->preview_payload && ! $isPublishedSchedule) {
             abort(404, 'No hay vista previa para este calendario.');
         }
@@ -1869,12 +1899,6 @@ class TimetablePdfController extends Controller
         ]);
         $pdf->setPaper('letter', 'landscape');
 
-        $response = $pdf->stream('formato-area-'.Str::slug((string) $area->name).'.pdf');
-        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-        $response->headers->set('Pragma', 'no-cache');
-        $response->headers->set('Expires', '0');
-        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s').' GMT');
-
-        return $response;
+        return $this->pdfResponse($pdf, 'formato-area-'.Str::slug((string) $area->name).'.pdf');
     }
 }

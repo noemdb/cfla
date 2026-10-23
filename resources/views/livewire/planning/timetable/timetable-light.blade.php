@@ -606,6 +606,10 @@
 
                                             <x-dropdown.item wire:click="editCalendar({{ $calendar['id'] }})"
                                                 icon="pencil-square" label="Editar" class="w-full" />
+                                            <x-dropdown.item wire:click="toggleCalendarTeacherVisibility({{ $calendar['id'] }})"
+                                                icon="{{ $calendar['status_profesor_show'] ? 'eye-slash' : 'eye' }}"
+                                                label="{{ $calendar['status_profesor_show'] ? 'Ocultar docentes' : 'Mostrar docentes' }}"
+                                                class="w-full" />
                                             <x-dropdown.item wire:click="duplicateCalendar({{ $calendar['id'] }})"
                                                 icon="document-duplicate" label="Duplicar" class="w-full" />
 
@@ -1301,6 +1305,15 @@
                                 Se generará el formato de <strong>{{ $selectedArea->name }}</strong>
                                 ({{ $selectedArea->campo_conocimientos_count }} asignatura(s)) usando el horario
                                 <strong>{{ $areaFormatCalendar->name }}</strong> en una nueva pestaña.
+                                <span class="mt-1 block font-bold">
+                                    Docentes en el PDF: {{ $areaFormatCalendar->status_profesor_show ? 'visibles' : 'ocultos' }}.
+                                </span>
+                                @if ($calendarId && (int) $areaFormatCalendar->id !== (int) $calendarId)
+                                    <span class="mt-1 block">
+                                        Advertencia: el horario resuelto para el área no coincide con el que tienes
+                                        abierto; el formato se genera con el calendario activo de ese P.Estudio.
+                                    </span>
+                                @endif
                             </div>
                         @else
                             <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300">

@@ -3197,6 +3197,12 @@
                             <span class="mt-1 block font-bold">
                                 Docentes en el PDF: {{ $areaFormatCalendar->status_profesor_show ? 'visibles' : 'ocultos' }}.
                             </span>
+                            @if ($calendarId && (int) $areaFormatCalendar->id !== (int) $calendarId)
+                                <span class="mt-1 block">
+                                    Advertencia: el horario resuelto para el área no coincide con el que tienes
+                                    abierto; el formato se genera con el calendario activo de ese P.Estudio.
+                                </span>
+                            @endif
                         </div>
                     @else
                         <div class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300">

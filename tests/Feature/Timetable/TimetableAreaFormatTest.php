@@ -178,6 +178,33 @@ class TimetableAreaFormatTest extends TestCase
         );
     }
 
+    public function test_area_format_modal_warns_when_resolved_calendar_differs_from_open_one(): void
+    {
+        $fixture = $this->fixture();
+
+        $otroPestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $otroLapso = Lapso::factory()->create();
+        $otraArea = AreaConocimiento::create([
+            'pestudio_id' => $otroPestudio->id, 'name' => 'ÁREA DE OTRO PESTUDIO', 'code' => 'OTRO',
+        ]);
+        $otroCalendar = TimetableCalendar::factory()->create([
+            'lapso_id' => $otroLapso->id, 'pestudio_id' => $otroPestudio->id, 'status' => 'active',
+        ]);
+
+        $component = Livewire::actingAs($fixture['user'])
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $fixture['calendar']->id)
+            ->call('openAreaFormatModal')
+            ->set('areaFormatId', $otraArea->id)
+            ->assertSee('usando el horario')
+            ->assertSee($otroCalendar->name)
+            ->assertSee('el horario resuelto para el área no coincide con el que tienes');
+
+        // Al volver al área del calendario abierto, la advertencia desaparece.
+        $component->set('areaFormatId', $fixture['area']->id)
+            ->assertDontSee('el formato se genera con el calendario activo de ese P.Estudio');
+    }
+
     public function test_preview_area_consolidates_subjects_in_one_grid(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

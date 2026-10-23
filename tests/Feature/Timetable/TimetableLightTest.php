@@ -171,6 +171,40 @@ class TimetableLightTest extends TestCase
         return substr($html, $start, $next === false ? null : $next - $start);
     }
 
+    public function test_light_card_can_toggle_teacher_visibility_from_dropdown(): void
+    {
+        [$user, $calendar] = $this->makeContext();
+
+        $component = Livewire::actingAs($user)->test(TimetableLight::class);
+        $component->assertSeeHtml('wire:click="toggleCalendarTeacherVisibility('.$calendar->id.')"');
+        $component->assertSee('Ocultar docentes');
+
+        $component->call('toggleCalendarTeacherVisibility', $calendar->id)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('timetable_calendars', [
+            'id' => $calendar->id,
+            'status_profesor_show' => false,
+        ]);
+
+        $html = $component->html();
+        $cardHtml = $this->lightCardHtml($html, (int) $calendar->id);
+        $this->assertStringContainsString('Docentes ocultos', $cardHtml);
+        $this->assertStringContainsString('Mostrar docentes', $cardHtml);
+
+        // Un segundo toggle devuelve el estado inicial.
+        $component->call('toggleCalendarTeacherVisibility', $calendar->id)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('timetable_calendars', [
+            'id' => $calendar->id,
+            'status_profesor_show' => true,
+        ]);
+
+        $cardHtml = $this->lightCardHtml($component->html(), (int) $calendar->id);
+        $this->assertStringContainsString('Docentes visibles', $cardHtml);
+    }
+
     public function test_editing_a_card_does_not_change_active_calendar_or_url(): void
     {
         [$user, $calendar] = $this->makeContext();
