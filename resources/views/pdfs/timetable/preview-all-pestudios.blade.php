@@ -18,7 +18,7 @@
         .section{margin-top:2px;page-break-inside:avoid;}
         .section.new-page{page-break-before:always;}
         table{width:100%;border-collapse:collapse;}
-        td,th{border:1px solid #d1d5db;padding:1px 2px;vertical-align:top;font-size:9.5pt;line-height:1;}
+        td,th{border:2px solid #A7AAAF;padding:1px 2px;vertical-align:top;font-size:9.5pt;line-height:1;}
         th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:9pt;padding:1px 2px;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
         .subject{font-weight:700;font-size:10.5pt;}
