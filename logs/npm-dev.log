@@ -1595,3 +1595,7 @@ warn - Fix this pattern or remove it from your `safelist` configuration.
 warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 3:34:18 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
 3:34:18 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:39:25 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:39:25 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:39:31 PM [vite] full reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php
+3:39:31 PM [vite] page reload resources/views/pdfs/timetable/preview-all-pestudios.blade.php

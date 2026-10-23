@@ -19,6 +19,12 @@
         .section.new-page{page-break-before:always;}
         table{width:100%;border-collapse:collapse;}
         td,th{border:2px solid #A7AAAF;padding:1px 2px;vertical-align:top;font-size:9.5pt;line-height:1;}
+        /* Altura uniforme de filas: todas las filas de una grilla comparten la
+           altura del caso más alto de esa grilla (pulida según contenido). */
+        .grid td{height:50px;}
+        .grid.teachers td{height:66px;}
+        .grid.with-halves td{height:78px;}
+        .grid.teachers.with-halves td{height:92px;}
         th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:9pt;padding:1px 2px;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
         .subject{font-weight:700;font-size:10.5pt;}
@@ -62,7 +68,13 @@
                         <span class="section-label">Sección {{ $schedule['section']->name }}</span>
                     </div>
                     @foreach ($schedule['shiftGrids'] as $shiftGrid)
-                        <table>
+                        @php
+                            $gridHasHalves = collect($shiftGrid['rows'])
+                                ->flatMap(static fn ($row) => $row['days'])
+                                ->flatMap(static fn ($day) => $day['assignments'] ?? [])
+                                ->contains(static fn ($slot) => data_get($slot, 'half') !== null);
+                        @endphp
+                        <table class="grid {{ ($pestudioData['calendar']->status_profesor_show ?? true) ? 'teachers' : '' }} {{ $gridHasHalves ? 'with-halves' : '' }}">
                             <thead><tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr></thead>
                             <tbody>
                                 @foreach ($shiftGrid['rows'] as $row)
