@@ -16,6 +16,7 @@
         .grade-section-title{display:block;background:#eff6ff;border:1px solid #bfdbfe;padding:1px 6px;color:#1d4ed8;font-size:10.5pt;font-weight:800;}
         .grade-section-title .section-label{float:right;color:#047857;}
         .section{margin-top:2px;page-break-inside:avoid;}
+        .sched{table-layout:fixed;}
         .section.new-page{page-break-before:always;}
         table{width:100%;border-collapse:collapse;}
         td,th{border:2px solid #A7AAAF;padding:1px 2px;vertical-align:top;font-size:9.5pt;line-height:1;}
@@ -24,7 +25,7 @@
         .subject{font-weight:700;font-size:10.5pt;}
         .teacher{font-size:6.5pt;color:#4b5563;}
         .group{font-size:6.5pt;color:#0d9488;font-weight:700;}
-        tr.break-row td{background:#fffbeb;color:#a16207;}
+        tr.break-row td{background:#fffbeb;color:#a16207;height:22px;}
         td.break-cell{text-align:center;font-size:9pt;font-weight:700;letter-spacing:.4px;color:#a16207;}
         .summary{margin:2px 0 2px;border:1px solid #cbd5e1;padding:1px 6px;}
         .summary-title{color:#374151;font-size:10pt;font-weight:800;margin-bottom:1px;}
@@ -63,85 +64,18 @@
                     </div>
                     @foreach ($schedule['shiftGrids'] as $shiftGrid)
                         @php
-                            $showTeachers = (bool) ($pestudioData['calendar']->status_profesor_show ?? true);
-
-                            // Líneas estimadas de un texto en una columna de ~133px,
-                            // simulando el corte por palabra de DomPDF.
-                            $wrapLines = static function (string $text, int $cpl): int {
-                                $text = trim(preg_replace('/\s+/', ' ', (string) $text));
-                                if ($text === '') {
-                                    return 0;
-                                }
-                                $lines = 1;
-                                $used = 0;
-                                foreach (preg_split('/\s+/', $text) as $word) {
-                                    $len = mb_strlen($word);
-                                    if ($len >= $cpl) {
-                                        if ($used > 0) {
-                                            $lines++;
-                                        }
-                                        $lines += (int) floor($len / $cpl);
-                                        $used = $len % $cpl;
-                                        continue;
-                                    }
-                                    if ($used === 0) {
-                                        $used = $len;
-                                    } elseif ($used + 1 + $len <= $cpl) {
-                                        $used += 1 + $len;
-                                    } else {
-                                        $lines++;
-                                        $used = $len;
-                                    }
-                                }
-
-                                return $lines;
-                            };
-
-                            // Pixeles verticales de una asignatura (+ grupo y docente si corresponden).
-                            $entryPx = static function ($cell) use ($wrapLines, $showTeachers): float {
-                                $px = $wrapLines((string) ($cell['asignatura'] ?? '?'), 21) * 14.0;
-                                if (! empty($cell['grupo'])) {
-                                    $px += $wrapLines((string) $cell['grupo'], 25) * 8.7;
-                                }
-                                if ($showTeachers && ! empty($cell['profesor'])) {
-                                    $px += $wrapLines((string) $cell['profesor'], 25) * 8.7;
-                                }
-
-                                return $px;
-                            };
-
-                            // Pixeles de una celda completa, incluidas las medias franjas.
-                            $cellPx = static function ($slots) use ($entryPx): float {
-                                $entries = collect($slots ?? [])->values();
-                                $entryPxOf = static fn ($entry) => $entryPx($entry);
-                                $full = $entries->filter(static fn ($entry) => data_get($entry, 'half') === null);
-                                $sup = $entries->filter(static fn ($entry) => data_get($entry, 'half') !== null && (int) data_get($entry, 'half') === 0);
-                                $inf = $entries->filter(static fn ($entry) => data_get($entry, 'half') !== null && (int) data_get($entry, 'half') === 1);
-                                $px = $full->sum($entryPxOf);
-                                if ($sup->isNotEmpty() || $inf->isNotEmpty()) {
-                                    $px += 26.6; // rótulos «½ sup./½ inf.» + separador y márgenes
-                                    $px += $sup->sum($entryPxOf);
-                                    $px += $inf->sum($entryPxOf);
-                                }
-
-                                return $px;
-                            };
-
                             // Id único de grilla: DomPDF solo respeta height en td
                             // desde una regla del stylesheet (lo ignora inline).
                             $gridUidCounter = ($gridUidCounter ?? 0) + 1;
                             $gridUid = 'rh-g'.$gridUidCounter;
 
                             // Altura uniforme de TODAS las filas de esta grilla: la de
-                            // su celda más cargada (+ padding). Los recesos no aportan.
-                            $rowHeight = max(24, (int) ceil(collect($shiftGrid['rows'])
-                                ->reject(static fn ($row) => $row['period']->is_break)
-                                ->flatMap(static fn ($row) => $row['days'])
-                                ->map(static fn ($day) => $cellPx($day['assignments'] ?? []))
-                                ->max() + 3.0));
+                            // su celda más cargada, estimada con métricas Helvetica.
+                            $showTeachers = (bool) ($pestudioData['calendar']->status_profesor_show ?? true);
+                            $rowHeight = \App\Services\Timetable\TimetableGridRowHeight::forGrid($shiftGrid['rows'], $showTeachers);
                         @endphp
                         <style>.{{ $gridUid }} td{height:{{ $rowHeight }}px;}</style>
-                        <table>
+                        <table class="sched">
                             <thead><tr><th>Hora</th><th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th></tr></thead>
                             <tbody>
                                 @foreach ($shiftGrid['rows'] as $row)
@@ -175,14 +109,18 @@
                             </tbody>
                         </table>
                     @endforeach
-                    @if (!empty($schedule['teacherSummary']) && ! ($pestudio->calendar->status_profesor_show ?? true))
+                    @if (!empty($schedule['teacherSummary']) && ($calendar->status_profesor_show ?? true))
                         <div class="summary">
                             <div class="summary-title">Profesores de la sección ({{ count($schedule['teacherSummary']) }}) · ½ = 0.5 bloque</div>
                             <table>
-                                <thead><tr><th>Profesor</th><th class="blq">Blq.</th><th>Profesor</th><th class="blq">Blq.</th></tr></thead>
+                                <thead><tr><th>Profesor</th><th class="blq">Blq.</th><th>Profesor</th><th class="blq">Blq.</th><th>Profesor</th><th class="blq">Blq.</th></tr></thead>
                                 <tbody>
-                                    @foreach (array_chunk($schedule['teacherSummary'], 2) as $pair)
-                                        <tr><td>{{ $pair[0]['name'] ?? '' }}</td><td class="blq">{{ $pair[0]['blocks'] ?? '' }}</td><td>{{ $pair[1]['name'] ?? '' }}</td><td class="blq">{{ $pair[1]['blocks'] ?? '' }}</td></tr>
+                                    @foreach (array_chunk($schedule['teacherSummary'], 3) as $group)
+                                        <tr>
+                                            <td>{{ $group[0]['name'] ?? '' }}</td><td class="blq">{{ $group[0]['blocks'] ?? '' }}</td>
+                                            <td>{{ $group[1]['name'] ?? '' }}</td><td class="blq">{{ $group[1]['blocks'] ?? '' }}</td>
+                                            <td>{{ $group[2]['name'] ?? '' }}</td><td class="blq">{{ $group[2]['blocks'] ?? '' }}</td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>

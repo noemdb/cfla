@@ -33,7 +33,7 @@
 <body>
 
     <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-    <h2>{{ ($isPublishedSchedule ?? false) ? 'Horario de Clases' : 'VISTA PREVIA — Horario de Clases' }} — Sección {{ $seccion->name }}</h2>
+    <h2>Horario de Clases — Sección {{ $seccion->name }}</h2>
     <div class="subhead">{{ $seccion->grado?->name ?? '' }} · {{ $calendar->name }} · {{ $fecha }}</div>
     <div class="badge">{{ ($isPublishedSchedule ?? false) ? 'HORARIO PUBLICADO' : 'BORRADOR — NO PUBLICADO' }}</div>
 

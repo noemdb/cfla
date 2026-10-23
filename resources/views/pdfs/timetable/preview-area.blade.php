@@ -31,7 +31,7 @@
 <body>
 
     <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-    <h2>{{ ($isPublishedSchedule ?? false) ? 'Formato por Asignaturas' : 'VISTA PREVIA — Formato por Asignaturas' }} — {{ $area->name }}</h2>
+    <h2>Formato por Asignaturas — {{ $area->name }}</h2>
     <div class="subhead">{{ $calendar->name }} · {{ $asignaturasCount }} asignatura(s) del área · {{ $fecha }}</div>
     <div class="badge">{{ ($isPublishedSchedule ?? false) ? 'HORARIO PUBLICADO' : 'BORRADOR — NO PUBLICADO' }}</div>
 

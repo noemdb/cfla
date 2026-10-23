@@ -258,6 +258,20 @@ ocultos en ese PDF en concreto; cuando ese calendario resuelto no coincide con
 el horario que tienes abierto, el modal muestra una advertencia explícita.
 Todos los streams de PDF del controlador envían cabeceras `no-store/no-cache`.
 
+### Altura uniforme de filas en el PDF «todos los P.Estudios»
+
+Cada grilla de sección calcula la altura de su celda más cargada (con métricas
+reales de Helvetica y corte greedy por palabra) y la aplica como regla CSS con
+clase única (`TimetableGridRowHeight::forGrid()`). DomPDF solo respeta `height`
+en `td` desde el stylesheet (lo ignora inline y en `tr`), y las columnas son
+iguales gracias a `table-layout:fixed`. Las filas de RECESO usan una altura
+fija mínima independiente.
+
+### Resumen de docentes por sección
+
+El bloque «Profesores de la sección» distribuye sus docentes en tres pares de
+columnas (Profesor + Blq.) por fila.
+
 ### Semántica del badge «publicado / borrador» en los PDFs
 
 El badge refleja la **fuente real de los datos** del documento. Un calendario

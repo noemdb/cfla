@@ -34,7 +34,7 @@
 <body>
     <div class="page-header">
         <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-        <h2>{{ ($isPublishedSchedule ?? false) ? 'HORARIOS DE CLASES' : 'VISTA PREVIA — HORARIOS DE CLASES' }} — {{ $grado->name }}</h2>
+        <h2>HORARIOS DE CLASES — {{ $grado->name }}</h2>
         <div class="subhead">{{ $calendar->name }} · {{ $fecha }}</div>
     </div>
 

@@ -22,10 +22,10 @@
         tbody tr{height:1.15cm;}
         tbody td{height:1.15cm;}
         td.time{text-align:center;font-weight:700;width:68px;background:#f8fafc;font-size:8.5pt;color:#1e293b;}
-        .subject{font-weight:800;font-size:10pt;text-align:center;line-height:1.15;color:#0f172a;}
+        .subject{font-weight:800;font-size:8.8pt;text-align:center;line-height:1.15;color:#0f172a;}
         .group{font-size:8pt;font-weight:700;color:#047857;text-align:center;margin-top:2px;}
         .cell-assignment + .cell-assignment{margin-top:2px;padding-top:2px;border-top:1px dashed #cbd5e1;}
-        tr.break-row, tr.break-row td{height:0.7cm;background:#fffbeb;color:#a16207;}
+        tr.break-row, tr.break-row td{height:0.35cm;background:#fffbeb;color:#a16207;}
         td.break-cell{text-align:center;font-size:8.5pt;font-weight:800;letter-spacing:1px;color:#a16207;}
         .footer{position:fixed;bottom:0.35cm;left:0.8cm;right:0.8cm;text-align:center;font-size:6.5pt;color:#6b7280;padding-top:2px;border-top:1px solid #cbd5e1;}
     </style>
@@ -33,9 +33,8 @@
 <body>
     <div class="page-header">
         <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-        <h2>{{ ($isPublishedSchedule ?? false) ? 'HORARIOS DE CLASES' : 'VISTA PREVIA — HORARIOS DE CLASES' }}</h2>
-        <div class="subhead">{{ $pestudio->name }} · {{ $calendar->name }} · {{ $fecha }}</div>
-    </div>
+        <h2>HORARIOS DE CLASES</h2>
+        <div class="subhead">{{ $pestudio->name }} · {{ $calendar->name }} · {{ $fecha }}</div>    </div>
 
     @php $firstSection = true; @endphp
     @forelse ($gradeSchedules as $gradeSchedule)
