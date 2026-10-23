@@ -134,78 +134,8 @@
 
                 @endif
 
-                {{-- Dropdown: formatos y reportes PDF. Dos variantes: con
-                     calendario abierto exporta el pestudio-preview de este
-                     calendario y los reportes acotados a él; sin calendario,
-                     exportaciones globales del lapso. --}}
-                @if ($calendarId)
-                    <x-dropdown position="bottom-end" width="7xl" height="auto">
-                        <x-slot name="trigger">
-                            <x-button
-                                label="Formatos"
-                                icon="document-text"
-                                right-icon="chevron-down"
-                                color="base"
-                                variant="outline"
-                                class="font-bold" />
-                        </x-slot>
-
-                        @if ($pestudioExportUrl)
-                            <x-dropdown.item
-                                href="{{ $pestudioExportUrl }}"
-                                target="_blank"
-                                rel="noopener"
-                                icon="folder"
-                                label="PDF P.Estudio"
-                                class="w-full !whitespace-nowrap" />
-                        @endif
-
-                        <x-dropdown.item
-                            href="#"
-                            x-on:click.prevent="$dispatch('open-teachers-pdf')"
-                            icon="document-arrow-down"
-                            label="Consolidado de docentes" />
-
-                        <x-dropdown.item
-                            href="#"
-                            x-on:click.prevent="$dispatch('open-teacher-totals')"
-                            icon="table-cells"
-                            label="Totalización por docente"
-                            separator />
-                    </x-dropdown>
-                @else
-                    <x-dropdown position="bottom-end" width="5xl" height="auto">
-                        <x-slot name="trigger">
-                            <x-button
-                                label="Formatos"
-                                icon="document-text"
-                                right-icon="chevron-down"
-                                color="base"
-                                variant="outline"
-                                class="font-bold" />
-                        </x-slot>
-
-                        <x-dropdown.item
-                            href="{{ route($moduleRoutePrefix.'.timetable.pdf.all-pestudios') }}"
-                            target="_blank"
-                            icon="document-text"
-                            label="Exportar todos los P.Estudios (PDF)"
-                            class="w-full !whitespace-nowrap" />
-
-                        <x-dropdown.item
-                            href="#"
-                            x-on:click.prevent="$dispatch('open-teachers-pdf')"
-                            icon="document-arrow-down"
-                            label="Consolidado de docentes" />
-
-                        <x-dropdown.item
-                            href="#"
-                            x-on:click.prevent="$dispatch('open-teacher-totals')"
-                            icon="table-cells"
-                            label="Totalización por docente"
-                            separator />
-                    </x-dropdown>
-                @endif
+                {{-- Dropdown: formatos y reportes PDF (variante según calendario). --}}
+                @include('livewire.planning.timetable.partials.dropdown-formatos', ['withCalendar' => (bool) $calendarId])
             </div>
     </header>
 
@@ -278,153 +208,25 @@
         </div>
     @endif
 
-    {{-- Diálogo: configuración del consolidado de docentes (PDF / HTML / XLS). --}}
-    <div x-data="{ open: false, format: 'html', orientation: 'portrait', perPage: 2 }"
-        x-on:open-teachers-pdf.window="open = true"
-        x-on:keydown.escape.window="open = false"
-        x-cloak x-show="open"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
-        role="dialog" aria-modal="true" aria-label="Consolidado de docentes">
-        <div x-on:click.stop
-            class="w-full max-w-md overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
-            <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
-                <div>
-                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
-                        Consolidado de docentes
-                    </h3>
-                    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        Elige el formato de salida · PDF, HTML o XLS
-                    </p>
-                </div>
-                <button type="button" x-on:click="open = false"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:hover:bg-white/10 dark:hover:text-white"
-                    aria-label="Cerrar">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
+    {{-- Diálogo compartido wizard/light: consolidado de docentes (los filtros por área/docentes son wizard-only). --}}
+    @include('timetable.partials.dialog-consolidado-docentes', ['entangleWizardState' => false, 'withAreaFilter' => false, 'withCalendarFilter' => (bool) $calendarId])
 
-            <div class="space-y-4 p-4">
-                <div>
-                    <label for="teachers-pdf-format"
-                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                        Formato
-                    </label>
-                    <select id="teachers-pdf-format" x-model="format"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
-                        <option value="pdf">PDF</option>
-                        <option value="html">HTML</option>
-                        <option value="xls">XLS</option>
-                    </select>
-                </div>
+    @include('timetable.partials.dialog-totalizacion-docente', ['idSuffix' => '-light', 'withCalendarFilter' => (bool) $calendarId])
 
-                <div x-cloak x-show="format !== 'xls'">
-                    <label for="teachers-pdf-orientation"
-                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                        Orientación
-                    </label>
-                    <select id="teachers-pdf-orientation" x-model="orientation"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
-                        <option value="portrait">Vertical</option>
-                        <option value="landscape">Horizontal</option>
-                    </select>
-                </div>
+    {{-- Diálogo (solo light): exportar todos los P.Estudios con formato + row_mode. --}}
+    @include('timetable.partials.dialog-all-pestudios-export')
 
-                <div x-cloak x-show="format !== 'xls'">
-                    <label for="teachers-pdf-per-page"
-                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                        Horarios por página
-                    </label>
-                    <select id="teachers-pdf-per-page" x-model.number="perPage"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
-                        @foreach (range(1, 6) as $n)
-                            <option value="{{ $n }}">{{ $n }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <p x-cloak x-show="format === 'xls'"
-                    class="rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] font-medium text-amber-700 dark:text-amber-300">
-                    El XLS conserva el mismo patrón visual del PDF, con una hoja por cada docente.
-                </p>
-                <p x-cloak x-show="format === 'pdf'"
-                    class="rounded-lg bg-sky-500/10 px-3 py-2 text-[11px] font-medium text-sky-700 dark:text-sky-300">
-                    El PDF abre la vista imprimible y lanza el diálogo de impresión del navegador (guardar como PDF).
-                </p>
-            </div>
-
-            <div class="flex justify-end gap-2 border-t border-gray-200 px-4 py-3 dark:border-white/10">
-                <button type="button" x-on:click="open = false"
-                    class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
-                    Cancelar
-                </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.all-teachers') }}?format=' + format + '&orientation=' + orientation + '&per_page=' + perPage @if ($calendarId)+ '&calendar={{ (int) $calendarId }}' @endif"
-
-                    target="_blank" rel="noopener" x-on:click="open = false"
-                    class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
-                    Generar
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {{-- Diálogo: totalización de bloques por docente (PDF / HTML / XLS). --}}
-    <div x-data="{ open: false, format: 'pdf' }"
-        x-on:open-teacher-totals.window="open = true"
-        x-on:keydown.escape.window="open = false"
-        x-cloak x-show="open"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4"
-        role="dialog" aria-modal="true" aria-label="Totalización por docente">
-        <div x-on:click.stop
-            class="w-full max-w-md overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
-            <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
-                <div>
-                    <h3 class="text-xs font-extrabold uppercase tracking-widest text-gray-700 dark:text-gray-200">
-                        Totalización por docente
-                    </h3>
-                    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        Elige el formato de salida · PDF, HTML o XLS
-                    </p>
-                </div>
-                <button type="button" x-on:click="open = false"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:hover:bg-white/10 dark:hover:text-white"
-                    aria-label="Cerrar">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-
-            <div class="space-y-4 p-4">
-                <div>
-                    <label for="teacher-totals-format-light"
-                        class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                        Formato
-                    </label>
-                    <select id="teacher-totals-format-light" x-model="format"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:border-white/10 dark:bg-gray-800 dark:text-gray-100">
-                        <option value="pdf">PDF</option>
-                        <option value="html">HTML</option>
-                        <option value="xls">XLS</option>
-                    </select>
-                </div>
-
-                <p x-cloak x-show="format === 'xls'"
-                    class="rounded-lg bg-amber-500/10 px-3 py-2 text-[11px] font-medium text-amber-700 dark:text-amber-300">
-                    El XLS agrega las columnas «Horas Administrativas» y «Horas Formación» vacías para llenado manual.
-                </p>
-            </div>
-
-            <div class="flex justify-end gap-2 border-t border-gray-200 px-4 py-3 dark:border-white/10">
-                <button type="button" x-on:click="open = false"
-                    class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/5">
-                    Cancelar
-                </button>
-                <a :href="'{{ route($moduleRoutePrefix.'.timetable.pdf.teacher-block-totals') }}?format=' + format @if ($calendarId)+ '&calendar={{ (int) $calendarId }}' @endif"
-                    target="_blank" rel="noopener" x-on:click="open = false"
-                    class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700">
-                    Generar
-                </a>
-            </div>
-        </div>
-    </div>
+    {{-- Diálogo (solo light, con calendario abierto): PDF P.Estudio con formato + row_mode. --}}
+    @if ($pestudioExportUrl)
+        @include('timetable.partials.dialog-all-pestudios-export', [
+            'title' => 'PDF P.Estudio',
+            'subtitle' => 'Horario del P.Estudio del calendario abierto, sección por sección',
+            'openEvent' => 'open-pestudio-prev-export',
+            'exportUrl' => $pestudioExportUrl,
+            'panelId' => 'pestudio-preview-export',
+            'withXls' => false,
+        ])
+    @endif
 
     {{-- Diálogo WireUI: exportación de los horarios de todos los P.Estudios. --}}
     <x-dialog id="pestudios-export" title="Exportar P.Estudios" width="lg" blur="lg" z-index="z-[2000]">
@@ -630,7 +432,7 @@
                                                 icon="document-duplicate" label="Duplicar" class="w-full" />
 
                                             @if ($calendarHasStateActions)
-                                                <x-dropdown.item separator />
+                                                <div class="w-full my-1 border-t border-secondary-200 dark:border-secondary-600"></div>
                                             @endif
                                             @if ($calendarCanActivate)
                                                 <x-dropdown.item wire:click="activateCalendar({{ $calendar['id'] }})"
@@ -649,7 +451,7 @@
                                                     icon="arrow-uturn-left" label="Desarchivar" class="w-full" />
                                             @endif
                                             @if ($calendarCanDelete)
-                                                <x-dropdown.item separator />
+                                                <div class="w-full my-1 border-t border-secondary-200 dark:border-secondary-600"></div>
                                                 <x-dropdown.item wire:click="deleteCalendar({{ $calendar['id'] }})"
                                                     icon="trash" label="Eliminar" class="w-full !text-red-500 dark:!text-red-400" />
                                             @endif
@@ -1114,103 +916,8 @@
             </x-modal-card>
         @endif
 
-        {{-- Horario por profesor (toda la carga del docente entre P.Estudios) --}}
-        @if ($showTeacherScheduleDialog)
-            <div class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/70 p-4"
-                role="dialog" aria-modal="true" aria-labelledby="light-teacher-schedule-title"
-                x-data x-on:keydown.escape.window="$wire.closeTeacherScheduleDialog()">
-                <div x-on:click.stop class="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-900">
-                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-white/10">
-                        <div>
-                            <h2 id="light-teacher-schedule-title" class="text-sm font-extrabold text-gray-900 dark:text-white">Horario por profesor</h2>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Toda la carga horaria asignada al profesor en las secciones de todos los calendarios/P.Estudios del lapso.</p>
-                        </div>
-                        <button type="button" wire:click="closeTeacherScheduleDialog"
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-full text-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 dark:hover:bg-white/10 dark:hover:text-white"
-                            aria-label="Cerrar horario por profesor">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
+    @include('timetable.partials.dialog-horario-profesor', ['titleSuffix' => '-light'])
 
-                    <div class="border-b border-gray-200 bg-gray-50 px-5 py-3 dark:border-white/10 dark:bg-white/5">
-                        <label for="light-teacher-schedule-profesor" class="mb-1 block text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:text-gray-400">Profesor</label>
-                        <select id="light-teacher-schedule-profesor" wire:model.live="teacherScheduleProfesorId"
-                            class="w-full max-w-xl rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/40 dark:border-white/10 dark:bg-gray-900 dark:text-white">
-                            @forelse ($teacherScheduleOptions as $teacher)
-                                <option value="{{ $teacher['id'] }}">{{ $teacher['name'] }}</option>
-                            @empty
-                                <option value="">No hay profesores asociados</option>
-                            @endforelse
-                        </select>
-                    </div>
-
-                    @if ($teacherScheduleCalendars !== [])
-                        <div class="flex border-b border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5"
-                            role="tablist" aria-label="P.Estudios del horario docente">
-                            @foreach ($teacherScheduleCalendars as $cal)
-                                @php $tabActive = (int) ($teacherScheduleActiveCalendarId ?? 0) === (int) $cal['calendar_id']; @endphp
-                                <button type="button" role="tab" aria-selected="{{ $tabActive ? 'true' : 'false' }}"
-                                    wire:click="setTeacherScheduleTab({{ $cal['calendar_id'] }})"
-                                    title="{{ $cal['calendar'] }}"
-                                    class="flex-1 basis-0 border-b-2 px-3 py-2 text-center text-xs font-bold transition-colors {{ $tabActive ? 'border-fuchsia-500 text-fuchsia-700 dark:text-fuchsia-300' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200' }}">
-                                    {{ $cal['pestudio'] }}
-                                </button>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <div class="overflow-auto p-5">
-                        @if ($teacherScheduleHasAssignments)
-                            <table class="w-full min-w-[900px] table-fixed border-collapse text-left text-xs">
-                                <caption class="sr-only">Lessons del profesor seleccionado por día y bloque</caption>
-                                <thead>
-                                    <tr class="border-b border-gray-200 bg-gray-50 text-[10px] font-extrabold uppercase tracking-widest text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
-                                        <th class="w-36 px-3 py-2.5">Turno · bloque</th>
-                                        @foreach (['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as $dayLabel)
-                                            <th class="px-3 py-2.5 text-center">{{ $dayLabel }}</th>
-                                        @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-white/5">
-                                    @foreach ($teacherScheduleGrid as $row)
-                                        <tr>
-                                            <th scope="row" class="px-3 py-2.5 font-bold text-gray-700 dark:text-gray-200">
-                                                <span class="block">{{ $row['shift'] }}</span>
-                                                <span class="mt-0.5 block text-[9px] font-normal uppercase tracking-widest text-gray-500 dark:text-gray-400">{{ $row['code'] }} · #{{ $row['order'] }}</span>
-                                            </th>
-                                            @for ($day = 1; $day <= 5; $day++)
-                                                <td class="px-2 py-2 align-top">
-                                                    @forelse ($row['cells'][$day] ?? [] as $lesson)
-                                                        <div class="mb-1 rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 p-2 last:mb-0">
-                                                            <div class="flex items-start justify-between gap-1">
-                                                                <div class="font-bold text-gray-900 dark:text-white">{{ $lesson['subject'] }}</div>
-                                                                @if (! empty($lesson['pestudio_code']))
-                                                                    <span class="shrink-0 rounded bg-fuchsia-500/10 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-fuchsia-700 dark:text-fuchsia-300">{{ $lesson['pestudio_code'] }}</span>
-                                                                @endif
-                                                            </div>
-                                                            <div class="mt-0.5 font-mono text-[10px] text-gray-500 dark:text-gray-400">{{ $lesson['start'] }}–{{ $lesson['end'] }}</div>
-                                                            <div class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
-                                                                @if (! empty($lesson['grado'])){{ $lesson['grado'] }} · @endif Sección {{ $lesson['section'] }}
-                                                            </div>
-                                                        </div>
-                                                    @empty
-                                                        <span class="text-gray-300 dark:text-gray-700">—</span>
-                                                    @endforelse
-                                                </td>
-                                            @endfor
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        @else
-                            <div class="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
-                                El profesor seleccionado no tiene lessons asignadas en este P.Estudio.
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @endif
             </div>
         @endif
     @endif

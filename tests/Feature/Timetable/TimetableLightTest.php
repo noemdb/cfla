@@ -74,9 +74,13 @@ class TimetableLightTest extends TestCase
 
         // El menú de formatos en el paso 1 (sin calendario abierto) solo
         // muestra exportaciones globales; los formatos que dependen del
-        // calendario abierto aparecen en el dropdown del paso 2.
+        // calendario abierto aparecen en el dropdown del paso 2. «Exportar
+        // todos los P.Estudios…» ya no ancla directo: abre un diálogo donde se
+        // elige el formato y el ajuste de filas (row_mode) del estimador.
         $component->assertSee('Formatos');
-        $component->assertSee('Exportar todos los P.Estudios (PDF)');
+        $component->assertSee('Exportar todos los P.Estudios…');
+        $component->assertSee('Ajuste de filas (temario)');
+        $component->assertSee('open-all-pestudios-export');
         $component->assertSee('Consolidado de docentes');
         $component->assertSee('Totalización por docente');
         $component->assertDontSee('Formato por área');

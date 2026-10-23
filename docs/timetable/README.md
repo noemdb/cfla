@@ -267,10 +267,95 @@ en `td` desde el stylesheet (lo ignora inline y en `tr`), y las columnas son
 iguales gracias a `table-layout:fixed`. Las filas de RECESO usan una altura
 fija mínima independiente.
 
+El estimador admite dos modos (`TimetableGridRowHeight::MODE_*`), seleccionables
+en este PDF/HTML con el parámetro `?row_mode=` (default `conservative`):
+
+- `conservative` — factor de corrección 1.05 y ancho útil a baja (152px vs el
+  real ~161px). Puede dejar la fila ~1 línea más alta que el mínimo en grillas
+  poco cargadas (efecto «espacios vacíos»), pero garantiza que DomPDF nunca
+  parta una celda.
+- `strict` — tolerance 0 (`?row_mode=strict`): factor 1.0 y ancho real. Da el
+  mínimo exacto del corte greedy; es el modo de **calibración** contra el render
+  real de DomPDF (comparar ambos HTML/PDF lado a lado y medir el desajuste). Si
+  un `strict` desajustado produce celdas partidas, ajusta el `factor`/`avail`
+  del modo, no vuelvas a dejar sin margen el `conservative`.
+
+Datos de la primera calibración (render HTML real, 35 grillas del lapso
+vigente): 22/35 grillas sin cambio y 13 grillas con −1 línea (media −4.9px,
+máx −18px); los deltas salen justamente en el rango de 1 línea de temario con
+pocos docentes (34→24, 48→34, 66→52, 106→89/97).
+
+El PDF por P.Estudio (`preview-pestudio`, vía «PDF P.Estudio…») usa el mismo
+estimador con el perfil `preview-pestudio` — su plantilla tiene métricas
+propias (`.subject` 8.8pt, `.group` 8pt con `line-height:1.15`, celda útil
+≈145px, gaps de 3px/5px) — sustituyendo sus filas fijas de 1.15cm. Este
+endpoint además acepta `?format=html` y `?row_mode=`. Elegir a mano el perfil:
+cálculos con métricas de la plantilla equivocada estiman mal.
+
 ### Resumen de docentes por sección
 
 El bloque «Profesores de la sección» distribuye sus docentes en tres pares de
 columnas (Profesor + Blq.) por fila.
+
+### Arquitectura del export PDF (refactor)
+
+`TimetablePdfController` es una capa delgada que delega en:
+
+- **`App\Http\Controllers\Timetable\Concerns\InteractsWithTimetablePdf`** —
+  límite de memoria para reportes grandes, semántica del badge
+  «publicado / borrador», resolución de slots persistidos y `pdfResponse()` con
+  cabeceras anti-caché.
+- **`App\Http\Controllers\Timetable\Concerns\MeasuresTimetableBlocks`** — peso
+  de media franja (ADR-TT-017), grupo estable, líneas half-aware del XLS y
+  alturas de celda de Excel (idéntico criterio que
+  `timetable.partials.half-cell`).
+- **`App\Services\Timetable\TimetablePestudioScheduleBuilder`** — construcción
+  de las grillas por grado/sección de un P.Estudio (PDF de un P.Estudio y
+  consolidado «todos los P.Estudios»); usa ambos traits, con lo cual helper y
+  servicio comparten una única implementación.
+
+El asistente light extrae su UI de formatos a parciales suyos, y los tres
+diálogos de exportación se comparten entre el **wizard y el light** en
+`resources/views/timetable/partials/` (el wizard pasa `entangleWizardState =>
+true, withAreaFilter => true`; el light inyecta el filtro `&calendar=` según
+tenga un calendario abierto):
+
+- `livewire/planning/timetable/partials/dropdown-formatos.blade.php`
+  (solo light; variante según `$withCalendar`: con calendario abre
+  `open-pestudio-prev-export` para «PDF P.Estudio…», PDF profesores y
+  reportes acotados; sin calendario, «Exportar todos los P.Estudios…»
+  abre `open-all-pestudios-export` y exportaciones globales del lapso),
+- `timetable/partials/dialog-all-pestudios-export.blade.php`
+  (solo light; parcial compartido parametrizado — `title`, `subtitle`,
+  `openEvent`, `exportUrl`, `panelId`, `withXls`; dos instancias:
+  «Exportar todos los P.Estudios…» sin calendario y «PDF P.Estudio…» con
+  calendario abierto (`$pestudioExportUrl`, sin XLS porque ese endpoint no
+  lo produce) — Formato (PDF/HTML y XLS según endpoint) y Ajuste de filas
+  `row_mode` Conservador/Estricto antes de generar; sustituyen a las anclas
+  directas).
+- `timetable/partials/dialog-consolidado-docentes.blade.php`
+  (consolidado de docentes; los filtros por área/docentes son wizard-only vía
+  `withAreaFilter`),
+- `timetable/partials/dialog-totalizacion-docente.blade.php`
+  (totalización; `idSuffix` distingue los ids de controles del light),
+- `timetable/partials/dialog-horario-profesor.blade.php`
+  (horario por profesor; `titleSuffix` distingue el id del título).
+
+Reglas estructurales de estos parciales (dos regresiones reales detectadas):
+
+- Cada parcial compuesto por `@include` debe ser **autobalanceado**: abre y
+  cierra sus propios `<div>` (un bloque envolvente por diálogo). Si se deja un
+  `</div>` sin cerrar, Livewire lo «resuelve» pero el DOM siguiente queda
+  anidado bajo el overlay oculto del diálogo (`x-cloak`/`x-show=false`) y
+  desaparece visualmente (así el paso Calendarios del light perdió sus
+  tarjetas); si se duplica el cierre en el host, el componente Livewire
+  termina con **múltiples elementos raíz** al quedar un `</div>` huérfano y
+  Livewire lanza `MultipleRootElementsDetectedException` (500 en todo el
+  wizard). Verificar con conteo de `<div`/`</div>` y render real del
+  componente.
+- No usar `<x-dropdown.item separator />` como divisor puro: WireUI renderiza
+  igualmente un `<a>` vacío; usar directamente el
+  `<div class="w-full my-1 border-t border-secondary-200 dark:border-secondary-600">`.
 
 ### Semántica del badge «publicado / borrador» en los PDFs
 
@@ -279,9 +364,11 @@ ACTIVO con slots publicados se rotula **HORARIO PUBLICADO**. Si aún existe una
 simulación vigente en `preview_payload` y el PDF la usa (paso 5, vista previa
 de sección/grado/P.Estudio), se rotula **BORRADOR** aunque el calendario esté
 activo; el formato por área fuerza los slots persistidos para calendarios
-activos y por eso rotula publicado. La lógica vive en el helper
-`TimetablePdfController::isPublishedSchedule()` compartido por los formatos
-sección, aula, docente, grado, P.Estudio, área y consolidados.
+activos y por eso rotula publicado. La lógica vive en el trait
+`App\Http\Controllers\Timetable\Concerns\InteractsWithTimetablePdf`
+(`isPublishedSchedule()`, compartido con el servicio
+`TimetablePestudioScheduleBuilder`) y lo usan los formatos sección, aula,
+docente, grado, P.Estudio, área y consolidados.
 
 La sincronización compara las Pevaluaciones vigentes (lapso + P.Estudio, con
 sección, grado, P.Estudio, pensum y asignatura vigentes) con

@@ -47,7 +47,31 @@
                         <span class="section-label">Sección {{ $schedule['section']->name }}</span>
                     </div>
                     @foreach ($schedule['shiftGrids'] as $shiftGrid)
-                        <table>
+                        @php
+                            // Id único de grilla: DomPDF solo respeta height en td
+                            // desde una regla del stylesheet (lo ignora inline).
+                            $gridUidCounter = ($gridUidCounter ?? 0) + 1;
+                            $gridUid = 'rh-g'.$gridUidCounter;
+
+                            // Altura uniforme de TODAS las filas de esta grilla: la de
+                            // su celda más cargada, estimada con métricas Helvetica
+                            // (sustituye las filas fijas de 1.15cm; rowMode viaja en el
+                            // render data — conservador por defecto, estricto vía
+                            // ?row_mode=strict). Perfil preview-pestudio: métricas de
+                            // ESTA plantilla (subject 8.8pt, group 8pt, td útil ~145px).
+                            // Sin docentes: esta vista no los muestra.
+                            $gridRows = $shiftGrid['rows'];
+                            $rowHeight = \App\Services\Timetable\TimetableGridRowHeight::forGrid(
+                                $gridRows,
+                                false,
+                                ($rowMode ?? 'conservative') === 'strict'
+                                    ? \App\Services\Timetable\TimetableGridRowHeight::MODE_STRICT
+                                    : \App\Services\Timetable\TimetableGridRowHeight::MODE_CONSERVATIVE,
+                                \App\Services\Timetable\TimetableGridRowHeight::STYLE_PREVIEW_PESTUDIO
+                            );
+                        @endphp
+                        <style>.{{ $gridUid }} td{height:{{ $rowHeight }}px;}</style>
+                        <table class="sched {{ $gridUid }}">
                             <thead>
                                 <tr>
                                     <th class="time-col">Hora</th>

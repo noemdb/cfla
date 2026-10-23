@@ -71,8 +71,17 @@
 
                             // Altura uniforme de TODAS las filas de esta grilla: la de
                             // su celda más cargada, estimada con métricas Helvetica.
+                            // `rowMode` llega del parámetro `?row_mode=` (ausente =>
+                            // conservative; el `?? 'conservative'` protege renders
+                            // directos de la vista sin el dato).
                             $showTeachers = (bool) ($pestudioData['calendar']->status_profesor_show ?? true);
-                            $rowHeight = \App\Services\Timetable\TimetableGridRowHeight::forGrid($shiftGrid['rows'], $showTeachers);
+                            $rowHeight = \App\Services\Timetable\TimetableGridRowHeight::forGrid(
+                                $shiftGrid['rows'],
+                                $showTeachers,
+                                ($rowMode ?? 'conservative') === 'strict'
+                                    ? \App\Services\Timetable\TimetableGridRowHeight::MODE_STRICT
+                                    : \App\Services\Timetable\TimetableGridRowHeight::MODE_CONSERVATIVE
+                            );
                         @endphp
                         <style>.{{ $gridUid }} td{height:{{ $rowHeight }}px;}</style>
                         <table class="sched">

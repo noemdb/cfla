@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Timetable;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Timetable\Concerns\InteractsWithTimetablePdf;
+use App\Http\Controllers\Timetable\Concerns\MeasuresTimetableBlocks;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
@@ -16,6 +18,8 @@ use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableSlot;
+use App\Services\Timetable\TimetableGridRowHeight;
+use App\Services\Timetable\TimetablePestudioScheduleBuilder;
 use App\Services\Timetable\TimetableViewService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -29,106 +33,10 @@ use Illuminate\Support\Str;
  */
 class TimetablePdfController extends Controller
 {
+    use InteractsWithTimetablePdf;
+    use MeasuresTimetableBlocks;
+
     public function __construct(private TimetableViewService $viewService) {}
-
-    /**
-     * Los informes multi-registro (todos los docentes, todos los grados, etc.)
-     * generan un único documento HTML que dompdf debe parsear y renderizar; el
-     * límite por defecto (128M) se agota fácilmente. Se sube para estas
-     * exportaciones puntuales.
-     */
-    private function raisePdfMemoryLimit(): void
-    {
-        @ini_set('memory_limit', '1024M');
-        @set_time_limit(300);
-    }
-
-    /**
-     * Nombre del grupo estable de la Pevaluación, solo cuando está definido.
-     * Si el id existe pero no la relación, se usa un identificador legible.
-     */
-    private function grupoEstableName(?Pevaluacion $pev): ?string
-    {
-        if (! $pev || ! $pev->grupo_estable_id) {
-            return null;
-        }
-
-        return (string) ($pev->grupoEstable?->name ?? 'G'.$pev->grupo_estable_id);
-    }
-
-    /**
-     * ADR-TT-017: una media franja pesa 0.5 bloque; un bloque completo, 1.
-     */
-    private function halfBlockWeight(mixed $half): float
-    {
-        return $half === null || $half === '' ? 1.0 : 0.5;
-    }
-
-    /**
-     * Conserva el tipo entero cuando el total no tiene fracción (compatibilidad
-     * con reportes y pruebas existentes) y devuelve float para las medias.
-     */
-    private function normalizeBlockValue(float $value): int|float
-    {
-        $rounded = round($value, 2);
-
-        return floor($rounded) == $rounded ? (int) $rounded : $rounded;
-    }
-
-    /**
-     * Líneas de una celda XLS con el mismo criterio que
-     * timetable.partials.half-cell: primero los bloques completos y luego las
-     * bandas ½ sup. / ½ inf. (con «—» cuando una banda está vacía).
-     *
-     * @param  iterable<int, mixed>  $entries
-     * @return list<string>
-     */
-    private function xlsHalfAwareLines(iterable $entries, callable $line): array
-    {
-        $full = [];
-        $sup = [];
-        $inf = [];
-
-        foreach ($entries as $entry) {
-            $half = data_get($entry, 'half');
-
-            if ($half === null) {
-                $full[] = (string) $line($entry);
-            } elseif ((int) $half === 0) {
-                $sup[] = (string) $line($entry);
-            } else {
-                $inf[] = (string) $line($entry);
-            }
-        }
-
-        if ($sup === [] && $inf === []) {
-            return $full;
-        }
-
-        return array_merge(
-            $full,
-            ['½ sup.'],
-            $sup !== [] ? $sup : ['—'],
-            ['½ inf.'],
-            $inf !== [] ? $inf : ['—'],
-        );
-    }
-
-    /**
-     * Altura necesaria para que Excel no recorte las líneas de una celda.
-     *
-     * @param  list<string>  $lines
-     */
-    private function xlsLinesHeight(array $lines, float $base = 28.0): float
-    {
-        $lineCount = 0;
-
-        foreach ($lines as $line) {
-            $lineCount += substr_count((string) $line, "\n") + 1;
-        }
-
-        return min(120.0, max($base, 9.0 * max(1, $lineCount)));
-    }
 
     public function section(Request $request, $calendarId, $seccionId)
     {
@@ -510,202 +418,32 @@ class TimetablePdfController extends Controller
         $calendar = TimetableCalendar::query()->findOrFail($calendarId);
         $pestudio = Pestudio::query()->findOrFail($pestudioId);
 
-        $schedules = $this->buildPestudioSchedules($calendar, $pestudio);
+        $schedules = app(TimetablePestudioScheduleBuilder::class)->build($calendar, $pestudio);
 
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
-        $pdf = Pdf::loadView('pdfs.timetable.preview-pestudio', [
+        $data = [
             'calendar' => $calendar,
             'pestudio' => $pestudio,
             'gradeSchedules' => $schedules['gradeSchedules'],
             'institucion' => $institucion,
             'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
             'isPublishedSchedule' => $schedules['isPublishedSchedule'],
-        ]);
+            // Modo del estimador de filas (`?row_mode=`, igual que all-pestudios);
+            // default conservador con margen anti-partido.
+            'rowMode' => strtolower((string) $request->query('row_mode', TimetableGridRowHeight::MODE_CONSERVATIVE)),
+        ];
+
+        if (strtolower((string) $request->query('format')) === 'html') {
+            return response()->view('pdfs.timetable.preview-pestudio', $data)->withHeaders([
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, private',
+                'Pragma' => 'no-cache',
+            ]);
+        }
+
+        $pdf = Pdf::loadView('pdfs.timetable.preview-pestudio', $data);
         $pdf->setPaper('letter', 'landscape');
 
         return $this->pdfResponse($pdf, "horarios-{$pestudio->name}.pdf");
-    }
-
-    /**
-     * Indica si el horario debe resolverse desde los slots persistidos en BD
-     * (calendario publicado o clonado, cuyo `preview_payload` no contiene
-     * 'assignment') en lugar del payload de vista previa (dry-run).
-     */
-    private function shouldUsePersistedSlots(TimetableCalendar $calendar): bool
-    {
-        return ! is_array($calendar->preview_payload['assignment'] ?? null);
-    }
-
-    /**
-     * Semántica compartida del badge «HORARIO PUBLICADO / BORRADOR» en todos
-     * los PDFs: el badge debe reflejar la FUENTE real de los datos.
-     *
-     * Un calendario activo publicado se lee desde `timetable_slots` y se
-     * rotula HORARIO PUBLICADO. Un calendario activo pero con una simulación
-     * vigente en `preview_payload` se lee desde esa simulación y se rotula
-     * BORRADOR (es una vista previa). Los borradores siempre son «preview».
-     */
-    private function isPublishedSchedule(TimetableCalendar $calendar, bool $usePersistedSlots): bool
-    {
-        return $calendar->status === TimetableCalendar::STATUS_ACTIVE && $usePersistedSlots;
-    }
-
-    /**
-     * Stream de PDF con cabeceras anti-caché: los reportes reflejan el estado
-     * vigente del calendario, así que el navegador no debe reutilizar versiones
-     * anteriores de la misma URL (badge/nombres desactualizados).
-     */
-    private function pdfResponse($pdf, string $filename)
-    {
-        $response = $pdf->stream($filename);
-        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-        $response->headers->set('Pragma', 'no-cache');
-        $response->headers->set('Expires', '0');
-        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s').' GMT');
-
-        return $response;
-    }
-
-    /**
-     * Horarios por grado/sección de un P.ESTUDIO para un calendario (compartido
-     * por el PDF de un P.Estudio y el consolidado de todos los P.Estudios).
-     *
-     * @return array{isPublishedSchedule: bool, gradeSchedules: \Illuminate\Support\Collection<int, array>}
-     */
-    private function buildPestudioSchedules(TimetableCalendar $calendar, Pestudio $pestudio, bool $forcePersistedSlots = false): array
-    {
-        $usePersistedSlots = $forcePersistedSlots || $this->shouldUsePersistedSlots($calendar);
-        $isPublishedSchedule = $this->isPublishedSchedule($calendar, $usePersistedSlots);
-
-        if ($forcePersistedSlots) {
-            // El consolidado de todos los P.Estudios solo incluye calendarios
-            // activos y debe leerse de una única fuente canónica (los slots
-            // persistidos) para no mezclar `preview_payload` de unos con
-            // slots de otros en el mismo documento. Un calendario sin slots
-            // produce un bloque vacío que el llamador filtra.
-        } elseif (! $calendar->preview_payload && ! $isPublishedSchedule) {
-            abort(404, 'No hay vista previa para este calendario.');
-        }
-
-        $grades = Grado::query()
-            ->where('pestudio_id', $pestudio->id)
-            ->where('status_active', 'true')
-            ->with(['seccions' => fn ($query) => $query->where('status_active', 'true')->orderBy('name')])
-            ->orderBy('order')
-            ->orderBy('name')
-            ->get();
-
-        $assignment = collect($calendar->preview_payload['assignment'] ?? []);
-        $periods = TimetablePeriod::query()
-            ->where('calendar_id', $calendar->id)
-            ->with('shift')
-            ->orderBy('day_of_week')
-            ->orderBy('order_in_day')
-            ->get()
-            ->keyBy('id');
-        $lessons = TimetableLesson::query()
-            ->where('calendar_id', $calendar->id)
-            ->whereHas('pevaluacion.seccion', fn ($query) => $query->where('status_active', 'true'))
-            ->whereHas('pevaluacion.seccion.grado', fn ($query) => $query->where('status_active', 'true'))
-            ->with(['pevaluacion.pensum.asignatura', 'pevaluacion.profesor', 'pevaluacion.seccion.grado', 'pevaluacion.grupoEstable'])
-            ->get();
-
-        $gradeSchedules = $grades->map(function (Grado $grado) use (
-            $calendar,
-            $assignment,
-            $periods,
-            $lessons,
-            $usePersistedSlots
-        ): array {
-            $sectionSchedules = $grado->seccions->map(function (Seccion $section) use (
-                $calendar,
-                $assignment,
-                $periods,
-                $lessons,
-                $usePersistedSlots
-            ): array {
-                $sectionLessons = $lessons->filter(fn (TimetableLesson $lesson): bool => (int) $lesson->pevaluacion?->seccion_id === (int) $section->id);
-                $sectionAssignment = $usePersistedSlots
-                    ? TimetableSlot::query()->where('calendar_id', $calendar->id)->where('seccion_id', $section->id)
-                        ->get(['lesson_id', 'period_id', 'room_id', 'half'])->groupBy('lesson_id')
-                        ->map(fn ($slots) => $slots->map(fn ($slot) => [
-                            'period_id' => (int) $slot->period_id,
-                            'room_id' => (int) ($slot->room_id ?? 0),
-                            'half' => $slot->half !== null ? (int) $slot->half : null,
-                        ])->values()->all())
-                    : $assignment;
-                $assignmentsByPeriod = [];
-                $teacherSummary = [];
-
-                foreach ($sectionLessons as $lesson) {
-                    foreach ($sectionAssignment->get((string) $lesson->id, $sectionAssignment->get($lesson->id, [])) as $slot) {
-                        $period = $periods->get((int) ($slot['period_id'] ?? 0));
-                        if (! $period) {
-                            continue;
-                        }
-                        $pev = $lesson->pevaluacion;
-                        $teacherId = (int) ($pev?->profesor_id ?? 0);
-                        if ($teacherId > 0) {
-                            $teacherSummary[$teacherId] ??= [
-                                'name' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
-                                'blocks' => 0,
-                            ];
-                            $teacherSummary[$teacherId]['blocks'] += $this->halfBlockWeight($slot['half'] ?? null);
-                        }
-                        $assignmentsByPeriod[$period->id][] = [
-                            'asignatura' => $pev?->pensum?->asignatura?->name ?? '?',
-                            'profesor' => trim(($pev?->profesor?->lastname ?? '').' '.($pev?->profesor?->name ?? '')),
-                            'grupo' => $this->grupoEstableName($pev),
-                            'half' => $slot['half'] ?? null,
-                        ];
-                    }
-                }
-
-                $shiftGrids = $periods->groupBy('shift_id')->map(function ($shiftPeriods) use ($assignmentsByPeriod): array {
-                    return [
-                        'shift' => $shiftPeriods->first()->shift,
-                        'rows' => $shiftPeriods->groupBy('order_in_day')->sortKeys()->map(function ($dayPeriods) use ($assignmentsByPeriod): array {
-                            $rowPeriod = $dayPeriods->first();
-
-                            return [
-                                'period' => $rowPeriod,
-                                'days' => collect(range(1, 5))->mapWithKeys(function (int $day) use ($dayPeriods, $assignmentsByPeriod): array {
-                                    $period = $dayPeriods->firstWhere('day_of_week', $day);
-
-                                    return [$day => [
-                                        'period' => $period,
-                                        'assignments' => $period ? ($assignmentsByPeriod[$period->id] ?? []) : [],
-                                    ]];
-                                })->all(),
-                            ];
-                        })->values()->all(),
-                    ];
-                })->values()->all();
-
-                return [
-                    'section' => $section,
-                    'shiftGrids' => $shiftGrids,
-                    'teacherSummary' => collect($teacherSummary)
-                        ->map(function (array $teacher): array {
-                            $teacher['blocks'] = $this->normalizeBlockValue((float) $teacher['blocks']);
-
-                            return $teacher;
-                        })
-                        ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-                        ->values()
-                        ->all(),
-                ];
-            })->filter(fn (array $schedule): bool => collect($schedule['shiftGrids'])->flatMap(fn ($grid) => $grid['rows'])->contains(
-                fn (array $row): bool => collect($row['days'])->contains(fn (array $day): bool => $day['assignments'] !== [])
-            ))->values()->all();
-
-            return ['grado' => $grado, 'sectionSchedules' => $sectionSchedules];
-        })->filter(fn (array $schedule): bool => $schedule['sectionSchedules'] !== [])->values();
-
-        return [
-            'isPublishedSchedule' => $isPublishedSchedule,
-            'gradeSchedules' => $gradeSchedules,
-        ];
     }
 
     /**
@@ -734,7 +472,7 @@ class TimetablePdfController extends Controller
                 return null;
             }
 
-            $schedules = $this->buildPestudioSchedules($calendar, $pestudio, forcePersistedSlots: true);
+            $schedules = app(TimetablePestudioScheduleBuilder::class)->build($calendar, $pestudio, forcePersistedSlots: true);
             if ($schedules['gradeSchedules']->isEmpty()) {
                 return null;
             }
@@ -754,28 +492,35 @@ class TimetablePdfController extends Controller
         $institucion = \App\Models\app\Entity\Institucion::orderByDesc('created_at')->first();
         $fecha = now()->isoFormat('DD [de] MMMM [de] YYYY');
 
+        // Modo del estimador de altura de filas: `?row_mode=strict` (tolerance
+        // 0, celdas altas al mínimo) solo para calibrar con render real; el
+        // default conserva el margen que evita partir filas en DomPDF.
+        $rowMode = strtolower((string) $request->query('row_mode', TimetableGridRowHeight::MODE_CONSERVATIVE));
+
         return match (strtolower((string) $request->query('format', 'pdf'))) {
             'html' => response()->view('pdfs.timetable.preview-all-pestudios', [
                 'lapso' => $lapso,
                 'pestudiosData' => $pestudiosData,
                 'institucion' => $institucion,
                 'fecha' => $fecha,
+                'rowMode' => $rowMode,
             ]),
             'xls', 'csv' => $this->allPestudiosXls($lapso, $pestudiosData, $institucion, $fecha),
-            default => $this->allPestudiosPdf($lapso, $pestudiosData, $institucion, $fecha),
+            default => $this->allPestudiosPdf($lapso, $pestudiosData, $institucion, $fecha, $rowMode),
         };
     }
 
     /**
      * @param  \Illuminate\Support\Collection<int, array{calendar:\App\Models\app\Timetable\TimetableCalendar, pestudio:\App\Models\app\Academy\Pestudio, isPublishedSchedule:bool, gradeSchedules:\Illuminate\Support\Collection<int, array>}>  $pestudiosData
      */
-    private function allPestudiosPdf(Lapso $lapso, \Illuminate\Support\Collection $pestudiosData, \App\Models\app\Entity\Institucion $institucion, string $fecha)
+    private function allPestudiosPdf(Lapso $lapso, \Illuminate\Support\Collection $pestudiosData, \App\Models\app\Entity\Institucion $institucion, string $fecha, string $rowMode = TimetableGridRowHeight::MODE_CONSERVATIVE)
     {
         $pdf = Pdf::loadView('pdfs.timetable.preview-all-pestudios', [
             'lapso' => $lapso,
             'pestudiosData' => $pestudiosData,
             'institucion' => $institucion,
             'fecha' => $fecha,
+            'rowMode' => $rowMode,
         ]);
         $pdf->setPaper('letter', 'landscape');
 
