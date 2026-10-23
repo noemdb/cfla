@@ -19,12 +19,6 @@
         .section.new-page{page-break-before:always;}
         table{width:100%;border-collapse:collapse;}
         td,th{border:2px solid #A7AAAF;padding:1px 2px;vertical-align:top;font-size:9.5pt;line-height:1;}
-        /* Altura uniforme de filas: todas las filas de una grilla comparten la
-           altura del caso más alto de esa grilla (pulida según contenido). */
-        .grid td{height:50px;}
-        .grid.teachers td{height:66px;}
-        .grid.with-halves td{height:78px;}
-        .grid.teachers.with-halves td{height:92px;}
         th{background:#0d9488;color:#fff;font-weight:700;text-align:center;font-size:9pt;padding:1px 2px;}
         td.time{text-align:center;font-weight:700;width:56px;background:#f8fafc;}
         .subject{font-weight:700;font-size:10.5pt;}
@@ -108,7 +102,7 @@
                             </tbody>
                         </table>
                     @endforeach
-                    @if (!empty($schedule['teacherSummary']))
+                    @if (!empty($schedule['teacherSummary']) && ! ($pestudio->calendar->status_profesor_show ?? true))
                         <div class="summary">
                             <div class="summary-title">Profesores de la sección ({{ count($schedule['teacherSummary']) }}) · ½ = 0.5 bloque</div>
                             <table>
