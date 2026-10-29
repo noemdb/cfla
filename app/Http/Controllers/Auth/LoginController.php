@@ -45,6 +45,15 @@ class LoginController extends Controller
                 return redirect()->to('/admin');
             }
 
+            // Seguimiento de Educación Inicial: mismo orden que
+            // MenuBuilder::resolveLayoutForUser() (después de admin), para que
+            // el destino coincida con el layout/navbar que verá el usuario.
+            // Si además tiene otros flags (profesor, jefatura), esos menús
+            // siguen visibles en el dropdown.
+            if ($user->isInicialManager()) {
+                return redirect()->route('inicials.seguimiento.index');
+            }
+
             if ($user->is_planner) {
                 return redirect()->route('app.planning.index');
             }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Academico\InicialController as AcademicoInicialController;
 use App\Http\Controllers\Evaluacion\InicialController as EvaluacionInicialController;
 use App\Http\Controllers\Inicial\HomeInicialController;
+use App\Http\Controllers\Inicial\SeguimientoInicialController;
 use App\Http\Controllers\Inicial\Tab\EievaluationkController;
 use App\Http\Controllers\Inicial\Tab\EifinalkController;
 use App\Http\Controllers\Inicial\Tab\EiplanningbwkController;
@@ -40,6 +41,49 @@ use Illuminate\Support\Facades\Route;
 | inalcanzable desde la UI.
 |
 */
+
+/*
+|--------------------------------------------------------------------------
+| 0. SEGUIMIENTO DE EDUCACIÓN INICIAL  ·  auth + is_inicial_manager
+|--------------------------------------------------------------------------
+| Quinta perspectiva: solo lectura sobre los 6 documentos de TODOS los
+| docentes de Inicial. No hay POST/PUT/PATCH/DELETE.
+|
+| Rutas por documento para que cada pestaña tenga URL y estado de menú
+| propios. El detalle y el formato los hereda de PerspectivaInicialController.
+|
+| Blueprint: blueprint/inicial · doc 11 · ADR-11.3 / ADR-11.6.
+*/
+Route::middleware(['auth', 'isInicialManager'])
+    ->prefix('app/inicials/seguimiento')
+    ->name('inicials.seguimiento.')
+    ->group(function () {
+        // Panel: redirige a la pestaña semanal.
+        Route::get('/', [SeguimientoInicialController::class, 'index'])->name('index');
+
+        foreach ([
+            'eiplanningwks',
+            'eiplanningbwks',
+            'eiprojectks',
+            'eispecialks',
+            'eievaluationks',
+            'eifinalks',
+        ] as $entidad) {
+            Route::get($entidad, [SeguimientoInicialController::class, 'listado'])
+                ->defaults('entidad', $entidad)
+                ->name($entidad.'.index');
+
+            Route::get($entidad.'/{id}', [SeguimientoInicialController::class, 'show'])
+                ->whereNumber('id')
+                ->defaults('entidad', $entidad)
+                ->name($entidad.'.show');
+
+            Route::get($entidad.'/{id}/format', [SeguimientoInicialController::class, 'format'])
+                ->whereNumber('id')
+                ->defaults('entidad', $entidad)
+                ->name($entidad.'.format');
+        }
+    });
 
 /*
 |--------------------------------------------------------------------------

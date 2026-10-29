@@ -44,6 +44,9 @@ class IndexComponent extends Component
     /** Acceso al módulo de Educación Inicial (pestudio 6). Blueprint inicial · D2/F1. */
     public $is_inicial = false;
 
+    /** Seguimiento de Educación Inicial, solo lectura. Blueprint inicial · doc 11 · F1. */
+    public $is_inicial_manager = false;
+
     public $is_leadership = false;
 
     public $is_coordinacion = false;
@@ -90,6 +93,7 @@ class IndexComponent extends Component
             'is_planner' => 'boolean',
             'is_profesor' => 'boolean',
             'is_inicial' => 'boolean',
+            'is_inicial_manager' => 'boolean',
             'is_leadership' => 'boolean',
             'is_coordinacion' => 'boolean',
             'is_director' => 'boolean',
@@ -112,6 +116,7 @@ class IndexComponent extends Component
         'is_planner' => 'planificador',
         'is_profesor' => 'profesor',
         'is_inicial' => 'educación inicial',
+        'is_inicial_manager' => 'seguimiento inicial',
         'is_leadership' => 'jefe de área',
         'is_coordinacion' => 'coordinación',
         'is_director' => 'dirección',
@@ -143,6 +148,8 @@ class IndexComponent extends Component
         // antes de aplicarla revienta con "Unknown column", así que se degrada
         // a "sin resultados" en vez de tumbar el listado de usuarios.
         $tieneIsInicial = Schema::hasColumn('users', 'is_inicial');
+        // Blueprint inicial · doc 11 · F1: mismo guard defensivo que is_inicial.
+        $tieneIsInicialManager = Schema::hasColumn('users', 'is_inicial_manager');
 
         // Filter by role
         if ($this->filter_role === 'admin') {
@@ -156,6 +163,10 @@ class IndexComponent extends Component
         } elseif ($this->filter_role === 'inicial') {
             $tieneIsInicial
                 ? $query->where('is_inicial', true)
+                : $query->whereRaw('1 = 0');
+        } elseif ($this->filter_role === 'inicial_manager') {
+            $tieneIsInicialManager
+                ? $query->where('is_inicial_manager', true)
                 : $query->whereRaw('1 = 0');
         } elseif ($this->filter_role === 'leadership') {
             $query->where('is_leadership', true);
@@ -180,6 +191,10 @@ class IndexComponent extends Component
             $tieneIsInicial
                 ? $query->where('is_inicial', false)
                 : $query->whereRaw('1 = 1');
+
+            $tieneIsInicialManager
+                ? $query->where('is_inicial_manager', false)
+                : $query->whereRaw('1 = 1');
         }
 
         if (in_array($this->sortField, ['id', 'username', 'email', 'is_active'])) {
@@ -197,6 +212,7 @@ class IndexComponent extends Component
             'planner' => 'Planificación',
             'profesor' => 'Profesor',
             'inicial' => 'Educación Inicial',
+            'inicial_manager' => 'Seguimiento Inicial',
             'leadership' => 'Jefe de Área',
             'coordinacion' => 'Coordinación',
             'director' => 'Dirección',
@@ -262,6 +278,8 @@ class IndexComponent extends Component
         // Blueprint inicial F1. `isInicial()` lee el atributo crudo y tolera
         // que la columna no exista todavía (entornos sin la migración).
         $this->is_inicial = (bool) $user->isInicial();
+        // Blueprint inicial · doc 11 · F1. tolera que la columna no exista.
+        $this->is_inicial_manager = $user->isInicialManager();
         $this->is_leadership = (bool) ($user->is_leadership ?? false);
         $this->is_coordinacion = (bool) ($user->is_coordinacion ?? false);
         $this->is_director = (bool) ($user->is_director ?? false);
@@ -280,6 +298,19 @@ class IndexComponent extends Component
     public function save()
     {
         $this->validate();
+
+        // Separación de funciones (doc 11 · ADR-11.2): el perfil de
+        // seguimiento es de solo lectura y no debe acumular el CRUD docente.
+        // Se rechaza la combinación en la UI; el middleware ya prioriza el
+        // flag manager si existiera data heredada.
+        if ($this->is_inicial && $this->is_inicial_manager) {
+            $this->addError(
+                'is_inicial_manager',
+                'Un usuario no puede ser docente de Inicial y gestor de seguimiento a la vez.'
+            );
+
+            return;
+        }
 
         try {
             DB::beginTransaction();
@@ -305,6 +336,11 @@ class IndexComponent extends Component
             // así el mismo código sirve para entornos que aún no la tengan.
             if (Schema::hasColumn('users', 'is_inicial')) {
                 $userData['is_inicial'] = $this->is_inicial ? 1 : 0;
+            }
+
+            // doc 11 · F1: mismo guard defensivo que is_inicial.
+            if (Schema::hasColumn('users', 'is_inicial_manager')) {
+                $userData['is_inicial_manager'] = $this->is_inicial_manager ? 1 : 0;
             }
 
             if ($this->isEditing) {
@@ -391,7 +427,7 @@ class IndexComponent extends Component
     {
         $this->reset([
             'username', 'email', 'password',
-            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_inicial', 'is_leadership', 'is_coordinacion', 'is_director', 'is_student',
+            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_inicial', 'is_inicial_manager', 'is_leadership', 'is_coordinacion', 'is_director', 'is_student',
             'firstname', 'lastname', 'card_number',
         ]);
         $this->is_active = 'enable';

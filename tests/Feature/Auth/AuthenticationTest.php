@@ -114,6 +114,56 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('app.leadership.dashboard'));
     }
 
+    public function test_manager_multirrol_redirects_to_seguimiento_inicial(): void
+    {
+        // Caso real: un usuario con jefatura y docencia además del flag de
+        // seguimiento. El layout primario es el del manager, así que el
+        // destino del login debe coincidir y no el dashboard de jefatura.
+        $user = User::factory()->create([
+            'is_inicial_manager' => true,
+            'is_profesor' => true,
+            'is_leadership' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('inicials.seguimiento.index'));
+    }
+
+    public function test_admin_con_flag_manager_sigue_redirigiendo_a_admin(): void
+    {
+        $user = User::factory()->create([
+            'is_admin' => true,
+            'is_inicial_manager' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/admin');
+    }
+
+    public function test_manager_autenticado_que_visita_login_va_a_seguimiento(): void
+    {
+        // Mismo orden en RedirectIfAuthenticated: evita que /login mande al
+        // manager al dashboard de jefatura mientras su layout es el nuevo.
+        $user = User::factory()->create([
+            'is_inicial_manager' => true,
+            'is_leadership' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/login')
+            ->assertRedirect(route('inicials.seguimiento.index'));
+    }
+
     public function test_coordinacion_user_redirects_to_coordinacion(): void
     {
         $user = User::factory()->coordinacion()->create([

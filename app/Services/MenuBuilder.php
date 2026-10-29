@@ -32,6 +32,7 @@ class MenuBuilder
         'planning' => 'Planificación Académica',
         'profesor' => 'Panel del Profesor',
         'inicial' => 'Educación Inicial',
+        'seguimiento_inicial' => 'Seguimiento · Educación Inicial',
         'student' => 'Portal Estudiante',
     ];
 
@@ -60,6 +61,11 @@ class MenuBuilder
 
         return match (true) {
             (bool) $user->is_admin => 'admin',
+            // Perfil dedicado de solo lectura: va antes que cualquier otro rol
+            // operativo para que el manager tenga su layout propio aunque
+            // comparta flags con otros roles. El layout incluye los grupos de
+            // esos roles y `hasPermission()` filtra los que no tiene.
+            (bool) $user->isInicialManager() => 'seguimiento_inicial',
             (bool) $user->is_director => 'director',
             (bool) $user->is_leadership => 'leadership',
             (bool) $user->isCoordinacion() => 'coordinacion',
@@ -123,6 +129,10 @@ class MenuBuilder
             // Módulo de Educación Inicial: ÚNICAMENTE usuarios con el flag
             // `is_inicial` (ni siquiera admin: así lo exige el requerimiento).
             'is_inicial' => (bool) $user->isInicial(),
+            // Seguimiento de Educación Inicial: solo lectura y solo con el
+            // flag explícito (ADR-11.4). El `default => true` de este método
+            // hace que omitirlo mostraría el grupo a cualquier layout.
+            'is_inicial_manager' => (bool) $user->isInicialManager(),
             default => true,
         };
     }

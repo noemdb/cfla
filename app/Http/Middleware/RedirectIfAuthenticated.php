@@ -26,6 +26,11 @@ class RedirectIfAuthenticated
                     return redirect()->to('/admin');
                 }
 
+                // Mismo orden que LoginController / MenuBuilder.
+                if ($user->isInicialManager()) {
+                    return redirect()->route('inicials.seguimiento.index');
+                }
+
                 if ($user->is_planner) {
                     return redirect()->route('app.planning.index');
                 }

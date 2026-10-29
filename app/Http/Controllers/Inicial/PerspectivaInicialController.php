@@ -67,6 +67,13 @@ abstract class PerspectivaInicialController extends AbstractInicialController
             'detalle' => RegistroInicial::parcialDetalle($entidad),
             'rutaFormato' => $this->rutaFormato($entidad, $documento->id),
             'campoRevision' => RegistroInicial::campoRevision($entidad),
+            // Navegación y nota de revisión: cada perspectiva puede cambiar
+            // a dónde vuelve el usuario y qué texto explica quién escribe.
+            // Las tres actuales usan los valores por defecto, así que su
+            // comportamiento no cambia (doc 11 · §7.1).
+            'rutaInicio' => $this->rutaInicio(),
+            'etiquetaInicio' => $this->etiquetaInicio(),
+            'notaRevision' => $this->notaRevision(),
         ]);
     }
 
@@ -128,6 +135,27 @@ abstract class PerspectivaInicialController extends AbstractInicialController
     protected function rutaFormato(string $entidad, int $id): string
     {
         return route($this->prefijoRutas.$entidad.'.format', $id);
+    }
+
+    /**
+     * A dónde vuelve el usuario desde el detalle.
+     *
+     * Por defecto, la portada del docente. El seguimiento la sobreescribe para
+     * no mandar a un manager a una ruta que le daría 403 (doc 11 · §7.1).
+     */
+    protected function rutaInicio(): string
+    {
+        return route('inicials.home');
+    }
+
+    protected function etiquetaInicio(): string
+    {
+        return 'Educación Inicial';
+    }
+
+    protected function notaRevision(): string
+    {
+        return 'La revisión la escribe la Coordinación de Evaluación desde su propia perspectiva.';
     }
 
     /**

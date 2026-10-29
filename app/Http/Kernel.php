@@ -105,6 +105,7 @@ class Kernel extends HttpKernel
         'isPlanner' => \App\Http\Middleware\IsPlanner::class,
         'isProfesor' => \App\Http\Middleware\IsProfesor::class,
         'isInicial' => \App\Http\Middleware\IsInicial::class,
+        'isInicialManager' => \App\Http\Middleware\IsInicialManager::class,
         'isStudent' => \App\Http\Middleware\IsStudent::class,
         'isLeadership' => \App\Http\Middleware\IsLeadership::class,
         'isCoordinacion' => \App\Http\Middleware\IsCoordinacion::class,

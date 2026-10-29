@@ -284,6 +284,143 @@ final class RegistroInicial
     }
 
     /**
+     * Datos de una fila de la tabla de seguimiento, ya agrupados.
+     *
+     * Blueprint: blueprint/inicial · doc 11 · §9.6.
+     *
+     * ─────────────────────────────────────────────────────────────────────────────
+     * POR QUÉ NO HAY UNA COLUMNA POR DATO
+     * ─────────────────────────────────────────────────────────────────────────────
+     * La variante plana sumaba nueve columnas del catálogo más Estado,
+     * Revisión y Acciones. Para que no se partieran obligaba a `nowrap` y a un
+     * `overflow-x-auto`, así que la tabla desbordaba incluso en escritorio.
+     *
+     * Aquí la misma información se agrupa en dos celdas:
+     *
+     *   · documento → nivel · sección · área / docente / N° · período
+     *   · contenido → diagnóstico, justificación, título… + contadores
+     *
+     * Con eso la tabla entra en cinco columnas y no necesita scroll
+     * horizontal. Los contadores siguen leyendo los `*_count` de `withCount()`.
+     *
+     * @return array{
+     *     principal: string,
+     *     secundario: ?string,
+     *     meta: ?string,
+     *     contenidoEtiqueta: string,
+     *     contenido: ?string,
+     *     contadores: array<string, int|string|null>
+     * }
+     */
+    public static function filaTabla(string $entidad, Model $documento): array
+    {
+        $unir = static function (array $partes, string $separador = ' · '): string {
+            $limpias = array_values(array_filter($partes, fn ($parte) => filled($parte)));
+
+            return $limpias === [] ? '—' : implode($separador, $limpias);
+        };
+
+        // `squish()` quita saltos de línea y espacios repetidos: una celda de
+        // tabla no debe crecer porque el diagnóstico venga con párrafos.
+        $texto = static fn ($valor, int $limite = 180): ?string => filled($valor)
+            ? (string) str($valor)->squish()->limit($limite)
+            : null;
+
+        $nivel = static fn (Model $doc): string => $unir([
+            $doc->grado?->name,
+            $doc->seccion?->name,
+        ]);
+
+        $area = static fn (Model $doc): ?string => $doc->pensum?->asignatura?->name;
+
+        $rango = static fn (Model $doc): string => $unir([
+            $doc->finicial?->format('d/m/Y'),
+            $doc->ffinal?->format('d/m/Y'),
+        ], ' → ');
+
+        $numero = static fn (Model $doc): string => 'N° '.$doc->id;
+
+        $docente = static fn (Model $doc): ?string => $doc->profesor?->full_name;
+
+        return match ($entidad) {
+            'eiplanningwks', 'eiplanningbwks' => [
+                'principal' => $unir([$nivel($documento), $area($documento)]),
+                'secundario' => $docente($documento),
+                'meta' => $unir([$numero($documento), $rango($documento), self::semanas($documento->tiempo_ejecucion)]),
+                'contenidoEtiqueta' => 'Diagnóstico',
+                'contenido' => $texto($documento->diagnostico),
+                'contadores' => [
+                    'Estrategias' => $documento->estrategias_count,
+                    'Resúmenes' => $documento->resumenes_count,
+                ],
+            ],
+            'eiprojectks' => [
+                'principal' => $unir([$nivel($documento), $area($documento)]),
+                'secundario' => $docente($documento),
+                'meta' => $unir([$numero($documento), $rango($documento), self::semanas($documento->tiempo_ejecucion)]),
+                'contenidoEtiqueta' => 'Diagnóstico',
+                'contenido' => $texto($documento->diagnostico),
+                'contadores' => [
+                    'Estrategias' => $documento->estrategias_count,
+                    'Resúmenes' => $documento->resumenes_count,
+                    'Revisiones' => $documento->revisiones_count,
+                ],
+            ],
+            'eispecialks' => [
+                'principal' => $unir([$nivel($documento), $area($documento)]),
+                'secundario' => $docente($documento),
+                'meta' => $unir([$numero($documento), $rango($documento)]),
+                'contenidoEtiqueta' => 'Justificación',
+                'contenido' => $texto($documento->justificacion),
+                'contadores' => [
+                    'Actividades' => $documento->actividades_count,
+                    'Estrategias' => $documento->estrategias_count,
+                ],
+            ],
+            'eievaluationks' => [
+                'principal' => $unir([$nivel($documento), $area($documento)]),
+                'secundario' => $docente($documento),
+                'meta' => $unir([$numero($documento), $documento->lapso?->name, $rango($documento)]),
+                'contenidoEtiqueta' => 'Observaciones',
+                'contenido' => $texto($documento->observaciones),
+                'contadores' => [
+                    'Posiciones' => $documento->posiciones_count,
+                ],
+            ],
+            'eifinalks' => [
+                'principal' => $unir([
+                    $documento->expectant?->full_name,
+                    $documento->expectant?->ci_estudiant,
+                ]),
+                'secundario' => $documento->pevaluacion?->profesor?->full_name,
+                'meta' => $unir([
+                    $numero($documento),
+                    $documento->pevaluacion?->seccion?->name,
+                    $documento->pevaluacion?->lapso?->name,
+                ]),
+                'contenidoEtiqueta' => 'Título',
+                'contenido' => $texto($documento->title),
+                'contadores' => [
+                    'Expectativas' => $documento->expectativas_count,
+                ],
+            ],
+            default => throw new \InvalidArgumentException("Documento de Educación Inicial desconocido: [{$entidad}]."),
+        };
+    }
+
+    /** «1 semana» / «2 semanas», o `null` si el documento no lo declara. */
+    private static function semanas(mixed $tiempo): ?string
+    {
+        if (! is_numeric($tiempo) || (int) $tiempo < 1) {
+            return null;
+        }
+
+        $semanas = (int) $tiempo;
+
+        return $semanas.' '.($semanas === 1 ? 'semana' : 'semanas');
+    }
+
+    /**
      * Consulta de la tabla de revisión con los filtros de la URL aplicados.
      *
      * @param  array<string, int|null>  $filtros  `profesor_id`, `grado_id`,

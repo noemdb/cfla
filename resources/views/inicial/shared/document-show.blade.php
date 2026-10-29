@@ -26,8 +26,8 @@
                 <nav class="text-xs text-gray-500" aria-label="Migas de pan">
                     <ol class="flex flex-wrap items-center gap-2">
                         <li>
-                            <a href="{{ route('inicials.home') }}" class="hover:text-cyan-400 transition-colors">
-                                Educación Inicial
+                            <a href="{{ $rutaInicio ?? route('inicials.home') }}" class="hover:text-cyan-400 transition-colors">
+                                {{ $etiquetaInicio ?? 'Educación Inicial' }}
                             </a>
                         </li>
                         <li aria-hidden="true">/</li>
@@ -81,7 +81,7 @@
                          (componente Livewire), no aquí: esta pantalla es de
                          lectura para las tres perspectivas. --}}
                     <p class="mt-2 text-[11px] text-gray-600">
-                        Para escribirla, use la pestaña «{{ $titulo }}» de la perspectiva correspondiente.
+                        {{ $notaRevision ?? 'Para escribirla, use la pestaña «'.$titulo.'» de la perspectiva correspondiente.' }}
                     </p>
                 </section>
             @endif

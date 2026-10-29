@@ -20,6 +20,8 @@
 
 > **Hallazgo clave:** la perspectiva Evaluación **NO es de solo lectura total** — sus componentes Livewire persisten `observacion` (planes) y `recomendacion` (evaluaciones): es la función de **revisión del Coordinador de Evaluación**. Planning y Académico sí son solo lectura.
 
+> **Nota cfla (quinta perspectiva):** el legacy no tiene un perfil de *seguimiento* global. En este proyecto se propone añadirlo como `is_inicial_manager` (`/app/inicials/seguimiento`), **solo lectura**, sin heredar `is_admin` ni el CRUD docente, reutilizando `RegistroInicial`, `PerspectivaFiltros` y `PerspectivaInicialController`. Plan, ADRs y pruebas en [`11-perfil-seguimiento-inicial.md`](11-perfil-seguimiento-inicial.md). Todo lo descrito en este documento sobre el legacy se mantiene como referencia histórica y no se modifica.
+
 ## 2. Vistas índice de las tres perspectivas
 
 ### 2.1 Evaluación — `resources/views/evaluacions/inicilas/index.blade.php` (159 líneas)

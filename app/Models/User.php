@@ -17,6 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @method bool isStudent()
  * @method bool isAdminOrDiagnostic()
  * @method bool isInicial()
+ * @method bool isInicialManager()
  */
 class User extends Authenticatable implements \App\Contracts\Auditable
 {
@@ -32,6 +33,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         return [
             'id', 'username', 'email', 'is_active',
             'is_admin', 'is_planner', 'is_diagnostic', 'is_profesor', 'is_inicial',
+            'is_inicial_manager',
             'is_coordinacion', 'is_leadership', 'is_director', 'is_student',
         ];
     }
@@ -56,6 +58,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         'is_diagnostic',
         'is_profesor',
         'is_inicial',
+        'is_inicial_manager',
         'is_coordinacion',
         'is_leadership',
         'is_director',
@@ -86,6 +89,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         'is_diagnostic' => 'boolean',
         'is_profesor' => 'boolean',
         'is_inicial' => 'boolean',
+        'is_inicial_manager' => 'boolean',
         'is_coordinacion' => 'boolean',
         'is_leadership' => 'boolean',
         'is_director' => 'boolean',
@@ -156,6 +160,20 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         return $this->attributes['is_inicial'] ?? false;
     }
 
+    /**
+     * Acceso al seguimiento de Educación Inicial (solo lectura).
+     *
+     * Lee el atributo crudo, igual que isInicial(), para no heredar el
+     * fallback de otros flags. Devuelve false mientras la migración
+     * `add_is_inicial_manager_to_users_table` no se haya corrido.
+     *
+     * Blueprint: blueprint/inicial · doc 11 · ADR-11.1 / ADR-11.4.
+     */
+    public function isInicialManager(): bool
+    {
+        return (bool) ($this->attributes['is_inicial_manager'] ?? false);
+    }
+
     public function isStudent(): bool
     {
         return $this->is_student ?? false;
@@ -186,12 +204,16 @@ class User extends Authenticatable implements \App\Contracts\Auditable
     public function getRoleLabelAttribute(): string
     {
         // Prioridad cuando el usuario tiene varios roles (requerimiento navbar):
-        // 'is_admin', 'is_planner','is_coordinacion', 'is_leadership', 'is_profesor', 'is_director', 'is_student', 'is_diagnostic'
+        // 'is_admin', 'is_inicial_manager', 'is_planner', 'is_coordinacion',
+        // 'is_leadership', 'is_profesor', 'is_director', 'is_student', 'is_diagnostic'
         // Se lee el atributo crudo para no heredar el fallback de is_planner/is_leadership/is_director que incluyen is_admin.
         $a = $this->attributes;
 
         if (! empty($a['is_admin'])) {
             return 'Administrador';
+        }
+        if (! empty($a['is_inicial_manager'])) {
+            return 'Seguimiento Inicial';
         }
         if (! empty($a['is_planner'])) {
             return 'Planificación';

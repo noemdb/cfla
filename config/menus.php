@@ -556,6 +556,62 @@ return [
             ],
         ],
 
+        // ---- SEGUIMIENTO DE EDUCACIÓN INICIAL (solo lectura) ----
+        // Quinta perspectiva (blueprint/inicial · doc 11 · ADR-11.8). Grupo y
+        // layout PROPIOS: el manager no es docente ni admin y no debe heredar
+        // sus menús. El permiso `is_inicial_manager` lo muestra únicamente a
+        // quien tiene el flag explícito.
+        'seguimiento_inicial' => [
+            'label' => 'Seguimiento Inicial',
+            'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.05-.383-3.016z',
+            'permission' => 'is_inicial_manager',
+            'color' => 'cyan',
+            'items' => [
+                [
+                    'label' => 'Panel',
+                    'route' => 'inicials.seguimiento.index',
+                    'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+                    'active' => 'inicials.seguimiento.index',
+                ],
+                [
+                    'label' => 'Planificación semanal',
+                    'route' => 'inicials.seguimiento.eiplanningwks.index',
+                    'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+                    'active' => 'inicials.seguimiento.eiplanningwks*',
+                ],
+                [
+                    'label' => 'Planificación quincenal',
+                    'route' => 'inicials.seguimiento.eiplanningbwks.index',
+                    'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM9 11h6M9 15h6',
+                    'active' => 'inicials.seguimiento.eiplanningbwks*',
+                ],
+                [
+                    'label' => 'Proyecto de aula',
+                    'route' => 'inicials.seguimiento.eiprojectks.index',
+                    'icon' => 'M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z',
+                    'active' => 'inicials.seguimiento.eiprojectks*',
+                ],
+                [
+                    'label' => 'Plan especial',
+                    'route' => 'inicials.seguimiento.eispecialks.index',
+                    'icon' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+                    'active' => 'inicials.seguimiento.eispecialks*',
+                ],
+                [
+                    'label' => 'Plan de evaluación',
+                    'route' => 'inicials.seguimiento.eievaluationks.index',
+                    'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+                    'active' => 'inicials.seguimiento.eievaluationks*',
+                ],
+                [
+                    'label' => 'Informe final',
+                    'route' => 'inicials.seguimiento.eifinalks.index',
+                    'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                    'active' => 'inicials.seguimiento.eifinalks*',
+                ],
+            ],
+        ],
+
         'profesor' => [
             'label' => 'Profesor',
             'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
@@ -655,6 +711,22 @@ return [
         ],
         'inicial' => [
             'groups' => ['inicial', 'profesor', 'seguimiento'],
+        ],
+        // Perfil dedicado de solo lectura. Un manager PUEDE compartir flags
+        // con otros roles (profesor, jefe de área, planificación, etc.): el
+        // layout declara esos grupos y `hasPermission()` muestra únicamente
+        // los que el usuario realmente tiene. `inicial` se incluye por data
+        // heredada; la UI de admin impide la combinación con el flag manager.
+        'seguimiento_inicial' => [
+            'groups' => [
+                'seguimiento_inicial',
+                'profesor',
+                'inicial',
+                'seguimiento',
+                'planning',
+                'coordinacion',
+                'director',
+            ],
         ],
         'leadership' => [
             'groups' => ['seguimiento', 'planning', 'coordinacion', 'director', 'admin', 'profesor'],

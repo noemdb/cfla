@@ -54,6 +54,10 @@ return [
         'planning' => 'isPlanner',
         // Académico/Dirección: solo lectura limitada.
         'academico' => 'isAdmin',
+        // Seguimiento: solo lectura de todos los docentes de Inicial.
+        // Documentación de configuración; el acceso real lo aplica el
+        // middleware `isInicialManager` (blueprint/inicial · doc 11 · §10.4).
+        'seguimiento' => 'isInicialManager',
     ],
 
     /*
