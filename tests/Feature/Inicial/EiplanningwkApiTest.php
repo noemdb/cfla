@@ -2,34 +2,43 @@
 
 namespace Tests\Feature\Inicial;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Inicial\Eiplanningwk;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
 
 class EiplanningwkApiTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use DatabaseTransactions, WithFaker;
 
     protected $user;
+
     protected $profesor;
+
     protected $token;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        // La API todavía no tiene factory de Eiplanningwk. Sin este guard el
+        // test no solo falla: con RefreshDatabase ejecutaba `migrate:fresh`
+        // sobre la base real. Se salta explícitamente hasta que exista.
+        if (! class_exists(\Database\Factories\app\Inicial\EiplanningwkFactory::class)) {
+            $this->markTestSkipped('Falta Database\Factories\app\Inicial\EiplanningwkFactory.');
+        }
+
         // Crear usuario y profesor para pruebas
         $this->user = User::factory()->create([
             'username' => 'profesor_test',
             'email' => 'profesor@test.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('password123'),
         ]);
 
         $this->profesor = Profesor::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
 
         // Crear token Sanctum
@@ -41,12 +50,12 @@ class EiplanningwkApiTest extends TestCase
     {
         // Crear algunas planificaciones de prueba
         Eiplanningwk::factory()->count(3)->create([
-            'profesor_id' => $this->profesor->id
+            'profesor_id' => $this->profesor->id,
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get('/api/inicial/eiplanningwks');
 
         $response->assertStatus(200)
@@ -59,14 +68,14 @@ class EiplanningwkApiTest extends TestCase
                         'seccion_id',
                         'finicial',
                         'ffinal',
-                        'links'
-                    ]
+                        'links',
+                    ],
                 ],
                 'meta' => [
                     'total',
                     'per_page',
-                    'current_page'
-                ]
+                    'current_page',
+                ],
             ]);
 
         $this->assertCount(3, $response->json('data'));
@@ -83,13 +92,13 @@ class EiplanningwkApiTest extends TestCase
             'ffinal' => '2026-10-05',
             'tiempo_ejecucion' => 1,
             'diagnostico' => 'Diagnóstico inicial de prueba',
-            'observacion' => 'Observaciones de prueba'
+            'observacion' => 'Observaciones de prueba',
         ];
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
+            'Authorization' => 'Bearer '.$this->token,
             'Accept' => 'application/json',
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
         ])->post('/api/inicial/eiplanningwks', $data);
 
         $response->assertStatus(201)
@@ -105,14 +114,14 @@ class EiplanningwkApiTest extends TestCase
                     'diagnostico',
                     'observacion',
                     'created_at',
-                    'updated_at'
+                    'updated_at',
                 ],
-                'message'
+                'message',
             ]);
 
         $this->assertDatabaseHas('eiplanningwks', [
             'profesor_id' => $this->profesor->id,
-            'diagnostico' => 'Diagnóstico inicial de prueba'
+            'diagnostico' => 'Diagnóstico inicial de prueba',
         ]);
     }
 
@@ -125,7 +134,7 @@ class EiplanningwkApiTest extends TestCase
             'grado_id' => 1,
             'seccion_id' => 1,
             'finicial' => '2026-10-01',
-            'ffinal' => '2026-10-05'
+            'ffinal' => '2026-10-05',
         ]);
 
         // Intentar crear duplicado
@@ -135,13 +144,13 @@ class EiplanningwkApiTest extends TestCase
             'seccion_id' => 1,
             'finicial' => '2026-10-01', // Misma fecha
             'ffinal' => '2026-10-05',
-            'tiempo_ejecucion' => 1
+            'tiempo_ejecucion' => 1,
         ];
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
+            'Authorization' => 'Bearer '.$this->token,
             'Accept' => 'application/json',
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
         ])->post('/api/inicial/eiplanningwks', $data);
 
         $response->assertStatus(422)
@@ -152,20 +161,20 @@ class EiplanningwkApiTest extends TestCase
     public function usuario_puede_ver_planificacion_especifica()
     {
         $plan = Eiplanningwk::factory()->create([
-            'profesor_id' => $this->profesor->id
+            'profesor_id' => $this->profesor->id,
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get("/api/inicial/eiplanningwks/{$plan->id}");
 
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
                     'id' => $plan->id,
-                    'profesor_id' => $plan->profesor_id
-                ]
+                    'profesor_id' => $plan->profesor_id,
+                ],
             ]);
     }
 
@@ -175,16 +184,16 @@ class EiplanningwkApiTest extends TestCase
         // Crear otro profesor y planificación
         $otroUser = User::factory()->create();
         $otroProfesor = Profesor::factory()->create([
-            'user_id' => $otroUser->id
+            'user_id' => $otroUser->id,
         ]);
 
         $plan = Eiplanningwk::factory()->create([
-            'profesor_id' => $otroProfesor->id
+            'profesor_id' => $otroProfesor->id,
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get("/api/inicial/eiplanningwks/{$plan->id}");
 
         $response->assertStatus(404); // 404 para no revelar existencia
@@ -194,31 +203,31 @@ class EiplanningwkApiTest extends TestCase
     public function usuario_puede_actualizar_su_planificacion()
     {
         $plan = Eiplanningwk::factory()->create([
-            'profesor_id' => $this->profesor->id
+            'profesor_id' => $this->profesor->id,
         ]);
 
         $data = [
             'diagnostico' => 'Diagnóstico actualizado',
-            'observacion' => 'Observaciones actualizadas'
+            'observacion' => 'Observaciones actualizadas',
         ];
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
+            'Authorization' => 'Bearer '.$this->token,
             'Accept' => 'application/json',
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json',
         ])->put("/api/inicial/eiplanningwks/{$plan->id}", $data);
 
         $response->assertStatus(200)
             ->assertJson([
                 'data' => [
                     'diagnostico' => 'Diagnóstico actualizado',
-                    'observacion' => 'Observaciones actualizadas'
-                ]
+                    'observacion' => 'Observaciones actualizadas',
+                ],
             ]);
 
         $this->assertDatabaseHas('eiplanningwks', [
             'id' => $plan->id,
-            'diagnostico' => 'Diagnóstico actualizado'
+            'diagnostico' => 'Diagnóstico actualizado',
         ]);
     }
 
@@ -226,21 +235,21 @@ class EiplanningwkApiTest extends TestCase
     public function usuario_puede_eliminar_su_planificacion()
     {
         $plan = Eiplanningwk::factory()->create([
-            'profesor_id' => $this->profesor->id
+            'profesor_id' => $this->profesor->id,
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->delete("/api/inicial/eiplanningwks/{$plan->id}");
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'Planificación eliminada exitosamente'
+                'message' => 'Planificación eliminada exitosamente',
             ]);
 
         $this->assertDatabaseMissing('eiplanningwks', [
-            'id' => $plan->id
+            'id' => $plan->id,
         ]);
     }
 
@@ -249,12 +258,12 @@ class EiplanningwkApiTest extends TestCase
     {
         // Crear algunas planificaciones
         Eiplanningwk::factory()->count(5)->create([
-            'profesor_id' => $this->profesor->id
+            'profesor_id' => $this->profesor->id,
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get('/api/inicial/eiplanningwks/statistics');
 
         $response->assertStatus(200)
@@ -265,7 +274,7 @@ class EiplanningwkApiTest extends TestCase
                 'promedio_resumenes_por_plan',
                 'planes_por_grado',
                 'planes_por_mes',
-                'planes_recientes'
+                'planes_recientes',
             ]);
     }
 
@@ -275,15 +284,15 @@ class EiplanningwkApiTest extends TestCase
         // Intentar hacer muchas solicitudes rápidamente
         for ($i = 0; $i < 35; $i++) {
             $response = $this->withHeaders([
-                'Authorization' => 'Bearer ' . $this->token,
-                'Accept' => 'application/json'
+                'Authorization' => 'Bearer '.$this->token,
+                'Accept' => 'application/json',
             ])->post('/api/inicial/eiplanningwks', [
                 'profesor_id' => $this->profesor->id,
                 'grado_id' => 1,
                 'seccion_id' => 1,
                 'finicial' => '2026-10-01',
                 'ffinal' => '2026-10-05',
-                'tiempo_ejecucion' => 1
+                'tiempo_ejecucion' => 1,
             ]);
 
             if ($response->status() == 429) {
@@ -293,7 +302,7 @@ class EiplanningwkApiTest extends TestCase
 
         // Debería haber recibido 429 en algún punto
         $this->assertTrue(
-            $response->status() == 429 || 
+            $response->status() == 429 ||
             $response->status() == 422, // O falla por validación
             'Rate limiting no funcionó'
         );
@@ -306,31 +315,31 @@ class EiplanningwkApiTest extends TestCase
         Eiplanningwk::factory()->create([
             'profesor_id' => $this->profesor->id,
             'grado_id' => 1,
-            'finicial' => '2026-10-01'
+            'finicial' => '2026-10-01',
         ]);
 
         Eiplanningwk::factory()->create([
             'profesor_id' => $this->profesor->id,
             'grado_id' => 2,
-            'finicial' => '2026-10-08'
+            'finicial' => '2026-10-08',
         ]);
 
         // Filtrar por grado_id = 1
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get('/api/inicial/eiplanningwks?grado_id=1');
 
         $response->assertStatus(200);
-        
+
         $data = $response->json('data');
         $this->assertCount(1, $data);
         $this->assertEquals(1, $data[0]['grado_id']);
 
         // Filtrar por fecha
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get('/api/inicial/eiplanningwks?fecha_desde=2026-10-05');
 
         $data = $response->json('data');
@@ -342,24 +351,24 @@ class EiplanningwkApiTest extends TestCase
     {
         // Crear más planificaciones que el límite por página
         Eiplanningwk::factory()->count(15)->create([
-            'profesor_id' => $this->profesor->id
+            'profesor_id' => $this->profesor->id,
         ]);
 
         // Solicitar con per_page = 5
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $this->token,
-            'Accept' => 'application/json'
+            'Authorization' => 'Bearer '.$this->token,
+            'Accept' => 'application/json',
         ])->get('/api/inicial/eiplanningwks?per_page=5');
 
         $response->assertStatus(200);
 
         $data = $response->json();
-        
+
         $this->assertCount(5, $data['data']);
         $this->assertEquals(5, $data['meta']['per_page']);
         $this->assertEquals(15, $data['meta']['total']);
         $this->assertEquals(3, $data['meta']['total_pages']);
-        
+
         // Verificar enlaces de paginación
         $this->assertNotNull($data['links']['first']);
         $this->assertNotNull($data['links']['last']);

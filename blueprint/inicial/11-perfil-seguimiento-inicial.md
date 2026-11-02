@@ -1,9 +1,9 @@
-# 11 — Perfil `is_inicial_manager` · Seguimiento de Educación Inicial (solo lectura)
+# 11 — Perfil `is_inicial_manager` · Seguimiento de Educación Inicial
 
-> **Estado:** propuesta de implementación · 2026-10-29 · decisiones de naming, acceso y exclusión de roles **confirmadas** (§17)
+> **Estado:** implementado · 2026-10-29 · ampliado el 2026-11-02 con la escritura de la revisión (ADR-11.11)
 > **Ámbito:** módulo Educación Inicial (pestudio 6), quinta perspectiva sobre los mismos seis documentos.
 > **Depende de:** [`01-rutas-controladores.md`](01-rutas-controladores.md), [`02-modelos-schema.md`](02-modelos-schema.md), [`03-livewire-componentes.md`](03-livewire-componentes.md), [`04-vistas-ui.md`](04-vistas-ui.md), [`07-perspectivas-roles.md`](07-perspectivas-roles.md) y [`08-adaptacion-cfla.md`](08-adaptacion-cfla.md).
-> **No implementado:** este documento es el plan. La migración y cualquier cambio de código requieren aprobación explícita.
+> **Alcance de escritura:** el perfil **consulta** los seis documentos y **solo escribe la revisión** (`observacion`/`recomendacion`). No crea, edita, elimina, clona ni importa documentos.
 
 ---
 
@@ -12,7 +12,7 @@
 | Aspecto | Decisión propuesta |
 |---|---|
 | Flag | `users.is_inicial_manager` (`boolean`, `default false`) |
-| Perfil | Seguimiento de Educación Inicial · **solo lectura** |
+| Perfil | Seguimiento de Educación Inicial · **consulta + revisión** |
 | Ruta base | `/app/inicials/seguimiento` |
 | Nombre de rutas | `inicials.seguimiento.*` |
 | Middleware | `auth` + `isInicialManager` (alias nuevo) |
@@ -20,8 +20,8 @@
 | Menú | Grupo `seguimiento_inicial` en `config/menus.php` |
 | Documentos | Los **6** del catálogo `RegistroInicial` |
 | Alcance de datos | **Todos** los docentes `is_inicial`, no solo el autenticado |
-| Escritura | **Ninguna**: sin crear, editar, eliminar, clonar, importar, observar ni recomendar |
-| Componente | `App\Livewire\Inicial\SeguimientoInicialComponent` (listado, filtros, tarjetas/tabla, modal de detalle) |
+| Escritura | **Solo la revisión** (`observacion`, o `recomendacion` en el plan de evaluación) desde el modal «Ver»; sin crear, editar, eliminar, clonar ni importar documentos |
+| Componente | `App\Livewire\Inicial\SeguimientoInicialComponent` (listado, filtros, tarjetas/tabla, modal de detalle y revisión) |
 | Detalle / impresión | `PerspectivaInicialController::show()` y `format()` reutilizados |
 | Servicio nuevo | `App\Services\Inicial\SeguimientoInicial` (consultas, filtros, completitud, KPI) |
 | Migración | Una sola columna en `users`; sin tablas nuevas |
@@ -41,19 +41,20 @@ El módulo de Inicial ya tiene cuatro perspectivas sobre los **mismos** seis doc
 | Planificación | `is_planner` | Solo lectura |
 | Académico / Dirección | `is_admin` | Solo lectura limitada (2 documentos) |
 
-Falta un perfil operativo que **no sea docente ni coordinador**: una persona que deba **revisar el avance de todos los docentes de Inicial**, detectar planes incompletos o sin revisión, abrir el detalle y descargar el formato, pero que **no pueda modificar ningún documento ni escribir observaciones**.
+Falta un perfil operativo que **no sea docente ni coordinador**: una persona que deba **revisar el avance de todos los docentes de Inicial**, detectar planes incompletos o sin revisión, abrir el detalle, descargar el formato y **registrar la revisión de la Coordinación**, pero que **no pueda crear, editar ni eliminar ningún documento**.
 
-El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una interfaz deliberadamente parecida a `/app/inicials/eiplanningwks`: filtros, tarjetas/tabla, paginación, indicadores de completitud, detalle y formato imprimible. La diferencia es que **no hay CRUD**: solo consulta, seguimiento y lectura.
+El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una interfaz deliberadamente parecida a `/app/inicials/eiplanningwks`: filtros, tarjetas/tabla, paginación, indicadores de completitud, detalle y formato imprimible. La diferencia es que **no hay CRUD**: la única escritura es `observacion`/`recomendacion`, con la misma regla `min:5` que la Coordinación de Evaluación.
 
 ### 1.1 Criterios de éxito medibles
 
 1. El manager ve registros de **dos docentes distintos** en la misma pantalla; no hay filtro implícito por `auth()->id()`.
 2. Puede filtrar por docente, nivel (`grado_id`), sección, lapso (cuando aplica), rango de fechas, estado y búsqueda; los filtros viajan en la URL.
 3. Puede abrir el detalle y el formato de los **seis** documentos.
-4. No existe ninguna ruta `POST/PUT/PATCH/DELETE` bajo `inicials.seguimiento.*`.
-5. Un docente `is_inicial` sin el flag recibe **403**; un `is_admin` sin el flag recibe **403**.
-6. La suite `tests/Feature/Inicial` sigue verde y se añaden pruebas específicas del perfil.
-7. La página índice no dispara N+1 ni carga las estrategias/resúmenes completos de cada fila.
+4. No existe ninguna ruta `POST/PUT/PATCH/DELETE` bajo `inicials.seguimiento.*`; la revisión viaja por el endpoint de Livewire.
+5. Desde el modal «Ver» puede registrar la revisión (`observacion`/`recomendacion`, `min:5`) y el badge y el KPI se actualizan en el mismo render.
+6. Un docente `is_inicial` sin el flag recibe **403**; un `is_admin` sin el flag recibe **403**.
+7. La suite `tests/Feature/Inicial` sigue verde y se añaden pruebas específicas del perfil.
+8. La página índice no dispara N+1 ni carga las estrategias/resúmenes completos de cada fila.
 
 ---
 
@@ -65,13 +66,14 @@ El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una in
 - Middleware, alias en `Kernel`, rutas, controlador, servicio, componente Livewire, vistas y parciales.
 - Menú/layout propio y entrada en el navbar.
 - Filtros, paginación, tarjetas/tabla, KPI, detalle y formato.
+- Escritura de la revisión (`observacion`/`recomendacion`, `required|string|min:5`) desde el modal «Ver», con defensa de rol en el componente.
 - Reutilización de `RegistroInicial`, `PerspectivaFiltros`, `PerspectivaInicialController` y las vistas de formato existentes.
-- Pruebas de acceso, datos, filtros, detalle, formato, menú, administración de usuarios y no-escritura.
+- Pruebas de acceso, datos, filtros, detalle, formato, menú, administración de usuarios, revisión y no-escritura del resto de campos.
 - Documentación de blueprint y actualización del `README`.
 
 ### 2.2 Fuera del alcance
 
-- Escribir `observacion`, `recomendacion` o cualquier campo de los documentos.
+- Escribir cualquier campo distinto de la revisión (`diagnostico`, rejilla de estrategias, resúmenes, etc.).
 - Crear, editar, eliminar, clonar, importar o restaurar documentos.
 - Exportaciones CSV/Excel, gráficos históricos, notificaciones o reportes automáticos.
 - Cambiar el CRUD del docente, sus políticas o sus componentes.
@@ -105,7 +107,7 @@ El requerimiento original decía `user.is_incial_manager`; **`incial` es un typo
 
 El manager **no hereda** `isInicial`, no usa `EiplanningwkComponent` y no comparte el `mount()` que resuelve `Auth::user()->profesor`. Un manager puede no tener ficha de `profesors`.
 
-**Decidido (2026-10-29):** ambos flags son **excluyentes**. Un mismo usuario no puede ser docente con CRUD y manager de solo lectura; la UI de admin lo rechaza (§4.3). Es la forma más simple de garantizar que el perfil nuevo nunca escriba: no hay ningún usuario que acumule ambos poderes.
+**Decidido (2026-10-29):** ambos flags son **excluyentes**. Un mismo usuario no puede ser docente con CRUD y manager de consulta y revisión; la UI de admin lo rechaza (§4.3). Es la forma más simple de garantizar que el perfil nuevo no herede el CRUD docente: no hay ningún usuario que acumule ambos poderes.
 
 - Middleware propio: `IsInicialManager`.
 - Controlador propio: `SeguimientoInicialController`.
@@ -198,6 +200,23 @@ Fase 1: **una sola migración**, `users.is_inicial_manager`.
 - No se añaden índices en fase 1: el volumen actual de Inicial es pequeño y la planificación semanal ya tiene índices (`eiplanningwks_profesor_finicial_index`, `eiplanningwks_grado_seccion_finicial_index`).
 - Fase 2: índices para los otros documentos **solo** después de medir con `EXPLAIN` y obtener aprobación. Se documentan en §12.3, no se incluyen en la migración inicial.
 
+### ADR-11.11 · La revisión se escribe desde el Seguimiento (2026-11-02)
+
+El perfil nació como solo lectura, pero el uso real exige que la persona que **detecta** un plan incompleto o sin revisión pueda **dejar constancia** de la revisión sin abrir otra perspectiva ni pedir otra cuenta.
+
+**Decidido:** la única escritura del perfil es el campo de revisión del documento, y ocurre **solo dentro del modal del listado**. El modal se abre con «Ver» o directamente con el botón «Revisión» que está junto a «Imprimir» en cada tarjeta o fila de la tabla:
+
+- Campo: `observacion` en planificación semanal, quincenal, proyecto y plan especial; `recomendacion` en el plan de evaluación. El informe final no tiene campo revisable y `abrirRevision()` responde **404**.
+- Regla: `required|string|min:5`, con los mismos mensajes que la Coordinación de Evaluación.
+- Defensa: `abort_unless(auth()->user()?->isInicialManager(), 403)` al inicio de `guardarRevision()`, porque una actualización de Livewire no vuelve a ejecutar `mount()`.
+- El botón «Revisión» llama a `revisarDetalle($id)`: abre el mismo modal y entra en modo escritura. No crea una ruta ni un formulario paralelo.
+- La ficha completa (`show`) y el formato siguen siendo de solo lectura; el formulario **no** se renderiza fuera del modal del listado.
+- No se añade ruta de escritura: la llamada viaja por el endpoint de Livewire y las rutas del grupo siguen siendo solo `GET`.
+
+**Descartado:** limitarse a mostrar la revisión existente (el perfil quedaría incompleto para su propósito) y derivar a `/app/evaluacions/inicials` (duplica el flujo y exige otro flag, `is_diagnostic`).
+
+**Consecuencia:** el perfil deja de ser «solo lectura» en su totalidad. El blueprint, los textos de la UI y las pruebas distinguen explícitamente **documento de solo lectura** de **revisión escribible**.
+
 ---
 
 ## 4. Modelo de datos y migración
@@ -218,7 +237,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Perfil de seguimiento de Educación Inicial (solo lectura).
+ * Perfil de seguimiento de Educación Inicial (consulta y revisión).
  *
  * Blueprint: blueprint/inicial · doc 11 · ADR-11.1.
  *
@@ -266,7 +285,7 @@ Notas:
 
 ```php
 /**
- * Acceso al seguimiento de Educación Inicial (solo lectura).
+ * Acceso al seguimiento de Educación Inicial (consulta y revisión).
  *
  * Lee el atributo crudo, igual que isInicial(), para no heredar el fallback
  * de otros flags. Devuelve false mientras la migración no se haya corrido.
@@ -326,7 +345,7 @@ if ($this->is_inicial && $this->is_inicial_manager) {
 }
 ```
 
-Se valida en `save()` después de `$this->validate()` y antes de la transacción. Es una regla de producto: el perfil es de solo lectura y no debe heredar el CRUD docente. Si más adelante se necesita un usuario con ambos roles, se revisa la decisión y se documenta.
+Se valida en `save()` después de `$this->validate()` y antes de la transacción. Es una regla de producto: el perfil consulta y revisa, pero no debe heredar el CRUD docente. Si más adelante se necesita un usuario con ambos roles, se revisa la decisión y se documenta.
 
 > Si un usuario heredado ya tiene ambos flags, el formulario los mostrará marcados
 > y el guardado fallará hasta desmarcar uno: es el comportamiento deseado
@@ -336,7 +355,7 @@ Se valida en `save()` después de `$this->validate()` y antes de la transacción
 
 Cambios en la vista:
 
-- Checkbox `is_inicial_manager` junto a `is_inicial`, con etiqueta **“Seguimiento Inicial (solo lectura)”** y texto de ayuda “No crea ni edita documentos”.
+- Checkbox `is_inicial_manager` junto a `is_inicial`, con etiqueta **“Seguimiento Inicial (consulta y revisión)”** y texto de ayuda “No crea ni edita documentos; solo registra la revisión”.
 - Badge en la columna Roles: `Seguim.` (color cian).
 - La condición de “Usuario Estándar” debe incluir `! $user->isInicialManager()`.
 - El selector de filtro por rol usa `$roleOptions`; no hace falta tocar el Blade si ya itera.
@@ -379,7 +398,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Acceso al seguimiento de Educación Inicial (solo lectura).
+ * Acceso al seguimiento de Educación Inicial (consulta y revisión).
  *
  * Blueprint: blueprint/inicial · doc 11 · ADR-11.4.
  *
@@ -447,8 +466,8 @@ No se corrige automáticamente: es una decisión de datos y requiere aprobación
 
 - Rutas: solo `GET`/`HEAD` (§6).
 - Middleware: `isInicialManager`.
-- Componente: `abort_unless(auth()->user()?->isInicialManager(), 403)` en `mount()`, por si se invoca fuera de la ruta.
-- Pruebas: acceso, métodos y ausencia de escritura (§11).
+- Componente: `abort_unless(auth()->user()?->isInicialManager(), 403)` en `mount()` y de nuevo en `guardarRevision()`, por si se invoca fuera de la ruta o con un snapshot manipulado.
+- Pruebas: acceso, métodos, revisión y ausencia de escritura del resto de campos (§11).
 
 Opcional, si se quiere centralizar la regla para Blade:
 
@@ -472,8 +491,10 @@ use App\Http\Controllers\Inicial\SeguimientoInicialController;
 |--------------------------------------------------------------------------
 | 0. SEGUIMIENTO DE EDUCACIÓN INICIAL  ·  auth + is_inicial_manager
 |--------------------------------------------------------------------------
-| Quinta perspectiva: solo lectura sobre los 6 documentos de TODOS los
-| docentes de Inicial. No hay POST/PUT/PATCH/DELETE.
+| Quinta perspectiva: consulta los 6 documentos de TODOS los docentes de
+| Inicial y solo escribe la revisión (`observacion`/`recomendacion`) desde
+| el modal «Ver». No hay POST/PUT/PATCH/DELETE en el grupo: la escritura
+| viaja por el endpoint de Livewire.
 |
 | Rutas por documento para que cada pestaña tenga URL y estado de menú
 | propios. El detalle y el formato los hereda de PerspectivaInicialController.
@@ -544,7 +565,7 @@ php artisan route:list --path=app/inicials/seguimiento --method=POST
 
 - **Sin conflictos:** el grupo del docente declara `/app/inicials/` y `/app/inicials/eiplanningwks/{id}`, no un wildcard raíz. `/app/inicials/seguimiento` no coincide con ningún recurso existente.
 - **Sin closures:** todas las rutas apuntan a métodos de controlador, así que `route:cache` funciona.
-- **Solo lectura:** no se declara `Route::resource`, `Route::post`, `put`, `patch` ni `delete`.
+- **Sin rutas de escritura:** no se declara `Route::resource`, `Route::post`, `put`, `patch` ni `delete`. La revisión se persiste desde `guardarRevision()` de Livewire, no desde el router.
 
 ---
 
@@ -562,7 +583,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 /**
- * Perspectiva de SEGUIMIENTO de Educación Inicial (solo lectura).
+ * Perspectiva de SEGUIMIENTO de Educación Inicial (consulta y revisión).
  *
  * Blueprint: blueprint/inicial · doc 11.
  *
@@ -615,7 +636,7 @@ class SeguimientoInicialController extends PerspectivaInicialController
 
     protected function notaRevision(): string
     {
-        return 'La revisión la realiza la Coordinación de Evaluación. Este perfil es de solo lectura.';
+        return 'La revisión se registra desde el listado (modal «Ver»). Esta ficha es de solo lectura.';
     }
 }
 ```
@@ -946,14 +967,14 @@ private function aplicarConteos(Builder $query, string $entidad): Builder
 | Lapso | `lapso_id` | — | — | — | — | `lapso_id` | `whereHas('pevaluacion')` |
 | Desde | `desde` | `finicial >=` | `finicial >=` | `finicial >=` | `finicial >=` | `finicial >=` | `created_at >=` |
 | Hasta | `hasta` | `ffinal <=` | `ffinal <=` | `ffinal <=` | `ffinal <=` | `ffinal <=` | `created_at <=` |
-| Estado | `estado` | completo/incompleto/revisión | revisión | revisión | revisión | revisión | — |
+| Estado | `estado` | sin_iniciar/en_progreso/completo + revisión | revisión | revisión | revisión | revisión | — |
 | Búsqueda | `search` | `diagnostico`, `observacion` | idem | `diagnostico`, `observacion` | `justificacion`, `observacion` | `observaciones`, `recomendacion`, `asistencia` | `title`, estudiante |
 
 Reglas:
 
 - **Fechas:** se interpreta “solapa el rango”: `finicial <= hasta` y `ffinal >= desde`. Es lo que espera un supervisor que busca “lo trabajado en octubre”, no solo lo que empieza y termina dentro.
 - **Lapso:** solo se ofrece para evaluación e informe final; en los demás la UI lo oculta y el servicio lo ignora.
-- **Estado:** `sin_revision` / `revisado` para los documentos con campo de revisión; `completo` / `incompleto` solo para semanal en fase 1. El informe final no tiene revisión: su estado es “emitido”.
+- **Estado:** dos ejes que comparten el parámetro `estado`. **Contenido** solo en semanal: `sin_iniciar` (0 estrategias), `en_progreso` (1..49) y `completo` (≥ 50); los tres tramos son disjuntos y suman el total. **Revisión** en los cinco documentos con campo: `sin_revision` / `revisado`. Al ser un único `<select>`, no se pueden combinar ambos ejes. El informe final no tiene revisión: su estado es “emitido”.
 - **Búsqueda:** `LIKE %texto%` sobre las columnas declaradas; para el informe final se añade `whereHas('expectant', ...)` por nombre/apellido.
 - **Docente:** la lista del filtro no usa `PerspectivaFiltros::profesores()` porque esa cruza `pevaluacions` y dejaría fuera a un docente con planes pero sin carga registrada. El servicio usa el flag `is_inicial` **más** los `profesor_id` distintos que ya existen en los seis documentos.
 
@@ -1076,6 +1097,9 @@ private function aplicarEstado(Builder $query, string $entidad, string $estado):
         ? $q
         : $q->whereNotNull($columna)->where($columna, '<>', '');
 
+    // Umbral de la rejilla semanal: 5 días × 10 momentos = 50.
+    $total = count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria'));
+
     match ($estado) {
         // `completo` solo se ofrece en semanal: es el único documento con una
         // rejilla de celdas acotada (5 días × 10 momentos) en fase 1.
@@ -1083,13 +1107,26 @@ private function aplicarEstado(Builder $query, string $entidad, string $estado):
             'eiplanningwstrategies',
             $conContenido('lunes'),
             '>=',
-            count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria'))
+            $total
         ),
-        'en_progreso' => $query->where(function ($q) use ($relevantes, $conContenido) {
-            foreach ($relevantes as [$relacion, $columna]) {
-                $q->orWhereHas($relacion, $conContenido($columna));
-            }
-        }),
+        // En semanal, `en_progreso` es el tramo 1..49: tiene contenido pero no
+        // llega a la rejilla completa. Sin este techo, el filtro devolvía
+        // también las semanas cuyo badge dice «Completo».
+        'en_progreso' => $query
+            ->where(function ($q) use ($relevantes, $conContenido) {
+                foreach ($relevantes as [$relacion, $columna]) {
+                    $q->orWhereHas($relacion, $conContenido($columna));
+                }
+            })
+            ->when(
+                $entidad === 'eiplanningwks',
+                fn (Builder $q) => $q->whereHas(
+                    'eiplanningwstrategies',
+                    $conContenido('lunes'),
+                    '<',
+                    $total
+                )
+            ),
         'sin_iniciar' => $query->where(function ($q) use ($relevantes, $conContenido) {
             foreach ($relevantes as [$relacion, $columna]) {
                 $q->whereDoesntHave($relacion, $conContenido($columna));
@@ -1163,6 +1200,12 @@ La revisión se muestra como **badge independiente**, no se mezcla con la comple
 - `observacion` / `recomendacion` vacíos → `Sin revisión` (ámbar).
 - Con texto → `Revisado` (esmeralda).
 - Informe final → sin badge de revisión.
+
+> El filtro de contenido replica estos mismos tramos: `sin_iniciar` = 0,
+> `en_progreso` = 1..49 y `completo` = 50. Así el badge de cada fila siempre
+> coincide con el filtro que la muestra: un plan completo no aparece bajo
+> “En progreso”. Un test comprueba que los tres tramos son disjuntos y suman
+> el total.
 
 > **Por qué no se reutiliza `EiplanningwkComponent::attachCompletion()`:** ese
 > método calcula días con contenido y resúmenes esperados **por sección del
@@ -1280,11 +1323,13 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
- * Listado de seguimiento de Educación Inicial (solo lectura).
+ * Listado de seguimiento de Educación Inicial.
  *
- * No tiene métodos de persistencia: no guarda, actualiza, elimina ni escribe
- * observaciones. Su estado es el de una consulta: filtros, página, vista y
- * documento abierto en el modal.
+ * No crea, actualiza ni elimina documentos. La ÚNICA escritura permitida es
+ * `guardarRevision()`: el manager registra `observacion` (o `recomendacion` en
+ * el plan de evaluación) desde el modal «Ver», con la misma regla `min:5` que
+ * la Coordinación de Evaluación. El resto del documento sigue siendo de solo
+ * lectura y las rutas del grupo solo declaran GET.
  */
 class SeguimientoInicialComponent extends Component
 {
@@ -1328,6 +1373,15 @@ class SeguimientoInicialComponent extends Component
     #[Locked]
     public ?int $detalleId = null;
 
+    /** El modal muestra el formulario de revisión en lugar del detalle. */
+    public bool $revisionAbierta = false;
+
+    /** Texto del campo revisable (`observacion` o `recomendacion`). */
+    public string $revision = '';
+
+    /** Aviso de éxito que se muestra al volver al detalle. */
+    public ?string $avisoRevision = null;
+
     /** Catálogos de filtros. */
     public Collection $listProfesores;
     public Collection $listGrados;
@@ -1369,7 +1423,7 @@ class SeguimientoInicialComponent extends Component
 }
 ```
 
-### 8.2 Métodos (todos de lectura o navegación)
+### 8.2 Métodos (consulta, navegación y revisión)
 
 | Método | Responsabilidad |
 |---|---|
@@ -1378,8 +1432,11 @@ class SeguimientoInicialComponent extends Component
 | `updated(string $name)` | Resetea la página cuando cambia un filtro. |
 | `limpiarFiltros()` | Limpia filtros y página; conserva la entidad. |
 | `alternarVista()` | Alterna `grid`/`table`; se refleja en la URL (`vista`). |
-| `abrirDetalle(int $id)` | Valida que el id exista para la entidad y abre el modal. |
-| `cerrarDetalle()` | Cierra el modal y limpia `detalleId`. |
+| `abrirDetalle(int $id)` | Valida que el id exista para la entidad, abre el modal y limpia cualquier revisión pendiente. |
+| `cerrarDetalle()` | Cierra el modal, limpia `detalleId` y el estado de revisión. |
+| `abrirRevision()` | Precarga el texto actual y muestra el formulario. 404 si la entidad no tiene campo revisable (informe final). |
+| `cerrarRevision()` | Descarta el texto no guardado y vuelve al detalle. |
+| `guardarRevision()` | **Única escritura.** Valida `required\|string\|min:5`, escribe `observacion`/`recomendacion` y deja `avisoRevision`. |
 | `queryFiltros(): array` | Devuelve los filtros no vacíos para construir los enlaces de pestañas. |
 
 ```php
@@ -1455,11 +1512,57 @@ public function abrirDetalle(int $id): void
     }
 
     $this->detalleId = $id;
+    $this->limpiarRevision();
+    $this->avisoRevision = null;
 }
 
 public function cerrarDetalle(): void
 {
     $this->detalleId = null;
+    $this->limpiarRevision();
+    $this->avisoRevision = null;
+}
+
+public function abrirRevision(): void
+{
+    $documento = $this->documentoDetalle();
+    $campo = RegistroInicial::campoRevision($this->entidad);
+
+    abort_if(! $campo || ! $documento, 404);
+
+    $this->revision = (string) $documento->{$campo};
+    $this->revisionAbierta = true;
+    $this->avisoRevision = null;
+
+    $this->resetValidation('revision');
+}
+
+public function guardarRevision(): void
+{
+    // Una actualización de Livewire no vuelve a ejecutar `mount()`.
+    abort_unless(auth()->user()?->isInicialManager(), 403);
+
+    $campo = RegistroInicial::campoRevision($this->entidad);
+    abort_if(! $campo, 404);
+
+    $rotulo = RegistroInicial::rotuloRevision($this->entidad);
+    $minuscula = mb_strtolower($rotulo);
+
+    $this->validate([
+        'revision' => ['required', 'string', 'min:5'],
+    ], [
+        'revision.required' => "Escribe la {$minuscula} de la Coordinación.",
+        'revision.min' => "La {$minuscula} debe tener al menos 5 caracteres.",
+    ]);
+
+    $documento = $this->documentoDetalle();
+    abort_if(! $documento, 404);
+
+    $documento->{$campo} = trim($this->revision);
+    $documento->save();
+
+    $this->limpiarRevision();
+    $this->avisoRevision = "{$rotulo} guardada.";
 }
 
 public function alternarVista(): void
@@ -1487,8 +1590,10 @@ Notas de implementación:
 
 - `updatedGradoId()` se dispara antes que `updated('grado_id')`; el `resetPage()` duplicado es inocuo.
 - `abrirDetalle()` no usa `findOrFail` dentro de Livewire: un 404 de Livewire rompe el modal. Se comprueba existencia y, si no, se cierra sin notificación (mismo criterio de no revelar ids).
-- No hay `$this->authorize()` de modelo porque no hay modelo de manager ni escritura. La autorización es el middleware + el `abort_unless` del `mount()`.
-- No se usa `WireUiActions` salvo que se quiera una notificación de error; para una pantalla de solo lectura no es necesario.
+- `guardarRevision()` es la única llamada que persiste. No toca otros campos ni crea registros; `documentoDetalle()` relee el registro por id para no confiar en el snapshot del cliente.
+- `abrirRevision()` responde 404 cuando `RegistroInicial::campoRevision()` es `null` (informe final): no se ofrece un formulario que al guardar no escribiría nada.
+- La autorización sigue siendo el middleware + el `abort_unless` del `mount()`; la escritura añade su propio `abort_unless` como defensa en profundidad.
+- No se usa `WireUiActions`: el aviso de éxito es un bloque `avisoRevision` que se muestra al volver al detalle.
 
 ### 8.3 Pestañas dentro del componente
 
@@ -1560,13 +1665,23 @@ No se crea un `show.blade.php` nuevo: el detalle reutiliza `inicial.shared.docum
                         Seguimiento de Educación Inicial
                     </h1>
                     <p class="text-xs text-gray-500 mt-0.5">
-                        Consulta de todos los docentes. Solo lectura: no se crean ni editan documentos.
+                        Consulta de todos los docentes. Los documentos no se crean ni se editan;
+                        solo se registra la revisión.
                     </p>
                 </div>
 
-                <span class="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300">
-                    Solo lectura
-                </span>
+                <div class="flex items-center gap-2" x-data="{ leyenda: false }">
+                    <span class="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300"
+                        title="Los documentos son de solo lectura; la revisión sí se registra.">
+                        Solo lectura
+                    </span>
+
+                    <button type="button" x-on:click="leyenda = true" aria-haspopup="dialog">
+                        Leyenda de estados
+                    </button>
+
+                    @include('inicial.seguimiento.partials.leyenda-estados')
+                </div>
             </header>
 
             <livewire:inicial.seguimiento-inicial-component
@@ -1592,10 +1707,15 @@ Usar `role="status"` o `aria-live="polite"` en la fila para que el cambio de fil
 
 ### 9.4 Filtros
 
+Disposición en dos filas:
+
+- **Fila 1:** Docente, Nivel, Sección y el selector de lapso o el par de fechas.
+- **Fila 2:** Buscar, Estado y las acciones (Limpiar, Tabla/Tarjetas), con las acciones alineadas a la derecha.
+
 Campos visibles según la entidad:
 
 - **Siempre:** Docente, Nivel, Sección y Buscar.
-- **Estado:** en los cinco documentos que tienen estado; el informe final no lo ofrece (no se inventa un estado que el documento no tiene).
+- **Estado:** a la derecha de Buscar, en la misma segunda fila; en los cinco documentos que tienen estado, el informe final no lo ofrece (no se inventa un estado que el documento no tiene).
 - **Semanal, quincenal, proyecto, especial:** Desde, Hasta.
 - **Evaluación:** Desde, Hasta, Lapso.
 - **Informe final:** Lapso (sin fechas; se usa `created_at` si se habilita en fase 2).
@@ -1605,6 +1725,7 @@ Detalles:
 - Etiqueta **Nivel**, nunca “Grado”.
 - Sección deshabilitada si no hay nivel: “Elija primero un nivel”.
 - El selector de estado se genera con `opcionesEstado()`; no se ofrecen opciones que el servicio ignoraría.
+- Botón **«Leyenda de estados»** junto a la insignia de solo lectura: abre un modal con la definición, la regla y un ejemplo de cada estado (contenido y revisión), incluido «Emitido» del informe final. Explica que son dos ejes independientes y que el filtro admite una sola opción.
 - El botón “Limpiar” no recarga la página.
 - `wire:loading` muestra un skeleton o un texto “Consultando…” en la tabla/tarjetas.
 
@@ -1649,23 +1770,26 @@ No hay botones de editar, clonar, eliminar, importar ni “Nuevo”.
 - Paginación Tailwind: `{{ $documentos->links() }}`.
 - Estado vacío: “No hay registros de {documento} para estos filtros.” con enlace para limpiar.
 
-### 9.7 Modal de detalle
+### 9.7 Modal de detalle y revisión
 
-- Cabecera: título, docente, `Nivel · Sección`, fechas/lapso, badges.
+- Cabecera: título, docente, `Nivel · Sección`, fechas/lapso, badges y botón **«Registrar revisión»** / **«Editar revisión»** (solo si la entidad tiene campo revisable).
 - Cuerpo:
   - Si `$detalleParcial` existe: `@include($detalleParcial, ['plan' => $detalle])`.
   - Si no (informe final): resumen de estudiante, carga, título y enlace al formato.
+  - Si `$revisionAbierta`: formulario `wire:submit="guardarRevision"` con `<textarea wire:model="revision">`, `min:5`, aviso de que solo se modifica ese campo, botones Cancelar/Guardar. El pie del modal se oculta durante la revisión.
+- Tras guardar, el modal vuelve al detalle, muestra `avisoRevision` y el badge pasa a «Revisado» en el mismo render.
 - Pie: “Abrir ficha completa” (`show`), “Formato imprimible” (`format`), “Cerrar”.
-- Sin `wire:model`, sin textarea, sin botón Guardar.
-- Cierre con `wire:click="cerrarDetalle"`, `@keydown.escape.window`, clic en backdrop.
+- Sin CRUD: no hay campos del documento editables, ni botón de crear/eliminar/clonar.
+- Cierre con `wire:click="cerrarDetalle"`, `@keydown.escape.window`, clic en backdrop o en la X: si el formulario está abierto, se cancela la revisión y se vuelve al detalle; no se descarta el modal completo.
 - Si el documento ya no existe, `abrirDetalle()` cierra el modal sin revelar el id.
+- El informe final no muestra el botón y `abrirRevision()` responde 404.
 
 ### 9.8 Detalle completo
 
 Se reutiliza `inicial.shared.document-show`. Con los hooks de §7.1:
 
 - Migas: “Seguimiento Inicial / {documento} / N° id”.
-- Nota de revisión: explica que la escritura es de la Coordinación de Evaluación.
+- Nota de revisión: explica que la revisión se registra desde el listado (modal «Ver») y que esta ficha es de solo lectura.
 - Botón “Formato imprimible” apunta a `inicials.seguimiento.{entidad}.format`.
 - El cuerpo incluye el parcial de detalle existente; para el informe final, el resumen que ya trae la vista compartida.
 
@@ -1678,7 +1802,7 @@ Se reutiliza `inicial.shared.document-show`. Con los hooks de §7.1:
 
 ### 9.10 Copy y accesibilidad
 
-- “Seguimiento”, “Solo lectura”, “Nivel”, “Sección”, “Docente”, “Período”, “Estado”, “Revisión”.
+- “Seguimiento”, “Documento de solo lectura”, “Registrar revisión”, “Editar revisión”, “Leyenda de estados”, “Nivel”, “Sección”, “Docente”, “Período”, “Estado”, “Revisión”.
 - No usar “Grado” en la UI.
 - Contraste y tamaños coherentes con el módulo (Tailwind, dark mode).
 - Foco visible en pestañas, filtros y acciones.
@@ -1785,7 +1909,7 @@ Además de §4.3:
 - En la tabla de usuarios, el badge `Seguim.` debe ser visible para `isInicialManager()`.
 - La condición de “Usuario Estándar” incluye el nuevo flag.
 - El filtro `filter_role = 'inicial_manager'` debe funcionar aunque el usuario no sea `is_profesor`.
-- El texto de ayuda del checkbox: “Acceso de solo lectura a todos los documentos de los docentes de Inicial”.
+- El texto de ayuda del checkbox: “Acceso de consulta a todos los documentos de los docentes de Inicial; solo registra la revisión”.
 
 ### 10.4 `config/inicial.php`
 
@@ -1849,65 +1973,78 @@ Si no se quiere refactorizar el test existente, duplicar solo los helpers mínim
 | 20 | Paginación | 15 por página, conserva filtros |
 | 21 | Pestaña `eiprojectks` | Solo carga proyectos, no los otros cinco |
 
-### 11.4 Casos de solo lectura
+### 11.4 Casos de lectura
 
 | # | Caso | Resultado |
 |---|---|---|
 | 22 | `Route::getRoutes()` filtra `inicials.seguimiento.*` | Todos los métodos son `GET`/`HEAD` |
 | 23 | `POST /app/inicials/seguimiento/eiplanningwks` | 405 (no existe ruta) |
-| 24 | Reflexión sobre `SeguimientoInicialComponent` | No existen `save`, `update`, `delete`, `create`, `store`, `destroy` |
-| 25 | El HTML del índice | No contiene `wire:model` sobre `observacion`/`recomendacion` |
+| 24 | Reflexión sobre `SeguimientoInicialComponent` | No existen `save`, `update`, `delete`, `create`, `store`, `destroy`; sí existe `guardarRevision` |
+| 25 | El HTML del índice (sin modal abierto) | No contiene `wire:model` sobre `observacion`/`recomendacion` |
 | 26 | El HTML del detalle | No contiene “Editar”, “Eliminar”, “Clonar”, “Nuevo” |
 
-La prueba 24 es simbólica pero barata; la 22 es la garantía real.
+La prueba 24 es simbólica pero barata; la 22 es la garantía real de que no hay rutas de escritura.
 
-### 11.5 Casos de menú y administración
-
-| # | Caso | Resultado |
-|---|---|---|
-| 27 | Manager | Ve el grupo “Seguimiento Inicial” y sus 7 ítems |
-| 28 | Docente | No ve el grupo |
-| 29 | Admin sin flag | No ve el grupo |
-| 30 | `MenuBuilder::resolveLayoutForUser()` con manager | `seguimiento_inicial` |
-| 31 | `subtitleForLayout('seguimiento_inicial')` | “Seguimiento · Educación Inicial” |
-| 32 | `User::isInicialManager()` | `true` solo con el flag |
-| 33 | `getRoleLabelAttribute()` | “Seguimiento Inicial” |
-| 34 | `auditableAttributes()` | Contiene `is_inicial_manager` |
-| 35 | Admin crea usuario manager | Se guarda el flag y aparece el badge |
-| 36 | Admin edita usuario manager | El checkbox queda marcado |
-| 37 | Admin filtra por `inicial_manager` | Solo managers |
-| 38 | Admin intenta guardar `is_inicial` + `is_inicial_manager` | Error de validación |
-| 39 | Admin filtra “Usuario Estándar” | No incluye managers |
-
-### 11.6 Casos de regresión
+### 11.5 Casos de revisión (única escritura)
 
 | # | Caso | Resultado |
 |---|---|---|
-| 40 | `inicials.home` y CRUD docente | Siguen funcionando |
-| 41 | `evaluacions.inicials.index`, `plannings.inicials.index`, `academicos.inicials.index` | Siguen funcionando |
-| 42 | `document-show` de las tres perspectivas | Sigue mostrando su miga “Educación Inicial” y su nota de revisión original |
-| 43 | Formatos de los seis documentos | Sin cambios |
-| 44 | `MenuInicialTest` | Sigue verde |
-| 45 | Suite `tests/Feature/Inicial` | Verde |
+| 27 | Manager abre «Ver» → «Registrar revisión» en plan semanal | El formulario aparece con `wire:model="revision"` y «Guardar» |
+| 28 | Guarda una observación con espacios | Se guarda con `trim`; `diagnostico` y demás campos no cambian; aviso `Observación guardada.`; badge «Revisado» |
+| 29 | Guarda una recomendación en `eievaluationks` | Escribe `recomendacion`, no `observacion`; aviso `Recomendación guardada.` |
+| 30 | Texto de 2 caracteres | Error `min:5`; el formulario sigue abierto y la BD no cambia |
+| 31 | Abre «Editar revisión» y cancela | El textarea precarga el texto actual; al cancelar se descarta y la BD conserva el original |
+| 32 | Informe final → `abrirRevision()` | 404: no hay campo revisable ni formulario |
 
-### 11.7 Rendimiento
+### 11.6 Casos de menú y administración
 
 | # | Caso | Resultado |
 |---|---|---|
-| 46 | Índice con 15 filas | Menos de 30 consultas (medir con `DB::listen` o `DB::getQueryLog`) |
-| 47 | Índice semanal | No carga `eiplanningwstrategies` completas; usa `withCount` |
-| 48 | Detalle | Usa `RegistroInicial::buscar()` con relaciones completas |
+| 33 | Manager | Ve el grupo “Seguimiento Inicial” y sus 7 ítems |
+| 34 | Docente | No ve el grupo |
+| 35 | Admin sin flag | No ve el grupo |
+| 36 | `MenuBuilder::resolveLayoutForUser()` con manager | `seguimiento_inicial` |
+| 37 | `subtitleForLayout('seguimiento_inicial')` | “Seguimiento · Educación Inicial” |
+| 38 | `User::isInicialManager()` | `true` solo con el flag |
+| 39 | `getRoleLabelAttribute()` | “Seguimiento Inicial” |
+| 40 | `auditableAttributes()` | Contiene `is_inicial_manager` |
+| 41 | Admin crea usuario manager | Se guarda el flag y aparece el badge |
+| 42 | Admin edita usuario manager | El checkbox queda marcado |
+| 43 | Admin filtra por `inicial_manager` | Solo managers |
+| 44 | Admin intenta guardar `is_inicial` + `is_inicial_manager` | Error de validación |
+| 45 | Admin filtra “Usuario Estándar” | No incluye managers |
+
+### 11.7 Casos de regresión
+
+| # | Caso | Resultado |
+|---|---|---|
+| 46 | `inicials.home` y CRUD docente | Siguen funcionando |
+| 47 | `evaluacions.inicials.index`, `plannings.inicials.index`, `academicos.inicials.index` | Siguen funcionando |
+| 48 | `document-show` de las tres perspectivas | Sigue mostrando su miga “Educación Inicial” y su nota de revisión original |
+| 49 | Formatos de los seis documentos | Sin cambios |
+| 50 | `MenuInicialTest` | Sigue verde |
+| 51 | Suite `tests/Feature/Inicial` (por archivo, nunca la carpeta completa) | Verde |
+
+### 11.8 Rendimiento
+
+| # | Caso | Resultado |
+|---|---|---|
+| 52 | Índice con 15 filas | Menos de 30 consultas (medir con `DB::listen` o `DB::getQueryLog`) |
+| 53 | Índice semanal | No carga `eiplanningwstrategies` completas; usa `withCount` |
+| 54 | Detalle | Usa `RegistroInicial::buscar()` con relaciones completas |
 
 No se hacen pruebas de carga en fase 1. El presupuesto de 30 consultas es una guía; si se supera, revisar primero `profesores()` (seis `distinct`) y luego `withCount`/`with`, antes de añadir caché.
 
-### 11.8 Comandos
+### 11.9 Comandos
 
 ```bash
+php artisan test tests/Feature/Inicial/SeguimientoInicialTest.php
 php artisan test --filter=SeguimientoInicial
-php artisan test tests/Feature/Inicial
 vendor/bin/pint --test
 git diff --check
 ```
+
+Nunca ejecutar la carpeta `tests/Feature/Inicial` completa sobre la base real: un test con `RefreshDatabase` haría `migrate:fresh` sobre `s2627`. Los tests del módulo usan `DatabaseTransactions` y los que no tienen factory se marcan `skipped`.
 
 Si se toca `MenuBuilder` o `document-show`, ejecutar además:
 
@@ -1988,16 +2125,16 @@ No en fase 1. Si los KPI se vuelven costosos:
 | **F0 · Decisión** | Este documento revisado y aprobado; naming confirmado | ✅ Confirmado 2026-10-29: `is_inicial_manager`, sin atajo para admin, roles excluyentes (§17). Pendiente el visto bueno de alcance 4–7 |
 | **F1 · Flag y acceso** | Migración, `User`, `IsInicialManager`, alias en `Kernel`, admin UI | Flag asignable; middleware probado; suite de usuarios verde |
 | **F2 · Backend de lectura** | Rutas, controlador, servicio, `filaTabla`, `show`/`format`, hooks de `document-show` | Manager ve detalle/formato de los 6; docente/admin 403; regresión de perspectivas verde |
-| **F3 · Interfaz** | Componente Livewire, vistas, parciales, filtros, KPI, tarjetas/tabla, modal | Índice funcional, filtros en URL, paginación, sin escritura, prueba de consultas |
+| **F3 · Interfaz** | Componente Livewire, vistas, parciales, filtros, KPI, tarjetas/tabla, modal y formulario de revisión | Índice funcional, filtros en URL, paginación, revisión `min:5`, prueba de consultas |
 | **F4 · Navegación** | `MenuBuilder`, `config/menus.php`, layout, badges de admin, docs | Menú visible solo para manager; layout correcto; README y docs actualizados |
 | **F5 · Rendimiento** | `EXPLAIN` y, si aplica, migración de índices | Aprobación explícita; migración separada; medición antes/después |
-| **F6 · QA y despliegue** | Checklist, backup, migración, smoke test | `tests/Feature/Inicial` verde; `route:list` correcto; manager real ve datos |
+| **F6 · QA y despliegue** | Checklist, backup, migración, smoke test | Pruebas de Inicial por archivo verdes; `route:list` correcto; manager real ve datos |
 
 ### 13.1 Orden de PRs sugerido
 
 1. **PR 1:** migración + `User` + middleware + `Kernel` + admin UI + pruebas. No hay rutas todavía; el flag se puede asignar sin exponer nada.
 2. **PR 2:** rutas + controlador + servicio + `filaTabla` + `show`/`format` + hooks de `document-show` + pruebas de acceso.
-3. **PR 3:** componente + vistas + parciales + pruebas de interfaz y no-escritura.
+3. **PR 3:** componente + vistas + parciales + pruebas de interfaz, revisión y no-escritura del resto de campos.
 4. **PR 4:** menú/layout + badges/filtros de admin + documentación.
 5. **PR 5 (opcional):** índices de fase 2, solo con aprobación.
 
@@ -2019,16 +2156,17 @@ Cada PR debe pasar `pint --test` y `git diff --check`. No se hace commit sin sol
 10. La vista permite alternar tarjetas/tabla y pagina de 15 en 15.
 11. La planificación semanal muestra estrategias, días, resúmenes y estado de revisión.
 12. El detalle y el formato funcionan para los seis documentos.
-13. No existe ninguna ruta de escritura bajo `inicials.seguimiento.*`.
-14. El componente no tiene métodos de persistencia ni `wire:model` sobre campos del documento.
-15. El detalle del manager no enlaza a `inicials.home` (que le daría 403); enlaza a `inicials.seguimiento.index`.
-16. El menú “Seguimiento Inicial” aparece solo para el flag y tiene estado activo correcto.
-17. El layout `seguimiento_inicial` tiene subtítulo “Seguimiento · Educación Inicial”.
-18. La UI dice **Nivel**, no “Grado”.
-19. La combinación `is_inicial` + `is_inicial_manager` se rechaza en la UI de admin.
-20. `tests/Feature/Inicial` está verde, incluidos los nuevos casos y la regresión de las cuatro perspectivas actuales.
-21. `pint --test` y `git diff --check` pasan.
-22. No se modificaron `.env`, assets compilados, formatos oficiales ni el CRUD docente.
+13. No existe ninguna ruta de escritura bajo `inicials.seguimiento.*`; la revisión viaja por el endpoint de Livewire.
+14. El componente no tiene métodos de CRUD (`save`, `update`, `delete`, `create`, `store`, `destroy`); su única persistencia es `guardarRevision()` sobre el campo revisable.
+15. El manager registra `observacion`/`recomendacion` (`required|string|min:5`) desde el modal «Ver»; el informe final responde 404 y no muestra el botón.
+16. El detalle del manager no enlaza a `inicials.home` (que le daría 403); enlaza a `inicials.seguimiento.index`.
+17. El menú “Seguimiento Inicial” aparece solo para el flag y tiene estado activo correcto.
+18. El layout `seguimiento_inicial` tiene subtítulo “Seguimiento · Educación Inicial”.
+19. La UI dice **Nivel**, no “Grado”.
+20. La combinación `is_inicial` + `is_inicial_manager` se rechaza en la UI de admin.
+21. Las pruebas de Inicial (por archivo, nunca la carpeta completa) están verdes, incluidos los nuevos casos y la regresión de las cuatro perspectivas actuales.
+22. `pint --test` y `git diff --check` pasan.
+23. No se modificaron `.env`, assets compilados, formatos oficiales ni el CRUD docente.
 
 ---
 
@@ -2037,14 +2175,14 @@ Cada PR debe pasar `pint --test` y `git diff --check`. No se hace commit sin sol
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
 | Se implementa el typo `is_incial_manager` | Deuda y confusión permanentes | Descartado en ADR-11.1 (decisión 2026-10-29); si reapareciera, renombrar global antes de F1 |
-| El manager hereda el CRUD docente | Falla de separación de funciones | Middleware propio, componente propio, sin rutas de escritura, prueba 22–26 |
+| El manager hereda el CRUD docente | Falla de separación de funciones | Middleware propio, componente propio, sin rutas de escritura, pruebas 22–32 |
 | `is_admin` entra sin flag | Acceso no autorizado a datos pedagógicos | `IsInicialManager` sin herencia; prueba 3 y 8 |
 | Fuga de datos entre docentes | Privacidad | El perfil es de seguimiento global por diseño; restringir el flag a personal autorizado; auditar asignaciones |
 | N+1 o listado lento | Mala experiencia | `with` acotado, `withCount`, `filaTabla`, presupuesto de consultas |
-| `document-show` se rompe para las otras perspectivas | Regresión | Variables opcionales + pruebas 40–42 |
+| `document-show` se rompe para las otras perspectivas | Regresión | Variables opcionales + pruebas 46–48 |
 | Conflictos de rutas | 404/403 inesperados | Prefijo distinto, `route:list`, prueba de rutas |
 | Migración en producción | Bloqueo o pérdida del flag | `--pretend`, backup, ventana, `down()` documentado |
-| El manager necesita escribir | Cambio de alcance | Este plan lo prohíbe; si cambia, se diseña otra perspectiva, no se relaja esta |
+| El manager escribe más allá de la revisión | Pérdida de control sobre el documento | `guardarRevision()` solo toca el campo revisable; `abort_unless` de rol; pruebas 27–32 |
 | Combinación de flags | Layout/permisos ambiguos | Validación en admin; auditoría SQL; orden de layout documentado |
 | Índices prematuros | Bloqueos de tabla | Fase 2 separada, `EXPLAIN`, aprobación |
 
@@ -2091,14 +2229,20 @@ El `down()` elimina la columna y el flag. No hay otras tablas ni datos afectados
 | 2 | Acceso de `is_admin` | **Solo con el flag.** `IsInicialManager` no hereda `is_admin`. |
 | 3 | Manager + docente en el mismo usuario | **Excluyentes.** La UI de admin rechaza ambos flags; el middleware, si existiera data heredada, da prioridad a manager. |
 
-**Pendientes de confirmar antes de F2/F5** (los valores recomendados son los del plan; si no hay objeción, se implementan tal cual):
+**Confirmadas el 2026-11-02:**
 
-| # | Decisión | Recomendación | Si se elige lo contrario |
-|---|---|---|---|
-| 4 | ¿Los 6 documentos desde el inicio? | **Sí**, con fase 1 genérica y semanal rica | Limitar a semanal y ampliar después; las rutas de los otros cinco se añaden en fase 2 |
-| 5 | ¿El formato impreso lleva marca de “seguimiento”? | **No**, mismo papel oficial | Añadir una marca de agua y una prueba de formato específica |
-| 6 | ¿Quién asigna el flag? | **Solo admin** (`/admin/users`) | Definir otro flujo y auditarlo |
-| 7 | ¿Se añaden índices en fase 1? | **No**, fase 2 con `EXPLAIN` | Incluir migración de índices con aprobación y medición previa |
+| # | Decisión | Resuelto |
+|---|---|---|
+| 8 | ¿El manager puede escribir la revisión? | **Sí, solo la revisión** (`observacion`/`recomendacion`, `min:5`) dentro del modal del listado, que se abre con «Ver» o con «Revisión» junto a «Imprimir». El resto del documento sigue de solo lectura (ADR-11.11). |
+
+**Adoptadas según la recomendación del plan** (implementadas; no cambian la arquitectura):
+
+| # | Decisión | Resuelto |
+|---|---|---|
+| 4 | ¿Los 6 documentos desde el inicio? | **Sí**, con fase 1 genérica y semanal rica |
+| 5 | ¿El formato impreso lleva marca de “seguimiento”? | **No**, mismo papel oficial |
+| 6 | ¿Quién asigna el flag? | **Solo admin** (`/admin/users`) |
+| 7 | ¿Se añaden índices en fase 1? | **No**, fase 2 con `EXPLAIN` |
 
 > Cualquier cambio en 1–3 obliga a revisar ADR-11.1, ADR-11.4 y §4.3/§5
 > antes de escribir código. Las decisiones 4–7 no cambian la arquitectura,
@@ -2116,7 +2260,7 @@ El `down()` elimina la columna y el flag. No hay otras tablas ni datos afectados
 | `app/Http/Middleware/IsInicialManager.php` | Middleware | Autorización del perfil |
 | `app/Http/Controllers/Inicial/SeguimientoInicialController.php` | Controlador | Índice, detalle y formato heredado |
 | `app/Services/Inicial/SeguimientoInicial.php` | Servicio | Consultas, filtros, estado, KPI |
-| `app/Livewire/Inicial/SeguimientoInicialComponent.php` | Livewire | Listado interactivo de solo lectura |
+| `app/Livewire/Inicial/SeguimientoInicialComponent.php` | Livewire | Listado interactivo con detalle y revisión |
 | `resources/views/inicial/seguimiento/index.blade.php` | Vista | Shell con layout y encabezado |
 | `resources/views/livewire/inicial/seguimiento/index.blade.php` | Vista | Raíz del componente |
 | `resources/views/livewire/inicial/seguimiento/partials/kpis.blade.php` | Parcial | Tarjetas de resumen |
@@ -2126,9 +2270,10 @@ El `down()` elimina la columna y el flag. No hay otras tablas ni datos afectados
 | `resources/views/livewire/inicial/seguimiento/partials/table.blade.php` | Parcial | Tabla |
 | `resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php` | Parcial | Tarjeta semanal |
 | `resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php` | Parcial | Tarjeta genérica |
-| `resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php` | Parcial | Modal de detalle |
+| `resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php` | Parcial | Modal de detalle y formulario de revisión |
+| `resources/views/inicial/seguimiento/partials/leyenda-estados.blade.php` | Parcial | Leyenda de estados (modal Alpine) |
 | `resources/views/livewire/inicial/seguimiento/partials/empty.blade.php` | Parcial | Estado vacío |
-| `tests/Feature/Inicial/SeguimientoInicialTest.php` | Prueba | Acceso, datos, filtros, no-escritura |
+| `tests/Feature/Inicial/SeguimientoInicialTest.php` | Prueba | Acceso, datos, filtros, revisión y no-escritura del resto |
 | `tests/Feature/Inicial/Concerns/CreaDocumentosInicial.php` | Trait (opcional) | Fixtures compartidos |
 
 ### 18.2 Archivos modificados
@@ -2175,7 +2320,7 @@ git diff --check
 La quinta perspectiva es **barata en código** porque el módulo ya tiene el catálogo, los filtros, el detalle y los formatos. El trabajo real está en tres fronteras:
 
 1. **Autorización:** un flag nuevo, un middleware propio y ningún atajo por `is_admin`.
-2. **Solo lectura:** rutas GET, componente sin persistencia y pruebas que lo demuestren.
+2. **Frontera de escritura:** rutas GET, CRUD ausente y una única escritura acotada a la revisión (`observacion`/`recomendacion`, `min:5`), con pruebas que lo demuestren.
 3. **Seguimiento:** consultas paginadas y acotadas, estado de completitud/revisión y una UI que se parezca al listado del docente sin heredar su CRUD.
 
 Si se respetan las decisiones de este documento, el perfil se puede implementar en cuatro PRs pequeños, con la migración aislada y la suite de Inicial como red de seguridad.

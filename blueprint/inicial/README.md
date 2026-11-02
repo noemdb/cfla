@@ -34,7 +34,7 @@ Flujo pedagógico general: **planificación** (semanal/bisemanal/proyectos) → 
 
 > El CRUD real lo hacen **componentes Livewire** embebidos en las vistas índice del docente; los controladores del docente son delgados (`index()` → vista que embebe el componente; `format()` → vista imprimible).
 
-> **Quinta perspectiva (solo en cfla, propuesta):** además de las cuatro del legacy, el proyecto añade **Seguimiento de Educación Inicial** (`is_inicial_manager`, ruta `/app/inicials/seguimiento`) para personal que debe revisar el avance de **todos** los docentes de Inicial sin poder escribir nada. Comparte catálogo, filtros, detalle e impresión con las otras perspectivas. Plan completo en [`11-perfil-seguimiento-inicial.md`](11-perfil-seguimiento-inicial.md).
+> **Quinta perspectiva (solo en cfla):** además de las cuatro del legacy, el proyecto añade **Seguimiento de Educación Inicial** (`is_inicial_manager`, ruta `/app/inicials/seguimiento`) para personal que debe revisar el avance de **todos** los docentes de Inicial: consulta los seis documentos y solo registra la revisión (`observacion`/`recomendacion`), sin CRUD. Comparte catálogo, filtros, detalle e impresión con las otras perspectivas. Plan completo en [`11-perfil-seguimiento-inicial.md`](11-perfil-seguimiento-inicial.md).
 
 ## 3. Arquitectura en el legacy
 
@@ -71,7 +71,7 @@ Estadísticas                                     app/Services/EducationStatsSer
 | [`08-adaptacion-cfla.md`](08-adaptacion-cfla.md) | Reglas de adaptación a este proyecto (Livewire 3, Tailwind/WireUI, BD, rutas) y plan de fases |
 | [`09-evaluacion-proximos-pasos.md`](09-evaluacion-proximos-pasos.md) | Evaluación del blueprint (notas por doc), 4 inconsistencias resueltas I1–I4 y próximos pasos F0–F7 con DoD (cerrado 2026-10-06) |
 | [`10-retrospectiva-roadmap-importacion-pensum.md`](10-retrospectiva-roadmap-importacion-pensum.md) | Retrospectiva y roadmap de la importación de pensum (F1–F8, lecciones aprendidas) |
-| [`11-perfil-seguimiento-inicial.md`](11-perfil-seguimiento-inicial.md) | **Propuesta** · Quinta perspectiva `is_inicial_manager`: flag, middleware propio, ruta `/app/inicials/seguimiento`, servicio y componente de solo lectura, menú/layout, pruebas y fases de implementación |
+| [`11-perfil-seguimiento-inicial.md`](11-perfil-seguimiento-inicial.md) | **Implementado** · Quinta perspectiva `is_inicial_manager`: flag, middleware propio, ruta `/app/inicials/seguimiento`, servicio y componente de consulta con revisión, menú/layout, pruebas y fases de implementación |
 
 ## 5. Glosario
 

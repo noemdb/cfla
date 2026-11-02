@@ -13,7 +13,8 @@
         : 'Diagnóstico u observación';
 @endphp
 
-<section class="rounded-xl border border-white/10 bg-gray-900/60 p-4">
+<section class="rounded-xl border border-white/10 bg-gray-900/60 p-4 space-y-3">
+    {{-- Fila 1: docente, nivel, sección y lapso o fechas. --}}
     <div class="flex flex-wrap items-end gap-3">
 
         <div class="w-full sm:w-52">
@@ -76,6 +77,16 @@
                     class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
             </div>
         @endif
+    </div>
+
+    {{-- Fila 2: buscar, estado y acciones. --}}
+    <div class="flex flex-wrap items-end gap-3">
+        <div class="w-full sm:w-56">
+            <label for="f-buscar" class="block text-xs font-medium text-gray-400 mb-1">Buscar</label>
+            <input id="f-buscar" type="search" wire:model.live.debounce.400ms="search"
+                placeholder="{{ $placeholderBusqueda }}"
+                class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
+        </div>
 
         @if (! empty($opcionesEstado))
             <div class="w-full sm:w-40">
@@ -89,13 +100,6 @@
                 </select>
             </div>
         @endif
-
-        <div class="w-full sm:w-56">
-            <label for="f-buscar" class="block text-xs font-medium text-gray-400 mb-1">Buscar</label>
-            <input id="f-buscar" type="search" wire:model.live.debounce.400ms="search"
-                placeholder="{{ $placeholderBusqueda }}"
-                class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
-        </div>
 
         <div class="flex items-center gap-2 ml-auto">
             <button wire:click="limpiarFiltros" type="button"

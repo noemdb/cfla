@@ -1,8 +1,8 @@
 {{--
     Tarjeta rica de planificación semanal.
 
-    Mismo lenguaje visual que el listado del docente, sin ninguna acción de
-    escritura: solo Ver (modal), Ficha (detalle) e Imprimir (formato).
+    Mismo lenguaje visual que el listado del docente: Ver (modal), Ficha
+    (detalle), Imprimir (formato) y Revisión (abre el modal en modo escritura).
 --}}
 @php
     $totalCeldas = count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria'));
@@ -108,5 +108,17 @@
             </svg>
             Imprimir
         </a>
+
+        @if ($campoRevision)
+            <button type="button" wire:click="revisarDetalle({{ $documento->id }})"
+                title="{{ $revisado ? 'Editar revisión' : 'Registrar revisión' }}"
+                class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 transition-colors">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Revisión
+            </button>
+        @endif
     </footer>
 </article>

@@ -475,11 +475,28 @@ final class SeguimientoInicial
                 '>=',
                 $this->totalCeldasSemanales()
             ),
-            'en_progreso' => $query->where(function ($q) use ($relevantes, $conContenido) {
-                foreach ($relevantes as [$relacion, $columna]) {
-                    $q->orWhereHas($relacion, $conContenido($columna));
-                }
-            }),
+            // `en_progreso` es el complemento exacto de `sin_iniciar` y
+            // `completo` en semanal: de 1 a 49 celdas. Sin el techo, el filtro
+            // devolvía también las semanas completas, cuyo badge dice
+            // «Completo»: el selector no particionaba el listado.
+            //
+            // `whereHas(..., '<', total)` y no `whereDoesntHave(..., '>=', ...)`:
+            // whereDoesntHave no acepta operador ni umbral.
+            'en_progreso' => $query
+                ->where(function ($q) use ($relevantes, $conContenido) {
+                    foreach ($relevantes as [$relacion, $columna]) {
+                        $q->orWhereHas($relacion, $conContenido($columna));
+                    }
+                })
+                ->when(
+                    $entidad === 'eiplanningwks',
+                    fn (Builder $q) => $q->whereHas(
+                        'eiplanningwstrategies',
+                        $conContenido('lunes'),
+                        '<',
+                        $this->totalCeldasSemanales()
+                    )
+                ),
             'sin_iniciar' => $query->where(function ($q) use ($relevantes, $conContenido) {
                 foreach ($relevantes as [$relacion, $columna]) {
                     $q->whereDoesntHave($relacion, $conContenido($columna));

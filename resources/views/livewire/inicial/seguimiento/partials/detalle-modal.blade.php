@@ -1,9 +1,10 @@
 {{--
-    Modal de detalle (solo lectura).
+    Modal de detalle y revisión.
 
     · Cierra con Escape, con el botón “Cerrar” y con clic en el fondo.
-    · Nunca renderiza textarea ni botón Guardar: la escritura vive en la
-      perspectiva de Evaluación.
+    · El formulario de revisión es la ÚNICA escritura: guarda `observacion`
+      (o `recomendacion` en evaluación) con la misma regla `min:5` que la
+      Coordinación. No crea ni edita el resto del documento.
     · Si el documento se borró mientras el modal estaba abierto, `$detalle`
       llega nulo y se informa sin revelar el id.
 --}}
@@ -23,11 +24,13 @@
 
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
     x-data
-    x-on:keydown.escape.window="$wire.cerrarDetalle()"
+    x-on:keydown.escape.window="$wire.revisionAbierta ? $wire.cerrarRevision() : $wire.cerrarDetalle()"
     role="dialog" aria-modal="true" aria-labelledby="detalle-titulo">
 
     {{-- Fondo --}}
-    <div class="absolute inset-0 bg-black/70" x-on:click="$wire.cerrarDetalle()" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-black/70"
+        x-on:click="$wire.revisionAbierta ? $wire.cerrarRevision() : $wire.cerrarDetalle()"
+        aria-hidden="true"></div>
 
     {{-- Panel --}}
     <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-gray-900 shadow-2xl">
@@ -58,18 +61,73 @@
                 @endif
             </div>
 
-            <button type="button" wire:click="cerrarDetalle"
-                class="shrink-0 rounded-lg p-1.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-                aria-label="Cerrar detalle">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            <div class="flex shrink-0 items-center gap-2">
+                @if ($detalle && $campoRevision && ! $revisionAbierta)
+                    <button type="button" wire:click="abrirRevision"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        {{ filled($detalle->{$campoRevision}) ? 'Editar revisión' : 'Registrar revisión' }}
+                    </button>
+                @endif
+
+                <button type="button"
+                    x-on:click="$wire.revisionAbierta ? $wire.cerrarRevision() : $wire.cerrarDetalle()"
+                    class="shrink-0 rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+                    aria-label="Cerrar detalle">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </header>
 
         <div class="px-5 py-4">
             @if (! $detalle)
                 <p class="text-sm text-gray-400">El documento ya no está disponible.</p>
+            @elseif ($revisionAbierta)
+                @php
+                    $rotulo = \App\Services\Inicial\RegistroInicial::rotuloRevision($entidad);
+                    $minuscula = mb_strtolower($rotulo);
+                @endphp
+
+                <form wire:submit="guardarRevision" class="space-y-3">
+                    <p class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs leading-relaxed text-amber-200/80">
+                        Vas a registrar la {{ $minuscula }} de la Coordinación. Solo se modifica ese
+                        campo; el documento no se crea ni se edita.
+                    </p>
+
+                    <div>
+                        <label for="revision-{{ $entidad }}" class="mb-1.5 block text-xs font-medium text-gray-400">
+                            {{ $rotulo }} de la Coordinación de Evaluación
+                        </label>
+
+                        <textarea id="revision-{{ $entidad }}" rows="6" wire:model="revision"
+                            placeholder="Escriba aquí la {{ $minuscula }}…"
+                            class="w-full rounded-lg border border-white/10 bg-gray-800/50 px-3 py-2 text-sm text-gray-200 outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/50"></textarea>
+
+                        @error('revision')
+                            <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                        @enderror
+
+                        <p class="mt-1 text-[11px] text-gray-600">
+                            Mínimo 5 caracteres. El resto del documento lo mantiene la docente.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
+                        <button type="button" wire:click="cerrarRevision"
+                            class="rounded-lg px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-500">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
             @else
                 {{-- Estado y revisión --}}
                 <div class="mb-4 flex flex-wrap items-center gap-2">
@@ -96,7 +154,7 @@
                         </span>
                     @endif
 
-                    <span class="text-[11px] text-gray-600">Solo lectura</span>
+                    <span class="text-[11px] text-gray-600">Documento de solo lectura</span>
                 </div>
 
                 {{-- Cuerpo: parcial reutilizado del docente --}}
@@ -139,23 +197,25 @@
             @endif
         </div>
 
-        <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-white/10 px-5 py-3">
-            <button type="button" wire:click="cerrarDetalle"
-                class="rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2 text-sm font-medium text-gray-300 transition-colors">
-                Cerrar
-            </button>
+        @if (! $revisionAbierta)
+            <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-white/10 px-5 py-3">
+                <button type="button" wire:click="cerrarDetalle"
+                    class="rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2 text-sm font-medium text-gray-300 transition-colors">
+                    Cerrar
+                </button>
 
-            @if ($detalle)
-                <a href="{{ route('inicials.seguimiento.'.$entidad.'.format', $detalle->id) }}" target="_blank" rel="noopener"
-                    class="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2 text-sm font-medium text-gray-200 transition-colors">
-                    Formato imprimible
-                </a>
+                @if ($detalle)
+                    <a href="{{ route('inicials.seguimiento.'.$entidad.'.format', $detalle->id) }}" target="_blank" rel="noopener"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-2 text-sm font-medium text-gray-200 transition-colors">
+                        Formato imprimible
+                    </a>
 
-                <a href="{{ route('inicials.seguimiento.'.$entidad.'.show', $detalle->id) }}" wire:navigate
-                    class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-sm font-medium text-white transition-colors">
-                    Abrir ficha completa
-                </a>
-            @endif
-        </footer>
+                    <a href="{{ route('inicials.seguimiento.'.$entidad.'.show', $detalle->id) }}" wire:navigate
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-sm font-medium text-white transition-colors">
+                        Abrir ficha completa
+                    </a>
+                @endif
+            </footer>
+        @endif
     </div>
 </div>

@@ -128,7 +128,7 @@
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/20">Inicial</span>
                                     @endif
                                     @if($user->isInicialManager())
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/20" title="Seguimiento de Educación Inicial (solo lectura)">Seguim.</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/20" title="Seguimiento de Educación Inicial (consulta y revisión)">Seguim.</span>
                                     @endif
                                     @if($user->is_diagnostic)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/15 text-purple-400 border border-purple-500/20">Diag.</span>
@@ -288,7 +288,7 @@
                                 <span class="text-sm text-gray-300">Educación Inicial</span>
                             </label>
                             <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors"
-                                title="Seguimiento de todos los docentes de Inicial · solo lectura, no crea ni edita documentos">
+                                title="Seguimiento de todos los docentes de Inicial · registra la revisión, no crea ni edita documentos">
                                 <input type="checkbox" wire:model="is_inicial_manager" class="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500/30">
                                 <span class="text-sm text-gray-300">Seguimiento Inicial</span>
                             </label>

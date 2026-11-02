@@ -1832,3 +1832,84 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 11:02:58 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
 12:25:39 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
 12:26:00 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 577 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+1:36:28 PM [vite] full reload resources/views/inicial/seguimiento/partials/leyenda-estados.blade.php
+1:36:38 PM [vite] full reload resources/views/inicial/seguimiento/index.blade.php
+1:36:38 PM [vite] page reload resources/views/inicial/seguimiento/index.blade.php
+1:36:47 PM [vite] full reload resources/views/inicial/seguimiento/index.blade.php
+1:36:47 PM [vite] page reload resources/views/inicial/seguimiento/index.blade.php
+1:40:19 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:40:19 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:40:21 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:40:21 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:40:32 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:40:32 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:40:40 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:40:40 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:40:52 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:40:52 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:40:57 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:40:57 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:41:04 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:41:04 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:41:08 PM [vite] full reload resources/views/inicial/seguimiento/index.blade.php
+1:41:08 PM [vite] page reload resources/views/inicial/seguimiento/index.blade.php
+1:41:16 PM [vite] page reload app/Models/User.php
+1:41:16 PM [vite] full reload resources/views/livewire/admin/users/index-component.blade.php
+1:41:16 PM [vite] page reload resources/views/livewire/admin/users/index-component.blade.php
+1:47:37 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:47:37 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+1:53:06 PM [vite] full reload routes/web.php
+1:53:13 PM [vite] full reload routes/web.php
+1:53:41 PM [vite] full reload routes/web.php
+1:53:49 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:53:49 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:54:21 PM [vite] full reload routes/web.php
+1:56:13 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:56:13 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:56:30 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:56:30 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:56:35 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:56:35 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+1:56:53 PM [vite] full reload routes/web.php
+1:58:22 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:58:22 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+1:58:28 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+1:58:28 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+1:58:34 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
+1:58:34 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
+1:58:38 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+1:58:38 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+1:58:52 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+1:58:52 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+1:58:55 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
+1:58:55 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
+3:26:30 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+3:26:30 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+3:29:17 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+3:29:17 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+3:29:17 PM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+3:29:17 PM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+3:31:40 PM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+3:31:40 PM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+3:31:40 PM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+3:31:40 PM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+3:31:41 PM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php
+3:31:41 PM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/detalle-modal.blade.php

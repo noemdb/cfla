@@ -161,7 +161,7 @@ class User extends Authenticatable implements \App\Contracts\Auditable
     }
 
     /**
-     * Acceso al seguimiento de Educación Inicial (solo lectura).
+     * Acceso al seguimiento de Educación Inicial (consulta y revisión).
      *
      * Lee el atributo crudo, igual que isInicial(), para no heredar el
      * fallback de otros flags. Devuelve false mientras la migración

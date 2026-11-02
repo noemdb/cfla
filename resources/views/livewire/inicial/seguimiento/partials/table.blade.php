@@ -181,6 +181,13 @@
                                 class="whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium text-gray-400 transition-colors hover:bg-white/5 hover:text-gray-200">
                                 Imprimir
                             </a>
+                            @if ($campoRevision)
+                                <button type="button" wire:click="revisarDetalle({{ $documento->id }})"
+                                    title="{{ $revisado ? 'Editar revisión' : 'Registrar revisión' }}"
+                                    class="whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/10 hover:text-amber-200">
+                                    Revisión
+                                </button>
+                            @endif
                         </div>
                     </td>
                 </tr>

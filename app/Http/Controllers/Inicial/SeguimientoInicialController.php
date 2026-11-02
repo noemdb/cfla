@@ -71,6 +71,6 @@ class SeguimientoInicialController extends PerspectivaInicialController
 
     protected function notaRevision(): string
     {
-        return 'La revisión la realiza la Coordinación de Evaluación. Este perfil es de solo lectura.';
+        return 'La revisión se registra desde el listado (modal «Ver»). Esta ficha es de solo lectura.';
     }
 }
