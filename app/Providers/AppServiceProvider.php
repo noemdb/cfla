@@ -9,6 +9,7 @@ use App\Observers\LmsActivityContentObserver;
 use App\Services\Binnacle\SqlQueryAuditor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -36,6 +37,18 @@ class AppServiceProvider extends ServiceProvider
         // (fue creada manualmente o importada). Ignoramos la
         // migración de Sanctum para evitar error "table already exists".
         Sanctum::ignoreMigrations();
+
+        // Sin `<link rel="preload" as="style">` para el CSS de Vite.
+        // El `<link rel="stylesheet">` se emite justo después, así que el
+        // preload no aporta; y en navegaciones `wire:navigate` Livewire lo
+        // reinyecta en cada swap de <head> sin que nada lo consuma, lo que
+        // provoca el aviso de Chrome "preloaded ... but not used". El
+        // modulepreload de los chunks JS se mantiene intacto.
+        Vite::usePreloadTagAttributes(
+            fn (string $src, string $url) => str_ends_with(parse_url($url, PHP_URL_PATH) ?? '', '.css')
+                ? false
+                : []
+        );
 
         // Las factories están en Database\Factories\ClassNameFactory (por nombre corto).
         // El resolver por defecto de Laravel usa el namespace completo (App\Models\app\Academy\...)

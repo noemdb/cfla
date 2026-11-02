@@ -329,6 +329,20 @@ class SeguimientoInicialTest extends TestCase
     }
 
     /** @test */
+    public function el_detalle_ofrece_un_boton_para_volver_al_listado_de_su_documento(): void
+    {
+        $manager = $this->makeManager();
+
+        foreach ($this->documentosDeLosSeis() as $entidad => $documento) {
+            $this->actingAs($manager)
+                ->get(route('inicials.seguimiento.'.$entidad.'.show', $documento->id))
+                ->assertOk()
+                ->assertSee('Volver al listado')
+                ->assertSee(route('inicials.seguimiento.'.$entidad.'.index'), false);
+        }
+    }
+
+    /** @test */
     public function un_docente_o_un_admin_sin_el_flag_no_abren_el_detalle_ni_el_formato(): void
     {
         $documentos = $this->documentosDeLosSeis();

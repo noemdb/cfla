@@ -60,6 +60,15 @@ class SeguimientoInicialController extends PerspectivaInicialController
         return 'Seguimiento Inicial';
     }
 
+    /**
+     * El listado natural del detalle es la pestaña del MISMO documento, no el
+     * panel (que redirige siempre a la planificación semanal).
+     */
+    protected function rutaListado(string $entidad): string
+    {
+        return route('inicials.seguimiento.'.$entidad.'.index');
+    }
+
     protected function notaRevision(): string
     {
         return 'La revisión la realiza la Coordinación de Evaluación. Este perfil es de solo lectura.';

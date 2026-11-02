@@ -73,6 +73,10 @@ abstract class PerspectivaInicialController extends AbstractInicialController
             // comportamiento no cambia (doc 11 · §7.1).
             'rutaInicio' => $this->rutaInicio(),
             'etiquetaInicio' => $this->etiquetaInicio(),
+            // Botón «Volver al listado». Por defecto apunta a la portada de la
+            // perspectiva; Seguimiento lo sobreescribe con la pestaña del
+            // documento abierto.
+            'rutaListado' => $this->rutaListado($entidad),
             'notaRevision' => $this->notaRevision(),
         ]);
     }
@@ -151,6 +155,19 @@ abstract class PerspectivaInicialController extends AbstractInicialController
     protected function etiquetaInicio(): string
     {
         return 'Educación Inicial';
+    }
+
+    /**
+     * A dónde vuelve el botón «Volver al listado» del detalle.
+     *
+     * Evaluación, Planificación y Académico tienen un único listado por
+     * perspectiva (sin rutas `.index` por documento), así que por defecto se
+     * vuelve a la portada de la perspectiva. Seguimiento sí expone una pestaña
+     * por documento y sobreescribe este método.
+     */
+    protected function rutaListado(string $entidad): string
+    {
+        return $this->rutaInicio();
     }
 
     protected function notaRevision(): string

@@ -117,5 +117,7 @@ class Kernel extends HttpKernel
         // Marca como leídas las notificaciones cuyo destino es la ruta visitada
         // (config/notifications.php#auto_read).
         'notifications.auto-read' => \App\Http\Middleware\MarkNotificationsAsRead::class,
+        // Rate limiting para API de Educación Inicial
+        'rate_limit_inicial' => \App\Http\Middleware\RateLimitInicialApi::class,
     ];
 }

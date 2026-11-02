@@ -19,6 +19,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// API para Educación Inicial
+require __DIR__.'/api_inicials.php';
+
 // Timeline de actividad de un usuario (Spec BINNACLE-001, §10). Requiere
 // token Sanctum; el panel Livewire lo consume en el cliente del admin.
 Route::middleware('auth:sanctum')->get('/binnacle/user/{userId}/timeline', function (Request $request, int $userId) {
