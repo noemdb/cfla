@@ -198,3 +198,17 @@ document.addEventListener("livewire:init", () => {
         });
     });
 });
+
+// ── Tema persistente en navegaciones SPA ─────────────────────
+// `wire:navigate` reemplaza los atributos de <html> con los del HTML que
+// sirve el servidor. Ese HTML no incluye la clase `dark` —se aplica en
+// cliente desde localStorage—, así que cada navegación SPA la eliminaba y la
+// página saltaba a modo claro. Se reaplica al terminar de navegar.
+const applyStoredTheme = () => {
+    document.documentElement.classList.toggle(
+        "dark",
+        localStorage.getItem("theme") !== "light"
+    );
+};
+
+document.addEventListener("livewire:navigated", applyStoredTheme);
