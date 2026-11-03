@@ -42,7 +42,7 @@
                 (sin iniciar, en progreso o completo) y la
                 <span class="font-medium text-gray-200">revisión</span> de Coordinación
                 (sin revisión o revisado). Un mismo plan puede estar «Completo» y «Sin revisión»
-                a la vez. El filtro admite una sola opción, así que no se combinan.
+                a la vez. Los filtros de avance y revisión son independientes y se pueden combinar.
             </p>
 
             <dl class="mt-4 divide-y divide-white/5">
@@ -54,12 +54,13 @@
                         </span>
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
-                        El documento no tiene <span class="text-gray-300">ningún contenido</span> registrado.
-                        En la planificación semanal son 0 de 50 estrategias; en los demás documentos,
-                        ninguna actividad, estrategia o posición según corresponda.
+                        El documento aún no tiene actividad pedagógica registrada.
+                        En los planes con rejilla no hay estrategias (ni actividades en el plan especial);
+                        en evaluación no hay posiciones. La planificación semanal también queda sin iniciar
+                        si no tiene estrategias ni resúmenes.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
-                            plan creado con fechas y diagnóstico, pero con la rejilla de 50 celdas vacía.
+                            plan recién creado con sus campos de cabecera, pero sin estrategias, actividades ni posiciones.
                         </span>
                     </dd>
                 </div>
@@ -71,11 +72,12 @@
                         </span>
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
-                        Hay contenido, pero la rejilla semanal <span class="text-gray-300">no está completa</span>:
-                        de 1 a 49 celdas escritas. Es el tramo intermedio entre «Sin iniciar» y «Completo».
+                        Hay contenido, pero falta completar algún requisito. Semanal exige las 50 estrategias y
+                        todos los resúmenes esperados; quincenal, proyecto y especial exigen 50 estrategias.
+                        En evaluación, cada posición registrada debe tener aprendizaje alcanzado.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
-                            40 de 50 estrategias escritas; faltan 10 celdas por completar.
+                            40 de 50 estrategias; o una evaluación con posiciones aún sin aprendizaje registrado.
                         </span>
                     </dd>
                 </div>
@@ -87,12 +89,12 @@
                         </span>
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
-                        La rejilla semanal tiene las <span class="text-gray-300">50 celdas</span> con texto
-                        (5 días × 10 momentos). Solo existe en la planificación semanal: los demás documentos
-                        no tienen una rejilla acotada.
+                        El requisito depende del documento: semanal tiene 50 estrategias y todos los resúmenes
+                        esperados; quincenal, proyecto y especial tienen 50 estrategias. En evaluación, debe
+                        existir al menos una posición y todas deben tener aprendizaje alcanzado.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
-                            plan con 50/50 estrategias, una por cada día y momento de la rutina.
+                            plan semanal con 50/50 estrategias y sus resúmenes completos; evaluación con resultados registrados en todas las posiciones.
                         </span>
                     </dd>
                 </div>
@@ -105,12 +107,12 @@
                         </span>
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
-                        Coordinación <span class="text-gray-300">todavía no escribió</span> la observación
-                        (o la recomendación, en el plan de evaluación). No dice nada sobre la calidad ni
+                        Seguimiento <span class="text-gray-300">todavía no escribió</span> la revisión independiente
+                        del campo `revision_seguimiento`. No dice nada sobre la calidad ni
                         la completitud del documento.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
-                            plan completo, pero con el campo de observación vacío.
+                            plan completo, pero con `revision_seguimiento` vacío.
                         </span>
                     </dd>
                 </div>
@@ -123,7 +125,7 @@
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
                         Coordinación <span class="text-gray-300">ya registró</span> la revisión: el campo
-                        de observación (o recomendación) tiene texto. Es independiente del contenido.
+                        `revision_seguimiento` tiene texto. Es independiente del contenido.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
                             «Ajustar la planificación del martes y ampliar el diagnóstico».
@@ -131,28 +133,11 @@
                     </dd>
                 </div>
 
-                <div class="flex flex-wrap items-start gap-3 py-3">
-                    <dt class="w-28 shrink-0">
-                        <span class="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
-                            Emitido
-                        </span>
-                    </dt>
-                    <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
-                        El informe final se <span class="text-gray-300">emitió firmado</span> y se archiva
-                        tal cual. Es el único documento sin campo de revisión, por eso no aparece en el
-                        filtro de estados.
-                        <span class="mt-1 block text-[11px] text-gray-500">
-                            <span class="font-medium text-gray-400">Ejemplo:</span>
-                            informe final de un estudiante, listo para imprimir.
-                        </span>
-                    </dd>
-                </div>
             </dl>
 
             <p class="mt-2 border-t border-white/5 pt-3 text-[11px] leading-relaxed text-gray-500">
-                El filtro «En progreso» excluye las semanas completas: los tres tramos de contenido
-                (0, 1–49 y 50) son excluyentes y suman el total. El informe final no tiene estado
-                de revisión ni de contenido.
+                Cada documento queda en un solo estado de avance. Los filtros de avance y revisión se pueden
+                combinar.
             </p>
         </div>
     </div>

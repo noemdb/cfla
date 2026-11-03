@@ -5,13 +5,11 @@
     `role="status"` + `aria-live="polite"` anuncian el cambio al filtrar.
 --}}
 @php
-    $cuartaEtiqueta = $entidad === 'eiplanningwks'
-        ? 'Completos'
-        : ($entidad === 'eifinalks' ? 'Emitidos' : 'Revisados');
+    $cuartaEtiqueta = $entidad === 'eifinalks' ? 'Emitidos' : 'Completos';
 
     $cuartoValor = $entidad === 'eifinalks'
         ? $resumen['total']
-        : ($resumen['completos'] ?? $resumen['revisados']);
+        : ($resumen['completos'] ?? 0);
 
     $ultima = $resumen['ultima_actualizacion'] ?? null;
     $ultimaTexto = $ultima ? \Illuminate\Support\Carbon::parse($ultima)->format('d/m/Y H:i') : '—';
@@ -45,7 +43,7 @@
         <p class="text-[11px] font-medium uppercase tracking-wider text-emerald-400/80">{{ $cuartaEtiqueta }}</p>
         <p class="mt-1 text-2xl font-semibold text-emerald-300 tabular-nums">{{ number_format((int) $cuartoValor) }}</p>
         <p class="mt-0.5 text-[11px] text-emerald-500/60">
-            {{ $entidad === 'eiplanningwks' ? 'Con la semana completa' : ($entidad === 'eifinalks' ? 'Informes emitidos' : 'Con revisión registrada') }}
+            {{ $entidad === 'eifinalks' ? 'Informes emitidos' : 'Con el contenido requerido completo' }}
         </p>
     </article>
 </section>

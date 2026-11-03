@@ -5,6 +5,8 @@
 <div class="space-y-6">
 
     @php
+        $resumirTextos = $resumirTextos ?? false;
+
         // DOS consumidores, una sola vista:
         //   · el modal del docente, que le pasa el id y el parcial carga lo que
         //     necesita;
@@ -49,16 +51,34 @@
             @endif
         </dl>
 
-        <div>
-            <dt class="text-xs font-medium text-gray-500">Diagnóstico inicial</dt>
-            <dd class="text-sm text-gray-300 mt-1 whitespace-pre-line">{{ $plan->diagnostico ?: '—' }}</dd>
-        </div>
+        @if ($resumirTextos && filled($plan->diagnostico))
+            <details class="rounded-lg border border-white/10 bg-gray-800/30 px-3 py-2">
+                <summary class="cursor-pointer text-xs font-medium text-gray-300">
+                    Diagnóstico inicial · {{ \Illuminate\Support\Str::limit($plan->diagnostico, 180) }}
+                </summary>
+                <p class="mt-2 text-sm text-gray-300 whitespace-pre-line">{{ $plan->diagnostico }}</p>
+            </details>
+        @else
+            <div>
+                <dt class="text-xs font-medium text-gray-500">Diagnóstico inicial</dt>
+                <dd class="text-sm text-gray-300 mt-1 whitespace-pre-line">{{ $plan->diagnostico ?: '—' }}</dd>
+            </div>
+        @endif
 
         @if ($plan->observacion)
-            <div>
-                <dt class="text-xs font-medium text-gray-500">Observación</dt>
-                <dd class="text-sm text-gray-300 mt-1 whitespace-pre-line">{{ $plan->observacion }}</dd>
-            </div>
+            @if ($resumirTextos)
+                <details class="rounded-lg border border-white/10 bg-gray-800/30 px-3 py-2">
+                    <summary class="cursor-pointer text-xs font-medium text-gray-300">
+                        Observación de la docente · {{ \Illuminate\Support\Str::limit($plan->observacion, 180) }}
+                    </summary>
+                    <p class="mt-2 text-sm text-gray-300 whitespace-pre-line">{{ $plan->observacion }}</p>
+                </details>
+            @else
+                <div>
+                    <dt class="text-xs font-medium text-gray-500">Observación</dt>
+                    <dd class="text-sm text-gray-300 mt-1 whitespace-pre-line">{{ $plan->observacion }}</dd>
+                </div>
+            @endif
         @endif
 
         {{-- ═══ Estrategias agrupadas por momento ═══ --}}

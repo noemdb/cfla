@@ -8,25 +8,30 @@ use App\Livewire\Inicial\SeguimientoInicialComponent;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Inicial\Eievaluationk;
+use App\Models\app\Inicial\Eievaluationp;
 use App\Models\app\Inicial\Eifinalk;
 use App\Models\app\Inicial\Eiplanningbwk;
 use App\Models\app\Inicial\Eiplanningwk;
 use App\Models\app\Inicial\Eiplanningwstrategy;
+use App\Models\app\Inicial\Eiplanningwsummary;
 use App\Models\app\Inicial\Eiprojectk;
+use App\Models\app\Inicial\Eiprojectkstrategy;
 use App\Models\app\Inicial\Eispecialk;
 use App\Models\app\Learner\Estudiant;
 use App\Models\User;
+use App\Notifications\InicialSeguimientoNotification;
 use App\Services\Inicial\RegistroInicial;
 use App\Services\Inicial\SeguimientoInicial;
 use App\Services\MenuBuilder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * Quinta perspectiva del módulo de Educación Inicial: SEGUIMIENTO (solo lectura).
+ * Quinta perspectiva del módulo de Educación Inicial: SEGUIMIENTO.
  *
  * Blueprint: blueprint/inicial · doc 11 · §11.
  *
@@ -172,6 +177,32 @@ class SeguimientoInicialTest extends TestCase
         return $orden;
     }
 
+    private function crearResumenSemanal(Eiplanningwk $plan, int $pevaluacionId): void
+    {
+        Eiplanningwsummary::create([
+            'eiplanningwk_id' => $plan->id,
+            'pevaluacion_id' => $pevaluacionId,
+            'componente' => 'Lenguaje',
+            'objetivo' => 'Participar en conversaciones.',
+            'aprendizaje_esperado' => 'Expresa ideas con claridad.',
+            'indicadores' => 'Participa y escucha.',
+        ]);
+    }
+
+    private function sembrarEstrategiasProyecto(Eiprojectk $plan): void
+    {
+        foreach (array_keys(config('inicial.dias_semana')) as $dia) {
+            foreach (array_keys(config('inicial.momentos_rutina_diaria')) as $momento) {
+                Eiprojectkstrategy::create([
+                    'eiprojectk_id' => $plan->id,
+                    'day_of_week' => $dia,
+                    'momento_rutina_diaria' => $momento,
+                    'lunes' => 'Estrategia '.$dia.' '.$momento,
+                ]);
+            }
+        }
+    }
+
     private function makeEstudiante(int $seccionId, string $nombre = 'Estudiante'): Estudiant
     {
         $planpagoId = DB::table('planpagos')->insertGetId([
@@ -306,8 +337,9 @@ class SeguimientoInicialTest extends TestCase
             ->assertSee('Completo')
             ->assertSee('Sin revisión')
             ->assertSee('Revisado')
-            ->assertSee('Emitido')
-            ->assertSee('50 celdas');
+            ->assertDontSee('Emitido')
+            ->assertSee('50 estrategias')
+            ->assertSee('resúmenes esperados');
     }
 
     /** @test */
@@ -435,7 +467,7 @@ class SeguimientoInicialTest extends TestCase
     }
 
     /** @test */
-    public function el_componente_solo_escribe_la_revision(): void
+    public function el_componente_no_ofrece_crud_de_documentos(): void
     {
         foreach (['save', 'update', 'delete', 'create', 'store', 'destroy'] as $metodo) {
             $this->assertFalse(
@@ -444,12 +476,14 @@ class SeguimientoInicialTest extends TestCase
             );
         }
 
-        // La única escritura permitida es el campo de revisión.
+        // El seguimiento no crea ni modifica documentos salvo las acciones
+        // explícitas de revisión y observación semanal.
         $this->assertTrue(method_exists(SeguimientoInicialComponent::class, 'guardarRevision'));
+        $this->assertTrue(method_exists(SeguimientoInicialComponent::class, 'guardarObservacion'));
     }
 
     /** @test */
-    public function el_indice_solo_expone_la_revision_del_manager(): void
+    public function el_indice_no_expone_los_campos_de_edicion_docente(): void
     {
         $this->saltarSiFaltaLaMigracion();
 
@@ -470,13 +504,15 @@ class SeguimientoInicialTest extends TestCase
             ->assertDontSee('Nueva planificación')
             ->assertDontSee('Importar de s2526');
 
-        // La escritura solo se abre desde el modal «Ver», sobre `revision`.
+        // Los dos formularios de seguimiento se abren desde el modal «Ver».
         Livewire::actingAs($manager)
             ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
             ->call('abrirDetalle', $plan->id)
             ->assertSee('Registrar revisión')
             ->call('abrirRevision')
             ->assertSee('wire:model="revision"', false)
+            ->call('seleccionarPestanaRevision', 'observacion')
+            ->assertSee('wire:model="observacion"', false)
             ->assertSee('Guardar');
     }
 
@@ -500,13 +536,14 @@ class SeguimientoInicialTest extends TestCase
     }
 
     // ═══════════════════════════════════════════════════════════════
-    //  REVISIÓN · ÚNICA ESCRITURA PERMITIDA
+    //  REVISIÓN Y OBSERVACIÓN · ESCRITURA ACOTADA
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function el_manager_registra_la_observacion_desde_el_modal(): void
+    public function el_manager_registra_la_revision_independiente_desde_el_modal(): void
     {
         $this->saltarSiFaltaLaMigracion();
+        Notification::fake();
 
         $docente = $this->makeDocente();
         $plan = Eiplanningwk::create($this->planAttributes(
@@ -516,19 +553,23 @@ class SeguimientoInicialTest extends TestCase
             ['diagnostico' => 'Diagnóstico intacto.']
         ));
 
-        Livewire::actingAs($this->makeManager())
+        $componente = Livewire::actingAs($this->makeManager())
             ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
-            ->call('abrirDetalle', $plan->id)
-            ->call('abrirRevision')
+            ->call('revisarDetalle', $plan->id)
             ->assertSet('revisionAbierta', true)
+            ->assertSet('detalleId', $plan->id);
+
+        Notification::assertNothingSent();
+
+        $componente
             ->set('revision', '  Ajustar la planificación del martes.  ')
             ->call('guardarRevision')
             ->assertHasNoErrors()
             ->assertSet('revisionAbierta', false)
             ->assertSet('detalleId', null)
             ->assertDispatched('wireui:notification', function ($eventName, $params) {
-                return ($params[0]['options']['title'] ?? null) === 'Observación guardada'
-                    && ($params[0]['options']['description'] ?? null) === 'La observación se actualizó correctamente.'
+                return ($params[0]['options']['title'] ?? null) === 'Revisión de seguimiento guardada'
+                    && ($params[0]['options']['description'] ?? null) === 'La revisión independiente se actualizó correctamente.'
                     && ($params[0]['options']['icon'] ?? null) === 'success';
             })
             ->assertDontSee('aria-modal="true"', false)
@@ -536,9 +577,17 @@ class SeguimientoInicialTest extends TestCase
 
         $actualizado = $plan->fresh();
 
-        // Trim aplicado y ningún otro campo tocado.
-        $this->assertSame('Ajustar la planificación del martes.', $actualizado->observacion);
+        // La revisión es independiente; el contenido docente no se modifica.
+        $this->assertSame('Ajustar la planificación del martes.', $actualizado->revision_seguimiento);
+        $this->assertNull($actualizado->observacion);
         $this->assertSame('Diagnóstico intacto.', $actualizado->diagnostico);
+        Notification::assertSentTo(
+            $docente['user'],
+            InicialSeguimientoNotification::class,
+            fn (InicialSeguimientoNotification $notification) => $notification->type === 'inicial_followup_review'
+                && $notification->documentoId === $plan->id
+                && $notification->campo === 'revision_seguimiento'
+        );
 
         // El KPI se recalcula con la misma escritura.
         $resumen = app(SeguimientoInicial::class)->resumen('eiplanningwks', [
@@ -558,7 +607,7 @@ class SeguimientoInicialTest extends TestCase
             $docente['profesor_id'],
             $docente['grado_id'],
             $docente['seccion_id'],
-            ['observacion' => 'Revisión previa.']
+            ['observacion' => 'Observación docente intacta.', 'revision_seguimiento' => 'Revisión previa.']
         ));
 
         Livewire::actingAs($this->makeManager())
@@ -568,13 +617,60 @@ class SeguimientoInicialTest extends TestCase
             ->assertSet('detalleId', $plan->id)
             ->assertSet('revisionAbierta', true)
             ->assertSet('revision', 'Revisión previa.')
+            ->assertSee('px-2 py-4 sm:px-4 lg:px-6 2xl:px-8', false)
+            ->assertSee('w-full max-w-none max-h-[90vh]', false)
             ->assertSee('wire:model="revision"', false);
     }
 
     /** @test */
-    public function el_manager_registra_la_recomendacion_del_plan_de_evaluacion(): void
+    public function la_pestana_observacion_edita_el_campo_y_notifica_al_docente_asociado(): void
+    {
+        Notification::fake();
+
+        $docente = $this->makeDocente();
+        $plan = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['observacion' => 'Observación anterior del plan.']
+        ));
+
+        $componente = Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->call('revisarDetalle', $plan->id)
+            ->assertSee('role="tablist"', false)
+            ->assertSee('Revisión')
+            ->assertSee('Observación')
+            ->call('seleccionarPestanaRevision', 'observacion')
+            ->assertSet('revisionPestana', 'observacion')
+            ->assertSet('observacion', 'Observación anterior del plan.')
+            ->assertSee('Eiplanningwk.observacion')
+            ->assertSee('wire:model="observacion"', false)
+            ->set('observacion', 'Actualizar el registro diario del grupo.')
+            ->call('guardarObservacion')
+            ->assertHasNoErrors()
+            ->assertSet('revisionAbierta', false)
+            ->assertSet('observacion', '')
+            ->assertDispatched('wireui:notification', function ($eventName, $params) {
+                return ($params[0]['options']['title'] ?? null) === 'Observación guardada'
+                    && ($params[0]['options']['icon'] ?? null) === 'success';
+            });
+
+        $this->assertSame('Actualizar el registro diario del grupo.', $plan->fresh()->observacion);
+        Notification::assertSentTo(
+            $docente['user'],
+            InicialSeguimientoNotification::class,
+            fn (InicialSeguimientoNotification $notification) => $notification->type === 'inicial_weekly_observation'
+                && $notification->documentoId === $plan->id
+                && $notification->campo === 'observacion'
+        );
+    }
+
+    /** @test */
+    public function el_manager_registra_la_revision_del_plan_de_evaluacion(): void
     {
         $this->saltarSiFaltaLaMigracion();
+        Notification::fake();
 
         $docente = $this->makeDocente();
         $plan = Eievaluationk::create(array_merge(
@@ -583,27 +679,28 @@ class SeguimientoInicialTest extends TestCase
                 $docente['grado_id'],
                 $docente['seccion_id']
             ),
-            ['lapso_id' => $docente['lapso_id'], 'recomendacion' => null]
+            ['lapso_id' => $docente['lapso_id'], 'recomendacion' => 'Recomendación de Coordinación.', 'revision_seguimiento' => null]
         ));
 
         Livewire::actingAs($this->makeManager())
             ->test(SeguimientoInicialComponent::class, ['entidad' => 'eievaluationks'])
             ->call('abrirDetalle', $plan->id)
             ->call('abrirRevision')
-            ->assertSee('Recomendación de la Coordinación de Evaluación')
+            ->assertSee('Revisión de seguimiento')
             ->set('revision', 'Incorporar la evaluación diagnóstica.')
             ->call('guardarRevision')
             ->assertHasNoErrors()
             ->assertSet('revisionAbierta', false)
             ->assertSet('detalleId', null)
             ->assertDispatched('wireui:notification', function ($eventName, $params) {
-                return ($params[0]['options']['title'] ?? null) === 'Recomendación guardada'
-                    && ($params[0]['options']['description'] ?? null) === 'La recomendación se actualizó correctamente.'
+                return ($params[0]['options']['title'] ?? null) === 'Revisión de seguimiento guardada'
+                    && ($params[0]['options']['description'] ?? null) === 'La revisión independiente se actualizó correctamente.'
                     && ($params[0]['options']['icon'] ?? null) === 'success';
             })
             ->assertDontSee('aria-modal="true"', false);
 
-        $this->assertSame('Incorporar la evaluación diagnóstica.', $plan->fresh()->recomendacion);
+        $this->assertSame('Incorporar la evaluación diagnóstica.', $plan->fresh()->revision_seguimiento);
+        $this->assertSame('Recomendación de Coordinación.', $plan->fresh()->recomendacion);
     }
 
     /** @test */
@@ -628,6 +725,16 @@ class SeguimientoInicialTest extends TestCase
             ->assertSet('revisionAbierta', true);
 
         $this->assertNull($plan->fresh()->observacion);
+        $this->assertNull($plan->fresh()->revision_seguimiento);
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->call('abrirDetalle', $plan->id)
+            ->call('abrirRevision')
+            ->set('revision', '     ')
+            ->call('guardarRevision')
+            ->assertHasErrors(['revision' => 'required'])
+            ->assertSet('revisionAbierta', true);
     }
 
     /** @test */
@@ -641,7 +748,8 @@ class SeguimientoInicialTest extends TestCase
             $docente['grado_id'],
             $docente['seccion_id'],
             [
-                'observacion' => 'Revisión anterior.',
+                'observacion' => 'Observación de la docente.',
+                'revision_seguimiento' => 'Revisión anterior.',
                 'diagnostico' => 'Contenido extenso del documento que no debe aparecer al cancelar.',
             ]
         ));
@@ -659,7 +767,8 @@ class SeguimientoInicialTest extends TestCase
             ->assertSet('detalleId', null)
             ->assertDontSee('aria-modal="true"', false);
 
-        $this->assertSame('Revisión anterior.', $plan->fresh()->observacion);
+        $this->assertSame('Revisión anterior.', $plan->fresh()->revision_seguimiento);
+        $this->assertSame('Observación de la docente.', $plan->fresh()->observacion);
     }
 
     /** @test */
@@ -845,21 +954,143 @@ class SeguimientoInicialTest extends TestCase
     }
 
     /** @test */
-    public function el_estado_completo_se_ignora_fuera_de_la_planificacion_semanal(): void
+    public function los_estados_completos_se_ofrecen_para_los_cinco_documentos_revisables(): void
     {
         $docente = $this->makeDocente();
-        Eiprojectk::create($this->planAttributes(
+        $incompleto = Eiprojectk::create($this->planAttributes(
             $docente['profesor_id'],
             $docente['grado_id'],
             $docente['seccion_id'],
             ['diagnostico' => 'Proyecto visible con estado manipulado.']
         ));
 
+        foreach ([
+            'eiplanningwks',
+            'eiplanningbwks',
+            'eiprojectks',
+            'eispecialks',
+            'eievaluationks',
+        ] as $entidad) {
+            $this->assertArrayHasKey(
+                'completo',
+                app(SeguimientoInicial::class)->opcionesEstado($entidad)
+            );
+        }
+
         Livewire::actingAs($this->makeManager())
             ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiprojectks'])
             ->set('estado', 'completo')
             ->assertOk()
+            ->assertDontSee('Proyecto visible con estado manipulado.');
+
+        $this->sembrarEstrategiasProyecto($incompleto);
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiprojectks'])
+            ->set('estado', 'completo')
             ->assertSee('Proyecto visible con estado manipulado.');
+    }
+
+    /** @test */
+    public function el_estado_clasifica_el_avance_completo_de_cada_tipo_de_documento(): void
+    {
+        $servicio = app(SeguimientoInicial::class);
+        $totalEstrategias = count(config('inicial.dias_semana'))
+            * count(config('inicial.momentos_rutina_diaria'));
+
+        foreach ([
+            'eiplanningwks' => new Eiplanningwk,
+            'eiplanningbwks' => new Eiplanningbwk,
+            'eiprojectks' => new Eiprojectk,
+            'eispecialks' => new Eispecialk,
+        ] as $entidad => $plan) {
+            $plan->setAttribute('estrategias_count', $totalEstrategias);
+
+            if ($entidad === 'eiplanningwks') {
+                $plan->setAttribute('resumenes_count', 3);
+                $plan->setAttribute('resumenes_esperados', 3);
+                $plan->setAttribute('resumenes_areas_completas_count', 3);
+            }
+
+            $this->assertSame('Completo', $servicio->estado($entidad, $plan)['etiqueta'], $entidad);
+
+            $plan->setAttribute('estrategias_count', 1);
+            $this->assertSame('En progreso', $servicio->estado($entidad, $plan)['etiqueta'], $entidad);
+        }
+
+        $weeklyWithoutSummaries = new Eiplanningwk;
+        $weeklyWithoutSummaries->setAttribute('estrategias_count', $totalEstrategias);
+        $weeklyWithoutSummaries->setAttribute('resumenes_count', 0);
+        $weeklyWithoutSummaries->setAttribute('resumenes_esperados', 3);
+        $weeklyWithoutSummaries->setAttribute('resumenes_areas_completas_count', 0);
+        $this->assertSame('En progreso', $servicio->estado('eiplanningwks', $weeklyWithoutSummaries)['etiqueta']);
+
+        $evaluation = new Eievaluationk;
+        $evaluation->setAttribute('posiciones_count', 2);
+        $evaluation->setAttribute('posiciones_completas_count', 1);
+        $this->assertSame('En progreso', $servicio->estado('eievaluationks', $evaluation)['etiqueta']);
+
+        $evaluation->setAttribute('posiciones_completas_count', 2);
+        $this->assertSame('Completo', $servicio->estado('eievaluationks', $evaluation)['etiqueta']);
+
+        $evaluation->setAttribute('posiciones_count', 0);
+        $evaluation->setAttribute('posiciones_completas_count', 0);
+        $this->assertSame('Sin iniciar', $servicio->estado('eievaluationks', $evaluation)['etiqueta']);
+
+        $planEspecial = new Eispecialk;
+        $planEspecial->setAttribute('estrategias_count', 0);
+        $planEspecial->setAttribute('actividades_count', 1);
+        $this->assertSame('En progreso', $servicio->estado('eispecialks', $planEspecial)['etiqueta']);
+    }
+
+    /** @test */
+    public function el_estado_de_evaluacion_se_completa_solo_con_aprendizaje_en_todas_las_posiciones(): void
+    {
+        $docente = $this->makeDocente();
+        $attributes = $this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        );
+
+        $completo = Eievaluationk::create(array_merge($attributes, [
+            'lapso_id' => $docente['lapso_id'],
+            'observaciones' => 'Se evaluaron los aprendizajes del grupo.',
+            'asistencia' => 'Asistencia completa.',
+        ]));
+        Eievaluationp::create([
+            'eievaluationk_id' => $completo->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'aprendizaje_alcanzado' => 'Comunica ideas y participa.',
+        ]);
+
+        $incompleto = Eievaluationk::create(array_merge($attributes, [
+            'lapso_id' => $docente['lapso_id'],
+            'observaciones' => 'Evaluación en proceso.',
+            'asistencia' => 'Asistencia registrada.',
+        ]));
+        Eievaluationp::create([
+            'eievaluationk_id' => $incompleto->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'aprendizaje_alcanzado' => null,
+        ]);
+
+        $sinPosiciones = Eievaluationk::create(array_merge($attributes, [
+            'lapso_id' => $docente['lapso_id'],
+            'observaciones' => 'Sin posiciones todavía.',
+            'asistencia' => 'Asistencia registrada.',
+        ]));
+
+        $servicio = app(SeguimientoInicial::class);
+        $filtrosBase = ['profesor_id' => $docente['profesor_id']];
+        $ids = fn (string $estado): array => $servicio
+            ->paginar('eievaluationks', $filtrosBase + ['estado' => $estado])
+            ->getCollection()
+            ->modelKeys();
+
+        $this->assertSame([$completo->id], $ids('completo'));
+        $this->assertSame([$incompleto->id], $ids('en_progreso'));
+        $this->assertSame([$sinPosiciones->id], $ids('sin_iniciar'));
     }
 
     /** @test */
@@ -905,7 +1136,7 @@ class SeguimientoInicialTest extends TestCase
     }
 
     /** @test */
-    public function filtra_por_estado_sin_revision_y_revisado(): void
+    public function filtra_por_revision_sin_mezclarla_con_el_avance(): void
     {
         $docente = $this->makeDocente();
 
@@ -913,33 +1144,234 @@ class SeguimientoInicialTest extends TestCase
             $docente['profesor_id'],
             $docente['grado_id'],
             $docente['seccion_id'],
-            ['diagnostico' => 'Plan sin revisión.', 'observacion' => null]
+            ['diagnostico' => 'Plan sin revisión.', 'revision_seguimiento' => null]
         ));
 
         Eiplanningwk::create($this->planAttributes(
             $docente['profesor_id'],
             $docente['grado_id'],
             $docente['seccion_id'],
-            ['diagnostico' => 'Plan ya revisado.', 'observacion' => 'Observación registrada.']
+            ['diagnostico' => 'Plan ya revisado.', 'revision_seguimiento' => 'Revisión registrada.']
         ));
 
         Livewire::actingAs($this->makeManager())
             ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
-            ->set('estado', 'sin_revision')
+            ->set('revisionEstado', 'sin_revision')
             ->assertSee('Plan sin revisión.')
             ->assertDontSee('Plan ya revisado.');
 
         Livewire::actingAs($this->makeManager())
             ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
-            ->set('estado', 'revisado')
+            ->set('revisionEstado', 'revisado')
             ->assertSee('Plan ya revisado.')
             ->assertDontSee('Plan sin revisión.');
     }
 
     /** @test */
-    public function el_estado_completo_solo_incluye_semanas_con_las_50_estrategias(): void
+    public function combina_filtros_de_avance_y_revision_y_prioriza_pendientes(): void
     {
         $docente = $this->makeDocente();
+        $sinIniciar = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['diagnostico' => 'Plan sin iniciar y sin revisión.']
+        ));
+        $progresoSinRevision = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['diagnostico' => 'Plan en progreso sin revisión.']
+        ));
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $progresoSinRevision->id,
+            'day_of_week' => array_key_first(config('inicial.dias_semana')),
+            'momento_rutina_diaria' => array_key_first(config('inicial.momentos_rutina_diaria')),
+            'lunes' => 'Estrategia pendiente.',
+            'order' => 0,
+        ]);
+        $progresoRevisado = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            [
+                'diagnostico' => 'Plan en progreso revisado.',
+                'revision_seguimiento' => 'Revisión realizada.',
+            ]
+        ));
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $progresoRevisado->id,
+            'day_of_week' => array_key_first(config('inicial.dias_semana')),
+            'momento_rutina_diaria' => array_key_first(config('inicial.momentos_rutina_diaria')),
+            'lunes' => 'Estrategia revisada.',
+            'order' => 0,
+        ]);
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->set('profesor_id', (string) $docente['profesor_id'])
+            ->set('estado', 'en_progreso')
+            ->set('revisionEstado', 'sin_revision')
+            ->assertSee('Plan en progreso sin revisión.')
+            ->assertDontSee('Plan sin iniciar y sin revisión.')
+            ->assertDontSee('Plan en progreso revisado.')
+            ->assertSee('Filtros activos')
+            ->assertSee('Mostrando')
+            ->assertSee('1–1', false)
+            ->assertSee('registros');
+
+        $ordenados = app(SeguimientoInicial::class)
+            ->paginar('eiplanningwks', [
+                'profesor_id' => $docente['profesor_id'],
+                'orden' => 'pendientes',
+            ])
+            ->getCollection()
+            ->modelKeys();
+
+        $this->assertSame(
+            [$sinIniciar->id, $progresoSinRevision->id, $progresoRevisado->id],
+            $ordenados
+        );
+    }
+
+    /** @test */
+    public function ordena_por_ultima_actualizacion_y_por_periodo(): void
+    {
+        $docente = $this->makeDocente();
+        $antiguo = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['finicial' => now()->subDays(30), 'diagnostico' => 'Período antiguo.']
+        ));
+        $reciente = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['finicial' => now()->subDays(5), 'diagnostico' => 'Período reciente.']
+        ));
+        $intermedio = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['finicial' => now()->subDays(15), 'diagnostico' => 'Período intermedio.']
+        ));
+
+        DB::table('eiplanningwks')->where('id', $antiguo->id)->update([
+            'updated_at' => now()->subDays(1),
+        ]);
+        DB::table('eiplanningwks')->where('id', $reciente->id)->update([
+            'updated_at' => now()->subDays(3),
+        ]);
+        DB::table('eiplanningwks')->where('id', $intermedio->id)->update([
+            'updated_at' => now()->subDays(2),
+        ]);
+
+        $servicio = app(SeguimientoInicial::class);
+        $filtros = ['profesor_id' => $docente['profesor_id']];
+        $porActualizacion = $servicio->paginar(
+            'eiplanningwks',
+            $filtros + ['orden' => 'actualizacion']
+        )->getCollection()->modelKeys();
+        $porPeriodo = $servicio->paginar(
+            'eiplanningwks',
+            $filtros + ['orden' => 'periodo']
+        )->getCollection()->modelKeys();
+
+        $this->assertSame([$antiguo->id, $intermedio->id, $reciente->id], $porActualizacion);
+        $this->assertSame([$reciente->id, $intermedio->id, $antiguo->id], $porPeriodo);
+    }
+
+    /** @test */
+    public function la_busqueda_y_el_quitado_de_chips_conservan_los_filtros_independientes(): void
+    {
+        $docente = $this->makeDocente();
+        $plan = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            [
+                'diagnostico' => 'Plan localizable desde el filtro activo.',
+                'revision_seguimiento' => 'Revisado por seguimiento.',
+            ]
+        ));
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $plan->id,
+            'day_of_week' => array_key_first(config('inicial.dias_semana')),
+            'momento_rutina_diaria' => array_key_first(config('inicial.momentos_rutina_diaria')),
+            'lunes' => 'Estrategia encontrada.',
+            'order' => 0,
+        ]);
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->set('search', 'localizable')
+            ->set('estado', 'en_progreso')
+            ->set('revisionEstado', 'revisado')
+            ->assertSee('Búsqueda:')
+            ->assertSee('Avance:')
+            ->assertSee('Revisión:')
+            ->call('quitarFiltro', 'estado')
+            ->assertSet('estado', '')
+            ->assertSet('revisionEstado', 'revisado')
+            ->call('quitarFiltro', 'revisionEstado')
+            ->assertSet('revisionEstado', '')
+            ->assertSet('search', 'localizable')
+            ->assertSee('Plan localizable desde el filtro activo.');
+    }
+
+    /** @test */
+    public function quitar_chip_de_revision_tambien_limpia_el_estado_legacy_de_la_url(): void
+    {
+        $docente = $this->makeDocente();
+        Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['diagnostico' => 'Registro legacy sin revisión.']
+        ));
+        Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            [
+                'diagnostico' => 'Registro legacy revisado.',
+                'revision_seguimiento' => 'Revisión existente.',
+            ]
+        ));
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->set('profesor_id', (string) $docente['profesor_id'])
+            ->set('estado', 'sin_revision')
+            ->assertSee('Registro legacy sin revisión.')
+            ->assertDontSee('Registro legacy revisado.')
+            ->call('quitarFiltro', 'revisionEstado')
+            ->assertSet('estado', '')
+            ->assertSet('revisionEstado', '')
+            ->assertSee('Registro legacy sin revisión.')
+            ->assertSee('Registro legacy revisado.');
+    }
+
+    /** @test */
+    public function el_estado_completo_semanal_exige_estrategias_y_resumenes_esperados(): void
+    {
+        $docente = $this->makeDocente();
+        $pensumBase = Pensum::where('grado_id', $docente['grado_id'])
+            ->where('id', DB::table('pevaluacions')->where('id', $docente['pevaluacion_id'])->value('pensum_id'))
+            ->firstOrFail();
+        $segundoPensum = Pensum::where('grado_id', $docente['grado_id'])
+            ->where('id', '<>', $pensumBase->id)
+            ->firstOrFail();
+        $segundaPevaluacionId = DB::table('pevaluacions')->insertGetId([
+            'profesor_id' => $docente['profesor_id'],
+            'pensum_id' => $segundoPensum->id,
+            'seccion_id' => $docente['seccion_id'],
+            'lapso_id' => $docente['lapso_id'],
+            'status_official' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         $completo = Eiplanningwk::create($this->planAttributes(
             $docente['profesor_id'],
@@ -955,9 +1387,19 @@ class SeguimientoInicialTest extends TestCase
             ['diagnostico' => 'Semana incompleta.']
         ));
 
-        $this->sembrarSemanaCompleta($completo);
+        $sinResumenes = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['diagnostico' => 'Semana completa sin resumen.']
+        ));
 
-        // Solo una estrategia en el plan incompleto.
+        $this->sembrarSemanaCompleta($completo);
+        $this->sembrarSemanaCompleta($sinResumenes);
+        $this->crearResumenSemanal($completo, $docente['pevaluacion_id']);
+        $this->crearResumenSemanal($completo, $docente['pevaluacion_id']);
+
+        // Una sola estrategia impide completar la rejilla, aunque tenga resumen.
         Eiplanningwstrategy::create([
             'eiplanningwk_id' => $incompleto->id,
             'day_of_week' => 'lunes',
@@ -965,7 +1407,14 @@ class SeguimientoInicialTest extends TestCase
             'lunes' => 'Única estrategia',
             'order' => 0,
         ]);
+        $this->crearResumenSemanal($incompleto, $docente['pevaluacion_id']);
 
+        $resumen = app(SeguimientoInicial::class)->resumen('eiplanningwks', [
+            'profesor_id' => $docente['profesor_id'],
+        ]);
+        $this->assertSame(0, $resumen['completos'], 'Un resumen duplicado no cubre el área faltante.');
+
+        $this->crearResumenSemanal($completo, $segundaPevaluacionId);
         $resumen = app(SeguimientoInicial::class)->resumen('eiplanningwks', [
             'profesor_id' => $docente['profesor_id'],
         ]);
@@ -976,6 +1425,7 @@ class SeguimientoInicialTest extends TestCase
             ->set('profesor_id', $docente['profesor_id'])
             ->set('estado', 'completo')
             ->assertSee('Semana completa.')
+            ->assertDontSee('Semana completa sin resumen.')
             ->assertDontSee('Semana incompleta.');
     }
 
@@ -1006,6 +1456,7 @@ class SeguimientoInicialTest extends TestCase
         ));
 
         $this->sembrarSemanaCompleta($completo);
+        $this->crearResumenSemanal($completo, $docente['pevaluacion_id']);
 
         Eiplanningwstrategy::create([
             'eiplanningwk_id' => $enProgreso->id,
@@ -1161,7 +1612,11 @@ class SeguimientoInicialTest extends TestCase
         $plan = Eiplanningwk::create($this->planAttributes(
             $docente['profesor_id'],
             $docente['grado_id'],
-            $docente['seccion_id']
+            $docente['seccion_id'],
+            [
+                'diagnostico' => str_repeat('Diagnóstico extenso de la situación inicial del grupo. ', 8),
+                'observacion' => 'Observación independiente de la docente.',
+            ]
         ));
 
         $componente = Livewire::actingAs($this->makeManager())
@@ -1169,7 +1624,10 @@ class SeguimientoInicialTest extends TestCase
             ->call('abrirDetalle', $plan->id)
             ->assertSet('detalleId', $plan->id)
             ->assertSee('Abrir ficha completa')
-            ->assertSee('Formato imprimible');
+            ->assertSee('Formato imprimible')
+            ->assertSee('<details', false)
+            ->assertSee('Diagnóstico inicial ·', false)
+            ->assertSee('Observación de la docente');
 
         $componente->call('cerrarDetalle')->assertSet('detalleId', null);
 

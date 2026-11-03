@@ -1,9 +1,9 @@
 # 11 — Perfil `is_inicial_manager` · Seguimiento de Educación Inicial
 
-> **Estado:** implementado · 2026-10-29 · ampliado el 2026-11-02 con la escritura de la revisión (ADR-11.11)
+> **Estado:** implementado · 2026-10-29 · revisión independiente y mejoras de seguimiento el 2026-11-02 (ADR-11.11 y ADR-11.12)
 > **Ámbito:** módulo Educación Inicial (pestudio 6), quinta perspectiva sobre los mismos seis documentos.
 > **Depende de:** [`01-rutas-controladores.md`](01-rutas-controladores.md), [`02-modelos-schema.md`](02-modelos-schema.md), [`03-livewire-componentes.md`](03-livewire-componentes.md), [`04-vistas-ui.md`](04-vistas-ui.md), [`07-perspectivas-roles.md`](07-perspectivas-roles.md) y [`08-adaptacion-cfla.md`](08-adaptacion-cfla.md).
-> **Alcance de escritura:** el perfil **consulta** los seis documentos y **solo escribe la revisión** (`observacion`/`recomendacion`). No crea, edita, elimina, clona ni importa documentos.
+> **Alcance de escritura:** el perfil consulta los seis documentos, escribe `revision_seguimiento` en los cinco documentos revisables y, solo en planificación semanal, puede editar el `observacion` existente. La observación semanal se reemplaza al guardar; no se crean, eliminan, clonan ni importan documentos.
 
 ---
 
@@ -20,11 +20,11 @@
 | Menú | Grupo `seguimiento_inicial` en `config/menus.php` |
 | Documentos | Los **6** del catálogo `RegistroInicial` |
 | Alcance de datos | **Todos** los docentes `is_inicial`, no solo el autenticado |
-| Escritura | **Solo la revisión** (`observacion`, o `recomendacion` en el plan de evaluación) desde el modal «Ver»; sin crear, editar, eliminar, clonar ni importar documentos |
+| Escritura | Revisión independiente en los cinco documentos revisables y observación semanal en `eiplanningwks.observacion`; sin CRUD de documentos |
 | Componente | `App\Livewire\Inicial\SeguimientoInicialComponent` (listado, filtros, tarjetas/tabla, modal de detalle y revisión) |
 | Detalle / impresión | `PerspectivaInicialController::show()` y `format()` reutilizados |
 | Servicio nuevo | `App\Services\Inicial\SeguimientoInicial` (consultas, filtros, completitud, KPI) |
-| Migración | Una sola columna en `users`; sin tablas nuevas |
+| Migración | Una columna nullable `revision_seguimiento` en cada uno de los cinco documentos revisables; sin tablas nuevas |
 | Fase 1 | Los 6 documentos visibles; planificación semanal con indicadores ricos |
 | Fase 2 | Enriquecer completitud por documento e índices, solo tras `EXPLAIN` y aprobación |
 
@@ -43,15 +43,15 @@ El módulo de Inicial ya tiene cuatro perspectivas sobre los **mismos** seis doc
 
 Falta un perfil operativo que **no sea docente ni coordinador**: una persona que deba **revisar el avance de todos los docentes de Inicial**, detectar planes incompletos o sin revisión, abrir el detalle, descargar el formato y **registrar la revisión de la Coordinación**, pero que **no pueda crear, editar ni eliminar ningún documento**.
 
-El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una interfaz deliberadamente parecida a `/app/inicials/eiplanningwks`: filtros, tarjetas/tabla, paginación, indicadores de completitud, detalle y formato imprimible. La diferencia es que **no hay CRUD**: la única escritura es `observacion`/`recomendacion`, con la misma regla `min:5` que la Coordinación de Evaluación.
+El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una interfaz deliberadamente parecida a `/app/inicials/eiplanningwks`: filtros, tarjetas/tabla, paginación, indicadores de completitud, detalle y formato imprimible. No hay CRUD de documentos: se registra `revision_seguimiento` en los cinco documentos revisables y se edita `eiplanningwk.observacion` únicamente desde la pestaña Observación del plan semanal.
 
 ### 1.1 Criterios de éxito medibles
 
 1. El manager ve registros de **dos docentes distintos** en la misma pantalla; no hay filtro implícito por `auth()->id()`.
-2. Puede filtrar por docente, nivel (`grado_id`), sección, lapso (cuando aplica), rango de fechas, estado y búsqueda; los filtros viajan en la URL.
+2. Puede combinar filtros independientes de avance y revisión junto a docente, nivel (`grado_id`), sección, lapso (cuando aplica), rango de fechas y búsqueda; los filtros viajan en la URL.
 3. Puede abrir el detalle y el formato de los **seis** documentos.
 4. No existe ninguna ruta `POST/PUT/PATCH/DELETE` bajo `inicials.seguimiento.*`; la revisión viaja por el endpoint de Livewire.
-5. Desde el modal «Ver» puede registrar la revisión (`observacion`/`recomendacion`, `min:5`) y el badge y el KPI se actualizan en el mismo render.
+5. Desde el modal, el manager puede registrar revisión (`revision_seguimiento`) y, para planificación semanal, editar `observacion`; cada guardado notifica al usuario asociado al profesor.
 6. Un docente `is_inicial` sin el flag recibe **403**; un `is_admin` sin el flag recibe **403**.
 7. La suite `tests/Feature/Inicial` sigue verde y se añaden pruebas específicas del perfil.
 8. La página índice no dispara N+1 ni carga las estrategias/resúmenes completos de cada fila.
@@ -66,7 +66,10 @@ El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una in
 - Middleware, alias en `Kernel`, rutas, controlador, servicio, componente Livewire, vistas y parciales.
 - Menú/layout propio y entrada en el navbar.
 - Filtros, paginación, tarjetas/tabla, KPI, detalle y formato.
-- Escritura de la revisión (`observacion`/`recomendacion`, `required|string|min:5`) desde el modal «Ver», con defensa de rol en el componente.
+- Escritura independiente de `revision_seguimiento` (`required|string|min:5`) y edición de `eiplanningwks.observacion` desde pestañas separadas del modal, con defensa de rol en el componente.
+- Notificación al profesor asociado mediante `App\Services\NotificationService` al guardar una revisión o la observación semanal.
+- Priorización de documentos pendientes, orden por actualización/período/pendientes, chips removibles y resumen del rango de resultados.
+- Resumen desplegable de diagnóstico y observación docente en el detalle rápido semanal; el detalle completo conserva el texto íntegro.
 - Reutilización de `RegistroInicial`, `PerspectivaFiltros`, `PerspectivaInicialController` y las vistas de formato existentes.
 - Pruebas de acceso, datos, filtros, detalle, formato, menú, administración de usuarios, revisión y no-escritura del resto de campos.
 - Documentación de blueprint y actualización del `README`.
@@ -75,7 +78,7 @@ El objetivo es entregar una quinta perspectiva, `is_inicial_manager`, con una in
 
 - Escribir cualquier campo distinto de la revisión (`diagnostico`, rejilla de estrategias, resúmenes, etc.).
 - Crear, editar, eliminar, clonar, importar o restaurar documentos.
-- Exportaciones CSV/Excel, gráficos históricos, notificaciones o reportes automáticos.
+- Exportaciones CSV/Excel, gráficos históricos y reportes automáticos. Las notificaciones operativas al manager por eventos del plan docente se documentan en ADR-11.14.
 - Cambiar el CRUD del docente, sus políticas o sus componentes.
 - Cambiar las vistas de formato oficiales (el manager imprime **el mismo papel**, sin marcas de agua).
 - Nuevas tablas, cambios de columnas existentes o migración de datos.
@@ -200,13 +203,13 @@ Fase 1: **una sola migración**, `users.is_inicial_manager`.
 - No se añaden índices en fase 1: el volumen actual de Inicial es pequeño y la planificación semanal ya tiene índices (`eiplanningwks_profesor_finicial_index`, `eiplanningwks_grado_seccion_finicial_index`).
 - Fase 2: índices para los otros documentos **solo** después de medir con `EXPLAIN` y obtener aprobación. Se documentan en §12.3, no se incluyen en la migración inicial.
 
-### ADR-11.11 · La revisión se escribe desde el Seguimiento (2026-11-02)
+### ADR-11.11 · La revisión se escribe desde el Seguimiento (2026-11-02; sustituido por ADR-11.12)
 
 El perfil nació como solo lectura, pero el uso real exige que la persona que **detecta** un plan incompleto o sin revisión pueda **dejar constancia** de la revisión sin abrir otra perspectiva ni pedir otra cuenta.
 
-**Decidido:** la única escritura del perfil es el campo de revisión del documento, y ocurre **solo dentro del modal del listado**. El modal se abre con «Ver» o directamente con el botón «Revisión» que está junto a «Imprimir» en cada tarjeta o fila de la tabla:
+**Decidido originalmente:** la escritura se limita al campo independiente de revisión y ocurre dentro del modal del listado. ADR-11.13 amplía explícitamente este alcance para permitir editar `eiplanningwk.observacion` en una pestaña independiente:
 
-- Campo: `observacion` en planificación semanal, quincenal, proyecto y plan especial; `recomendacion` en el plan de evaluación. El informe final no tiene campo revisable y `abrirRevision()` responde **404**.
+- Decisión inicial (sustituida): usar `observacion` en planificación semanal, quincenal, proyecto y plan especial, y `recomendacion` en evaluación. ADR-11.12 introduce `revision_seguimiento` para no mezclar la revisión del manager con contenido pedagógico.
 - Regla: `required|string|min:5`, con los mismos mensajes que la Coordinación de Evaluación.
 - Defensa: `abort_unless(auth()->user()?->isInicialManager(), 403)` al inicio de `guardarRevision()`, porque una actualización de Livewire no vuelve a ejecutar `mount()`.
 - El botón «Revisión» llama a `revisarDetalle($id)`: abre el mismo modal y entra en modo escritura. No crea una ruta ni un formulario paralelo.
@@ -215,7 +218,58 @@ El perfil nació como solo lectura, pero el uso real exige que la persona que **
 
 **Descartado:** limitarse a mostrar la revisión existente (el perfil quedaría incompleto para su propósito) y derivar a `/app/evaluacions/inicials` (duplica el flujo y exige otro flag, `is_diagnostic`).
 
-**Consecuencia:** el perfil deja de ser «solo lectura» en su totalidad. El blueprint, los textos de la UI y las pruebas distinguen explícitamente **documento de solo lectura** de **revisión escribible**.
+**Consecuencia original:** el perfil dejó de ser «solo lectura» en su totalidad. ADR-11.13 conserva `revision_seguimiento` como campo de revisión independiente y autoriza, solo en semanal, reemplazar el campo existente `observacion`.
+
+### ADR-11.12 · Revisión independiente y filtros accionables (2026-11-02)
+
+La revisión del manager no comparte columnas con el contenido escrito por el
+docente o por Coordinación. La migración
+`2026_11_02_000001_add_revision_seguimiento_to_inicial_review_tables` añade
+`revision_seguimiento` nullable a `eiplanningwks`, `eiplanningbwks`,
+`eiprojectks`, `eispecialks` y `eievaluationks`; el informe final no es
+revisable. Los cinco modelos incluyen el campo en su definición y
+asignación permitida. La UI docente no lo muestra y la lista explícita de
+campos persistidos de sus formularios impide guardar un valor manipulado.
+
+No se copian valores históricos desde `observacion` o `recomendacion`: no se
+puede distinguir con seguridad una nota previa del manager del contenido
+pedagógico original. Los registros existentes comienzan sin revisión
+independiente y se revisan de nuevo en el perfil.
+
+El filtro de avance (`estado`: `sin_iniciar`, `en_progreso`, `completo`) queda
+separado del filtro de revisión (`revision`: `sin_revision`, `revisado`) para
+que ambos ejes puedan combinarse. Se conservan URLs antiguas que enviaban
+`estado=sin_revision|revisado`. El listado también permite ordenar por última
+actualización, período o pendientes, y muestra prioridad, filtros activos
+removibles y el rango de resultados. El detalle rápido semanal resume los
+textos largos mediante desplegables; la ficha completa y la impresión no se
+recortan.
+
+**Consecuencia:** el estado «Revisado» representa exclusivamente
+`revision_seguimiento`. En el flujo semanal, el manager también puede editar
+`observacion` desde una pestaña independiente; ese guardado reemplaza el texto
+anterior y notifica al usuario asociado al profesor.
+
+### ADR-11.13 · Revisión y observación en pestañas con notificación (2026-11-02)
+
+El modal abierto por «Revisión» organiza la escritura en dos pestañas para
+planificación semanal: «Revisión» conserva el formulario independiente de
+`revision_seguimiento`; «Observación» permite editar el campo existente
+`eiplanningwk.observacion`. Al guardar la observación, el valor anterior del
+campo se reemplaza. Ambas operaciones validan al menos cinco caracteres y
+envían una notificación en base de datos al usuario relacionado con
+`profesor_id` mediante `NotificationService`; la notificación de revisión
+también aplica a los otros documentos revisables.
+
+### ADR-11.14 · Avisos operativos de planificación semanal (2026-11-02)
+
+Desde el CRUD docente de planificación semanal se notifica a los usuarios
+activos con `is_inicial_manager` mediante `App\Services\NotificationService`
+cuando se crea un plan, cuando sus 50 estrategias válidas pasan de incompletas
+a completas y cuando se registra un resumen nuevo. Los avisos enlazan al
+seguimiento semanal; no se envían por editar un resumen existente ni por
+guardar de nuevo una rejilla ya completa. Si el usuario actor también tiene el
+flag de manager, no recibe su propia notificación.
 
 ---
 
@@ -492,9 +546,9 @@ use App\Http\Controllers\Inicial\SeguimientoInicialController;
 | 0. SEGUIMIENTO DE EDUCACIÓN INICIAL  ·  auth + is_inicial_manager
 |--------------------------------------------------------------------------
 | Quinta perspectiva: consulta los 6 documentos de TODOS los docentes de
-| Inicial y solo escribe la revisión (`observacion`/`recomendacion`) desde
-| el modal «Ver». No hay POST/PUT/PATCH/DELETE en el grupo: la escritura
-| viaja por el endpoint de Livewire.
+| Inicial; escribe `revision_seguimiento` y, solo en planificación semanal,
+| puede reemplazar el campo existente `observacion`. No hay
+| POST/PUT/PATCH/DELETE en el grupo: la escritura viaja por Livewire.
 |
 | Rutas por documento para que cada pestaña tenga URL y estado de menú
 | propios. El detalle y el formato los hereda de PerspectivaInicialController.
@@ -838,21 +892,22 @@ private function idsConDocumentos(): array
 public function opcionesEstado(string $entidad): array
 {
     if ($entidad === 'eifinalks') {
-        return []; // no tiene revisión ni estado de contenido en fase 1
+        return [];
     }
 
-    $revision = [
-        'sin_revision' => 'Sin revisión',
-        'revisado' => 'Revisado',
-    ];
-
-    return $entidad === 'eiplanningwks'
+    return in_array($entidad, [
+        'eiplanningwks',
+        'eiplanningbwks',
+        'eiprojectks',
+        'eispecialks',
+        'eievaluationks',
+    ], true)
         ? [
             'sin_iniciar' => 'Sin iniciar',
             'en_progreso' => 'En progreso',
             'completo' => 'Completo',
-        ] + $revision
-        : $revision;
+        ]
+        : [];
 }
 
 // La tabla no recibe columnas: la fila la arma el catálogo con
@@ -891,10 +946,10 @@ private const RELACIONES_LISTADO = [
 /**
  * Contadores por documento: alias => [relación, columna de contenido].
  *
- * `null` como columna significa contar todas las filas de la relación. En la
- * planificación semanal se cuenta solo `lunes` no vacío, igual que el listado
- * del docente: el texto vive SIEMPRE en `lunes` (quirk de persistencia, D3) y
- * las filas legadas vacías no deben inflar el progreso.
+ * `null` como columna significa contar todas las filas de la relación. Para
+ * estrategias y aprendizaje alcanzado, `TRIM(COALESCE(...)) <> ''` excluye
+ * NULL, cadenas vacías y valores compuestos solo por espacios. El texto de
+ * las estrategias vive SIEMPRE en `lunes` (quirk de persistencia, D3).
  */
 private const CONTEO = [
     'eiplanningwks' => [
@@ -916,6 +971,7 @@ private const CONTEO = [
     ],
     'eievaluationks' => [
         'posiciones_count' => ['eievaluationps', null],
+        'posiciones_completas_count' => ['eievaluationps', 'aprendizaje_alcanzado'],
     ],
     'eifinalks' => [
         'expectativas_count' => ['expectations', null],
@@ -967,14 +1023,20 @@ private function aplicarConteos(Builder $query, string $entidad): Builder
 | Lapso | `lapso_id` | — | — | — | — | `lapso_id` | `whereHas('pevaluacion')` |
 | Desde | `desde` | `finicial >=` | `finicial >=` | `finicial >=` | `finicial >=` | `finicial >=` | `created_at >=` |
 | Hasta | `hasta` | `ffinal <=` | `ffinal <=` | `ffinal <=` | `ffinal <=` | `ffinal <=` | `created_at <=` |
-| Estado | `estado` | sin_iniciar/en_progreso/completo + revisión | revisión | revisión | revisión | revisión | — |
-| Búsqueda | `search` | `diagnostico`, `observacion` | idem | `diagnostico`, `observacion` | `justificacion`, `observacion` | `observaciones`, `recomendacion`, `asistencia` | `title`, estudiante |
+| Avance | `estado` | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | — |
+| Revisión | `revision` | sin_revision/revisado | sin_revision/revisado | sin_revision/revisado | sin_revision/revisado | sin_revision/revisado | — |
+| Orden | `orden` | actualizacion/periodo/pendientes | idem | idem | idem | idem | idem |
+| Búsqueda | `search` | `diagnostico`, `observacion`, `revision_seguimiento` | idem | `diagnostico`, `observacion`, `revision_seguimiento` | `justificacion`, `observacion`, `revision_seguimiento` | `observaciones`, `recomendacion`, `asistencia`, `revision_seguimiento` | `title`, estudiante |
 
 Reglas:
 
 - **Fechas:** se interpreta “solapa el rango”: `finicial <= hasta` y `ffinal >= desde`. Es lo que espera un supervisor que busca “lo trabajado en octubre”, no solo lo que empieza y termina dentro.
 - **Lapso:** solo se ofrece para evaluación e informe final; en los demás la UI lo oculta y el servicio lo ignora.
-- **Estado:** dos ejes que comparten el parámetro `estado`. **Contenido** solo en semanal: `sin_iniciar` (0 estrategias), `en_progreso` (1..49) y `completo` (≥ 50); los tres tramos son disjuntos y suman el total. **Revisión** en los cinco documentos con campo: `sin_revision` / `revisado`. Al ser un único `<select>`, no se pueden combinar ambos ejes. El informe final no tiene revisión: su estado es “emitido”.
+- **Avance:** `estado` filtra todos los documentos salvo el informe final. `sin_iniciar` significa que no hay contenido requerido; `en_progreso`, que existe contenido pero falta algún requisito; `completo`, que se cumplen los requisitos del documento.
+- **Criterios de avance:** semanal requiere 50 estrategias no vacías y todos los resúmenes por área esperados; quincenal, proyecto y especial requieren 50 estrategias no vacías; especial también cuenta actividades como contenido para distinguirlo de «Sin iniciar». Evaluación requiere al menos una posición y aprendizaje alcanzado no vacío en todas las posiciones.
+- **Revisión:** `revision` filtra los cinco documentos revisables por `revision_seguimiento` vacío (`sin_revision`) o con texto (`revisado`). Ambos selectores pueden combinarse; el informe final no ofrece revisión y se considera “emitido”.
+- **Compatibilidad:** URLs antiguas con `estado=sin_revision|revisado` se interpretan como filtro de revisión.
+- **Orden:** `actualizacion` (última actualización, predeterminado), `periodo` (fecha inicial más reciente; informe final por creación) o `pendientes` (revisiones vacías primero y, en semanal, menos estrategias primero). Solo se aceptan opciones de una lista fija.
 - **Búsqueda:** `LIKE %texto%` sobre las columnas declaradas; para el informe final se añade `whereHas('expectant', ...)` por nombre/apellido.
 - **Docente:** la lista del filtro no usa `PerspectivaFiltros::profesores()` porque esa cruza `pevaluacions` y dejaría fuera a un docente con planes pero sin carga registrada. El servicio usa el flag `is_inicial` **más** los `profesor_id` distintos que ya existen en los seis documentos.
 
@@ -988,11 +1050,11 @@ public function paginar(string $entidad, array $filtros, int $porPagina = 15): L
 }
 
 private const BUSQUEDA = [
-    'eiplanningwks' => ['diagnostico', 'observacion'],
-    'eiplanningbwks' => ['diagnostico', 'observacion'],
-    'eiprojectks' => ['diagnostico', 'observacion'],
-    'eispecialks' => ['justificacion', 'observacion'],
-    'eievaluationks' => ['observaciones', 'recomendacion', 'asistencia'],
+    'eiplanningwks' => ['diagnostico', 'observacion', 'revision_seguimiento'],
+    'eiplanningbwks' => ['diagnostico', 'observacion', 'revision_seguimiento'],
+    'eiprojectks' => ['diagnostico', 'observacion', 'revision_seguimiento'],
+    'eispecialks' => ['justificacion', 'observacion', 'revision_seguimiento'],
+    'eievaluationks' => ['observaciones', 'recomendacion', 'asistencia', 'revision_seguimiento'],
     'eifinalks' => ['title'],
 ];
 
@@ -1060,161 +1122,64 @@ private function aplicarFiltros(Builder $query, string $entidad, array $filtros)
     return $query;
 }
 
-private function aplicarEstado(Builder $query, string $entidad, string $estado): void
-{
-    $campoRevision = RegistroInicial::campoRevision($entidad);
+El filtro de revisión solo consulta `revision_seguimiento`: vacío o NULL es
+«Sin revisión» y texto no vacío es «Revisado». El filtro de avance se calcula
+por entidad con `whereHas`/`whereDoesntHave`, conteos de contenido y subconsultas
+para los resúmenes semanales; no depende del texto de revisión ni filtra por
+alias `withCount` mediante `HAVING`. En particular:
 
-    if ($campoRevision && $estado === 'sin_revision') {
-        $query->where(fn ($q) => $q->whereNull($campoRevision)->orWhere($campoRevision, ''));
-
-        return;
-    }
-
-    if ($campoRevision && $estado === 'revisado') {
-        $query->whereNotNull($campoRevision)->where($campoRevision, '<>', '');
-
-        return;
-    }
-
-    // Estados de CONTENIDO. Se resuelven con whereHas + umbral, no con
-    // having() sobre el alias de withCount(): paginate() ejecuta un count(*)
-    // que se rompe con un HAVING sin GROUP BY.
-    //
-    // Se miran TODAS las relaciones de contenido del documento (estrategias,
-    // actividades, posiciones), no solo la primera: un plan especial puede
-    // tener actividades sin estrategias y no por eso está "sin iniciar".
-    $relevantes = array_values(array_intersect_key(
-        self::CONTEO[$entidad] ?? [],
-        array_flip(['estrategias_count', 'actividades_count', 'posiciones_count'])
-    ));
-
-    if ($relevantes === []) {
-        return; // el informe final no ofrece filtro de estado
-    }
-
-    // Devuelve el closure de condición para cada relación de contenido.
-    $conContenido = fn (?string $columna) => fn ($q) => $columna === null
-        ? $q
-        : $q->whereNotNull($columna)->where($columna, '<>', '');
-
-    // Umbral de la rejilla semanal: 5 días × 10 momentos = 50.
-    $total = count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria'));
-
-    match ($estado) {
-        // `completo` solo se ofrece en semanal: es el único documento con una
-        // rejilla de celdas acotada (5 días × 10 momentos) en fase 1.
-        'completo' => $query->whereHas(
-            'eiplanningwstrategies',
-            $conContenido('lunes'),
-            '>=',
-            $total
-        ),
-        // En semanal, `en_progreso` es el tramo 1..49: tiene contenido pero no
-        // llega a la rejilla completa. Sin este techo, el filtro devolvía
-        // también las semanas cuyo badge dice «Completo».
-        'en_progreso' => $query
-            ->where(function ($q) use ($relevantes, $conContenido) {
-                foreach ($relevantes as [$relacion, $columna]) {
-                    $q->orWhereHas($relacion, $conContenido($columna));
-                }
-            })
-            ->when(
-                $entidad === 'eiplanningwks',
-                fn (Builder $q) => $q->whereHas(
-                    'eiplanningwstrategies',
-                    $conContenido('lunes'),
-                    '<',
-                    $total
-                )
-            ),
-        'sin_iniciar' => $query->where(function ($q) use ($relevantes, $conContenido) {
-            foreach ($relevantes as [$relacion, $columna]) {
-                $q->whereDoesntHave($relacion, $conContenido($columna));
-            }
-        }),
-        default => null,
-    };
-}
+- Semanal: «Completo» exige al menos 50 estrategias no vacías y que no exista
+  un área esperada sin resumen válido. «En progreso» es contenido existente
+  que no satisface ambos requisitos; «Sin iniciar» no tiene estrategias ni
+  resúmenes.
+- Quincenal, proyecto y especial: el umbral de «Completo» es 50 estrategias no
+  vacías. Actividades hacen que un plan especial tenga contenido, aunque no
+  haya estrategias.
+- Evaluación: «Completo» exige al menos una posición y ninguna posición con
+  aprendizaje alcanzado vacío. «En progreso» tiene al menos una posición
+  incompleta; sin posiciones está «Sin iniciar».
+- Las condiciones de contenido aplican `TRIM(COALESCE(campo, '')) <> ''`, por
+  lo que NULL, cadenas vacías y espacios no se consideran texto.
 ```
 
 #### Estado y completitud (fase 1)
 
-```php
-public function estado(string $entidad, Model $documento): array
-{
-    if ($entidad === 'eiplanningwks') {
-        $total = count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria')); // 50
-        $escritas = (int) ($documento->estrategias_count ?? 0);
+Los badges, el filtro y el KPI de documentos completos comparten los mismos
+criterios:
 
-        return match (true) {
-            $escritas >= $total => [
-                'clave' => 'completo',
-                'etiqueta' => 'Completo',
-                'variante' => 'emerald',
-                'detalle' => "{$escritas}/{$total} estrategias",
-            ],
-            $escritas > 0 => [
-                'clave' => 'en_progreso',
-                'etiqueta' => 'En progreso',
-                'variante' => 'amber',
-                'detalle' => "{$escritas}/{$total} estrategias",
-            ],
-            default => [
-                'clave' => 'sin_iniciar',
-                'etiqueta' => 'Sin iniciar',
-                'variante' => 'gray',
-                'detalle' => "0/{$total} estrategias",
-            ],
-        };
-    }
+| Documento | Sin iniciar | En progreso | Completo |
+|---|---|---|---|
+| Planificación semanal | Sin estrategias ni resúmenes | Tiene contenido, pero falta completar las 50 estrategias o los resúmenes esperados | 50 estrategias no vacías y todos los resúmenes esperados |
+| Planificación quincenal | Sin estrategias | Tiene de 1 a 49 estrategias no vacías | 50 estrategias no vacías |
+| Proyecto | Sin estrategias | Tiene de 1 a 49 estrategias no vacías | 50 estrategias no vacías |
+| Especial | Sin estrategias ni actividades | Tiene estrategias o actividades, pero no llega a 50 estrategias | 50 estrategias no vacías |
+| Evaluación | Sin posiciones | Tiene posiciones, pero alguna no tiene aprendizaje alcanzado | Tiene una o más posiciones y todas tienen aprendizaje alcanzado |
 
-    if ($entidad === 'eifinalks') {
-        return [
-            'clave' => 'emitido',
-            'etiqueta' => 'Emitido',
-            'variante' => 'emerald',
-            'detalle' => 'Informe final',
-        ];
-    }
-
-    // El máximo de los contadores: `??` no sirve porque withCount devuelve 0
-    // (no null) y un plan especial puede tener actividades sin estrategias.
-    $contenido = max(
-        (int) ($documento->estrategias_count ?? 0),
-        (int) ($documento->actividades_count ?? 0),
-        (int) ($documento->posiciones_count ?? 0),
-        (int) ($documento->expectativas_count ?? 0),
-    );
-
-    return [
-        'clave' => $contenido > 0 ? 'en_progreso' : 'sin_iniciar',
-        'etiqueta' => $contenido > 0 ? 'Con contenido' : 'Sin contenido',
-        'variante' => $contenido > 0 ? 'cyan' : 'gray',
-        'detalle' => $contenido.' ítem(s)',
-    ];
-}
-```
+Las cadenas vacías y compuestas solo por espacios no cuentan como contenido.
+En planificación semanal, los resúmenes esperados se calculan por docente y
+sección a partir de las áreas de aprendizaje activas; si no hay áreas
+esperadas, el requisito se satisface con cero resúmenes. El avance cuenta
+áreas distintas representadas por resúmenes válidos del docente y sección:
+duplicar un resumen o asociarlo a otra carga no cubre un área faltante.
 
 La revisión se muestra como **badge independiente**, no se mezcla con la completitud:
 
-- `observacion` / `recomendacion` vacíos → `Sin revisión` (ámbar).
+- `revision_seguimiento` vacío → `Sin revisión` (ámbar).
 - Con texto → `Revisado` (esmeralda).
 - Informe final → sin badge de revisión.
 
-> El filtro de contenido replica estos mismos tramos: `sin_iniciar` = 0,
-> `en_progreso` = 1..49 y `completo` = 50. Así el badge de cada fila siempre
-> coincide con el filtro que la muestra: un plan completo no aparece bajo
-> “En progreso”. Un test comprueba que los tres tramos son disjuntos y suman
-> el total.
+> El filtro de contenido y el KPI de completos replican los criterios de la
+> tabla. En semanal, una rejilla 50/50 sin resúmenes esperados completos sigue
+> “En progreso”; una evaluación con posiciones incompletas no cuenta como
+> completa. Los tramos son mutuamente excluyentes, de modo que el badge de cada
+> fila coincide con el filtro que la muestra.
 
-> **Por qué no se reutiliza `EiplanningwkComponent::attachCompletion()`:** ese
-> método calcula días con contenido y resúmenes esperados **por sección del
-> docente autenticado** (`$this->profesor_id`), y el manager no tiene profesor.
-> En fase 1 el seguimiento mide celdas escritas de la rejilla (50) y muestra
-> resúmenes como dato absoluto; en fase 2 se puede portar el cálculo de
-> resúmenes esperados por sección, agrupado para toda la página y sin depender
-> del usuario. Ambas métricas deben llamarse distinto en la UI (“Estrategias”
-> vs. “Resúmenes esperados”) para que no parezcan la misma cifra.
+> El listado docente también muestra el estado semanal junto al contador de
+> resúmenes y un badge «Revisado» cuando `revision_seguimiento` tiene texto.
+> El estado de avance usa el mismo criterio que el seguimiento: 50 estrategias
+> no vacías **y** todos los resúmenes esperados por sección. El cálculo de
+> estos últimos se agrupa para los planes de la página y se limita al docente
+> autenticado.
 
 #### KPI (`resumen`)
 
@@ -1325,11 +1290,9 @@ use Livewire\WithPagination;
 /**
  * Listado de seguimiento de Educación Inicial.
  *
- * No crea, actualiza ni elimina documentos. La ÚNICA escritura permitida es
- * `guardarRevision()`: el manager registra `observacion` (o `recomendacion` en
- * el plan de evaluación) desde el modal «Ver», con la misma regla `min:5` que
- * la Coordinación de Evaluación. El resto del documento sigue siendo de solo
- * lectura y las rutas del grupo solo declaran GET.
+ * No crea, elimina, clona ni importa documentos. La escritura permitida es
+ * `revision_seguimiento` y, en planificación semanal, el campo existente
+ * `observacion`; las rutas del grupo solo declaran GET.
  */
 class SeguimientoInicialComponent extends Component
 {
@@ -1360,6 +1323,12 @@ class SeguimientoInicialComponent extends Component
     #[Url(as: 'estado', except: '')]
     public $estado = '';
 
+    #[Url(as: 'revision', except: '')]
+    public string $revisionEstado = '';
+
+    #[Url(as: 'orden', except: 'actualizacion')]
+    public string $orden = 'actualizacion';
+
     #[Url(as: 'buscar', except: '')]
     public string $search = '';
 
@@ -1376,11 +1345,14 @@ class SeguimientoInicialComponent extends Component
     /** El modal muestra el formulario de revisión en lugar del detalle. */
     public bool $revisionAbierta = false;
 
-    /** Texto del campo revisable (`observacion` o `recomendacion`). */
+    /** Texto de revisión del manager, persistido en `revision_seguimiento`. */
     public string $revision = '';
 
-    /** Aviso de éxito que se muestra al volver al detalle. */
-    public ?string $avisoRevision = null;
+    /** Observación del plan semanal, persistida en `eiplanningwk.observacion`. */
+    public string $observacion = '';
+
+    /** Pestaña activa del formulario de seguimiento. */
+    public string $revisionPestana = 'revision';
 
     /** Catálogos de filtros. */
     public Collection $listProfesores;
@@ -1434,9 +1406,11 @@ class SeguimientoInicialComponent extends Component
 | `alternarVista()` | Alterna `grid`/`table`; se refleja en la URL (`vista`). |
 | `abrirDetalle(int $id)` | Valida que el id exista para la entidad, abre el modal y limpia cualquier revisión pendiente. |
 | `cerrarDetalle()` | Cierra el modal, limpia `detalleId` y el estado de revisión. |
-| `abrirRevision()` | Precarga el texto actual y muestra el formulario. 404 si la entidad no tiene campo revisable (informe final). |
-| `cerrarRevision()` | Descarta el texto no guardado y vuelve al detalle. |
-| `guardarRevision()` | **Única escritura.** Valida `required\|string\|min:5`, escribe `observacion`/`recomendacion` y deja `avisoRevision`. |
+| `abrirRevision()` | Precarga `revision_seguimiento` y, para semanal, `observacion`; abre la pestaña Revisión. 404 si la entidad no tiene campo revisable (informe final). |
+| `seleccionarPestanaRevision(string $pestana)` | Cambia entre Revisión y Observación; la segunda solo existe para planificación semanal. |
+| `cerrarRevision()` | Descarta el texto no guardado y cierra el modal completo. |
+| `guardarRevision()` | Valida `required\|string\|min:5`, escribe `revision_seguimiento`, notifica al profesor asociado, cierra el modal y muestra toast. |
+| `guardarObservacion()` | Solo semanal; valida `required\|string\|min:5`, reemplaza `observacion`, notifica al profesor asociado, cierra el modal y muestra toast. |
 | `queryFiltros(): array` | Devuelve los filtros no vacíos para construir los enlaces de pestañas. |
 
 ```php
@@ -1513,27 +1487,25 @@ public function abrirDetalle(int $id): void
 
     $this->detalleId = $id;
     $this->limpiarRevision();
-    $this->avisoRevision = null;
 }
 
 public function cerrarDetalle(): void
 {
     $this->detalleId = null;
     $this->limpiarRevision();
-    $this->avisoRevision = null;
 }
 
 public function abrirRevision(): void
 {
     $documento = $this->documentoDetalle();
-    $campo = RegistroInicial::campoRevision($this->entidad);
+    $campo = RegistroInicial::campoRevision($this->entidad)
+        ? 'revision_seguimiento'
+        : null;
 
     abort_if(! $campo || ! $documento, 404);
 
     $this->revision = (string) $documento->{$campo};
     $this->revisionAbierta = true;
-    $this->avisoRevision = null;
-
     $this->resetValidation('revision');
 }
 
@@ -1542,17 +1514,17 @@ public function guardarRevision(): void
     // Una actualización de Livewire no vuelve a ejecutar `mount()`.
     abort_unless(auth()->user()?->isInicialManager(), 403);
 
-    $campo = RegistroInicial::campoRevision($this->entidad);
+    $campo = RegistroInicial::campoRevision($this->entidad)
+        ? 'revision_seguimiento'
+        : null;
     abort_if(! $campo, 404);
 
-    $rotulo = RegistroInicial::rotuloRevision($this->entidad);
-    $minuscula = mb_strtolower($rotulo);
-
+    $this->revision = trim($this->revision);
     $this->validate([
         'revision' => ['required', 'string', 'min:5'],
     ], [
-        'revision.required' => "Escribe la {$minuscula} de la Coordinación.",
-        'revision.min' => "La {$minuscula} debe tener al menos 5 caracteres.",
+        'revision.required' => 'Escribe la revisión de seguimiento.',
+        'revision.min' => 'La revisión debe tener al menos 5 caracteres.',
     ]);
 
     $documento = $this->documentoDetalle();
@@ -1562,7 +1534,11 @@ public function guardarRevision(): void
     $documento->save();
 
     $this->limpiarRevision();
-    $this->avisoRevision = "{$rotulo} guardada.";
+    $this->detalleId = null;
+    $this->notification()->success(
+        'Revisión de seguimiento guardada',
+        'La revisión independiente se actualizó correctamente.'
+    );
 }
 
 public function alternarVista(): void
@@ -1579,7 +1555,11 @@ public function queryFiltros(): array
         'lapso' => $this->lapso_id,
         'desde' => $this->desde,
         'hasta' => $this->hasta,
-        'estado' => $this->estado,
+        'estado' => in_array($this->estado, ['sin_revision', 'revisado'], true) ? null : $this->estado,
+        'revision' => $this->revisionEstado !== ''
+            ? $this->revisionEstado
+            : (in_array($this->estado, ['sin_revision', 'revisado'], true) ? $this->estado : null),
+        'orden' => $this->orden === 'actualizacion' ? null : $this->orden,
         'buscar' => $this->search,
         'vista' => $this->viewMode === 'grid' ? null : $this->viewMode,
     ], fn ($valor) => $valor !== null && $valor !== '');
@@ -1590,10 +1570,10 @@ Notas de implementación:
 
 - `updatedGradoId()` se dispara antes que `updated('grado_id')`; el `resetPage()` duplicado es inocuo.
 - `abrirDetalle()` no usa `findOrFail` dentro de Livewire: un 404 de Livewire rompe el modal. Se comprueba existencia y, si no, se cierra sin notificación (mismo criterio de no revelar ids).
-- `guardarRevision()` es la única llamada que persiste. No toca otros campos ni crea registros; `documentoDetalle()` relee el registro por id para no confiar en el snapshot del cliente.
+- `guardarRevision()` persiste únicamente `revision_seguimiento`; `guardarObservacion()` persiste únicamente `observacion` y solo admite planificación semanal. Ambos releen el registro por id, notifican al profesor asociado y muestran un toast WireUI.
 - `abrirRevision()` responde 404 cuando `RegistroInicial::campoRevision()` es `null` (informe final): no se ofrece un formulario que al guardar no escribiría nada.
 - La autorización sigue siendo el middleware + el `abort_unless` del `mount()`; la escritura añade su propio `abort_unless` como defensa en profundidad.
-- No se usa `WireUiActions`: el aviso de éxito es un bloque `avisoRevision` que se muestra al volver al detalle.
+- El componente usa `WireUiActions` para comunicar el éxito sin reabrir el detalle extenso.
 
 ### 8.3 Pestañas dentro del componente
 
@@ -1701,21 +1681,23 @@ Cuatro tarjetas para la entidad activa:
 | Registros | `$resumen['total']` | Con los filtros actuales |
 | Docentes | `$resumen['docentes']` | Distinct de profesor (o carga en informe final) |
 | Sin revisión | `$resumen['sin_revision']` | Ámbar; oculta en informe final |
-| Completos / Revisados | `$resumen['completos'] ?? $resumen['revisados']` | Semanal: completos; otros: revisados; final: “Emitidos” |
+| Completos / Emitidos | `$resumen['completos'] ?? $resumen['total']` | Documentos revisables: completos según su contenido requerido; informe final: emitidos |
 
 Usar `role="status"` o `aria-live="polite"` en la fila para que el cambio de filtros se anuncie. No usar gráficos en fase 1.
 
 ### 9.4 Filtros
 
-Disposición en dos filas:
+Disposición responsiva en filas:
 
-- **Fila 1:** Docente, Nivel, Sección y el selector de lapso o el par de fechas.
-- **Fila 2:** Buscar, Estado y las acciones (Limpiar, Tabla/Tarjetas), con las acciones alineadas a la derecha.
+- Docente, Nivel, Sección y el selector de lapso o el par de fechas.
+- Buscar, Avance, Revisión, Orden y las acciones (Limpiar, Tabla/Tarjetas), que pueden pasar a filas adicionales en pantallas estrechas.
 
 Campos visibles según la entidad:
 
 - **Siempre:** Docente, Nivel, Sección y Buscar.
-- **Estado:** a la derecha de Buscar, en la misma segunda fila; en los cinco documentos que tienen estado, el informe final no lo ofrece (no se inventa un estado que el documento no tiene).
+- **Avance:** en todos menos el informe final; las opciones dependen del tipo de documento.
+- **Revisión:** en los cinco documentos con `revision_seguimiento`; puede combinarse con Avance.
+- **Orden:** última actualización, período o pendientes cuando el documento es revisable.
 - **Semanal, quincenal, proyecto, especial:** Desde, Hasta.
 - **Evaluación:** Desde, Hasta, Lapso.
 - **Informe final:** Lapso (sin fechas; se usa `created_at` si se habilita en fase 2).
@@ -1724,8 +1706,9 @@ Detalles:
 
 - Etiqueta **Nivel**, nunca “Grado”.
 - Sección deshabilitada si no hay nivel: “Elija primero un nivel”.
-- El selector de estado se genera con `opcionesEstado()`; no se ofrecen opciones que el servicio ignoraría.
-- Botón **«Leyenda de estados»** junto a la insignia de solo lectura: abre un modal con la definición, la regla y un ejemplo de cada estado (contenido y revisión), incluido «Emitido» del informe final. Explica que son dos ejes independientes y que el filtro admite una sola opción.
+- Los selectores de avance, revisión y orden se generan con `opcionesEstado()`, `opcionesRevision()` y `opcionesOrden()`; no se ofrecen opciones que el servicio ignoraría.
+- Los chips de filtros activos permiten quitar un filtro individual; el listado muestra el total de resultados y el rango visible.
+- Botón **«Leyenda de estados»** junto a la insignia de solo lectura: abre un modal con la definición, la regla y un ejemplo de cada estado de contenido y revisión. El estado «Emitido» del informe final se reserva para una futura actualización y no se muestra en esta leyenda. Explica que los ejes son independientes y combinables.
 - El botón “Limpiar” no recarga la página.
 - `wire:loading` muestra un skeleton o un texto “Consultando…” en la tabla/tarjetas.
 
@@ -1737,7 +1720,8 @@ Detalles:
 - Docente y área.
 - Diagnóstico truncado (3 líneas).
 - Progreso: `estrategias_count / 50` con barra.
-- Badges: estado de completitud + revisión.
+- Badges: estado de completitud + revisión; prioridad visual si está sin iniciar o sin revisión.
+- Fecha de última actualización.
 - Acciones: **Ver** (modal), **Ficha** (show), **Imprimir** (format).
 
 **Otros documentos (`card-documento.blade.php`):**
@@ -1745,7 +1729,7 @@ Detalles:
 - Título del documento y número.
 - Docente, `Nivel · Sección`, fechas o lapso.
 - Contador principal según entidad (estrategias, actividades, posiciones, expectativas).
-- Badge de estado + revisión (si aplica).
+- Badge de estado + revisión (si aplica), prioridad de pendientes y fecha de actualización.
 - Acciones: Ver, Ficha, Imprimir.
 
 No hay botones de editar, clonar, eliminar, importar ni “Nuevo”.
@@ -1776,11 +1760,12 @@ No hay botones de editar, clonar, eliminar, importar ni “Nuevo”.
 - Cuerpo:
   - Si `$detalleParcial` existe: `@include($detalleParcial, ['plan' => $detalle])`.
   - Si no (informe final): resumen de estudiante, carga, título y enlace al formato.
-  - Si `$revisionAbierta`: formulario `wire:submit="guardarRevision"` con `<textarea wire:model="revision">`, `min:5`, aviso de que solo se modifica ese campo, botones Cancelar/Guardar. El pie del modal se oculta durante la revisión.
-- Tras guardar, el modal vuelve al detalle, muestra `avisoRevision` y el badge pasa a «Revisado» en el mismo render.
+  - Si `$revisionAbierta` y la entidad es semanal: pestañas «Revisión» y «Observación». La primera guarda `revision_seguimiento`; la segunda edita `Eiplanningwk.observacion` y advierte que reemplazará el texto existente. Cada guardado notifica al profesor asociado, cierra el modal y muestra un toast WireUI.
+  - Para las demás entidades revisables se mantiene solo la pestaña/formulario de Revisión. El pie del modal se oculta durante la edición.
+  - Cancelar descarta los cambios no guardados y cierra el modal; al volver a abrir, el badge «Revisado» depende exclusivamente de `revision_seguimiento`.
 - Pie: “Abrir ficha completa” (`show`), “Formato imprimible” (`format`), “Cerrar”.
 - Sin CRUD: no hay campos del documento editables, ni botón de crear/eliminar/clonar.
-- Cierre con `wire:click="cerrarDetalle"`, `@keydown.escape.window`, clic en backdrop o en la X: si el formulario está abierto, se cancela la revisión y se vuelve al detalle; no se descarta el modal completo.
+- Cierre con `wire:click="cerrarDetalle"`, Escape, clic en backdrop o en la X. Si el formulario está abierto, se cancela la revisión y se cierra el modal completo.
 - Si el documento ya no existe, `abrirDetalle()` cierra el modal sin revelar el id.
 - El informe final no muestra el botón y `abrirRevision()` responde 404.
 
@@ -1968,10 +1953,14 @@ Si no se quiere refactorizar el test existente, duplicar solo los helpers mínim
 | 15 | Filtro `lapso` en semanal | La UI no lo ofrece; el servicio lo ignora |
 | 16 | Búsqueda por diagnóstico | Devuelve el plan correspondiente |
 | 17 | Búsqueda por docente en informe final | Devuelve los informes del docente |
-| 18 | Estado `sin_revision` / `revisado` | Coincide con `observacion`/`recomendacion` |
-| 19 | Estado `completo` en semanal | Solo planes con 50 estrategias no vacías |
-| 20 | Paginación | 15 por página, conserva filtros |
-| 21 | Pestaña `eiprojectks` | Solo carga proyectos, no los otros cinco |
+| 18 | Avance + revisión simultáneos | Ambos filtros independientes se aplican de forma combinada; revisión coincide exclusivamente con `revision_seguimiento` |
+| 19 | Estado `completo` en semanal | Solo planes con 50 estrategias no vacías y todos los resúmenes esperados |
+| 19a | Estado semanal con rejilla 50/50 sin resúmenes | `En progreso` en tarjeta y tabla docente |
+| 19b | Estado semanal con rejilla 50/50 y todos los resúmenes | `Completo` en tarjeta y tabla docente y en el filtro de seguimiento |
+| 19c | Quincenal, proyecto y especial | `Completo` solo con 50 estrategias no vacías |
+| 19d | Evaluación | `Completo` solo con posiciones y aprendizaje alcanzado no vacío en todas |
+| 20 | Paginación y rango | 15 por página, conserva filtros y muestra rango/total de resultados |
+| 21 | Pestaña `eiprojectks` | Solo carga proyectos, no los otros cinco; los chips permiten quitar filtros y el orden `pendientes` prioriza sin revisión |
 
 ### 11.4 Casos de lectura
 
@@ -1980,21 +1969,23 @@ Si no se quiere refactorizar el test existente, duplicar solo los helpers mínim
 | 22 | `Route::getRoutes()` filtra `inicials.seguimiento.*` | Todos los métodos son `GET`/`HEAD` |
 | 23 | `POST /app/inicials/seguimiento/eiplanningwks` | 405 (no existe ruta) |
 | 24 | Reflexión sobre `SeguimientoInicialComponent` | No existen `save`, `update`, `delete`, `create`, `store`, `destroy`; sí existe `guardarRevision` |
-| 25 | El HTML del índice (sin modal abierto) | No contiene `wire:model` sobre `observacion`/`recomendacion` |
+| 25 | El HTML del índice (sin modal abierto) | No contiene `wire:model` sobre `observacion`/`recomendacion` ni `revision_seguimiento` |
 | 26 | El HTML del detalle | No contiene “Editar”, “Eliminar”, “Clonar”, “Nuevo” |
 
 La prueba 24 es simbólica pero barata; la 22 es la garantía real de que no hay rutas de escritura.
 
-### 11.5 Casos de revisión (única escritura)
+### 11.5 Casos de revisión y observación
 
 | # | Caso | Resultado |
 |---|---|---|
-| 27 | Manager abre «Ver» → «Registrar revisión» en plan semanal | El formulario aparece con `wire:model="revision"` y «Guardar» |
-| 28 | Guarda una observación con espacios | Se guarda con `trim`; `diagnostico` y demás campos no cambian; aviso `Observación guardada.`; badge «Revisado» |
-| 29 | Guarda una recomendación en `eievaluationks` | Escribe `recomendacion`, no `observacion`; aviso `Recomendación guardada.` |
-| 30 | Texto de 2 caracteres | Error `min:5`; el formulario sigue abierto y la BD no cambia |
-| 31 | Abre «Editar revisión» y cancela | El textarea precarga el texto actual; al cancelar se descarta y la BD conserva el original |
-| 32 | Informe final → `abrirRevision()` | 404: no hay campo revisable ni formulario |
+| 27 | Manager abre «Revisión» en semanal | Aparecen pestañas Revisión y Observación; la primera precarga `revision_seguimiento` |
+| 28 | Guarda una revisión con espacios | Se guarda con `trim` en `revision_seguimiento`, conserva `observacion`, notifica al profesor y muestra toast |
+| 29 | Guarda una revisión en `eievaluationks` | Escribe `revision_seguimiento`, sin alterar `recomendacion` |
+| 30 | Texto de 2 caracteres o solo espacios | Error de validación; la BD no cambia |
+| 31 | Abre «Editar revisión» y cancela | El textarea precarga la revisión; al cancelar se cierra el modal y la BD conserva el original |
+| 32 | Informe final → `abrirRevision()` y formulario docente manipulado | No hay formulario manager; el formulario docente no persiste `revision_seguimiento` |
+| 33 | Guarda una observación semanal existente | Reemplaza `Eiplanningwk.observacion`, conserva `revision_seguimiento`, notifica al profesor y muestra toast |
+| 34 | Observación semanal inválida | Mantiene abierto el modal en pestaña Observación; no persiste ni notifica |
 
 ### 11.6 Casos de menú y administración
 
@@ -2151,14 +2142,14 @@ Cada PR debe pasar `pint --test` y `git diff --check`. No se hace commit sin sol
 5. Un `is_admin` sin el flag recibe 403.
 6. El manager ve registros de **todos** los docentes, no solo los suyos.
 7. El índice ofrece los seis documentos con pestañas y menú propio.
-8. Los filtros son: docente, nivel, sección, lapso (cuando aplica), fechas, estado y búsqueda.
+8. Los filtros son: docente, nivel, sección, lapso (cuando aplica), fechas, avance, revisión, orden y búsqueda; avance y revisión pueden combinarse.
 9. Los filtros viajan en la URL y sobreviven a F5 y al cambio de pestaña.
 10. La vista permite alternar tarjetas/tabla y pagina de 15 en 15.
 11. La planificación semanal muestra estrategias, días, resúmenes y estado de revisión.
 12. El detalle y el formato funcionan para los seis documentos.
 13. No existe ninguna ruta de escritura bajo `inicials.seguimiento.*`; la revisión viaja por el endpoint de Livewire.
-14. El componente no tiene métodos de CRUD (`save`, `update`, `delete`, `create`, `store`, `destroy`); su única persistencia es `guardarRevision()` sobre el campo revisable.
-15. El manager registra `observacion`/`recomendacion` (`required|string|min:5`) desde el modal «Ver»; el informe final responde 404 y no muestra el botón.
+14. El componente no tiene métodos de CRUD (`save`, `update`, `delete`, `create`, `store`, `destroy`); sus únicas persistencias son las acciones acotadas de revisión y observación semanal.
+15. El manager registra `revision_seguimiento` (`required|string|min:5`) en los cinco documentos revisables; para semanal también puede reemplazar `observacion` (`required|string|min:5`). Cada guardado notifica al profesor asociado. El informe final responde 404 y no muestra el botón.
 16. El detalle del manager no enlaza a `inicials.home` (que le daría 403); enlaza a `inicials.seguimiento.index`.
 17. El menú “Seguimiento Inicial” aparece solo para el flag y tiene estado activo correcto.
 18. El layout `seguimiento_inicial` tiene subtítulo “Seguimiento · Educación Inicial”.
@@ -2182,7 +2173,7 @@ Cada PR debe pasar `pint --test` y `git diff --check`. No se hace commit sin sol
 | `document-show` se rompe para las otras perspectivas | Regresión | Variables opcionales + pruebas 46–48 |
 | Conflictos de rutas | 404/403 inesperados | Prefijo distinto, `route:list`, prueba de rutas |
 | Migración en producción | Bloqueo o pérdida del flag | `--pretend`, backup, ventana, `down()` documentado |
-| El manager escribe más allá de la revisión | Pérdida de control sobre el documento | `guardarRevision()` solo toca el campo revisable; `abort_unless` de rol; pruebas 27–32 |
+| El manager escribe más allá de la revisión | Pérdida de control sobre el documento | `guardarRevision()` solo toca `revision_seguimiento`; `abort_unless` de rol; pruebas 27–32 |
 | Combinación de flags | Layout/permisos ambiguos | Validación en admin; auditoría SQL; orden de layout documentado |
 | Índices prematuros | Bloqueos de tabla | Fase 2 separada, `EXPLAIN`, aprobación |
 
@@ -2233,7 +2224,7 @@ El `down()` elimina la columna y el flag. No hay otras tablas ni datos afectados
 
 | # | Decisión | Resuelto |
 |---|---|---|
-| 8 | ¿El manager puede escribir la revisión? | **Sí, solo la revisión** (`observacion`/`recomendacion`, `min:5`) dentro del modal del listado, que se abre con «Ver» o con «Revisión» junto a «Imprimir». El resto del documento sigue de solo lectura (ADR-11.11). |
+| 8 | ¿El manager puede escribir la revisión? | **Sí**, mediante `revision_seguimiento` (`min:5`) en los cinco documentos revisables; semanal además permite reemplazar `observacion` desde la pestaña separada, con notificación al profesor (ADR-11.13). |
 
 **Adoptadas según la recomendación del plan** (implementadas; no cambian la arquitectura):
 
@@ -2320,8 +2311,7 @@ git diff --check
 La quinta perspectiva es **barata en código** porque el módulo ya tiene el catálogo, los filtros, el detalle y los formatos. El trabajo real está en tres fronteras:
 
 1. **Autorización:** un flag nuevo, un middleware propio y ningún atajo por `is_admin`.
-2. **Frontera de escritura:** rutas GET, CRUD ausente y una única escritura acotada a la revisión (`observacion`/`recomendacion`, `min:5`), con pruebas que lo demuestren.
-3. **Seguimiento:** consultas paginadas y acotadas, estado de completitud/revisión y una UI que se parezca al listado del docente sin heredar su CRUD.
+2. **Frontera de escritura:** rutas GET, CRUD de documentos ausente, revisión independiente en los cinco documentos y edición de `observacion` solo para planificación semanal (`min:5`), con notificación al profesor y pruebas que lo demuestren.
+3. **Seguimiento:** consultas paginadas y acotadas, filtros independientes de avance/revisión, orden de pendientes y una UI que se parezca al listado del docente sin heredar su CRUD.
 
 Si se respetan las decisiones de este documento, el perfil se puede implementar en cuatro PRs pequeños, con la migración aislada y la suite de Inicial como red de seguridad.
-

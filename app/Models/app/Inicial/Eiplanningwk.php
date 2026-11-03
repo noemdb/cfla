@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $tiempo_ejecucion
  * @property string|null $diagnostico
  * @property string|null $observacion
+ * @property string|null $revision_seguimiento
  */
 class Eiplanningwk extends Model
 {
@@ -48,6 +49,7 @@ class Eiplanningwk extends Model
         'tiempo_ejecucion',
         'diagnostico',
         'observacion',
+        'revision_seguimiento',
     ];
 
     /**
@@ -71,6 +73,7 @@ class Eiplanningwk extends Model
         'tiempo_ejecucion' => 'Cant.Semanas',
         'diagnostico' => 'Diagnóstico inicial',
         'observacion' => 'Observación',
+        'revision_seguimiento' => 'Revisión de seguimiento',
         'lapso_id' => 'Momento',
         'eiprojectk_id' => 'Proyecto vinculado',
     ];

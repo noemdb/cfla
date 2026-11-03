@@ -10,8 +10,10 @@ use App\Models\app\Inicial\Eiplanningwk;
 use App\Models\app\Inicial\Eiplanningwstrategy;
 use App\Models\app\Inicial\Eiplanningwsummary;
 use App\Models\User;
+use App\Notifications\InicialWeeklyPlanNotification;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -104,6 +106,18 @@ class EiplanningwkComponentTest extends TestCase
         ];
     }
 
+    private function makeInicialManager(): User
+    {
+        if (! Schema::hasColumn('users', 'is_inicial_manager')) {
+            $this->markTestSkipped('Requiere la columna users.is_inicial_manager.');
+        }
+
+        return User::factory()->create([
+            'is_admin' => false,
+            'is_inicial_manager' => true,
+        ]);
+    }
+
     /** Sección activa del grado de la fixture. */
     private function seccionDe(int $gradoId): int
     {
@@ -187,6 +201,17 @@ class EiplanningwkComponentTest extends TestCase
     }
 
     // ─── Listado y carga en cascada ──────────────────────────────
+
+    /** @test */
+    public function la_pagina_semanal_usa_el_ancho_disponible_con_margenes_responsivos(): void
+    {
+        $docente = $this->makeDocenteInicial();
+
+        $this->actingAs($docente['user'])
+            ->get(route('inicials.eiplanningwks.index'))
+            ->assertOk()
+            ->assertSee('w-full max-w-none mx-auto px-2 sm:px-4 lg:px-6 2xl:px-8', false);
+    }
 
     /** @test */
     public function el_select_de_grado_solo_ofrece_los_grados_de_inicial_del_docente(): void
@@ -293,6 +318,37 @@ class EiplanningwkComponentTest extends TestCase
         $this->assertFalse($component->get('showModal'), 'El modal debe cerrarse tras guardar.');
     }
 
+    /** @test */
+    public function al_registrar_un_plan_semanal_notifica_a_los_managers_activos(): void
+    {
+        Notification::fake();
+        $manager = $this->makeInicialManager();
+        $inactiveManager = User::factory()->create([
+            'is_inicial_manager' => true,
+            'is_active' => 'disable',
+        ]);
+        $otroUsuario = User::factory()->create(['is_inicial_manager' => false]);
+        $docente = $this->makeDocenteInicial();
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->set($this->planForm())
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $plan = Eiplanningwk::where('profesor_id', $docente['profesor_id'])->firstOrFail();
+
+        Notification::assertSentTo(
+            $manager,
+            InicialWeeklyPlanNotification::class,
+            fn (InicialWeeklyPlanNotification $notification) => $notification->type === 'inicial_weekly_plan_created'
+                && $notification->planId === $plan->id
+                && $notification->action === 'creado'
+        );
+        Notification::assertNotSentTo($inactiveManager, InicialWeeklyPlanNotification::class);
+        Notification::assertNotSentTo($otroUsuario, InicialWeeklyPlanNotification::class);
+    }
+
     // ─── Edición de cabecera (grid + table) ───────────────────
 
     /** @test */
@@ -347,11 +403,105 @@ class EiplanningwkComponentTest extends TestCase
         // guardados, el indicador debe avisar que falta uno.
         $component->assertSee('0/1 resúmenes');
         $component->assertSee('Faltan 1 resúmenes por área');
+        $component->assertSee('En progreso');
 
         $component->call('toggleView')
             ->assertSee('3/5 días')
             ->assertSee('47 vacías')
             ->assertSee('faltan 1');
+    }
+
+    /** @test */
+    public function el_estado_del_plan_semanal_exige_estrategias_y_resumenes_esperados(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        foreach (array_keys(config('inicial.dias_semana')) as $dia) {
+            foreach (array_keys(config('inicial.momentos_rutina_diaria')) as $momento) {
+                Eiplanningwstrategy::create([
+                    'eiplanningwk_id' => $plan->id,
+                    'day_of_week' => $dia,
+                    'momento_rutina_diaria' => $momento,
+                    'lunes' => 'Estrategia '.$dia.' '.$momento,
+                ]);
+            }
+        }
+
+        $pensumBase = Pensum::findOrFail($docente['pensum_id']);
+        $segundoPensum = Pensum::query()
+            ->where('grado_id', $pensumBase->grado_id)
+            ->where('id', '<>', $pensumBase->id)
+            ->firstOrFail();
+        $segundaPevaluacionId = DB::table('pevaluacions')->insertGetId([
+            'profesor_id' => $docente['profesor_id'],
+            'pensum_id' => $segundoPensum->id,
+            'seccion_id' => $this->seccionDe((int) $pensumBase->grado_id),
+            'lapso_id' => DB::table('lapsos')->value('id'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->assertSee('En progreso')
+            ->assertSee('0/2 resúmenes');
+
+        $resumen = [
+            'eiplanningwk_id' => $plan->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'componente' => 'Lenguaje',
+            'objetivo' => 'Participar en conversaciones.',
+            'aprendizaje_esperado' => 'Expresa ideas con claridad.',
+            'indicadores' => 'Participa y escucha.',
+        ];
+        Eiplanningwsummary::create($resumen);
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->assertSee('En progreso')
+            ->assertSee('1/2 resúmenes');
+
+        Eiplanningwsummary::create($resumen);
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->assertSee('En progreso')
+            ->assertSee('1/2 resúmenes');
+
+        Eiplanningwsummary::create(array_merge($resumen, [
+            'pevaluacion_id' => $segundaPevaluacionId,
+            'componente' => 'Matemática',
+        ]));
+
+        $componente = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->assertSee('Completo')
+            ->assertSee('2/2 resúmenes');
+
+        $componente->call('toggleView')
+            ->assertSee('Completo')
+            ->assertSee('2/2');
+    }
+
+    /** @test */
+    public function el_listado_muestra_el_badge_revisado_solo_si_hay_revision(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $revisado = $this->makePlan($docente['profesor_id']);
+        $revisado->update(['revision_seguimiento' => 'Revisado por coordinación.']);
+        $this->makePlan($docente['profesor_id'], '2026-10-12');
+
+        $componente = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class);
+
+        $this->assertSame(1, substr_count($componente->html(), 'aria-label="Revisado"'));
+        $componente->assertSee('Revisado');
+
+        $componente->call('toggleView');
+
+        $this->assertSame(1, substr_count($componente->html(), 'aria-label="Revisado"'));
+        $componente->assertSee('Revisado');
     }
 
     /** @test */
@@ -589,6 +739,7 @@ class EiplanningwkComponentTest extends TestCase
 
         $component
             ->set('eiplanningwk.diagnostico', 'Diagnóstico actualizado tras la revisión semanal del grupo.')
+            ->set('eiplanningwk.revision_seguimiento', 'Intento de revisión no autorizado.')
             ->call('save')
             ->assertHasNoErrors();
 
@@ -596,6 +747,7 @@ class EiplanningwkComponentTest extends TestCase
             'Diagnóstico actualizado tras la revisión semanal del grupo.',
             $plan->fresh()->diagnostico
         );
+        $this->assertNull($plan->fresh()->revision_seguimiento);
         $this->assertFalse($component->get('showModal'), 'El modal debe cerrarse tras guardar.');
     }
 
@@ -769,6 +921,42 @@ class EiplanningwkComponentTest extends TestCase
             ->call('saveStrategies');
 
         $this->assertSame(3, Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->count());
+    }
+
+    /** @test */
+    public function al_completar_las_cincuenta_estrategias_notifica_a_los_managers_activos(): void
+    {
+        Notification::fake();
+        $manager = $this->makeInicialManager();
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        $componente = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'strategy', $plan->id);
+
+        $estrategias = $componente->get('strategies');
+        foreach (array_keys(Eiplanningwstrategy::WEEK_DAYS) as $dia) {
+            foreach (array_keys(Eiplanningwstrategy::LIST_MOMENT) as $indice => $momento) {
+                $estrategias[$dia][$indice]['estrategia'] = "Estrategia {$dia} {$momento}.";
+            }
+        }
+
+        $componente
+            ->set('strategies', $estrategias)
+            ->call('saveStrategies')
+            ->call('saveStrategies')
+            ->assertHasNoErrors();
+
+        $this->assertSame(50, Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->count());
+        Notification::assertSentTo(
+            $manager,
+            InicialWeeklyPlanNotification::class,
+            fn (InicialWeeklyPlanNotification $notification) => $notification->type === 'inicial_weekly_strategies_completed'
+                && $notification->planId === $plan->id
+                && $notification->action === 'completado'
+        );
+        Notification::assertSentToTimes($manager, InicialWeeklyPlanNotification::class, 1);
     }
 
     /** @test */
@@ -1080,6 +1268,37 @@ class EiplanningwkComponentTest extends TestCase
 
         $this->assertNotNull($resumen);
         $this->assertSame('Lenguaje', $resumen->componente);
+    }
+
+    /** @test */
+    public function al_registrar_un_resumen_notifica_a_los_managers_activos(): void
+    {
+        Notification::fake();
+        $manager = $this->makeInicialManager();
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'summary', $plan->id)
+            ->set('eiplanningwsummary.pevaluacion_id', $docente['pevaluacion_id'])
+            ->set('eiplanningwsummary.componente', 'Lenguaje')
+            ->set('eiplanningwsummary.objetivo', 'Participa en conversaciones cotidianas.')
+            ->set('eiplanningwsummary.aprendizaje_esperado', 'Conversa con sus pares sobre temas cotidianos.')
+            ->set('eiplanningwsummary.indicadores', 'Inicia la conversación y escucha al otro.')
+            ->call('saveSummary')
+            ->assertHasNoErrors();
+
+        $summary = Eiplanningwsummary::where('eiplanningwk_id', $plan->id)->firstOrFail();
+
+        Notification::assertSentTo(
+            $manager,
+            InicialWeeklyPlanNotification::class,
+            fn (InicialWeeklyPlanNotification $notification) => $notification->type === 'inicial_weekly_summary_created'
+                && $notification->planId === $plan->id
+                && $notification->summaryId === $summary->id
+                && $notification->action === 'registrado'
+        );
     }
 
     /** @test */

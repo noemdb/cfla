@@ -38,6 +38,7 @@ use Illuminate\Support\Str;
  * @property int $tiempo_ejecucion
  * @property string|null $diagnostico
  * @property string|null $observacion
+ * @property string|null $revision_seguimiento
  */
 class Eiprojectk extends Model
 {
@@ -53,6 +54,7 @@ class Eiprojectk extends Model
         'tiempo_ejecucion',
         'diagnostico',
         'observacion',
+        'revision_seguimiento',
     ];
 
     /**
@@ -76,6 +78,7 @@ class Eiprojectk extends Model
         'tiempo_ejecucion' => 'Cant.Semanas',
         'diagnostico' => 'Diagnóstico inicial',
         'observacion' => 'Observación',
+        'revision_seguimiento' => 'Revisión de seguimiento',
     ];
 
     // ─── RELACIONES ──────────────────────────────────────────────

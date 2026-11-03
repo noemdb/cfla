@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $ffinal
  * @property string|null $observaciones
  * @property string|null $recomendacion
+ * @property string|null $revision_seguimiento
  * @property string|null $asistencia
  */
 class Eievaluationk extends Model
@@ -52,6 +53,7 @@ class Eievaluationk extends Model
         'ffinal',
         'observaciones',
         'recomendacion',
+        'revision_seguimiento',
         'asistencia',
     ];
 
@@ -70,6 +72,7 @@ class Eievaluationk extends Model
         'ffinal' => 'Fecha final',
         'observaciones' => 'Observaciones del docente',
         'recomendacion' => 'Recomendación del Coord. de Evaluación',
+        'revision_seguimiento' => 'Revisión de seguimiento',
         'asistencia' => 'Control de Asistencia',
     ];
 

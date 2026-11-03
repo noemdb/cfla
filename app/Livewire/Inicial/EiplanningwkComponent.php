@@ -18,6 +18,7 @@ use App\Models\app\Inicial\Eiplanningwsummary;
 use App\Models\app\Inicial\Eiprojectk;
 use App\Services\Inicial\ClonadorEiplanningwk;
 use App\Services\Inicial\ImportadorEiplanningwk;
+use App\Services\Inicial\InicialWeeklyPlanNotifier;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -223,8 +224,7 @@ class EiplanningwkComponent extends Component
                 // Solo las celdas con texto cuentan como escritas; una fila
                 // legada con `lunes` vacío no debe inflar el progreso.
                 'eiplanningwstrategies as eiplanningwstrategies_count' => fn ($q) => $q
-                    ->whereNotNull('lunes')
-                    ->where('lunes', '<>', ''),
+                    ->whereRaw("TRIM(COALESCE(`lunes`, '')) <> ''"),
                 'eiplanningwsummaries as eiplanningwsummaries_count',
             ]);
 
@@ -284,8 +284,7 @@ class EiplanningwkComponent extends Component
 
         $diasPorPlan = Eiplanningwstrategy::query()
             ->whereIn('eiplanningwk_id', $planes->pluck('id'))
-            ->whereNotNull('lunes')
-            ->where('lunes', '<>', '')
+            ->whereRaw("TRIM(COALESCE(`lunes`, '')) <> ''")
             ->selectRaw('eiplanningwk_id, COUNT(DISTINCT day_of_week) as dias')
             ->groupBy('eiplanningwk_id')
             ->pluck('dias', 'eiplanningwk_id');
@@ -304,13 +303,37 @@ class EiplanningwkComponent extends Component
                 ->groupBy('pevaluacions.seccion_id')
                 ->pluck('total', 'pevaluacions.seccion_id');
 
+        $resumenesPorPlan = DB::table('eiplanningwsummaries as weekly_summaries')
+            ->join('pevaluacions as summary_evaluations', 'summary_evaluations.id', '=', 'weekly_summaries.pevaluacion_id')
+            ->join('pensums as summary_pensums', 'summary_pensums.id', '=', 'summary_evaluations.pensum_id')
+            ->join('eiplanningwks as weekly_plans', 'weekly_plans.id', '=', 'weekly_summaries.eiplanningwk_id')
+            ->whereIn('weekly_summaries.eiplanningwk_id', $planes->modelKeys())
+            ->whereColumn('summary_evaluations.profesor_id', 'weekly_plans.profesor_id')
+            ->whereColumn('summary_evaluations.seccion_id', 'weekly_plans.seccion_id')
+            ->whereNull('summary_evaluations.deleted_at')
+            ->whereNull('summary_pensums.deleted_at')
+            ->selectRaw('weekly_summaries.eiplanningwk_id as plan_id, COUNT(DISTINCT summary_evaluations.pensum_id) as total')
+            ->groupBy('weekly_summaries.eiplanningwk_id')
+            ->pluck('total', 'plan_id');
+
         foreach ($planes as $plan) {
-            $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
+            $resumenes = (int) ($resumenesPorPlan[$plan->id] ?? 0);
             $esperados = (int) ($areasPorSeccion[$plan->seccion_id] ?? 0);
 
             $plan->setAttribute('dias_con_contenido', (int) ($diasPorPlan[$plan->id] ?? 0));
             $plan->setAttribute('resumenes_esperados', $esperados);
+            $plan->setAttribute('resumenes_areas_completas_count', $resumenes);
             $plan->setAttribute('resumenes_pendientes', max(0, $esperados - $resumenes));
+
+            $estrategias = (int) ($plan->eiplanningwstrategies_count ?? 0);
+            $totalEstrategias = count($this->weekDays) * count($this->moments);
+            $completo = $estrategias >= $totalEstrategias && $resumenes >= $esperados;
+            $tieneContenido = $estrategias > 0 || (int) ($plan->eiplanningwsummaries_count ?? 0) > 0;
+            $plan->setAttribute('estado_plan', [
+                'clave' => $completo ? 'completo' : ($tieneContenido ? 'en_progreso' : 'sin_iniciar'),
+                'etiqueta' => $completo ? 'Completo' : ($tieneContenido ? 'En progreso' : 'Sin iniciar'),
+                'detalle' => "{$estrategias}/{$totalEstrategias} estrategias · {$resumenes}/{$esperados} resúmenes",
+            ]);
         }
     }
 
@@ -726,6 +749,10 @@ class EiplanningwkComponent extends Component
         $plan->fill($validated);
         $plan->save();
 
+        if ($plan->wasRecentlyCreated) {
+            app(InicialWeeklyPlanNotifier::class)->planCreado($plan);
+        }
+
         $this->notification()->success(
             title: 'Plan semanal guardado',
             description: 'El plan se guardó correctamente.'
@@ -761,9 +788,14 @@ class EiplanningwkComponent extends Component
         $summary = $this->eiplanningwsummary_id
             ? $this->findSummary($this->eiplanningwsummary_id, 'update')
             : new Eiplanningwsummary;
+        $esNuevo = ! $summary->exists;
 
         $summary->fill($data);
         $summary->save();
+
+        if ($esNuevo) {
+            app(InicialWeeklyPlanNotifier::class)->resumenRegistrado($plan, $summary);
+        }
 
         $this->notification()->success(
             title: 'Resumen guardado',
@@ -805,7 +837,10 @@ class EiplanningwkComponent extends Component
             return;
         }
 
+        $estrategiasCompletasAntes = app(InicialWeeklyPlanNotifier::class)
+            ->estrategiasCompletas($this->eiplanningwk_id);
         $this->persistStrategy($this->activeDay, $i, $celda);
+        $this->notificarEstrategiasCompletadas($estrategiasCompletasAntes);
 
         $this->notification()->success(
             title: 'Estrategia guardada',
@@ -834,6 +869,8 @@ class EiplanningwkComponent extends Component
         $this->findPlan($this->eiplanningwk_id, 'update');
 
         $guardadas = 0;
+        $estrategiasCompletasAntes = app(InicialWeeklyPlanNotifier::class)
+            ->estrategiasCompletas($this->eiplanningwk_id);
 
         foreach ($this->strategies as $day => $momentos) {
             foreach ($momentos as $i => $celda) {
@@ -854,6 +891,8 @@ class EiplanningwkComponent extends Component
 
             return;
         }
+
+        $this->notificarEstrategiasCompletadas($estrategiasCompletasAntes);
 
         $this->notification()->success(
             title: 'Estrategias guardadas',
@@ -900,6 +939,22 @@ class EiplanningwkComponent extends Component
         // Se actualiza el id en la rejilla para que el siguiente guardado
         // actualice en vez de duplicar.
         $this->strategies[$day][$index]['id'] = $strategy->id;
+    }
+
+    private function notificarEstrategiasCompletadas(bool $estabanCompletas): void
+    {
+        if ($estabanCompletas || ! $this->eiplanningwk_id) {
+            return;
+        }
+
+        $notifier = app(InicialWeeklyPlanNotifier::class);
+
+        if (! $notifier->estrategiasCompletas($this->eiplanningwk_id)) {
+            return;
+        }
+
+        $plan = Eiplanningwk::query()->findOrFail($this->eiplanningwk_id);
+        $notifier->estrategiasCompletadas($plan);
     }
 
     /**

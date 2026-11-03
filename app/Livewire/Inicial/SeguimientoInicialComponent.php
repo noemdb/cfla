@@ -2,10 +2,14 @@
 
 namespace App\Livewire\Inicial;
 
+use App\Models\app\Academy\Profesor;
+use App\Notifications\InicialSeguimientoNotification;
 use App\Services\Inicial\RegistroInicial;
 use App\Services\Inicial\SeguimientoInicial;
+use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,12 +24,8 @@ use WireUi\Traits\WireUiActions;
  * ─────────────────────────────────────────────────────────────────────────────
  * CONSULTA + REVISIÓN, NADA MÁS
  * ─────────────────────────────────────────────────────────────────────────────
- * No crea, actualiza ni elimina documentos. La ÚNICA escritura permitida es
- * `guardarRevision()`: el manager registra `observacion` (o `recomendacion` en
- * el plan de evaluación) desde el modal «Ver», con la misma regla `min:5` que
- * la Coordinación de Evaluación. El resto del documento sigue siendo de solo
- * lectura, y las rutas del grupo solo declaran GET (la escritura viaja por el
- * endpoint de Livewire).
+ * La escritura de seguimiento se limita a la revisión y, en planificación
+ * semanal, a la observación existente del documento.
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * POR QUÉ LA ENTIDAD ES `Locked`
@@ -36,7 +36,7 @@ use WireUi\Traits\WireUiActions;
  */
 class SeguimientoInicialComponent extends Component
 {
-    use WithPagination, WireUiActions;
+    use WireUiActions, WithPagination;
 
     /** Documento activo; lo fija la ruta y no se puede cambiar desde el cliente. */
     #[Locked]
@@ -63,6 +63,12 @@ class SeguimientoInicialComponent extends Component
     #[Url(as: 'estado', except: '')]
     public $estado = '';
 
+    #[Url(as: 'revision', except: '')]
+    public string $revisionEstado = '';
+
+    #[Url(as: 'orden', except: 'actualizacion')]
+    public string $orden = 'actualizacion';
+
     #[Url(as: 'buscar', except: '')]
     public string $search = '';
 
@@ -76,11 +82,17 @@ class SeguimientoInicialComponent extends Component
     #[Locked]
     public ?int $detalleId = null;
 
-    /** El modal muestra el formulario de revisión en lugar del detalle. */
+    /** El modal muestra los formularios de seguimiento en lugar del detalle. */
     public bool $revisionAbierta = false;
 
-    /** Texto del campo revisable (`observacion` o `recomendacion`). */
+    /** Texto de revisión del manager; se persiste en `revision_seguimiento`. */
     public string $revision = '';
+
+    /** Observación del plan semanal; se persiste en el campo existente. */
+    public string $observacion = '';
+
+    /** Pestaña activa del formulario de seguimiento. */
+    public string $revisionPestana = 'revision';
 
     /** Catálogos del panel de filtros. */
     public Collection $listProfesores;
@@ -113,6 +125,9 @@ class SeguimientoInicialComponent extends Component
             'documentos' => $documentos,
             'resumen' => $servicio->resumen($this->entidad, $filtros),
             'opcionesEstado' => $servicio->opcionesEstado($this->entidad),
+            'opcionesRevision' => $servicio->opcionesRevision($this->entidad),
+            'opcionesOrden' => $servicio->opcionesOrden($this->entidad),
+            'filtrosActivos' => $this->filtrosActivos(),
             'soportaFechas' => $servicio->soportaFechas($this->entidad),
             'soportaLapso' => $servicio->soportaLapso($this->entidad),
             // `consulta()->first()` y no `buscar()`: dentro de Livewire un 404
@@ -153,7 +168,11 @@ class SeguimientoInicialComponent extends Component
             'lapso_id' => $this->lapso_id,
             'desde' => $this->desde,
             'hasta' => $this->hasta,
-            'estado' => $this->estado,
+            'estado' => in_array($this->estado, ['sin_revision', 'revisado'], true) ? '' : $this->estado,
+            'revision' => $this->revisionEstado !== ''
+                ? $this->revisionEstado
+                : (in_array($this->estado, ['sin_revision', 'revisado'], true) ? $this->estado : ''),
+            'orden' => $this->orden,
             'search' => $this->search,
         ], fn ($valor) => $valor !== null && $valor !== '');
     }
@@ -174,10 +193,10 @@ class SeguimientoInicialComponent extends Component
     {
         $this->reset([
             'profesor_id', 'grado_id', 'seccion_id', 'lapso_id',
-            'desde', 'hasta', 'estado', 'search',
+            'desde', 'hasta', 'estado', 'revisionEstado', 'search', 'orden',
         ]);
 
-        $this->listSecciones = collect();
+        $this->listSecciones = app(SeguimientoInicial::class)->secciones(null);
         $this->resetPage();
     }
 
@@ -185,10 +204,78 @@ class SeguimientoInicialComponent extends Component
     {
         if (in_array($name, [
             'profesor_id', 'grado_id', 'seccion_id', 'lapso_id',
-            'desde', 'hasta', 'estado', 'search',
+            'desde', 'hasta', 'estado', 'revisionEstado', 'orden', 'search',
         ], true)) {
             $this->resetPage();
         }
+    }
+
+    /** @return array<int, array{campo: string, etiqueta: string, valor: string}> */
+    public function filtrosActivos(): array
+    {
+        $servicio = app(SeguimientoInicial::class);
+        $opcionesEstado = $servicio->opcionesEstado($this->entidad);
+        $opcionesRevision = $servicio->opcionesRevision($this->entidad);
+        $estado = in_array($this->estado, ['sin_revision', 'revisado'], true) ? '' : $this->estado;
+        $revisionEstado = $this->revisionEstado !== ''
+            ? $this->revisionEstado
+            : (in_array($this->estado, ['sin_revision', 'revisado'], true) ? $this->estado : '');
+
+        $filtros = [
+            'profesor_id' => ['Docente', $this->listProfesores->get((int) $this->profesor_id, 'ID '.$this->profesor_id)],
+            'grado_id' => ['Nivel', $this->listGrados->get((int) $this->grado_id, 'ID '.$this->grado_id)],
+            'seccion_id' => ['Sección', $this->listSecciones->get((int) $this->seccion_id, 'ID '.$this->seccion_id)],
+            'lapso_id' => ['Lapso', $this->listLapsos->get((int) $this->lapso_id, 'ID '.$this->lapso_id)],
+            'desde' => ['Desde', $this->desde !== '' ? \Illuminate\Support\Carbon::parse($this->desde)->format('d/m/Y') : null],
+            'hasta' => ['Hasta', $this->hasta !== '' ? \Illuminate\Support\Carbon::parse($this->hasta)->format('d/m/Y') : null],
+            'estado' => ['Avance', $opcionesEstado[$estado] ?? null],
+            'revisionEstado' => ['Revisión', $opcionesRevision[$revisionEstado] ?? null],
+            'search' => ['Búsqueda', $this->search],
+        ];
+        $valores = [
+            'profesor_id' => $this->profesor_id,
+            'grado_id' => $this->grado_id,
+            'seccion_id' => $this->seccion_id,
+            'lapso_id' => $this->lapso_id,
+            'desde' => $this->desde,
+            'hasta' => $this->hasta,
+            'estado' => $estado,
+            'revisionEstado' => $revisionEstado,
+            'search' => $this->search,
+        ];
+
+        return collect($filtros)
+            ->filter(fn ($filtro, $campo) => filled($valores[$campo]) && filled($filtro[1]))
+            ->map(fn ($filtro, $campo) => [
+                'campo' => $campo,
+                'etiqueta' => $filtro[0],
+                'valor' => (string) $filtro[1],
+            ])
+            ->values()
+            ->all();
+    }
+
+    public function quitarFiltro(string $campo): void
+    {
+        if (! in_array($campo, [
+            'profesor_id', 'grado_id', 'seccion_id', 'lapso_id',
+            'desde', 'hasta', 'estado', 'revisionEstado', 'search',
+        ], true)) {
+            return;
+        }
+
+        $this->{$campo} = '';
+
+        if ($campo === 'grado_id') {
+            $this->seccion_id = '';
+            $this->listSecciones = app(SeguimientoInicial::class)->secciones(null);
+        }
+
+        if ($campo === 'revisionEstado' && in_array($this->estado, ['sin_revision', 'revisado'], true)) {
+            $this->estado = '';
+        }
+
+        $this->resetPage();
     }
 
     public function abrirDetalle(int $id): void
@@ -235,14 +322,26 @@ class SeguimientoInicialComponent extends Component
     public function abrirRevision(): void
     {
         $documento = $this->documentoDetalle();
-        $campo = RegistroInicial::campoRevision($this->entidad);
+        $campo = $this->campoRevisionSeguimiento();
 
         abort_if(! $campo || ! $documento, 404);
 
         $this->revision = (string) $documento->{$campo};
+        $this->observacion = $this->entidad === 'eiplanningwks'
+            ? (string) $documento->observacion
+            : '';
+        $this->revisionPestana = 'revision';
         $this->revisionAbierta = true;
 
-        $this->resetValidation('revision');
+        $this->resetValidation();
+    }
+
+    public function seleccionarPestanaRevision(string $pestana): void
+    {
+        abort_unless(in_array($pestana, ['revision', 'observacion'], true), 404);
+        abort_if($pestana === 'observacion' && $this->entidad !== 'eiplanningwks', 404);
+
+        $this->revisionPestana = $pestana;
     }
 
     public function cerrarRevision(): void
@@ -252,14 +351,11 @@ class SeguimientoInicialComponent extends Component
         // aquí mostraría de golpe todo el contenido del documento.
         $this->cerrarDetalle();
 
-        $this->resetValidation('revision');
+        $this->resetValidation();
     }
 
     /**
-     * Guarda la revisión del manager en el campo del documento.
-     *
-     * Misma regla que la Coordinación (`required|min:5`). No toca ningún otro
-     * campo ni crea registros: solo `observacion`/`recomendacion`.
+     * Guarda la revisión de seguimiento del manager.
      */
     public function guardarRevision(): void
     {
@@ -267,11 +363,12 @@ class SeguimientoInicialComponent extends Component
         // pero una actualización de Livewire no vuelve a ejecutar `mount()`.
         abort_unless(auth()->user()?->isInicialManager(), 403);
 
-        $campo = RegistroInicial::campoRevision($this->entidad);
+        $campo = $this->campoRevisionSeguimiento();
         abort_if(! $campo, 404);
 
-        $rotulo = RegistroInicial::rotuloRevision($this->entidad);
+        $rotulo = 'Revisión de seguimiento';
         $minuscula = mb_strtolower($rotulo);
+        $this->revision = trim($this->revision);
 
         $this->validate([
             'revision' => ['required', 'string', 'min:5'],
@@ -283,15 +380,47 @@ class SeguimientoInicialComponent extends Component
         $documento = $this->documentoDetalle();
         abort_if(! $documento, 404);
 
+        $actualizacion = filled($documento->{$campo});
         $documento->{$campo} = trim($this->revision);
         $documento->save();
+        $this->notificarDocente($documento, $campo, $actualizacion);
 
         $this->limpiarRevision();
         $this->detalleId = null;
-        $this->resetValidation('revision');
+        $this->resetValidation();
         $this->notification()->success(
             "{$rotulo} guardada",
-            "La {$minuscula} se actualizó correctamente."
+            'La revisión independiente se actualizó correctamente.'
+        );
+    }
+
+    public function guardarObservacion(): void
+    {
+        abort_unless(auth()->user()?->isInicialManager(), 403);
+        abort_unless($this->entidad === 'eiplanningwks', 404);
+
+        $this->observacion = trim($this->observacion);
+        $this->validate([
+            'observacion' => ['required', 'string', 'min:5'],
+        ], [
+            'observacion.required' => 'Escribe la observación del plan.',
+            'observacion.min' => 'La observación debe tener al menos 5 caracteres.',
+        ]);
+
+        $documento = $this->documentoDetalle();
+        abort_if(! $documento, 404);
+
+        $actualizacion = filled($documento->observacion);
+        $documento->observacion = $this->observacion;
+        $documento->save();
+        $this->notificarDocente($documento, 'observacion', $actualizacion);
+
+        $this->limpiarRevision();
+        $this->detalleId = null;
+        $this->resetValidation();
+        $this->notification()->success(
+            'Observación guardada',
+            'La observación del plan semanal se actualizó correctamente.'
         );
     }
 
@@ -307,10 +436,54 @@ class SeguimientoInicialComponent extends Component
             ->first();
     }
 
+    private function campoRevisionSeguimiento(): ?string
+    {
+        return RegistroInicial::campoRevision($this->entidad) ? 'revision_seguimiento' : null;
+    }
+
+    private function notificarDocente(Model $documento, string $campo, bool $actualizacion): void
+    {
+        $profesor = Profesor::query()
+            ->with('user')
+            ->find($documento->profesor_id);
+
+        if (! $profesor?->user) {
+            Log::warning('No se pudo notificar el seguimiento de Inicial: el profesor no tiene usuario asociado.', [
+                'entidad' => $this->entidad,
+                'documento_id' => $documento->getKey(),
+                'profesor_id' => $documento->profesor_id,
+                'campo' => $campo,
+            ]);
+
+            return;
+        }
+
+        $esObservacion = $campo === 'observacion';
+        $tipo = $esObservacion ? 'inicial_weekly_observation' : 'inicial_followup_review';
+        $accion = $actualizacion ? 'actualizó' : 'registró';
+        $contenido = $esObservacion ? 'una observación' : 'una revisión de seguimiento';
+        $tituloDocumento = RegistroInicial::titulo($this->entidad);
+
+        app(NotificationService::class)->notifyUsers(
+            [$profesor->user],
+            new InicialSeguimientoNotification(
+                type: $tipo,
+                message: "Coordinación {$accion} {$contenido} en tu {$tituloDocumento}.",
+                url: route('inicials.'.$this->entidad.'.index'),
+                entidad: $this->entidad,
+                documentoId: (int) $documento->getKey(),
+                accion: $actualizacion ? 'actualizado' : 'registrado',
+                campo: $campo,
+            )
+        );
+    }
+
     private function limpiarRevision(): void
     {
         $this->revisionAbierta = false;
         $this->revision = '';
+        $this->observacion = '';
+        $this->revisionPestana = 'revision';
     }
 
     public function alternarVista(): void
@@ -335,8 +508,12 @@ class SeguimientoInicialComponent extends Component
             'lapso' => $this->lapso_id,
             'desde' => $this->desde,
             'hasta' => $this->hasta,
-            'estado' => $this->estado,
+            'estado' => in_array($this->estado, ['sin_revision', 'revisado'], true) ? null : $this->estado,
+            'revision' => $this->revisionEstado !== ''
+                ? $this->revisionEstado
+                : (in_array($this->estado, ['sin_revision', 'revisado'], true) ? $this->estado : null),
             'buscar' => $this->search,
+            'orden' => $this->orden === 'actualizacion' ? null : $this->orden,
             'vista' => $this->viewMode === 'grid' ? null : $this->viewMode,
         ], fn ($valor) => $valor !== null && $valor !== '');
     }

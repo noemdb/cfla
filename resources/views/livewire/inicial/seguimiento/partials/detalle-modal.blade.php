@@ -2,16 +2,17 @@
     Modal de detalle y revisión.
 
     · Cierra con Escape, con el botón “Cerrar” y con clic en el fondo.
-    · El formulario de revisión es la ÚNICA escritura: guarda `observacion`
-      (o `recomendacion` en evaluación) con la misma regla `min:5` que la
-      Coordinación. No crea ni edita el resto del documento.
+    · El formulario guarda `revision_seguimiento`; en planificación semanal
+      también permite editar el campo `observacion` existente.
     · Si el documento se borró mientras el modal estaba abierto, `$detalle`
       llega nulo y se informa sin revelar el id.
 --}}
 @php
     $servicio = app(\App\Services\Inicial\SeguimientoInicial::class);
     $esFinal = $entidad === 'eifinalks';
-    $campoRevision = \App\Services\Inicial\RegistroInicial::campoRevision($entidad);
+    $campoRevision = \App\Services\Inicial\RegistroInicial::campoRevision($entidad)
+        ? 'revision_seguimiento'
+        : null;
 
     if ($detalle && $esFinal) {
         $nivel = ($detalle->pevaluacion?->seccion?->name ?? '—').' · '.($detalle->pevaluacion?->lapso?->name ?? '—');
@@ -22,7 +23,7 @@
     }
 @endphp
 
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+<div class="fixed inset-0 z-50 flex items-center justify-center px-2 py-4 sm:px-4 lg:px-6 2xl:px-8"
     x-data
     x-on:keydown.escape.window="$wire.revisionAbierta ? $wire.cerrarRevision() : $wire.cerrarDetalle()"
     role="dialog" aria-modal="true" aria-labelledby="detalle-titulo">
@@ -33,7 +34,7 @@
         aria-hidden="true"></div>
 
     {{-- Panel --}}
-    <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-gray-900 shadow-2xl">
+    <div class="relative w-full max-w-none max-h-[90vh] overflow-y-auto rounded-xl border border-white/10 bg-gray-900 shadow-2xl">
         <header class="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-white/10 bg-gray-900/95 backdrop-blur px-5 py-4">
             <div class="min-w-0">
                 <h2 id="detalle-titulo" class="text-sm font-semibold text-gray-100">
@@ -88,46 +89,120 @@
             @if (! $detalle)
                 <p class="text-sm text-gray-400">El documento ya no está disponible.</p>
             @elseif ($revisionAbierta)
-                @php
-                    $rotulo = \App\Services\Inicial\RegistroInicial::rotuloRevision($entidad);
-                    $minuscula = mb_strtolower($rotulo);
-                @endphp
-
-                <form wire:submit="guardarRevision" class="space-y-3">
-                    <p class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs leading-relaxed text-amber-200/80">
-                        Vas a registrar la {{ $minuscula }} de la Coordinación. Solo se modifica ese
-                        campo; el documento no se crea ni se edita.
-                    </p>
-
-                    <div>
-                        <label for="revision-{{ $entidad }}" class="mb-1.5 block text-xs font-medium text-gray-400">
-                            {{ $rotulo }} de la Coordinación de Evaluación
-                        </label>
-
-                        <textarea id="revision-{{ $entidad }}" rows="6" wire:model="revision"
-                            placeholder="Escriba aquí la {{ $minuscula }}…"
-                            class="w-full rounded-lg border border-white/10 bg-gray-800/50 px-3 py-2 text-sm text-gray-200 outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/50"></textarea>
-
-                        @error('revision')
-                            <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
-                        @enderror
-
-                        <p class="mt-1 text-[11px] text-gray-600">
-                            Mínimo 5 caracteres. El resto del documento lo mantiene la docente.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
-                        <button type="button" wire:click="cerrarRevision"
-                            class="rounded-lg px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5">
-                            Cancelar
+                @if ($entidad === 'eiplanningwks')
+                    <div class="mb-4 flex gap-1 border-b border-white/10" role="tablist" aria-label="Edición de seguimiento">
+                        <button type="button" role="tab"
+                            id="tab-revision"
+                            aria-controls="panel-revision"
+                            aria-selected="{{ $revisionPestana === 'revision' ? 'true' : 'false' }}"
+                            wire:click="seleccionarPestanaRevision('revision')"
+                            @class([
+                                'min-h-11 border-b-2 px-4 text-sm font-medium transition-colors',
+                                'border-amber-400 text-amber-300' => $revisionPestana === 'revision',
+                                'border-transparent text-gray-400 hover:text-gray-200' => $revisionPestana !== 'revision',
+                            ])>
+                            Revisión
                         </button>
-                        <button type="submit"
-                            class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-500">
-                            Guardar
+                        <button type="button" role="tab"
+                            id="tab-observacion"
+                            aria-controls="panel-observacion"
+                            aria-selected="{{ $revisionPestana === 'observacion' ? 'true' : 'false' }}"
+                            wire:click="seleccionarPestanaRevision('observacion')"
+                            @class([
+                                'min-h-11 border-b-2 px-4 text-sm font-medium transition-colors',
+                                'border-cyan-400 text-cyan-300' => $revisionPestana === 'observacion',
+                                'border-transparent text-gray-400 hover:text-gray-200' => $revisionPestana !== 'observacion',
+                            ])>
+                            Observación
                         </button>
                     </div>
-                </form>
+                @endif
+
+                @if ($revisionPestana === 'revision')
+                    <section @if ($entidad === 'eiplanningwks') id="panel-revision" role="tabpanel" aria-labelledby="tab-revision" @endif>
+                        <form wire:submit="guardarRevision" class="space-y-3">
+                            <p class="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs leading-relaxed text-amber-200/80">
+                                Registra la revisión de seguimiento en un campo independiente. La observación
+                                del plan y el resto del documento permanecen intactos.
+                            </p>
+
+                            <div>
+                                <label for="revision-{{ $entidad }}" class="mb-1.5 block text-xs font-medium text-gray-400">
+                                    Revisión de seguimiento
+                                </label>
+
+                                <textarea id="revision-{{ $entidad }}" rows="6" wire:model="revision"
+                                    placeholder="Escriba la revisión de seguimiento…"
+                                    class="w-full rounded-lg border border-white/10 bg-gray-800/50 px-3 py-2 text-sm text-gray-200 outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/50"></textarea>
+
+                                @error('revision')
+                                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                                @enderror
+
+                                <p class="mt-1 text-[11px] text-gray-400">
+                                    Mínimo 5 caracteres. El texto se guarda en un campo separado de la observación.
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
+                                <button type="button" wire:click="cerrarRevision"
+                                    class="min-h-11 rounded-lg px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5">
+                                    Cancelar
+                                </button>
+                                <button type="submit" wire:loading.attr="disabled" wire:target="guardarRevision"
+                                    class="min-h-11 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-500 disabled:opacity-50">
+                                    Guardar revisión
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                @elseif ($entidad === 'eiplanningwks')
+                    <section id="panel-observacion" role="tabpanel" aria-labelledby="tab-observacion">
+                        <form wire:submit="guardarObservacion" class="space-y-4">
+                            <div class="rounded-lg border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-sm leading-relaxed text-cyan-100/90">
+                                <h3 class="font-medium text-cyan-200">Observación para el plan semanal</h3>
+                                <p class="mt-1">
+                                    Este campo sirve para dejar una indicación concreta sobre la planificación que
+                                    debe considerar el docente. Describe el aspecto que requiere atención, el ajuste
+                                    esperado y, cuando sea útil, el momento o área al que se refiere. El texto queda
+                                    visible en el documento semanal y el profesor asociado recibirá una notificación
+                                    al guardarlo.
+                                </p>
+                                <p class="mt-2 text-xs text-cyan-200/70">
+                                    Se editará el campo existente <code>Eiplanningwk.observacion</code>; al guardar,
+                                    el contenido actual de ese campo será reemplazado. La revisión de seguimiento
+                                    permanece independiente.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label for="observacion-{{ $entidad }}" class="mb-1.5 block text-xs font-medium text-gray-300">
+                                    Observación del plan semanal
+                                </label>
+                                <textarea id="observacion-{{ $entidad }}" rows="7" wire:model="observacion"
+                                    placeholder="Escriba la observación para el docente…"
+                                    class="w-full rounded-lg border border-white/10 bg-gray-800/50 px-3 py-2 text-sm text-gray-200 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/50"></textarea>
+
+                                @error('observacion')
+                                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                                @enderror
+
+                                <p class="mt-1 text-xs text-gray-400">Mínimo 5 caracteres.</p>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
+                                <button type="button" wire:click="cerrarRevision"
+                                    class="min-h-11 rounded-lg px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-white/5">
+                                    Cancelar
+                                </button>
+                                <button type="submit" wire:loading.attr="disabled" wire:target="guardarObservacion"
+                                    class="min-h-11 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-500 disabled:opacity-50">
+                                    Guardar observación
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                @endif
             @else
                 {{-- Estado y revisión --}}
                 <div class="mb-4 flex flex-wrap items-center gap-2">
@@ -159,7 +234,7 @@
 
                 {{-- Cuerpo: parcial reutilizado del docente --}}
                 @if ($detalleParcial)
-                    @include($detalleParcial, ['plan' => $detalle])
+                    @include($detalleParcial, ['plan' => $detalle, 'resumirTextos' => true])
                 @else
                     <dl class="grid gap-3 sm:grid-cols-3">
                         <div>
@@ -185,7 +260,7 @@
                 @if ($campoRevision)
                     <div class="mt-4 rounded-lg border border-white/10 bg-gray-800/40 p-3">
                         <p class="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1">
-                            {{ \App\Services\Inicial\RegistroInicial::rotuloRevision($entidad) }} de la Coordinación
+                            Revisión de seguimiento
                         </p>
                         @if (filled($detalle->{$campoRevision}))
                             <p class="text-sm text-gray-200 whitespace-pre-line">{{ $detalle->{$campoRevision} }}</p>

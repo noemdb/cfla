@@ -4,13 +4,13 @@
     · La etiqueta es “Nivel”, nunca “Grado” (ADR-11.9).
     · Sección se deshabilita sin nivel: una sección de otro grado no aplica.
     · Lapso solo en evaluación e informe final; fechas en los otros cuatro.
-    · Estado se genera con `opcionesEstado()`: no se ofrecen opciones que el
-      servicio ignore.
+    · Avance y revisión son ejes independientes y se pueden combinar.
+    · Las opciones de orden corresponden a ordenamientos que ejecuta el servicio.
 --}}
 @php
     $placeholderBusqueda = $entidad === 'eifinalks'
         ? 'Estudiante o título'
-        : 'Diagnóstico u observación';
+        : 'Diagnóstico, observación o revisión';
 @endphp
 
 <section class="rounded-xl border border-white/10 bg-gray-900/60 p-4 space-y-3">
@@ -79,7 +79,7 @@
         @endif
     </div>
 
-    {{-- Fila 2: buscar, estado y acciones. --}}
+    {{-- Fila 2: buscar, avance, revisión, orden y acciones. --}}
     <div class="flex flex-wrap items-end gap-3">
         <div class="w-full sm:w-56">
             <label for="f-buscar" class="block text-xs font-medium text-gray-400 mb-1">Buscar</label>
@@ -90,7 +90,7 @@
 
         @if (! empty($opcionesEstado))
             <div class="w-full sm:w-40">
-                <label for="f-estado" class="block text-xs font-medium text-gray-400 mb-1">Estado</label>
+                <label for="f-estado" class="block text-xs font-medium text-gray-400 mb-1">Avance</label>
                 <select id="f-estado" wire:model.live="estado"
                     class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
                     <option value="">Todos</option>
@@ -100,6 +100,29 @@
                 </select>
             </div>
         @endif
+
+        @if (! empty($opcionesRevision))
+            <div class="w-full sm:w-40">
+                <label for="f-revision" class="block text-xs font-medium text-gray-400 mb-1">Revisión</label>
+                <select id="f-revision" wire:model.live="revisionEstado"
+                    class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
+                    <option value="">Todas</option>
+                    @foreach ($opcionesRevision as $valor => $etiqueta)
+                        <option value="{{ $valor }}">{{ $etiqueta }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
+        <div class="w-full sm:w-48">
+            <label for="f-orden" class="block text-xs font-medium text-gray-400 mb-1">Ordenar por</label>
+            <select id="f-orden" wire:model.live="orden"
+                class="w-full bg-gray-800/50 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none">
+                @foreach ($opcionesOrden as $valor => $etiqueta)
+                    <option value="{{ $valor }}">{{ $etiqueta }}</option>
+                @endforeach
+            </select>
+        </div>
 
         <div class="flex items-center gap-2 ml-auto">
             <button wire:click="limpiarFiltros" type="button"

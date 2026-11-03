@@ -31,8 +31,13 @@
         default => [0, 'ítems'],
     };
 
-    $campoRevision = \App\Services\Inicial\RegistroInicial::campoRevision($entidad);
+    $campoRevision = \App\Services\Inicial\RegistroInicial::campoRevision($entidad)
+        ? 'revision_seguimiento'
+        : null;
     $revisado = $campoRevision && filled($documento->{$campoRevision});
+    $estadoActual = $estado['clave'];
+    $requiereAtencion = $campoRevision
+        && ($estadoActual === 'sin_iniciar' || ! $revisado);
 
     // Texto principal según el documento: evaluación y plan especial no usan
     // `diagnostico`, y mostrar «Sin diagnóstico» ocultaría su contenido real.
@@ -50,7 +55,11 @@
     ][$estado['variante']] ?? 'border-white/10 bg-white/5 text-gray-400';
 @endphp
 
-<article class="rounded-xl border border-white/10 bg-gray-900/60 hover:border-cyan-500/30 transition-colors flex flex-col"
+<article @class([
+        'rounded-xl border bg-gray-900/60 transition-colors flex flex-col',
+        'border-amber-500/30 hover:border-amber-400/50' => $requiereAtencion,
+        'border-white/10 hover:border-cyan-500/30' => ! $requiereAtencion,
+    ])
     wire:key="doc-{{ $entidad }}-{{ $documento->id }}">
 
     <div class="p-4 flex-1">
@@ -73,6 +82,9 @@
         </p>
         <p class="text-xs text-gray-500 truncate">
             Área: <span class="text-gray-400">{{ $area ?? '—' }}</span>
+        </p>
+        <p class="mt-1 text-[11px] text-gray-500">
+            Actualizado: {{ $documento->updated_at?->format('d/m/Y H:i') ?? '—' }}
         </p>
 
         @if ($esFinal)
@@ -98,6 +110,12 @@
                 title="{{ $estado['detalle'] }}">
                 {{ $estado['etiqueta'] }}
             </span>
+
+            @if ($requiereAtencion)
+                <span class="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-200">
+                    Requiere atención
+                </span>
+            @endif
 
             @if ($campoRevision)
                 <span @class([

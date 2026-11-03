@@ -1,5 +1,5 @@
 {{--
-    Listado en tabla de solo lectura.
+    Listado en tabla para consulta y revisión de seguimiento.
 
     ─────────────────────────────────────────────────────────────────────────────
     POR QUÉ LA FILA ESTÁ AGRUPADA
@@ -20,7 +20,9 @@
 --}}
 @php
     $servicio = app(\App\Services\Inicial\SeguimientoInicial::class);
-    $campoRevision = \App\Services\Inicial\RegistroInicial::campoRevision($entidad);
+    $campoRevision = \App\Services\Inicial\RegistroInicial::campoRevision($entidad)
+        ? 'revision_seguimiento'
+        : null;
 
     // La etiqueta del contenido depende del documento (Diagnóstico,
     // Justificación, Observaciones, Título). Se toma una vez de la primera
@@ -35,7 +37,7 @@
     <table class="w-full table-fixed text-sm">
         <caption class="sr-only">
             Seguimiento de {{ \App\Services\Inicial\RegistroInicial::titulo($entidad) }}.
-            Solo lectura.
+            Documentos de consulta con revisión de seguimiento independiente.
         </caption>
 
         {{-- Con revisión: 34 + 25 + 11 + 11 + 19 = 100 --}}
@@ -87,6 +89,8 @@
                     $fila = \App\Services\Inicial\RegistroInicial::filaTabla($entidad, $documento);
                     $estado = $servicio->estado($entidad, $documento);
                     $revisado = $campoRevision && filled($documento->{$campoRevision});
+                    $requiereAtencion = $campoRevision
+                        && ($estado['clave'] === 'sin_iniciar' || ! $revisado);
 
                     $variante = [
                         'emerald' => 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300',
@@ -102,7 +106,10 @@
                 @endphp
 
                 <tr wire:key="doc-{{ $entidad }}-{{ $documento->id }}"
-                    class="block p-4 transition-colors hover:bg-white/[0.03] md:table-row md:p-0">
+                    @class([
+                        'block p-4 transition-colors hover:bg-white/[0.03] md:table-row md:p-0',
+                        'bg-amber-500/[0.04]' => $requiereAtencion,
+                    ])>
 
                     {{-- Documento: nivel · sección · área / docente / N° · período --}}
                     <td class="block md:table-cell md:px-3 md:py-2.5 md:align-top">
@@ -121,6 +128,9 @@
                                 {{ $fila['meta'] }}
                             </p>
                         @endif
+                        <p class="mt-0.5 text-[11px] text-gray-600">
+                            Actualizado: {{ $documento->updated_at?->format('d/m/Y H:i') ?? '—' }}
+                        </p>
                     </td>
 
                     {{-- Contenido: diagnóstico, justificación, observaciones o título --}}
@@ -148,6 +158,11 @@
                             title="{{ $estado['detalle'] }}">
                             {{ $estado['etiqueta'] }}
                         </span>
+                        @if ($requiereAtencion)
+                            <span class="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-200">
+                                Prioridad
+                            </span>
+                        @endif
                     </td>
 
                     {{-- Revisión --}}

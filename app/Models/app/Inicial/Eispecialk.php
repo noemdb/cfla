@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $tiempo_ejecucion
  * @property string|null $justificacion
  * @property string|null $observacion
+ * @property string|null $revision_seguimiento
  */
 class Eispecialk extends Model
 {
@@ -50,6 +51,7 @@ class Eispecialk extends Model
         'tiempo_ejecucion',
         'justificacion',
         'observacion',
+        'revision_seguimiento',
     ];
 
     /**
@@ -73,6 +75,7 @@ class Eispecialk extends Model
         'tiempo_ejecucion' => 'Cant.Semanas',
         'justificacion' => 'Justificación',
         'observacion' => 'Observación',
+        'revision_seguimiento' => 'Revisión de seguimiento',
     ];
 
     // ─── RELACIONES ──────────────────────────────────────────────

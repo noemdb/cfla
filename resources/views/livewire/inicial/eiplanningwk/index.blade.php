@@ -127,7 +127,7 @@
                     $total = count($weekDays) * count($moments);
                     $totalDias = count($weekDays);
                     $escritas = (int) ($plan->eiplanningwstrategies_count ?? 0);
-                    $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
+                    $resumenes = (int) ($plan->resumenes_areas_completas_count ?? 0);
                     $diasContenido = (int) ($plan->dias_con_contenido ?? 0);
                     $resumenesEsperados = (int) ($plan->resumenes_esperados ?? 0);
                     $resumenesPendientes = (int) ($plan->resumenes_pendientes ?? 0);
@@ -209,6 +209,25 @@
                                         {{ $resumenes }} resúmenes
                                     @endif
                                 </span>
+                                <span
+                                    title="{{ $plan->estado_plan['detalle'] }}"
+                                    aria-label="Estado del plan: {{ $plan->estado_plan['etiqueta'] }}"
+                                    @class([
+                                        'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5',
+                                        'border-emerald-500/20 bg-emerald-500/10 text-emerald-300' => $plan->estado_plan['clave'] === 'completo',
+                                        'border-amber-500/20 bg-amber-500/10 text-amber-300' => $plan->estado_plan['clave'] === 'en_progreso',
+                                        'border-white/10 bg-white/5 text-gray-400' => $plan->estado_plan['clave'] === 'sin_iniciar',
+                                    ])>
+                                    {{ $plan->estado_plan['etiqueta'] }}
+                                </span>
+                                @if (filled($plan->revision_seguimiento))
+                                    <span
+                                        title="Este plan tiene una revisión de seguimiento"
+                                        aria-label="Revisado"
+                                        class="inline-flex items-center gap-1 rounded-md border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-emerald-300">
+                                        Revisado
+                                    </span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -328,7 +347,7 @@
                             $total = count($weekDays) * count($moments);
                             $totalDias = count($weekDays);
                             $escritas = (int) ($plan->eiplanningwstrategies_count ?? 0);
-                            $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
+                            $resumenes = (int) ($plan->resumenes_areas_completas_count ?? 0);
                             $diasContenido = (int) ($plan->dias_con_contenido ?? 0);
                             $resumenesEsperados = (int) ($plan->resumenes_esperados ?? 0);
                             $resumenesPendientes = (int) ($plan->resumenes_pendientes ?? 0);
@@ -348,8 +367,27 @@
                                 </p>
                             </td>
                             <td class="px-3 py-2.5 text-right whitespace-nowrap tabular-nums">
-                                <p class="text-gray-300">
-                                    {{ $resumenes }}@if ($resumenesEsperados > 0)<span class="text-gray-500">/{{ $resumenesEsperados }}</span>@endif
+                                <p class="flex items-center justify-end gap-2 text-gray-300">
+                                    <span>{{ $resumenes }}@if ($resumenesEsperados > 0)<span class="text-gray-500">/{{ $resumenesEsperados }}</span>@endif</span>
+                                    <span
+                                        title="{{ $plan->estado_plan['detalle'] }}"
+                                        aria-label="Estado del plan: {{ $plan->estado_plan['etiqueta'] }}"
+                                        @class([
+                                            'inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium',
+                                            'border-emerald-500/20 bg-emerald-500/10 text-emerald-300' => $plan->estado_plan['clave'] === 'completo',
+                                            'border-amber-500/20 bg-amber-500/10 text-amber-300' => $plan->estado_plan['clave'] === 'en_progreso',
+                                            'border-white/10 bg-white/5 text-gray-400' => $plan->estado_plan['clave'] === 'sin_iniciar',
+                                        ])>
+                                        {{ $plan->estado_plan['etiqueta'] }}
+                                    </span>
+                                    @if (filled($plan->revision_seguimiento))
+                                        <span
+                                            title="Este plan tiene una revisión de seguimiento"
+                                            aria-label="Revisado"
+                                            class="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300">
+                                            Revisado
+                                        </span>
+                                    @endif
                                 </p>
                                 @if ($resumenesEsperados > 0)
                                     <p class="text-[10px] {{ $resumenesPendientes === 0 ? 'text-emerald-400' : 'text-amber-400' }}">
