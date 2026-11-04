@@ -1998,3 +1998,225 @@ warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
 9:06:27 PM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
 9:07:22 PM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
 9:07:22 PM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:46:47 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:46:47 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:47:01 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:47:01 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:47:14 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:47:14 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:47:22 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+7:47:22 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+7:47:22 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+7:47:22 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+7:47:55 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:47:55 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:48:04 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:48:04 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:48:19 AM [vite] full reload resources/views/livewire/inicial/shared/strategy-wizard.blade.php
+7:48:19 AM [vite] page reload resources/views/livewire/inicial/shared/strategy-wizard.blade.php
+7:48:37 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:48:37 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:48:45 AM [vite] full reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+7:48:45 AM [vite] page reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+7:49:06 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:49:06 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:49:26 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:49:26 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+7:50:09 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:50:09 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:53:18 AM [vite] full reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+7:53:18 AM [vite] page reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+7:54:05 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:54:05 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:54:05 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+7:54:05 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/table.blade.php
+7:55:38 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:55:39 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+7:55:46 AM [vite] full reload resources/views/inicial/eiplanningwk/index.blade.php
+7:55:46 AM [vite] page reload resources/views/inicial/eiplanningwk/index.blade.php
+7:55:47 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:55:47 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:55:50 AM [vite] full reload resources/views/inicial/eiplanningwk/index.blade.php
+7:55:50 AM [vite] page reload resources/views/inicial/eiplanningwk/index.blade.php
+7:55:56 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:55:56 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:57:42 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:57:42 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+7:59:08 AM [vite] full reload resources/views/inicial/eiplanningwk/index.blade.php
+7:59:08 AM [vite] page reload resources/views/inicial/eiplanningwk/index.blade.php
+7:59:08 AM [vite] full reload resources/views/inicial/eiplanningwk/index.blade.php
+7:59:08 AM [vite] page reload resources/views/inicial/eiplanningwk/index.blade.php
+8:01:26 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:01:26 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:02:37 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:02:37 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:02:43 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:02:43 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:02:58 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:02:58 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:03:09 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:03:09 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:03:22 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:03:22 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+8:17:56 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:17:56 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:18:08 AM [vite] full reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+8:18:08 AM [vite] page reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+8:18:16 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+8:18:16 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-eiplanningwk.blade.php
+8:18:17 AM [vite] full reload resources/views/inicial/seguimiento/partials/leyenda-estados.blade.php
+8:18:17 AM [vite] page reload resources/views/inicial/seguimiento/partials/leyenda-estados.blade.php
+8:18:45 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:18:45 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:19:17 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:19:17 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:25:00 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:25:00 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:27:36 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:27:36 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:27:54 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:27:54 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:29:10 AM [vite] full reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+8:29:10 AM [vite] page reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+8:37:06 AM [vite] full reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+8:37:06 AM [vite] page reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+8:51:17 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+8:51:17 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+8:53:03 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+8:53:03 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+8:53:13 AM [vite] page reload app/Models/app/Inicial/Eiplanningwk.php
+8:54:13 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+8:54:13 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 579 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+10:18:38 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:18:38 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:19:58 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:19:58 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:20:02 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:20:02 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:21:05 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:21:05 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:21:14 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:21:14 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:21:16 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:21:16 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:22:53 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:22:53 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:04 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:04 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:29 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:29 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:33 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:33 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:36 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:36 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:38 AM [vite] full reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:23:38 AM [vite] page reload app/Livewire/Inicial/EiplanningwkComponent.php
+10:47:15 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:47:15 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:48:56 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:48:56 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:49:02 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:49:02 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:49:02 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:49:02 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:49:28 AM [vite] full reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+10:49:28 AM [vite] page reload resources/views/livewire/inicial/eiplanningwk/index.blade.php
+10:50:07 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/calendar-modal.blade.php
+10:50:24 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+10:50:24 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+10:53:52 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+10:53:52 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+10:53:58 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:53:58 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:54:16 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:54:16 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:54:22 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:54:22 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+10:54:40 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+10:54:40 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+11:00:00 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:00:00 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:11:32 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:11:32 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:27:23 AM [vite] full reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+11:27:23 AM [vite] page reload app/Livewire/Inicial/SeguimientoInicialComponent.php
+11:27:23 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+11:27:23 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+11:27:30 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
+11:27:30 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/card-documento.blade.php
+11:27:36 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:27:36 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:27:47 AM [vite] full reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:27:47 AM [vite] page reload resources/views/livewire/inicial/seguimiento/partials/filters.blade.php
+11:27:51 AM [vite] full reload resources/views/inicial/seguimiento/partials/leyenda-estados.blade.php
+11:27:51 AM [vite] page reload resources/views/inicial/seguimiento/partials/leyenda-estados.blade.php
+11:27:59 AM [vite] full reload resources/views/livewire/inicial/seguimiento/index.blade.php
+11:27:59 AM [vite] page reload resources/views/livewire/inicial/seguimiento/index.blade.php
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 533 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+
+> dev
+> vite
+
+
+  VITE v5.4.21  ready in 582 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+
+  LARAVEL v10.50.0  plugin v1.3.0
+
+  ➜  APP_URL: http://localhost:8000
+
+warn - The safelist pattern `/bg-(slate|indigo|violet|pink|rose|orange|amber|emerald|teal|cyan|sky|green|lime|blue)-500\/\[0\.04\]/` doesn't match any Tailwind CSS classes.
+warn - Fix this pattern or remove it from your `safelist` configuration.
+warn - https://tailwindcss.com/docs/content-configuration#safelisting-classes
+1:15:16 PM [vite] full reload app/Livewire/Planning/Activities/IndexComponent.php
+1:15:16 PM [vite] page reload app/Livewire/Planning/Activities/IndexComponent.php
+1:15:16 PM [vite] full reload app/Livewire/Planning/Activities/IndexComponent.php
+1:15:16 PM [vite] page reload app/Livewire/Planning/Activities/IndexComponent.php
+1:15:26 PM [vite] full reload resources/views/livewire/planning/activities/index-component.blade.php
+1:15:26 PM [vite] page reload resources/views/livewire/planning/activities/index-component.blade.php
+1:15:26 PM [vite] full reload resources/views/livewire/planning/activities/index-component.blade.php
+1:15:26 PM [vite] page reload resources/views/livewire/planning/activities/index-component.blade.php
+1:15:26 PM [vite] full reload resources/views/livewire/planning/activities/index-component.blade.php
+1:15:26 PM [vite] page reload resources/views/livewire/planning/activities/index-component.blade.php

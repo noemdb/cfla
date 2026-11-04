@@ -16,7 +16,9 @@ use App\Models\app\Inicial\Eiplanningwstrategy;
 use App\Models\app\Inicial\Eiplanningwsummary;
 use App\Models\app\Inicial\Eiprojectk;
 use App\Models\app\Inicial\Eiprojectkstrategy;
+use App\Models\app\Inicial\Eispecialact;
 use App\Models\app\Inicial\Eispecialk;
+use App\Models\app\Inicial\Eispecialstrategy;
 use App\Models\app\Learner\Estudiant;
 use App\Models\User;
 use App\Notifications\InicialSeguimientoNotification;
@@ -203,6 +205,22 @@ class SeguimientoInicialTest extends TestCase
         }
     }
 
+    private function sembrarEstrategiasEspeciales(Eispecialk $plan, int $cantidad): void
+    {
+        $dias = array_keys(config('inicial.dias_semana'));
+        $momentos = array_keys(config('inicial.momentos_rutina_diaria'));
+
+        for ($indice = 0; $indice < $cantidad; $indice++) {
+            Eispecialstrategy::create([
+                'eispecialk_id' => $plan->id,
+                'day_of_week' => $dias[intdiv($indice, count($momentos))],
+                'momento_rutina_diaria' => $momentos[$indice % count($momentos)],
+                'lunes' => 'Estrategia especial '.$indice,
+                'order' => $indice,
+            ]);
+        }
+    }
+
     private function makeEstudiante(int $seccionId, string $nombre = 'Estudiante'): Estudiant
     {
         $planpagoId = DB::table('planpagos')->insertGetId([
@@ -325,6 +343,36 @@ class SeguimientoInicialTest extends TestCase
     }
 
     /** @test */
+    public function los_filtros_se_muestran_en_un_panel_colapsable_y_conservan_su_distribucion(): void
+    {
+        $component = Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->assertSet('filtrosAbiertos', false)
+            ->assertSee('Filtros')
+            ->assertSee('Mostrar criterios de búsqueda')
+            ->assertSee('aria-expanded="false"', false)
+            ->assertDontSee('f-docente', false)
+            ->call('toggleFiltros')
+            ->assertSet('filtrosAbiertos', true)
+            ->assertSee('Ocultar criterios de búsqueda')
+            ->assertSee('aria-expanded="true"', false)
+            ->assertSee('Plan y período')
+            ->assertSee('Búsqueda y seguimiento')
+            ->assertSee('xl:grid-cols-12', false)
+            ->assertSee('xl:col-span-3', false)
+            ->assertSee('min-h-11', false)
+            ->assertSee('f-docente', false)
+            ->assertSee('f-desde', false)
+            ->assertSee('f-estado', false)
+            ->assertSee('f-revision', false)
+            ->assertSee('f-orden', false);
+
+        $component->call('toggleFiltros')
+            ->assertSet('filtrosAbiertos', false)
+            ->assertDontSee('f-docente', false);
+    }
+
+    /** @test */
     public function la_cabecera_incluye_una_leyenda_con_la_definicion_de_cada_estado(): void
     {
         $this->actingAs($this->makeManager())
@@ -339,7 +387,8 @@ class SeguimientoInicialTest extends TestCase
             ->assertSee('Revisado')
             ->assertDontSee('Emitido')
             ->assertSee('50 estrategias')
-            ->assertSee('resúmenes esperados');
+            ->assertSee('al menos un resumen')
+            ->assertSee('las actividades no son obligatorias para marcarlo completo');
     }
 
     /** @test */
@@ -498,7 +547,8 @@ class SeguimientoInicialTest extends TestCase
         $this->actingAs($manager)
             ->get(route('inicials.seguimiento.eiplanningwks.index'))
             ->assertOk()
-            ->assertSee('Nivel')
+            ->assertSee('Filtros')
+            ->assertSee('Mostrar criterios de búsqueda')
             ->assertDontSee('wire:model="observacion"', false)
             ->assertDontSee('wire:model="recomendacion"', false)
             ->assertDontSee('Nueva planificación')
@@ -1007,9 +1057,7 @@ class SeguimientoInicialTest extends TestCase
             $plan->setAttribute('estrategias_count', $totalEstrategias);
 
             if ($entidad === 'eiplanningwks') {
-                $plan->setAttribute('resumenes_count', 3);
-                $plan->setAttribute('resumenes_esperados', 3);
-                $plan->setAttribute('resumenes_areas_completas_count', 3);
+                $plan->setAttribute('resumenes_count', 1);
             }
 
             $this->assertSame('Completo', $servicio->estado($entidad, $plan)['etiqueta'], $entidad);
@@ -1021,8 +1069,6 @@ class SeguimientoInicialTest extends TestCase
         $weeklyWithoutSummaries = new Eiplanningwk;
         $weeklyWithoutSummaries->setAttribute('estrategias_count', $totalEstrategias);
         $weeklyWithoutSummaries->setAttribute('resumenes_count', 0);
-        $weeklyWithoutSummaries->setAttribute('resumenes_esperados', 3);
-        $weeklyWithoutSummaries->setAttribute('resumenes_areas_completas_count', 0);
         $this->assertSame('En progreso', $servicio->estado('eiplanningwks', $weeklyWithoutSummaries)['etiqueta']);
 
         $evaluation = new Eievaluationk;
@@ -1041,6 +1087,184 @@ class SeguimientoInicialTest extends TestCase
         $planEspecial->setAttribute('estrategias_count', 0);
         $planEspecial->setAttribute('actividades_count', 1);
         $this->assertSame('En progreso', $servicio->estado('eispecialks', $planEspecial)['etiqueta']);
+    }
+
+    /** @test */
+    public function la_tarjeta_del_plan_especial_muestra_estrategias_y_actividades_por_separado(): void
+    {
+        $docente = $this->makeDocente();
+        $plan = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        $this->sembrarEstrategiasEspeciales($plan, 50);
+
+        foreach (range(1, 2) as $orden) {
+            Eispecialact::create([
+                'eispecialk_id' => $plan->id,
+                'pevaluacion_id' => $docente['pevaluacion_id'],
+                'componente' => 'Componente '.$orden,
+                'objetivo' => 'Objetivo '.$orden,
+                'order' => $orden,
+            ]);
+        }
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eispecialks'])
+            ->assertSee('50/50 estrategias')
+            ->assertSee('2 actividades')
+            ->assertSee('Completo con 50 estrategias; las actividades son complementarias.');
+    }
+
+    /** @test */
+    public function los_accesos_rapidos_de_plan_especial_filtran_avance_y_revision(): void
+    {
+        $docente = $this->makeDocente();
+        $sinIniciar = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        $enProgreso = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        Eispecialact::create([
+            'eispecialk_id' => $enProgreso->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'componente' => 'Actividad registrada',
+        ]);
+        $completo = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        $this->sembrarEstrategiasEspeciales($completo, 50);
+        $completo->update(['revision_seguimiento' => 'Plan revisado.']);
+
+        $component = Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eispecialks'])
+            ->assertSee('Accesos rápidos')
+            ->assertSee('Filtrar por estado: Sin iniciar')
+            ->assertSee('Filtrar por estado: En progreso')
+            ->assertSee('Filtrar por estado: Completo')
+            ->assertSee('Filtrar por revisión: Sin revisión')
+            ->assertSee('Filtrar por revisión: Revisado')
+            ->call('aplicarFiltroRapido', 'estado', 'completo')
+            ->assertSet('estado', 'completo')
+            ->assertSee('N° '.$completo->id)
+            ->assertDontSee('N° '.$sinIniciar->id)
+            ->call('aplicarFiltroRapido', 'revisionEstado', 'revisado')
+            ->assertSet('revisionEstado', 'revisado')
+            ->assertSee('N° '.$completo->id)
+            ->assertDontSee('N° '.$enProgreso->id);
+    }
+
+    /** @test */
+    public function la_busqueda_de_plan_especial_incluye_actividades_y_estrategias(): void
+    {
+        $docente = $this->makeDocente();
+        $planActividad = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['justificacion' => 'Plan especial de búsqueda.']
+        ));
+        Eispecialact::create([
+            'eispecialk_id' => $planActividad->id,
+            'pevaluacion_id' => $docente['pevaluacion_id'],
+            'objetivo' => 'MarcadorActividadEspecial',
+        ]);
+
+        $planEstrategia = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['justificacion' => 'Otro plan especial.']
+        ));
+        Eispecialstrategy::create([
+            'eispecialk_id' => $planEstrategia->id,
+            'day_of_week' => 'lunes',
+            'momento_rutina_diaria' => 'Recibimiento',
+            'lunes' => 'MarcadorEstrategiaEspecial',
+        ]);
+
+        $servicio = app(SeguimientoInicial::class);
+        $porActividad = $servicio->paginar('eispecialks', [
+            'profesor_id' => $docente['profesor_id'],
+            'search' => 'MarcadorActividadEspecial',
+        ]);
+        $porEstrategia = $servicio->paginar('eispecialks', [
+            'profesor_id' => $docente['profesor_id'],
+            'search' => 'MarcadorEstrategiaEspecial',
+        ]);
+
+        $this->assertSame([$planActividad->id], $porActividad->getCollection()->modelKeys());
+        $this->assertSame([$planEstrategia->id], $porEstrategia->getCollection()->modelKeys());
+    }
+
+    /** @test */
+    public function pendientes_de_plan_especial_prioriza_incompletos_y_luego_sin_revision(): void
+    {
+        $docente = $this->makeDocente();
+        $pocasEstrategias = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        $this->sembrarEstrategiasEspeciales($pocasEstrategias, 3);
+
+        $completoSinRevision = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        $this->sembrarEstrategiasEspeciales($completoSinRevision, 50);
+
+        $incompletoRevisado = Eispecialk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id']
+        ));
+        $incompletoRevisado->update(['revision_seguimiento' => 'Revisado.']);
+        $this->sembrarEstrategiasEspeciales($incompletoRevisado, 1);
+        DB::table('eispecialks')
+            ->where('id', $pocasEstrategias->id)
+            ->update(['updated_at' => now()]);
+        DB::table('eispecialks')
+            ->where('id', $completoSinRevision->id)
+            ->update(['updated_at' => now()->subDay()]);
+        DB::table('eispecialks')
+            ->where('id', $incompletoRevisado->id)
+            ->update(['updated_at' => now()->subDays(2)]);
+
+        $planes = app(SeguimientoInicial::class)
+            ->paginar('eispecialks', [
+                'profesor_id' => $docente['profesor_id'],
+                'orden' => 'pendientes',
+            ])
+            ->getCollection();
+
+        $this->assertSame(
+            [$pocasEstrategias->id, $completoSinRevision->id, $incompletoRevisado->id],
+            $planes->modelKeys()
+        );
+    }
+
+    /** @test */
+    public function el_estado_semanal_explica_que_requisitos_faltan(): void
+    {
+        $plan = new Eiplanningwk;
+        $plan->setAttribute('estrategias_count', 2);
+        $plan->setAttribute('resumenes_count', 1);
+
+        $estado = app(SeguimientoInicial::class)->estado('eiplanningwks', $plan);
+
+        $this->assertSame('En progreso', $estado['etiqueta']);
+        $this->assertStringContainsString('48 estrategias pendientes', $estado['detalle']);
+        $this->assertStringNotContainsString('resumen', $estado['detalle']);
     }
 
     /** @test */
@@ -1165,6 +1389,83 @@ class SeguimientoInicialTest extends TestCase
             ->set('revisionEstado', 'revisado')
             ->assertSee('Plan ya revisado.')
             ->assertDontSee('Plan sin revisión.');
+    }
+
+    /** @test */
+    public function muestra_conteos_rapidos_y_resumen_pendiente_por_docente(): void
+    {
+        $docente = $this->makeDocente();
+        $otroDocente = $this->makeDocente();
+
+        $sinIniciar = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            ['diagnostico' => 'MarcaConteos Plan completamente vacío.']
+        ));
+        $enProgreso = Eiplanningwk::create($this->planAttributes(
+            $docente['profesor_id'],
+            $docente['grado_id'],
+            $docente['seccion_id'],
+            [
+                'diagnostico' => 'MarcaConteos Plan parcialmente completado.',
+                'revision_seguimiento' => 'Revisado.',
+            ]
+        ));
+        $otroSinIniciar = Eiplanningwk::create($this->planAttributes(
+            $otroDocente['profesor_id'],
+            $otroDocente['grado_id'],
+            $otroDocente['seccion_id'],
+            ['diagnostico' => 'MarcaConteos Plan vacío de otro docente.']
+        ));
+
+        Eiplanningwstrategy::create([
+            'eiplanningwk_id' => $enProgreso->id,
+            'day_of_week' => 'lunes',
+            'momento_rutina_diaria' => 'Recibimiento',
+            'lunes' => 'Estrategia pendiente.',
+            'order' => 0,
+        ]);
+
+        $servicio = app(SeguimientoInicial::class);
+        $filtros = ['search' => 'MarcaConteos'];
+        $conteos = $servicio->conteosRapidos('eiplanningwks', $filtros);
+
+        $this->assertSame(2, $conteos['sin_iniciar']);
+        $this->assertSame(1, $conteos['en_progreso']);
+        $this->assertSame(0, $conteos['completo']);
+        $this->assertSame(2, $conteos['sin_revision']);
+        $this->assertSame(1, $conteos['revisado']);
+
+        $docentes = $servicio->resumenDocentes('eiplanningwks', $filtros)
+            ->keyBy('profesor_id');
+        $this->assertSame(2, $docentes[$docente['profesor_id']]['total']);
+        $this->assertSame(2, $docentes[$docente['profesor_id']]['incompletos']);
+        $this->assertSame(1, $docentes[$docente['profesor_id']]['sin_revision']);
+        $this->assertSame(1, $docentes[$otroDocente['profesor_id']]['total']);
+
+        Livewire::actingAs($this->makeManager())
+            ->test(SeguimientoInicialComponent::class, ['entidad' => 'eiplanningwks'])
+            ->set('search', 'MarcaConteos')
+            ->assertSee('Accesos rápidos')
+            ->assertSee('Resumen por docente')
+            ->call('toggleResumenDocentes')
+            ->assertSet('resumenDocentesAbierto', true)
+            ->assertSee('Seguimiento Test, Docente')
+            ->call('aplicarFiltroRapido', 'estado', 'en_progreso')
+            ->assertSet('estado', 'en_progreso')
+            ->assertSee('MarcaConteos Plan parcialmente completado.')
+            ->assertDontSee('MarcaConteos Plan completamente vacío.')
+            ->call('aplicarFiltroRapido', 'revisionEstado', 'sin_revision')
+            ->assertSet('estado', 'en_progreso')
+            ->assertSet('revisionEstado', 'sin_revision')
+            ->assertDontSee('MarcaConteos Plan parcialmente completado.')
+            ->call('aplicarFiltroRapido', 'revisionEstado', 'sin_revision')
+            ->assertSet('revisionEstado', '')
+            ->call('filtrarDocente', $docente['profesor_id'])
+            ->assertSet('profesor_id', (string) $docente['profesor_id'])
+            ->assertSee('MarcaConteos Plan parcialmente completado.')
+            ->assertDontSee('MarcaConteos Plan vacío de otro docente.');
     }
 
     /** @test */
@@ -1354,7 +1655,7 @@ class SeguimientoInicialTest extends TestCase
     }
 
     /** @test */
-    public function el_estado_completo_semanal_exige_estrategias_y_resumenes_esperados(): void
+    public function una_planificacion_semanal_completa_con_un_resumen_sin_exigir_uno_por_area(): void
     {
         $docente = $this->makeDocente();
         $pensumBase = Pensum::where('grado_id', $docente['grado_id'])
@@ -1397,7 +1698,6 @@ class SeguimientoInicialTest extends TestCase
         $this->sembrarSemanaCompleta($completo);
         $this->sembrarSemanaCompleta($sinResumenes);
         $this->crearResumenSemanal($completo, $docente['pevaluacion_id']);
-        $this->crearResumenSemanal($completo, $docente['pevaluacion_id']);
 
         // Una sola estrategia impide completar la rejilla, aunque tenga resumen.
         Eiplanningwstrategy::create([
@@ -1412,7 +1712,7 @@ class SeguimientoInicialTest extends TestCase
         $resumen = app(SeguimientoInicial::class)->resumen('eiplanningwks', [
             'profesor_id' => $docente['profesor_id'],
         ]);
-        $this->assertSame(0, $resumen['completos'], 'Un resumen duplicado no cubre el área faltante.');
+        $this->assertSame(1, $resumen['completos'], 'Una sola síntesis basta aunque haya varias áreas de aprendizaje.');
 
         $this->crearResumenSemanal($completo, $segundaPevaluacionId);
         $resumen = app(SeguimientoInicial::class)->resumen('eiplanningwks', [
@@ -1645,7 +1945,8 @@ class SeguimientoInicialTest extends TestCase
         $estado = app(SeguimientoInicial::class)->estado('eiplanningwks', $completo);
 
         $this->assertSame('En progreso', $estado['etiqueta']);
-        $this->assertStringContainsString('1/', $estado['detalle']);
+        $this->assertStringContainsString('49 estrategias pendientes', $estado['detalle']);
+        $this->assertStringContainsString('falta el resumen requerido', $estado['detalle']);
     }
 
     /** @test */

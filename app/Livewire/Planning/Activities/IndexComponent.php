@@ -256,7 +256,7 @@ class IndexComponent extends Component
     public function restoreFilters(array $filters): void
     {
         $this->search = trim((string) ($filters['search'] ?? ''));
-        $this->status_activities = in_array($filters['status_activities'] ?? '', ['SI', 'NO', 'SI_LE', 'NO_LE'], true)
+        $this->status_activities = in_array($filters['status_activities'] ?? '', ['SI', 'NO', 'SI_LE', 'NO_LE', 'SI_SUP'], true)
             ? $filters['status_activities']
             : '';
         $this->filter_status = in_array($filters['filter_status'] ?? '', ['pending', 'approved'], true)
@@ -342,6 +342,7 @@ class IndexComponent extends Component
                 'activities as activities_revision_count' => fn ($q) => $q->where('status', 0),
                 'activities as activities_approved_count' => fn ($q) => $q->where('status', 1),
                 'activities as activities_lessons_count' => fn ($q) => $q->whereHas('lmsPublication'),
+                'activities as activities_supplements_count' => fn ($q) => $q->whereHas('supplement'),
             ])
             ->whereHas('pensum.pestudio', fn ($q) => $q->where('planning_module', true))
             ->whereNull('pevaluacions.deleted_at');
@@ -370,6 +371,8 @@ class IndexComponent extends Component
                 $query->having('activities_lessons_count', '>', 0);
             } elseif ($filters['status_activities'] === 'NO_LE') {
                 $query->having('activities_lessons_count', '=', 0);
+            } elseif ($filters['status_activities'] === 'SI_SUP') {
+                $query->having('activities_supplements_count', '>', 0);
             }
         }
         if (! empty($filters['filter_observations'])) {

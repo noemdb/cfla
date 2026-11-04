@@ -263,6 +263,10 @@ class NotificationService
 
         $admin = $recipients->first(fn (User $user) => (int) $user->id === $superadminId);
 
+        if (! $admin instanceof User) {
+            return $recipients;
+        }
+
         if ($this->isSuperadminAllowed($admin, $notification)) {
             return $recipients;
         }
@@ -364,10 +368,14 @@ class NotificationService
     private function presentationData(BaseNotification $notification, User $recipient): array
     {
         if (method_exists($notification, 'toDatabase')) {
-            return (array) $notification->toDatabase($recipient);
+            return (array) call_user_func([$notification, 'toDatabase'], $recipient);
         }
 
-        return (array) $notification->toArray($recipient);
+        if (method_exists($notification, 'toArray')) {
+            return (array) call_user_func([$notification, 'toArray'], $recipient);
+        }
+
+        throw new \RuntimeException('Notification is missing toDatabase / toArray method.');
     }
 
     /**
@@ -378,7 +386,13 @@ class NotificationService
     public function unreadCountFor(int $userId): int
     {
         return (int) Cache::remember(self::UNREAD_PREFIX.$userId, self::cacheTtlSeconds(), function () use ($userId) {
-            return User::query()->find($userId)?->unreadNotifications()->count() ?? 0;
+            $user = User::query()->find($userId);
+
+            if (! $user instanceof User) {
+                return 0;
+            }
+
+            return $user->unreadNotifications()->count();
         });
     }
 

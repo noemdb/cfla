@@ -34,8 +34,111 @@
         </section>
     @endif
 
+    @if (in_array($entidad, ['eiplanningwks', 'eispecialks'], true))
+        <section class="space-y-3"
+            aria-label="{{ $entidad === 'eiplanningwks' ? 'Accesos rápidos y resumen por docente' : 'Accesos rápidos de avance y revisión' }}">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="mr-1 text-xs font-medium text-gray-400">Accesos rápidos</span>
+                @foreach ([
+                    ['estado', 'sin_iniciar', 'Sin iniciar'],
+                    ['estado', 'en_progreso', 'En progreso'],
+                    ['estado', 'completo', 'Completo'],
+                    ['revisionEstado', 'sin_revision', 'Sin revisión'],
+                    ['revisionEstado', 'revisado', 'Revisado'],
+                ] as [$campo, $valor, $etiqueta])
+                    @php
+                        $activo = $campo === 'estado'
+                            ? $this->estado === $valor
+                            : ($this->revisionEstado === $valor
+                                || ($this->revisionEstado === '' && $this->estado === $valor));
+                    @endphp
+                    <button type="button" wire:click="aplicarFiltroRapido('{{ $campo }}', '{{ $valor }}')"
+                        aria-pressed="{{ $activo ? 'true' : 'false' }}"
+                        aria-label="{{ $campo === 'estado' ? 'Filtrar por estado: ' : 'Filtrar por revisión: ' }}{{ $etiqueta }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors
+                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60
+                            {{ $activo
+                                ? 'border-cyan-500/40 bg-cyan-500/15 text-cyan-200'
+                                : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10' }}">
+                        {{ $etiqueta }}
+                        <span class="tabular-nums text-gray-400">{{ $conteosRapidos[$valor] ?? 0 }}</span>
+                    </button>
+                @endforeach
+            </div>
+
+            @if ($entidad === 'eispecialks')
+                <p class="text-xs text-gray-400">
+                    Un plan especial se completa con 50 estrategias. Las actividades son complementarias y no sustituyen estrategias.
+                </p>
+            @endif
+
+            @if ($entidad === 'eiplanningwks')
+            <section class="rounded-xl border border-white/10 bg-gray-900/40">
+                <button type="button" wire:click="toggleResumenDocentes"
+                    aria-expanded="{{ $resumenDocentesAbierto ? 'true' : 'false' }}"
+                    class="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3 text-left text-sm text-gray-200 hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan-500/60">
+                    <span>Resumen por docente</span>
+                    <span class="text-xs text-gray-500">
+                        {{ $resumenDocentesAbierto
+                            ? 'Ocultar'
+                            : 'Ver planes, incompletos y sin revisión' }}
+                    </span>
+                </button>
+                @if ($resumenDocentesAbierto)
+                    @if ($resumenDocentes->isNotEmpty())
+                    <div class="overflow-x-auto border-t border-white/10">
+                        <table class="w-full min-w-[34rem] text-left text-xs">
+                            <thead class="bg-white/[0.03] text-gray-500">
+                                <tr>
+                                    <th scope="col" class="px-4 py-2 font-medium">Docente</th>
+                                    <th scope="col" class="px-3 py-2 text-right font-medium">Planes</th>
+                                    <th scope="col" class="px-3 py-2 text-right font-medium">Incompletos</th>
+                                    <th scope="col" class="px-3 py-2 text-right font-medium">Sin revisión</th>
+                                    <th scope="col" class="px-4 py-2 text-right font-medium">Filtro</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                @foreach ($resumenDocentes as $filaDocente)
+                                    <tr wire:key="resumen-docente-{{ $filaDocente['profesor_id'] }}">
+                                        <th scope="row" class="px-4 py-2.5 font-medium text-gray-200">
+                                            {{ $filaDocente['nombre'] }}
+                                        </th>
+                                        <td class="px-3 py-2.5 text-right tabular-nums text-gray-300">
+                                            {{ $filaDocente['total'] }}
+                                        </td>
+                                        <td class="px-3 py-2.5 text-right tabular-nums text-amber-300">
+                                            {{ $filaDocente['incompletos'] }}
+                                        </td>
+                                        <td class="px-3 py-2.5 text-right tabular-nums text-amber-300">
+                                            {{ $filaDocente['sin_revision'] }}
+                                        </td>
+                                        <td class="px-4 py-2.5 text-right">
+                                            <button type="button"
+                                                wire:click="filtrarDocente({{ $filaDocente['profesor_id'] }})"
+                                                class="rounded-md px-2 py-1 text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60">
+                                                {{ (string) $profesor_id === (string) $filaDocente['profesor_id']
+                                                    ? 'Quitar'
+                                                    : 'Ver planes' }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                        <p class="border-t border-white/10 px-4 py-3 text-xs text-gray-400">
+                            No hay planes por docente para los filtros generales seleccionados.
+                        </p>
+                    @endif
+                @endif
+            </section>
+            @endif
+        </section>
+    @endif
+
     {{-- Aviso de consulta en curso (accesible) --}}
-    <div wire:loading.flex wire:target="profesor_id,grado_id,seccion_id,lapso_id,desde,hasta,estado,revisionEstado,orden,search,alternarVista,limpiarFiltros"
+    <div wire:loading.flex wire:target="profesor_id,grado_id,seccion_id,lapso_id,desde,hasta,estado,revisionEstado,orden,search,alternarVista,limpiarFiltros,aplicarFiltroRapido,filtrarDocente,toggleResumenDocentes"
         class="hidden items-center gap-2 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-200"
         role="status" aria-live="polite">
         <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
@@ -71,4 +174,7 @@
     @if ($detalleId)
         @include('livewire.inicial.seguimiento.partials.detalle-modal')
     @endif
+
+    {{-- Modal de calendario --}}
+    @include('livewire.inicial.seguimiento.partials.calendar-modal')
 </div>

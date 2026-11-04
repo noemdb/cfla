@@ -52,6 +52,19 @@
         @endif
     </div>
 
+    @if (method_exists($this, 'hasUnsavedStrategies'))
+        <p role="status" aria-live="polite"
+            @class([
+                'rounded-lg border px-3 py-2 text-xs',
+                'border-amber-500/30 bg-amber-500/10 text-amber-200' => $this->hasUnsavedStrategies(),
+                'border-white/10 bg-white/[0.03] text-gray-400' => ! $this->hasUnsavedStrategies(),
+            ])>
+            {{ $this->hasUnsavedStrategies()
+                ? 'Hay cambios sin guardar. Guarda la rejilla antes de cerrar o cambiar de plan.'
+                : 'No hay cambios pendientes en la rejilla.' }}
+        </p>
+    @endif
+
     {{-- ═══ Pestañas de día con progreso ═══ --}}
     <div class="flex flex-wrap gap-1.5 border-b border-white/10 pb-2" role="tablist" aria-label="Días de la semana">
         @foreach ($weekDays as $clave => $nombre)
@@ -138,7 +151,11 @@
              `wire:key` del contenedor fuerza a pintar la celda nueva al
              cambiar de día o de momento. --}}
         <textarea id="celda-estrategia" rows="4" wire:key="strategy-text-{{ $activeDay }}-{{ $activeMomentIndex }}"
-            wire:model="{{ $rutaCelda }}.estrategia"
+            @if (method_exists($this, 'hasUnsavedStrategies'))
+                wire:model.live.debounce.500ms="{{ $rutaCelda }}.estrategia"
+            @else
+                wire:model="{{ $rutaCelda }}.estrategia"
+            @endif
             placeholder="Qué hace el niño en este momento de la rutina, con qué recursos, cómo se adapta al grupo…"
             class="w-full bg-gray-900/60 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none">{{ $celda['estrategia'] }}</textarea>
 
@@ -147,7 +164,11 @@
                 <label for="celda-order" class="block text-xs font-medium text-gray-400 mb-1">Orden</label>
                 <input id="celda-order" type="number" min="1" step="1"
                     wire:key="strategy-order-{{ $activeDay }}-{{ $activeMomentIndex }}"
-                    wire:model="{{ $rutaCelda }}.order"
+                    @if (method_exists($this, 'hasUnsavedStrategies'))
+                        wire:model.live.debounce.500ms="{{ $rutaCelda }}.order"
+                    @else
+                        wire:model="{{ $rutaCelda }}.order"
+                    @endif
                     class="w-full bg-gray-900/60 border border-white/10 text-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none">
             </div>
 

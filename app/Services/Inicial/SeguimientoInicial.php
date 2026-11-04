@@ -9,7 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Consultas del perfil de SEGUIMIENTO de Educación Inicial (solo lectura).
@@ -241,10 +240,6 @@ final class SeguimientoInicial
             ->paginate($porPagina)
             ->withQueryString();
 
-        if ($entidad === 'eiplanningwks') {
-            $this->adjuntarResumenesEsperados($paginator);
-        }
-
         return $paginator;
     }
 
@@ -278,6 +273,92 @@ final class SeguimientoInicial
     }
 
     /**
+     * Conteos para los accesos rápidos del seguimiento semanal.
+     *
+     * Los conteos conservan los filtros generales y deliberadamente ignoran
+     * avance/revisión para que los botones no desaparezcan al seleccionarlos.
+     *
+     * @param  array<string, mixed>  $filtros
+     * @return array<string, int>
+     */
+    public function conteosRapidos(string $entidad, array $filtros): array
+    {
+        unset($filtros['estado'], $filtros['revision'], $filtros['orden']);
+
+        $base = fn () => $this->aplicarFiltros($this->consultaBase($entidad), $entidad, $filtros);
+        $conteos = [];
+
+        foreach ($this->opcionesEstado($entidad) as $estado => $etiqueta) {
+            $query = $base();
+            $this->aplicarEstado($query, $entidad, $estado);
+            $conteos[$estado] = $query->count();
+        }
+
+        $total = $conteos === [] ? $base()->count() : array_sum($conteos);
+
+        if ($campoRevision = $this->campoRevisionSeguimiento($entidad)) {
+            $conteos['sin_revision'] = $base()
+                ->where(fn ($query) => $query
+                    ->whereNull($campoRevision)
+                    ->orWhere($campoRevision, ''))
+                ->count();
+            $conteos['revisado'] = max(0, $total - $conteos['sin_revision']);
+        }
+
+        return $conteos;
+    }
+
+    /**
+     * Consolida los documentos semanales por docente, manteniendo los filtros
+     * generales activos y calculando pendientes fuera de los filtros de estado.
+     *
+     * @param  array<string, mixed>  $filtros
+     * @return Collection<int, array{profesor_id: int, nombre: string, total: int, incompletos: int, sin_revision: int}>
+     */
+    public function resumenDocentes(string $entidad, array $filtros): Collection
+    {
+        unset($filtros['estado'], $filtros['revision'], $filtros['orden']);
+
+        $base = $this->aplicarFiltros($this->consultaBase($entidad), $entidad, $filtros);
+        $totales = $this->contarPorDocente(clone $base, $entidad);
+        $completos = [];
+
+        if ($this->opcionesEstado($entidad) !== []) {
+            $queryCompletos = clone $base;
+            $this->aplicarEstado($queryCompletos, $entidad, 'completo');
+            $completos = $this->contarPorDocente($queryCompletos, $entidad);
+        }
+
+        $sinRevision = [];
+        if ($campoRevision = $this->campoRevisionSeguimiento($entidad)) {
+            $querySinRevision = clone $base;
+            $querySinRevision->where(fn ($query) => $query
+                ->whereNull($campoRevision)
+                ->orWhere($campoRevision, ''));
+            $sinRevision = $this->contarPorDocente($querySinRevision, $entidad);
+        }
+
+        $ids = $totales->keys()->map(fn ($id) => (int) $id);
+        $nombres = Profesor::query()
+            ->whereIn('id', $ids)
+            ->get(['id', 'name', 'lastname'])
+            ->mapWithKeys(fn (Profesor $profesor) => [
+                $profesor->id => trim("{$profesor->lastname}, {$profesor->name}"),
+            ]);
+
+        return $totales
+            ->map(fn (int $total, int|string $profesorId) => [
+                'profesor_id' => (int) $profesorId,
+                'nombre' => $nombres->get($profesorId, 'Docente sin identificar'),
+                'total' => $total,
+                'incompletos' => max(0, $total - (int) ($completos[$profesorId] ?? 0)),
+                'sin_revision' => (int) ($sinRevision[$profesorId] ?? 0),
+            ])
+            ->sortBy('nombre', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+    }
+
+    /**
      * Estado de un documento.
      *
      * @return array{clave: string, etiqueta: string, variante: string, detalle: string}
@@ -293,19 +374,39 @@ final class SeguimientoInicial
                 : 0;
 
             if ($entidad === 'eiplanningwks') {
-                $resumenes = $this->resumenesRegistrados($documento);
-                $esperados = $this->resumenesEsperados($documento);
-                $resumenesCompletos = $resumenes >= $esperados;
-                $detalle = "{$estrategias}/{$total} estrategias · {$resumenes}/{$esperados} resúmenes";
-                $tieneResumenes = $this->contar(
+                $resumenes = $this->contar(
                     $documento,
                     'resumenes_count',
                     'eiplanningwsummaries',
                     null
-                ) > 0;
+                );
+                $resumenesCompletos = $resumenes > 0;
+                $pendientes = [];
+
+                if ($estrategias < $total) {
+                    $pendientes[] = ($total - $estrategias).' '.(($total - $estrategias) === 1
+                        ? 'estrategia pendiente'
+                        : 'estrategias pendientes');
+                }
+
+                if (! $resumenesCompletos) {
+                    $pendientes[] = 'el resumen requerido';
+                }
+
+                $detalle = match (count($pendientes)) {
+                    0 => "{$estrategias}/{$total} estrategias · resumen registrado",
+                    1 => $pendientes[0] === 'el resumen requerido'
+                        ? 'Falta el resumen requerido'
+                        : 'Faltan '.$pendientes[0],
+                    default => 'Faltan '.$pendientes[0].'; falta el resumen requerido',
+                };
+                $tieneResumenes = $resumenesCompletos;
             } else {
                 $resumenesCompletos = true;
-                $detalle = "{$estrategias}/{$total} estrategias";
+                $faltantes = max(0, $total - $estrategias);
+                $detalle = $faltantes === 0
+                    ? "{$estrategias}/{$total} estrategias completas"
+                    : 'Faltan '.$faltantes.' '.($faltantes === 1 ? 'estrategia' : 'estrategias');
                 $tieneResumenes = false;
             }
 
@@ -328,10 +429,16 @@ final class SeguimientoInicial
             );
             $completo = $posiciones > 0 && $completas >= $posiciones;
 
+            $faltantes = max(0, $posiciones - $completas);
+
             return $this->estadoDeProgreso(
                 $completo,
                 $posiciones > 0,
-                "{$completas}/{$posiciones} posiciones con aprendizaje registrado"
+                $posiciones === 0
+                    ? 'Sin posiciones de aprendizaje registradas'
+                    : ($faltantes > 0
+                        ? "Faltan {$faltantes} ".($faltantes === 1 ? 'aprendizaje por registrar' : 'aprendizajes por registrar')
+                        : "{$completas}/{$posiciones} aprendizajes registrados")
             );
         }
 
@@ -389,7 +496,9 @@ final class SeguimientoInicial
         ];
 
         if ($this->campoRevisionSeguimiento($entidad)) {
-            $opciones['pendientes'] = 'Pendientes primero';
+            $opciones['pendientes'] = $entidad === 'eispecialks'
+                ? 'Pendientes: sin revisión y menos estrategias'
+                : 'Pendientes primero';
         }
 
         return $opciones;
@@ -406,7 +515,7 @@ final class SeguimientoInicial
     {
         $query->orderByRaw("CASE WHEN TRIM(COALESCE(revision_seguimiento, '')) = '' THEN 0 ELSE 1 END");
 
-        if ($entidad === 'eiplanningwks') {
+        if (in_array($entidad, ['eiplanningwks', 'eispecialks'], true)) {
             return $query->orderBy('estrategias_count')->orderBy('updated_at')->orderBy('id');
         }
 
@@ -494,6 +603,24 @@ final class SeguimientoInicial
                     $q->orWhere($columna, 'like', $texto);
                 }
 
+                if ($entidad === 'eispecialks') {
+                    $q->orWhereHas('activities', fn (Builder $activities) => $activities
+                        ->where(function (Builder $activity) use ($texto) {
+                            foreach ([
+                                'componente',
+                                'objetivo',
+                                'aprendizaje_esperado',
+                                'indicadores',
+                                'linea_investigacion',
+                                'enfasis_curriculares',
+                            ] as $columna) {
+                                $activity->orWhere($columna, 'like', $texto);
+                            }
+                        }));
+                    $q->orWhereHas('eispecialstrategies', fn (Builder $strategies) => $strategies
+                        ->where('lunes', 'like', $texto));
+                }
+
                 if ($entidad === 'eifinalks') {
                     // El estudiante guarda `name` y `lastname` (no `firstname`).
                     $q->orWhereHas('expectant', fn ($e) => $e
@@ -541,7 +668,7 @@ final class SeguimientoInicial
                 $query->whereHas($relacion, $conTexto, '>=', $total);
 
                 if ($entidad === 'eiplanningwks') {
-                    $query->whereRaw($this->sqlResumenesSemanalesCompletos());
+                    $query->whereHas('eiplanningwsummaries');
                 }
 
                 return;
@@ -576,7 +703,7 @@ final class SeguimientoInicial
                     $q->whereHas($relacion, $conTexto, '<', $total);
 
                     if ($entidad === 'eiplanningwks') {
-                        $q->orWhereRaw($this->sqlResumenesSemanalesIncompletos());
+                        $q->orWhereDoesntHave('eiplanningwsummaries');
                     }
                 });
             }
@@ -619,6 +746,27 @@ final class SeguimientoInicial
         return (int) $query->distinct()->count('profesor_id');
     }
 
+    /**
+     * @return Collection<int|string, int>
+     */
+    private function contarPorDocente(Builder $query, string $entidad): Collection
+    {
+        if ($entidad === 'eifinalks') {
+            return $query
+                ->join('pevaluacions', 'pevaluacions.id', '=', 'eifinalks.pevaluacion_id')
+                ->selectRaw('pevaluacions.profesor_id as profesor_id, COUNT(*) as total')
+                ->groupBy('pevaluacions.profesor_id')
+                ->pluck('total', 'profesor_id')
+                ->map(fn ($total) => (int) $total);
+        }
+
+        return $query
+            ->selectRaw($entidad.'.profesor_id as profesor_id, COUNT(*) as total')
+            ->groupBy($entidad.'.profesor_id')
+            ->pluck('total', 'profesor_id')
+            ->map(fn ($total) => (int) $total);
+    }
+
     private function contarCompletos(Builder $query, string $entidad): int
     {
         if (isset(self::RELACION_ESTRATEGIAS[$entidad])) {
@@ -630,7 +778,7 @@ final class SeguimientoInicial
             );
 
             if ($entidad === 'eiplanningwks') {
-                $query->whereRaw($this->sqlResumenesSemanalesCompletos());
+                $query->whereHas('eiplanningwsummaries');
             }
 
             return $query->count();
@@ -650,129 +798,6 @@ final class SeguimientoInicial
     private function totalEstrategiasEsperadas(): int
     {
         return count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria'));
-    }
-
-    /**
-     * The weekly plan is complete only when its strategy grid and expected
-     * summaries are both complete. Area expectations are teacher-specific.
-     */
-    private function sqlResumenesSemanalesCompletos(): string
-    {
-        return 'NOT EXISTS ('
-            .'SELECT 1 FROM pevaluacions AS expected_evaluations '
-            .'INNER JOIN pensums AS expected_pensums '
-            .'ON expected_pensums.id = expected_evaluations.pensum_id '
-            .'WHERE expected_evaluations.profesor_id = eiplanningwks.profesor_id '
-            .'AND expected_evaluations.seccion_id = eiplanningwks.seccion_id '
-            .'AND expected_evaluations.deleted_at IS NULL '
-            .'AND expected_pensums.deleted_at IS NULL '
-            .'AND NOT EXISTS ('
-            .'SELECT 1 FROM eiplanningwsummaries AS weekly_summaries '
-            .'INNER JOIN pevaluacions AS summary_evaluations '
-            .'ON summary_evaluations.id = weekly_summaries.pevaluacion_id '
-            .'WHERE weekly_summaries.eiplanningwk_id = eiplanningwks.id '
-            .'AND summary_evaluations.profesor_id = eiplanningwks.profesor_id '
-            .'AND summary_evaluations.seccion_id = eiplanningwks.seccion_id '
-            .'AND summary_evaluations.pensum_id = expected_evaluations.pensum_id '
-            .'AND summary_evaluations.deleted_at IS NULL'
-            .'))';
-    }
-
-    private function sqlResumenesSemanalesIncompletos(): string
-    {
-        return 'NOT ('.$this->sqlResumenesSemanalesCompletos().')';
-    }
-
-    private function resumenesEsperados(Model $documento): int
-    {
-        $esperados = $documento->getAttribute('resumenes_esperados');
-
-        if ($esperados !== null) {
-            return (int) $esperados;
-        }
-
-        return (int) Pevaluacion::query()
-            ->join('pensums', 'pensums.id', '=', 'pevaluacions.pensum_id')
-            ->where('pevaluacions.profesor_id', $documento->profesor_id)
-            ->where('pevaluacions.seccion_id', $documento->seccion_id)
-            ->whereNull('pevaluacions.deleted_at')
-            ->whereNull('pensums.deleted_at')
-            ->distinct()
-            ->count('pevaluacions.pensum_id');
-    }
-
-    private function resumenesRegistrados(Model $documento): int
-    {
-        $registrados = $documento->getAttribute('resumenes_areas_completas_count');
-
-        if ($registrados !== null) {
-            return (int) $registrados;
-        }
-
-        return (int) DB::table('eiplanningwsummaries as weekly_summaries')
-            ->join('pevaluacions as summary_evaluations', 'summary_evaluations.id', '=', 'weekly_summaries.pevaluacion_id')
-            ->join('pensums as summary_pensums', 'summary_pensums.id', '=', 'summary_evaluations.pensum_id')
-            ->where('weekly_summaries.eiplanningwk_id', $documento->getKey())
-            ->where('summary_evaluations.profesor_id', $documento->profesor_id)
-            ->where('summary_evaluations.seccion_id', $documento->seccion_id)
-            ->whereNull('summary_evaluations.deleted_at')
-            ->whereNull('summary_pensums.deleted_at')
-            ->distinct()
-            ->count('summary_evaluations.pensum_id');
-    }
-
-    private function adjuntarResumenesEsperados(LengthAwarePaginator $paginator): void
-    {
-        $planes = $paginator->getCollection();
-
-        if ($planes->isEmpty()) {
-            return;
-        }
-
-        $pares = $planes
-            ->map(fn (Model $plan) => [
-                'profesor_id' => (int) $plan->profesor_id,
-                'seccion_id' => (int) $plan->seccion_id,
-            ])
-            ->unique(fn (array $par) => $par['profesor_id'].':'.$par['seccion_id'])
-            ->values();
-
-        $totales = Pevaluacion::query()
-            ->join('pensums', 'pensums.id', '=', 'pevaluacions.pensum_id')
-            ->where(function ($query) use ($pares) {
-                foreach ($pares as $par) {
-                    $query->orWhere(fn ($query) => $query
-                        ->where('pevaluacions.profesor_id', $par['profesor_id'])
-                        ->where('pevaluacions.seccion_id', $par['seccion_id']));
-                }
-            })
-            ->whereNull('pevaluacions.deleted_at')
-            ->whereNull('pensums.deleted_at')
-            ->selectRaw('pevaluacions.profesor_id, pevaluacions.seccion_id, COUNT(DISTINCT pevaluacions.pensum_id) as total')
-            ->groupBy('pevaluacions.profesor_id', 'pevaluacions.seccion_id')
-            ->get()
-            ->mapWithKeys(fn ($row) => [
-                $row->profesor_id.':'.$row->seccion_id => (int) $row->total,
-            ]);
-
-        $resumenesPorPlan = DB::table('eiplanningwsummaries as weekly_summaries')
-            ->join('pevaluacions as summary_evaluations', 'summary_evaluations.id', '=', 'weekly_summaries.pevaluacion_id')
-            ->join('pensums as summary_pensums', 'summary_pensums.id', '=', 'summary_evaluations.pensum_id')
-            ->join('eiplanningwks as weekly_plans', 'weekly_plans.id', '=', 'weekly_summaries.eiplanningwk_id')
-            ->whereIn('weekly_plans.id', $planes->modelKeys())
-            ->whereColumn('summary_evaluations.profesor_id', 'weekly_plans.profesor_id')
-            ->whereColumn('summary_evaluations.seccion_id', 'weekly_plans.seccion_id')
-            ->whereNull('summary_evaluations.deleted_at')
-            ->whereNull('summary_pensums.deleted_at')
-            ->selectRaw('weekly_plans.id as plan_id, COUNT(DISTINCT summary_evaluations.pensum_id) as total')
-            ->groupBy('weekly_plans.id')
-            ->pluck('total', 'plan_id');
-
-        foreach ($planes as $plan) {
-            $clave = $plan->profesor_id.':'.$plan->seccion_id;
-            $plan->setAttribute('resumenes_esperados', $totales->get($clave, 0));
-            $plan->setAttribute('resumenes_areas_completas_count', (int) ($resumenesPorPlan[$plan->id] ?? 0));
-        }
     }
 
     /**

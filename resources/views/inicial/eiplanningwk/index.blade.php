@@ -8,7 +8,7 @@
 --}}
 <x-layouts.role>
     <div class="py-6">
-        <div class="w-full max-w-none mx-auto px-2 sm:px-4 lg:px-6 2xl:px-8">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             {{-- Migas de pan del módulo --}}
             <nav class="mb-4 text-xs text-gray-500" aria-label="Migas de pan">
@@ -22,12 +22,6 @@
                     <li class="text-gray-300" aria-current="page">Planificación Semanal</li>
                 </ol>
             </nav>
-
-            {{--
-                Componente único full-page: listado, filtros, modal único y
-                wizard de estrategias. Es el patrón del proyecto para páginas
-                interactivas (CLAUDE.md · "Livewire over Controllers").
-            --}}
             <livewire:inicial.eiplanningwk-component />
         </div>
     </div>

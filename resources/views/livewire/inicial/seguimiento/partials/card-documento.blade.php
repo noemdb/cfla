@@ -14,6 +14,9 @@
         ? ($documento->pevaluacion?->lapso?->name ?? '—')
         : (($documento->finicial?->format('d/m/Y') ?? '—').' → '.($documento->ffinal?->format('d/m/Y') ?? '—'));
 
+    $totalEstrategias = count(config('inicial.dias_semana')) * count(config('inicial.momentos_rutina_diaria'));
+    $estrategias = (int) ($documento->estrategias_count ?? 0);
+
     $docente = $esFinal
         ? $documento->pevaluacion?->profesor?->full_name
         : $documento->profesor?->full_name;
@@ -100,9 +103,22 @@
             </p>
         @endif
 
-        <p class="mt-4 text-[11px] uppercase tracking-wider text-gray-500">
-            {{ $contador }} {{ $etiquetaContador }}
-        </p>
+        @if ($entidad === 'eispecialks')
+            <div class="mt-4 space-y-1">
+                <p class="text-xs tabular-nums text-gray-300">
+                    <span class="font-medium text-cyan-300">{{ $estrategias }}/{{ $totalEstrategias }} estrategias</span>
+                    <span class="text-gray-500">·</span>
+                    <span>{{ $contador }} actividades</span>
+                </p>
+                <p class="text-[11px] leading-relaxed text-gray-500">
+                    Completo con {{ $totalEstrategias }} estrategias; las actividades son complementarias.
+                </p>
+            </div>
+        @else
+            <p class="mt-4 text-[11px] uppercase tracking-wider text-gray-500">
+                {{ $contador }} {{ $etiquetaContador }}
+            </p>
+        @endif
 
         {{-- Estado + revisión --}}
         <div class="mt-3 flex flex-wrap gap-1.5">

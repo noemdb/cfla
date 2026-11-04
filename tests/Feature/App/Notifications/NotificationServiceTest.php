@@ -101,6 +101,17 @@ class NotificationServiceTest extends TestCase
         });
     }
 
+    public function test_notify_users_rechaza_notificacion_sin_metodo_de_presentacion(): void
+    {
+        $recipient = $this->makeRecipient();
+        $notification = new class extends \Illuminate\Notifications\Notification {};
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Notification is missing toDatabase / toArray method.');
+
+        app(NotificationService::class)->notifyUsers([$recipient], $notification);
+    }
+
     public function test_unread_count_for_devuelve_conteo_fresco_y_cacheado(): void
     {
         $recipient = $this->makeRecipient();
@@ -113,6 +124,14 @@ class NotificationServiceTest extends TestCase
         // Segunda llamada: cacheado (no se vuelve a la DB).
         Cache::put(NotificationService::UNREAD_PREFIX.$recipient->id, 5, 60);
         $this->assertSame(5, $service->unreadCountFor($recipient->id));
+    }
+
+    public function test_unread_count_for_id_inexistente_devuelve_cero(): void
+    {
+        $service = app(NotificationService::class);
+
+        $this->assertSame(0, $service->unreadCountFor(999999));
+        $this->assertSame(0, Cache::get(NotificationService::UNREAD_PREFIX.'999999'));
     }
 
     public function test_invalidate_unread_count_borra_cache(): void

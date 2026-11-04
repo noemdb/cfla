@@ -271,6 +271,23 @@ seguimiento semanal; no se envían por editar un resumen existente ni por
 guardar de nuevo una rejilla ya completa. Si el usuario actor también tiene el
 flag de manager, no recibe su propia notificación.
 
+### ADR-11.15 · Señales accionables para el seguimiento semanal (2026-11-02)
+
+La planificación semanal muestra la causa concreta de incompletitud: cuántas
+estrategias y cuántos resúmenes de área faltan. Los accesos rápidos muestran
+conteos de cada estado y de revisión, conservan los filtros generales y
+actualizan los mismos parámetros de URL que los selectores. El resumen
+desplegable por docente agrega total, planes incompletos y planes sin revisión;
+sus conteos se cargan al desplegar y omiten deliberadamente los filtros de
+avance/revisión para que sean comparables entre docentes. La consulta agrupa
+en SQL, no pagina grupos ni hace una consulta por cada fila.
+
+En el wizard docente, la rejilla comunica si hay cambios pendientes. Antes de
+cerrar el modal o abrir otro plan/otra sección del mismo flujo, se pide
+confirmación para descartarlos. El guardado confirma el éxito con la
+notificación existente y limpia el estado pendiente solo cuando la rejilla
+coincide con lo persistido.
+
 ---
 
 ## 4. Modelo de datos y migración
@@ -794,6 +811,12 @@ final class SeguimientoInicial
     /** @param array<string,mixed> $filtros @return array<string,mixed> */
     public function resumen(string $entidad, array $filtros): array;
 
+    /** @param array<string,mixed> $filtros @return array<string,int> */
+    public function conteosRapidos(string $entidad, array $filtros): array;
+
+    /** @param array<string,mixed> $filtros */
+    public function resumenDocentes(string $entidad, array $filtros): Collection;
+
     /** @return array{clave:string, etiqueta:string, variante:string, detalle:string} */
     public function estado(string $entidad, Model $documento): array;
 
@@ -1026,18 +1049,18 @@ private function aplicarConteos(Builder $query, string $entidad): Builder
 | Avance | `estado` | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | sin_iniciar/en_progreso/completo | — |
 | Revisión | `revision` | sin_revision/revisado | sin_revision/revisado | sin_revision/revisado | sin_revision/revisado | sin_revision/revisado | — |
 | Orden | `orden` | actualizacion/periodo/pendientes | idem | idem | idem | idem | idem |
-| Búsqueda | `search` | `diagnostico`, `observacion`, `revision_seguimiento` | idem | `diagnostico`, `observacion`, `revision_seguimiento` | `justificacion`, `observacion`, `revision_seguimiento` | `observaciones`, `recomendacion`, `asistencia`, `revision_seguimiento` | `title`, estudiante |
+| Búsqueda | `search` | `diagnostico`, `observacion`, `revision_seguimiento` | idem | `diagnostico`, `observacion`, `revision_seguimiento` | `justificacion`, `observacion`, `revision_seguimiento`, actividades y estrategias | `observaciones`, `recomendacion`, `asistencia`, `revision_seguimiento` | `title`, estudiante |
 
 Reglas:
 
 - **Fechas:** se interpreta “solapa el rango”: `finicial <= hasta` y `ffinal >= desde`. Es lo que espera un supervisor que busca “lo trabajado en octubre”, no solo lo que empieza y termina dentro.
 - **Lapso:** solo se ofrece para evaluación e informe final; en los demás la UI lo oculta y el servicio lo ignora.
 - **Avance:** `estado` filtra todos los documentos salvo el informe final. `sin_iniciar` significa que no hay contenido requerido; `en_progreso`, que existe contenido pero falta algún requisito; `completo`, que se cumplen los requisitos del documento.
-- **Criterios de avance:** semanal requiere 50 estrategias no vacías y todos los resúmenes por área esperados; quincenal, proyecto y especial requieren 50 estrategias no vacías; especial también cuenta actividades como contenido para distinguirlo de «Sin iniciar». Evaluación requiere al menos una posición y aprendizaje alcanzado no vacío en todas las posiciones.
+- **Criterios de avance:** semanal requiere 50 estrategias no vacías y al menos un resumen asociado al plan; quincenal, proyecto y especial requieren 50 estrategias no vacías; especial también cuenta actividades como contenido para distinguirlo de «Sin iniciar». Evaluación requiere al menos una posición y aprendizaje alcanzado no vacío en todas las posiciones.
 - **Revisión:** `revision` filtra los cinco documentos revisables por `revision_seguimiento` vacío (`sin_revision`) o con texto (`revisado`). Ambos selectores pueden combinarse; el informe final no ofrece revisión y se considera “emitido”.
 - **Compatibilidad:** URLs antiguas con `estado=sin_revision|revisado` se interpretan como filtro de revisión.
-- **Orden:** `actualizacion` (última actualización, predeterminado), `periodo` (fecha inicial más reciente; informe final por creación) o `pendientes` (revisiones vacías primero y, en semanal, menos estrategias primero). Solo se aceptan opciones de una lista fija.
-- **Búsqueda:** `LIKE %texto%` sobre las columnas declaradas; para el informe final se añade `whereHas('expectant', ...)` por nombre/apellido.
+- **Orden:** `actualizacion` (última actualización, predeterminado), `periodo` (fecha inicial más reciente; informe final por creación) o `pendientes` (revisiones vacías primero y, en semanal/especial, menos estrategias primero). Solo se aceptan opciones de una lista fija.
+- **Búsqueda:** `LIKE %texto%` sobre las columnas declaradas; en planes especiales también consulta las actividades y `eispecialstrategies.lunes`; para el informe final se añade `whereHas('expectant', ...)` por nombre/apellido.
 - **Docente:** la lista del filtro no usa `PerspectivaFiltros::profesores()` porque esa cruza `pevaluacions` y dejaría fuera a un docente con planes pero sin carga registrada. El servicio usa el flag `is_inicial` **más** los `profesor_id` distintos que ya existen en los seis documentos.
 
 ```php
@@ -1149,18 +1172,16 @@ criterios:
 
 | Documento | Sin iniciar | En progreso | Completo |
 |---|---|---|---|
-| Planificación semanal | Sin estrategias ni resúmenes | Tiene contenido, pero falta completar las 50 estrategias o los resúmenes esperados | 50 estrategias no vacías y todos los resúmenes esperados |
+| Planificación semanal | Sin estrategias ni resúmenes | Tiene contenido, pero falta completar las 50 estrategias o registrar un resumen | 50 estrategias no vacías y al menos un resumen asociado |
 | Planificación quincenal | Sin estrategias | Tiene de 1 a 49 estrategias no vacías | 50 estrategias no vacías |
 | Proyecto | Sin estrategias | Tiene de 1 a 49 estrategias no vacías | 50 estrategias no vacías |
 | Especial | Sin estrategias ni actividades | Tiene estrategias o actividades, pero no llega a 50 estrategias | 50 estrategias no vacías |
 | Evaluación | Sin posiciones | Tiene posiciones, pero alguna no tiene aprendizaje alcanzado | Tiene una o más posiciones y todas tienen aprendizaje alcanzado |
 
 Las cadenas vacías y compuestas solo por espacios no cuentan como contenido.
-En planificación semanal, los resúmenes esperados se calculan por docente y
-sección a partir de las áreas de aprendizaje activas; si no hay áreas
-esperadas, el requisito se satisface con cero resúmenes. El avance cuenta
-áreas distintas representadas por resúmenes válidos del docente y sección:
-duplicar un resumen o asociarlo a otra carga no cubre un área faltante.
+En planificación semanal, basta con que exista al menos un resumen asociado
+al plan; no se exige un resumen por cada área de aprendizaje. Los resúmenes
+adicionales siguen siendo válidos y se muestran en el contador del plan.
 
 La revisión se muestra como **badge independiente**, no se mezcla con la completitud:
 
@@ -1169,17 +1190,15 @@ La revisión se muestra como **badge independiente**, no se mezcla con la comple
 - Informe final → sin badge de revisión.
 
 > El filtro de contenido y el KPI de completos replican los criterios de la
-> tabla. En semanal, una rejilla 50/50 sin resúmenes esperados completos sigue
-> “En progreso”; una evaluación con posiciones incompletas no cuenta como
+> tabla. En semanal, una rejilla 50/50 sin ningún resumen sigue “En progreso”;
+> una evaluación con posiciones incompletas no cuenta como
 > completa. Los tramos son mutuamente excluyentes, de modo que el badge de cada
 > fila coincide con el filtro que la muestra.
 
 > El listado docente también muestra el estado semanal junto al contador de
 > resúmenes y un badge «Revisado» cuando `revision_seguimiento` tiene texto.
 > El estado de avance usa el mismo criterio que el seguimiento: 50 estrategias
-> no vacías **y** todos los resúmenes esperados por sección. El cálculo de
-> estos últimos se agrupa para los planes de la página y se limita al docente
-> autenticado.
+> no vacías **y** al menos un resumen asociado al plan.
 
 #### KPI (`resumen`)
 
@@ -1687,10 +1706,11 @@ Usar `role="status"` o `aria-live="polite"` en la fila para que el cambio de fil
 
 ### 9.4 Filtros
 
-Disposición responsiva en filas:
+Disposición responsiva en dos grupos:
 
-- Docente, Nivel, Sección y el selector de lapso o el par de fechas.
-- Buscar, Avance, Revisión, Orden y las acciones (Limpiar, Tabla/Tarjetas), que pueden pasar a filas adicionales en pantallas estrechas.
+- «Plan y período»: Docente, Nivel, Sección y el selector de lapso o el par de fechas.
+- «Búsqueda y seguimiento»: Buscar, Avance, Revisión, Orden y las acciones (Limpiar, Tabla/Tarjetas).
+- En móvil los controles se apilan; en tabletas usan dos columnas y en pantallas amplias una retícula de doce columnas. Los campos y acciones conservan una altura táctil mínima de 44 px.
 
 Campos visibles según la entidad:
 
@@ -1708,6 +1728,8 @@ Detalles:
 - Sección deshabilitada si no hay nivel: “Elija primero un nivel”.
 - Los selectores de avance, revisión y orden se generan con `opcionesEstado()`, `opcionesRevision()` y `opcionesOrden()`; no se ofrecen opciones que el servicio ignoraría.
 - Los chips de filtros activos permiten quitar un filtro individual; el listado muestra el total de resultados y el rango visible.
+- En seguimiento semanal, los botones rápidos muestran conteos por avance y revisión; conservan los demás filtros y se sincronizan con la URL.
+- El panel desplegable «Resumen por docente» agrupa planes, incompletos y sin revisión con los filtros generales activos, pero sin limitar sus totales por avance/revisión. Cada fila permite aplicar o quitar el filtro de docente.
 - Botón **«Leyenda de estados»** junto a la insignia de solo lectura: abre un modal con la definición, la regla y un ejemplo de cada estado de contenido y revisión. El estado «Emitido» del informe final se reserva para una futura actualización y no se muestra en esta leyenda. Explica que los ejes son independientes y combinables.
 - El botón “Limpiar” no recarga la página.
 - `wire:loading` muestra un skeleton o un texto “Consultando…” en la tabla/tarjetas.
@@ -1721,6 +1743,7 @@ Detalles:
 - Diagnóstico truncado (3 líneas).
 - Progreso: `estrategias_count / 50` con barra.
 - Badges: estado de completitud + revisión; prioridad visual si está sin iniciar o sin revisión.
+- Si no está completo, muestra debajo del estado la cantidad pendiente de estrategias y/o resúmenes de área.
 - Fecha de última actualización.
 - Acciones: **Ver** (modal), **Ficha** (show), **Imprimir** (format).
 
@@ -1954,13 +1977,20 @@ Si no se quiere refactorizar el test existente, duplicar solo los helpers mínim
 | 16 | Búsqueda por diagnóstico | Devuelve el plan correspondiente |
 | 17 | Búsqueda por docente en informe final | Devuelve los informes del docente |
 | 18 | Avance + revisión simultáneos | Ambos filtros independientes se aplican de forma combinada; revisión coincide exclusivamente con `revision_seguimiento` |
-| 19 | Estado `completo` en semanal | Solo planes con 50 estrategias no vacías y todos los resúmenes esperados |
+| 19 | Estado `completo` en semanal | Solo planes con 50 estrategias no vacías y al menos un resumen asociado |
 | 19a | Estado semanal con rejilla 50/50 sin resúmenes | `En progreso` en tarjeta y tabla docente |
-| 19b | Estado semanal con rejilla 50/50 y todos los resúmenes | `Completo` en tarjeta y tabla docente y en el filtro de seguimiento |
+| 19b | Estado semanal con rejilla 50/50 y un resumen | `Completo` en tarjeta y tabla docente y en el filtro de seguimiento |
 | 19c | Quincenal, proyecto y especial | `Completo` solo con 50 estrategias no vacías |
 | 19d | Evaluación | `Completo` solo con posiciones y aprendizaje alcanzado no vacío en todas |
 | 20 | Paginación y rango | 15 por página, conserva filtros y muestra rango/total de resultados |
 | 21 | Pestaña `eiprojectks` | Solo carga proyectos, no los otros cinco; los chips permiten quitar filtros y el orden `pendientes` prioriza sin revisión |
+| 21a | Accesos rápidos semanales | Conteos por avance/revisión respetan búsqueda y filtros generales, y los botones actualizan la URL |
+| 21b | Resumen por docente | Agrega total, incompletos y sin revisión sin aplicar los filtros de avance/revisión |
+| 21c | Motivo de incompletitud | La tarjeta/tabla semanal indica estrategias y resúmenes de área faltantes |
+| 21d | Wizard docente con cambios pendientes | Muestra estado sin guardar y confirma antes de cerrar o cambiar de plan |
+| 21e | Tarjeta de plan especial | Muestra por separado estrategias y actividades, e indica que las actividades son complementarias |
+| 21f | Accesos rápidos especiales | Los botones filtran avance/revisión y exponen conteos rápidos |
+| 21g | Búsqueda y orden especiales | La búsqueda consulta actividades/estrategias; «Pendientes» prioriza sin revisión y luego menos estrategias |
 
 ### 11.4 Casos de lectura
 
@@ -2059,9 +2089,15 @@ Para una página de 15 registros:
 | `withCount` | 1 por contador (1–3) |
 | Catálogos de filtros | 4 (niveles, secciones, lapsos) + 7 (`profesores()`: flag + seis `distinct`) |
 | KPI | 4–5 |
+| Accesos rápidos semanales | 4 (conteos de avance + revisión), solo en la planificación semanal |
+| Resumen por docente | 4 agregadas, bajo demanda al desplegar |
 | **Total** | **~21–28** |
 
-No se carga el detalle de estrategias/resúmenes en el listado. Esa es la diferencia principal con `RegistroInicial::documentos()`, que está pensado para tablas pequeñas de perspectivas y no para paginación.
+El resumen por docente se consulta bajo demanda; al abrirlo, el total semanal
+estimado sube a ~29–36 consultas. No se carga el detalle de estrategias/
+resúmenes en el listado. Esa es la diferencia principal con
+`RegistroInicial::documentos()`, que está pensado para tablas pequeñas de
+perspectivas y no para paginación.
 
 ### 12.2 Evitar N+1
 

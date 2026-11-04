@@ -399,20 +399,19 @@ class EiplanningwkComponentTest extends TestCase
         // 3 de 5 días con contenido y 47 celdas vacías de 50.
         $component->assertSee('3/5 días');
         $component->assertSee('47 vacías');
-        // La fixture tiene una carga/área para la sección; sin resúmenes
-        // guardados, el indicador debe avisar que falta uno.
-        $component->assertSee('0/1 resúmenes');
-        $component->assertSee('Faltan 1 resúmenes por área');
+        // El requisito es registrar al menos un resumen en el plan.
+        $component->assertSee('0/1 resumen');
+        $component->assertSee('Falta el resumen requerido');
         $component->assertSee('En progreso');
 
         $component->call('toggleView')
             ->assertSee('3/5 días')
             ->assertSee('47 vacías')
-            ->assertSee('faltan 1');
+            ->assertSee('falta el requerido');
     }
 
     /** @test */
-    public function el_estado_del_plan_semanal_exige_estrategias_y_resumenes_esperados(): void
+    public function el_estado_semanal_se_completa_con_un_resumen_y_todas_las_estrategias(): void
     {
         $docente = $this->makeDocenteInicial();
         $plan = $this->makePlan($docente['profesor_id']);
@@ -445,7 +444,7 @@ class EiplanningwkComponentTest extends TestCase
         Livewire::actingAs($docente['user'])
             ->test(EiplanningwkComponent::class)
             ->assertSee('En progreso')
-            ->assertSee('0/2 resúmenes');
+            ->assertSee('0/1 resumen');
 
         $resumen = [
             'eiplanningwk_id' => $plan->id,
@@ -459,15 +458,15 @@ class EiplanningwkComponentTest extends TestCase
 
         Livewire::actingAs($docente['user'])
             ->test(EiplanningwkComponent::class)
-            ->assertSee('En progreso')
-            ->assertSee('1/2 resúmenes');
+            ->assertSee('Completo')
+            ->assertSee('1/1 resumen');
 
         Eiplanningwsummary::create($resumen);
 
         Livewire::actingAs($docente['user'])
             ->test(EiplanningwkComponent::class)
-            ->assertSee('En progreso')
-            ->assertSee('1/2 resúmenes');
+            ->assertSee('Completo')
+            ->assertSee('2 resúmenes');
 
         Eiplanningwsummary::create(array_merge($resumen, [
             'pevaluacion_id' => $segundaPevaluacionId,
@@ -477,11 +476,11 @@ class EiplanningwkComponentTest extends TestCase
         $componente = Livewire::actingAs($docente['user'])
             ->test(EiplanningwkComponent::class)
             ->assertSee('Completo')
-            ->assertSee('2/2 resúmenes');
+            ->assertSee('3 resúmenes');
 
         $componente->call('toggleView')
             ->assertSee('Completo')
-            ->assertSee('2/2');
+            ->assertSee('3');
     }
 
     /** @test */
@@ -875,6 +874,54 @@ class EiplanningwkComponentTest extends TestCase
     }
 
     /** @test */
+    public function avisa_antes_de_cerrar_el_wizard_con_estrategias_sin_guardar(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $plan = $this->makePlan($docente['profesor_id']);
+
+        $component = Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'strategy', $plan->id)
+            ->set('strategies.lunes.0.estrategia', 'Cambio todavía no guardado.')
+            ->assertSee('Hay cambios sin guardar.')
+            ->call('closeModal')
+            ->assertSet('showModal', true)
+            ->assertSet('eiplanningwk_id', $plan->id)
+            ->assertDispatched('wireui:confirm-dialog', function ($eventName, $params) {
+                return ($params[0]['options']['title'] ?? null) === 'Descartar cambios sin guardar';
+            });
+
+        $this->assertDatabaseMissing('eiplanningwstrategies', [
+            'eiplanningwk_id' => $plan->id,
+            'lunes' => 'Cambio todavía no guardado.',
+        ]);
+
+        $component->call('discardAndCloseModal')
+            ->assertSet('showModal', false);
+    }
+
+    /** @test */
+    public function confirma_antes_de_cambiar_de_plan_con_estrategias_sin_guardar(): void
+    {
+        $docente = $this->makeDocenteInicial();
+        $planActual = $this->makePlan($docente['profesor_id']);
+        $otroPlan = $this->makePlan($docente['profesor_id'], '2026-10-12');
+
+        Livewire::actingAs($docente['user'])
+            ->test(EiplanningwkComponent::class)
+            ->call('openModal', 'strategy', $planActual->id)
+            ->set('strategies.lunes.0.estrategia', 'Cambio pendiente antes de navegar.')
+            ->call('openModal', 'strategy', $otroPlan->id)
+            ->assertSet('eiplanningwk_id', $planActual->id)
+            ->assertDispatched('wireui:confirm-dialog', function ($eventName, $params) {
+                return ($params[0]['options']['title'] ?? null) === 'Descartar cambios sin guardar';
+            })
+            ->call('confirmDiscardAndOpenModal', 'strategy', $otroPlan->id)
+            ->assertSet('eiplanningwk_id', $otroPlan->id)
+            ->assertDontSee('Hay cambios sin guardar.');
+    }
+
+    /** @test */
     public function la_estrategia_se_persiste_en_la_columna_lunes_del_legacy(): void
     {
         $docente = $this->makeDocenteInicial();
@@ -887,7 +934,8 @@ class EiplanningwkComponentTest extends TestCase
             ->call('setActiveDay', 'martes')
             ->call('setActiveMoment', 3)
             ->set('strategies.martes.3.estrategia', 'El docente modela la saludo del día.')
-            ->call('saveCurrentStrategy');
+            ->call('saveCurrentStrategy')
+            ->assertSee('No hay cambios pendientes en la rejilla.');
 
         $component->assertHasNoErrors();
 
@@ -918,7 +966,8 @@ class EiplanningwkComponentTest extends TestCase
             ->set('strategies.viernes.9.estrategia', 'Cierre en círculo y reflexión grupal.')
             // Celda vacía: no debe generar fila.
             ->set('strategies.martes.0.estrategia', '')
-            ->call('saveStrategies');
+            ->call('saveStrategies')
+            ->assertSee('No hay cambios pendientes en la rejilla.');
 
         $this->assertSame(3, Eiplanningwstrategy::where('eiplanningwk_id', $plan->id)->count());
     }

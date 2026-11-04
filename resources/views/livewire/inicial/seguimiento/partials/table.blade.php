@@ -150,7 +150,7 @@
                     </td>
 
                     {{-- Estado --}}
-                    <td class="mt-3 flex items-center gap-2 md:mt-0 md:table-cell md:px-3 md:py-2.5 md:align-top">
+                    <td class="mt-3 flex flex-wrap items-center gap-2 md:mt-0 md:table-cell md:px-3 md:py-2.5 md:align-top">
                         <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 md:hidden">
                             Estado
                         </span>
@@ -161,6 +161,11 @@
                         @if ($requiereAtencion)
                             <span class="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-200">
                                 Prioridad
+                            </span>
+                        @endif
+                        @if ($entidad === 'eiplanningwks' && $estado['clave'] !== 'completo')
+                            <span class="basis-full break-words text-[11px] leading-relaxed text-amber-200/90">
+                                {{ $estado['detalle'] }}
                             </span>
                         @endif
                     </td>

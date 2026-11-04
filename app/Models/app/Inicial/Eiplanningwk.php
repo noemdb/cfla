@@ -27,8 +27,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $seccion_id
  * @property int|null $pensum_id
  * @property int|null $eiprojectk_id
- * @property string $finicial
- * @property string $ffinal
+ * @property \Illuminate\Support\Carbon $finicial
+ * @property \Illuminate\Support\Carbon $ffinal
  * @property int $tiempo_ejecucion
  * @property string|null $diagnostico
  * @property string|null $observacion

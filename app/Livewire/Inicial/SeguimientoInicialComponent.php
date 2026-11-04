@@ -85,6 +85,15 @@ class SeguimientoInicialComponent extends Component
     /** El modal muestra los formularios de seguimiento en lugar del detalle. */
     public bool $revisionAbierta = false;
 
+    /** El resumen agregado se carga solo cuando el usuario lo despliega. */
+    public bool $resumenDocentesAbierto = false;
+
+    /** Los filtros empiezan plegados; los criterios activos siguen visibles como chips. */
+    public bool $filtrosAbiertos = false;
+
+    /** Modal de calendario para vista global de planificaciones. */
+    public bool $showCalendarModal = false;
+
     /** Texto de revisión del manager; se persiste en `revision_seguimiento`. */
     public string $revision = '';
 
@@ -120,9 +129,17 @@ class SeguimientoInicialComponent extends Component
         $filtros = $this->filtros();
 
         $documentos = $servicio->paginar($this->entidad, $filtros, $this->paginate);
+        $conteosRapidos = in_array($this->entidad, ['eiplanningwks', 'eispecialks'], true)
+            ? $servicio->conteosRapidos($this->entidad, $filtros)
+            : [];
+        $resumenDocentes = $this->entidad === 'eiplanningwks' && $this->resumenDocentesAbierto
+            ? $servicio->resumenDocentes($this->entidad, $filtros)
+            : collect();
 
         return view('livewire.inicial.seguimiento.index', [
             'documentos' => $documentos,
+            'conteosRapidos' => $conteosRapidos,
+            'resumenDocentes' => $resumenDocentes,
             'resumen' => $servicio->resumen($this->entidad, $filtros),
             'opcionesEstado' => $servicio->opcionesEstado($this->entidad),
             'opcionesRevision' => $servicio->opcionesRevision($this->entidad),
@@ -276,6 +293,59 @@ class SeguimientoInicialComponent extends Component
         }
 
         $this->resetPage();
+    }
+
+    public function aplicarFiltroRapido(string $campo, string $valor): void
+    {
+        $servicio = app(SeguimientoInicial::class);
+
+        if ($campo === 'estado' && array_key_exists($valor, $servicio->opcionesEstado($this->entidad))) {
+            if ($revisionLegacy = in_array($this->estado, ['sin_revision', 'revisado'], true)) {
+                $this->revisionEstado = $this->revisionEstado !== '' ? $this->revisionEstado : $this->estado;
+            }
+
+            $this->estado = $this->estado === $valor ? '' : $valor;
+            if ($revisionLegacy) {
+                $this->estado = $valor;
+            }
+        } elseif ($campo === 'revisionEstado'
+            && array_key_exists($valor, $servicio->opcionesRevision($this->entidad))) {
+            $revisionLegacy = in_array($this->estado, ['sin_revision', 'revisado'], true);
+            $actual = $this->revisionEstado !== ''
+                ? $this->revisionEstado
+                : ($revisionLegacy ? $this->estado : '');
+
+            $this->revisionEstado = $actual === $valor ? '' : $valor;
+            if ($revisionLegacy) {
+                $this->estado = '';
+            }
+        } else {
+            return;
+        }
+
+        $this->resetPage();
+    }
+
+    public function filtrarDocente(int $profesorId): void
+    {
+        if (! $this->listProfesores->has($profesorId)) {
+            return;
+        }
+
+        $this->profesor_id = $this->profesor_id === (string) $profesorId
+            ? ''
+            : (string) $profesorId;
+        $this->resetPage();
+    }
+
+    public function toggleResumenDocentes(): void
+    {
+        $this->resumenDocentesAbierto = ! $this->resumenDocentesAbierto;
+    }
+
+    public function toggleFiltros(): void
+    {
+        $this->filtrosAbiertos = ! $this->filtrosAbiertos;
     }
 
     public function abrirDetalle(int $id): void
@@ -489,6 +559,123 @@ class SeguimientoInicialComponent extends Component
     public function alternarVista(): void
     {
         $this->viewMode = $this->viewMode === 'grid' ? 'table' : 'grid';
+    }
+
+    // ─── Calendario ──────────────────────────────────────────────
+
+    public function openCalendar(): void
+    {
+        $this->showCalendarModal = true;
+    }
+
+    public function closeCalendar(): void
+    {
+        $this->showCalendarModal = false;
+    }
+
+    /**
+     * Obtiene los planes para el calendario, agrupados por fecha.
+     * Considera los filtros aplicados en el seguimiento.
+     */
+    public function getCalendarPlans(): array
+    {
+        $servicio = app(SeguimientoInicial::class);
+        $filtros = $this->filtros();
+
+        // Obtener todos los planes sin paginación
+        $plans = RegistroInicial::documentos($this->entidad, $filtros);
+
+        $calendarData = [];
+
+        foreach ($plans as $plan) {
+            // Determinar estado del plan
+            $estado = $this->determinarEstadoPlan($plan);
+
+            // Color según estado
+            $color = match ($estado['clave']) {
+                'completo' => 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300',
+                'en_progreso' => 'bg-amber-500/20 border-amber-500/30 text-amber-300',
+                default => 'bg-gray-500/20 border-gray-500/30 text-gray-400',
+            };
+
+            // Agregar evento para cada día del rango (solo para eiplanningwks)
+            if ($this->entidad === 'eiplanningwks' || $this->entidad === 'eiplanningbwks') {
+                $fechaInicio = $plan->finicial;
+                $fechaFin = $plan->ffinal;
+
+                if ($fechaInicio && $fechaFin) {
+                    $currentDate = $fechaInicio->copy();
+
+                    while ($currentDate->lte($fechaFin)) {
+                        $calendarData[] = [
+                            'date' => $currentDate->format('Y-m-d'),
+                            'plan' => $plan,
+                            'color' => $color,
+                            'estado' => $estado,
+                            'esPrimerDia' => $currentDate->isSameDay($fechaInicio),
+                            'esUltimoDia' => $currentDate->isSameDay($fechaFin),
+                        ];
+                        $currentDate->addDay();
+                    }
+                }
+            } else {
+                // Para otros documentos, mostrar solo la fecha de creación/actualización
+                $fecha = $plan->created_at ?? now();
+                $calendarData[] = [
+                    'date' => $fecha->format('Y-m-d'),
+                    'plan' => $plan,
+                    'color' => $color,
+                    'estado' => $estado,
+                    'esPrimerDia' => true,
+                    'esUltimoDia' => true,
+                ];
+            }
+        }
+
+        return $calendarData;
+    }
+
+    /**
+     * Determina el estado de un plan para la visualización en calendario.
+     */
+    private function determinarEstadoPlan($plan): array
+    {
+        // Estado basado en revisión de seguimiento
+        $revisado = filled($plan->revision_seguimiento ?? $plan->observacion ?? null);
+
+        if ($revisado) {
+            return [
+                'clave' => 'completo',
+                'etiqueta' => 'Revisado',
+                'detalle' => 'Documento revisado',
+            ];
+        }
+
+        // Para planificaciones, verificar estrategias y resúmenes
+        if (property_exists($plan, 'estrategias_count') || property_exists($plan, 'eiplanningwstrategies_count')) {
+            $estrategiasCount = $plan->estrategias_count ?? $plan->eiplanningwstrategies_count ?? 0;
+            $resumenesCount = $plan->resumenes_count ?? $plan->eiplanningwsummaries_count ?? 0;
+
+            if ($estrategiasCount >= 40 && $resumenesCount >= 1) {
+                return [
+                    'clave' => 'completo',
+                    'etiqueta' => 'Completo',
+                    'detalle' => 'Planificación completa',
+                ];
+            } elseif ($estrategiasCount > 0 || $resumenesCount > 0) {
+                return [
+                    'clave' => 'en_progreso',
+                    'etiqueta' => 'En progreso',
+                    'detalle' => sprintf('%d estrategias, %d resúmenes', $estrategiasCount, $resumenesCount),
+                ];
+            }
+        }
+
+        return [
+            'clave' => 'sin_iniciar',
+            'etiqueta' => 'Sin revisar',
+            'detalle' => 'Documento pendiente de revisión',
+        ];
     }
 
     /**

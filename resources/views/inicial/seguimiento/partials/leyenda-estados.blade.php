@@ -73,8 +73,9 @@
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
                         Hay contenido, pero falta completar algún requisito. Semanal exige las 50 estrategias y
-                        todos los resúmenes esperados; quincenal, proyecto y especial exigen 50 estrategias.
+                        al menos un resumen; quincenal, proyecto y especial exigen 50 estrategias.
                         En evaluación, cada posición registrada debe tener aprendizaje alcanzado.
+                        En el plan especial, las actividades son complementarias y no sustituyen las estrategias.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
                             40 de 50 estrategias; o una evaluación con posiciones aún sin aprendizaje registrado.
@@ -89,12 +90,13 @@
                         </span>
                     </dt>
                     <dd class="min-w-0 flex-1 text-xs leading-relaxed text-gray-400">
-                        El requisito depende del documento: semanal tiene 50 estrategias y todos los resúmenes
-                        esperados; quincenal, proyecto y especial tienen 50 estrategias. En evaluación, debe
+                        El requisito depende del documento: semanal tiene 50 estrategias y al menos un resumen;
+                        quincenal, proyecto y especial tienen 50 estrategias. En evaluación, debe
                         existir al menos una posición y todas deben tener aprendizaje alcanzado.
+                        Para el plan especial, las actividades no son obligatorias para marcarlo completo.
                         <span class="mt-1 block text-[11px] text-gray-500">
                             <span class="font-medium text-gray-400">Ejemplo:</span>
-                            plan semanal con 50/50 estrategias y sus resúmenes completos; evaluación con resultados registrados en todas las posiciones.
+                            plan semanal con 50/50 estrategias y un resumen registrado; evaluación con resultados registrados en todas las posiciones.
                         </span>
                     </dd>
                 </div>

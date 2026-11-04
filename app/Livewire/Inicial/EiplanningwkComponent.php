@@ -19,10 +19,12 @@ use App\Models\app\Inicial\Eiprojectk;
 use App\Services\Inicial\ClonadorEiplanningwk;
 use App\Services\Inicial\ImportadorEiplanningwk;
 use App\Services\Inicial\InicialWeeklyPlanNotifier;
+use App\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -85,6 +87,10 @@ class EiplanningwkComponent extends Component
 
     public ?int $eiplanningwsummary_id = null;
 
+    // ─── Vista de calendario ─────────────────────────────────────
+
+    public bool $showCalendarModal = false;
+
     // ─── Formulario de cabecera ──────────────────────────────────
 
     public ?int $profesor_id = null;
@@ -96,6 +102,9 @@ class EiplanningwkComponent extends Component
     // ─── Wizard de estrategias (rejilla 5 días × 10 momentos) ─────
 
     public array $strategies = [];
+
+    #[Locked]
+    public string $savedStrategiesFingerprint = '';
 
     public string $activeDay = 'lunes';
 
@@ -118,11 +127,35 @@ class EiplanningwkComponent extends Component
      */
     public function openStrategyCell(int $planId, string $day, string $moment): void
     {
-        $this->openModal('strategy', $planId);
+        if ($this->hasUnsavedStrategies()) {
+            $this->dialog()->confirm([
+                'title' => 'Descartar cambios sin guardar',
+                'description' => 'La rejilla tiene cambios pendientes. Si continúas, se descartarán antes de abrir la otra planificación.',
+                'icon' => 'warning',
+                'accept' => [
+                    'label' => 'Descartar y continuar',
+                    'method' => 'confirmDiscardAndOpenStrategyCell',
+                    'params' => [$planId, $day, $moment],
+                    'color' => 'amber',
+                ],
+                'reject' => ['label' => 'Seguir editando'],
+            ]);
+
+            return;
+        }
+
+        $this->performOpenModal('strategy', $planId);
         $this->setActiveDay($day);
         // `setActiveMoment()` espera el ÍNDICE, no el nombre: pasarle el nombre
         // hacía `momentForIndex('Recibimiento')` → '' → la celda nunca se
         // enfocaba y el docente caía siempre en el primer momento del día.
+        $this->setActiveMoment($this->indexForMoment($moment));
+    }
+
+    public function confirmDiscardAndOpenStrategyCell(int $planId, string $day, string $moment): void
+    {
+        $this->performOpenModal('strategy', $planId);
+        $this->setActiveDay($day);
         $this->setActiveMoment($this->indexForMoment($moment));
     }
 
@@ -159,15 +192,6 @@ class EiplanningwkComponent extends Component
     public Collection $listLapso;
 
     public Collection $listPevaluacion;
-
-    /**
-     * Áreas de aprendizaje (pensums) del docente para el select de la cabecera.
-     *
-     * Se escopan a las `pevaluaciones` del docente en el lapso en curso: solo
-     * los pensums donde realmente tiene carga. Se recargan al elegir grado
-     * (más abajo), porque un grado tiene sus propias áreas.
-     */
-    public Collection $listPensum;
 
     public Collection $listEiprojectk;
 
@@ -264,15 +288,15 @@ class EiplanningwkComponent extends Component
             // `$strategies` y el `wire:model` usan el índice. Sin este array la
             // vista tendría que cruzar dos sistemas de claves a mano.
             'momentLabels' => array_values($this->moments),
+            'calendarPlans' => $this->showCalendarModal ? $this->getCalendarPlans() : [],
         ]);
     }
 
     /**
      * Añade a cada plan los indicadores de completitud del listado.
      *
-     * Se resuelven con DOS consultas agrupadas para toda la página (días con
-     * contenido y áreas esperadas), no una por plan. Los conteos de estrategias
-     * y resúmenes ya vienen en el `withCount()` del render.
+     * Los días con contenido se resuelven en una consulta agrupada para la
+     * página. Los conteos de estrategias y resúmenes vienen del `withCount()`.
      */
     private function attachCompletion($paginator): void
     {
@@ -289,50 +313,38 @@ class EiplanningwkComponent extends Component
             ->groupBy('eiplanningwk_id')
             ->pluck('dias', 'eiplanningwk_id');
 
-        $seccionIds = $planes->pluck('seccion_id')->filter()->unique();
-
-        $areasPorSeccion = $seccionIds->isEmpty()
-            ? collect()
-            : Pevaluacion::query()
-                ->join('pensums', 'pensums.id', '=', 'pevaluacions.pensum_id')
-                ->where('pevaluacions.profesor_id', $this->profesor_id)
-                ->whereIn('pevaluacions.seccion_id', $seccionIds)
-                ->whereNull('pevaluacions.deleted_at')
-                ->whereNull('pensums.deleted_at')
-                ->selectRaw('pevaluacions.seccion_id, COUNT(DISTINCT pevaluacions.pensum_id) as total')
-                ->groupBy('pevaluacions.seccion_id')
-                ->pluck('total', 'pevaluacions.seccion_id');
-
-        $resumenesPorPlan = DB::table('eiplanningwsummaries as weekly_summaries')
-            ->join('pevaluacions as summary_evaluations', 'summary_evaluations.id', '=', 'weekly_summaries.pevaluacion_id')
-            ->join('pensums as summary_pensums', 'summary_pensums.id', '=', 'summary_evaluations.pensum_id')
-            ->join('eiplanningwks as weekly_plans', 'weekly_plans.id', '=', 'weekly_summaries.eiplanningwk_id')
-            ->whereIn('weekly_summaries.eiplanningwk_id', $planes->modelKeys())
-            ->whereColumn('summary_evaluations.profesor_id', 'weekly_plans.profesor_id')
-            ->whereColumn('summary_evaluations.seccion_id', 'weekly_plans.seccion_id')
-            ->whereNull('summary_evaluations.deleted_at')
-            ->whereNull('summary_pensums.deleted_at')
-            ->selectRaw('weekly_summaries.eiplanningwk_id as plan_id, COUNT(DISTINCT summary_evaluations.pensum_id) as total')
-            ->groupBy('weekly_summaries.eiplanningwk_id')
-            ->pluck('total', 'plan_id');
-
         foreach ($planes as $plan) {
-            $resumenes = (int) ($resumenesPorPlan[$plan->id] ?? 0);
-            $esperados = (int) ($areasPorSeccion[$plan->seccion_id] ?? 0);
+            $resumenes = (int) ($plan->eiplanningwsummaries_count ?? 0);
 
             $plan->setAttribute('dias_con_contenido', (int) ($diasPorPlan[$plan->id] ?? 0));
-            $plan->setAttribute('resumenes_esperados', $esperados);
-            $plan->setAttribute('resumenes_areas_completas_count', $resumenes);
-            $plan->setAttribute('resumenes_pendientes', max(0, $esperados - $resumenes));
 
             $estrategias = (int) ($plan->eiplanningwstrategies_count ?? 0);
             $totalEstrategias = count($this->weekDays) * count($this->moments);
-            $completo = $estrategias >= $totalEstrategias && $resumenes >= $esperados;
-            $tieneContenido = $estrategias > 0 || (int) ($plan->eiplanningwsummaries_count ?? 0) > 0;
+            $completo = $estrategias >= $totalEstrategias && $resumenes > 0;
+            $tieneContenido = $estrategias > 0 || $resumenes > 0;
+            $pendientes = [];
+
+            if ($estrategias < $totalEstrategias) {
+                $faltantes = $totalEstrategias - $estrategias;
+                $pendientes[] = $faltantes.' '.($faltantes === 1
+                    ? 'estrategia pendiente'
+                    : 'estrategias pendientes');
+            }
+
+            if ($resumenes === 0) {
+                $pendientes[] = 'el resumen requerido';
+            }
+
             $plan->setAttribute('estado_plan', [
                 'clave' => $completo ? 'completo' : ($tieneContenido ? 'en_progreso' : 'sin_iniciar'),
                 'etiqueta' => $completo ? 'Completo' : ($tieneContenido ? 'En progreso' : 'Sin iniciar'),
-                'detalle' => "{$estrategias}/{$totalEstrategias} estrategias · {$resumenes}/{$esperados} resúmenes",
+                'detalle' => match (count($pendientes)) {
+                    0 => "{$estrategias}/{$totalEstrategias} estrategias · resumen registrado",
+                    1 => $pendientes[0] === 'el resumen requerido'
+                        ? 'Falta el resumen requerido'
+                        : 'Faltan '.$pendientes[0],
+                    default => 'Faltan '.$pendientes[0].'; falta el resumen requerido',
+                },
             ]);
         }
     }
@@ -340,6 +352,33 @@ class EiplanningwkComponent extends Component
     // ─── Modal ───────────────────────────────────────────────────
 
     public function openModal(string $type, ?int $id = null): void
+    {
+        if ($this->hasUnsavedStrategies()) {
+            $this->dialog()->confirm([
+                'title' => 'Descartar cambios sin guardar',
+                'description' => 'La rejilla tiene cambios pendientes. Si continúas, se descartarán.',
+                'icon' => 'warning',
+                'accept' => [
+                    'label' => 'Descartar y continuar',
+                    'method' => 'confirmDiscardAndOpenModal',
+                    'params' => [$type, $id],
+                    'color' => 'amber',
+                ],
+                'reject' => ['label' => 'Seguir editando'],
+            ]);
+
+            return;
+        }
+
+        $this->performOpenModal($type, $id);
+    }
+
+    public function confirmDiscardAndOpenModal(string $type, ?int $id = null): void
+    {
+        $this->performOpenModal($type, $id);
+    }
+
+    private function performOpenModal(string $type, ?int $id = null): void
     {
         $this->resetValidation();
         $this->modalType = $type;
@@ -361,11 +400,11 @@ class EiplanningwkComponent extends Component
             // convierten en un "Error al cargar los datos" silencioso y el
             // docente no sabe por qué su plan no abre. Se cierra el modal y se
             // propaga.
-            $this->closeModal();
+            $this->forceCloseModal();
 
             throw $e;
         } catch (\Throwable $e) {
-            $this->closeModal();
+            $this->forceCloseModal();
             $this->notification()->error(
                 title: 'Error al cargar los datos',
                 description: $e->getMessage()
@@ -374,6 +413,33 @@ class EiplanningwkComponent extends Component
     }
 
     public function closeModal(): void
+    {
+        if ($this->hasUnsavedStrategies()) {
+            $this->dialog()->confirm([
+                'title' => 'Descartar cambios sin guardar',
+                'description' => 'La rejilla tiene cambios pendientes. ¿Quieres cerrar y descartarlos?',
+                'icon' => 'warning',
+                'accept' => [
+                    'label' => 'Descartar cambios',
+                    'method' => 'discardAndCloseModal',
+                    'params' => [],
+                    'color' => 'red',
+                ],
+                'reject' => ['label' => 'Seguir editando'],
+            ]);
+
+            return;
+        }
+
+        $this->forceCloseModal();
+    }
+
+    public function discardAndCloseModal(): void
+    {
+        $this->forceCloseModal();
+    }
+
+    private function forceCloseModal(): void
     {
         $this->showModal = false;
         $this->modalType = '';
@@ -384,6 +450,94 @@ class EiplanningwkComponent extends Component
         $this->activeMomentIndex = 0;
         $this->activeMoment = 'Recibimiento';
         $this->resetValidation();
+    }
+
+    // ─── Calendario ──────────────────────────────────────────────
+
+    public function openCalendar(): void
+    {
+        $this->showCalendarModal = true;
+    }
+
+    public function closeCalendar(): void
+    {
+        $this->showCalendarModal = false;
+    }
+
+    /**
+     * Obtiene los planes para el calendario, agrupados por fecha.
+     */
+    public function getCalendarPlans(): array
+    {
+        $plans = Eiplanningwk::where('profesor_id', $this->profesor_id)
+            ->with(['grado', 'seccion', 'pensum'])
+            ->orderBy('finicial')
+            ->get();
+
+        $calendarData = [];
+
+        foreach ($plans as $plan) {
+            // Determinar estado del plan
+            $estado = $this->determinarEstadoPlan($plan);
+
+            // Color según estado
+            $color = match($estado['clave']) {
+                'completo' => 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300',
+                'en_progreso' => 'bg-amber-500/20 border-amber-500/30 text-amber-300',
+                default => 'bg-gray-500/20 border-gray-500/30 text-gray-400',
+            };
+
+            // Agregar evento para cada día del rango
+            $fechaInicio = $plan->finicial;
+            $fechaFin = $plan->ffinal;
+
+            if ($fechaInicio && $fechaFin) {
+                $currentDate = $fechaInicio->copy();
+
+                while ($currentDate->lte($fechaFin)) {
+                    $calendarData[] = [
+                        'date' => $currentDate->format('Y-m-d'),
+                        'plan' => $plan,
+                        'color' => $color,
+                        'estado' => $estado,
+                        'esPrimerDia' => $currentDate->isSameDay($fechaInicio),
+                        'esUltimoDia' => $currentDate->isSameDay($fechaFin),
+                    ];
+                    $currentDate->addDay();
+                }
+            }
+        }
+
+        return $calendarData;
+    }
+
+    /**
+     * Determina el estado de un plan para el calendario.
+     */
+    private function determinarEstadoPlan($plan): array
+    {
+        $estrategiasCount = $plan->eiplanningwstrategies_count ?? 0;
+        $resumenesCount = $plan->eiplanningwsummaries_count ?? 0;
+
+        if ($estrategiasCount >= 40 && $resumenesCount >= 1) {
+            return [
+                'clave' => 'completo',
+                'etiqueta' => 'Completo',
+                'detalle' => 'Planificación completa',
+            ];
+        } elseif ($estrategiasCount > 0 || $resumenesCount > 0) {
+            return [
+                'clave' => 'en_progreso',
+                'etiqueta' => 'En progreso',
+                'detalle' => sprintf('%d estrategias, %d resúmenes', $estrategiasCount, $resumenesCount),
+            ];
+        } else {
+            return [
+                'clave' => 'sin_iniciar',
+                'etiqueta' => 'Sin iniciar',
+                'detalle' => 'Sin estrategias ni resúmenes',
+            ];
+        }
     }
 
     // ─── Carga de datos ──────────────────────────────────────────
@@ -460,6 +614,65 @@ class EiplanningwkComponent extends Component
                 ];
             }
         }
+
+        $this->savedStrategiesFingerprint = $this->fingerprintStrategies($this->strategies);
+    }
+
+    public function hasUnsavedStrategies(): bool
+    {
+        return $this->showModal
+            && $this->modalType === 'strategy'
+            && $this->eiplanningwk_id !== null
+            && $this->fingerprintStrategies($this->strategies) !== $this->savedStrategiesFingerprint;
+    }
+
+    private function fingerprintStrategies(array $strategies): string
+    {
+        $snapshot = [];
+
+        foreach (array_keys($this->weekDays) as $day) {
+            foreach (array_keys($this->moments) as $index => $moment) {
+                $cell = $strategies[$day][$index] ?? [];
+                $text = trim((string) ($cell['estrategia'] ?? ''));
+
+                $snapshot[] = [
+                    $day,
+                    $moment,
+                    $text,
+                    $text === ''
+                        || ! filled($cell['order'] ?? null)
+                        || (int) $cell['order'] === 0
+                        ? null
+                        : (int) $cell['order'],
+                ];
+            }
+        }
+
+        return hash('sha256', json_encode($snapshot, JSON_THROW_ON_ERROR));
+    }
+
+    private function refreshSavedStrategiesFingerprint(): void
+    {
+        if (! $this->eiplanningwk_id) {
+            $this->savedStrategiesFingerprint = $this->fingerprintStrategies([]);
+
+            return;
+        }
+
+        $persisted = [];
+        foreach (Eiplanningwstrategy::query()
+            ->where('eiplanningwk_id', $this->eiplanningwk_id)
+            ->get() as $strategy) {
+            $index = $this->indexForMoment($strategy->momento_rutina_diaria);
+            if ($index >= 0 && array_key_exists($strategy->day_of_week, $this->weekDays)) {
+                $persisted[$strategy->day_of_week][$index] = [
+                    'estrategia' => $strategy->estrategia,
+                    'order' => $strategy->order,
+                ];
+            }
+        }
+
+        $this->savedStrategiesFingerprint = $this->fingerprintStrategies($persisted);
     }
 
     /**
@@ -476,7 +689,9 @@ class EiplanningwkComponent extends Component
      */
     public function indexForMoment(string $moment): int
     {
-        return (int) array_search($moment, array_keys($this->moments), true);
+        $index = array_search($moment, array_keys($this->moments), true);
+
+        return $index === false ? -1 : $index;
     }
 
     private function loadSummary(?int $id): void
@@ -840,6 +1055,7 @@ class EiplanningwkComponent extends Component
         $estrategiasCompletasAntes = app(InicialWeeklyPlanNotifier::class)
             ->estrategiasCompletas($this->eiplanningwk_id);
         $this->persistStrategy($this->activeDay, $i, $celda);
+        $this->refreshSavedStrategiesFingerprint();
         $this->notificarEstrategiasCompletadas($estrategiasCompletasAntes);
 
         $this->notification()->success(
@@ -892,6 +1108,7 @@ class EiplanningwkComponent extends Component
             return;
         }
 
+        $this->refreshSavedStrategiesFingerprint();
         $this->notificarEstrategiasCompletadas($estrategiasCompletasAntes);
 
         $this->notification()->success(
@@ -999,6 +1216,7 @@ class EiplanningwkComponent extends Component
             'estrategia' => '',
             'order' => null,
         ];
+        $this->refreshSavedStrategiesFingerprint();
 
         $this->notification()->success(
             title: 'Estrategia eliminada',
@@ -1290,7 +1508,11 @@ class EiplanningwkComponent extends Component
     {
         $user = Auth::user();
 
-        abort_if(! $user || (! $user->isInicial() && ! $user->is_admin), 403, 'Acceso denegado al módulo de Educación Inicial.');
+        if (! $user instanceof User) {
+            abort(403, 'Acceso denegado al módulo de Educación Inicial.');
+        }
+
+        abort_if(! $user->isInicial() && ! $user->is_admin, 403, 'Acceso denegado al módulo de Educación Inicial.');
     }
 
     private function loadGrados(): Collection

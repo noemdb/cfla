@@ -65,6 +65,7 @@
             'NO' => 'Sin actividades',
             'SI_LE' => 'Con lecciones',
             'NO_LE' => 'Sin lecciones',
+            'SI_SUP' => 'Con complemento',
         ];
         $statusReviewLabels = [
             'approved' => 'Aprobada',
@@ -189,6 +190,7 @@
                     <option value="NO">Sin actividades</option>
                     <option value="SI_LE">Con lecciones</option>
                     <option value="NO_LE">Sin lecciones</option>
+                    <option value="SI_SUP">Con complemento</option>
                 </select>
             </div>
 
@@ -445,6 +447,12 @@
                                             Revisión
                                         </span>
                                     @endif
+                                    @if($item->activities_supplements_count > 0)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-cyan-500/12 text-cyan-400 border border-cyan-500/20 rounded-md" title="Al menos una actividad tiene información complementaria">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                                            Complemento
+                                        </span>
+                                    @endif
                                 </div>
 
                                 {{-- Observations (inline en el card) --}}
@@ -665,6 +673,12 @@
                                         <span class="px-2 py-1 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-bold rounded-lg border border-amber-200 dark:border-amber-500/20">
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>
                                             {{ $item->activities_revision_count }} revisión
+                                        </span>
+                                    @endif
+                                    @if($item->activities_supplements_count > 0)
+                                        <span class="px-2 py-1 bg-cyan-100 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-[10px] font-bold rounded-lg border border-cyan-200 dark:border-cyan-500/20" title="Al menos una actividad tiene información complementaria">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block"></span>
+                                            Complemento
                                         </span>
                                     @endif
                                 @else

@@ -76,7 +76,7 @@
                 <div class="h-full bg-cyan-500 rounded-full" style="width: {{ $porcentaje }}%"></div>
             </div>
             <p class="mt-1 text-[11px] text-gray-600 tabular-nums">
-                {{ $resumenes }} {{ $resumenes === 1 ? 'resumen' : 'resúmenes' }} por área
+                {{ $resumenes }} {{ $resumenes === 1 ? 'resumen registrado' : 'resúmenes registrados' }}
             </p>
         </div>
 
@@ -103,6 +103,12 @@
                 </span>
             @endif
         </div>
+
+        @if ($estado['clave'] !== 'completo')
+            <p class="mt-2 text-[11px] leading-relaxed text-amber-200/90">
+                {{ $estado['detalle'] }}
+            </p>
+        @endif
     </div>
 
     <footer class="flex items-center gap-2 border-t border-white/5 px-4 py-2.5">
