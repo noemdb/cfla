@@ -168,8 +168,8 @@ class ActivityForm extends Form
      */
     public function fillFromModel(Activity $activity): static
     {
-        $this->finicial = $activity->finicial;
-        $this->ffinal = $activity->ffinal;
+        $this->finicial = $activity->finicial?->format('Y-m-d');
+        $this->ffinal = $activity->ffinal?->format('Y-m-d');
         $this->topic = $activity->topic;
         $this->thematic = $activity->thematic;
         $this->references = $activity->references;

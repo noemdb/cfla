@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /home/nuser/code/cfla && php artisan test tests/Feature/Profesor/ActivityImprovementTest.php tests/Feature/Profesor/ActivityDeleteConfirmTest.php 2>&1 | tail -20)",
+      "Bash(cd /home/nuser/code/cfla && php artisan test --filter \"Activity\" 2>&1 | tail -15)"
+    ]
+  }
+}
