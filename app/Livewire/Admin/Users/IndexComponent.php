@@ -62,6 +62,22 @@ class IndexComponent extends Component
 
     public $card_number;
 
+    // ─── Attendance fields (tab "Asistencia") ──────────────────
+    /** Identificador del trabajador (columna `users.work_id`). */
+    public $work_id;
+
+    /** Número de tarjeta de marcaje (columna `users.card_id`). */
+    public $card_id;
+
+    /** Identificador biométrico del trabajador (columna `users.ident`). */
+    public $ident;
+
+    /** Cédula de identidad (columna `users.number_id`). */
+    public $number_id;
+
+    // ─── UI: pestaña activa del formulario ─────────────────────
+    public $formTab = 'general';
+
     // ─── Filters, pagination & sorting ─────────────────────────
     public $search = '';
 
@@ -101,6 +117,10 @@ class IndexComponent extends Component
             'firstname' => 'nullable|string|max:100',
             'lastname' => 'nullable|string|max:100',
             'card_number' => 'nullable|string|max:20',
+            'work_id' => 'nullable|integer|min:0',
+            'card_id' => 'nullable|string|max:191',
+            'ident' => 'nullable|string|max:191',
+            'number_id' => 'nullable|string|max:191',
         ];
 
         return $rules;
@@ -124,6 +144,10 @@ class IndexComponent extends Component
         'firstname' => 'nombre',
         'lastname' => 'apellido',
         'card_number' => 'cédula',
+        'work_id' => 'identificador de trabajador',
+        'card_id' => 'número de tarjeta',
+        'ident' => 'identificador biométrico',
+        'number_id' => 'cédula de identidad',
     ];
 
     public function render()
@@ -256,6 +280,7 @@ class IndexComponent extends Component
         $this->resetForm();
         $this->isEditing = false;
         $this->user_id = null;
+        $this->formTab = 'general';
         $this->modeForm = true;
     }
 
@@ -291,19 +316,44 @@ class IndexComponent extends Component
             $this->card_number = $user->profile->card_number;
         }
 
+        // Datos de asistencia (columnas propias de `users`).
+        $this->work_id = $user->work_id;
+        $this->card_id = $user->card_id;
+        $this->ident = $user->ident;
+        $this->number_id = $user->number_id;
+
+        $this->formTab = 'general';
         $this->isEditing = true;
         $this->modeForm = true;
     }
 
+    /** Cambia la pestaña activa del formulario sin recargar la página. */
+    public function setFormTab($tab)
+    {
+        $this->formTab = in_array($tab, ['general', 'asistencia'], true) ? $tab : 'general';
+    }
+
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Si el error está en un campo del tab "Asistencia", abrimos ese
+            // tab para que el mensaje sea visible (y viceversa).
+            $firstField = array_key_first($e->errors());
+            $this->formTab = in_array($firstField, ['work_id', 'card_id', 'ident', 'number_id'], true)
+                ? 'asistencia'
+                : 'general';
+
+            throw $e;
+        }
 
         // Separación de funciones (doc 11 · ADR-11.2): el perfil de
         // seguimiento es de solo lectura y no debe acumular el CRUD docente.
         // Se rechaza la combinación en la UI; el middleware ya prioriza el
         // flag manager si existiera data heredada.
         if ($this->is_inicial && $this->is_inicial_manager) {
+            $this->formTab = 'general';
             $this->addError(
                 'is_inicial_manager',
                 'Un usuario no puede ser docente de Inicial y gestor de seguimiento a la vez.'
@@ -327,6 +377,11 @@ class IndexComponent extends Component
                 'is_director' => $this->is_director ? 1 : 0,
                 'is_student' => $this->is_student ? 1 : 0,
                 'is_active' => $this->is_active,
+                // Datos de asistencia (pestaña "Asistencia").
+                'work_id' => $this->work_id === '' || $this->work_id === null ? null : (int) $this->work_id,
+                'card_id' => $this->card_id !== '' ? $this->card_id : null,
+                'ident' => $this->ident !== '' ? $this->ident : null,
+                'number_id' => $this->number_id !== '' ? $this->number_id : null,
             ];
 
             // La columna `is_inicial` nace con la migración
@@ -429,8 +484,10 @@ class IndexComponent extends Component
             'username', 'email', 'password',
             'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_inicial', 'is_inicial_manager', 'is_leadership', 'is_coordinacion', 'is_director', 'is_student',
             'firstname', 'lastname', 'card_number',
+            'work_id', 'card_id', 'ident', 'number_id',
         ]);
         $this->is_active = 'enable';
+        $this->formTab = 'general';
     }
 
     #[Layout('layouts.dashboard')]

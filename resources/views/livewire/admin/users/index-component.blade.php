@@ -229,7 +229,28 @@
             </div>
 
             <form wire:submit="save">
+                {{-- Pestañas del formulario --}}
+                <div class="px-6 pt-4">
+                    <div class="flex gap-2 border-b border-white/5">
+                        <button type="button" wire:click="setFormTab('general')"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition-colors {{ $formTab === 'general' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-white' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            General
+                        </button>
+                        <button type="button" wire:click="setFormTab('asistencia')"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition-colors {{ $formTab === 'asistencia' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-white' }}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Asistencia
+                        </button>
+                    </div>
+                </div>
+
                 <div class="px-6 py-5 space-y-6 max-h-[65vh] overflow-y-auto">
+                    @if($formTab === 'general')
 
                     {{-- Sección: Cuenta --}}
                     <div>
@@ -339,6 +360,44 @@
                             </div>
                         </div>
                     </div>
+
+                    @else
+
+                    {{-- Sección: Asistencia --}}
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400/60 mb-2">Datos de Asistencia</h3>
+                        <p class="text-xs text-gray-500 mb-3">
+                            Identificadores del trabajador usados para asociar los registros de marcaje y asistencia.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Ident. Trabajador</label>
+                                <input type="number" min="0" wire:model="work_id" placeholder="Ej: 1024"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                @error('work_id') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Número de Tarjeta</label>
+                                <input type="text" wire:model="card_id" placeholder="Tarjeta de marcaje"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                @error('card_id') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Ident. Trabajador BIO</label>
+                                <input type="text" wire:model="ident" placeholder="Identificador biométrico"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                @error('ident') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Cédula de Identidad</label>
+                                <input type="text" wire:model="number_id" placeholder="Ej: V-12345678"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                @error('number_id') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    @endif
 
                 </div>
 

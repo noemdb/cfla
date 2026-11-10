@@ -63,6 +63,9 @@ class User extends Authenticatable implements \App\Contracts\Auditable
         'is_leadership',
         'is_director',
         'is_student',
+        'work_id',
+        'card_id',
+        'ident',
         'number_id',
     ];
 
