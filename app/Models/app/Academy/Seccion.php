@@ -80,4 +80,20 @@ class Seccion extends Model
             ->where('status_active', true)
             ->pluck('name', 'id');
     }
+
+    /**
+     * Profesores con carga académica activa en esta sección.
+     *
+     * @see Pevaluacion::getProfesoresConCargaActiva()
+     */
+    public function getProfesoresConCargaActiva(?int $lapsoId = null): \Illuminate\Support\Collection
+    {
+        return Pevaluacion::getProfesoresConCargaActiva(
+            $lapsoId,
+            null,
+            null,
+            null,
+            $this->id
+        );
+    }
 }

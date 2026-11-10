@@ -9,6 +9,7 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Instrument\DiagQuestion;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,12 +19,25 @@ class QuestionByPensum extends Component
 
     protected $paginationTheme = 'tailwind';
 
+    #[Url(as: 'diagQuestionPensum')]
     public ?int $pensumId = null;
+
+    #[Url(as: 'diagQuestionPestudio')]
     public ?int $pestudioId = null;
+
+    #[Url(as: 'diagQuestionGrado')]
     public ?int $gradoId = null;
+
+    #[Url(as: 'diagQuestionPevaluacion')]
     public ?int $pevaluacionId = null;
+
+    #[Url(as: 'diagQuestionGroup')]
     public ?int $grupoEstableId = null;
+
+    #[Url(as: 'diagQuestionSearch', except: '')]
     public string $search = '';
+
+    #[Url(as: 'diagQuestionShowInactive')]
     public bool $showInactive = true;
     public int $summaryPerPage = 10;
 

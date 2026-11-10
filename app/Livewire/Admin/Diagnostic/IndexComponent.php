@@ -6,6 +6,7 @@ use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
 use App\Services\Binnacle;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
@@ -13,6 +14,7 @@ class IndexComponent extends Component
 {
     use WireUiActions;
 
+    #[Url(as: 'diagActivationSearch', except: '')]
     public string $search = '';
 
     public function toggleAllPestudio($pestudioId, $activate)

@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe Ejecutivo | Diagnóstico Educativo — 1.er Momento</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          forest: { 50:'#f1f7f2',100:'#e1eee3',200:'#c5ddc9',300:'#9fc5a6',400:'#6fa77c',500:'#478653',600:'#2f7040',700:'#245b34',800:'#19472a',900:'#123820',950:'#092516' },
+          limeleaf: '#9acb52'
+        },
+        boxShadow: {
+          soft: '0 12px 35px rgba(15, 55, 31, .07)',
+          lift: '0 18px 45px rgba(15, 55, 31, .11)'
+        }
+      } }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; }
+    body { font-family:'DM Sans',sans-serif; background:#f5f8f5; color:#1b2d22; }
+    h1,h2,h3,h4,.display { font-family:'Manrope',sans-serif; }
+    .eyebrow { letter-spacing:.16em; }
+    .report-grid { background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px); background-size:18px 18px; }
+    .chart { min-height:280px; }
+    .metric-bar { height:7px; border-radius:999px; background:#e8efe9; overflow:hidden; }
+    .metric-bar > span { display:block; height:100%; border-radius:999px; }
+    .section-number { width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#eaf3ec;color:#245b34;font-weight:800;font-size:12px; }
+    table { border-collapse:collapse; }
+    @media print {
+      body { background:#fff !important; }
+      .no-print { display:none !important; }
+      .print-break { break-before:page; }
+      .shadow-soft,.shadow-lift { box-shadow:none !important; }
+      .report-shell { max-width:none !important; padding:0 !important; }
+      .card { break-inside:avoid; }
+      a { text-decoration:none; color:inherit; }
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <main class="report-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <!-- Cabecera institucional -->
+    <header class="relative overflow-hidden rounded-[28px] bg-forest-900 text-white shadow-lift">
+      <div class="absolute inset-0 report-grid opacity-40"></div>
+      <div class="absolute -right-20 -top-28 h-96 w-96 rounded-full border border-white/10"></div>
+      <div class="absolute -right-4 -top-12 h-72 w-72 rounded-full border border-white/10"></div>
+      <div class="relative px-7 py-8 sm:px-10 sm:py-10 lg:px-12">
+        <div class="flex flex-col gap-7 md:flex-row md:items-start md:justify-between">
+          <div class="max-w-3xl">
+            <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase eyebrow text-forest-100">
+              <span class="h-1.5 w-1.5 rounded-full bg-limeleaf"></span>
+              Informe de gestión académica
+            </div>
+            <p class="text-xs font-semibold uppercase tracking-[.22em] text-forest-200">Subdirección Académica</p>
+            <h1 class="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[42px]">
+              Resultados del<br class="hidden sm:block"> diagnóstico educativo
+            </h1>
+            <p class="mt-4 max-w-2xl text-sm leading-6 text-forest-100 sm:text-base">
+              Precisión del logro por grado, área de formación y área de conocimiento, a partir del instrumento <em>Aproximación pedagógica y exploración de competencias</em>.
+            </p>
+          </div>
+          <div class="shrink-0 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm md:min-w-[220px]">
+            <p class="text-[10px] font-bold uppercase tracking-[.18em] text-forest-200">Período evaluado</p>
+            <p class="mt-2 text-xl font-extrabold">1.er Momento</p>
+            <p class="mt-1 text-xs text-forest-100">Instrumento diagnóstico #1</p>
+            <div class="mt-4 border-t border-white/15 pt-3">
+              <p class="text-[10px] uppercase tracking-wider text-forest-200">Corte del reporte</p>
+              <p class="mt-1 text-sm font-semibold">10 noviembre 2026 · 11:21</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-2">
+          <span class="rounded-lg bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white">Educación Primaria</span>
+          <span class="rounded-lg bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white">Educación Media General</span>
+          <span class="rounded-lg bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white">Media General Ciencia y Tecnología</span>
+          <span class="rounded-lg border border-limeleaf/40 bg-limeleaf/15 px-3 py-1.5 text-[11px] font-semibold text-lime-100">Corte institucional automatizado</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Nota de alcance -->
+    <section class="mt-6 rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 shadow-sm">
+      <div class="flex gap-3">
+        <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+          <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-blue-950">Nota de lectura ejecutiva</p>
+          <p class="mt-1 text-sm leading-6 text-blue-900/85">
+            La <strong>precisión</strong> es la proporción de respuestas correctas sobre respuestas elegibles de opción múltiple. Cada segmento se presenta con su propio denominador, por lo que los porcentajes de grados, áreas de formación y áreas de conocimiento no son sumables entre sí: las áreas de conocimiento comparten áreas de formación. <strong>La Subdirección Académica en ningún caso ha dejado de dar instrucciones:</strong> orienta de forma oportuna la aplicación del diagnóstico y el acompañamiento a los docentes. Lo que queda pendiente es convertir esos resultados en decisiones registradas y verificables en la plataforma.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resumen ejecutivo -->
+    <section class="mt-10">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">01 / Síntesis directiva</p>
+          <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">Resumen ejecutivo</h2>
+        </div>
+        <span class="rounded-full bg-forest-100 px-3 py-1 text-[11px] font-bold text-forest-800">Resultados al 10.11.2026</span>
+      </div>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[11px] font-semibold text-slate-500">Precisión global</p>
+          <p class="mt-2 display text-[30px] font-extrabold leading-none text-forest-900">57,3%</p>
+          <p class="mt-2 text-[11px] leading-5 text-slate-500">18.177 correctas de 31.750 respuestas elegibles</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[11px] font-semibold text-slate-500">Sesiones procesadas</p>
+          <p class="mt-2 display text-[30px] font-extrabold leading-none text-forest-900">3.572</p>
+          <p class="mt-2 text-[11px] leading-5 text-slate-500">3.524 completadas · 98,7% de finalización</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[11px] font-semibold text-slate-500">Estudiantes alcanzados</p>
+          <p class="mt-2 display text-[30px] font-extrabold leading-none text-forest-900">441</p>
+          <p class="mt-2 text-[11px] leading-5 text-slate-500">Estudiantes distintos en el universo evaluado</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[11px] font-semibold text-slate-500">Preguntas del instrumento</p>
+          <p class="mt-2 display text-[30px] font-extrabold leading-none text-forest-900">955</p>
+          <p class="mt-2 text-[11px] leading-5 text-slate-500">807 de opción múltiple · 147 abiertas · 1 de escala</p>
+        </div>
+      </div>
+
+      <div class="mt-5 grid gap-4 lg:grid-cols-[1.35fr_.9fr]">
+        <div class="card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-soft">
+          <div class="flex items-center gap-2">
+            <span class="section-number">A</span>
+            <h3 class="text-base font-extrabold text-slate-900">Hallazgos para orientar la gestión</h3>
+          </div>
+          <ul class="mt-4 space-y-3">
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-forest-600"></span><span><strong class="text-slate-900">Brecha entre grados de 15,3 puntos:</strong> SEGUNDO AÑO alcanza 62,8% y 5TO GRADO 47,5%. Los cuatro primeros grados de primaria no registran sesiones.</span></li>
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-amber-500"></span><span><strong class="text-slate-900">Concentración en el extremo bajo:</strong> 19 de 59 áreas de formación con datos quedan por debajo de 50% y reúnen 10.683 respuestas, el 33,6% de la base evaluada.</span></li>
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-rose-500"></span><span><strong class="text-slate-900">Educación Física marca el techo:</strong> SEGUNDO AÑO - EDFI-2A (91,7%) y TERCER AÑO - EDFI-1A (87,9%) lideran; BI-4 (27,3%) e IN-TE-PR-3 (26,6%) cierran la lista.</span></li>
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-slate-400"></span><span><strong class="text-slate-900">Cobertura incompleta:</strong> 34 de 93 áreas de formación no registran respuestas; tres áreas de conocimiento y cuatro grados quedan sin base para el cálculo.</span></li>
+          </ul>
+        </div>
+        <aside class="rounded-2xl border border-forest-200 bg-forest-50 p-6">
+          <div class="flex items-center gap-2">
+            <span class="rounded-lg bg-forest-700 p-2 text-white">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>
+            </span>
+            <h3 class="text-base font-extrabold text-forest-950">Lectura de la Subdirección</h3>
+          </div>
+          <p class="mt-4 text-sm leading-6 text-forest-950">
+            El diagnóstico se aplicó de forma amplia y con cierre casi total de las sesiones. <strong class="text-forest-950">La Subdirección Académica en ningún caso ha dejado de dar instrucciones:</strong> las orientaciones sobre el instrumento, los tiempos y el acompañamiento docente se han dado de manera oportuna. La diferencia entre áreas no refleja falta de instrucción, sino la necesidad de registrar y usar los resultados para ajustar la enseñanza en los segmentos con menor precisión.
+          </p>
+          <div class="mt-5 border-t border-forest-200 pt-4">
+            <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-forest-700">Siguiente paso de gestión</p>
+            <p class="mt-1 text-lg font-extrabold text-forest-950">Convertir los resultados en planes de refuerzo por área</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Alcance -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">02</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Marco de evaluación</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Alcance y universo de análisis</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-4 md:grid-cols-4">
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Áreas de formación con datos</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">59<span class="text-base font-bold text-slate-400"> / 93</span></p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">Pensums del instrumento con respuestas de opción múltiple</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Áreas de conocimiento con datos</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">27<span class="text-base font-bold text-slate-400"> / 30</span></p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">Adscripciones del catálogo con respuestas registradas</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Grados con datos</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">7<span class="text-base font-bold text-slate-400"> / 11</span></p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">1ER a 4TO GRADO sin sesiones registradas</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Respuestas elegibles</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">31.750</p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">De 37.442 respuestas completadas en total</p>
+        </div>
+      </div>
+      <div class="mt-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="text-sm font-bold text-slate-800">Filtros aplicados</p>
+            <p class="mt-1 text-xs text-slate-500">Instrumento: #1 Diagnóstico Educativo · Lapso: 1.er Momento · Programa: Todos · Plan: Todos · Grado: Todos</p>
+          </div>
+          <span class="rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-600">Corte 10/11/2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Precisión global -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">03</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Resultado global</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Precisión del instrumento</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-4 lg:grid-cols-[.9fr_1.35fr]">
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <h3 class="font-extrabold text-slate-900">Correctas vs. incorrectas</h3>
+          <p class="mt-1 text-xs text-slate-500">Base: 31.750 respuestas elegibles de opción múltiple</p>
+          <div id="precisionChart" class="chart mt-2"></div>
+        </article>
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 class="font-extrabold text-slate-900">Composición del banco de preguntas</h3>
+              <p class="mt-1 text-xs text-slate-500">955 preguntas por dificultad declarada</p>
+            </div>
+            <span class="rounded-lg bg-forest-50 px-2.5 py-1 text-[10px] font-bold text-forest-700">Diseño del instrumento</span>
+          </div>
+          <div id="difficultyChart" class="chart mt-2"></div>
+          <div class="mt-2 grid grid-cols-3 gap-3 border-t border-slate-100 pt-3">
+            <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Opción múltiple</p><p class="text-lg font-extrabold text-forest-900">807</p></div>
+            <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Abiertas</p><p class="text-lg font-extrabold text-slate-700">147</p></div>
+            <div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Escala</p><p class="text-lg font-extrabold text-slate-700">1</p></div>
+          </div>
+        </article>
+      </div>
+      <div class="mt-4 grid gap-4 md:grid-cols-3">
+        <div class="rounded-xl border border-forest-200 bg-forest-50 px-5 py-4">
+          <p class="text-[10px] font-extrabold uppercase tracking-[.14em] text-forest-700">Primaria</p>
+          <p class="mt-1 display text-2xl font-extrabold text-forest-900">49,1%</p>
+          <p class="text-[11px] text-forest-800/70">1.009 / 2.053 respuestas · 4 áreas de formación</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-4">
+          <p class="text-[10px] font-extrabold uppercase tracking-[.14em] text-slate-500">Media General</p>
+          <p class="mt-1 display text-2xl font-extrabold text-slate-800">59,2%</p>
+          <p class="text-[11px] text-slate-500">7.001 / 11.836 respuestas · 22 áreas de formación</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white px-5 py-4">
+          <p class="text-[10px] font-extrabold uppercase tracking-[.14em] text-slate-500">Media General Ciencia y Tecnología</p>
+          <p class="mt-1 display text-2xl font-extrabold text-slate-800">56,9%</p>
+          <p class="text-[11px] text-slate-500">10.167 / 17.861 respuestas · 33 áreas de formación</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Precisión por grado -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">04</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Segmentación por grado</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Precisión por grado (<span class="font-mono text-base">gradoId</span>)</h2>
+        </div>
+      </div>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Los siete grados con respuestas se ordenan por precisión. Las dos listas se construyen sobre el mismo conjunto: al haber solo siete grados con datos, comparten tres filas intermedias.</p>
+      <article class="card mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-slate-900">Precisión por grado</h3>
+            <p class="mt-1 text-xs text-slate-500">Respuestas correctas ÷ respuestas elegibles · los 7 grados suman exactamente el total global</p>
+          </div>
+          <span class="rounded-lg bg-forest-50 px-2.5 py-1 text-[10px] font-bold text-forest-700">31.750 respuestas</span>
+        </div>
+        <div id="gradeChart" class="chart mt-3"></div>
+      </article>
+      <div class="mt-4 grid gap-4 lg:grid-cols-2">
+            <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-forest-50 text-forest-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15l5-5 4 4 6-7"/></svg>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-slate-900">Mayor precisión</h4>
+                  </div>
+                  <p class="mt-1 text-[11px] text-slate-500">Los 5 grados con mejor desempeño</p>
+                </div>
+                <span class="rounded-lg bg-forest-50 px-2 py-1 text-[10px] font-bold text-forest-700">Top 5</span>
+              </div>
+              <table class="mt-3 w-full">
+                <tbody class="divide-y divide-slate-100">
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">01</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">SEGUNDO AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 13 · 747 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:62.8%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">62,8%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">4.005 / 6.375</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">02</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">PRIMER AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 7 · 416 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:59.9%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">59,9%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">2.661 / 4.443</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">03</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">QUINTO AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 11 · 754 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:58.7%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">58,7%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">4.340 / 7.393</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">04</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">TERCER AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 14 · 728 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:58.5%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">58,5%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">3.068 / 5.244</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">05</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">6TO GRADO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 6 · 103 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:50.8%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">50,8%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">523 / 1.030</td>
+              </tr>
+                </tbody>
+              </table>
+              <p class="mt-3 text-[10px] leading-4 text-slate-400">Cada fila indica gradoId, sesiones registradas y la relación correctas / respuestas elegibles.</p>
+            </article>
+            <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 9l5 5 4-4 6 7"/></svg>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-slate-900">Menor precisión</h4>
+                  </div>
+                  <p class="mt-1 text-[11px] text-slate-500">Los 5 grados con menor desempeño</p>
+                </div>
+                <span class="rounded-lg bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-700">Bottom 5</span>
+              </div>
+              <table class="mt-3 w-full">
+                <tbody class="divide-y divide-slate-100">
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">01</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">5TO GRADO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 5 · 104 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:47.5%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">47,5%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">486 / 1.023</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">02</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">CUARTO AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 15 · 720 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:49.6%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">49,6%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">3.094 / 6.242</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">03</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">6TO GRADO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 6 · 103 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:50.8%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">50,8%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">523 / 1.030</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">04</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">TERCER AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 14 · 728 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:58.5%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">58,5%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">3.068 / 5.244</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">05</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">QUINTO AÑO</p>
+                  <span class="text-[10px] text-slate-400">gradoId 11 · 754 sesiones</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:58.7%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">58,7%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">4.340 / 7.393</td>
+              </tr>
+                </tbody>
+              </table>
+              <p class="mt-3 text-[10px] leading-4 text-slate-400">6TO GRADO, TERCER AÑO y QUINTO AÑO aparecen también en la lista superior: con 7 grados con datos, ambas listas se solapan en tres filas.</p>
+            </article>
+      </div>
+    </section>
+
+    <!-- Precisión por área de formación -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">05</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Segmentación curricular</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Precisión por área de formación (<span class="font-mono text-base">pensumId</span>)</h2>
+        </div>
+      </div>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Cada área de formación equivale a un pensum: grado + asignatura dentro de un plan de estudio. Se excluyen las 34 áreas sin respuestas y se exige una base mínima de 100 respuestas; todas las áreas listadas superan ese umbral (mínimo: 192).</p>
+      <article class="card mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-slate-900">Extremos de precisión por área de formación</h3>
+            <p class="mt-1 text-xs text-slate-500">5 áreas con mayor precisión y 5 con menor precisión sobre 59 áreas con datos</p>
+          </div>
+          <div class="flex items-center gap-3 text-[10px] font-bold">
+            <span class="flex items-center gap-1.5 text-forest-700"><span class="h-2 w-2 rounded-full bg-forest-600"></span>Mayor</span>
+            <span class="flex items-center gap-1.5 text-rose-700"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Menor</span>
+          </div>
+        </div>
+        <div id="pensumChart" class="chart mt-3"></div>
+        <p class="mt-2 text-[10px] leading-4 text-slate-400">La suma de respuestas de las 59 áreas de formación coincide con la base global (31.750), por lo que este desglose es exhaustivo y no se solapa. Brecha entre extremos: 65,1 puntos porcentuales.</p>
+      </article>
+      <div class="mt-4 grid gap-4 lg:grid-cols-2">
+            <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-forest-50 text-forest-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15l5-5 4 4 6-7"/></svg>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-slate-900">Mayor precisión</h4>
+                  </div>
+                  <p class="mt-1 text-[11px] text-slate-500">Las 5 áreas de formación con mejor desempeño</p>
+                </div>
+                <span class="rounded-lg bg-forest-50 px-2 py-1 text-[10px] font-bold text-forest-700">Top 5</span>
+              </div>
+              <table class="mt-3 w-full">
+                <tbody class="divide-y divide-slate-100">
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">01</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">SEGUNDO AÑO - EDFI-2A</p>
+                  <span class="text-[10px] text-slate-400">pensumId 152 · 31059B · SEGUNDO AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:91.7%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">91,7%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">642 / 700</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">02</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">TERCER AÑO - EDFI-1A</p>
+                  <span class="text-[10px] text-slate-400">pensumId 189 · 31059B · TERCER AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:87.9%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">87,9%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">615 / 700</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">03</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">PRIMER AÑO - AP-1</p>
+                  <span class="text-[10px] text-slate-400">pensumId 63 · 31059 · PRIMER AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:81.9%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">81,9%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">245 / 299</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">04</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">QUINTO AÑO - GH-5</p>
+                  <span class="text-[10px] text-slate-400">pensumId 120 · 31059 · QUINTO AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:78.1%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">78,1%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">275 / 352</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">05</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">SEGUNDO AÑO - ORI-VOC-2A</p>
+                  <span class="text-[10px] text-slate-400">pensumId 164 · 31059B · SEGUNDO AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:76.7%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">76,7%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">514 / 670</td>
+              </tr>
+                </tbody>
+              </table>
+              <p class="mt-3 text-[10px] leading-4 text-slate-400">Se muestran pensumId, plan de estudio y grado. Diez áreas superan el 70% de precisión.</p>
+            </article>
+            <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 9l5 5 4-4 6 7"/></svg>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-slate-900">Menor precisión</h4>
+                  </div>
+                  <p class="mt-1 text-[11px] text-slate-500">Las 5 áreas de formación con menor desempeño</p>
+                </div>
+                <span class="rounded-lg bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-700">Bottom 5</span>
+              </div>
+              <table class="mt-3 w-full">
+                <tbody class="divide-y divide-slate-100">
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">01</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">TERCER AÑO - IN-TE-PR-3</p>
+                  <span class="text-[10px] text-slate-400">pensumId 197 · 31059B · TERCER AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:26.6%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">26,6%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">51 / 192</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">02</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">CUARTO AÑO - BI-4</p>
+                  <span class="text-[10px] text-slate-400">pensumId 239 · 31059B · CUARTO AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:27.3%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">27,3%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">114 / 417</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">03</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">TERCER AÑO - IDIOMAS-3A</p>
+                  <span class="text-[10px] text-slate-400">pensumId 194 · 31059B · TERCER AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:36.9%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">36,9%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">194 / 526</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">04</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">5TO GRADO - MAT-5G</p>
+                  <span class="text-[10px] text-slate-400">pensumId 54 · 21000 · 5TO GRADO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:40.0%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">40,0%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">197 / 493</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">05</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">CUARTO AÑO - IDIOMAS-4A</p>
+                  <span class="text-[10px] text-slate-400">pensumId 234 · 31059B · CUARTO AÑO</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:40.1%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">40,1%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">215 / 536</td>
+              </tr>
+                </tbody>
+              </table>
+              <p class="mt-3 text-[10px] leading-4 text-slate-400">Estas cinco áreas concentran 2.164 respuestas. Doce de las diecinueve áreas bajo 50% pertenecen a Media General Ciencia y Tecnología.</p>
+            </article>
+      </div>
+    </section>
+
+    <!-- Precisión por área de conocimiento -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">06</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Segmentación por campo de conocimiento</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Precisión por área de conocimiento (<span class="font-mono text-base">AreaConocimientoId</span>)</h2>
+        </div>
+      </div>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Un área de formación puede estar adscrita a varias áreas de conocimiento, por lo que los agregados se solapan: las 27 áreas con datos suman 82.168 respuestas sobre una base de 31.750. Los porcentajes describen cada área, no participaciones del total.</p>
+      <article class="card mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-slate-900">Extremos de precisión por área de conocimiento</h3>
+            <p class="mt-1 text-xs text-slate-500">5 áreas con mayor precisión y 5 con menor precisión sobre 27 áreas con datos</p>
+          </div>
+          <div class="flex items-center gap-3 text-[10px] font-bold">
+            <span class="flex items-center gap-1.5 text-forest-700"><span class="h-2 w-2 rounded-full bg-forest-600"></span>Mayor</span>
+            <span class="flex items-center gap-1.5 text-rose-700"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Menor</span>
+          </div>
+        </div>
+        <div id="areaChart" class="chart mt-3"></div>
+        <p class="mt-2 text-[10px] leading-4 text-slate-400">Se excluye del ranking el agregado <strong>Sin área asignada</strong> (61,5% · 743 respuestas · 5 áreas de formación), porque no corresponde a un área del catálogo. Brecha entre extremos: 51,0 puntos porcentuales.</p>
+      </article>
+      <div class="mt-4 grid gap-4 lg:grid-cols-2">
+            <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-forest-50 text-forest-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15l5-5 4 4 6-7"/></svg>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-slate-900">Mayor precisión</h4>
+                  </div>
+                  <p class="mt-1 text-[11px] text-slate-500">Las 5 áreas de conocimiento con mejor desempeño</p>
+                </div>
+                <span class="rounded-lg bg-forest-50 px-2 py-1 text-[10px] font-bold text-forest-700">Top 5</span>
+              </div>
+              <table class="mt-3 w-full">
+                <tbody class="divide-y divide-slate-100">
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">01</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">MGCT-EF — MGCT - ÁREA EDUCACIÓN FÍSICA</p>
+                  <span class="text-[10px] text-slate-400">áreaId 40 · 2 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:91.7%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">91,7%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">642 / 700</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">02</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">CSC-SOC — CIENCIAS SOCIALES</p>
+                  <span class="text-[10px] text-slate-400">áreaId 34 · 11 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:66.5%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">66,5%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">1.886 / 2.834</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">03</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">FHC-MG — FORMACION HUMANO CRISTIANA MG</p>
+                  <span class="text-[10px] text-slate-400">áreaId 45 · 5 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:62.0%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">62,0%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">971 / 1.565</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">04</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">PMG-CT — Planificación Media General CT</p>
+                  <span class="text-[10px] text-slate-400">áreaId 31 · 24 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:61.0%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">61,0%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">4.607 / 7.549</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">05</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">MG-CYT — MATEMÁTICAS MG-CYT</p>
+                  <span class="text-[10px] text-slate-400">áreaId 48 · 5 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:59.6%;background:#2f7040"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#2f7040">59,6%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">1.562 / 2.622</td>
+              </tr>
+                </tbody>
+              </table>
+              <p class="mt-3 text-[10px] leading-4 text-slate-400">MGCT - Área Educación Física se apoya en dos áreas de formación y 700 respuestas; el resto de la lista supera las 1.500 respuestas.</p>
+            </article>
+            <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 9l5 5 4-4 6 7"/></svg>
+                    </span>
+                    <h4 class="text-sm font-extrabold text-slate-900">Menor precisión</h4>
+                  </div>
+                  <p class="mt-1 text-[11px] text-slate-500">Las 5 áreas de conocimiento con menor desempeño</p>
+                </div>
+                <span class="rounded-lg bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-700">Bottom 5</span>
+              </div>
+              <table class="mt-3 w-full">
+                <tbody class="divide-y divide-slate-100">
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">01</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">MAT — MATEMÁTICAS (PRI)</p>
+                  <span class="text-[10px] text-slate-400">áreaId 18 · 2 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:40.7%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">40,7%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">404 / 993</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">02</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">IN-MGCT — INGLES MG. CC. TECN.</p>
+                  <span class="text-[10px] text-slate-400">áreaId 25/30/44 · 5 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:41.3%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">41,3%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">629 / 1.524</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">03</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">LN-MGCT — LENGUA (MG C&amp;T)</p>
+                  <span class="text-[10px] text-slate-400">áreaId 53 · 3 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:46.4%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">46,4%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">540 / 1.165</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">04</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">ESP-MG — Especialistas MG</p>
+                  <span class="text-[10px] text-slate-400">áreaId 58 · 5 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:46.9%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">46,9%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">1.103 / 2.353</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="py-2 pl-1 pr-2 text-[10px] font-bold text-slate-400 tabular-nums">05</td>
+                <td class="py-2 pr-3">
+                  <p class="text-xs font-bold leading-5 text-slate-800">LEN — LENGUA (MG)</p>
+                  <span class="text-[10px] text-slate-400">áreaId 17 · 2 áreas de formación</span>
+                </td>
+                <td class="w-[34%] py-2 pr-3">
+                  <div class="flex items-center gap-2">
+                    <div class="metric-bar flex-1"><span style="width:48.8%;background:#e11d48"></span></div>
+                    <span class="w-12 shrink-0 text-right text-xs font-extrabold tabular-nums" style="color:#e11d48">48,8%</span>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap py-2 pr-1 text-right text-[10px] tabular-nums text-slate-500">668 / 1.369</td>
+              </tr>
+                </tbody>
+              </table>
+              <p class="mt-3 text-[10px] leading-4 text-slate-400">Ocho de las 27 áreas con datos quedan bajo 50%: predominan idiomas, lengua y matemáticas, junto con agregados de Primaria y especialistas.</p>
+            </article>
+      </div>
+    </section>
+
+    <!-- Metodología -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">07</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Trazabilidad</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Metodología y límites de lectura</h2>
+        </div>
+      </div>
+      <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50/80">
+            <tr class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              <th class="px-5 py-3">Indicador</th>
+              <th class="px-5 py-3">Base de cálculo</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Precisión global</td><td class="px-5 py-3 text-slate-600">Respuestas correctas ÷ respuestas elegibles, considerando solo preguntas activas de opción múltiple con opción marcada como correcta. 18.177 ÷ 31.750 = 57,3%.</td></tr>
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Precisión por grado</td><td class="px-5 py-3 text-slate-600">Mismo cálculo agrupado por <span class="font-mono text-[11px]">gradoId</span>. La suma de los 7 grados con datos reproduce el total global sin solapamiento.</td></tr>
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Precisión por área de formación</td><td class="px-5 py-3 text-slate-600">Mismo cálculo agrupado por <span class="font-mono text-[11px]">pensumId</span>. Incluye respuestas con opción de todas las preguntas del pensum; también suma 31.750.</td></tr>
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Precisión por área de conocimiento</td><td class="px-5 py-3 text-slate-600">Agrega las áreas de formación adscritas vía <span class="font-mono text-[11px]">campo_conocimientos</span>. Un pensum puede pertenecer a varias áreas, por lo que los totales se solapan.</td></tr>
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Sesiones</td><td class="px-5 py-3 text-slate-600">3.572 sesiones: el instrumento no tiene sesiones vinculadas directamente y se usa el fallback por pensum; puede incluir sesiones de otros instrumentos aplicados sobre las mismas áreas de formación.</td></tr>
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Muestra mínima</td><td class="px-5 py-3 text-slate-600">Para los rankings se exigen 100 respuestas por segmento. Todas las filas listadas cumplen el criterio; el mínimo observado es 192 respuestas (TERCER AÑO - IN-TE-PR-3).</td></tr>
+            <tr><td class="px-5 py-3 font-bold text-slate-800">Segmentos sin datos</td><td class="px-5 py-3 text-slate-600">34 áreas de formación sin respuestas, 3 áreas de conocimiento (DP-PRI, IN-PRIM, PR-1RA-ET) y los grados 1ER a 4TO GRADO. Se excluyen de los rankings y no se imputan como cero.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+        <p class="text-sm font-bold text-amber-950">Límites que deben acompañar la lectura</p>
+        <ul class="mt-2 space-y-1.5 text-xs leading-5 text-amber-900/85">
+          <li>La precisión mide respuestas correctas, no calidad de la enseñanza ni dominio curricular integral: 148 preguntas abiertas y de escala no entran en el cálculo.</li>
+          <li>La prueba diagnóstica tiene una dificultad declarada heterogénea (256 fáciles, 585 medias, 114 difíciles); comparar áreas sin considerar esa composición puede distorsionar el resultado.</li>
+          <li>Las áreas de conocimiento se solapan; no es correcto sumar sus respuestas ni promediar sus porcentajes.</li>
+          <li>El fallback de sesiones por pensum amplía el universo y puede incorporar sesiones de otros instrumentos aplicados en las mismas áreas de formación.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Conclusiones -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">08</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Decisiones sugeridas</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Conclusiones y próximos pasos</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-4 lg:grid-cols-3">
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[10px] font-extrabold uppercase tracking-[.14em] text-forest-700">01 · Refuerzo focalizado</p>
+          <h3 class="mt-2 text-base font-extrabold text-slate-900">Priorizar las áreas bajo 50%</h3>
+          <p class="mt-2 text-sm leading-6 text-slate-600">Las 19 áreas de formación por debajo de 50% concentran un tercio de las respuestas. Conviene iniciar por BI-4, IN-TE-PR-3, IDIOMAS-3A/4A y MAT-5G/6G, con seguimiento quincenal.</p>
+        </article>
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[10px] font-extrabold uppercase tracking-[.14em] text-forest-700">02 · Extender la cobertura</p>
+          <h3 class="mt-2 text-base font-extrabold text-slate-900">Completar los grados sin datos</h3>
+          <p class="mt-2 text-sm leading-6 text-slate-600">1ER a 4TO GRADO no registran sesiones y 34 áreas de formación quedan sin respuestas. Sin esa base no es posible sostener comparaciones entre etapas educativas.</p>
+        </article>
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-[10px] font-extrabold uppercase tracking-[.14em] text-forest-700">03 · Documentar la gestión</p>
+          <h3 class="mt-2 text-base font-extrabold text-slate-900">Registrar las decisiones tomadas</h3>
+          <p class="mt-2 text-sm leading-6 text-slate-600">Las orientaciones ya se dan; el paso pendiente es dejar constancia del análisis por área, del plan de refuerzo acordado y de su verificación en la plataforma.</p>
+        </article>
+      </div>
+      <aside class="mt-4 rounded-2xl border border-forest-200 bg-forest-50 px-6 py-5">
+        <p class="text-sm leading-6 text-forest-950">
+          <strong>La Subdirección Académica en ningún caso ha dejado de dar instrucciones.</strong> El diagnóstico confirma que la aplicación del instrumento fue amplia y que el cierre de sesiones es casi total. La brecha de 65,1 puntos entre la mejor y la peor área de formación no es un problema de instrucción: es una señal para dirigir el acompañamiento y el refuerzo donde los resultados lo exigen, y para que ese acompañamiento quede registrado.
+        </p>
+      </aside>
+    </section>
+
+    <footer class="mt-11 border-t border-slate-200 pt-5 text-[11px] leading-5 text-slate-500">
+      <p><strong class="text-slate-700">Fuente:</strong> exportación Markdown del módulo Diagnóstico (<span class="font-mono">diagnostico-diagnostico-educativo-aproximacion-pedagogica-y-exploracion-de-competencias-20261110_112150.md</span>), generada desde <span class="font-mono">/app/planning/diagnostico?selectedId=1</span> el 10/11/2026 a las 11:21.</p>
+      <p class="mt-1">El informe reproduce los porcentajes del snapshot; no se recalcularon ni se imputaron valores faltantes. Los identificadores de grado, área de formación y área de conocimiento permiten auditar cada fila contra la plataforma.</p>
+    </footer>
+  </main>
+
+  <script>
+    const fmt = (v) => v.toFixed(1).replace('.', ',') + '%';
+
+    new ApexCharts(document.querySelector('#precisionChart'), {
+      chart: { type: 'donut', height: 300, fontFamily: 'DM Sans, sans-serif', animations: { enabled: false } },
+      series: [18177, 13573],
+      labels: ['Correctas', 'Incorrectas'],
+      colors: ['#2f7040', '#fb7185'],
+      stroke: { width: 0 },
+      legend: { position: 'bottom', fontSize: '12px', markers: { radius: 4 } },
+      dataLabels: { enabled: false },
+      plotOptions: { pie: { donut: { size: '68%', labels: {
+        show: true,
+        name: { fontSize: '12px', color: '#64748b' },
+        value: { fontSize: '26px', fontWeight: 800, color: '#123820', formatter: (v) => fmt(v) },
+        total: { show: true, label: 'Precisión', fontSize: '11px', color: '#64748b',
+          formatter: () => '57,3%' }
+      } } } },
+      tooltip: { y: { formatter: (v) => v.toLocaleString('es-VE') + ' respuestas' } }
+    }).render();
+
+    new ApexCharts(document.querySelector('#difficultyChart'), {
+      chart: { type: 'bar', height: 300, fontFamily: 'DM Sans, sans-serif', animations: { enabled: false }, toolbar: { show: false } },
+      series: [{ name: 'Preguntas', data: [256, 585, 114] }],
+      xaxis: { categories: ['Fácil', 'Media', 'Difícil'], labels: { style: { fontSize: '11px', colors: '#64748b' } } },
+      colors: ['#2f7040'],
+      plotOptions: { bar: { horizontal: false, borderRadius: 6, columnWidth: '45%', distributed: true } },
+      legend: { show: false },
+      dataLabels: { enabled: true, offsetY: 0, style: { fontSize: '12px', fontWeight: 700 } },
+      grid: { borderColor: '#eef2ef', strokeDashArray: 4 },
+      yaxis: { labels: { style: { fontSize: '11px', colors: '#94a3b8' } } },
+      tooltip: { y: { formatter: (v) => v + ' preguntas' } }
+    }).render();
+
+    new ApexCharts(document.querySelector('#gradeChart'), {
+      chart: { type: 'bar', height: 320, fontFamily: 'DM Sans, sans-serif', animations: { enabled: false }, toolbar: { show: false } },
+      series: [{ name: 'Precisión', data: [62.8, 59.9, 58.7, 58.5, 50.8, 49.6, 47.5] }],
+      xaxis: { categories: ["SEGUNDO AÑO", "PRIMER AÑO", "QUINTO AÑO", "TERCER AÑO", "6TO GRADO", "CUARTO AÑO", "5TO GRADO"], max: 100, labels: { style: { fontSize: '11px', colors: '#64748b' }, formatter: (v) => Math.round(v) + '%' } },
+      colors: ['#2f7040'],
+      plotOptions: { bar: { horizontal: true, borderRadius: 6, barHeight: '55%', distributed: true } },
+      dataLabels: { enabled: true, formatter: (v) => fmt(v), style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'] } },
+      grid: { borderColor: '#eef2ef', strokeDashArray: 4 },
+      yaxis: { labels: { style: { fontSize: '11px', colors: '#334155', fontWeight: 600 } } },
+      legend: { show: false },
+      tooltip: { y: { formatter: (v) => fmt(v) } }
+    }).render();
+
+    new ApexCharts(document.querySelector('#pensumChart'), {
+      chart: { type: 'bar', height: 420, fontFamily: 'DM Sans, sans-serif', animations: { enabled: false }, toolbar: { show: false } },
+      series: [{ name: 'Precisión', data: [91.7, 87.9, 81.9, 78.1, 76.7, 40.1, 40.0, 36.9, 27.3, 26.6] }],
+      xaxis: { categories: ["SEGUNDO AÑO - EDFI-2A", "TERCER AÑO - EDFI-1A", "PRIMER AÑO - AP-1", "QUINTO AÑO - GH-5", "SEGUNDO AÑO - ORI-VOC-2A", "CUARTO AÑO - IDIOMAS-4A", "5TO GRADO - MAT-5G", "TERCER AÑO - IDIOMAS-3A", "CUARTO AÑO - BI-4", "TERCER AÑO - IN-TE-PR-3"], max: 100, labels: { style: { fontSize: '10px', colors: '#64748b' }, formatter: (v) => Math.round(v) + '%' } },
+      colors: ["#2f7040", "#2f7040", "#2f7040", "#2f7040", "#2f7040", "#e11d48", "#e11d48", "#e11d48", "#e11d48", "#e11d48"],
+      plotOptions: { bar: { horizontal: true, borderRadius: 5, barHeight: '62%', distributed: true } },
+      dataLabels: { enabled: true, formatter: (v) => fmt(v), style: { fontSize: '10px', fontWeight: 700, colors: ['#fff'] } },
+      grid: { borderColor: '#eef2ef', strokeDashArray: 4 },
+      yaxis: { labels: { maxWidth: 250, style: { fontSize: '10px', colors: '#334155', fontWeight: 600 } } },
+      legend: { show: false },
+      tooltip: { y: { formatter: (v) => fmt(v) } }
+    }).render();
+
+    new ApexCharts(document.querySelector('#areaChart'), {
+      chart: { type: 'bar', height: 420, fontFamily: 'DM Sans, sans-serif', animations: { enabled: false }, toolbar: { show: false } },
+      series: [{ name: 'Precisión', data: [91.7, 66.5, 62.0, 61.0, 59.6, 48.8, 46.9, 46.4, 41.3, 40.7] }],
+      xaxis: { categories: ["MGCT-EF", "CSC-SOC", "FHC-MG", "PMG-CT", "MG-CYT", "LEN", "ESP-MG", "LN-MGCT", "IN-MGCT", "MAT"], max: 100, labels: { style: { fontSize: '10px', colors: '#64748b' }, formatter: (v) => Math.round(v) + '%' } },
+      colors: ["#2f7040", "#2f7040", "#2f7040", "#2f7040", "#2f7040", "#e11d48", "#e11d48", "#e11d48", "#e11d48", "#e11d48"],
+      plotOptions: { bar: { horizontal: true, borderRadius: 5, barHeight: '62%', distributed: true } },
+      dataLabels: { enabled: true, formatter: (v) => fmt(v), style: { fontSize: '10px', fontWeight: 700, colors: ['#fff'] } },
+      grid: { borderColor: '#eef2ef', strokeDashArray: 4 },
+      yaxis: { labels: { maxWidth: 250, style: { fontSize: '10px', colors: '#334155', fontWeight: 600 } } },
+      legend: { show: false },
+      tooltip: { y: { formatter: (v) => fmt(v) } }
+    }).render();
+  </script>
+</body>
+</html>

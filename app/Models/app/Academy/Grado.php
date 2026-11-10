@@ -214,4 +214,22 @@ class Grado extends Model
             ],
         };
     }
+
+    /**
+     * Profesores con carga académica activa en este grado.
+     *
+     * @see Pevaluacion::getProfesoresConCargaActiva()
+     */
+    public function getProfesoresConCargaActiva(
+        ?int $lapsoId = null,
+        ?int $seccionId = null
+    ): \Illuminate\Support\Collection {
+        return Pevaluacion::getProfesoresConCargaActiva(
+            $lapsoId,
+            null,
+            $this->pestudio_id,
+            $this->id,
+            $seccionId
+        );
+    }
 }

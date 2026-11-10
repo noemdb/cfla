@@ -99,4 +99,26 @@ class Asignatura extends Model
     {
         return '['.$this->code.'] '.$this->name;
     }
+
+    /**
+     * Profesores con carga académica activa en esta asignatura.
+     *
+     * @see Pevaluacion::getProfesoresConCargaActiva()
+     */
+    public function getProfesoresConCargaActiva(
+        ?int $lapsoId = null,
+        ?int $pestudioId = null,
+        ?int $gradoId = null,
+        ?int $seccionId = null
+    ): \Illuminate\Support\Collection {
+        return Pevaluacion::getProfesoresConCargaActiva(
+            $lapsoId,
+            null,
+            $pestudioId,
+            $gradoId,
+            $seccionId,
+            null,
+            $this->id
+        );
+    }
 }

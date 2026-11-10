@@ -11,9 +11,11 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagSession;
+use App\Services\Planning\IndicatorMarkdownBuilder;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class IndexComponent extends Component
 {
@@ -238,7 +240,7 @@ class IndexComponent extends Component
             $totalProfesores = collect();
             foreach ($pestudios as $pestudio) {
                 $totalActivities += $pestudio->getActivitiesCount($lapsoId);
-                $totalProfesores = $totalProfesores->merge($pestudio->getProfesors($lapsoId));
+                $totalProfesores = $totalProfesores->merge($pestudio->getProfesoresConCargaActiva($lapsoId));
             }
 
             // Solo lecciones con contenido LMS (al menos una sección o recurso),
@@ -289,7 +291,9 @@ class IndexComponent extends Component
                         $profs = $profs->where('id', $this->selectedProfesorId);
                     }
                     $allProfesors = $allProfesors->merge($profs);
-                    $pestIeeProm = $pestudio->getProfesorsIEEsPROM($tab2Lapso->id);
+                    // El promedio se calcula sobre la misma lista que se muestra
+                    // (incluye el filtro por profesor cuando está activo).
+                    $pestIeeProm = $pestudio->getProfesorsIEEsPROM($tab2Lapso->id, $profs);
                     $totalBoletinsPROM += $pestIeeProm * $profs->count();
                     $profesorCount += $profs->count();
                 }
@@ -314,26 +318,32 @@ class IndexComponent extends Component
                 $pestudios = $this->getPestudiosForPeducativo($peducativo->id);
                 $pestudioIds = $pestudios->pluck('id');
 
-                // Single query for all pevIds in this peducativo
-                $pevIds = Pevaluacion::whereNull('pevaluacions.deleted_at')
-                    ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
-                    ->whereIn('pensums.pestudio_id', $pestudioIds)
-                    ->where('pevaluacions.lapso_id', $tab3Lapso->id)
-                    ->pluck('pevaluacions.id');
+                // Universo del tab: solo cargas académicas activas y profesores
+                // que no pertenezcan a Educación Inicial (is_inicial), los
+                // mismos criterios aplicados al listado del tab Profesores.
+                $pevs = Pevaluacion::query()
+                    ->activeLoad($tab3Lapso->id, $peducativo->id, null, null, null, null, null, true)
+                    ->whereIn('pestudios.id', $pestudioIds)
+                    ->select('pevaluacions.id', 'pevaluacions.profesor_id', 'pevaluacions.observations')
+                    ->get();
 
+                $pevIds = $pevs->pluck('id');
                 $totalPevCount = $pevIds->count();
 
                 // Single query for all activities in this peducativo
                 $allActivities = Activity::whereIn('pevaluacion_id', $pevIds)->get();
                 $totalActivities = $allActivities->count();
 
-                // Teacher counts (per pestudio — can't merge across pestudio FK)
-                $totalTeachers = 0;
-                $totalActiveTeachers = 0;
-                foreach ($pestudios as $pestudio) {
-                    $totalTeachers += $pestudio->getTeachersCount($tab3Lapso->id);
-                    $totalActiveTeachers += $pestudio->getActiveTeachersCount($tab3Lapso->id);
-                }
+                // Docentes del universo filtrado: carga activa y no is_inicial.
+                $profesorByPev = $pevs->pluck('profesor_id', 'id');
+                $totalTeachers = $pevs->pluck('profesor_id')->filter()->unique()->count();
+                $totalActiveTeachers = $allActivities
+                    ->pluck('pevaluacion_id')
+                    ->unique()
+                    ->map(fn ($pevId) => $profesorByPev[$pevId] ?? null)
+                    ->filter()
+                    ->unique()
+                    ->count();
 
                 // Aggregated indicators at peducativo level
                 $cobertura = $totalPevCount > 0
@@ -348,10 +358,7 @@ class IndexComponent extends Component
                 $aprobacion = $totalActivities > 0
                     ? round(($approved / $totalActivities) * 100, 1) : 0;
 
-                $pevWithObs = Pevaluacion::whereIn('id', $pevIds)
-                    ->whereNotNull('observations')
-                    ->where('observations', '<>', '')
-                    ->count();
+                $pevWithObs = $pevs->filter(fn ($pev) => filled($pev->observations))->count();
                 $supervision = $totalPevCount > 0
                     ? round(($pevWithObs / $totalPevCount) * 100, 1) : 0;
 
@@ -902,6 +909,168 @@ class IndexComponent extends Component
             'x' => $r->date,
             'y' => (int) $r->total,
         ])->toArray();
+    }
+
+    /**
+     * Descarga un snapshot Markdown de todo el dashboard respetando los
+     * filtros activos. El archivo está pensado para que un LLM lo analice
+     * y redacte un informe ejecutivo con contexto pedagógico y técnico.
+     */
+    public function downloadMarkdownReport()
+    {
+        $report = $this->buildMarkdownPayload();
+        $markdown = app(IndicatorMarkdownBuilder::class)->build($report);
+
+        $lapsoSlug = Str::slug(
+            $this->lapsos->firstWhere('id', $this->selectedLapsoId)?->name ?? 'sin-lapso'
+        ) ?: 'lapso';
+
+        $filename = 'indicadores-planificacion-'.$lapsoSlug.'-'.now()->format('Ymd_His').'.md';
+
+        return response()->streamDownload(
+            static function () use ($markdown): void {
+                echo $markdown;
+            },
+            $filename,
+            ['Content-Type' => 'text/markdown; charset=UTF-8']
+        );
+    }
+
+    /**
+     * Payload ya filtrado que consume `IndicatorMarkdownBuilder`.
+     * El builder no consulta la base de datos: toda la selección ocurre aquí.
+     */
+    private function buildMarkdownPayload(): array
+    {
+        $lapsoId = $this->selectedLapsoId;
+        $filteredPeducativos = $this->getFilteredPeducativos();
+        $profesor = $this->selectedProfesorId
+            ? Profesor::find($this->selectedProfesorId)
+            : null;
+
+        return [
+            'generated_at' => now(),
+            'source_url'   => route('app.planning.indicators.index'),
+
+            'filters' => [
+                'lapso'      => $this->lapsos->firstWhere('id', $lapsoId),
+                'peducativo' => $this->selectedPeducativoId
+                    ? $this->peducativos->firstWhere('id', $this->selectedPeducativoId)
+                    : null,
+                'pestudio'   => $this->selectedPestudioId
+                    ? $this->pestudios->firstWhere('id', $this->selectedPestudioId)
+                    : null,
+                'grado'      => $this->selectedGradoId
+                    ? Grado::find($this->selectedGradoId)
+                    : null,
+                'profesor'   => $profesor,
+                'ranges'     => [
+                    'activities'   => $this->chartActivitiesRange,
+                    'lessons'      => $this->chartLessonsRange,
+                    'scheduled'    => $this->chartScheduledRange,
+                    'registration' => $this->registrationRange,
+                ],
+            ],
+
+            'lapsos' => $this->lapsos,
+            'cargas_por_lapso' => Pevaluacion::query()
+                ->whereNull('pevaluacions.deleted_at')
+                ->selectRaw('pevaluacions.lapso_id, COUNT(*) as total')
+                ->groupBy('pevaluacions.lapso_id')
+                ->pluck('total', 'lapso_id')
+                ->all(),
+
+            'catalog' => [
+                'peducativos' => $filteredPeducativos,
+            ],
+
+            'global' => [
+                'total_activities'         => $this->totalActivities,
+                'activity_approved'        => $this->activityApproved,
+                'activity_with_comment'    => $this->activityWithComment,
+                'total_diag_active'        => $this->totalDiagActive,
+                'diag_students'            => $this->diagStudents,
+                'diag_answers'             => $this->diagAnswers,
+                'diag_precision'           => $this->diagPrecision,
+                'total_profesores_activos' => $this->totalProfesoresActivos,
+                'profesor_pevaluacions'    => $this->profesorPevaluacions,
+                'profesor_diagnostics'     => $this->profesorDiagnostics,
+                'lesson_total'             => $this->lessonTotal,
+                'lesson_published'         => $this->lessonPublished,
+                'lesson_scheduled'         => $this->lessonScheduled,
+                'lesson_published_pct'     => $this->lessonPublishedPct,
+                'lesson_scheduled_pct'     => $this->lessonScheduledPct,
+            ],
+
+            'tab1' => $this->peducativoMainIndicators,
+            'tab2' => $this->tab2Data,
+            'tab3' => $this->tab3Data,
+            'tab4' => $this->tab4Data,
+
+            'charts' => [
+                'activities'       => $this->chartActivitiesByDay,
+                'lessons'          => $this->normalizeLessonChart($this->chartLessonsByDay),
+                'scheduled'        => $this->chartScheduledByDay,
+                'activities_flow'  => $this->chartActivitiesFlow,
+                'lessons_flow'     => $this->chartLessonsFlow,
+                'diagnostics_flow' => $this->chartDiagnosticsFlow,
+            ],
+
+            'excluded_inicial' => $this->getExcludedInicialByPeducativo($lapsoId),
+        ];
+    }
+
+    /**
+     * Garantiza la forma { categories: [], series: [] } que espera el builder,
+     * incluso cuando el gráfico de lecciones no tiene datos.
+     */
+    private function normalizeLessonChart($chart): array
+    {
+        if (!is_array($chart) || !isset($chart['categories'], $chart['series'])) {
+            return ['categories' => [], 'series' => []];
+        }
+
+        return $chart;
+    }
+
+    /**
+     * Profesores con carga activa que quedan fuera del listado por `is_inicial`,
+     * agrupados por programa educativo. Se calcula sobre el universo sin la
+     * exclusión para poder auditar a quiénes afecta el criterio.
+     */
+    private function getExcludedInicialByPeducativo(?int $lapsoId): array
+    {
+        $result = [];
+
+        foreach ($this->getFilteredPeducativos() as $peducativo) {
+            $pestudioIds = $this->getPestudiosForPeducativo($peducativo->id)->pluck('id');
+
+            $profesorIds = Pevaluacion::query()
+                ->activeLoad(
+                    $lapsoId,
+                    $peducativo->id,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false
+                )
+                ->whereIn('pestudios.id', $pestudioIds)
+                ->when($this->selectedProfesorId, fn ($q) => $q->where('pevaluacions.profesor_id', $this->selectedProfesorId))
+                ->select('pevaluacions.profesor_id')
+                ->distinct()
+                ->pluck('profesor_id');
+
+            $result[$peducativo->id] = Profesor::query()
+                ->whereIn('id', $profesorIds)
+                ->whereHas('user', fn ($q) => $q->where('is_inicial', true))
+                ->orderBy('lastname')
+                ->orderBy('name')
+                ->get();
+        }
+
+        return $result;
     }
 
     public function render()

@@ -8,7 +8,7 @@
             <h1 class="text-lg font-extrabold text-white mb-2">Indicadores de Planificación</h1>
             <p class="text-cyan-400 font-medium">Dashboard institucional con KPIs por programa educativo y período académico.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('app.planning.index') }}"
                 class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 min-h-[44px] bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +23,17 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
                 <span class="hidden sm:inline">Refrescar</span>
+            </button>
+            <button wire:click="downloadMarkdownReport"
+                wire:loading.attr="disabled"
+                title="Descargar snapshot en Markdown (.md) con los filtros activos"
+                aria-label="Descargar snapshot en Markdown"
+                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 min-h-[44px] min-w-[44px] bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold disabled:opacity-50 disabled:cursor-wait">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span class="hidden sm:inline">Descargar MD</span>
+                <span class="sm:hidden">MD</span>
             </button>
         </div>
     </div>
@@ -495,7 +506,7 @@
                                             <tr class="border-b border-white/5">
                                                 <th class="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</th>
                                                 <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Actividades</th>
-                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Lecciones publicadas, programadas y borradores">Lecciones</th>
+                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Actividades con contenido LMS (secciones, recursos, enlaces o embeds)">Lecciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
@@ -522,6 +533,18 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="mt-3 flex items-start gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
+                                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p class="text-[11px] leading-relaxed text-gray-500">
+                                        <span class="font-semibold text-gray-400">Nota:</span>
+                                        se excluyen de este listado los profesores de Educación Inicial
+                                        (<span class="font-mono text-[10px] text-gray-400">is_inicial</span>):
+                                        gestionan las actividades de planificación con otra metodología y sus
+                                        indicadores no son comparables con los del resto de la carga académica.
+                                    </p>
                                 </div>
                             @else
                                 <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">

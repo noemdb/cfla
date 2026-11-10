@@ -76,6 +76,26 @@ class Peducativo extends Model
         return Peducativo::where('peducativos.status_active', "true")->get();
     }
 
+    /**
+     * Profesores con carga académica activa en este programa educativo.
+     *
+     * @see Pevaluacion::getProfesoresConCargaActiva()
+     */
+    public function getProfesoresConCargaActiva(
+        ?int $lapsoId = null,
+        ?int $pestudioId = null,
+        ?int $gradoId = null,
+        ?int $seccionId = null
+    ): \Illuminate\Support\Collection {
+        return Pevaluacion::getProfesoresConCargaActiva(
+            $lapsoId,
+            $this->id,
+            $pestudioId,
+            $gradoId,
+            $seccionId
+        );
+    }
+
     public function getFullNameAttribute()
     {
         return "{$this->name}";

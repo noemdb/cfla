@@ -136,4 +136,21 @@ class Pensum extends Model implements \App\Contracts\Auditable
 
         return "{$gradoName} - {$asignaturaName}";
     }
+
+    /**
+     * Profesores con carga académica activa en esta área de formación.
+     *
+     * @see Pevaluacion::getProfesoresConCargaActiva()
+     */
+    public function getProfesoresConCargaActiva(?int $lapsoId = null): \Illuminate\Support\Collection
+    {
+        return Pevaluacion::getProfesoresConCargaActiva(
+            $lapsoId,
+            null,
+            null,
+            null,
+            null,
+            $this->id
+        );
+    }
 }

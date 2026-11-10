@@ -250,21 +250,39 @@ class Pestudio extends Model
     /**
      * IEE promedio (ieePROM) — promedio de boletins por profesor en este pestudio.
      * Se usa como denominador para IRE.
+     *
+     * @param  int|null  $lapsoId
+     * @param  \Illuminate\Support\Collection|null  $profesores  Colección ya filtrada
+     *                                                            (p. ej. solo un profesor seleccionado). Si se omite,
+     *                                                            se usan los profesores con carga académica activa.
      */
-    public function getProfesorsIEEsPROM($lapsoId = null)
+    public function getProfesorsIEEsPROM($lapsoId = null, $profesores = null)
     {
-        $profesors = $this->getProfesors($lapsoId);
+        $profesores = $profesores ?? $this->getProfesoresConCargaActiva($lapsoId);
 
-        if ($profesors->isEmpty()) {
+        if ($profesores->isEmpty()) {
             return 0;
         }
 
+        $boletinsByProfesor = Boletin::query()
+            ->join('evaluacions', 'boletins.evaluacion_id', '=', 'evaluacions.id')
+            ->join('pevaluacions', 'evaluacions.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->whereIn('pevaluacions.profesor_id', $profesores->pluck('id'))
+            ->where('pensums.pestudio_id', $this->id)
+            ->whereNull('evaluacions.deleted_at')
+            ->whereNull('pevaluacions.deleted_at')
+            ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
+            ->selectRaw('pevaluacions.profesor_id as profesor_id, COUNT(boletins.id) as total')
+            ->groupBy('pevaluacions.profesor_id')
+            ->pluck('total', 'profesor_id');
+
         $totalBoletins = 0;
-        foreach ($profesors as $profesor) {
-            $totalBoletins += $profesor->getBoletins($lapsoId, $this->id)->count();
+        foreach ($profesores as $profesor) {
+            $totalBoletins += (int) ($boletinsByProfesor[$profesor->id] ?? 0);
         }
 
-        return $totalBoletins / $profesors->count();
+        return $totalBoletins / $profesores->count();
     }
 
     /**
@@ -443,72 +461,70 @@ class Pestudio extends Model
     }
 
     /**
-     * Count of distinct profesors who have pevaluacions in this pestudio.
+     * Cantidad de profesores con carga académica activa en este pestudio.
      */
     public function getProfesoresConCargaCount(?int $lapsoId = null): int
     {
-        $query = Profesor::join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
-            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
-            ->where('profesors.status_active', 'true')
-            ->where('pensums.pestudio_id', $this->id)
-            ->whereNull('pevaluacions.deleted_at');
-
-        if ($lapsoId) {
-            $query->where('pevaluacions.lapso_id', $lapsoId);
-        }
-
-        return $query->distinct('profesors.id')->count('profesors.id');
+        return $this->getProfesoresConCargaActiva($lapsoId)->count();
     }
 
     /**
-     * Profesors who have pevaluacions in this pestudio, with full KPI data.
-     * Uses real IEE/IEE-CN/IRE formulas via Profesor model methods.
+     * Profesores con carga académica activa en este pestudio, con sus KPIs
+     * de actividades, aprobación y lecciones con contenido LMS.
+     *
+     * Devuelve modelos `Profesor` con los atributos calculados
+     * `activities_count`, `approval_rate` y `lessons_count`.
+     *
+     * Excluye a los profesores de Educación Inicial (`users.is_inicial`),
+     * que planifican con otra metodología; sus indicadores no son comparables
+     * con los del resto de la carga académica.
      */
     public function getProfesorsWithKPIs(?int $lapsoId = null): \Illuminate\Support\Collection
     {
-        $profesors = Profesor::where('profesors.status_active', 'true')
-            ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
+        $profesores = $this->getProfesoresConCargaActiva($lapsoId, null, null, true);
+
+        if ($profesores->isEmpty()) {
+            return $profesores;
+        }
+
+        $profesorIds = $profesores->pluck('id');
+
+        $activityStats = Activity::query()
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->where('pensums.pestudio_id', $this->id)
+            ->whereIn('pevaluacions.profesor_id', $profesorIds)
             ->whereNull('pevaluacions.deleted_at')
             ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
-            ->select('profesors.id', 'profesors.name', 'profesors.lastname', 'profesors.ci_profesor')
-            ->distinct()
-            ->get();
+            ->groupBy('pevaluacions.profesor_id')
+            ->selectRaw('pevaluacions.profesor_id as profesor_id, COUNT(activities.id) as activities_count, SUM(CASE WHEN activities.status = 1 THEN 1 ELSE 0 END) as approved_count')
+            ->get()
+            ->keyBy('profesor_id');
 
-        // Pre-calculate ieePROM for IRE
-        $ieePROM = $this->getProfesorsIEEsPROM($lapsoId);
+        $lessonStats = Activity::withLmsContent()
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pensums.pestudio_id', $this->id)
+            ->whereIn('pevaluacions.profesor_id', $profesorIds)
+            ->whereNull('pevaluacions.deleted_at')
+            ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
+            ->groupBy('pevaluacions.profesor_id')
+            ->selectRaw('pevaluacions.profesor_id as profesor_id, COUNT(DISTINCT activities.id) as lessons_count')
+            ->get()
+            ->keyBy('profesor_id');
 
-        return $profesors->map(function ($profesor) use ($lapsoId, $ieePROM) {
-            $fullProfesor = Profesor::find($profesor->id);
+        return $profesores->map(function (Profesor $profesor) use ($activityStats, $lessonStats) {
+            $stats = $activityStats->get($profesor->id);
+            $activitiesCount = (int) ($stats->activities_count ?? 0);
+            $approvedActivities = (int) ($stats->approved_count ?? 0);
 
-            $pevIds = Pevaluacion::where('profesor_id', $profesor->id)
-                ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
-                ->where('pensums.pestudio_id', $this->id)
-                ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
-                ->pluck('pevaluacions.id');
+            $profesor->activities_count = $activitiesCount;
+            $profesor->approval_rate = $activitiesCount > 0
+                ? round(($approvedActivities / $activitiesCount) * 100, 1)
+                : 0;
+            $profesor->lessons_count = (int) ($lessonStats->get($profesor->id)->lessons_count ?? 0);
 
-            $pevCount = $pevIds->count();
-
-            $activitiesCount = Activity::whereIn('pevaluacion_id', $pevIds)->count();
-            $approvedActivities = Activity::whereIn('pevaluacion_id', $pevIds)
-                ->where('status', true)
-                ->count();
-
-            $approvalRate = $activitiesCount > 0 ? round(($approvedActivities / $activitiesCount) * 100, 1) : 0;
-
-            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
-                ->whereIn('activities.pevaluacion_id', $pevIds)
-                ->count(DB::raw('DISTINCT activities.id'));
-
-            return (object) [
-                'id' => $profesor->id,
-                'full_name' => trim("{$profesor->lastname} {$profesor->name}"),
-                'ci_profesor' => $profesor->ci_profesor,
-                'activities_count' => $activitiesCount,
-                'approval_rate' => $approvalRate,
-                'lessons_count' => $lessonsCount,
-            ];
+            return $profesor;
         });
     }
 
@@ -577,4 +593,26 @@ class Pestudio extends Model
         ];
     }
 
+    /**
+     * Profesores con carga académica activa en este plan de estudio.
+     *
+     * @see Pevaluacion::getProfesoresConCargaActiva()
+     */
+    public function getProfesoresConCargaActiva(
+        ?int $lapsoId = null,
+        ?int $gradoId = null,
+        ?int $seccionId = null,
+        bool $excludeInicial = false
+    ): \Illuminate\Support\Collection {
+        return Pevaluacion::getProfesoresConCargaActiva(
+            $lapsoId,
+            $this->peducativo_id,
+            $this->id,
+            $gradoId,
+            $seccionId,
+            null,
+            null,
+            $excludeInicial
+        );
+    }
 }

@@ -2,9 +2,11 @@
 
 namespace App\Models\app\Academy;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Pevaluacion extends Model implements \App\Contracts\Auditable
@@ -202,6 +204,132 @@ class Pevaluacion extends Model implements \App\Contracts\Auditable
                     ->orWhereNull('pensums.status_active');
             });
         });
+    }
+
+    // ─── CARGA ACADÉMICA ACTIVA ─────────────────────────────────
+
+    /**
+     * Cargas académicas activas: cadena completa
+     * pestudio → grado → sección → pensum → asignatura vigente.
+     *
+     * La cadena se resuelve de forma coherente:
+     *  - `grados` se toma desde `seccions.grado_id` (el grado real de la sección).
+     *  - `pensums` debe pertenecer a ese mismo grado y pestudio, de modo que una
+     *    carga con pensum de otro plan no se considere activa.
+     *
+     * Todos los modelos de la cadena deben estar vigentes (sin `deleted_at`) y
+     * con su bandera de estado activa. `Pestudio` no usa SoftDeletes y
+     * `Pensum.status_active` está casteado a boolean.
+     *
+     * @param  int|null  $lapsoId  Limita al momento académico.
+     * @param  int|null  $peducativoId  Limita al programa educativo.
+     * @param  int|null  $pestudioId  Limita al plan de estudio.
+     * @param  int|null  $gradoId  Limita al grado.
+     * @param  int|null  $seccionId  Limita a la sección.
+     * @param  int|null  $pensumId  Limita al área de formación.
+     * @param  int|null  $asignaturaId  Limita a la asignatura.
+     * @param  bool  $excludeInicial  Excluye profesores cuyo usuario tiene
+     *                                `users.is_inicial = true` (usan otra
+     *                                metodología para planificar actividades).
+     */
+    public function scopeActiveLoad(
+        $query,
+        ?int $lapsoId = null,
+        ?int $peducativoId = null,
+        ?int $pestudioId = null,
+        ?int $gradoId = null,
+        ?int $seccionId = null,
+        ?int $pensumId = null,
+        ?int $asignaturaId = null,
+        bool $excludeInicial = false
+    ) {
+        return $query
+            ->join('profesors', 'pevaluacions.profesor_id', '=', 'profesors.id')
+            ->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
+            ->join('grados', 'seccions.grado_id', '=', 'grados.id')
+            ->join('pestudios', 'grados.pestudio_id', '=', 'pestudios.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->join('asignaturas', 'pensums.asignatura_id', '=', 'asignaturas.id')
+            // El pensum de la carga debe corresponder al grado y pestudio de la sección.
+            ->whereColumn('pensums.grado_id', 'grados.id')
+            ->whereColumn('pensums.pestudio_id', 'pestudios.id')
+            ->whereNull('pevaluacions.deleted_at')
+            ->whereNull('profesors.deleted_at')
+            ->whereNull('seccions.deleted_at')
+            ->whereNull('grados.deleted_at')
+            ->whereNull('pestudios.deleted_at')
+            ->whereNull('pensums.deleted_at')
+            ->whereNull('asignaturas.deleted_at')
+            ->where('profesors.status_active', 'true')
+            ->where('seccions.status_active', 'true')
+            ->where('grados.status_active', 'true')
+            ->where('pestudios.status_active', 'true')
+            ->where('pensums.status_active', true)
+            ->when($lapsoId, fn ($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
+            ->when($peducativoId, fn ($q) => $q->where('pestudios.peducativo_id', $peducativoId))
+            ->when($pestudioId, fn ($q) => $q->where('pestudios.id', $pestudioId))
+            ->when($gradoId, fn ($q) => $q->where('grados.id', $gradoId))
+            ->when($seccionId, fn ($q) => $q->where('seccions.id', $seccionId))
+            ->when($pensumId, fn ($q) => $q->where('pensums.id', $pensumId))
+            ->when($asignaturaId, fn ($q) => $q->where('asignaturas.id', $asignaturaId))
+            ->when($excludeInicial, fn ($q) => $q->whereNotExists(function ($sub) {
+                $sub->select(DB::raw(1))
+                    ->from('users')
+                    ->whereColumn('users.id', 'profesors.user_id')
+                    ->where('users.is_inicial', true);
+            }));
+    }
+
+    /**
+     * Builder de profesores con carga académica activa, listo para consultar
+     * (con `distinct` y orden alfabético por apellido/nombre).
+     */
+    public static function queryProfesoresConCargaActiva(
+        ?int $lapsoId = null,
+        ?int $peducativoId = null,
+        ?int $pestudioId = null,
+        ?int $gradoId = null,
+        ?int $seccionId = null,
+        ?int $pensumId = null,
+        ?int $asignaturaId = null,
+        bool $excludeInicial = false
+    ): Builder {
+        $profesorIds = static::query()
+            ->activeLoad($lapsoId, $peducativoId, $pestudioId, $gradoId, $seccionId, $pensumId, $asignaturaId, $excludeInicial)
+            ->select('pevaluacions.profesor_id')
+            ->toBase();
+
+        return Profesor::query()
+            ->select('profesors.*')
+            ->whereIn('profesors.id', $profesorIds)
+            ->distinct()
+            ->orderBy('profesors.lastname')
+            ->orderBy('profesors.name');
+    }
+
+    /**
+     * Profesores con carga académica activa para los filtros indicados.
+     */
+    public static function getProfesoresConCargaActiva(
+        ?int $lapsoId = null,
+        ?int $peducativoId = null,
+        ?int $pestudioId = null,
+        ?int $gradoId = null,
+        ?int $seccionId = null,
+        ?int $pensumId = null,
+        ?int $asignaturaId = null,
+        bool $excludeInicial = false
+    ): Collection {
+        return static::queryProfesoresConCargaActiva(
+            $lapsoId,
+            $peducativoId,
+            $pestudioId,
+            $gradoId,
+            $seccionId,
+            $pensumId,
+            $asignaturaId,
+            $excludeInicial
+        )->get();
     }
 
     // ─── ACCESSORS ───────────────────────────────────────────────

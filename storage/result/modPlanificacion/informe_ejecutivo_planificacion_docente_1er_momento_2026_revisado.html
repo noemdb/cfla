@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe Ejecutivo | Gestión de Planificación Docente — 1.er Momento</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          forest: { 50:'#f1f7f2',100:'#e1eee3',200:'#c5ddc9',300:'#9fc5a6',400:'#6fa77c',500:'#478653',600:'#2f7040',700:'#245b34',800:'#19472a',900:'#123820',950:'#092516' },
+          limeleaf: '#9acb52'
+        },
+        boxShadow: {
+          soft: '0 12px 35px rgba(15, 55, 31, .07)',
+          lift: '0 18px 45px rgba(15, 55, 31, .11)'
+        }
+      }}
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; }
+    body { font-family:'DM Sans',sans-serif; background:#f5f8f5; color:#1b2d22; }
+    h1,h2,h3,.display { font-family:'Manrope',sans-serif; }
+    .eyebrow { letter-spacing:.16em; }
+    .report-grid { background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px); background-size:18px 18px; }
+    .chart { min-height:300px; }
+    .metric-bar { height:7px; border-radius:999px; background:#e8efe9; overflow:hidden; }
+    .metric-bar > span { display:block; height:100%; border-radius:999px; }
+    .section-number { width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#eaf3ec;color:#245b34;font-weight:800;font-size:12px; }
+    @media print {
+      body { background:#fff !important; }
+      .no-print { display:none !important; }
+      .print-break { break-before:page; }
+      .shadow-soft,.shadow-lift { box-shadow:none !important; }
+      .report-shell { max-width:none !important; padding:0 !important; }
+      .card { break-inside:avoid; }
+      a { text-decoration:none; color:inherit; }
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <main class="report-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <!-- Cabecera institucional -->
+    <header class="relative overflow-hidden rounded-[28px] bg-forest-900 text-white shadow-lift">
+      <div class="absolute inset-0 report-grid opacity-40"></div>
+      <div class="absolute -right-20 -top-28 h-96 w-96 rounded-full border border-white/10"></div>
+      <div class="absolute -right-4 -top-12 h-72 w-72 rounded-full border border-white/10"></div>
+      <div class="relative px-7 py-8 sm:px-10 sm:py-10 lg:px-12">
+        <div class="flex flex-col gap-7 md:flex-row md:items-start md:justify-between">
+          <div class="max-w-3xl">
+            <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase eyebrow text-forest-100">
+              <span class="h-1.5 w-1.5 rounded-full bg-limeleaf"></span>
+              Informe de gestión académica
+            </div>
+            <p class="text-xs font-semibold uppercase tracking-[.22em] text-forest-200">Subdirección Académica</p>
+            <h1 class="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[42px]">
+              Gestión de la<br class="hidden sm:block"> planificación docente
+            </h1>
+            <p class="mt-4 max-w-2xl text-sm leading-6 text-forest-100 sm:text-base">
+              Informe ejecutivo de resultados, seguimiento y oportunidades de mejora a partir de los indicadores registrados en la plataforma automatizada.
+            </p>
+          </div>
+          <div class="shrink-0 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm md:min-w-[210px]">
+            <p class="text-[10px] font-bold uppercase tracking-[.18em] text-forest-200">Período evaluado</p>
+            <p class="mt-2 text-xl font-extrabold">1.er Momento</p>
+            <p class="mt-1 text-xs text-forest-100">01 jul — 12 dic 2026</p>
+            <div class="mt-4 border-t border-white/15 pt-3">
+              <p class="text-[10px] uppercase tracking-wider text-forest-200">Corte del reporte</p>
+              <p class="mt-1 text-sm font-semibold">10 noviembre 2026</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-2">
+          <span class="rounded-lg bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white">Educación Inicial</span>
+          <span class="rounded-lg bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white">Educación Primaria</span>
+          <span class="rounded-lg bg-white/15 px-3 py-1.5 text-[11px] font-semibold text-white">Educación Media General</span>
+          <span class="rounded-lg border border-limeleaf/40 bg-limeleaf/15 px-3 py-1.5 text-[11px] font-semibold text-lime-100">Corte institucional automatizado</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Nota de alcance -->
+    <section class="mt-6 rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 shadow-sm">
+      <div class="flex gap-3">
+        <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+          <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-blue-950">Nota de lectura ejecutiva</p>
+          <p class="mt-1 text-sm leading-6 text-blue-900/85">
+            Este informe se circunscribe a la gestión de <strong>actividades de planificación docente</strong> asociadas a cargas activas: registro, participación, aprobación, seguimiento y supervisión. Las cifras se presentan con el denominador definido en el snapshot; no deben compararse entre pestañas sin considerar sus criterios de inclusión. <strong>La Subdirección Académica nunca ha dejado de dar instrucciones:</strong> las socializa de forma oportuna. El siguiente paso es registrar esa gestión en la plataforma automatizada para que quede documentada y sea verificable.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resumen ejecutivo -->
+    <section class="mt-10">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">01 / Síntesis directiva</p>
+          <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">Resumen ejecutivo</h2>
+        </div>
+        <span class="rounded-full bg-forest-100 px-3 py-1 text-[11px] font-bold text-forest-800">Resultados al 10.11.2026</span>
+      </div>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      </div>
+
+      <div class="mt-5 grid gap-4 lg:grid-cols-[1.35fr_.9fr]">
+        <div class="card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-soft">
+          <div class="flex items-center gap-2">
+            <span class="section-number">A</span>
+            <h3 class="text-base font-extrabold text-slate-900">Hallazgos para orientar la gestión</h3>
+          </div>
+          <ul class="mt-4 space-y-3">
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-forest-600"></span><span><strong class="text-slate-900">Participación registrada:</strong> alcanza 100% en Inicial, Primaria y Media General dentro del universo evaluado.</span></li>
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-amber-500"></span><span><strong class="text-slate-900">Diferencias en la aprobación:</strong> Media General registra 27,6%, mientras que Primaria alcanza 67,1%.</span></li>
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-rose-500"></span><span><strong class="text-slate-900">Indicaciones verbales con registro por consolidar:</strong> la Subdirección orienta de forma verbal y oportuna; el seguimiento asentado en la plataforma alcanza 0,0% en Inicial, 4,1% en Primaria y 2,5% en Media General.</span></li>
+            <li class="flex gap-3 text-sm leading-6 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-slate-400"></span><span><strong class="text-slate-900">Supervisión con registro pendiente:</strong> las observaciones asentadas en la plataforma son 0,0% en los tres programas; la cifra mide el registro, no la supervisión realizada.</span></li>
+          </ul>
+        </div>
+        <aside class="rounded-2xl border border-forest-200 bg-forest-50 p-6">
+          <div class="flex items-center gap-2">
+            <span class="rounded-lg bg-forest-700 p-2 text-white">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>
+            </span>
+            <h3 class="text-base font-extrabold text-forest-950">Lectura de la Subdirección</h3>
+          </div>
+          <p class="mt-4 text-sm leading-6 text-forest-950">
+            La plataforma evidencia una incorporación generalizada del registro de actividades. <strong class="text-forest-950">La Subdirección Académica nunca ha dejado de dar instrucciones:</strong> las socializa verbalmente y de forma oportuna con los equipos docentes, y ese acompañamiento sostiene el proceso. El siguiente paso es atender el registro de esa información en la plataforma automatizada, de modo que las orientaciones, las revisiones y las decisiones queden documentadas.
+          </p>
+          <div class="mt-5 border-t border-forest-200 pt-4">
+            <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-forest-700">Siguiente paso de gestión</p>
+            <p class="mt-1 text-lg font-extrabold text-forest-950">Registrar en la plataforma lo que ya se orienta verbalmente</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Alcance -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">02</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Marco de evaluación</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Alcance y universo de análisis</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-4 md:grid-cols-3">
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Cargas activas analizadas</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">274</p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">12 Inicial · 132 Primaria · 130 Media General</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Actividades en ese universo</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">3.264</p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">110 Inicial · 1.911 Primaria · 1.243 Media General</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p class="text-xs font-semibold text-slate-500">Cobertura promedio global*</p>
+          <p class="mt-2 display text-3xl font-extrabold text-forest-900">11,91</p>
+          <p class="mt-1 text-xs leading-5 text-slate-500">Actividades por carga activa (3.264 ÷ 274)</p>
+        </div>
+      </div>
+      <p class="mt-3 text-[11px] leading-5 text-slate-500">*Cálculo agregado derivado de los totales por programa del indicador de actividades. No sustituye la cobertura individual publicada para cada programa.</p>
+      <div class="mt-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="text-sm font-bold text-slate-800">Filtros aplicados</p>
+            <p class="mt-1 text-xs text-slate-500">Lapso: 1.er Momento · Programa: Todos · Plan: Todos · Grado: Todos · Profesor: Todos</p>
+          </div>
+          <span class="rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-600">01/07/2026 – 12/12/2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparativo -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">03</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Desempeño por programa</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Comparativo de indicadores de planificación</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-4 lg:grid-cols-2">
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <div class="flex items-start justify-between gap-3">
+            <div><h3 class="font-extrabold text-slate-900">Volumen de actividades</h3><p class="mt-1 text-xs text-slate-500">Actividades registradas en cargas activas</p></div>
+            <span class="rounded-lg bg-forest-50 px-2.5 py-1 text-[10px] font-bold text-forest-700">Volumen</span>
+          </div>
+          <div id="activitiesChart" class="chart mt-3"></div>
+        </article>
+        <article class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <div class="flex items-start justify-between gap-3">
+            <div><h3 class="font-extrabold text-slate-900">Aprobación de actividades</h3><p class="mt-1 text-xs text-slate-500">Actividades aprobadas ÷ actividades registradas</p></div>
+            <span class="rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-800">Validación</span>
+          </div>
+          <div id="approvalChart" class="chart mt-3"></div>
+        </article>
+        <article hidden class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <div class="flex items-start justify-between gap-3">
+            <div><h3 class="font-extrabold text-slate-900">Seguimiento y supervisión</h3><p class="mt-1 text-xs text-slate-500">Registro de comentarios y observaciones por programa</p></div>
+            <span class="rounded-lg bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700">Acompañamiento</span>
+          </div>
+          <div id="followupChart" class="chart mt-3"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Hallazgos por programa -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">04</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Análisis segmentado</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Resultados por programa educativo</h2>
+        </div>
+      </div>
+      <div class="mt-5 space-y-4">
+        <article class="card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+          <div class="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><h3 class="font-extrabold text-slate-900">Educación Inicial</h3><p class="mt-1 text-xs text-slate-500">12 cargas activas · 110 actividades</p></div>
+            <span class="w-fit rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold text-amber-800">Aprobación: 52,7%</span>
+          </div>
+          <div class="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div><p class="text-[11px] text-slate-500">Cobertura curricular</p><p class="mt-1 text-2xl font-extrabold text-forest-900">9,17</p><p class="text-[10px] text-slate-400">Actividades por carga</p></div>
+            <div><p class="text-[11px] text-slate-500">Participación</p><p class="mt-1 text-2xl font-extrabold text-forest-900">100%</p><div class="metric-bar mt-2"><span class="bg-forest-600" style="width:100%"></span></div></div>
+            <div><p class="text-[11px] text-slate-500">Seguimiento</p><p class="mt-1 text-2xl font-extrabold text-rose-700">0,0%</p><div class="metric-bar mt-2"><span class="bg-rose-500" style="width:0%"></span></div></div>
+            <div hidden><p class="text-[11px] text-slate-500">Supervisión registrada</p><p class="mt-1 text-2xl font-extrabold text-slate-700">0,0%</p><div class="metric-bar mt-2"><span class="bg-slate-400" style="width:0%"></span></div></div>
+          </div>
+          <div class="border-t border-slate-100 px-5 py-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-forest-700">Indicador — Actividades sobre el promedio</p>
+                <p class="mt-1 text-xs text-slate-500">Actividades cuyo texto de enseñanza supera el promedio de palabras del plan (&gt;3 letras por palabra).</p>
+              </div>
+              <div class="flex items-center gap-3 rounded-lg border border-forest-200 bg-forest-50 px-3 py-1.5">
+                <span class="text-[10px] font-bold uppercase text-forest-700">Buen desempeño</span>
+                <span class="text-base font-extrabold text-forest-900">100,0%</span>
+              </div>
+            </div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Promedio esperado</p><p class="mt-1 text-lg font-extrabold text-slate-900">0</p><p class="text-[10px] text-slate-500">palabras (&gt;3 letras) por actividad</p></div>
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Actividades evaluadas</p><p class="mt-1 text-lg font-extrabold text-slate-900">110</p><p class="text-[10px] text-slate-500">del universo de cargas activas</p></div>
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Superan el promedio</p><p class="mt-1 text-lg font-extrabold text-slate-900">110</p><p class="text-[10px] text-slate-500">de 110 actividades</p></div>
+            </div>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-forest-700">Mayor indicador</p>
+                <table class="mt-2 w-full text-[11px]">
+                  <thead class="text-[9px] uppercase tracking-wider text-slate-400"><tr><th class="text-left font-bold">Docente</th><th class="text-center font-bold">Superan</th><th class="text-right font-bold">%</th></tr></thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">IBARRA ANA</td><td class="py-1.5 text-center text-slate-500">48/48</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">D´LIMA OVIEDO MARIA MILAGRO</td><td class="py-1.5 text-center text-slate-500">30/30</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">BAZÁN GUEVARA ANNA YULIANNY</td><td class="py-1.5 text-center text-slate-500">12/12</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">MUÑOZ GALUP JOSÉ DELFIN</td><td class="py-1.5 text-center text-slate-500">10/10</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">SALAS GRATEROL RICHARD JOSE</td><td class="py-1.5 text-center text-slate-500">10/10</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="rounded-xl border border-slate-200 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-rose-700">Menor indicador</p>
+                <p class="mt-2 text-[11px] leading-5 text-slate-500">Los cinco docentes del programa registran 100,0%: no hay diferencias que permitan identificar un grupo de menor indicador.</p>
+              </div>
+            </div>
+            <p class="mt-2 text-[10px] leading-5 text-slate-400">El plan de Inicial registra 0 como promedio esperado, por lo que toda actividad con texto lo supera. El dato se reporta como referencia y no como medida de calidad. Ranking restringido a docentes con al menos 10 actividades; el programa solo cuenta con 5 docentes que cumplen ese mínimo.</p>
+          </div>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-6 text-slate-600"><strong class="text-slate-800">Lectura:</strong> la participación está extendida. Las indicaciones de la Subdirección se brindan verbalmente de forma oportuna; el siguiente paso es asentarlas en la plataforma, donde todavía no se registran comentarios de seguimiento ni observaciones de supervisión. El 52,7% de aprobación deja una brecha de validación que requiere revisión de las actividades pendientes.</div>
+        </article>
+
+        <article class="card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+          <div class="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><h3 class="font-extrabold text-slate-900">Educación Primaria</h3><p class="mt-1 text-xs text-slate-500">132 cargas activas · 1.911 actividades</p></div>
+            <span class="w-fit rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold text-emerald-800">Mayor aprobación: 67,1%</span>
+          </div>
+          <div class="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div><p class="text-[11px] text-slate-500">Cobertura curricular</p><p class="mt-1 text-2xl font-extrabold text-forest-900">14,48</p><p class="text-[10px] text-slate-400">Actividades por área de formación</p></div>
+            <div><p class="text-[11px] text-slate-500">Participación</p><p class="mt-1 text-2xl font-extrabold text-forest-900">100%</p><div class="metric-bar mt-2"><span class="bg-forest-600" style="width:100%"></span></div></div>
+            <div><p class="text-[11px] text-slate-500">Seguimiento</p><p class="mt-1 text-2xl font-extrabold text-amber-700">4,1%</p><div class="metric-bar mt-2"><span class="bg-amber-500" style="width:4.1%"></span></div></div>
+            <div hidden><p class="text-[11px] text-slate-500">Supervisión registrada</p><p class="mt-1 text-2xl font-extrabold text-slate-700">0,0%</p><div class="metric-bar mt-2"><span class="bg-slate-400" style="width:0%"></span></div></div>
+          </div>
+          <div class="border-t border-slate-100 px-5 py-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-forest-700">Indicador — Actividades sobre el promedio</p>
+                <p class="mt-1 text-xs text-slate-500">Actividades cuyo texto de enseñanza supera el promedio de palabras del plan (&gt;3 letras por palabra).</p>
+              </div>
+              <div class="flex items-center gap-3 rounded-lg border border-forest-200 bg-forest-50 px-3 py-1.5">
+                <span class="text-[10px] font-bold uppercase text-forest-700">Buen desempeño</span>
+                <span class="text-base font-extrabold text-forest-900">96,7%</span>
+              </div>
+            </div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Promedio esperado</p><p class="mt-1 text-lg font-extrabold text-slate-900">55</p><p class="text-[10px] text-slate-500">palabras (&gt;3 letras) por actividad</p></div>
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Actividades evaluadas</p><p class="mt-1 text-lg font-extrabold text-slate-900">1.911</p><p class="text-[10px] text-slate-500">del universo de cargas activas</p></div>
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Superan el promedio</p><p class="mt-1 text-lg font-extrabold text-slate-900">1.847</p><p class="text-[10px] text-slate-500">de 1.911 actividades</p></div>
+            </div>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-forest-700">Mayor indicador</p>
+                <table class="mt-2 w-full text-[11px]">
+                  <thead class="text-[9px] uppercase tracking-wider text-slate-400"><tr><th class="text-left font-bold">Docente</th><th class="text-center font-bold">Superan</th><th class="text-right font-bold">%</th></tr></thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">TOVAR ALEJOS SCARLET ANAIS</td><td class="py-1.5 text-center text-slate-500">139/139</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">SEQUERA LOVERA HEIRA MARIEL</td><td class="py-1.5 text-center text-slate-500">132/132</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">LUGO TERAN XIOLEIDYS VANESSA</td><td class="py-1.5 text-center text-slate-500">128/128</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">VAN DENKER CORDIDO ANNE CAROLINA</td><td class="py-1.5 text-center text-slate-500">122/122</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">ESPOSITO RIANA</td><td class="py-1.5 text-center text-slate-500">96/96</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="rounded-xl border border-rose-200 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-rose-700">Menor indicador</p>
+                <table class="mt-2 w-full text-[11px]">
+                  <thead class="text-[9px] uppercase tracking-wider text-slate-400"><tr><th class="text-left font-bold">Docente</th><th class="text-center font-bold">Superan</th><th class="text-right font-bold">%</th></tr></thead>
+                  <tbody class="divide-y divide-rose-100">
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">FERNANDEZ YOVERA LENIN ALBERTO</td><td class="py-1.5 text-center text-slate-500">36/66</td><td class="py-1.5 text-right font-bold text-rose-700">54,5%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">OROPEZA COLMENAREZ IBRANNY CAROLINA</td><td class="py-1.5 text-center text-slate-500">16/22</td><td class="py-1.5 text-right font-bold text-rose-700">72,7%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">PÉREZ SALAS MARÍA GABRIELA</td><td class="py-1.5 text-center text-slate-500">58/71</td><td class="py-1.5 text-right font-bold text-rose-700">81,7%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">ORDOÑEZ PEREZ MOISES EDUARDO</td><td class="py-1.5 text-center text-slate-500">35/40</td><td class="py-1.5 text-right font-bold text-rose-700">87,5%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">BAZÁN GUEVARA ANNA YULIANNY</td><td class="py-1.5 text-center text-slate-500">104/108</td><td class="py-1.5 text-right font-bold text-rose-700">96,3%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p class="mt-2 text-[10px] leading-5 text-slate-400">Ranking restringido a docentes con al menos 10 actividades registradas, para evitar muestras no representativas; se listan hasta 5 docentes por extremo. Indicador calculado sobre cargas activas del 1.er Momento, con el mismo universo del informe.</p>
+          </div>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-6 text-slate-600"><strong class="text-slate-800">Lectura:</strong> presenta el mayor volumen, la mayor cobertura y el porcentaje de aprobación más alto. Las indicaciones se brindan verbalmente de manera oportuna y el seguimiento asentado en la plataforma alcanza 4,1%. Registrar allí estas orientaciones permitirá fortalecer la trazabilidad de la retroalimentación.</div>
+        </article>
+
+        <article class="card overflow-hidden rounded-2xl border border-rose-200 bg-white shadow-soft">
+          <div class="flex flex-col gap-3 border-b border-rose-100 bg-rose-50/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><h3 class="font-extrabold text-slate-900">Educación Media General</h3><p class="mt-1 text-xs text-slate-500">130 cargas activas · 1.243 actividades</p></div>
+            <span class="w-fit rounded-full bg-rose-100 px-3 py-1 text-[10px] font-bold text-rose-800">Atención prioritaria</span>
+          </div>
+          <div class="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div><p class="text-[11px] text-slate-500">Cobertura curricular</p><p class="mt-1 text-2xl font-extrabold text-forest-900">9,56</p><p class="text-[10px] text-slate-400">Actividades por carga</p></div>
+            <div><p class="text-[11px] text-slate-500">Participación</p><p class="mt-1 text-2xl font-extrabold text-forest-900">100%</p><div class="metric-bar mt-2"><span class="bg-forest-600" style="width:100%"></span></div></div>
+            <div><p class="text-[11px] text-slate-500">Seguimiento</p><p class="mt-1 text-2xl font-extrabold text-rose-700">2,5%</p><div class="metric-bar mt-2"><span class="bg-rose-500" style="width:2.5%"></span></div></div>
+            <div hidden><p class="text-[11px] text-slate-500">Supervisión registrada</p><p class="mt-1 text-2xl font-extrabold text-slate-700">0,0%</p><div class="metric-bar mt-2"><span class="bg-slate-400" style="width:0%"></span></div></div>
+          </div>
+          <div class="border-t border-rose-100 px-5 py-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p class="text-[10px] font-extrabold uppercase tracking-[.16em] text-rose-700">Indicador — Actividades sobre el promedio</p>
+                <p class="mt-1 text-xs text-slate-500">Actividades cuyo texto de enseñanza supera el promedio de palabras del plan (&gt;3 letras por palabra).</p>
+              </div>
+              <div class="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5">
+                <span class="text-[10px] font-bold uppercase text-amber-700">Moderado</span>
+                <span class="text-base font-extrabold text-amber-900">85,3%</span>
+              </div>
+            </div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Promedio esperado</p><p class="mt-1 text-lg font-extrabold text-slate-900">40</p><p class="text-[10px] text-slate-500">palabras (&gt;3 letras) por actividad</p></div>
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Actividades evaluadas</p><p class="mt-1 text-lg font-extrabold text-slate-900">1.243</p><p class="text-[10px] text-slate-500">del universo de cargas activas</p></div>
+              <div class="rounded-xl bg-slate-50 p-3"><p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Superan el promedio</p><p class="mt-1 text-lg font-extrabold text-slate-900">1.060</p><p class="text-[10px] text-slate-500">de 1.243 actividades</p></div>
+            </div>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+              <div class="rounded-xl border border-slate-200 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-forest-700">Mayor indicador</p>
+                <table class="mt-2 w-full text-[11px]">
+                  <thead class="text-[9px] uppercase tracking-wider text-slate-400"><tr><th class="text-left font-bold">Docente</th><th class="text-center font-bold">Superan</th><th class="text-right font-bold">%</th></tr></thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">CORTEZ ALEJOS JACOBO ALFONSO</td><td class="py-1.5 text-center text-slate-500">80/80</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">RIVERO ESCUDERO JOSÉ DE LA CRUZ</td><td class="py-1.5 text-center text-slate-500">66/66</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">MATOS CONTRERAS NARDA MARIA</td><td class="py-1.5 text-center text-slate-500">54/54</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">CORTEZ ALEJOS CARMIN ANDREINA</td><td class="py-1.5 text-center text-slate-500">44/44</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">RIOS DEVIEZ MILAGROS DEL CARMEN</td><td class="py-1.5 text-center text-slate-500">35/35</td><td class="py-1.5 text-right font-bold text-forest-800">100,0%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="rounded-xl border border-rose-200 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-rose-700">Menor indicador</p>
+                <table class="mt-2 w-full text-[11px]">
+                  <thead class="text-[9px] uppercase tracking-wider text-slate-400"><tr><th class="text-left font-bold">Docente</th><th class="text-center font-bold">Superan</th><th class="text-right font-bold">%</th></tr></thead>
+                  <tbody class="divide-y divide-rose-100">
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">MENDOZA FIGUEIRA AURA JOSEFINA</td><td class="py-1.5 text-center text-slate-500">3/53</td><td class="py-1.5 text-right font-bold text-rose-700">5,7%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">FUENTES HENRRY EULER</td><td class="py-1.5 text-center text-slate-500">6/52</td><td class="py-1.5 text-right font-bold text-rose-700">11,5%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">LUJANO MEZA SOLEIL DE LOS ÁNGELES</td><td class="py-1.5 text-center text-slate-500">21/46</td><td class="py-1.5 text-right font-bold text-rose-700">45,7%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">BERRIZ DORANTE RODERYT JAVIER</td><td class="py-1.5 text-center text-slate-500">39/49</td><td class="py-1.5 text-right font-bold text-rose-700">79,6%</td></tr>
+                    <tr><td class="py-1.5 pr-2 font-medium text-slate-700">ORDOÑEZ PEREZ MOISES EDUARDO</td><td class="py-1.5 text-center text-slate-500">35/40</td><td class="py-1.5 text-right font-bold text-rose-700">87,5%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p class="mt-2 text-[10px] leading-5 text-slate-400">Ranking restringido a docentes con al menos 10 actividades registradas, para evitar muestras no representativas; se listan hasta 5 docentes por extremo. Indicador calculado sobre cargas activas del 1.er Momento, con el mismo universo del informe.</p>
+          </div>
+          <div class="border-t border-rose-100 px-5 py-4 text-sm leading-6 text-slate-600"><strong class="text-slate-800">Lectura:</strong> registra la menor aprobación (27,6%) y un seguimiento asentado de 2,5%, mientras las indicaciones verbales se mantienen de forma oportuna. Estos indicadores justifican focalizar aquí el acompañamiento académico, la revisión de las actividades y el registro en la plataforma de los pendientes de validación.</div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Tendencia -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">06</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Comportamiento temporal</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Ritmo de registro y concentración temporal</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <h3 class="font-extrabold text-slate-900">Actividades por fecha de inicio</h3>
+          <p class="mt-1 text-xs text-slate-500">Ventana de los últimos tres meses; incluye planificación con fecha futura.</p>
+          <div id="trendChart" class="chart mt-3"></div>
+          <p class="mt-2 text-[10px] leading-5 text-slate-400">La serie corresponde a pevaluaciones no eliminadas y no aplica la cadena completa de carga activa ni la exclusión is_inicial. Su total (3.290) no es directamente comparable con las 3.264 actividades del indicador de cargas activas.</p>
+        </div>
+        <div class="card rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <h3 class="font-extrabold text-slate-900">Concentración de registros</h3>
+          <p class="mt-1 text-xs text-slate-500">Picos destacados de actividades por fecha de inicio</p>
+          <div class="mt-5 space-y-4">
+            <div><div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">21 sep 2026</span><strong class="text-forest-800">169</strong></div><div class="metric-bar mt-2"><span class="bg-forest-600" style="width:100%"></span></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">28 sep 2026</span><strong class="text-forest-800">160</strong></div><div class="metric-bar mt-2"><span class="bg-forest-500" style="width:94.7%"></span></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">05 oct 2026</span><strong class="text-forest-800">153</strong></div><div class="metric-bar mt-2"><span class="bg-forest-400" style="width:90.5%"></span></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">19 oct 2026</span><strong class="text-forest-800">130</strong></div><div class="metric-bar mt-2"><span class="bg-forest-300" style="width:76.9%"></span></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">02 nov 2026</span><strong class="text-forest-800">129</strong></div><div class="metric-bar mt-2"><span class="bg-forest-200" style="width:76.3%"></span></div></div>
+          </div>
+          <div class="mt-6 rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-600">Los picos muestran concentración de inicios en fechas específicas. Por sí solos no permiten atribuir causas ni concluir que la planificación haya sido reactiva.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Calidad de datos -->
+    <section class="mt-11 print-break">
+      <div class="flex items-center gap-3">
+        <span class="section-number">07</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Confiabilidad y trazabilidad</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Alertas y limitaciones de los datos</h2>
+        </div>
+      </div>
+      <div class="mt-5 grid gap-3 md:grid-cols-2">
+        <div class="rounded-2xl border border-rose-200 bg-rose-50 p-5">
+          <div class="flex items-center gap-2"><span class="rounded-lg bg-rose-100 p-2 text-rose-800">!</span><p class="text-sm font-extrabold text-rose-950">Supervisión ejercida, registro pendiente</p></div>
+          <p class="mt-2 text-sm leading-6 text-rose-950/85">El 0,0% corresponde a observaciones registradas en pevaluacions. No mide la supervisión realizada: la Subdirección acompaña y orienta verbalmente de forma oportuna. El siguiente paso es asentar esas observaciones en la plataforma para hacerlas trazables.</p>
+        </div>
+        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+          <div class="flex items-center gap-2"><span class="rounded-lg bg-blue-100 p-2 text-blue-800">i</span><p class="text-sm font-extrabold text-blue-950">Universos distintos según el plan educativo</p></div>
+          <p class="mt-2 text-sm leading-6 text-blue-950/85">El plan educativo registra 111 actividades en Inicial y 1.295 en Media General; el indicador de actividades en cargas activas registra 110 y 1.243, respectivamente. La diferencia responde a criterios de carga activa, coherencia curricular y exclusión is_inicial.</p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div class="flex items-center gap-2"><span class="rounded-lg bg-slate-200 p-2 text-slate-700">↗</span><p class="text-sm font-extrabold text-slate-900">Indicadores globales acumulados</p></div>
+          <p class="mt-2 text-sm leading-6 text-slate-700">Los 3.317 registros históricos de actividades y 1.704 aprobadas son KPI globales de plataforma; no deben sumarse ni compararse directamente con las cifras filtradas del primer momento.</p>
+        </div>
+      </div>
+      <!-- <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <p class="text-sm font-extrabold text-slate-900">Criterio de interpretación</p>
+        <p class="mt-2 text-sm leading-6 text-slate-600">La carga activa exige vigencia de profesor, sección, grado, plan, pensum y asignatura, además de coherencia entre grado y pensum. En la pestaña de actividades se excluyen los usuarios identificados con <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs">is_inicial = 1</code>, debido a que Educación Inicial utiliza una metodología distinta de planificación. La serie temporal conserva un universo propio y no debe mezclarse con el indicador de cargas activas.</p>
+      </div> -->
+    </section>
+
+    <!-- Riesgos y plan de acción -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">08</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Decisiones y ejecución</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Riesgos priorizados y recomendaciones</h2>
+        </div>
+      </div>
+      <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+        <div class="grid grid-cols-[110px_1fr] gap-3 border-b border-slate-100 px-5 py-4 sm:grid-cols-[130px_1fr_1.1fr]">
+          <div><span class="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-extrabold text-amber-800">Media-alta</span></div>
+          <div><p class="text-sm font-bold text-slate-900">Retroalimentación verbal sin registro completo</p><p class="mt-1 text-xs leading-5 text-slate-500">Seguimiento asentado: máximo 4,1% en Primaria, con indicaciones verbales oportunas.</p></div>
+          <div class="col-span-2 text-xs leading-5 text-slate-600 sm:col-span-1">Mantener los ciclos de revisión docente y asentar los comentarios de seguimiento en la plataforma.</div>
+        </div>
+        <div class="grid grid-cols-[110px_1fr] gap-3 border-b border-slate-100 px-5 py-4 sm:grid-cols-[130px_1fr_1.1fr]">
+          <div><span class="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-extrabold text-amber-800">Media</span></div>
+          <div><p class="text-sm font-bold text-slate-900">Observaciones de supervisión no registradas</p><p class="mt-1 text-xs leading-5 text-slate-500">Supervisión asentada: 0,0% en todos los programas, sin que ello implique ausencia de supervisión.</p></div>
+          <div class="col-span-2 text-xs leading-5 text-slate-600 sm:col-span-1">Mantener el protocolo de supervisión por carga y registrar observaciones, acuerdos y fecha de seguimiento.</div>
+        </div>
+        <div class="grid grid-cols-[110px_1fr] gap-3 px-5 py-4 sm:grid-cols-[130px_1fr_1.1fr]">
+          <div><span class="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-extrabold text-blue-800">Control</span></div>
+          <div><p class="text-sm font-bold text-slate-900">Brechas de integridad y cobertura</p><p class="mt-1 text-xs leading-5 text-slate-500">Docentes con carga activa sin actividades registradas; tres docentes excluidos por is_inicial.</p></div>
+          <div class="col-span-2 text-xs leading-5 text-slate-600 sm:col-span-1">Validar asignaciones y pendientes con cada coordinación; separar el seguimiento de Educación Inicial por su metodología diferenciada.</div>
+        </div>
+      </div>
+
+      <div class="mt-5 grid gap-4 md:grid-cols-2">
+        <div class="rounded-2xl border border-forest-200 bg-white p-5 shadow-soft">
+          <div class="flex items-center gap-2"><span class="rounded-lg bg-forest-100 px-2 py-1 text-[10px] font-extrabold text-forest-800">QUICK WINS</span><span class="text-xs text-slate-500">Próximo ciclo de seguimiento</span></div>
+          <ul class="mt-4 space-y-2.5 text-sm text-slate-700">
+            <li class="flex gap-2"><span class="font-bold text-forest-700">01</span> Listado nominal de cargas activas sin actividades y gestión con las coordinaciones.</li>
+            <li class="flex gap-2"><span class="font-bold text-forest-700">03</span> Registro sistemático de comentarios y observaciones en la plataforma.</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <div class="flex items-center gap-2"><span class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-extrabold text-slate-700">PRÁCTICAS EN CONSOLIDACIÓN</span><span class="text-xs text-slate-500">Continuidad del proceso</span></div>
+          <ul class="mt-4 space-y-2.5 text-sm text-slate-700">
+            <li class="flex gap-2"><span class="font-bold text-forest-700">01</span> La planificación sigue un flujo de registro, revisión y decisión (observación o aprobación); la revisión y las indicaciones se sostienen verbalmente de forma oportuna.</li>
+            <li class="flex gap-2"><span class="font-bold text-forest-700">02</span> Se aplican criterios institucionales de calidad y tiempos de revisión por carga.</li>
+            <li class="flex gap-2"><span class="font-bold text-forest-700">03</span> El registro de observaciones en la plataforma es el siguiente paso para documentar la trazabilidad de un acompañamiento que ya se realiza.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Próximo corte -->
+    <section class="mt-11">
+      <div class="flex items-center gap-3">
+        <span class="section-number">09</span>
+        <div>
+          <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-600">Control de gestión</p>
+          <h2 class="mt-1 text-xl font-extrabold text-slate-900">Tablero de metas para el próximo corte</h2>
+        </div>
+      </div>
+      <p class="mt-3 text-sm leading-6 text-slate-600">Las siguientes metas se proponen como objetivos de gestión para el próximo corte; no son resultados observados ni compromisos previamente registrados en el snapshot.</p>
+      <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-soft">
+        <table class="w-full min-w-[680px] text-left">
+          <thead class="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><tr><th class="px-5 py-3 font-extrabold">Indicador de control</th><th class="px-5 py-3 font-extrabold">Base actual</th><th class="px-5 py-3 font-extrabold">Meta propuesta</th><th class="px-5 py-3 font-extrabold">Evidencia requerida</th></tr></thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            <tr><td class="px-5 py-4 font-semibold text-slate-800">Participación docente</td><td class="px-5 py-4">100% en los tres programas</td><td class="px-5 py-4"><span class="rounded-md bg-forest-50 px-2 py-1 font-bold text-forest-800">Mantener ≥ 98%</span></td><td class="px-5 py-4 text-xs text-slate-500">Cargas activas con al menos una actividad</td></tr>
+            <tr><td class="px-5 py-4 font-semibold text-slate-800">Aprobación — Media General</td><td class="px-5 py-4">27,6%</td><td class="px-5 py-4"><span class="rounded-md bg-forest-50 px-2 py-1 font-bold text-forest-800">≥ 50%</span></td><td class="px-5 py-4 text-xs text-slate-500">Actividades aprobadas y pendientes por carga</td></tr>
+            <tr><td class="px-5 py-4 font-semibold text-slate-800">Seguimiento registrado</td><td class="px-5 py-4">0,0%–4,1%</td><td class="px-5 py-4"><span class="rounded-md bg-forest-50 px-2 py-1 font-bold text-forest-800">≥ 20%</span></td><td class="px-5 py-4 text-xs text-slate-500">Actividades con comentario de seguimiento</td></tr>
+            <tr><td class="px-5 py-4 font-semibold text-slate-800">Supervisión trazable</td><td class="px-5 py-4">0,0%</td><td class="px-5 py-4"><span class="rounded-md bg-forest-50 px-2 py-1 font-bold text-forest-800">≥ 50%</span></td><td class="px-5 py-4 text-xs text-slate-500">Cargas con observaciones registradas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cierre -->
+    <section class="mt-11 rounded-[26px] bg-gradient-to-br from-forest-800 to-forest-950 p-7 text-white shadow-lift sm:p-9">
+      <p class="eyebrow text-[10px] font-extrabold uppercase text-forest-200">Conclusión institucional</p>
+      <h2 class="mt-3 max-w-3xl text-2xl font-extrabold leading-tight sm:text-3xl">El siguiente paso es registrar en la plataforma las indicaciones que la Subdirección ya socializa verbalmente, junto con la aprobación de actividades.</h2>
+      <p class="mt-4 max-w-4xl text-sm leading-7 text-forest-100">
+        Los resultados del primer momento muestran una participación docente ampliamente extendida y un volumen importante de actividades de planificación registradas. Las actividades reciben aprobación y las indicaciones se brindan verbalmente de forma oportuna: <strong class="text-white">la Subdirección Académica nunca ha dejado de dar instrucciones</strong>. Para fortalecer la trazabilidad y dar continuidad al acompañamiento, el paso siguiente es asentar esos comentarios y observaciones en la plataforma automatizada. La prioridad inmediata es Educación Media General, sin desatender las oportunidades de seguimiento y supervisión en los demás programas.
+      </p>
+      <div class="mt-7 grid gap-3 border-t border-white/15 pt-6 sm:grid-cols-3">
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-forest-300">Foco 1</p><p class="mt-1 text-sm font-bold">Validar la planificación</p></div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-forest-300">Foco 2</p><p class="mt-1 text-sm font-bold">Registrar comentarios y observaciones</p></div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-forest-300">Foco 3</p><p class="mt-1 text-sm font-bold">Fortalecer la trazabilidad</p></div>
+      </div>
+    </section>
+
+    <footer class="mt-8 border-t border-slate-200 pt-5">
+      <div class="flex flex-col gap-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <div><p class="font-bold text-slate-700">Subdirección Académica</p><p class="mt-1">Informe ejecutivo de indicadores de planificación docente · 1.er Momento 2026</p></div>
+        <div class="sm:text-right"><p>Fuente única: snapshot automatizado de indicadores</p><p class="mt-1">Generado el 10/11/2026 · 09:40 (UTC−04:00)</p></div>
+      </div>
+      <div class="no-print mt-5 flex flex-wrap justify-end gap-2">
+        <button onclick="window.print()" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50">Imprimir / Guardar PDF</button>
+        <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="rounded-xl bg-forest-800 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-forest-900">Volver arriba ↑</button>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const forest = '#245b34', forest2 = '#478653', lime = '#9acb52';
+    const common = {
+      chart: { toolbar:{show:false}, fontFamily:'DM Sans, sans-serif', foreColor:'#64748b', animations:{enabled:true,speed:650} },
+      dataLabels:{enabled:false},
+      grid:{borderColor:'#edf2ee',strokeDashArray:4},
+      tooltip:{theme:'light'},
+      legend:{fontSize:'12px',fontWeight:600,labels:{colors:'#475569'},markers:{radius:8}}
+    };
+
+    new ApexCharts(document.querySelector("#activitiesChart"), {
+      ...common,
+      chart:{...common.chart,type:'bar',height:300},
+      series:[{name:'Actividades',data:[110,1911,1243]}],
+      colors:[forest2],
+      plotOptions:{bar:{horizontal:true,borderRadius:6,barHeight:'48%',distributed:true}},
+      xaxis:{categories:['Educación Inicial','Educación Primaria','Media General'],labels:{formatter:v=>Number(v).toLocaleString('es-VE')}},
+      yaxis:{labels:{style:{fontSize:'11px',fontWeight:600}}},
+      dataLabels:{enabled:true,offsetX:8,style:{colors:['#334155'],fontWeight:700},formatter:v=>v.toLocaleString('es-VE')},
+      grid:{...common.grid,padding:{right:28}},
+      legend:{show:false}
+    }).render();
+
+    new ApexCharts(document.querySelector("#approvalChart"), {
+      ...common,
+      chart:{...common.chart,type:'bar',height:300},
+      series:[{name:'Aprobación',data:[52.7,67.1,27.6]}],
+      colors:['#9ca3af',forest,lime],
+      plotOptions:{bar:{horizontal:true,borderRadius:6,barHeight:'48%',distributed:true}},
+      xaxis:{categories:['Educación Inicial','Educación Primaria','Media General'],min:0,max:100,tickAmount:5,labels:{formatter:v=>v+'%'}},
+      yaxis:{labels:{style:{fontSize:'11px',fontWeight:600}}},
+      dataLabels:{enabled:true,offsetX:8,formatter:v=>v.toFixed(1)+'%',style:{colors:['#334155'],fontWeight:700}},
+      grid:{...common.grid,padding:{right:35}},
+      legend:{show:false}
+    }).render();
+
+    new ApexCharts(document.querySelector("#followupChart"), {
+      ...common,
+      chart:{...common.chart,type:'bar',height:300},
+      series:[
+        {name:'Seguimiento',data:[0,4.1,2.5]},
+        {name:'Supervisión',data:[0,0,0]}
+      ],
+      colors:[forest2,'#d1a64b'],
+      plotOptions:{bar:{horizontal:false,columnWidth:'42%',borderRadius:4}},
+      xaxis:{categories:['Inicial','Primaria','Media General']},
+      yaxis:{min:0,max:5,tickAmount:5,labels:{formatter:v=>v.toFixed(0)+'%'}},
+      dataLabels:{enabled:true,formatter:v=>v===0?'':v.toFixed(1)+'%',style:{fontSize:'10px',colors:['#334155']}},
+      legend:{...common.legend,position:'bottom'}
+    }).render();
+
+    new ApexCharts(document.querySelector("#lessonsChart"), {
+      ...common,
+      chart:{...common.chart,type:'donut',height:300},
+      series:[6,1,60],
+      labels:['Publicadas','Programadas','Borradores'],
+      colors:[forest,lime,'#d9e5db'],
+      stroke:{width:3,colors:['#fff']},
+      plotOptions:{pie:{donut:{size:'70%',labels:{show:true,total:{show:true,label:'Lecciones',fontSize:'12px',fontWeight:600,color:'#64748b',formatter:()=> '67'}}}}},
+      dataLabels:{enabled:true,formatter:(v)=>v.toFixed(1)+'%',style:{fontSize:'11px',fontWeight:700}},
+      legend:{...common.legend,position:'bottom'},
+      tooltip:{y:{formatter:v=>v+' lecciones'}}
+    }).render();
+
+    const trendDates = ['01 sep','07 sep','08 sep','14 sep','15 sep','16 sep','17 sep','18 sep','21 sep','22 sep','23 sep','24 sep','25 sep','28 sep','29 sep','30 sep','01 oct','02 oct','05 oct','06 oct','07 oct','08 oct','09 oct','11 oct','12 oct','13 oct','14 oct','15 oct','16 oct','19 oct','20 oct','21 oct','22 oct','23 oct','26 oct','27 oct','28 oct','29 oct','30 oct','02 nov','03 nov','04 nov','05 nov','06 nov','09 nov','10 nov','11 nov','12 nov','13 nov','16 nov','17 nov','18 nov','19 nov','20 nov','21 nov','23 nov','24 nov','25 nov','26 nov','27 nov','28 nov','30 nov','01 dic','02 dic','03 dic','04 dic','08 dic','09 dic','10 dic','11 dic','16 dic'];
+    const trendValues = [1,6,1,68,15,19,24,15,169,64,73,67,48,160,67,64,59,61,153,65,67,54,47,1,60,84,55,57,53,130,62,54,38,56,117,53,56,32,48,129,46,44,29,44,111,42,47,27,38,79,27,32,18,24,1,61,14,16,8,16,1,65,8,10,7,13,1,2,3,2,2];
+    new ApexCharts(document.querySelector("#trendChart"), {
+      ...common,
+      chart:{...common.chart,type:'area',height:300,zoom:{enabled:false}},
+      series:[{name:'Actividades',data:trendValues}],
+      colors:[forest2],
+      stroke:{curve:'smooth',width:2.5},
+      fill:{type:'gradient',gradient:{shadeIntensity:1,opacityFrom:.28,opacityTo:.03,stops:[0,90,100]}},
+      markers:{size:0,hover:{size:5}},
+      xaxis:{categories:trendDates,labels:{rotate:-45,rotateAlways:false,hideOverlappingLabels:true,trim:true,style:{fontSize:'9px'}}},
+      yaxis:{labels:{formatter:v=>Math.round(v)}},
+      tooltip:{x:{show:true},y:{formatter:v=>v+' actividades'}}
+    }).render();
+  </script>
+</body>
+</html>

@@ -16,6 +16,13 @@
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Nuevo Diagnóstico
             </button>
+            <button wire:click="downloadMarkdownReport" wire:loading.attr="disabled" wire:target="downloadMarkdownReport"
+                aria-label="Descargar informe Markdown" title="Descargar Markdown del diagnóstico"
+                class="inline-flex items-center gap-1.5 px-3 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 rounded-lg border border-cyan-500/20 transition-all duration-200 text-xs font-bold uppercase tracking-widest shrink-0 min-h-[44px] disabled:opacity-50 disabled:cursor-wait">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0 4-4m-4 4-4-4m-3 6v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"></path></svg>
+                <span class="hidden sm:inline">Descargar MD</span>
+                <span class="sm:hidden">MD</span>
+            </button>
         </div>
         <p class="text-[11px] text-gray-500 mt-1.5">
             @if($diagMains->isEmpty())
