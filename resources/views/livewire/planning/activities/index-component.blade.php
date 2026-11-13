@@ -225,14 +225,27 @@
             </div>
 
             <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
-                <button type="button" wire:click="resetFilters"
-                    @click="localStorage.removeItem('planning-activities-filters')"
-                    class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-xs font-bold uppercase tracking-widest">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    Limpiar filtros
-                </button>
+                <div class="grid w-full grid-cols-1 gap-2 xl:grid-cols-2">
+                    <button type="button" wire:click="downloadMarkdownReport"
+                        wire:loading.attr="disabled" wire:target="downloadMarkdownReport"
+                        title="Descargar un snapshot Markdown con todas las actividades filtradas para análisis con IA"
+                        aria-label="Exportar actividades filtradas en formato Markdown"
+                        class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-all duration-200 text-xs font-bold uppercase tracking-widest disabled:opacity-60 disabled:cursor-wait">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span wire:loading.remove wire:target="downloadMarkdownReport">Exportar MD</span>
+                        <span wire:loading wire:target="downloadMarkdownReport">Generando…</span>
+                    </button>
+                    <button type="button" wire:click="resetFilters"
+                        @click="localStorage.removeItem('planning-activities-filters')"
+                        class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-xs font-bold uppercase tracking-widest">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Limpiar filtros
+                    </button>
+                </div>
             </div>
         </div>
     </div>

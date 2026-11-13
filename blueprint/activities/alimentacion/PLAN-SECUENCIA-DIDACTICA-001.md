@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Código** | `PLAN-SECUENCIA-DIDACTICA-001` |
-| **Estado** | Análisis y diseño. Listo para revisión funcional y descomposición en tickets. **No implementado.** |
+| **Estado** | Análisis y diseño corregidos en F0.5. Migraciones F1 ejecutadas en `s2627` el 2026-11-13. Rutas y policy pendientes. |
 | **Módulo** | Planificación → Actividades (`/app/planning/activities`) |
 | **Componente existente** | `App\Livewire\Planning\Activities\IndexComponent` |
 | **Vista existente** | `resources/views/livewire/planning/activities/index-component.blade.php` |
@@ -15,8 +15,8 @@
 ## 1. Resumen ejecutivo
 
 Se requiere crear y actualizar un **plan de clases / secuencia didáctica** por
-**sección**, a partir de las actividades de planificación que están visibles con
-los **filtros activos** de `/app/planning/activities`.
+**sección y semana**, a partir de las actividades de planificación que están
+visibles con los **filtros activos** de `/app/planning/activities`.
 
 El plan utiliza la **alimentación y la gastronomía como eje articulador** para
 enseñar Ciencias Naturales, Cultura e Identidad. No es un menú de comedor ni una
@@ -39,10 +39,13 @@ filtros de la página.** El wizard recibe una instantánea de esos filtros, cons
 todas las actividades del resultado filtrado (no solo la página visible) y no
 busca en toda la base.
 
-**El periodo del plan es el rango de fechas establecido por los filtros.** No se
-elige una semana aparte: si el filtro (o las actividades filtradas) cubre del
-17/11 al 21/11, ese es el periodo. El wizard solo confirma ese rango y, si abarca
-más de una semana, ofrece dividirlo en planes semanales.
+**El periodo del plan es una semana derivada de los filtros.** La barra no tiene
+selector de fechas: el rango candidato se deriva del lapso y de las fechas
+válidas de las actividades filtradas. El wizard muestra las semanas de ese rango
+y exige elegir una; el plan siempre dura 7 días (lunes–domingo), o menos si la
+primera/última semana del rango está cortada. Si la sección no está fijada, se
+elige primero y el rango se recalcula para esa sección. Si no hay fechas válidas,
+el wizard no permite continuar.
 
 ---
 
@@ -63,9 +66,9 @@ más de una semana, ofrece dividirlo en planes semanales.
 
 | Hallazgo | Evidencia | Implicación |
 |---|---|---|
-| La secuencia ya está semiestructurada | `Activity::getTeachingSections()` separa `INICIO:`, `DESARROLLO:` y `CIERRE:` dentro de `teaching`. | Se reutiliza ese método; no hace falta un parser de texto libre para el MVP. |
+| La secuencia está semiestructurada | `Activity::getTeachingSections()` separa `INICIO:`, `DESARROLLO:` y `CIERRE:`, pero **devuelve `[]` si falta una sección**. | Se agrega `parseTeachingSections()` para detectar secuencias parciales; `getTeachingSections()` delega en él. |
 | Hay campos ricos para el plan | `topic`, `thematic`, `references`, `learning`, `description`, `observations`, `achievements`. | El mapeo a la sesión didáctica es directo y determinista. |
-| Los indicadores no siempre existen | En los casos 3903, 3904, 3971, 4501 y 4813, `achievements` está vacío. | El wizard debe permitir indicadores manuales y no bloquear el guardado. |
+| Los indicadores casi nunca existen | Solo 312 de 3.324 actividades tienen `achievements`; en 2.º A son 7 de 157. | El wizard debe permitir indicadores manuales y no bloquear el guardado. |
 | La página ya tiene wizard en modal | `modeCopy` y el modal “Copiar actividades entre planes” usan `x-modal-card width="max-w-[90vw]"` y stepper. | Reutilizar el patrón visual y de navegación. |
 | La página ya tiene filtros completos | `pestudio_id`, `grado_id`, `seccion_id`, `lapso_id`, `profesor_id`, `status_activities`, `filter_status`, `filter_observations`, `search`. | El wizard debe consumir esa misma instantánea, no crear otra búsqueda. |
 | La consulta filtra pevaluaciones y actividades | `IndexComponent::getPevaluaciones()` aplica los filtros y relaciones. | Extraer un servicio/consulta compartida para que página y wizard no diverjan. |
@@ -81,7 +84,7 @@ Se encontraron actividades reales que corresponden al proyecto descrito:
 | Actividad | Grado / sección | Asignatura | Fecha | Contenido |
 |---|---|---|---|---|
 | 3903 | 2.º A | Ciencias Naturales | 17/11/2026 | “Alimentación saludable”, semáforo alimenticio, menú balanceado, ODS 3. |
-| 3904 | 2.º A | Ciencias Naturales | 24/11/2026 | Continuidad de alimentación saludable y lonchera; lista de cotejo. |
+| 3904 | 2.º A | Ciencias Naturales | 20/11/2026 | Continuidad de alimentación saludable y lonchera; lista de cotejo. |
 | 3971 | 1.º B | Ciencias Sociales | 17/11/2026 | “Soy parte de una cultura”: Rincón de los Sabores, Chefsitos, Gran Mesa Venezolana; ODS 4 y 16. |
 | 4501 | 1.º A | Ciencias Sociales | 17/11/2026 | Misma secuencia de cultura y gastronomía. |
 | 4813 | 1.º A | Ciencias Naturales | 20/11/2026 | Lonchera saludable, menú balanceado, ODS 3. |
@@ -90,12 +93,18 @@ Observaciones:
 
 - Un plan semanal puede integrar **Ciencias Naturales + Ciencias Sociales** y
   varias sesiones de la misma sección.
-- Las actividades ya tienen `INICIO`, `DESARROLLO` y `CIERRE` bien diferenciados.
-- Los ODS están en `observations`, no en un campo estructurado.
-- El instrumento de evaluación está en `description` (lista de cotejo, escala de
-  estimación, etc.).
-- Los indicadores de logro pueden estar en `achievements` o no existir; en estos
-  casos hay que redactarlos o extraerlos manualmente.
+- Las actividades ya tienen `INICIO`, `DESARROLLO` y `CIERRE` bien diferenciados:
+  en 2.º A, las **157 actividades del lapso actual** tienen secuencia completa.
+- Los ODS están en `observations`, no en un campo estructurado (142 de 157 en
+  2.º A).
+- El instrumento de evaluación está en `description` (114 de 157 en 2.º A).
+- Los indicadores de logro casi nunca existen: **7 de 157** en 2.º A. Hay que
+  redactarlos manualmente o extraerlos de `learning` como sugerencia.
+- El lapso actual de 2.º A tiene **157 actividades entre 14/09 y 03/12/2026**
+  (80 días). Un plan derivado del lapso sin selector de semana obligaría a
+  dividir siempre; de ahí la decisión de plan semanal.
+- Hay datos sucios: 1 actividad con `0000-00-00`, 25 anteriores al lapso y 5
+  posteriores. La derivación del periodo debe ignorarlos y avisar.
 - La imagen de “Armando mi mochila” y su escala de estimación no coincide
   exactamente con el texto de la actividad 3904; el wizard debe permitir
   ajustar el instrumento y los indicadores sin depender de que la actividad los
@@ -108,11 +117,15 @@ inventar un formato de menú. Hay que **mapear una estructura pedagógica
 existente** a un plan semanal consolidado, respetando los filtros de la página y
 permitiendo la corrección humana.
 
-El mayor riesgo es de **consolidación**, no de extracción:
+El mayor riesgo es de **consolidación y delimitación del universo**, no de
+extracción:
 
+- el lapso cubre 80 días y 157 actividades; sin selector de semana el wizard no
+  produce un plan semanal útil;
+- el scoring preselecciona casi todo si no exige tema afín y semana;
 - varias actividades pueden caer en el mismo día;
-- una actividad puede caer fuera del periodo;
-- una actividad puede no tener indicadores;
+- una actividad puede caer fuera de la semana;
+- una actividad puede no tener indicadores (lo habitual);
 - dos actividades pueden repetir o contradecir el mismo objetivo;
 - el usuario puede querer incluir solo una parte de una actividad.
 
@@ -128,7 +141,9 @@ solo lectura.
 - Botón y modal de 90 % en `/app/planning/activities`.
 - Wizard de 5 pasos con navegación adelante/atrás y conservación de estado.
 - Instantánea de los filtros activos de la página.
-- Consulta de todas las actividades del resultado filtrado.
+- Resolución de sección y selección de una semana dentro del rango filtrado.
+- Consulta de todas las actividades del resultado filtrado de esa sección/semana.
+- Búsqueda de contenido (`activity_search`) acotada al universo filtrado.
 - Detección de secuencia didáctica completa/parcial por actividad.
 - Selección múltiple de actividades.
 - Consolidación en sesiones editables.
@@ -143,6 +158,7 @@ solo lectura.
 ### 3.2 Fuera del alcance (MVP)
 
 - Búsqueda global de actividades fuera de los filtros activos.
+- Búsqueda de texto libre en toda la base (la del wizard vive acotada al universo).
 - OCR de imágenes o PDFs.
 - Menús de comedor, dietas, calorías o inventario.
 - Publicación a estudiantes o representantes.
@@ -158,14 +174,16 @@ solo lectura.
 
 | Tema | Decisión |
 |---|---|
-| Unidad del plan | **Por sección**. Un plan = una `seccion_id`. No se mezclan secciones. |
-| Periodo | **Rango de fechas de los filtros**. Se deriva del rango explícito del filtro o, en su defecto, de `MIN(finicial)`–`MAX(ffinal)` de las actividades filtradas. |
+| Unidad del plan | **Por sección y semana**. Un plan = una `seccion_id` + una semana. No se mezclan secciones. |
+| Periodo | **Semana derivada de los filtros** (lunes–domingo). Se generan semanas dentro del rango del lapso y de las fechas válidas de las actividades; el usuario elige una. El plan no supera 7 días. |
 | Aprobación | **Usuario de planificación** (`isPlanner`). No hay aprobador externo; se registra `approved_by`. |
-| Universo de actividades | Filtros activos de la página; snapshot inmutable al abrir el wizard. |
-| Sesiones | Una sesión por actividad seleccionada; se permite fusionar o dividir. |
+| Permisos MVP | Planificación y Admin crean/aprueban; Diagnóstico solo lectura; Dirección, Coordinación y Liderazgo quedan fuera del MVP. |
+| Universo de actividades | Filtros activos de la página; snapshot inmutable al abrir el wizard. Se guarda `universe_hash` de los IDs. |
+| Búsqueda | La barra busca metadatos; el wizard puede buscar contenido con `activity_search`, acotado al universo. |
+| Sesiones | Una sesión por actividad seleccionada; se permite fusionar o dividir (la división exige fecha). |
 | Eje | “Alimentación, cultura e identidad”; editable. |
 | Evaluación | Instrumento y descripción desde `description`; indicadores desde `achievements` o manuales. |
-| Versionado | El plan aprobado es inmutable; editarlo genera una nueva versión. |
+| Versionado | El plan aprobado es inmutable; editarlo genera una nueva versión. Un solo borrador por clave. |
 | PDF | Carta vertical, con firmas de elaboración y aprobación. Formato oficial pendiente de validar con una hoja impresa. |
 | IA | Opcional y posterior; el MVP es determinista. |
 
@@ -189,17 +207,18 @@ El botón envía al wizard:
 
 - la instantánea de filtros;
 - la lista de IDs de pevaluaciones/actividades del resultado filtrado;
-- el lapso actual y la sección si están definidos.
+- el lapso actual y la sección si están definidos;
+- el rango candidato y las semanas calculadas.
 
 ### 5.2 Máquina de estados
 
 ```
 cerrado
-  └─ abrir ─▶ filtros_periodo
+  └─ abrir ─▶ seccion_semana
                 └─ siguiente ─▶ actividades_filtradas
                                   └─ siguiente ─▶ consolidacion
                                                     └─ siguiente ─▶ verificacion
-                                                                      ├─ guardar borrador ─▶ borrador_guardado
+                                                                      ├─ guardar borrador ─▶ verificacion (borrador_guardado)
                                                                       └─ aprobar ─▶ pdf
                                                                                       └─ cerrar ─▶ cerrado
 ```
@@ -210,12 +229,13 @@ Reglas:
 - “Atrás” conserva los datos ya cargados.
 - Cerrar con cambios sin guardar pide confirmación.
 - Si el plan ya existe, el paso 1 muestra su estado y versión.
-- El paso 5 solo está disponible después de guardar o aprobar.
+- Guardar borrador permanece en el paso 4; solo la aprobación habilita el paso 5.
+- El paso 5 solo está disponible para planes `approved` o `superseded`.
 
-### 5.3 Paso 1 — Filtros y periodo
+### 5.3 Paso 1 — Sección y semana
 
-No es un paso para volver a filtrar. Es una **confirmación del universo y del
-periodo**.
+No es un paso para volver a filtrar. Es una **confirmación del universo, la
+sección y la semana**.
 
 Contenido:
 
@@ -229,28 +249,32 @@ Contenido:
   - estado de actividades/lecciones;
   - estado de revisión;
   - observaciones.
+- Resolución de sección:
+  - si el filtro fija una sección, se usa;
+  - si no, se listan las secciones presentes y se exige elegir una;
+  - al elegir sección, se recalcula el rango de fechas y las semanas.
 - Contador: “N actividades filtradas · M con secuencia didáctica”.
-- Periodo del plan (solo lectura):
-  - `period_start` y `period_end` calculados desde el filtro;
-  - origen del cálculo: “rango del filtro” o “fechas de las actividades filtradas”;
-  - días lectivos y no lectivos dentro del rango;
-  - si el rango supera 7 días, opción “dividir en planes semanales”;
-  - si supera 31 días, la división es obligatoria;
-  - no se permite escribir fechas fuera del rango filtrado.
+- Periodo del plan (semana):
+  - `period_start` (lunes) y `period_end` (domingo) de la semana elegida;
+  - origen del rango: “lapso” o “fechas válidas de las actividades”;
+  - se excluyen `0000-00-00`, nulos y fechas fuera del lapso;
+  - semanas generadas dentro del rango; la primera/última puede estar cortada;
+  - por defecto se propone la semana con más actividades afines al eje;
+  - no se permite escribir fechas libres;
+  - si no hay fechas válidas, estado vacío y no se puede continuar.
 - Eje articulador:
   - por defecto “Alimentación, cultura e identidad”;
   - editable.
 - Proyecto/título:
   - opcional; por defecto se sugiere “Alimentación saludable y cultura
     venezolana”.
-- Si el filtro no fija una sección:
-  - mostrar las secciones presentes en el resultado;
-  - exigir elegir una para el plan;
-  - no permitir un plan mezclando secciones.
 - Si no hay actividades filtradas:
   - estado vacío;
   - acción “Cerrar y ajustar filtros”;
   - no buscar fuera del filtro.
+- Si no hay semanas con fechas válidas:
+  - estado vacío con el motivo (“El filtro no define fechas válidas”);
+  - no permitir continuar.
 
 Acciones:
 
@@ -266,15 +290,18 @@ la secuencia didáctica.
 Interfaz:
 
 - Encabezado con los chips de filtros y el contador.
-- Lista de actividades del resultado filtrado, agrupadas por asignatura o por
-  fecha.
+- Buscador de contenido (`activity_search`) acotado a `topic`, `thematic`,
+  `teaching`, `learning`, `observations` de las actividades del universo. No es
+  la búsqueda de la barra de la página.
+- Lista de actividades de la sección y semana elegidas, agrupadas por asignatura
+  o por fecha.
 - Cada fila/tarjeta muestra:
   - checkbox;
   - fecha(s);
   - asignatura, profesor y pevaluación;
   - tema (`topic`);
   - badges:
-    - “Secuencia completa” si `getTeachingSections()` devuelve las tres partes;
+    - “Secuencia completa” si `parseTeachingSections()` encuentra las tres partes;
     - “Secuencia parcial” si falta alguna;
     - “Evaluación” si `description` no está vacía;
     - “ODS” si `observations` menciona ODS;
@@ -284,7 +311,7 @@ Interfaz:
   - botón “Ver detalle” con inicio/desarrollo/cierre, evaluación, ODS e
     indicadores.
 - Acciones:
-  - “Seleccionar las que tengan secuencia completa”;
+  - “Seleccionar las afines al eje de esta semana”;
   - “Seleccionar todas”;
   - “Limpiar”;
   - “Ninguna tiene la secuencia: crear plan manual”.
@@ -292,10 +319,14 @@ Interfaz:
 
 Reglas:
 
-- El universo es exactamente el resultado filtrado. No hay búsqueda global.
-- Se consultan todas las actividades del resultado, no solo la página visible.
-- Si una actividad cae fuera del periodo filtrado, se muestra con advertencia
-  “fuera del periodo” y no se preselecciona.
+- El universo es exactamente el resultado filtrado de la sección y semana. No hay
+  búsqueda global.
+- Se consultan todas las actividades de ese universo, no solo la página visible.
+- **Por defecto no se preselecciona nada.** La acción “Seleccionar las afines al
+  eje” preselecciona solo actividades con tema afín y fecha dentro de la semana,
+  con un máximo de 10.
+- Si una actividad cae fuera de la semana, se muestra con advertencia “fuera de
+  la semana” y no se preselecciona.
 - Si dos actividades son del mismo día, se muestran juntas y se sugiere fusionar.
 - Si una actividad no tiene `INICIO/DESARROLLO/CIERRE`, se puede seleccionar,
   pero se marca “parcial” y se pedirá completar en el paso 3.
@@ -327,7 +358,7 @@ Interfaz:
   - duplicar;
   - reordenar;
   - fusionar con otra del mismo día;
-  - dividir en dos sesiones;
+  - dividir en dos sesiones (la segunda exige una fecha dentro de la semana);
   - marcar como no lectiva.
 - Acciones:
   - “Agregar sesión manual”;
@@ -338,7 +369,7 @@ Interfaz:
   - “Dos actividades del 17/11: ¿fusionar o mantener separadas?”;
   - “La actividad 3903 no tiene indicadores; agrega al menos uno”;
   - “La actividad 3971 es de otra sección”;
-  - “La fecha de la actividad está fuera del periodo filtrado”.
+  - “La fecha de la actividad está fuera de la semana elegida”.
 
 Regla de oro: **el usuario siempre puede corregir todo**. La consolidación es una
 propuesta, no una verdad.
@@ -369,13 +400,17 @@ Contenido:
 
 Reglas:
 
-- Guardar borrador no exige completitud total, pero sí contexto y periodo.
-- Aprobar exige checklist completo o justificación explícita.
+- Guardar borrador no exige completitud total, pero sí contexto y periodo. Se
+  queda en el paso 4 y muestra “Borrador guardado”.
+- Aprobar exige el checklist completo. Solo se admite justificación escrita en
+  `notes` para indicadores y ODS cuando la actividad no los trae.
 - La aprobación la realiza el usuario de planificación autenticado; se registra
   `approved_by` y `approved_at`. No se elige aprobador.
 - Si otro usuario modificó el borrador, avisar antes de sobrescribir.
 
 ### 5.7 Paso 5 — PDF
+
+Solo se habilita después de aprobar. Un borrador no genera PDF oficial en el MVP.
 
 Contenido:
 
@@ -399,33 +434,42 @@ El wizard recibe un objeto inmutable con los valores actuales:
 
 | Filtro | Origen | Efecto en el wizard |
 |---|---|---|
-| `search` | Barra de búsqueda | Limita el resultado. |
+| `search` | Barra de búsqueda | Limita el resultado por asignatura, profesor, sección o ID. **No busca contenido de actividades.** |
 | `pestudio_id` | Selector Plan de Estudio | Limita el resultado. |
 | `grado_id` | Selector Grado/Año | Limita el resultado. |
 | `seccion_id` | Selector Sección | Define el contexto del plan; si falta, se pide elegir una del resultado. |
-| `lapso_id` | Pestaña/selector Momento | Limita el resultado y el contexto. |
+| `lapso_id` | Pestaña/selector Momento | Limita el resultado y define el rango candidato. |
 | `profesor_id` | Selector Profesor | Limita el resultado. |
-| `status_activities` | Selector Actividades/Lecciones | Limita el resultado. |
-| `filter_status` | Selector Estado | Limita el resultado. |
-| `filter_observations` | Toggle Observaciones | Limita el resultado. |
-| `date_from`, `date_to` | Rango de fechas del filtro (si existe) | Define el periodo del plan. |
+| `status_activities` | Selector Actividades/Lecciones | Limita el resultado (a nivel de pevaluación). |
+| `filter_status` | Selector Estado | Limita el resultado (a nivel de pevaluación). |
+| `filter_observations` | Toggle Observaciones | Limita por `pevaluacions.observations`, no por ODS de actividades. |
+| `activity_search` | Buscador del wizard (nuevo) | Busca en `topic`, `thematic`, `teaching`, `learning`, `observations` del universo ya filtrado. |
 
-No se incluye `paginate`: el wizard consulta **todo** el resultado filtrado, no
-solo la página actual.
+No existe hoy `date_from`/`date_to` en la barra. No se incluye `paginate`: el
+wizard consulta **todo** el resultado filtrado, no solo la página actual, con una
+consulta sin paginación.
 
-Si la barra de filtros no expone un rango de fechas, el periodo se deriva del
-resultado: `MIN(activities.finicial)` y `MAX(activities.ffinal)`.
+El periodo candidato se deriva, en este orden:
+
+1. fechas válidas de las actividades del universo (`MIN(finicial)`–`MAX(ffinal)`),
+   excluyendo `0000-00-00`, nulos y fechas fuera del lapso;
+2. rango del lapso (`lapsos.finicial`–`lapsos.ffinal`) como respaldo.
+
+Sobre ese rango se generan semanas (lunes–domingo) y el usuario elige una.
 
 ### 6.2 Consulta compartida
 
 Para evitar divergencias:
 
 - Extraer la lógica de filtros de `IndexComponent::getPevaluaciones()` a un
-  servicio o query object reutilizable, por ejemplo
-  `Planning\Activities\FilteredActivitiesQuery`.
-- La página y el wizard usan el mismo servicio.
-- El wizard recibe los IDs de pevaluaciones/actividades del resultado, o vuelve
-  a ejecutar la consulta con la instantánea.
+  servicio o query object reutilizable:
+  `App\Services\Planning\FilteredActivitiesQuery`.
+- La página y el wizard usan el mismo servicio. El wizard lo consume sin
+  paginación.
+- El servicio expone `pevaluacions()` y `activities()` derivadas del mismo
+  builder; las pruebas verifican paridad con la página.
+- El wizard guarda la instantánea y el `universe_hash` (IDs ordenados) del
+  universo.
 - No duplicar condiciones de filtro en el wizard.
 
 ### 6.3 Reglas de contexto
@@ -436,6 +480,8 @@ Para evitar divergencias:
   - si hay una sola, usarla;
   - si hay varias, pedir selección;
   - si no hay, estado vacío.
+- Al resolver la sección, **recalcular** el rango de fechas y las semanas: el
+  `MIN/MAX` de todas las secciones no representa a una sola.
 - Si `lapso_id` está definido: usarlo.
 - Si no: usar el lapso actual o pedir selección entre los presentes.
 - Si el filtro incluye varias asignaturas: es válido; el plan puede integrarlas.
@@ -451,13 +497,13 @@ para el plan:
 
 | Señal | Peso | Condición |
 |---|---:|---|
-| Secuencia completa | +30 | `getTeachingSections()` devuelve INICIO, DESARROLLO y CIERRE. |
+| Secuencia completa | +30 | `parseTeachingSections()` devuelve las tres secciones. |
 | Evaluación | +20 | `description` no vacía. |
 | ODS | +15 | `observations` contiene “ODS” o un número de ODS. |
 | Objetivo/aprendizaje | +10 | `learning` no vacío. |
 | Indicadores | +10 | `achievements` tiene al menos uno. |
 | Tema afín al eje | +10 | `topic`/`thematic` menciona alimentación, cultura, identidad, gastronomía, platos típicos, etc. |
-| Fecha dentro del periodo | +5 | `finicial`/`ffinal` dentro de `period_start`–`period_end`. |
+| Fecha dentro de la semana | +5 | `finicial`/`ffinal` dentro de `period_start`–`period_end`. |
 | Secuencia parcial | −10 | Falta inicio, desarrollo o cierre. |
 
 Umbrales:
@@ -467,18 +513,21 @@ Umbrales:
 - **Parcial:** 20–39.
 - **Débil:** < 20.
 
-La puntuación se muestra con motivos. No excluye actividades: solo ordena y
-sugiere.
+La puntuación se muestra con motivos y **no preselecciona por sí sola**. La
+preselección exige además tema afín, fecha dentro de la semana y un máximo de 10.
+Por defecto no hay ninguna actividad seleccionada.
 
 ### 6.5 Reglas anti-falsos-positivos
 
 - Una actividad de “alimentación saludable” sin secuencia didáctica no es un plan
   completo, aunque sea del eje.
 - Una actividad de otra sección no se debe poder seleccionar.
-- Una actividad fuera del periodo filtrado se muestra con advertencia y no se
+- Una actividad fuera de la semana elegida se muestra con advertencia y no se
   preselecciona.
 - Una actividad sin evaluación no se descarta, pero se marca para completar.
 - Una actividad sin indicadores no se descarta; se piden manualmente.
+- No se preseleccionan las 157 actividades del lapso: el universo del paso 2 es
+  la semana elegida, no el lapso completo.
 
 ---
 
@@ -521,11 +570,13 @@ Si no se detecta, se deja vacío y se pide completar.
 ### 7.3 Indicadores
 
 - Si `achievements` tiene registros, se copian como indicadores.
-- Si no, se puede:
-  - extraer una frase de `learning` como indicador sugerido;
-  - dejar vacío y pedir al usuario;
-  - agregar manualmente varios indicadores.
+- En la práctica casi nunca existen (7 de 157 en 2.º A). Si no hay:
+  - se sugiere una frase de `learning` solo como propuesta editable;
+  - se deja vacío y se pide al usuario;
+  - se pueden agregar manualmente varios indicadores.
 - El indicador puede tener ponderación opcional.
+- La aprobación exige al menos un indicador por sesión lectiva **o** una
+  justificación escrita en `notes`.
 
 ### 7.4 ODS
 
@@ -577,17 +628,21 @@ didactic_plans N ── 1 seccions / grados / pestudios
 didactic_plans N ── 1 users (created_by, approved_by)
 ```
 
+Las fuentes son **a nivel de plan**: una actividad puede originar varias sesiones
+y la atribución se hace con `didactic_plan_sessions.source_activity_id`. Por eso
+`didactic_plan_sources` no guarda `didactic_plan_session_id`.
+
 ### 8.3 Campos clave de `didactic_plans`
 
 | Campo | Tipo | Regla |
 |---|---|---|
 | `pestudio_id`, `grado_id`, `seccion_id` | FK | Obligatorios; coherencia validada. |
 | `lapso_id` | FK opcional | Momento académico. |
-| `period_start`, `period_end` | date | Rango derivado de los filtros. `period_end ≥ period_start`. |
+| `period_start`, `period_end` | date | Semana elegida (lunes–domingo). `period_end ≥ period_start` y diferencia ≤ 6 días. |
 | `filter_snapshot` | json | Instantánea inmutable de los filtros. |
-| `filter_hash` | char(64) | Hash del universo filtrado. |
+| `filter_hash` | char(64) | Hash de la instantánea normalizada. |
+| `universe_hash` | char(64) | Hash de los IDs ordenados del universo filtrado. |
 | `filtered_count`, `selected_count` | smallint unsigned | Evidencia de alcance. |
-| `shift` | varchar(20) | `single`, `morning`, `afternoon`. |
 | `axis` | varchar(150) | Eje articulador; por defecto alimentación/cultura. |
 | `project_title` | varchar(180) | Nombre del proyecto o secuencia. |
 | `objective` | text | Objetivo general del plan. |
@@ -602,11 +657,13 @@ didactic_plans N ── 1 users (created_by, approved_by)
 
 ### 8.4 Reglas de unicidad y concurrencia
 
-- Un único plan **vigente aprobado** por `seccion_id + period_start + period_end + shift`.
-- Un borrador por la misma clave; si existe, se reutiliza.
+- Un único plan **vigente aprobado** por `seccion_id + lapso_id + period_start + period_end`.
+- Un solo borrador por la misma clave; se reutiliza y se registra `updated_by`.
 - La versión se calcula dentro de una transacción con bloqueo.
-- Restricción única de respaldo: `seccion_id + period_start + period_end + shift + version`.
+- Restricción única de respaldo: `seccion_id + lapso_id + period_start + period_end + version`.
 - `approved_key` único garantiza un solo vigente (los borradores lo dejan en `NULL`).
+- Se rechaza un plan cuyo rango se solape con otro `approved` de la misma sección.
+- `shift` no se usa en el MVP: `seccions` no tiene turno. Queda como pregunta abierta.
 - El checksum detecta si el contenido cambió sin guardar.
 
 ### 8.5 Auditoría
@@ -647,6 +704,8 @@ No se selecciona aprobador y se permite que coincida con `created_by`.
 3. El plan anterior sigue `approved` hasta que la nueva versión se apruebe.
 4. Al aprobar la nueva, la anterior pasa a `superseded`.
 5. Si se abandona el borrador, se puede eliminar sin afectar el vigente.
+6. La sección, el lapso y la semana **no se editan** en una nueva versión: si
+   cambian, se crea un plan nuevo.
 
 ### 9.4 Desincronización con la fuente
 
@@ -674,7 +733,7 @@ No se selecciona aprobador y se permite que coincida con `created_by`.
 
 Cinco pasos con etiquetas cortas:
 
-1. Filtros y periodo.
+1. Sección y semana.
 2. Actividades.
 3. Consolidación.
 4. Aprobación.
@@ -692,7 +751,7 @@ no saltar a uno posterior sin completar.
 | Sin secuencia completa | Opción de seleccionar parciales o crear manual. |
 | Error de consolidación | Mensaje no técnico + reintentar + edición manual. |
 | Guardando | Botones deshabilitados y spinner. |
-| Guardado | Notificación WireUI y avance al paso 5. |
+| Guardado | Notificación WireUI “Borrador guardado”; permanece en el paso 4. |
 | Conflicto de concurrencia | Aviso y opción de recargar. |
 | Permiso insuficiente | Ocultar acción o mostrar 403 amable. |
 
@@ -723,10 +782,10 @@ no saltar a uno posterior sin completar.
 
 - Ruta dentro del grupo `planning`:
   `GET /app/planning/activities/didactic-plans/{didacticPlan}/pdf`.
-- Nombre: `planning.activities.didactic-plans.pdf`.
+- Nombre real (el grupo `app.` ya existe): `app.planning.activities.didactic-plans.pdf`.
 - Controlador: `App\Http\Controllers\Planning\DidacticPlanPdfController`.
 - Método: `download(DidacticPlan $didacticPlan)`.
-- Autorización: policy `view` + alcance por sección/grado.
+- Autorización: policy `view` + `isPlanner` (sin alcance por sección en el MVP).
 - Respuesta: `stream()` para vista previa y `download()` para descarga.
 
 ### 11.2 Vista
@@ -741,8 +800,7 @@ Contenido:
    - título “PLAN DE CLASES / SECUENCIA DIDÁCTICA”.
 2. Contexto:
    - plan de estudio, grado, sección;
-   - periodo derivado de los filtros (`period_start` – `period_end`);
-   - turno;
+   - semana (`period_start` – `period_end`);
    - momento/lapso;
    - eje articulador;
    - proyecto/título;
@@ -760,9 +818,9 @@ Contenido:
    - recursos.
 4. Notas para el PDF.
 5. Firmas:
-   - “Elaborado por” (usuario creador);
-   - “Aprobado por (Planificación)” con `approved_by` y fecha;
-   - línea opcional de coordinación/dirección según formato institucional.
+   - “Elaborado por”: nombre y `role_label` del creador;
+   - “Aprobado por (Planificación)”: nombre, `role_label` y fecha de `approved_by`;
+   - sin línea de coordinación/dirección en el MVP.
 6. Pie:
    - código del plan `PSD-{sección}-{period_start}-v{versión}`;
    - fecha de generación;
@@ -772,12 +830,13 @@ Contenido:
 
 ### 11.3 Reglas de maquetación
 
-- Carta vertical por defecto; landscape si hay muchas sesiones o textos largos.
+- Carta vertical siempre en el MVP; no se cambia de orientación automáticamente.
 - Fuente Helvetica, 6–10 pt, como los PDF existentes.
 - Colores institucionales discretos; sin imágenes remotas.
 - Escapar todo el texto (Blade `{{ }}`), sin HTML del usuario.
-- Evitar saltos de página dentro de una sesión.
-- Si hay muchas sesiones, una página por sesión o segunda página de anexos.
+- Evitar saltos de página dentro de una sesión (`page-break-inside: avoid`).
+- Si hay más de 3 sesiones o textos largos, reducir el cuerpo y usar una segunda
+  página de anexos; no mezclar “una página por sesión” con “2–3 por página”.
 - Optimizar con `enable_font_subsetting`, `dpi 72` y Helvetica.
 
 ### 11.4 Variantes opcionales
@@ -796,12 +855,14 @@ Contenido:
 |---|---|
 | `Planning\Activities\IndexComponent` | Solo abre/cierra el modal y pasa la instantánea de filtros. |
 | `Planning\DidacticPlans\Wizard` (nuevo Livewire) | Estado y lógica de los 5 pasos. |
-| `Planning\DidacticPlans\StepFilters` | Confirmación de filtros y periodo. |
-| `Planning\DidacticPlans\StepActivities` | Lista de actividades filtradas y selección. |
+| `Planning\DidacticPlans\StepContext` | Sección, rango candidato y elección de semana. |
+| `Planning\DidacticPlans\StepActivities` | Lista de actividades del universo y selección. |
 | `Planning\DidacticPlans\StepConsolidation` | Sesiones editables y conflictos. |
 | `Planning\DidacticPlans\StepApproval` | Resumen, checklist y guardado. |
 | `Planning\DidacticPlans\StepPdf` | Estado final y enlaces de PDF. |
 | `FilteredActivitiesQuery` | Consulta compartida con la página. |
+| `DidacticPlanPeriodResolver` | Rango candidato, semanas y validación de fechas. |
+| `DidacticPlanScorer` | Puntuación y preselección. |
 | `DidacticPlanBuilder` | Mapeo actividad → sesión. |
 | `DidacticPlanService` | Crear, actualizar, aprobar, versionar. |
 | `DidacticPlanPdfController` | PDF. |
@@ -814,19 +875,21 @@ Contenido:
 
 | Método | Ruta | Nombre | Middleware |
 |---|---|---|---|
-| GET | `/app/planning/activities` | `planning.activities.index` | `auth`, `isPlanner` (existente) |
-| GET | `/app/planning/activities/didactic-plans/{didacticPlan}/pdf` | `planning.activities.didactic-plans.pdf` | `auth`, `isPlanner`, policy |
-| GET | `/app/planning/activities/didactic-plans/{didacticPlan}` | `planning.activities.didactic-plans.show` | `auth`, `isPlanner`, policy (opcional) |
+| GET | `/app/planning/activities` | `app.planning.activities.index` | `auth`, `isPlanner` (existente) |
+| GET | `/app/planning/activities/didactic-plans/{didacticPlan}/pdf` | `app.planning.activities.didactic-plans.pdf` | `auth`, `isPlanner`, policy |
+| GET | `/app/planning/activities/didactic-plans/{didacticPlan}` | `app.planning.activities.didactic-plans.show` | `auth`, `isPlanner`, policy (opcional) |
 
 El wizard se abre por Livewire; no requiere ruta propia. La ruta `show` es útil
 para consulta posterior y enlaces directos.
 
 ### 12.3 Servicios y transacciones
 
-- `DidacticPlanService::resolvePeriod()`: deriva `period_start`/`period_end` del
-  snapshot o de las actividades filtradas.
-- `DidacticPlanService::saveDraft()`: valida contexto, crea/actualiza borrador,
-  guarda sesiones, indicadores y fuentes en una transacción.
+- `DidacticPlanPeriodResolver::resolveRange()`: deriva el rango candidato del
+  lapso y de las fechas válidas de las actividades filtradas.
+- `DidacticPlanPeriodResolver::weeks()`: genera semanas (lunes–domingo) dentro del
+  rango, con la primera/última posiblemente cortada.
+- `DidacticPlanService::saveDraft()`: valida contexto y semana, crea/actualiza el
+  borrador único, guarda sesiones, indicadores y fuentes en una transacción.
 - `DidacticPlanService::approve()`: valida checklist, bloquea la clave, marca la
   versión anterior como `superseded`, aprueba con el usuario de planificación y
   audita.
@@ -852,28 +915,34 @@ para consulta posterior y enlaces directos.
 
 ### 13.1 Roles
 
-| Acción | Planificación | Dirección | Coordinación | Liderazgo | Admin |
-|---|---|---|---|---|---|
-| Ver | Sí | Sí | Solo su alcance | Solo sus áreas | Sí |
-| Crear/editar borrador | Sí | Sí | No (MVP) | No | Sí |
-| Aprobar | Sí | Sí | No | No | Sí |
-| Archivar | Sí | Sí | No | No | Sí |
-| Descargar PDF | Sí | Sí | Solo su alcance | Solo sus áreas | Sí |
+| Acción | Planificación | Admin | Diagnóstico | Dirección / Coordinación / Liderazgo |
+|---|---|---|---|---|
+| Ver | Sí | Sí | Solo lectura | No (MVP) |
+| Crear/editar borrador | Sí | Sí | No | No |
+| Aprobar | Sí | Sí | No | No |
+| Archivar | Sí | Sí | No | No |
+| Descargar PDF | Sí | Sí | Sí | No |
 
-> La aprobación la ejecuta el usuario de planificación autenticado. No se elige
-> aprobador en la UI. Coordinación queda fuera de creación/edición en el MVP para
-> no ampliar la superficie de permisos; si se requiere, se ajusta la policy.
+> La ruta hereda `auth` + `isPlanner`, que hoy permite admin, planificador y
+> diagnóstico (`IsPlanner.php:20`). Dirección, Coordinación y Liderazgo no pasan
+> ese middleware; por eso quedan fuera del MVP y no se promete su acceso en la
+> matriz. Planificación no tiene alcance por sección: en el MVP ve todas las
+> secciones. Si se requiere alcance, se implementa una policy nueva y se prueba
+> con 403.
 
 ### 13.2 Reglas
 
-- La ruta hereda `auth` + `isPlanner`; la policy refina.
+- La ruta hereda `auth` + `isPlanner`; la policy refina (MVP: admin/planificador).
 - `DidacticPlanService::approve()` asigna `approved_by` con el usuario autenticado
-  de planificación y valida `isPlanner` + alcance.
-- El PDF valida `didacticPlan->seccion_id` contra el alcance del usuario.
+  de planificación.
+- El PDF valida `DidacticPlanPolicy@view`; en el MVP no hay alcance por sección.
 - No confiar en IDs enviados por el cliente: validar sección → grado → plan de
   estudio.
 - Escapar todo texto en la vista y el PDF.
-- Limitar la lista a las actividades filtradas y a un máximo de 200.
+- El universo del wizard es la sección y semana elegidas. Si supera **200
+  actividades**, no se trunca: se pide acotar el filtro o la semana.
+- Validar pertenencia al universo con `universe_hash` y/o reejecutando
+  `FilteredActivitiesQuery`; no con `filter_hash`.
 - No registrar en logs el texto completo de las actividades; solo IDs y
   longitudes.
 - Rate limit en la extracción IA (si se habilita).
@@ -897,7 +966,7 @@ para consulta posterior y enlaces directos.
 - No tocar tablas existentes ni columnas de `activities` o `pevaluacions`.
 - No usar `migrate:fresh`, `db:wipe`, `schema:dump --prune` ni rollbacks masivos.
 - Nombres con fecha, por ejemplo
-  `2026_11_20_000001_create_didactic_plans_table.php`.
+  `2026_11_13_000001_create_didactic_plans_table.php`.
 - Claves foráneas con `ON DELETE` explícito:
   - `didactic_plan_sessions` → `didactic_plans`: cascade.
   - `didactic_plan_indicators` → `didactic_plans`/`sessions`: cascade.
@@ -938,55 +1007,63 @@ para consulta posterior y enlaces directos.
 
 ### 15.1 Pruebas unitarias
 
+- `Activity::parseTeachingSections()`:
+  - tres secciones;
+  - falta una;
+  - texto vacío;
+  - marcadores en orden inesperado.
+- `DidacticPlanPeriodResolver`:
+  - rango desde actividades válidas;
+  - respaldo por lapso;
+  - fechas `0000-00-00` y nulas ignoradas;
+  - fechas fuera del lapso ignoradas;
+  - semanas lunes–domingo;
+  - primera/última semana cortada;
+  - rango sin fechas válidas.
+- `DidacticPlanScorer`:
+  - completa;
+  - parcial;
+  - débil;
+  - tema afín;
+  - preselección solo con tema + semana + máximo 10.
 - `DidacticPlanBuilder`:
   - mapeo de todos los campos;
-  - secuencia completa;
-  - secuencia parcial;
   - sin evaluación;
   - sin indicadores;
-  - ODS múltiples;
-  - fechas fuera del periodo;
+  - ODS múltiples (`ODS 3`, `ODS 3-`, `ODS 16`);
   - dos actividades el mismo día;
   - actividad de otra sección.
-- Derivación de periodo:
-  - rango explícito del filtro;
-  - `MIN/MAX` de actividades;
-  - respaldo por lapso;
-  - rango invertido;
-  - rango > 7 días y > 31 días.
 - Detección de instrumento:
   - lista de cotejo;
   - escala de estimación;
   - rúbrica;
   - sin instrumento.
-- Puntuación de completitud:
-  - completa;
-  - parcial;
-  - débil;
-  - actividad del eje sin secuencia.
 
 ### 15.2 Pruebas de feature
 
 - El botón aparece solo con permiso y bandera activa.
 - El modal abre con la instantánea de filtros.
-- El wizard solo muestra actividades del resultado filtrado.
-- No muestra actividades fuera de los filtros, aunque existan.
-- Si no hay sección, pide elegir una del resultado.
-- El periodo mostrado coincide con el rango de los filtros.
-- No se puede editar una fecha fuera del periodo filtrado.
+- El wizard solo muestra actividades de la sección y semana elegidas.
+- No muestra actividades fuera de la semana, aunque existan.
+- Si no hay sección, pide elegir una del resultado y recalcula el rango.
+- El periodo mostrado es una semana (≤ 7 días).
+- No se puede editar una fecha fuera de la semana.
 - Si no hay actividades, no busca fuera.
-- Selección múltiple y paso a consolidación.
-- Edición de sesiones y guardado de borrador.
+- Selección múltiple y paso a consolidación; por defecto nada seleccionado.
+- Edición de sesiones y guardado de borrador (permanece en el paso 4).
 - Aprobación con checklist incompleto bloqueada.
 - Aprobación correcta y transición de estados.
 - Solo un usuario de planificación puede aprobar y queda registrado en `approved_by`.
 - Nueva versión de un plan aprobado.
-- Unicidad de plan vigente.
+- Unicidad de plan vigente por sección/lapso/semana.
+- Rechazo de periodos solapados.
+- `universe_hash` detecta cambios en el universo.
 - PDF propio responde 200 y contiene el texto esperado.
 - PDF de otra sección devuelve 403.
 - Usuario sin permiso no accede.
 - Borrado lógico de borrador.
 - Concurrencia: dos guardados simultáneos no duplican.
+- Paridad de filtros: página y `FilteredActivitiesQuery` devuelven el mismo universo.
 
 ### 15.3 Pruebas de PDF
 
@@ -996,22 +1073,21 @@ para consulta posterior y enlaces directos.
 - No rompe con textos largos ni caracteres acentuados.
 - No incluye datos de estudiantes.
 - Página y firmas presentes.
-- Si no hay plan aprobado, no se genera (o se genera solo borrador con marca de
-  agua, según decisión).
+- Si no hay plan aprobado, el PDF responde 403 (sin marca de agua en el MVP).
 
 ### 15.4 Criterios de aceptación
 
 1. El botón “Plan de clases” está junto a “Actualizar” y abre el modal.
 2. El modal ocupa el 90 % de la pantalla, con scroll interno y footer fijo.
 3. El wizard tiene 5 pasos y conserva el estado al navegar.
-4. El wizard usa exactamente las actividades del resultado filtrado.
-5. Si no hay filtros de sección, pide elegir una del resultado.
-6. Se pueden seleccionar actividades con secuencia completa o parcial.
-7. La consolidación permite editar y fusionar sesiones.
-8. Se guarda un borrador y se aprueba un plan con trazabilidad.
-9. Existe una sola versión vigente por sección/periodo.
+4. El wizard usa exactamente las actividades de la sección y semana elegidas.
+5. Si no hay filtros de sección, pide elegir una del resultado y recalcula el rango.
+6. Se pueden seleccionar actividades con secuencia completa o parcial; por defecto no hay preselección.
+7. La consolidación permite editar y fusionar sesiones; la división exige fecha.
+8. Se guarda un borrador (sin saltar al PDF) y se aprueba un plan con trazabilidad.
+9. Existe una sola versión vigente por sección/lapso/semana y no hay solapamientos.
 10. El PDF descargable contiene la secuencia didáctica, la aprobación de planificación y las firmas.
-11. Los permisos y el alcance se respetan en UI, guardado y PDF.
+11. Los permisos se respetan en UI, guardado y PDF.
 12. Las pruebas del módulo pasan y no hay regresiones en actividades.
 13. `pint` limpio y sin `dd`/`dump`.
 
@@ -1021,36 +1097,39 @@ para consulta posterior y enlaces directos.
 
 | Fase | Alcance | Entregable | Estimación |
 |---|---|---|---|
-| **F0. Confirmación funcional** | Validar “plan de clases”, eje, filtros, sección, PDF y firmas. | Documento ajustado + 2 casos reales. | 1 día |
+| **F0. Confirmación funcional** | Validar “plan de clases”, eje, filtros, semana, permisos y PDF. | Documento ajustado + 2 casos reales. | 1 día |
+| **F0.5. Corrección de supuestos** | Semana, búsqueda, parser parcial, permisos, scoring, `universe_hash`, esquema y fixtures. | Documentos corregidos + pruebas unitarias base. | 2–4 días |
 | **F1. Datos y modelos** | Migraciones, modelos, relaciones, factories, policy, auditoría. | Tablas y modelos probados. | 2–3 días |
-| **F2. Botón, modal y filtros** | Entrada, layout 90 %, snapshot de filtros, derivación del periodo, feature flag. | Wizard abre y confirma universo y periodo. | 2–3 días |
-| **F3. Actividades filtradas** | Consulta compartida, badges de secuencia, selección, estados vacíos. | Paso 2 funcional. | 3–4 días |
+| **F2. Botón, modal y contexto** | Entrada, layout 90 %, snapshot de filtros, resolución de sección y semanas, feature flag. | Wizard abre y confirma sección/semana. | 2–3 días |
+| **F3. Actividades del universo** | Consulta compartida, `activity_search`, badges de secuencia, selección, estados vacíos. | Paso 2 funcional. | 3–4 días |
 | **F4. Consolidación** | Mapeo actividad → sesión, edición, merge/split, conflictos, fuentes. | Paso 3 funcional. | 3–5 días |
 | **F5. Aprobación y versionado** | Checklist, guardado, estados, nueva versión, concurrencia. | Pasos 4 y persistencia. | 3–4 días |
 | **F6. PDF** | Controlador, vista, rutas, firmas, autorización, pruebas. | Paso 5 y descarga. | 2–3 días |
 | **F7. IA opcional** | Redacción integrada, merge asistido, validación JSON. | Botón “Sugerir redacción”. | 3–5 días |
 | **F8. Hardening** | Accesibilidad, rendimiento, pruebas, documentación, canario. | Release. | 3–4 días |
 
-**Total MVP (sin IA):** 16–24 días de desarrollo, más revisión funcional y
-validación en producción.
+**Total MVP (sin IA, incluida F0.5 y F8):** 20–30 días de desarrollo, más
+revisión funcional y validación en producción. Con IA: 23–35 días.
 
 ### 16.1 Tickets sugeridos
 
 | Ticket | Título | Depende de |
 |---|---|---|
-| DID-001 | Confirmar alcance, filtros y PDF | — |
-| DID-002 | Migraciones y modelos `didactic_plans` | DID-001 |
+| DID-001 | Confirmar alcance, semana, permisos y PDF | — |
+| DID-000 | Corrección F0.5 de documentos y supuestos | DID-001 |
+| DID-002 | Migraciones y modelos `didactic_plans` | DID-000 |
 | DID-003 | Policy, auditoría y feature flag | DID-002 |
 | DID-004 | Botón + modal 90 % + snapshot de filtros | DID-002 |
-| DID-005 | Consulta compartida de actividades filtradas | DID-004 |
-| DID-006 | Detección de secuencia y badges | DID-005 |
-| DID-007 | Mapeo actividad → sesión | DID-006 |
-| DID-008 | Consolidación editable y conflictos | DID-007 |
-| DID-009 | Guardar borrador y aprobar | DID-008 |
-| DID-010 | Versionado y concurrencia | DID-009 |
-| DID-011 | PDF y autorización | DID-009 |
-| DID-012 | Pruebas de feature y hardening | DID-010, DID-011 |
-| DID-013 | IA opcional | DID-012 |
+| DID-005 | Resolución de sección y semanas | DID-004 |
+| DID-006 | Consulta compartida y `activity_search` | DID-005 |
+| DID-007 | Parser parcial, badges y scoring | DID-006 |
+| DID-008 | Mapeo actividad → sesión | DID-007 |
+| DID-009 | Consolidación editable y conflictos | DID-008 |
+| DID-010 | Guardar borrador y aprobar | DID-009 |
+| DID-011 | Versionado, solapamiento y concurrencia | DID-010 |
+| DID-012 | PDF y autorización | DID-010 |
+| DID-013 | Pruebas de feature y hardening | DID-011, DID-012 |
+| DID-014 | IA opcional | DID-013 |
 
 ---
 
@@ -1058,19 +1137,23 @@ validación en producción.
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |---|---|---|---|
-| El wizard consulta fuera de los filtros | Media | Alto | Consulta compartida + snapshot + pruebas explícitas. |
-| Divergencia entre página y wizard | Media | Alto | Extraer `FilteredActivitiesQuery` y reutilizarla. |
-| Filtros sin sección | Alta | Medio | Pedir elegir una sección del resultado; no inventar. |
-| Actividades sin indicadores | Alta | Medio | Indicadores manuales y checklist flexible. |
+| El wizard consulta fuera de los filtros | Media | Alto | Consulta compartida + snapshot + `universe_hash` + pruebas explícitas. |
+| Divergencia entre página y wizard | Media | Alto | Extraer `FilteredActivitiesQuery` y reutilizarla; prueba de paridad. |
+| El lapso cubre 80 días y 157 actividades | Alta | Alto | Plan semanal con selector de semana; límite de 200 con mensaje, sin truncar. |
+| Fechas inválidas en `activities` | Alta | Medio | Excluir `0000-00-00`, nulos y fuera del lapso; avisar. |
+| `search` no busca contenido | Alta | Medio | `activity_search` acotado al universo; no prometer búsqueda de contenido en la barra. |
+| Scoring preselecciona casi todo | Alta | Medio | Preselección solo con tema + semana + máximo 10; por defecto nada. |
+| Filtros sin sección | Alta | Medio | Pedir elegir una sección del resultado y recalcular el rango. |
+| Actividades sin indicadores | Alta | Medio | Indicadores manuales y checklist con justificación. |
 | Actividades sin evaluación | Media | Medio | Advertencia y campo editable. |
 | Varias actividades el mismo día | Alta | Medio | Merge/split manual y advertencia. |
-| Textos muy largos en PDF | Media | Medio | Landscape condicional, segunda página, `word-wrap`. |
-| Duplicidad de planes | Media | Alto | Único por sección/periodo; transacción y bloqueo. |
-| Edición simultánea | Media | Medio | `lock_version` + aviso de conflicto. |
-| Permisos/IDOR | Baja | Alto | Policy + validación de alcance + pruebas 403. |
+| Textos muy largos en PDF | Media | Medio | Carta vertical, segunda página de anexos, `word-wrap`. |
+| Duplicidad de planes | Media | Alto | Único por sección/lapso/semana; transacción y bloqueo; rechazo de solapamientos. |
+| Edición simultánea | Media | Medio | `lock_version` + aviso de conflicto; un solo borrador por clave. |
+| Permisos/IDOR | Baja | Alto | Policy + `isPlanner` + pruebas 403 (sin alcance por sección en MVP). |
 | Migración en producción | Baja | Alto | Aditiva, backup, bandera, canario, sin `fresh`. |
 | Datos sensibles en logs | Baja | Alto | No loguear texto completo; solo IDs y longitudes. |
-| Cambios en la actividad fuente | Media | Medio | Checksum y advertencia de desincronización. |
+| Cambios en la actividad fuente | Media | Medio | `activity_checksum` y advertencia de desincronización. |
 
 ---
 
@@ -1104,21 +1187,24 @@ validación en producción.
 | # | Pregunta | Decisión (2026-11-13) |
 |---|---|---|
 | 1 | ¿El plan se genera por sección o por grado? | **Por sección.** |
-| 2 | ¿La semana se elige o se deriva? | **Se deriva del rango de fechas de los filtros**, no se elige libremente. |
+| 2 | ¿La semana se elige o se deriva? | **Se deriva** el conjunto de semanas del rango filtrado y **el usuario elige una**; no escribe fechas libres. |
 | 3 | ¿Quién aprueba? | **El usuario de planificación** autenticado; se registra `approved_by`. Puede coincidir con el creador. |
+| 4 | ¿La barra filtra por contenido? | **No**: solo asignatura, profesor, sección e ID. El wizard añade `activity_search` acotado. |
+| 5 | ¿Cómo se detecta una secuencia parcial? | Con `parseTeachingSections()`; `getTeachingSections()` solo devuelve completas. |
+| 6 | ¿Cómo se evita preseleccionar todo? | Preselección solo con tema afín + semana + máximo 10; por defecto nada. |
 
 ### Pendientes
 
 | # | Pregunta | Impacto | Recomendación |
 |---|---|---|---|
-| 4 | ¿El PDF lleva logo y formato oficial? | Medio | Sí; confirmar nombres/cargos de las firmas. |
-| 5 | ¿Se permiten indicadores manuales? | Medio | Sí, obligatorio cuando `achievements` está vacío. |
-| 6 | ¿Se permite fusionar actividades del mismo día? | Medio | Sí, con confirmación. |
-| 7 | ¿Se debe publicar a estudiantes/representantes? | Medio | Fuera del MVP. |
-| 8 | ¿Se permite IA? ¿Con qué proveedor? | Medio | Opcional, con consentimiento y gateway. |
-| 9 | ¿Se requiere historial y por cuánto tiempo? | Medio | Versionado indefinido; archivar, no borrar. |
-| 10 | ¿Hay turnos mañana/tarde? | Bajo | Campo `shift` preparado. |
-| 11 | ¿Se importan planes históricos de `s2526`? | Bajo | Fuera del MVP; comando aparte. |
+| 7 | ¿El PDF lleva logo y formato oficial? | Medio | Sí; usar `role_label` para las firmas. |
+| 8 | ¿Se permiten indicadores manuales? | Medio | Sí, obligatorio cuando `achievements` está vacío. |
+| 9 | ¿Se permite fusionar actividades del mismo día? | Medio | Sí, con confirmación. |
+| 10 | ¿Se debe publicar a estudiantes/representantes? | Medio | Fuera del MVP. |
+| 11 | ¿Se permite IA? ¿Con qué proveedor? | Medio | Opcional, con consentimiento y gateway. |
+| 12 | ¿Se requiere historial y por cuánto tiempo? | Medio | Versionado indefinido; archivar, no borrar. |
+| 13 | ¿Hay turnos mañana/tarde? | Bajo | Fuera del MVP; `seccions` no tiene turno. |
+| 14 | ¿Se importan planes históricos de `s2526`? | Bajo | Fuera del MVP; comando aparte. |
 
 ---
 
@@ -1136,8 +1222,12 @@ validación en producción.
 - [x] Confirmar que el producto es “plan de clases / secuencia didáctica”.
 - [x] Confirmar que el universo son las actividades filtradas por la página.
 - [x] Confirmar que el plan es por sección.
-- [x] Confirmar que el periodo se deriva del rango de fechas de los filtros.
+- [x] Corregir que la barra no tiene rango de fechas: el plan es semanal con
+      selector de semana derivado del lapso/actividades.
 - [x] Confirmar que aprueba el usuario de planificación.
+- [x] Confirmar permisos MVP: Planificación/Admin; Diagnóstico solo lectura.
+- [x] Confirmar que la búsqueda de la barra no cubre contenido de actividades.
+- [x] Confirmar parser parcial, `universe_hash` y esquema de fuentes.
 - [ ] Confirmar eje, proyecto y campos obligatorios.
 - [ ] Confirmar evaluación/indicadores que se imprimen.
 - [ ] Validar el formato PDF con una hoja impresa.

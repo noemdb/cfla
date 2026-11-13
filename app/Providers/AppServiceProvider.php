@@ -118,6 +118,12 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\app\Academy\Lms\LmsActivityPublication::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\ActivityComment::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\LmsActivityProgress::observe(\App\Observers\AuditableModelObserver::class);
+
+        // Plan de clases / secuencia didáctica (F1): auditoría de las tablas nuevas.
+        \App\Models\app\Academy\DidacticPlan::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\DidacticPlanSession::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\DidacticPlanIndicator::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\DidacticPlanSource::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\BroadcastEvent::observe(\App\Observers\AuditableModelObserver::class);
 
         // Mejora propuesta #7 ampliada: Educational (debates) e Instrument (diagnóstico).

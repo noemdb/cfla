@@ -212,6 +212,59 @@ class Activity extends Model implements \App\Contracts\Auditable
     }
 
     /**
+     * Descompone el campo `teaching` en las secciones que estén presentes.
+     *
+     * A diferencia de `getTeachingSections()`, no exige que estén las tres:
+     * devuelve las encontradas y la lista de faltantes. Sirve para detectar
+     * secuencias parciales en el wizard de plan de clases.
+     *
+     * @return array{sections: array<string, string>, missing: array<int, string>}
+     */
+    public function parseTeachingSections(): array
+    {
+        $text = (string) $this->teaching;
+        $labels = ['INICIO', 'DESARROLLO', 'CIERRE'];
+
+        if (trim($text) === '') {
+            return ['sections' => [], 'missing' => $labels];
+        }
+
+        $found = [];
+        foreach ($labels as $label) {
+            $pattern = '/\b'.preg_quote($label, '/').'\b\s*:\s*/u';
+            if (preg_match($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {
+                $found[$label] = [
+                    'marker_start' => $matches[0][1],
+                    'content_start' => $matches[0][1] + strlen($matches[0][0]),
+                ];
+            }
+        }
+
+        // Orden documental: si los marcadores aparecen fuera de orden, cada
+        // sección termina donde empieza el siguiente marcador encontrado.
+        uasort($found, fn (array $a, array $b) => $a['marker_start'] <=> $b['marker_start']);
+
+        $ordered = array_keys($found);
+        $sections = [];
+
+        foreach ($ordered as $index => $label) {
+            $start = $found[$label]['content_start'];
+            $end = strlen($text);
+
+            if (isset($ordered[$index + 1])) {
+                $end = $found[$ordered[$index + 1]]['marker_start'];
+            }
+
+            $sections[$label] = trim(substr($text, $start, $end - $start));
+        }
+
+        return [
+            'sections' => $sections,
+            'missing' => array_values(array_diff($labels, array_keys($sections))),
+        ];
+    }
+
+    /**
      * Descompone el campo `teaching` en tres secciones (INICIO, DESARROLLO, CIERRE).
      *
      * Solo reconoce los marcadores con dos puntos y en mayúsculas que produce
@@ -224,45 +277,17 @@ class Activity extends Model implements \App\Contracts\Auditable
      */
     public function getTeachingSections(): array
     {
-        $text = (string) $this->teaching;
-        if (trim($text) === '') {
+        $parsed = $this->parseTeachingSections();
+
+        if ($parsed['missing'] !== []) {
             return [];
         }
 
-        $labels = ['INICIO', 'DESARROLLO', 'CIERRE'];
-        $found = [];
-        $cursor = 0;
-
-        foreach ($labels as $label) {
-            $pattern = '/\b'.preg_quote($label, '/').'\b\s*:\s*/u';
-            if (preg_match($pattern, $text, $matches, PREG_OFFSET_CAPTURE, $cursor)) {
-                $found[$label] = [
-                    'marker_start' => $matches[0][1],
-                    'content_start' => $matches[0][1] + strlen($matches[0][0]),
-                ];
-                $cursor = $found[$label]['content_start'];
-            }
+        $ordered = [];
+        foreach (['INICIO', 'DESARROLLO', 'CIERRE'] as $label) {
+            $ordered[$label] = $parsed['sections'][$label];
         }
 
-        if (count($found) !== count($labels)) {
-            return [];
-        }
-
-        $sections = [];
-        foreach ($labels as $index => $label) {
-            $start = $found[$label]['content_start'];
-            $end = strlen($text);
-
-            foreach (array_slice($labels, $index + 1) as $nextLabel) {
-                if (isset($found[$nextLabel])) {
-                    $end = $found[$nextLabel]['marker_start'];
-                    break;
-                }
-            }
-
-            $sections[$label] = trim(substr($text, $start, $end - $start));
-        }
-
-        return $sections;
+        return $ordered;
     }
 }

@@ -13,7 +13,10 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\User;
 use App\Services\Planning\ActivityCopyService;
+use App\Services\Planning\ActivityMarkdownBuilder;
+use App\Services\Planning\FilteredActivitiesQuery;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -136,19 +139,7 @@ class IndexComponent extends Component
 
     public function render()
     {
-        $filters = array_filter([
-            'pestudio_id' => $this->pestudio_id,
-            'grado_id' => $this->grado_id,
-            'seccion_id' => $this->seccion_id,
-            'lapso_id' => $this->lapso_id,
-            'profesor_id' => $this->profesor_id,
-            'status_activities' => $this->status_activities,
-            'filter_observations' => $this->filter_observations ? true : null,
-            'filter_status' => $this->filter_status ?: null,
-            'search' => $this->search ?: null,
-        ], fn ($v) => $v !== null && $v !== '');
-
-        $pevaluacions = $this->getPevaluaciones($filters);
+        $pevaluacions = $this->getPevaluaciones($this->currentFilters());
 
         // Compute the active tab index from the current lapso_id
         $activeTabIndex = 1;
@@ -163,6 +154,28 @@ class IndexComponent extends Component
             'pevaluacions' => $pevaluacions,
             'activeTabIndex' => $activeTabIndex,
         ]);
+    }
+
+    /**
+     * Filtros activos normalizados. Fuente única para la pantalla y para la
+     * exportación Markdown, de modo que el archivo descargado refleje
+     * exactamente el universo visible.
+     *
+     * @return array<string, mixed>
+     */
+    private function currentFilters(): array
+    {
+        return array_filter([
+            'pestudio_id' => $this->pestudio_id,
+            'grado_id' => $this->grado_id,
+            'seccion_id' => $this->seccion_id,
+            'lapso_id' => $this->lapso_id,
+            'profesor_id' => $this->profesor_id,
+            'status_activities' => $this->status_activities,
+            'filter_observations' => $this->filter_observations ? true : null,
+            'filter_status' => $this->filter_status ?: null,
+            'search' => $this->search ?: null,
+        ], fn ($v) => $v !== null && $v !== '');
     }
 
     // ─── FILTERS CASCADE ────────────────────────────────────────
@@ -326,82 +339,7 @@ class IndexComponent extends Component
 
     protected function getPevaluaciones(array $filters)
     {
-        $query = Pevaluacion::with([
-            'pensum.asignatura',
-            'pensum.pestudio',
-            'seccion.grado',
-            'profesor',
-            'lapso',
-            'grupoEstable',
-        ])
-            ->with('activities.lmsPublication')
-            ->with('activities.lmsSections')
-            ->with('activities.supplement')
-            ->withCount([
-                'activities',
-                'activities as activities_revision_count' => fn ($q) => $q->where('status', 0),
-                'activities as activities_approved_count' => fn ($q) => $q->where('status', 1),
-                'activities as activities_lessons_count' => fn ($q) => $q->whereHas('lmsPublication'),
-                'activities as activities_supplements_count' => fn ($q) => $q->whereHas('supplement'),
-            ])
-            ->whereHas('pensum.pestudio', fn ($q) => $q->where('planning_module', true))
-            ->whereNull('pevaluacions.deleted_at');
-
-        if (isset($filters['pestudio_id'])) {
-            $query->whereHas('pensum.pestudio', fn ($q) => $q->where('id', $filters['pestudio_id']));
-        }
-        if (isset($filters['grado_id'])) {
-            $query->whereHas('seccion.grado', fn ($q) => $q->where('id', $filters['grado_id']));
-        }
-        if (isset($filters['seccion_id'])) {
-            $query->where('seccion_id', $filters['seccion_id']);
-        }
-        if (isset($filters['lapso_id'])) {
-            $query->where('lapso_id', $filters['lapso_id']);
-        }
-        if (isset($filters['profesor_id'])) {
-            $query->where('profesor_id', $filters['profesor_id']);
-        }
-        if (isset($filters['status_activities'])) {
-            if ($filters['status_activities'] === 'SI') {
-                $query->having('activities_count', '>', 0);
-            } elseif ($filters['status_activities'] === 'NO') {
-                $query->having('activities_count', '=', 0);
-            } elseif ($filters['status_activities'] === 'SI_LE') {
-                $query->having('activities_lessons_count', '>', 0);
-            } elseif ($filters['status_activities'] === 'NO_LE') {
-                $query->having('activities_lessons_count', '=', 0);
-            } elseif ($filters['status_activities'] === 'SI_SUP') {
-                $query->having('activities_supplements_count', '>', 0);
-            }
-        }
-        if (! empty($filters['filter_observations'])) {
-            $query->whereNotNull('pevaluacions.observations')
-                ->where('pevaluacions.observations', '!=', '');
-        }
-        if (! empty($filters['filter_status'])) {
-            if ($filters['filter_status'] === 'pending') {
-                $query->whereHas('activities', fn ($q) => $q->where('status', 0));
-            } elseif ($filters['filter_status'] === 'approved') {
-                $query->has('activities')
-                    ->whereDoesntHave('activities', fn ($q) => $q->where('status', 0));
-            }
-        }
-        if (! empty($filters['search'])) {
-            $term = trim((string) $filters['search']);
-            $query->where(function ($q) use ($term) {
-                $q->whereHas('pensum.asignatura', fn ($q) => $q
-                    ->where('name', 'like', "%{$term}%")
-                    ->orWhere('code', 'like', "%{$term}%"))
-                    ->orWhereHas('profesor', fn ($q) => $q
-                        ->where('name', 'like', "%{$term}%")
-                        ->orWhere('lastname', 'like', "%{$term}%"))
-                    ->orWhereHas('seccion', fn ($q) => $q->where('name', 'like', "%{$term}%"))
-                    ->orWhere('pevaluacions.id', 'like', "%{$term}%");
-            });
-        }
-
-        $query->orderBy('created_at', 'desc');
+        $query = app(FilteredActivitiesQuery::class)->pevaluacions($filters);
 
         if ((int) $this->paginate === 9999) {
             $all = $query->get();
@@ -416,6 +354,212 @@ class IndexComponent extends Component
         }
 
         return $query->paginate($this->paginate);
+    }
+
+    // ─── EXPORTACIÓN MARKDOWN (contexto para LLM) ───────────────
+
+    /**
+     * Descarga un snapshot Markdown con TODAS las actividades que cumplen los
+     * filtros activos (sin paginar), incluyendo pensum, asignatura, grado,
+     * sección, lapso, docente, actividades, indicadores y observaciones.
+     *
+     * El archivo está pensado como contexto autocontenido para que otro LLM
+     * analice la planificación y genere productos derivados.
+     */
+    public function downloadMarkdownReport()
+    {
+        $markdown = app(ActivityMarkdownBuilder::class)->build($this->buildMarkdownPayload());
+
+        $lapsoSlug = Str::slug($this->selectedLapsoName() ?? 'todos-los-lapsos') ?: 'todos-los-lapsos';
+        $filename = 'actividades-planificacion-'.$lapsoSlug.'-'.now()->format('Ymd_His').'.md';
+
+        return response()->streamDownload(
+            static function () use ($markdown): void {
+                echo $markdown;
+            },
+            $filename,
+            ['Content-Type' => 'text/markdown; charset=UTF-8']
+        );
+    }
+
+    /**
+     * Payload ya filtrado y normalizado que consume `ActivityMarkdownBuilder`.
+     * El builder no consulta la base de datos: toda la selección ocurre aquí.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildMarkdownPayload(): array
+    {
+        $filters = $this->currentFilters();
+
+        $pevaluacions = app(FilteredActivitiesQuery::class)
+            ->pevaluacions($filters)
+            ->with([
+                'activities.achievements',
+                'activities.lmsResources',
+                'activities.lmsLinks',
+                'activities.lmsHtmlEmbeds',
+            ])
+            ->get();
+
+        $plans = $pevaluacions
+            ->map(fn (Pevaluacion $pevaluacion) => $this->normalizePlanForMarkdown($pevaluacion))
+            ->values()
+            ->all();
+
+        $pestudio = $this->pestudio_id ? Pestudio::find($this->pestudio_id) : null;
+        $grado = $this->grado_id ? Grado::find($this->grado_id) : null;
+        $seccion = $this->seccion_id ? Seccion::find($this->seccion_id) : null;
+        $lapso = $this->lapso_id ? Lapso::find($this->lapso_id) : null;
+        $profesor = $this->profesor_id ? Profesor::find($this->profesor_id) : null;
+
+        $statusActivityLabels = [
+            'SI' => 'Con actividades',
+            'NO' => 'Sin actividades',
+            'SI_LE' => 'Con lecciones LMS',
+            'NO_LE' => 'Sin lecciones LMS',
+            'SI_SUP' => 'Con información complementaria',
+        ];
+        $statusReviewLabels = [
+            'approved' => 'Aprobadas',
+            'pending' => 'En revisión',
+        ];
+
+        return [
+            'generated_at' => now(),
+            'source_url' => route('app.planning.activities.index'),
+            'filters' => [
+                'search' => $this->search ?: null,
+                'pestudio' => $pestudio?->name ?? 'Todos',
+                'grado' => $grado?->name ?? 'Todos',
+                'seccion' => $seccion?->name ?? 'Todos',
+                'lapso' => $lapso?->name ?? 'Todos',
+                'profesor' => $profesor?->full_name ?? 'Todos',
+                'status_activities' => $statusActivityLabels[$this->status_activities] ?? 'Todas',
+                'filter_status' => $statusReviewLabels[$this->filter_status] ?? 'Todos',
+                'filter_observations' => (bool) $this->filter_observations,
+                'raw' => $filters,
+            ],
+            'plans' => $plans,
+        ];
+    }
+
+    private function selectedLapsoName(): ?string
+    {
+        return $this->lapso_id
+            ? Lapso::whereKey($this->lapso_id)->value('name')
+            : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizePlanForMarkdown(Pevaluacion $pevaluacion): array
+    {
+        $activities = $pevaluacion->activities
+            ->sortBy(fn ($activity) => $activity->finicial?->timestamp ?? PHP_INT_MAX)
+            ->values()
+            ->map(fn ($activity) => $this->normalizeActivityForMarkdown($activity))
+            ->all();
+
+        return [
+            'id' => $pevaluacion->id,
+            'pestudio' => [
+                'name' => $pevaluacion->pensum?->pestudio?->name,
+                'code' => $pevaluacion->pensum?->pestudio?->code,
+                'activities_avr' => $pevaluacion->pensum?->pestudio?->activities_avr,
+            ],
+            'grado' => [
+                'name' => $pevaluacion->seccion?->grado?->name,
+                'code' => $pevaluacion->seccion?->grado?->code,
+            ],
+            'seccion' => [
+                'name' => $pevaluacion->seccion?->name,
+                'amount_student' => $pevaluacion->seccion?->amount_student,
+            ],
+            'asignatura' => [
+                'name' => $pevaluacion->pensum?->asignatura?->name,
+                'code' => $pevaluacion->pensum?->asignatura?->code,
+                'hour_t_week' => $pevaluacion->pensum?->asignatura?->hour_t_week,
+                'hour_p_week' => $pevaluacion->pensum?->asignatura?->hour_p_week,
+                'unid_credit' => $pevaluacion->pensum?->asignatura?->unid_credit,
+            ],
+            'lapso' => [
+                'name' => $pevaluacion->lapso?->name,
+                'code' => $pevaluacion->lapso?->code,
+                'finicial' => $pevaluacion->lapso?->finicial,
+                'ffinal' => $pevaluacion->lapso?->ffinal,
+            ],
+            'profesor' => [
+                'name' => $pevaluacion->profesor?->name,
+                'lastname' => $pevaluacion->profesor?->lastname,
+            ],
+            'grupo' => $pevaluacion->grupoEstable?->name,
+            'objetivo' => $pevaluacion->objetivo,
+            'description' => $pevaluacion->description,
+            'observations' => $pevaluacion->observations,
+            'category' => $pevaluacion->category,
+            'status_official' => $pevaluacion->status_official,
+            'status_baremo' => $pevaluacion->status_baremo,
+            'nota_type' => $pevaluacion->nota_type,
+            'created_at' => $pevaluacion->created_at,
+            'updated_at' => $pevaluacion->updated_at,
+            'activities' => $activities,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizeActivityForMarkdown(Activity $activity): array
+    {
+        $publication = $activity->lmsPublication;
+
+        return [
+            'id' => $activity->id,
+            'finicial' => $activity->finicial,
+            'ffinal' => $activity->ffinal,
+            'topic' => $activity->topic,
+            'thematic' => $activity->thematic,
+            'references' => $activity->references,
+            'teaching' => $activity->teaching,
+            'teaching_sections' => $activity->parseTeachingSections(),
+            'learning' => $activity->learning,
+            'description' => $activity->description,
+            'observations' => $activity->observations,
+            'comments' => $activity->comments,
+            'status' => $activity->status,
+            'word_count' => $activity->teachingWordsMayorCount(),
+            'activities_avr' => $activity->activities_avr,
+            'created_at' => $activity->created_at,
+            'updated_at' => $activity->updated_at,
+            'achievements' => $activity->achievements
+                ->map(fn ($achievement) => [
+                    'name' => $achievement->name,
+                    'weighting' => $achievement->weighting,
+                    'quantitative' => (bool) $achievement->status_quantitative_weighting,
+                ])
+                ->values()
+                ->all(),
+            'supplement' => $activity->supplement
+                ? [
+                    'text' => $activity->supplement->text,
+                    'image_url' => $activity->supplement->image_url,
+                ]
+                : null,
+            'lms' => $publication
+                ? [
+                    'status' => $publication->status,
+                    'published_at' => $publication->published_at,
+                    'publish_at' => $publication->publish_at,
+                    'unpublish_at' => $publication->unpublish_at,
+                    'sections' => $activity->lmsSections->count(),
+                    'resources' => $activity->lmsResources->count(),
+                    'links' => $activity->lmsLinks->count(),
+                    'embeds' => $activity->lmsHtmlEmbeds->count(),
+                ]
+                : null,
+        ];
     }
 
     public function setProfesorLists($value = null)
