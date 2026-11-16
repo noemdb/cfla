@@ -45,14 +45,22 @@ class DidacticPlanBuilder
         $sections = $parsed['sections'];
         $warnings = [];
 
-        $date = $this->periodResolver->normalizeDate($activity->finicial ?? null)
-            ?? $this->periodResolver->normalizeDate($activity->ffinal ?? null);
+        $startDate = $this->periodResolver->normalizeDate($activity->finicial ?? null);
+        $endDate = $this->periodResolver->normalizeDate($activity->ffinal ?? null) ?? $startDate;
+        $date = $startDate ?? $endDate;
 
-        if ($date === null) {
+        if ($startDate === null) {
             $warnings[] = 'La actividad no tiene una fecha válida; asigna una fecha dentro de la semana.';
-        } elseif ($weekStart !== null && $weekEnd !== null
-            && ! $this->periodResolver->isWithinWeek($date, $weekStart, $weekEnd)) {
-            $warnings[] = 'La fecha de la actividad está fuera de la semana elegida.';
+        } elseif ($weekStart !== null && $weekEnd !== null) {
+            $overlapsWeek = $startDate <= $weekEnd && ($endDate ?? $startDate) >= $weekStart;
+
+            if (! $overlapsWeek) {
+                $warnings[] = 'La fecha de la actividad está fuera de la semana elegida.';
+            } else {
+                // Si la actividad empieza antes de la semana, la sesión se
+                // ancla al primer día de la semana para no salir del plan.
+                $date = max($startDate, $weekStart);
+            }
         }
 
         if ($parsed['missing'] !== []) {

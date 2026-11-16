@@ -101,6 +101,24 @@ class DidacticPlanBuilderTest extends TestCase
         $this->assertContains('Secuencia parcial: falta CIERRE.', $session['warnings']);
     }
 
+    public function test_activity_overlapping_the_week_is_clamped_instead_of_warned(): void
+    {
+        $activity = $this->activity([
+            'topic' => 'Proyecto que cruza la semana',
+            'teaching' => 'INICIO: A. DESARROLLO: B. CIERRE: C.',
+            'finicial' => '2026-11-15',
+            'ffinal' => '2026-11-18',
+        ]);
+
+        $session = $this->builder->buildSession($activity, '2026-11-17', '2026-11-21');
+
+        $this->assertSame('2026-11-17', $session['date']);
+        $this->assertNotContains(
+            'La fecha de la actividad está fuera de la semana elegida.',
+            $session['warnings']
+        );
+    }
+
     public function test_warns_when_activity_is_outside_week_or_without_date(): void
     {
         $outside = $this->activity([

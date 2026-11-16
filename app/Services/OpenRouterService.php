@@ -17,7 +17,7 @@ class OpenRouterService
      * @param  array<string,mixed> $overrides  Parámetros opcionales que sobrescriben la config.
      *                                         Claves soportadas: model, max_tokens, temperature,
      *                                         timeout, response_format.
-     * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
+     * @return array{success: bool, content: ?string, model: ?string, usage: ?array, finish_reason: ?string, error: ?string}
      */
     public function ask(string $systemPrompt, string $userMessage, array $overrides = []): array
     {
@@ -81,6 +81,7 @@ class OpenRouterService
                 'content' => $data['choices'][0]['message']['content'],
                 'model'   => $data['model'] ?? null,
                 'usage'   => $data['usage'] ?? null,
+                'finish_reason' => $data['choices'][0]['finish_reason'] ?? null,
                 'error'   => null,
             ];
         } catch (RequestException $e) {
@@ -98,7 +99,7 @@ class OpenRouterService
      * @param  string       $text         Texto que acompaña a las imágenes.
      * @param  array        $images       Arreglo de rutas locales o URLs públicas.
      * @param  array<string,mixed> $overrides
-     * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
+     * @return array{success: bool, content: ?string, model: ?string, usage: ?array, finish_reason: ?string, error: ?string}
      */
     public function askWithImages(string $systemPrompt, string $text, array $images, array $overrides = []): array
     {
@@ -173,6 +174,7 @@ class OpenRouterService
                 'content' => $data['choices'][0]['message']['content'],
                 'model'   => $data['model'] ?? null,
                 'usage'   => $data['usage'] ?? null,
+                'finish_reason' => $data['choices'][0]['finish_reason'] ?? null,
                 'error'   => null,
             ];
         } catch (RequestException $e) {

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{REPORT_TITLE}}</title>
+
+<!-- ============================================================
+     TEMPLATE: Consolidado de Eje Temático Transversal
+     Nivel: Staff Engineer
+     Uso: Agente de código recibe un tema concreto y rellena
+          el objeto REPORT_DATA al final del <script>.
+     Estructura:
+       1. CDN (Tailwind + ApexCharts + Fuente)
+       2. CSS variables (paleta parametrizable por tema)
+       3. HTML semántico (secciones modulares)
+       4. Data layer (objeto REPORT_DATA)
+       5. Render functions (puro, sin mutación del DOM fuera)
+     ============================================================ -->
+
+<!-- CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Configuración Tailwind extendida -->
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        colors: {
+          brand: {
+            50:  'var(--brand-50)',
+            100: 'var(--brand-100)',
+            500: 'var(--brand-500)',
+            600: 'var(--brand-600)',
+            700: 'var(--brand-700)',
+            800: 'var(--brand-800)',
+            900: 'var(--brand-900)'
+          },
+          accent: {
+            500: 'var(--accent-500)',
+            600: 'var(--accent-600)',
+            700: 'var(--accent-700)'
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* ============================================================
+     PALETA PARAMETRIZABLE
+     El agente puede cambiar estas variables según el tema.
+     Ej: tema alimentación → emerald/teal
+         tema matemática   → blue/indigo
+         tema cultura      → amber/orange
+     ============================================================ */
+  :root {
+    --brand-50:  #f0fdf4;
+    --brand-100: #dcfce7;
+    --brand-500: #22c55e;
+    --brand-600: #16a34a;
+    --brand-700: #15803d;
+    --brand-800: #166534;
+    --brand-900: #14532d;
+
+    --accent-500: #f59e0b;
+    --accent-600: #d97706;
+    --accent-700: #b45309;
+
+    --danger-500: #ef4444;
+    --danger-600: #dc2626;
+    --danger-700: #b91c1c;
+
+    --info-500: #0ea5e9;
+    --info-600: #0284c7;
+    --info-700: #0369a1;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 12px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+  }
+
+  .card {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s ease;
+  }
+  .card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.06); }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #334155;
+    border-left: 4px solid var(--brand-600);
+    padding-left: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .apexcharts-tooltip { font-family: 'Inter', sans-serif; border-radius: 8px; }
+
+  /* Scroll personalizado */
+  .scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scroll-area::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  .scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .scroll-area::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  /* Animación sutil */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeInUp 0.5s ease-out both; }
+
+  /* Print */
+  @media print {
+    .no-print { display: none !important; }
+    .page-break { page-break-before: always; }
+    body { background: white; }
+  }
+</style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 text-white shadow-xl">
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="flex flex-wrap gap-2 mb-4" id="header-badges"></div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-2" id="header-title"></h1>
+    <p class="text-brand-50 text-lg mb-4" id="header-subtitle"></p>
+    <div class="text-brand-100 text-sm flex flex-wrap gap-x-6 gap-y-2" id="header-meta"></div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-10">
+
+  <!-- ============================================================
+       KPIs
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title">Indicadores clave</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="kpi-grid"></div>
+  </section>
+
+  <!-- ============================================================
+       DOS EJES ARTICULADOS
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title">Ejes articulados</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="axes-grid"></div>
+  </section>
+
+  <!-- ============================================================
+       GRÁFICOS
+       ============================================================ -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in">
+    <div class="card p-5">
+      <h3 class="font-semibold text-slate-700 mb-3" id="chart1-title"></h3>
+      <div id="chart-1"></div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold text-slate-700 mb-3" id="chart2-title"></h3>
+      <div id="chart-2"></div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold text-slate-700 mb-3" id="chart3-title"></h3>
+      <div id="chart-3"></div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold text-slate-700 mb-3" id="chart4-title"></h3>
+      <div id="chart-4"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MATRIZ POR GRADO × ÁREA
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title" id="matrix-title"></h2>
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto scroll-area">
+        <table class="w-full text-sm" id="matrix-table"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PROGRESIÓN CURRICULAR (ESPIRAL)
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title" id="progression-title"></h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3" id="progression-grid"></div>
+  </section>
+
+  <!-- ============================================================
+       CATÁLOGO DE ESTRATEGIAS
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title" id="catalog-title"></h2>
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto scroll-area max-h-[560px]">
+        <table class="w-full text-sm" id="catalog-table"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HALLAZGOS DE CALIDAD
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title" style="border-color: var(--danger-500);" id="findings-title"></h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="findings-grid"></div>
+  </section>
+
+  <!-- ============================================================
+       RECOMENDACIONES
+       ============================================================ -->
+  <section class="animate-in">
+    <h2 class="section-title" id="recommendations-title"></h2>
+    <ol class="card divide-y divide-slate-100" id="recommendations-list"></ol>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="text-center text-xs text-slate-500 py-6 border-t border-slate-200 mt-12" id="footer"></footer>
+
+</main>
+
+<!-- ============================================================
+     DATA LAYER + RENDER
+     El agente solo debe rellenar REPORT_DATA.
+     ============================================================ -->
+<script>
+/* ============================================================
+   REPORT_DATA — El agente rellena este objeto.
+   Cada campo está documentado con su tipo y propósito.
+   ============================================================ */
+const REPORT_DATA = {
+  // --- Metadatos generales ---
+  reportTitle:     'Consolidado de actividades y estrategias',
+  ejeTematico:     'Alimentación y gastronomía',
+  areasArticuladas:'Ciencias Naturales · Cultura e Identidad',
+  periodo:         '1ER MOMENTO · 2026',
+  nivelEducativo:  'EDUCACIÓN PRIMARIA',
+  avr:             'AVR 55',
+  fuente:          'actividades-planificacion-1er-momento-20261113_141810.md',
+  fechaSnapshot:   '13/11/2026',
+  fechaGeneracion: '16/11/2026',
+  sistema:         'EduSys',
+  totalPlanes:     134,
+  totalActividades:1918,
+
+  // --- KPIs (mínimo 4, máximo 6) ---
+  kpis: [
+    { label:'Actividades vinculadas', value:'132', desc:'de 1.918 totales (6,9 %)', color:'brand'   },
+    { label:'Nucleares (eje en tema)',value:'51',  desc:'declaradas en tema generador', color:'brand' },
+    { label:'Contextuales',           value:'81',  desc:'eje como contexto didáctico',    color:'accent'},
+    { label:'Estrategias reutilizables',value:'40',desc:'banco institucional',            color:'info'  },
+    { label:'Sin actividad evaluativa',value:'14', desc:'23 % · brecha crítica',          color:'danger'}
+  ],
+
+  // --- Ejes articulados (2 tarjetas comparativas) ---
+  axes: [
+    {
+      title:     'Eje Ciencias Naturales — nutrición y salud integral',
+      count:     82,
+      percent:   62,
+      color:     'brand',
+      description:'Nutrición, Trompo de los Alimentos, cadenas tróficas, sistemas del cuerpo, platos sostenibles, soberanía alimentaria, salud integral.',
+      metadata:  'Grados con mayor densidad: 3.º (14), 4.º (12), 6.º (26) · Áreas: CNAT, EFIS, EEST (sensorialidad)'
+    },
+    {
+      title:     'Eje Cultura e Identidad — gastronomía venezolana',
+      count:     50,
+      percent:   38,
+      color:     'accent',
+      description:'Gastronomía afrovenezolana, indígena y regional; platos navideños (hallaca, pan de jamón, pabellón); mestizaje; tradiciones decembrinas; identidad latinoamericana.',
+      metadata:  'Grados con mayor densidad: 2.º (9), 3.º (11), 5.º (11), 6.º (19) · Áreas: CSOC, EEST, LEN, MAT, ACI'
+    }
+  ],
+
+  // --- Gráficos ---
+  charts: {
+    chart1: {
+      title: 'Actividades por grado',
+      type:  'bar',
+      series: [
+        { name:'CNAT',  data:[5,12,14,12,4,26]  },
+        { name:'CSOC',  data:[12,6,11,1,6,8]    },
+        { name:'Otros', data:[3,0,2,2,13,9]     }
+      ],
+      categories: ['1.º','2.º','3.º','4.º','5.º','6.º'],
+      colors: ['#16a34a','#f59e0b','#64748b']
+    },
+    chart2: {
+      title: 'Distribución por área curricular',
+      type:  'donut',
+      series: [73,44,16,8,5],
+      labels: ['CNAT','CSOC','MAT','EEST','Otros'],
+      colors: ['#16a34a','#f59e0b','#e11d48','#a855f7','#64748b']
+    },
+    chart3: {
+      title: 'ODS asociados al eje',
+      type:  'bar-horizontal',
+      series: [{ name:'Actividades', data:[19,13,12,10,7,6,4,4,2,2,2] }],
+      categories: ['ODS 2','ODS 12','ODS 4','ODS 3','ODS 15','ODS 10','ODS 17','ODS 16','ODS 1','ODS 8','ODS 13'],
+      colors: ['#16a34a']
+    },
+    chart4: {
+      title: 'Estado de revisión',
+      type:  'radial',
+      value: 98.5,
+      label: 'Aprobadas',
+      totalLabel: '130 de 132 aprobadas',
+      color: '#16a34a'
+    }
+  },
+
+  // --- Matriz por grado × área ---
+  matrix: {
+    title: 'Matriz consolidada por grado',
+    headers: ['Grado','CNAT','CSOC','EEST','MAT','Otros','Total'],
+    rows: [
+      ['1.º',5,12,2,1,0,20],
+      ['2.º',12,6,0,0,0,18],
+      ['3.º',14,11,2,0,0,27],
+      ['4.º',12,1,2,0,0,15],
+      ['5.º',4,6,0,11,2,23],
+      ['6.º',26,8,2,4,3,43]
+    ],
+    totals: ['TOTAL',73,44,8,16,5,186]
+  },
+
+  // --- Progresión curricular ---
+  progression: {
+    title: 'Progresión curricular (espiral)',
+    stages: [
+      { label:'1.º GRADO', title:'Perceptivo',       desc:'Reconocer saludable/no saludable; color, forma, modelado; lonchera' },
+      { label:'2.º GRADO', title:'Hábito',           desc:'Dieta equilibrada, merienda, alimentos típicos, alimentación indígena y navideña' },
+      { label:'3.º GRADO', title:'Clasificación',    desc:'Trompo de los Alimentos, gastronomía afrovenezolana, texturas sensoriales' },
+      { label:'4.º GRADO', title:'Función',          desc:'Energéticos/constructores/reguladores, estado óptimo de salud, menús' },
+      { label:'5.º GRADO', title:'Matemática alimentaria', desc:'División y reparto equitativo, soberanía alimentaria, mestizaje gastronómico' },
+      { label:'6.º GRADO', title:'Sistémico–ético',  desc:'Cadenas tróficas, sostenibilidad, consumo responsable, ODS 2 y 12' }
+    ]
+  },
+
+  // --- Catálogo de estrategias ---
+  catalog: {
+    title: 'Catálogo de estrategias didácticas',
+    headers: ['#','Estrategia','Eje','Nivel / Área','Producto'],
+    rows: [
+      ['01','Semáforo alimenticio','CNAT','1.º–4.º','Clasificación mural + argumento'],
+      ['02','Trompo de los Alimentos','CNAT','3.º','Trompo coloreado e identificado'],
+      ['03','Pirámide de alimentos','CNAT','4.º','Collage por categorías'],
+      ['04','El cuerpo como un automóvil','CNAT','4.º','Producción escrita clasificatoria'],
+      ['05','La Cesta Sorpresa','CNAT','4.º','Mapa mental de saberes previos'],
+      ['06','Menú balanceado local','CNAT','1.º–4.º','Menú ilustrado'],
+      ['07','Mi lonchera saludable','CNAT','1.º–2.º','Lonchera dibujada + menú'],
+      ['08','Mercado de Sabores','CNAT/EEST','1.º','Maqueta de mercado (plastilina)'],
+      ['09','Plato Arcoíris','EEST/CNAT','6.º','Diseño con ≥4 colores + reflexión'],
+      ['10','Texturas visuales y táctiles','EEST','3.º','Lámina de texturas'],
+      ['11','Collage de texturas reutilizado','EEST','3.º','Representación con material reciclado'],
+      ['12','Mural del Menú Consciente','CNAT','6.º','Mural + argumentación 2 min'],
+      ['13','Mi Plato Sostenible','CNAT','6.º','Cartulina + ticket de salida'],
+      ['14','La Ruta del Alimento','CNAT','6.º','Esquema secuencial o historieta'],
+      ['15','Feria de Infografías Sostenibles','CNAT','6.º','Infografía/maqueta + decálogo'],
+      ['16','La red invisible','CNAT','6.º','Red trófica con hilo de lana'],
+      ['17','Germinando Soberanía','CNAT','6.º','Germinador reciclado + bitácora'],
+      ['18','La Telaraña de la Vida','CNAT','6.º','Red con pabilo + simulación'],
+      ['19','Del campo a la mesa festiva','CNAT','6.º','Esquema en cascada'],
+      ['20','Ruta del Sol al Plato Navideño','CNAT','6.º','Infografía + Galería Verde'],
+      ['21','De la hojarasca a la mesa','CNAT','6.º','Esquema circular + microcarta'],
+      ['22','Cartografía ecológica de la hallaca','CNAT','6.º','Trama trófica en papel bond'],
+      ['23','Pirámide trófica navideña','CNAT','6.º','Pirámide con recortes'],
+      ['24','Guardianes de la Mesa y del Planeta','CNAT','6.º','Feria + compromiso firmado'],
+      ['25','Plato Ancestral','CSOC','3.º','Ilustración afrovenezolana'],
+      ['26','Mapa gastronómico regional','CSOC','3.º','Esquema ingrediente ↔ región'],
+      ['27','Mi plato navideño favorito','CSOC','2.º','Dibujo rotulado'],
+      ['28','La Maleta Viajera','CSOC','1.º','Producción plástica + relato'],
+      ['29','Detectives de Raíces','CSOC','5.º','Pasatiempos + Maraca Preguntona'],
+      ['30','Trabajo escrito del mestizaje','CSOC','5.º','Investigación ilustrada'],
+      ['31','Mini-diccionario de indigenismos','CSOC','6.º','Diccionario alfabético ilustrado'],
+      ['32','Decálogo de Valores Ciudadanos','CSOC','6.º','Desde la elaboración del casabe'],
+      ['33','Debate del comedor','LEN','6.º','Debate reglado sobre azúcares'],
+      ['34','El Trueque Justo','MAT','5.º','Reparto con comprobación + debate'],
+      ['35','Ruta de Parrandas Latinoamericanas','MAT','5.º','6 fichas regionales + vocero'],
+      ['36','Reparto navideño','MAT','5.º','Problemas con residuo interpretado'],
+      ['37','Desafío matemático latinoamericano','MAT','5.º','Reto final por equipos'],
+      ['38','Control del comedor escolar','MAT','6.º','Resta de decimales con tara'],
+      ['39','Ficha de consolidación','CNAT','3.º','Prueba corta + corrección colectiva'],
+      ['40','Compromiso y metacognición','Transversal','Todos','Ticket de salida + compromiso']
+    ]
+  },
+
+  // --- Hallazgos de calidad ---
+  findings: {
+    title: 'Hallazgos de calidad',
+    items: [
+      { level:'danger',  title:'1. Sin indicadores de logro',        desc:'100 % de las actividades nucleares carecen de indicadores declarados.' },
+      { level:'danger',  title:'2. Ponderación 0,00',                desc:'Las actividades no aportan peso al registro de calificación.' },
+      { level:'danger',  title:'3. Sin vinculación LMS',             desc:'132 de 132 sin recurso digital de respaldo ni trazabilidad.' },
+      { level:'accent',  title:'4. Tema genérico oculta contenido',  desc:'20 actividades registradas como «Seres vivos» con contenido real de gastronomía navideña.' },
+      { level:'accent',  title:'5. Tres modelos gráficos coexistentes', desc:'Trompo, pirámide y semáforo: incoherencia con el referente nacional (INN).' },
+      { level:'accent',  title:'6. Doble registro en la misma fecha', desc:'6.º B: 06/11 (3980 y 4404) y 13/11 (3985 y 4408) — riesgo de duplicidad.' },
+      { level:'brand',   title:'7. Asimetría A/B en 5.º',            desc:'5.º B carece de la sesión de cierre del 30/10 (3478 no contiene el eje).' },
+      { level:'brand',   title:'8. Errores de fechas',               desc:'Act. 2085 y 2037: fin (23/09) anterior al inicio (23/10).' }
+    ]
+  },
+
+  // --- Recomendaciones ---
+  recommendations: {
+    title: 'Recomendaciones priorizadas',
+    items: [
+      { title:'Normalizar temas genéricos', desc:'Declarar el eje alimentación/gastronomía explícitamente en el tema generador.' },
+      { title:'Cargar indicadores de logro', desc:'Mínimo 2 por actividad y asignar ponderación coherente con el instrumento declarado.' },
+      { title:'Unificar el modelo gráfico',  desc:'Al Trompo de los Alimentos (INN); semáforo y pirámide quedan como recursos comparativos.' },
+      { title:'Convertir el catálogo en banco institucional', desc:'Reutilizable por grado y área, con código propio y producto esperado.' },
+      { title:'Cerrar asimetrías A/B',       desc:'En 5.º y 6.º antes del 20/11/2026.' },
+      { title:'Reforzar el eje cultura/identidad', desc:'En 1.º y 4.º, hoy concentrado en 2.º, 3.º, 5.º y 6.º.' },
+      { title:'Vincular lecciones LMS',      desc:'En las estrategias con producto digitalizable (infografías, murales, menús).' }
+    ]
+  }
+};
+
+/* ============================================================
+   RENDER ENGINE — Consume REPORT_DATA y pinta el DOM.
+   No modificar salvo que se cambie la estructura del template.
+   ============================================================ */
+const $ = (sel) => document.querySelector(sel);
+
+const COLOR_MAP = {
+  brand:  { bg:'bg-brand-50',  text:'text-brand-700',  border:'border-brand-600',  solid:'bg-brand-600'  },
+  accent: { bg:'bg-amber-50',  text:'text-amber-700',  border:'border-amber-500',  solid:'bg-amber-500'  },
+  info:   { bg:'bg-sky-50',    text:'text-sky-700',    border:'border-sky-500',    solid:'bg-sky-500'    },
+  danger: { bg:'bg-rose-50',   text:'text-rose-700',   border:'border-rose-500',   solid:'bg-rose-500'   }
+};
+
+const LEVEL_BORDER = {
+  danger: 'border-[var(--danger-500)]',
+  accent: 'border-[var(--accent-500)]',
+  brand:  'border-[var(--brand-600)]',
+  info:   'border-[var(--info-500)]'
+};
+const LEVEL_TEXT = {
+  danger: 'text-[var(--danger-700)]',
+  accent: 'text-[var(--accent-700)]',
+  brand:  'text-[var(--brand-700)]',
+  info:   'text-[var(--info-700)]'
+};
+
+/* --- Header --- */
+function renderHeader(d) {
+  $('#header-badges').innerHTML = `
+    <span class="chip bg-white/20 text-white">${d.periodo}</span>
+    <span class="chip bg-white/20 text-white">${d.nivelEducativo}</span>
+    <span class="chip bg-white/20 text-white">${d.avr}</span>
+    <span class="chip bg-[var(--accent-500)]/90 text-[var(--brand-900)]">EJE: ${d.ejeTematico.toUpperCase()}</span>
+  `;
+  $('#header-title').textContent = d.reportTitle;
+  $('#header-subtitle').innerHTML =
+    `La <b>${d.ejeTematico.toLowerCase()}</b> como eje central para enseñar <b>${d.areasArticuladas}</b>.`;
+  $('#header-meta').innerHTML = `
+    <span><strong>Fuente:</strong> <code class="bg-black/20 px-2 py-0.5 rounded text-xs">${d.fuente}</code></span>
+    <span><strong>Snapshot:</strong> ${d.fechaSnapshot}</span>
+    <span><strong>Generado:</strong> ${d.fechaGeneracion}</span>
+    <span><strong>Planes:</strong> ${d.totalPlanes} · <strong>Actividades:</strong> ${d.totalActividades}</span>
+  `;
+}
+
+/* --- KPIs --- */
+function renderKPIs(kpis) {
+  $('#kpi-grid').innerHTML = kpis.map(k => {
+    const c = COLOR_MAP[k.color] || COLOR_MAP.brand;
+    return `
+      <div class="card p-5 border-t-4 ${c.border}">
+        <p class="text-xs uppercase tracking-wide text-slate-500 font-semibold">${k.label}</p>
+        <p class="text-4xl font-extrabold ${c.text} mt-2">${k.value}</p>
+        <p class="text-xs text-slate-500 mt-1">${k.desc}</p>
+      </div>`;
+  }).join('');
+}
+
+/* --- Ejes articulados --- */
+function renderAxes(axes) {
+  $('#axes-grid').innerHTML = axes.map(a => {
+    const c = COLOR_MAP[a.color] || COLOR_MAP.brand;
+    return `
+      <div class="card p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-3 h-3 rounded-full ${c.solid}"></span>
+          <h3 class="font-semibold text-slate-700">${a.title}</h3>
+        </div>
+        <p class="text-3xl font-extrabold ${c.text}">
+          ${a.count} actividades
+          <span class="text-sm font-normal text-slate-500">(${a.percent} %)</span>
+        </p>
+        <p class="text-sm text-slate-600 mt-3">${a.description}</p>
+        <div class="mt-4 text-xs text-slate-500"><b>${a.metadata}</b></div>
+      </div>`;
+  }).join('');
+}
+
+/* --- Gráficos --- */
+function renderCharts(charts) {
+  $('#chart1-title').textContent = charts.chart1.title;
+  $('#chart2-title').textContent = charts.chart2.title;
+  $('#chart3-title').textContent = charts.chart3.title;
+  $('#chart4-title').textContent = charts.chart4.title;
+
+  const baseOpts = {
+    chart: { toolbar:{show:false}, fontFamily:'Inter, sans-serif', animations:{enabled:true, speed:600} },
+    tooltip: { theme:'light' },
+    dataLabels: { enabled:true, style:{fontSize:'11px', fontWeight:600} },
+    legend: { position:'top', fontSize:'13px' }
+  };
+
+  // Chart 1: barras agrupadas
+  new ApexCharts(document.querySelector('#chart-1'), {
+    ...baseOpts,
+    chart: { ...baseOpts.chart, type:'bar', height:320 },
+    series: charts.chart1.series,
+    xaxis: { categories: charts.chart1.categories },
+    plotOptions: { bar: { columnWidth:'55%', borderRadius:4 } },
+    colors: charts.chart1.colors,
+    dataLabels: { enabled:false }
+  }).render();
+
+  // Chart 2: dona
+  new ApexCharts(document.querySelector('#chart-2'), {
+    ...baseOpts,
+    chart: { ...baseOpts.chart, type:'donut', height:320 },
+    series: charts.chart2.series,
+    labels: charts.chart2.labels,
+    colors: charts.chart2.colors,
+    legend: { ...baseOpts.legend, position:'bottom' },
+    plotOptions: { pie: { donut: { size:'65%' } } },
+    dataLabels: { ...baseOpts.dataLabels, formatter: v => v.toFixed(0) + '%' }
+  }).render();
+
+  // Chart 3: barras horizontales
+  new ApexCharts(document.querySelector('#chart-3'), {
+    ...baseOpts,
+    chart: { ...baseOpts.chart, type:'bar', height:320 },
+    series: charts.chart3.series,
+    xaxis: { categories: charts.chart3.categories },
+    plotOptions: { bar: { borderRadius:4, horizontal:true, distributed:true } },
+    colors: charts.chart3.colors,
+    legend: { show:false }
+  }).render();
+
+  // Chart 4: radial
+  new ApexCharts(document.querySelector('#chart-4'), {
+    ...baseOpts,
+    chart: { ...baseOpts.chart, type:'radialBar', height:320 },
+    series: [charts.chart4.value],
+    labels: [charts.chart4.label],
+    plotOptions: {
+      radialBar: {
+        startAngle:-135, endAngle:135,
+        hollow: { size:'55%' },
+        track: { background:'#fecaca' },
+        dataLabels: {
+          name: { offsetY:-10 },
+          value: { fontSize:'28px', fontWeight:700, color:charts.chart4.color, offsetY:10, formatter:v=>v+'%' },
+          total: { show:true, label:charts.chart4.totalLabel, color:'#64748b' }
+        }
+      }
+    },
+    fill: { colors:[charts.chart4.color] },
+    stroke: { lineCap:'round' }
+  }).render();
+}
+
+/* --- Matriz --- */
+function renderMatrix(m) {
+  $('#matrix-title').textContent = m.title;
+  const thead = `<thead class="bg-brand-800 text-white">
+    <tr>${m.headers.map(h=>`<th class="px-4 py-3 ${h===m.headers[0]?'text-left':'text-center'} font-semibold">${h}</th>`).join('')}</tr>
+  </thead>`;
+  const tbody = `<tbody class="divide-y divide-slate-100">
+    ${m.rows.map((r,i)=>{
+      const highlight = i >= m.rows.length - 2 ? 'bg-brand-50' : '';
+      return `<tr class="hover:bg-slate-50 ${highlight}">
+        ${r.map((c,j)=>`<td class="px-4 py-3 ${j===0?'font-medium':'text-center'} ${j===r.length-1?'font-bold':''}">${c===0?'—':c}</td>`).join('')}
+      </tr>`;
+    }).join('')}
+    <tr class="bg-slate-100 font-bold">
+      ${m.totals.map((c,j)=>`<td class="px-4 py-3 ${j===0?'':'text-center'}">${c===0?'—':c}</td>`).join('')}
+    </tr>
+  </tbody>`;
+  $('#matrix-table').innerHTML = thead + tbody;
+}
+
+/* --- Progresión --- */
+function renderProgression(p) {
+  $('#progression-title').textContent = p.title;
+  const borders = ['border-brand-400','border-brand-500','border-brand-600','border-brand-700','border-teal-600','border-teal-700'];
+  $('#progression-grid').innerHTML = p.stages.map((s,i)=>`
+    <div class="card p-4 border-t-4 ${borders[i%borders.length]}">
+      <p class="text-xs text-slate-500 font-semibold">${s.label}</p>
+      <p class="font-bold text-brand-700 mt-1">${s.title}</p>
+      <p class="text-xs text-slate-600 mt-2">${s.desc}</p>
+    </div>
+  `).join('');
+}
+
+/* --- Catálogo --- */
+function renderCatalog(c) {
+  $('#catalog-title').textContent = `${c.title} (${c.rows.length})`;
+  const ejeColors = {
+    'CNAT':'bg-emerald-100 text-emerald-800',
+    'CSOC':'bg-amber-100 text-amber-800',
+    'EEST':'bg-purple-100 text-purple-800',
+    'LEN':'bg-sky-100 text-sky-800',
+    'MAT':'bg-rose-100 text-rose-800',
+    'Transversal':'bg-slate-100 text-slate-700'
+  };
+  const thead = `<thead class="bg-slate-700 text-white sticky top-0">
+    <tr>${c.headers.map(h=>`<th class="px-3 py-2 text-left font-semibold">${h}</th>`).join('')}</tr>
+  </thead>`;
+  const tbody = `<tbody class="divide-y divide-slate-100">
+    ${c.rows.map(r=>{
+      const eje = (r[2]||'').split('/')[0];
+      const chip = ejeColors[eje] || 'bg-slate-100 text-slate-700';
+      return `<tr class="hover:bg-slate-50">
+        <td class="px-3 py-2 text-slate-500 font-mono">${r[0]}</td>
+        <td class="px-3 py-2 font-medium">${r[1]}</td>
+        <td class="px-3 py-2"><span class="chip ${chip}">${r[2]}</span></td>
+        <td class="px-3 py-2 text-slate-600">${r[3]}</td>
+        <td class="px-3 py-2 text-slate-600">${r[4]}</td>
+      </tr>`;
+    }).join('')}
+  </tbody>`;
+  $('#catalog-table').innerHTML = thead + tbody;
+}
+
+/* --- Hallazgos --- */
+function renderFindings(f) {
+  $('#findings-title').textContent = f.title;
+  $('#findings-grid').innerHTML = f.items.map(it=>`
+    <div class="card p-5 border-l-4 ${LEVEL_BORDER[it.level]}">
+      <p class="font-bold ${LEVEL_TEXT[it.level]}">${it.title}</p>
+      <p class="text-sm text-slate-600 mt-1">${it.desc}</p>
+    </div>
+  `).join('');
+}
+
+/* --- Recomendaciones --- */
+function renderRecommendations(r) {
+  $('#recommendations-title').textContent = r.title;
+  $('#recommendations-list').innerHTML = r.items.map((it,i)=>`
+    <li class="p-4 flex gap-3 hover:bg-slate-50 transition-colors">
+      <span class="bg-brand-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">${i+1}</span>
+      <p class="text-sm text-slate-700"><b>${it.title}</b><br>${it.desc}</p>
+    </li>
+  `).join('');
+}
+
+/* --- Footer --- */
+function renderFooter(d) {
+  $('#footer').innerHTML = `
+    <p>Reporte generado el ${d.fechaGeneracion} · ${d.sistema} · ${d.totalPlanes} planes · ${d.totalActividades} actividades analizadas</p>
+    <p class="mt-1">Template v1.0 · Eje temático: ${d.ejeTematico}</p>
+  `;
+}
+
+/* --- Init --- */
+document.addEventListener('DOMContentLoaded', () => {
+  const d = REPORT_DATA;
+  renderHeader(d);
+  renderKPIs(d.kpis);
+  renderAxes(d.axes);
+  renderCharts(d.charts);
+  renderMatrix(d.matrix);
+  renderProgression(d.progression);
+  renderCatalog(d.catalog);
+  renderFindings(d.findings);
+  renderRecommendations(d.recommendations);
+  renderFooter(d);
+});
+</script>
+
+</body>
+</html>

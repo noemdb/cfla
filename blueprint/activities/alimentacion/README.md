@@ -55,9 +55,9 @@ Se agregará un botón **“Plan de clases”** junto al botón **“Actualizar�
 `/app/planning/activities`. Abrirá un wizard en un modal que ocupa el **90 % de la
 pantalla**, con cinco pasos:
 
-1. **Sección y semana** — el wizard confirma los filtros activos, resuelve la
-   sección y muestra las semanas contenidas en el rango filtrado; el usuario
-   elige una. El plan es semanal: `period_start` es lunes y `period_end` domingo.
+1. **Sección y periodo** — el wizard confirma los filtros activos, resuelve la
+   sección y muestra las semanas sugeridas dentro del rango filtrado; el usuario
+   elige una o ajusta las fechas manualmente, con un máximo de 7 días.
 2. **Actividades filtradas** — muestra únicamente las actividades de esa sección
    y semana, marca cuáles contienen una secuencia didáctica completa o parcial y
    permite seleccionarlas.
@@ -82,7 +82,7 @@ La fuente **sí existe y está semiestructurada**:
 - `activities.observations` contiene los ODS y la sistematización.
 - `activities.achievements` contiene indicadores de logro, aunque no siempre está
   poblado.
-- `activities.finicial` y `activities.ffinal` ubican la sesión dentro de la semana elegida.
+- `activities.finicial` y `activities.ffinal` ubican la sesión dentro del periodo elegido.
 
 Se verificaron casos reales en `s2627`:
 
@@ -118,10 +118,11 @@ resultado filtrado. Si no hay resultados, el wizard no busca fuera: pide ajustar
 los filtros. Si los filtros no fijan una sección, el wizard solicita elegir una
 de las secciones presentes en el resultado, porque el plan es por sección.
 
-El periodo del plan es una **semana derivada de los filtros**. La barra de
+El periodo del plan se **limita al rango derivado de los filtros**. La barra de
 filtros **no tiene selector de fechas**: el rango candidato sale del lapso y de
-las fechas válidas de las actividades filtradas. El wizard muestra las semanas
-contenidas en ese rango y exige elegir una; no permite escribir fechas libres.
+las fechas válidas de las actividades filtradas. El wizard ofrece semanas
+sugeridas y permite ajustar manualmente las fechas dentro del rango, por un
+máximo de 7 días.
 Si los filtros no fijan una sección, se elige una primero y el rango se
 recalcula para esa sección.
 
@@ -134,7 +135,7 @@ no se presenta como filtro de la página.
 
 | Hallazgo | Corrección en el plan |
 |---|---|
-| La barra no expone rango de fechas y el lapso actual cubre 80 días | El plan es semanal: el wizard deriva semanas del lapso/actividades y exige elegir una. Se limita a 7 días. |
+| La barra no expone rango de fechas y el lapso actual cubre 80 días | El wizard deriva un rango de fechas, ofrece semanas sugeridas y permite ajustar fechas dentro del rango con un máximo de 7 días. |
 | `search` no busca contenido de actividades | Se separa búsqueda de página y `activity_search` del wizard, acotada al universo. |
 | `getTeachingSections()` no detecta parciales | Se agrega `parseTeachingSections()` y `getTeachingSections()` delega en él. |
 | Permisos contradictorios con `isPlanner` | MVP: Planificación y Admin. Diagnóstico solo lectura. Dirección/Coordinación/Liderazgo fuera del MVP. |

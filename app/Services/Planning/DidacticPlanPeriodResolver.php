@@ -128,12 +128,6 @@ class DidacticPlanPeriodResolver
             return ['La fecha de fin no puede ser anterior a la de inicio.'];
         }
 
-        $days = Carbon::parse($start)->diffInDays(Carbon::parse($end)) + 1;
-
-        if ($days > 7) {
-            return ['La semana no puede superar 7 días.'];
-        }
-
         return [];
     }
 

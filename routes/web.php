@@ -230,6 +230,16 @@ Route::prefix('app')->name('app.')->middleware(['notifications.auto-read'])->gro
             // Rutas PDF (controlador propio)
             Route::get('/format/{pevaluacion}', [\App\Http\Controllers\Planning\ActivityPdfController::class, 'format'])->name('format');
             Route::get('/resume/{pevaluacion}', [\App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'])->name('resume');
+            Route::get('/didactic-plans/{didacticPlan}/pdf', [\App\Http\Controllers\Planning\DidacticPlanPdfController::class, 'download'])
+                ->name('didactic-plans.pdf');
+            Route::get('/system-prompt', [\App\Http\Controllers\Planning\SystemPromptController::class, 'show'])
+                ->name('system-prompt');
+            Route::post('/system-prompt/compose', [\App\Http\Controllers\Planning\SystemPromptController::class, 'compose'])
+                ->middleware('throttle:30,1')
+                ->name('system-prompt.compose');
+            Route::post('/system-prompt/refine', [\App\Http\Controllers\Planning\SystemPromptController::class, 'refine'])
+                ->middleware('throttle:10,1')
+                ->name('system-prompt.refine');
         });
 
         // Módulo de Planes de Estudio

@@ -102,6 +102,8 @@ class ActivityListUxTest extends TestCase
             ->set('status_activities', 'SI')
             ->set('filter_status', 'pending')
             ->set('filter_observations', true)
+            ->set('date_from', '2026-10-01')
+            ->set('date_to', '2026-10-31')
             ->set('paginate', 50)
             ->call('resetFilters')
             ->assertOk()
@@ -109,6 +111,80 @@ class ActivityListUxTest extends TestCase
             ->assertSet('status_activities', '')
             ->assertSet('filter_status', '')
             ->assertSet('filter_observations', false)
+            ->assertSet('date_from', null)
+            ->assertSet('date_to', null)
             ->assertSet('paginate', 10);
+    }
+
+    public function test_date_range_filters_activities_within_the_selected_lapso(): void
+    {
+        $planner = User::factory()->create(['is_planner' => true]);
+        $lapso = Lapso::factory()->create([
+            'finicial' => '2026-09-07',
+            'ffinal' => '2026-12-11',
+        ]);
+
+        $insideName = 'ASIG-DENTRO-'.uniqid();
+        $outsideName = 'ASIG-FUERA-'.uniqid();
+
+        $inside = $this->makePevaluacion($lapso, $insideName, 'PROF-UNO-'.uniqid());
+        $outside = $this->makePevaluacion($lapso, $outsideName, 'PROF-DOS-'.uniqid());
+
+        $this->makeActivity($inside['pevaluacion']->id, '2026-10-05', '2026-10-06', 'Actividad dentro del rango');
+        $this->makeActivity($outside['pevaluacion']->id, '2026-11-30', '2026-11-30', 'Actividad fuera del rango');
+
+        Livewire::actingAs($planner)
+            ->test(ActivitiesIndex::class)
+            ->set('lapso_id', $lapso->id)
+            ->set('date_from', '2026-10-01')
+            ->set('date_to', '2026-10-31')
+            ->assertOk()
+            ->assertSee($insideName)
+            ->assertDontSee($outsideName)
+            ->assertSee('Desde: 01/10/2026')
+            ->assertSee('Hasta: 31/10/2026');
+    }
+
+    public function test_date_range_is_clamped_to_the_selected_lapso_bounds(): void
+    {
+        $planner = User::factory()->create(['is_planner' => true]);
+        $lapso = Lapso::factory()->create([
+            'finicial' => '2026-09-07',
+            'ffinal' => '2026-12-11',
+        ]);
+
+        Livewire::actingAs($planner)
+            ->test(ActivitiesIndex::class)
+            ->set('lapso_id', $lapso->id)
+            ->set('date_from', '2026-01-01')
+            ->set('date_to', '2027-01-01')
+            ->assertSet('date_from', '2026-09-07')
+            ->assertSet('date_to', '2026-12-11');
+
+        Livewire::actingAs($planner)
+            ->test(ActivitiesIndex::class)
+            ->call('restoreFilters', [
+                'lapso_id' => $lapso->id,
+                'date_from' => '2026-10-31',
+                'date_to' => '2026-10-01',
+            ])
+            ->assertSet('date_from', '2026-10-01')
+            ->assertSet('date_to', '2026-10-31');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function makeActivity(int $pevaluacionId, string $start, string $end, string $topic): \App\Models\app\Academy\Activity
+    {
+        return \App\Models\app\Academy\Activity::create([
+            'pevaluacion_id' => $pevaluacionId,
+            'finicial' => $start,
+            'ffinal' => $end,
+            'topic' => $topic,
+            'teaching' => 'INICIO: Inicio. DESARROLLO: Desarrollo. CIERRE: Cierre.',
+            'description' => 'Lista de cotejo.',
+            'status' => false,
+        ]);
     }
 }

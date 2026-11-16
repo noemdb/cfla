@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Consolidado | Alimentación y Gastronomía como Eje Didáctico</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .apexcharts-tooltip { font-family: 'Inter', sans-serif; }
+  .chip { display:inline-block; padding:2px 10px; border-radius:9999px; font-size:11px; font-weight:600; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<!-- HEADER -->
+<header class="bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-700 text-white shadow-xl">
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="flex flex-wrap gap-2 mb-3">
+      <span class="chip bg-white/20 text-white">1ER MOMENTO · 2026</span>
+      <span class="chip bg-white/20 text-white">EDUCACIÓN PRIMARIA</span>
+      <span class="chip bg-white/20 text-white">AVR 55</span>
+      <span class="chip bg-amber-400/90 text-emerald-900">EJE: ALIMENTACIÓN Y GASTRONOMÍA</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-bold leading-tight">Consolidado de actividades y estrategias</h1>
+    <p class="text-emerald-50 mt-2 text-lg">La alimentación y la gastronomía como eje central para enseñar <b>Ciencias Naturales</b> y <b>Cultura e Identidad</b>.</p>
+    <p class="text-emerald-100 text-sm mt-4">Fuente: <code class="bg-black/20 px-2 py-0.5 rounded text-xs">actividades-planificacion-1er-momento-20261113_141810.md</code> · Snapshot 13/11/2026 · 134 planes · 1.918 actividades analizadas</p>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-10">
+
+  <!-- KPIs -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-emerald-600 pl-3">Indicadores del consolidado</h2>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="bg-white rounded-xl shadow p-5 border-t-4 border-emerald-600">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Actividades vinculadas</p>
+        <p class="text-4xl font-bold text-emerald-700 mt-2">132</p>
+        <p class="text-xs text-slate-500 mt-1">de 1.918 totales (6,9 %)</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-t-4 border-teal-600">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Nucleares (eje en tema)</p>
+        <p class="text-4xl font-bold text-teal-700 mt-2">51</p>
+        <p class="text-xs text-slate-500 mt-1">declaradas en tema generador</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-t-4 border-amber-500">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Contextuales</p>
+        <p class="text-4xl font-bold text-amber-700 mt-2">81</p>
+        <p class="text-xs text-slate-500 mt-1">eje como contexto didáctico</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-t-4 border-sky-500">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Estrategias reutilizables</p>
+        <p class="text-4xl font-bold text-sky-700 mt-2">40</p>
+        <p class="text-xs text-slate-500 mt-1">banco institucional</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-t-4 border-rose-500">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Sin actividad evaluativa</p>
+        <p class="text-4xl font-bold text-rose-700 mt-2">14</p>
+        <p class="text-xs text-slate-500 mt-1">23 % · brecha crítica</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOS EJES -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-emerald-600 pl-3">Distribución por los dos ejes solicitados</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+          <h3 class="font-semibold text-slate-700">Eje Ciencias Naturales — nutrición y salud integral</h3>
+        </div>
+        <p class="text-3xl font-bold text-emerald-700">82 actividades <span class="text-sm font-normal text-slate-500">(62 %)</span></p>
+        <p class="text-sm text-slate-600 mt-3">Nutrición, Trompo de los Alimentos, cadenas tróficas, sistemas del cuerpo, platos sostenibles, soberanía alimentaria, salud integral.</p>
+        <div class="mt-4 text-xs text-slate-500">
+          <b>Grados con mayor densidad:</b> 3.º (14), 4.º (12), 6.º (26) · <b>Áreas:</b> CNAT, EFIS, EEST (sensorialidad)
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+          <h3 class="font-semibold text-slate-700">Eje Cultura e Identidad — gastronomía venezolana</h3>
+        </div>
+        <p class="text-3xl font-bold text-amber-700">50 actividades <span class="text-sm font-normal text-slate-500">(38 %)</span></p>
+        <p class="text-sm text-slate-600 mt-3">Gastronomía afrovenezolana, indígena y regional; platos navideños (hallaca, pan de jamón, pabellón); mestizaje; tradiciones decembrinas; identidad latinoamericana.</p>
+        <div class="mt-4 text-xs text-slate-500">
+          <b>Grados con mayor densidad:</b> 2.º (9), 3.º (11), 5.º (11), 6.º (19) · <b>Áreas:</b> CSOC, EEST, LEN, MAT, ACI
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRÁFICOS -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow p-5">
+      <h3 class="font-semibold text-slate-700 mb-3">Actividades por grado</h3>
+      <div id="chartGrado"></div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5">
+      <h3 class="font-semibold text-slate-700 mb-3">Distribución por área curricular</h3>
+      <div id="chartArea"></div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5">
+      <h3 class="font-semibold text-slate-700 mb-3">ODS asociados al eje</h3>
+      <div id="chartODS"></div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5">
+      <h3 class="font-semibold text-slate-700 mb-3">Estado de revisión</h3>
+      <div id="chartEstado"></div>
+    </div>
+  </section>
+
+  <!-- MATRIZ POR GRADO -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-emerald-600 pl-3">Matriz consolidada por grado</h2>
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-emerald-800 text-white">
+            <tr>
+              <th class="px-4 py-3 text-left">Grado</th>
+              <th class="px-4 py-3 text-center">CNAT</th>
+              <th class="px-4 py-3 text-center">CSOC</th>
+              <th class="px-4 py-3 text-center">EEST</th>
+              <th class="px-4 py-3 text-center">MAT</th>
+              <th class="px-4 py-3 text-center">Otros</th>
+              <th class="px-4 py-3 text-center">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-medium">1.º</td><td class="text-center">5</td><td class="text-center">12</td><td class="text-center">2</td><td class="text-center">1</td><td class="text-center">—</td><td class="text-center font-bold">20</td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-medium">2.º</td><td class="text-center">12</td><td class="text-center">6</td><td class="text-center">—</td><td class="text-center">—</td><td class="text-center">—</td><td class="text-center font-bold">18</td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-medium">3.º</td><td class="text-center">14</td><td class="text-center">11</td><td class="text-center">2</td><td class="text-center">—</td><td class="text-center">—</td><td class="text-center font-bold">27</td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-4 py-3 font-medium">4.º</td><td class="text-center">12</td><td class="text-center">1</td><td class="text-center">2</td><td class="text-center">—</td><td class="text-center">—</td><td class="text-center font-bold">15</td></tr>
+            <tr class="hover:bg-slate-50 bg-emerald-50"><td class="px-4 py-3 font-medium">5.º</td><td class="text-center">4</td><td class="text-center">6</td><td class="text-center">—</td><td class="text-center">11</td><td class="text-center">2</td><td class="text-center font-bold text-emerald-700">23</td></tr>
+            <tr class="hover:bg-slate-50 bg-emerald-50"><td class="px-4 py-3 font-medium">6.º</td><td class="text-center">26</td><td class="text-center">8</td><td class="text-center">2</td><td class="text-center">4</td><td class="text-center">3</td><td class="text-center font-bold text-emerald-700">43</td></tr>
+            <tr class="bg-slate-100 font-bold"><td class="px-4 py-3">TOTAL</td><td class="text-center">73</td><td class="text-center">44</td><td class="text-center">8</td><td class="text-center">16</td><td class="text-center">5</td><td class="text-center">146</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRESIÓN -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-emerald-600 pl-3">Progresión curricular (espiral)</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="bg-white rounded-xl shadow p-4 border-t-4 border-emerald-400">
+        <p class="text-xs text-slate-500">1.º GRADO</p>
+        <p class="font-bold text-emerald-700">Perceptivo</p>
+        <p class="text-xs text-slate-600 mt-2">Reconocer saludable/no saludable; color, forma, modelado; lonchera</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-4 border-t-4 border-emerald-500">
+        <p class="text-xs text-slate-500">2.º GRADO</p>
+        <p class="font-bold text-emerald-700">Hábito</p>
+        <p class="text-xs text-slate-600 mt-2">Dieta equilibrada, merienda, alimentos típicos, alimentación indígena y navideña</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-4 border-t-4 border-emerald-600">
+        <p class="text-xs text-slate-500">3.º GRADO</p>
+        <p class="font-bold text-emerald-700">Clasificación</p>
+        <p class="text-xs text-slate-600 mt-2">Trompo de los Alimentos, gastronomía afrovenezolana, texturas sensoriales</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-4 border-t-4 border-emerald-700">
+        <p class="text-xs text-slate-500">4.º GRADO</p>
+        <p class="font-bold text-emerald-700">Función</p>
+        <p class="text-xs text-slate-600 mt-2">Energéticos/constructores/reguladores, estado óptimo de salud, menús</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-4 border-t-4 border-teal-600">
+        <p class="text-xs text-slate-500">5.º GRADO</p>
+        <p class="font-bold text-teal-700">Matemática alimentaria</p>
+        <p class="text-xs text-slate-600 mt-2">División y reparto equitativo, soberanía alimentaria, mestizaje gastronómico</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-4 border-t-4 border-teal-700">
+        <p class="text-xs text-slate-500">6.º GRADO</p>
+        <p class="font-bold text-teal-700">Sistémico–ético</p>
+        <p class="text-xs text-slate-600 mt-2">Cadenas tróficas, sostenibilidad, consumo responsable, ODS 2 y 12</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-emerald-600 pl-3">Catálogo de estrategias didácticas (40)</h2>
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+      <div class="overflow-x-auto max-h-[560px]">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-700 text-white sticky top-0">
+            <tr>
+              <th class="px-3 py-2 text-left w-10">#</th>
+              <th class="px-3 py-2 text-left">Estrategia</th>
+              <th class="px-3 py-2 text-left">Eje</th>
+              <th class="px-3 py-2 text-left">Nivel / Área</th>
+              <th class="px-3 py-2 text-left">Producto</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100" id="tbodyEstrategias"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- HALLAZGOS -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-rose-500 pl-3">Hallazgos de calidad</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-rose-500">
+        <p class="font-bold text-rose-700">1. Sin indicadores de logro</p>
+        <p class="text-sm text-slate-600 mt-1">100 % de las actividades nucleares carecen de indicadores declarados.</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-rose-500">
+        <p class="font-bold text-rose-700">2. Ponderación 0,00</p>
+        <p class="text-sm text-slate-600 mt-1">Las actividades no aportan peso al registro de calificación.</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-rose-500">
+        <p class="font-bold text-rose-700">3. Sin vinculación LMS</p>
+        <p class="text-sm text-slate-600 mt-1">132 de 132 sin recurso digital de respaldo ni trazabilidad.</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-amber-500">
+        <p class="font-bold text-amber-700">4. Tema genérico oculta contenido</p>
+        <p class="text-sm text-slate-600 mt-1">20 actividades registradas como «Seres vivos» con contenido real de gastronomía navideña.</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-amber-500">
+        <p class="font-bold text-amber-700">5. Tres modelos gráficos coexistentes</p>
+        <p class="text-sm text-slate-600 mt-1">Trompo, pirámide y semáforo: incoherencia con el referente nacional (INN).</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-amber-500">
+        <p class="font-bold text-amber-700">6. Doble registro en la misma fecha</p>
+        <p class="text-sm text-slate-600 mt-1">6.º B: 06/11 (3980 y 4404) y 13/11 (3985 y 4408) — riesgo de duplicidad.</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-emerald-500">
+        <p class="font-bold text-emerald-700">7. Asimetría A/B en 5.º</p>
+        <p class="text-sm text-slate-600 mt-1">5.º B carece de la sesión de cierre del 30/10 (3478 no contiene el eje).</p>
+      </div>
+      <div class="bg-white rounded-xl shadow p-5 border-l-4 border-emerald-500">
+        <p class="font-bold text-emerald-700">8. Errores de fechas</p>
+        <p class="text-sm text-slate-600 mt-1">Act. 2085 y 2037: fin (23/09) anterior al inicio (23/10).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECOMENDACIONES -->
+  <section>
+    <h2 class="text-xl font-bold text-slate-700 mb-4 border-l-4 border-emerald-600 pl-3">Recomendaciones priorizadas</h2>
+    <ol class="bg-white rounded-xl shadow divide-y divide-slate-100">
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">1</span><p class="text-sm text-slate-700"><b>Normalizar temas genéricos</b> («Seres vivos», «Números y operaciones») declarando el eje alimentación/gastronomía en el tema generador.</p></li>
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">2</span><p class="text-sm text-slate-700"><b>Cargar indicadores de logro</b> (mínimo 2 por actividad) y asignar ponderación coherente con el instrumento declarado.</p></li>
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">3</span><p class="text-sm text-slate-700"><b>Unificar el modelo gráfico</b> al Trompo de los Alimentos (INN); semáforo y pirámide quedan como recursos comparativos.</p></li>
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">4</span><p class="text-sm text-slate-700"><b>Convertir el catálogo en banco institucional</b> reutilizable por grado y área, con código propio y producto esperado.</p></li>
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">5</span><p class="text-sm text-slate-700"><b>Cerrar asimetrías A/B</b> en 5.º y 6.º antes del 20/11/2026.</p></li>
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">6</span><p class="text-sm text-slate-700"><b>Reforzar el eje cultura/identidad</b> en 1.º y 4.º, hoy concentrado en 2.º, 3.º, 5.º y 6.º.</p></li>
+      <li class="p-4 flex gap-3"><span class="bg-emerald-600 text-white font-bold rounded-full w-7 h-7 flex items-center justify-center text-sm shrink-0">7</span><p class="text-sm text-slate-700"><b>Vincular lecciones LMS</b> en las estrategias con producto digitalizable (infografías, murales, menús).</p></li>
+    </ol>
+  </section>
+
+  <footer class="text-center text-xs text-slate-500 py-6 border-t border-slate-200">
+    Reporte generado el 16/11/2026 · EduSys · 134 planes · 1.918 actividades analizadas · 132 vinculadas al eje alimentación/gastronomía
+  </footer>
+</main>
+
+<script>
+const estrategias = [
+  [1,'Semáforo alimenticio','CNAT','1.º–4.º','Clasificación mural + argumento'],
+  [2,'Trompo de los Alimentos','CNAT','3.º','Trompo coloreado e identificado'],
+  [3,'Pirámide de alimentos','CNAT','4.º','Collage por categorías'],
+  [4,'El cuerpo como un automóvil','CNAT','4.º','Producción escrita clasificatoria'],
+  [5,'La Cesta Sorpresa','CNAT','4.º','Mapa mental de saberes previos'],
+  [6,'Menú balanceado local','CNAT','1.º–4.º','Menú ilustrado'],
+  [7,'Mi lonchera saludable','CNAT','1.º–2.º','Lonchera dibujada + menú'],
+  [8,'Mercado de Sabores','CNAT/EEST','1.º','Maqueta de mercado (plastilina)'],
+  [9,'Plato Arcoíris','EEST/CNAT','6.º','Diseño con ≥4 colores + reflexión'],
+  [10,'Texturas visuales y táctiles','EEST','3.º','Lámina de texturas'],
+  [11,'Collage de texturas reutilizado','EEST','3.º','Representación con material reciclado'],
+  [12,'Mural del Menú Consciente','CNAT','6.º','Mural + argumentación 2 min'],
+  [13,'Mi Plato Sostenible','CNAT','6.º','Cartulina + ticket de salida'],
+  [14,'La Ruta del Alimento','CNAT','6.º','Esquema secuencial o historieta'],
+  [15,'Feria de Infografías Sostenibles','CNAT','6.º','Infografía/maqueta + decálogo'],
+  [16,'La red invisible','CNAT','6.º','Red trófica con hilo de lana'],
+  [17,'Germinando Soberanía','CNAT','6.º','Germinador reciclado + bitácora'],
+  [18,'La Telaraña de la Vida','CNAT','6.º','Red con pabilo + simulación'],
+  [19,'Del campo a la mesa festiva','CNAT','6.º','Esquema en cascada'],
+  [20,'Ruta del Sol al Plato Navideño','CNAT','6.º','Infografía + Galería Verde'],
+  [21,'De la hojarasca a la mesa','CNAT','6.º','Esquema circular + microcarta'],
+  [22,'Cartografía ecológica de la hallaca','CNAT','6.º','Trama trófica en papel bond'],
+  [23,'Pirámide trófica navideña','CNAT','6.º','Pirámide con recortes'],
+  [24,'Guardianes de la Mesa y del Planeta','CNAT','6.º','Feria + compromiso firmado'],
+  [25,'Plato Ancestral','CSOC','3.º','Ilustración afrovenezolana'],
+  [26,'Mapa gastronómico regional','CSOC','3.º','Esquema ingrediente ↔ región'],
+  [27,'Mi plato navideño favorito','CSOC','2.º','Dibujo rotulado'],
+  [28,'La Maleta Viajera','CSOC','1.º','Producción plástica + relato'],
+  [29,'Detectives de Raíces','CSOC','5.º','Pasatiempos + Maraca Preguntona'],
+  [30,'Trabajo escrito del mestizaje','CSOC','5.º','Investigación ilustrada'],
+  [31,'Mini-diccionario de indigenismos','CSOC','6.º','Diccionario alfabético ilustrado'],
+  [32,'Decálogo de Valores Ciudadanos','CSOC','6.º','Desde la elaboración del casabe'],
+  [33,'Debate del comedor','LEN','6.º','Debate reglado sobre azúcares'],
+  [34,'El Trueque Justo','MAT','5.º','Reparto con comprobación + debate'],
+  [35,'Ruta de Parrandas Latinoamericanas','MAT','5.º','6 fichas regionales + vocero'],
+  [36,'Reparto navideño','MAT','5.º','Problemas con residuo interpretado'],
+  [37,'Desafío matemático latinoamericano','MAT','5.º','Reto final por equipos'],
+  [38,'Control del comedor escolar','MAT','6.º','Resta de decimales con tara'],
+  [39,'Ficha de consolidación','CNAT','3.º','Prueba corta + corrección colectiva'],
+  [40,'Compromiso y metacognición','Transversal','Todos','Ticket de salida + compromiso']
+];
+
+const tbody = document.getElementById('tbodyEstrategias');
+const colorEje = { 'CNAT':'bg-emerald-100 text-emerald-800', 'CSOC':'bg-amber-100 text-amber-800', 'EEST':'bg-purple-100 text-purple-800', 'LEN':'bg-sky-100 text-sky-800', 'MAT':'bg-rose-100 text-rose-800', 'Transversal':'bg-slate-100 text-slate-700' };
+estrategias.forEach(e => {
+  const eje = e[2].split('/')[0];
+  const chip = colorEje[eje] || 'bg-slate-100 text-slate-700';
+  const tr = document.createElement('tr');
+  tr.className = 'hover:bg-slate-50';
+  tr.innerHTML = `<td class="px-3 py-2 text-slate-500 font-mono">${String(e[0]).padStart(2,'0')}</td>
+    <td class="px-3 py-2 font-medium">${e[1]}</td>
+    <td class="px-3 py-2"><span class="chip ${chip}">${e[2]}</span></td>
+    <td class="px-3 py-2 text-slate-600">${e[3]}</td>
+    <td class="px-3 py-2 text-slate-600">${e[4]}</td>`;
+  tbody.appendChild(tr);
+});
+
+const opts = (extra = {}) => ({
+  chart: { toolbar: { show: false }, fontFamily: 'Inter, sans-serif', ...extra.chart },
+  ...extra
+});
+
+// 1. Actividades por grado
+new ApexCharts(document.querySelector('#chartGrado'), opts({
+  chart: { type: 'bar', height: 320 },
+  series: [
+    { name: 'CNAT', data: [5, 12, 14, 12, 4, 26] },
+    { name: 'CSOC', data: [12, 6, 11, 1, 6, 8] },
+    { name: 'Otros (EEST/MAT/LEN/ACI)', data: [3, 0, 2, 2, 13, 9] }
+  ],
+  xaxis: { categories: ['1.º','2.º','3.º','4.º','5.º','6.º'] },
+  plotOptions: { bar: { columnWidth: '55%', borderRadius: 4 } },
+  colors: ['#047857','#f59e0b','#64748b'],
+  dataLabels: { enabled: false },
+  legend: { position: 'top' }
+})).render();
+
+// 2. Área curricular
+new ApexCharts(document.querySelector('#chartArea'), opts({
+  chart: { type: 'donut', height: 320 },
+  series: [73, 44, 16, 8, 5],
+  labels: ['CNAT','CSOC','MAT','EEST','Otros (LEN/ACI/EFIS)'],
+  colors: ['#047857','#f59e0b','#e11d48','#a855f7','#64748b'],
+  legend: { position: 'bottom' },
+  dataLabels: { style: { fontSize: '11px' }, formatter: v => v.toFixed(0) + '%' }
+})).render();
+
+// 3. ODS
+new ApexCharts(document.querySelector('#chartODS'), opts({
+  chart: { type: 'bar', height: 320 },
+  series: [{ name: 'Actividades', data: [19, 13, 12, 10, 7, 6, 4, 4, 2, 2, 2] }],
+  xaxis: { categories: ['ODS 2','ODS 12','ODS 4','ODS 3','ODS 15','ODS 10','ODS 17','ODS 16','ODS 1','ODS 8','ODS 13'] },
+  plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
+  colors: ['#047857'],
+  legend: { show: false },
+  dataLabels: { enabled: true, style: { fontSize: '11px' } }
+})).render();
+
+// 4. Estado
+new ApexCharts(document.querySelector('#chartEstado'), opts({
+  chart: { type: 'radialBar', height: 320 },
+  series: [98.5],
+  labels: ['Aprobadas'],
+  plotOptions: { radialBar: {
+    startAngle: -135, endAngle: 135,
+    hollow: { size: '55%' },
+    track: { background: '#fecaca' },
+    dataLabels: {
+      name: { offsetY: -10 },
+      value: { fontSize: '28px', fontWeight: 700, color: '#047857', offsetY: 10,
+        formatter: v => v + '%' },
+      total: { show: true, label: '130 de 132 aprobadas', color: '#64748b' }
+    }
+  }},
+  fill: { colors: ['#047857'] },
+  stroke: { lineCap: 'round' }
+})).render();
+</script>
+</body>
+</html>

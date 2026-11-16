@@ -51,8 +51,8 @@ Reglas:
   respaldo, del lapso.
 - Se ignoran `0000-00-00`, nulos y fechas fuera del lapso; si no queda ninguna
   fecha válida, el wizard no permite continuar.
-- Sobre el rango se generan semanas (lunes–domingo); el usuario elige una. El plan
-  dura 7 días o menos si la semana está cortada.
+- Sobre el rango se generan semanas sugeridas (lunes–domingo); el usuario puede
+  elegir una o ajustar las fechas dentro del rango. El periodo no supera 7 días.
 - No se permiten actividades fuera de la instantánea.
 - Si el usuario cambia los filtros con el modal abierto, la instantánea no cambia
   hasta cerrar y volver a abrir.
@@ -319,7 +319,7 @@ edición o “deshacer” en la sesión).
 |---|---|---|
 | `pestudio_id`, `grado_id`, `seccion_id` | int | Contexto. `seccion_id` es obligatorio. |
 | `lapso_id` | int? | Momento. |
-| `period_start`, `period_end` | date | Semana elegida (lunes–domingo); `period_end ≥ period_start` y diferencia ≤ 6 días. |
+| `period_start`, `period_end` | date | Periodo elegido dentro del rango candidato; `period_end ≥ period_start` y diferencia ≤ 6 días. |
 | `filter_snapshot` | object | Instantánea inmutable de los filtros. |
 | `filter_hash` | string(64) | Hash de la instantánea normalizada. |
 | `universe_hash` | string(64) | Hash de los IDs ordenados del universo. |

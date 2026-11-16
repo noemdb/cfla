@@ -39,13 +39,14 @@ filtros de la página.** El wizard recibe una instantánea de esos filtros, cons
 todas las actividades del resultado filtrado (no solo la página visible) y no
 busca en toda la base.
 
-**El periodo del plan es una semana derivada de los filtros.** La barra no tiene
-selector de fechas: el rango candidato se deriva del lapso y de las fechas
-válidas de las actividades filtradas. El wizard muestra las semanas de ese rango
-y exige elegir una; el plan siempre dura 7 días (lunes–domingo), o menos si la
-primera/última semana del rango está cortada. Si la sección no está fijada, se
-elige primero y el rango se recalcula para esa sección. Si no hay fechas válidas,
-el wizard no permite continuar.
+**El periodo del plan se limita al rango derivado de los filtros.** La barra no
+tiene selector de fechas: el rango candidato se deriva del lapso y de las fechas
+válidas de las actividades filtradas. El wizard propone por defecto el periodo
+con más actividades afines al eje y permite ajustar las fechas manualmente dentro
+del rango, sin selector de semanas y sin límite de días (distinto del rango
+disponible, que sí tiene un tope de 366 días).
+Si la sección no está fijada, se elige primero y el rango se recalcula para esa
+sección. Si no hay fechas válidas, el wizard no permite continuar.
 
 ---
 
@@ -70,7 +71,7 @@ el wizard no permite continuar.
 | Hay campos ricos para el plan | `topic`, `thematic`, `references`, `learning`, `description`, `observations`, `achievements`. | El mapeo a la sesión didáctica es directo y determinista. |
 | Los indicadores casi nunca existen | Solo 312 de 3.324 actividades tienen `achievements`; en 2.º A son 7 de 157. | El wizard debe permitir indicadores manuales y no bloquear el guardado. |
 | La página ya tiene wizard en modal | `modeCopy` y el modal “Copiar actividades entre planes” usan `x-modal-card width="max-w-[90vw]"` y stepper. | Reutilizar el patrón visual y de navegación. |
-| La página ya tiene filtros completos | `pestudio_id`, `grado_id`, `seccion_id`, `lapso_id`, `profesor_id`, `status_activities`, `filter_status`, `filter_observations`, `search`. | El wizard debe consumir esa misma instantánea, no crear otra búsqueda. |
+| La página ya tiene filtros completos | `pestudio_id`, `grado_id`, `seccion_id`, `lapso_id`, `profesor_id`, `status_activities`, `filter_status`, `filter_observations`, `date_from`, `date_to`, `search`. | El wizard debe consumir esa misma instantánea, no crear otra búsqueda. |
 | La consulta filtra pevaluaciones y actividades | `IndexComponent::getPevaluaciones()` aplica los filtros y relaciones. | Extraer un servicio/consulta compartida para que página y wizard no diverjan. |
 | Ya existe generación de PDF | `ActivityPdfController` + `pdfs.planning.activities.*` con DomPDF. | Crear un controlador y una vista nuevos sin tocar los PDF actuales. |
 | La ruta está protegida por `auth` + `isPlanner` | Grupo `planning` en `routes/web.php`. | El nuevo endpoint hereda la protección y suma policy por plan. |
@@ -174,8 +175,8 @@ solo lectura.
 
 | Tema | Decisión |
 |---|---|
-| Unidad del plan | **Por sección y semana**. Un plan = una `seccion_id` + una semana. No se mezclan secciones. |
-| Periodo | **Semana derivada de los filtros** (lunes–domingo). Se generan semanas dentro del rango del lapso y de las fechas válidas de las actividades; el usuario elige una. El plan no supera 7 días. |
+| Unidad del plan | **Por sección y semana, generado en lote**. El wizard permite marcar varias secciones; cada sección produce un plan independiente con su propio borrador, aprobación, versionado y PDF. Un plan nunca mezcla secciones. |
+| Periodo | **Derivado de los filtros, editable**, con semanas sugeridas. El rango disponible puede ampliarse o reducirse manualmente y el periodo del plan se elige dentro de él, sin límite de días. |
 | Aprobación | **Usuario de planificación** (`isPlanner`). No hay aprobador externo; se registra `approved_by`. |
 | Permisos MVP | Planificación y Admin crean/aprueban; Diagnóstico solo lectura; Dirección, Coordinación y Liderazgo quedan fuera del MVP. |
 | Universo de actividades | Filtros activos de la página; snapshot inmutable al abrir el wizard. Se guarda `universe_hash` de los IDs. |
@@ -193,7 +194,8 @@ solo lectura.
 
 ### 5.1 Punto de entrada
 
-En la cabecera de `/app/planning/activities`, junto a **“Actualizar”**, agregar:
+En el bloque de acciones de filtros de `/app/planning/activities`, junto a
+**“Exportar MD”** y **“Limpiar filtros”**, agregar:
 
 - **Etiqueta:** “Plan de clases” o “Secuencia didáctica”.
 - **Icono:** libro, calendario o secuencia.
@@ -207,8 +209,68 @@ El botón envía al wizard:
 
 - la instantánea de filtros;
 - la lista de IDs de pevaluaciones/actividades del resultado filtrado;
-- el lapso actual y la sección si están definidos;
+- el lapso actual y las secciones si están definidas;
 - el rango candidato y las semanas calculadas.
+
+**“Copiar prompt”** se ubica junto a “Exportar MD”: abre un diálogo para
+parametrizar el system prompt de `blueprint/activities/alimentacion/systemPrompt.md`
+antes de copiarlo, de modo que el texto copiado quede listo para usarse en una IA
+junto con el Markdown exportado.
+
+El diálogo es Alpine puro (no hace round-trips de Livewire) y solicita:
+
+| Campo | Uso en el prompt |
+|---|---|
+| **Eje transversal del plan** (obligatorio) | `ejeTematico`; es el tema del consolidado. |
+| **Ejes / áreas articuladas** | `areasArticuladas`; áreas curriculares que se cruzan con el eje. |
+| **Nivel educativo** | `nivelEducativo`; precargado con el plan de estudio activo. |
+| **Periodo / momento** | `periodo`; precargado con el lapso activo. |
+| **Título del reporte** | `reportTitle`; reemplaza el `{{REPORT_TITLE}}` del prompt. |
+| **Instrucciones adicionales** | Refinamientos libres del usuario. |
+
+Los valores se agregan al final del prompt base como bloques
+`# PARÁMETROS DE ESTA EJECUCIÓN` (lista de campos con su clave técnica) e
+`# INSTRUCCIONES ADICIONALES` (solo si el campo tiene texto). Luego se copia el
+resultado al portapapeles y el diálogo se cierra.
+
+#### Refinamiento con IA (OpenRouter)
+
+El botón **“Mejorar con IA”** del diálogo pide a OpenRouter un bloque de
+refinamiento para los parámetros actuales:
+
+- El servicio `App\Services\Planning\SystemPromptService` envía al modelo el
+  prompt base completo más los parámetros y pide **solo un bloque Markdown**
+  (`# REFINAMIENTO PARA ESTA EJECUCIÓN`) con énfasis temático, vinculación
+  curricular, evidencia/trazabilidad, riesgos y criterios de aceptación.
+- No reescribe el prompt ni el template HTML: eso evita truncamientos y
+  protege el contrato `REPORT_DATA`, el template y los `render*()`.
+- Cadena de modelos: `model_text_primary` → `model_text_fallback1` →
+  `model_text_fallback2` → `model_primary` → `model_fallback1`. Se descarta una
+  respuesta si viene vacía, truncada (`finish_reason = length`) o sin el bloque
+  esperado, y se prueba el siguiente modelo.
+- El bloque se muestra en un área editable para que el usuario lo ajuste antes
+  de copiar; si cambia cualquier parámetro del formulario, el bloque se descarta
+  para evitar prompts desincronizados.
+- Al copiar, el bloque se inserta entre los parámetros y las instrucciones
+  adicionales. La copia se arma en el servidor
+  (`POST …/system-prompt/compose`), de modo que el formato del prompt no se
+  duplica en JavaScript.
+
+Endpoints (grupo `auth` + `isPlanner`):
+
+| Método | Ruta | Uso |
+|---|---|---|
+| `GET` | `app.planning.activities.system-prompt` | Prompt base crudo (`text/markdown`). |
+| `POST` | `…/system-prompt/compose` | Prompt final con parámetros, refinamiento e instrucciones (sin IA). |
+| `POST` | `…/system-prompt/refine` | Bloque de refinamiento generado por IA (con throttle). |
+
+Así el prompt no se incrusta en cada render de Livewire porque contiene
+`{{REPORT_TITLE}}` y bloques `@media`. La copia usa `navigator.clipboard` y, si
+el contexto no es seguro, un fallback con `document.execCommand('copy')`.
+
+Si el filtro de **plan de estudio** está activo, el wizard preselecciona todas
+las secciones de ese plan que tengan actividades en el universo filtrado. El
+usuario puede desmarcar secciones antes de continuar.
 
 ### 5.2 Máquina de estados
 
@@ -249,18 +311,30 @@ Contenido:
   - estado de actividades/lecciones;
   - estado de revisión;
   - observaciones.
-- Resolución de sección:
-  - si el filtro fija una sección, se usa;
-  - si no, se listan las secciones presentes y se exige elegir una;
-  - al elegir sección, se recalcula el rango de fechas y las semanas.
+- Resolución de secciones:
+  - selector múltiple agrupado por plan de estudio y grado;
+  - si el filtro fija una sección, se usa esa;
+  - si el filtro fija un plan de estudio, se preseleccionan todas sus secciones
+    con actividades filtradas;
+  - el usuario puede marcar o desmarcar secciones; “Todas” y “Ninguna” aceleran
+    la selección;
+  - al cambiar la selección se recalcula el rango de fechas y las semanas;
+  - se genera un plan por cada sección marcada, con su propio PDF y aprobación.
 - Contador: “N actividades filtradas · M con secuencia didáctica”.
-- Periodo del plan (semana):
-  - `period_start` (lunes) y `period_end` (domingo) de la semana elegida;
+- Rango disponible (editable):
+  - parte del rango derivado del lapso o de las fechas de las actividades;
+  - el usuario puede ampliarlo o reducirlo con las fechas “Desde” y “Hasta”;
+  - la acción “Usar rango derivado” restaura los valores originales;
+  - al cambiarlo se reconstruyen las semanas y se conserva el periodo si sigue
+    siendo válido.
+- Periodo del plan (sin límite de días):
+  - `period_start` y `period_end` dentro del rango disponible;
   - origen del rango: “lapso” o “fechas válidas de las actividades”;
   - se excluyen `0000-00-00`, nulos y fechas fuera del lapso;
-  - semanas generadas dentro del rango; la primera/última puede estar cortada;
-  - por defecto se propone la semana con más actividades afines al eje;
-  - no se permite escribir fechas libres;
+  - por defecto se propone el periodo con más actividades afines al eje;
+  - el selector de “Semanas sugeridas” no se muestra; las fechas se escriben
+    directamente en “Desde” y “Hasta”;
+  - se permite ajustar manualmente las fechas dentro del rango, sin límite de días;
   - si no hay fechas válidas, estado vacío y no se puede continuar.
 - Eje articulador:
   - por defecto “Alimentación, cultura e identidad”;
@@ -293,8 +367,8 @@ Interfaz:
 - Buscador de contenido (`activity_search`) acotado a `topic`, `thematic`,
   `teaching`, `learning`, `observations` de las actividades del universo. No es
   la búsqueda de la barra de la página.
-- Lista de actividades de la sección y semana elegidas, agrupadas por asignatura
-  o por fecha.
+- Lista de actividades de la sección activa y semana elegidas, con pestañas para
+  cambiar de sección dentro del lote y contador de seleccionadas por sección.
 - Cada fila/tarjeta muestra:
   - checkbox;
   - fecha(s);
@@ -407,6 +481,25 @@ Reglas:
 - La aprobación la realiza el usuario de planificación autenticado; se registra
   `approved_by` y `approved_at`. No se elige aprobador.
 - Si otro usuario modificó el borrador, avisar antes de sobrescribir.
+- Si la aprobación falla, el borrador **no se pierde**: el plan queda guardado
+  con estado `draft` y el paso 5 muestra el resultado por sección.
+- Los errores se resumen por categoría en lugar de repetir el mensaje de cada
+  sesión:
+  - `N sesiones sin indicadores`;
+  - `N sesiones sin actividad evaluativa`;
+  - `N sesiones sin momentos completos`;
+  - `el plan no menciona ODS`;
+  - otros mensajes no clasificados (máximo dos, con contador de restantes).
+- El detalle completo por sesión queda dentro de un bloque colapsable
+  (“Ver detalle”), ordenado y sin duplicar el resumen.
+- Acción **“Justificar faltantes y aprobar”** (paso 4 y paso 5): agrega a
+  `notes` una justificación estándar, vuelve a guardar y reintenta la
+  aprobación. La justificación se inserta una sola vez.
+- Texto estándar: “Se justifica la ausencia de indicadores de logro y de
+  actividad evaluativa en las sesiones que lo requieren, porque serán
+  completados durante el desarrollo del proyecto.”
+- También existe **“Justificar faltantes en las notas”** en el paso 4 para
+  editar el texto antes de aprobar.
 
 ### 5.7 Paso 5 — PDF
 
@@ -414,15 +507,21 @@ Solo se habilita después de aprobar. Un borrador no genera PDF oficial en el MV
 
 Contenido:
 
-- Confirmación: “Plan aprobado · v1 · PSD-2A-2026-11-17”.
-- Vista previa embebida o botón “Abrir vista previa”.
-- Botones:
-  - **Descargar PDF**;
-  - **Imprimir**;
-  - **Crear nueva versión**;
+- Resumen del lote: aprobados, borradores y validaciones pendientes.
+- Tabla por sección con estado (`Aprobado`, `Borrador`, `Error`), versión y
+  documento.
+- **Descargar PDF** por cada sección aprobada; no se genera un PDF consolidado
+  porque cada sección tiene su propio plan, folio y aprobación.
+- Botones generales:
+  - **Aprobar borradores pendientes** si el lote quedó en borrador;
+  - **Justificar faltantes y aprobar** si la aprobación falló por validaciones;
+  - **Volver a revisar** para corregir en el paso 4;
   - **Cerrar**.
-- Nota: el PDF refleja la versión aprobada; si se edita después, se genera una
-  nueva versión y un nuevo PDF.
+- Trazabilidad visible: filtros, hash del universo, periodo y conteo de
+  actividades filtradas/seleccionadas.
+
+Nota: el PDF refleja la versión aprobada; si se edita después, se genera una
+nueva versión y un nuevo PDF.
 
 ---
 
@@ -443,9 +542,13 @@ El wizard recibe un objeto inmutable con los valores actuales:
 | `status_activities` | Selector Actividades/Lecciones | Limita el resultado (a nivel de pevaluación). |
 | `filter_status` | Selector Estado | Limita el resultado (a nivel de pevaluación). |
 | `filter_observations` | Toggle Observaciones | Limita por `pevaluacions.observations`, no por ODS de actividades. |
+| `date_from`, `date_to` | Rango de fechas (Desde/Hasta) | Limita a pevaluaciones con al menos una actividad que se solape con el rango. Si hay lapso, las fechas se acotan a `lapso.finicial`–`lapso.ffinal`. |
 | `activity_search` | Buscador del wizard (nuevo) | Busca en `topic`, `thematic`, `teaching`, `learning`, `observations` del universo ya filtrado. |
 
-No existe hoy `date_from`/`date_to` en la barra. No se incluye `paginate`: el
+El filtro de fechas se aplica con solapamiento: `finicial <= date_to` y
+`COALESCE(NULLIF(ffinal, '0000-00-00'), finicial) >= date_from`. Los campos de la
+barra usan `min`/`max` del lapso y el servidor normaliza el rango: recorta fechas
+fuera del lapso e invierte un rango escrito al revés. No se incluye `paginate`: el
 wizard consulta **todo** el resultado filtrado, no solo la página actual, con una
 consulta sin paginación.
 
@@ -455,7 +558,8 @@ El periodo candidato se deriva, en este orden:
    excluyendo `0000-00-00`, nulos y fechas fuera del lapso;
 2. rango del lapso (`lapsos.finicial`–`lapsos.ffinal`) como respaldo.
 
-Sobre ese rango se generan semanas (lunes–domingo) y el usuario elige una.
+Sobre ese rango se calcula el periodo por defecto y el usuario puede establecer
+cualquier fecha dentro de él, sin límite de días y sin selector de semanas.
 
 ### 6.2 Consulta compartida
 
@@ -638,7 +742,7 @@ y la atribución se hace con `didactic_plan_sessions.source_activity_id`. Por es
 |---|---|---|
 | `pestudio_id`, `grado_id`, `seccion_id` | FK | Obligatorios; coherencia validada. |
 | `lapso_id` | FK opcional | Momento académico. |
-| `period_start`, `period_end` | date | Semana elegida (lunes–domingo). `period_end ≥ period_start` y diferencia ≤ 6 días. |
+| `period_start`, `period_end` | date | Periodo elegido dentro del rango candidato; `period_end ≥ period_start` y diferencia ≤ 6 días. |
 | `filter_snapshot` | json | Instantánea inmutable de los filtros. |
 | `filter_hash` | char(64) | Hash de la instantánea normalizada. |
 | `universe_hash` | char(64) | Hash de los IDs ordenados del universo filtrado. |
@@ -1187,7 +1291,7 @@ revisión funcional y validación en producción. Con IA: 23–35 días.
 | # | Pregunta | Decisión (2026-11-13) |
 |---|---|---|
 | 1 | ¿El plan se genera por sección o por grado? | **Por sección.** |
-| 2 | ¿La semana se elige o se deriva? | **Se deriva** el conjunto de semanas del rango filtrado y **el usuario elige una**; no escribe fechas libres. |
+| 2 | ¿Cómo se define el periodo? | **Se deriva** el rango filtrado; el usuario elige una semana sugerida o ajusta fechas dentro del rango, con máximo 7 días. |
 | 3 | ¿Quién aprueba? | **El usuario de planificación** autenticado; se registra `approved_by`. Puede coincidir con el creador. |
 | 4 | ¿La barra filtra por contenido? | **No**: solo asignatura, profesor, sección e ID. El wizard añade `activity_search` acotado. |
 | 5 | ¿Cómo se detecta una secuencia parcial? | Con `parseTeachingSections()`; `getTeachingSections()` solo devuelve completas. |

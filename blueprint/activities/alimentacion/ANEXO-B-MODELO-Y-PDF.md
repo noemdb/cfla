@@ -13,7 +13,7 @@
 | Tema | Decisión |
 |---|---|
 | Unidad del plan | **Por sección y semana**. Un plan corresponde a una `seccion_id` concreta y a una semana (lunes–domingo). |
-| Periodo | **La semana se elige dentro del rango derivado de los filtros** de `/app/planning/activities`. La barra no tiene selector de fechas: el rango candidato sale del lapso y de las fechas válidas de las actividades. El usuario no escribe fechas libres. |
+| Periodo | **Se limita al rango derivado de los filtros** de `/app/planning/activities`. La barra no tiene selector de fechas; el wizard permite elegir semanas sugeridas o ajustar fechas dentro del rango, por un máximo de 7 días. |
 | Aprobación | **La realiza el usuario de planificación** (`isPlanner`). No hay aprobador externo en el MVP. |
 | Permisos MVP | Planificación y Admin crean/aprueban; Diagnóstico solo lectura; Dirección, Coordinación y Liderazgo quedan fuera del MVP. |
 | Universo de actividades | Exactamente el resultado filtrado de la sección y semana, con `universe_hash` de los IDs ordenados. Snapshot inmutable al abrir el wizard. |
@@ -21,8 +21,8 @@
 
 Consecuencias directas:
 
-1. El paso 1 resuelve la sección y muestra las **semanas del rango**; el usuario elige una. No hay fechas libres.
-2. `period_start` (lunes) y `period_end` (domingo) pertenecen a la semana elegida; el plan dura 7 días o menos si la semana está cortada.
+1. El paso 1 resuelve la sección y muestra las **semanas sugeridas**; el usuario puede elegir una o ajustar las fechas manualmente dentro del rango candidato.
+2. `period_start` y `period_end` deben pertenecer al rango candidato y cubrir como máximo 7 días.
 3. Si la sección no está fijada, se elige primero y el rango se recalcula para esa sección.
 4. El plan no se crea si el resultado filtrado está vacío o no tiene fechas válidas.
 5. El campo `approved_by` se llena con el usuario de planificación que aprueba; puede ser el mismo que creó el borrador.
@@ -71,8 +71,8 @@ la atribución se hace con `didactic_plan_sessions.source_activity_id`. Por eso
 | `grado_id` | int unsigned | No | — | FK → `grados` (`restrict`). |
 | `seccion_id` | int unsigned | No | — | FK → `seccions` (`restrict`). Unidad del plan. |
 | `lapso_id` | int unsigned | Sí | null | FK → `lapsos` (`nullOnDelete`); contexto del filtro. |
-| `period_start` | date | No | — | Lunes de la semana elegida. |
-| `period_end` | date | No | — | Domingo de la semana elegida; ≤ `period_start + 6 días`. |
+| `period_start` | date | No | — | Inicio del periodo, dentro del rango candidato. |
+| `period_end` | date | No | — | Fin del periodo; entre `period_start` y `period_start + 6 días`, dentro del rango candidato. |
 | `axis` | varchar(150) | No | `Alimentación, cultura e identidad` | Eje articulador. |
 | `project_title` | varchar(180) | Sí | null | Proyecto o título de la secuencia. |
 | `objective` | text | Sí | null | Objetivo general del plan. |
@@ -162,7 +162,7 @@ Reglas:
 
 - La consulta del wizard **no pagina**: obtiene todo el universo filtrado de la sección y semana.
 - No existe `date_from`/`date_to` en la barra. El rango candidato se deriva de las fechas válidas de las actividades y, como respaldo, del lapso.
-- `week` guarda la semana elegida. Se valida que esté contenida en el rango candidato.
+- `period_start`/`period_end` guardan el periodo elegido. Se valida que esté contenido en el rango candidato y no exceda 7 días.
 - `activity_search` es una búsqueda del wizard (`topic`, `thematic`, `teaching`, `learning`, `observations`) acotada al universo; no modifica la búsqueda de la página.
 - `filter_hash` = SHA-256 del JSON con claves ordenadas y sin `captured_at`, para comparar filtros entre sesiones.
 - `universe_hash` = SHA-256 de los IDs de actividad ordenados ascendentemente. Prueba pertenencia; `filter_hash` **no** la prueba.
@@ -179,7 +179,7 @@ Sobre ese rango:
 
 - se generan semanas lunes–domingo;
 - la primera y la última pueden estar cortadas;
-- el usuario elige una semana y el plan queda limitado a ella;
+- el usuario elige una semana sugerida o ajusta las fechas, siempre dentro del rango y con máximo 7 días;
 - por defecto se propone la semana con más actividades afines al eje;
 - el plan nunca supera 7 días.
 
@@ -188,7 +188,7 @@ Reglas:
 - `period_end` nunca es menor que `period_start` y la diferencia máxima es 6 días.
 - Si no hay ninguna fecha válida, el wizard no permite continuar: “El filtro no define una semana con fechas; ajusta los filtros”.
 - Al cambiar de sección se **recalcula** el rango y las semanas: el `MIN/MAX` de todas las secciones no representa a una sola.
-- El usuario **no** puede escribir fechas libres ni fuera del rango candidato.
+- El usuario puede ajustar las fechas, pero no salir del rango candidato ni superar 7 días.
 
 ---
 
@@ -404,7 +404,7 @@ Reglas:
 | Regla | Nivel |
 |---|---|
 | `period_end ≥ period_start` y diferencia ≤ 6 días | Aplicación. |
-| `period_start` es lunes y `period_end` domingo (o corte del rango) | Servicio. |
+| `period_start` y `period_end` están dentro del rango candidato y cubren como máximo 7 días | Servicio. |
 | `date` de sesión dentro de la semana | Aplicación. |
 | Una sesión lectiva por fecha mínima al aprobar | Servicio. |
 | Indicador con `origin = activity` requiere fuente | Servicio. |

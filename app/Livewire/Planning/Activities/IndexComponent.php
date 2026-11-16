@@ -84,6 +84,10 @@ class IndexComponent extends Component
 
     public $filter_status = '';
 
+    public $date_from;
+
+    public $date_to;
+
     // Select lists
     public $list_pestudio;
 
@@ -150,9 +154,13 @@ class IndexComponent extends Component
             }
         }
 
+        $bounds = $this->selectedLapsoBounds();
+
         return view('livewire.planning.activities.index-component', [
             'pevaluacions' => $pevaluacions,
             'activeTabIndex' => $activeTabIndex,
+            'lapsoMinDate' => $bounds[0],
+            'lapsoMaxDate' => $bounds[1],
         ]);
     }
 
@@ -174,11 +182,76 @@ class IndexComponent extends Component
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
             'filter_status' => $this->filter_status ?: null,
+            'date_from' => $this->date_from ?: null,
+            'date_to' => $this->date_to ?: null,
             'search' => $this->search ?: null,
         ], fn ($v) => $v !== null && $v !== '');
     }
 
     // ─── FILTERS CASCADE ────────────────────────────────────────
+
+    /**
+     * Límites del lapso seleccionado para el rango de fechas.
+     *
+     * @return array{0:?string,1:?string}
+     */
+    private function selectedLapsoBounds(): array
+    {
+        if (empty($this->lapso_id)) {
+            return [null, null];
+        }
+
+        $lapso = Lapso::query()->find($this->lapso_id);
+
+        if (! $lapso || ! $lapso->finicial || ! $lapso->ffinal) {
+            return [null, null];
+        }
+
+        $min = $lapso->finicial->format('Y-m-d');
+        $max = $lapso->ffinal->format('Y-m-d');
+
+        return $min <= $max ? [$min, $max] : [$max, $min];
+    }
+
+    /**
+     * Normaliza el rango y lo mantiene dentro del lapso cuando está definido.
+     */
+    private function normalizeDateRange(): void
+    {
+        $from = $this->normalizeDateValue($this->date_from);
+        $to = $this->normalizeDateValue($this->date_to);
+
+        [$min, $max] = $this->selectedLapsoBounds();
+
+        if ($min !== null && $max !== null) {
+            if ($from !== null && ($from < $min || $from > $max)) {
+                $from = $min;
+            }
+            if ($to !== null && ($to < $min || $to > $max)) {
+                $to = $max;
+            }
+        }
+
+        if ($from !== null && $to !== null && $from > $to) {
+            [$from, $to] = [$to, $from];
+        }
+
+        $this->date_from = $from;
+        $this->date_to = $to;
+    }
+
+    private function normalizeDateValue(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse($value)->toDateString();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
 
     public function updatedPestudioId($value)
     {
@@ -223,12 +296,14 @@ class IndexComponent extends Component
 
     public function updatedLapsoId($value)
     {
+        $this->normalizeDateRange();
         $this->resetPage();
     }
 
     public function selectLapso($id)
     {
         $this->lapso_id = $id;
+        $this->normalizeDateRange();
         $this->resetPage();
     }
 
@@ -249,6 +324,18 @@ class IndexComponent extends Component
 
     public function updatedFilterStatus($value)
     {
+        $this->resetPage();
+    }
+
+    public function updatedDateFrom(): void
+    {
+        $this->normalizeDateRange();
+        $this->resetPage();
+    }
+
+    public function updatedDateTo(): void
+    {
+        $this->normalizeDateRange();
         $this->resetPage();
     }
 
@@ -276,12 +363,15 @@ class IndexComponent extends Component
             ? $filters['filter_status']
             : '';
         $this->filter_observations = (bool) ($filters['filter_observations'] ?? false);
-        $this->paginate = in_array((int) ($filters['paginate'] ?? 10), [10, 25, 50, 100], true)
-            ? (int) $filters['paginate']
-            : 10;
+        $paginate = (int) ($filters['paginate'] ?? 10);
+        $this->paginate = in_array($paginate, [10, 25, 50, 100], true) ? $paginate : 10;
 
         $lapso = Lapso::find($filters['lapso_id'] ?? null);
         $this->lapso_id = $lapso?->id ?? Lapso::current()?->id;
+
+        $this->date_from = $this->normalizeDateValue($filters['date_from'] ?? null);
+        $this->date_to = $this->normalizeDateValue($filters['date_to'] ?? null);
+        $this->normalizeDateRange();
 
         $this->pestudio_id = $filters['pestudio_id'] ?? '';
         if ($this->pestudio_id) {
@@ -324,6 +414,7 @@ class IndexComponent extends Component
         $this->reset([
             'pestudio_id', 'grado_id', 'seccion_id', 'profesor_id',
             'status_activities', 'search', 'filter_observations', 'filter_status',
+            'date_from', 'date_to',
         ]);
 
         $this->paginate = 10;
@@ -786,6 +877,34 @@ class IndexComponent extends Component
         $this->refreshCopyFromOptions($service);
         $this->refreshCopyToFilterLists($service);
         $this->refreshCopyToOptions($service);
+    }
+
+    /**
+     * Abre el asistente de plan de clases con exactamente los filtros activos.
+     */
+    public function openDidacticPlanWizard(): void
+    {
+        if (! (bool) config('planning.didactic_plans_enabled')) {
+            $this->notification()->error(
+                'Módulo no disponible',
+                'El plan de clases aún no está habilitado en este entorno.'
+            );
+
+            return;
+        }
+
+        $user = Auth::user();
+
+        if (! $user || ! ($user->is_admin || $user->is_planner)) {
+            $this->notification()->error(
+                'Sin permiso',
+                'Solo el personal de planificación puede generar el plan de clases.'
+            );
+
+            return;
+        }
+
+        $this->dispatch('open-didactic-plan-wizard', filters: $this->currentFilters());
     }
 
     public function updatedCopySource($value)

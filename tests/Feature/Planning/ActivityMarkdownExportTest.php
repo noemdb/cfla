@@ -106,6 +106,43 @@ class ActivityMarkdownExportTest extends TestCase
         self::assertStringNotContainsString($excluded['profesor']->lastname, $markdown);
     }
 
+    public function test_system_prompt_copy_button_and_endpoint_are_available(): void
+    {
+        $planner = User::factory()->create(['is_planner' => true]);
+        $lapso = Lapso::factory()->create(['name' => '1.er Momento · 2026']);
+        $data = $this->makePlan($lapso, 'ASIG-PROMPT-'.uniqid(), 'PROF-PROMPT-'.uniqid());
+        $data['pestudio']->update(['name' => 'EDUCACION PRIMARIA']);
+
+        Livewire::actingAs($planner)
+            ->test(ActivitiesIndex::class)
+            ->assertSee('Copiar prompt')
+            ->assertSee('Parámetros del system prompt')
+            ->assertSee('Eje transversal del plan')
+            ->assertSee('Ejes / áreas articuladas')
+            ->assertSee('Nivel educativo')
+            ->assertSee('Periodo / momento')
+            ->assertSee('Instrucciones adicionales para refinar el prompt')
+            ->assertSee('system-prompt-instrucciones')
+            ->assertSee('Mejorar con IA')
+            ->assertSee('Refinamiento generado por IA', false)
+            ->assertSee(route('app.planning.activities.system-prompt.compose'), false)
+            ->assertSee(route('app.planning.activities.system-prompt.refine'), false)
+            ->set('pestudio_id', $data['pestudio']->id)
+            ->set('lapso_id', $lapso->id)
+            ->assertSee('data-nivel="'.$data['pestudio']->name.'"', false)
+            ->assertSee('data-periodo="1.er Momento · 2026"', false);
+
+        $path = base_path('blueprint/activities/alimentacion/systemPrompt.md');
+        $expected = (string) file_get_contents($path);
+
+        $response = $this->actingAs($planner)
+            ->get(route('app.planning.activities.system-prompt'));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/markdown; charset=UTF-8');
+        self::assertSame($expected, $response->getContent());
+    }
+
     /**
      * @return array<string, mixed>
      */

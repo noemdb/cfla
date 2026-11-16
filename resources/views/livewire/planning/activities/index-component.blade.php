@@ -5,6 +5,24 @@
     modeCopy: @entangle('modeCopy'),
     commentStatus: @entangle('status'),
     restored: false,
+    promptOpen: false,
+    promptCopying: false,
+    promptRefining: false,
+    promptRefined: '',
+    promptRefinedVisible: false,
+    promptRefineModel: '',
+    promptRefineError: '',
+    promptCopied: false,
+    promptError: false,
+    promptTimer: null,
+    promptForm: {
+        eje: 'Alimentación, cultura e identidad',
+        areas: '',
+        nivel: '',
+        periodo: '',
+        titulo: 'Consolidado de actividades y estrategias',
+        instrucciones: '',
+    },
     init() {
         if (this.restored) return;
         this.restored = true;
@@ -19,6 +37,150 @@
             console.error('Failed to parse planning activity filters', e);
         }
     },
+    openPromptDialog() {
+        const dialog = this.$refs.promptDialog;
+        if (dialog) {
+            if (!this.promptForm.nivel) {
+                this.promptForm.nivel = dialog.dataset.nivel || '';
+            }
+            if (!this.promptForm.periodo) {
+                this.promptForm.periodo = dialog.dataset.periodo || '';
+            }
+        }
+        this.promptCopied = false;
+        this.promptError = false;
+        this.promptRefineError = '';
+        this.promptOpen = true;
+        this.$nextTick(() => this.$refs.promptEje?.focus());
+    },
+    closePromptDialog() {
+        if (this.promptCopying) return;
+        this.promptOpen = false;
+        this.promptError = false;
+    },
+    promptPayload() {
+        return {
+            eje: this.promptForm.eje.trim(),
+            areas: this.promptForm.areas.trim(),
+            nivel: this.promptForm.nivel.trim(),
+            periodo: this.promptForm.periodo.trim(),
+            titulo: this.promptForm.titulo.trim(),
+            instrucciones: this.promptForm.instrucciones.trim(),
+            refinamiento: this.promptRefined,
+        };
+    },
+    csrfToken() {
+        return document.querySelector('meta[name=csrf-token]')?.content || '';
+    },
+    async postPromptJson(url, payload) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': this.csrfToken(),
+            },
+            body: JSON.stringify(payload),
+        });
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (e) {
+            data = {};
+        }
+        if (!response.ok) {
+            throw new Error(data.error || ('HTTP ' + response.status));
+        }
+        return data;
+    },
+    async refineSystemPrompt() {
+        if (this.promptRefining || !this.promptForm.eje.trim()) {
+            return;
+        }
+        this.promptRefining = true;
+        this.promptRefineError = '';
+        try {
+            const data = await this.postPromptJson(
+                '{{ route('app.planning.activities.system-prompt.refine') }}',
+                this.promptPayload()
+            );
+            if (!data.success || !data.prompt) {
+                throw new Error(data.error || 'No se pudo mejorar el prompt.');
+            }
+            this.promptRefined = data.prompt;
+            this.promptRefinedVisible = true;
+            this.promptRefineModel = data.model || '';
+            this.$nextTick(() => this.$refs.promptRefinedPreview?.focus());
+        } catch (e) {
+            this.promptRefineError = e.message || 'No se pudo mejorar el prompt con IA.';
+        } finally {
+            this.promptRefining = false;
+        }
+    },
+    clearRefinement() {
+        this.promptRefined = '';
+        this.promptRefinedVisible = false;
+        this.promptRefineModel = '';
+        this.promptRefineError = '';
+    },
+    async copySystemPrompt() {
+        if (this.promptCopying || !this.promptForm.eje.trim()) {
+            return;
+        }
+        this.promptCopying = true;
+        this.promptError = false;
+        let text = '';
+        try {
+            const data = await this.postPromptJson(
+                '{{ route('app.planning.activities.system-prompt.compose') }}',
+                this.promptPayload()
+            );
+            if (!data.success || !data.prompt) {
+                throw new Error(data.error || 'El prompt está vacío.');
+            }
+            text = data.prompt;
+        } catch (e) {
+            this.promptCopying = false;
+            this.promptError = true;
+            return;
+        }
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+            } else if (!this.copyPromptFallback(text)) {
+                throw new Error('No se pudo copiar');
+            }
+            this.promptCopying = false;
+            this.promptOpen = false;
+            this.promptCopied = true;
+            this.promptError = false;
+            clearTimeout(this.promptTimer);
+            this.promptTimer = setTimeout(() => {
+                this.promptCopied = false;
+            }, 2200);
+        } catch (e) {
+            this.promptCopying = false;
+            this.promptError = true;
+        }
+    },
+    copyPromptFallback(text) {
+        try {
+            const helper = document.createElement('textarea');
+            helper.value = text;
+            helper.setAttribute('readonly', 'readonly');
+            helper.style.position = 'fixed';
+            helper.style.top = '0';
+            helper.style.left = '-9999px';
+            document.body.appendChild(helper);
+            helper.select();
+            helper.setSelectionRange(0, helper.value.length);
+            const ok = document.execCommand('copy');
+            document.body.removeChild(helper);
+            return ok;
+        } catch (e) {
+            return false;
+        }
+    },
     saveFilters() {
         if (!$wire) return;
         localStorage.setItem('planning-activities-filters', JSON.stringify({
@@ -31,6 +193,8 @@
             status_activities: $wire.status_activities,
             filter_status: $wire.filter_status,
             filter_observations: $wire.filter_observations,
+            date_from: $wire.date_from,
+            date_to: $wire.date_to,
             paginate: $wire.paginate
         }));
     }
@@ -95,6 +259,12 @@
         }
         if ($filter_observations) {
             $activeChips[] = ['key' => 'filter_observations', 'value' => 'false', 'label' => 'Con observaciones'];
+        }
+        if ($date_from) {
+            $activeChips[] = ['key' => 'date_from', 'value' => "''", 'label' => 'Desde: ' . \Carbon\Carbon::parse($date_from)->format('d/m/Y')];
+        }
+        if ($date_to) {
+            $activeChips[] = ['key' => 'date_to', 'value' => "''", 'label' => 'Hasta: ' . \Carbon\Carbon::parse($date_to)->format('d/m/Y')];
         }
         $hasActiveFilters = count($activeChips) > 0;
     @endphp
@@ -204,6 +374,24 @@
                 </select>
             </div>
 
+            <div>
+                <label for="planning-activities-date-from" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Desde</label>
+                <input id="planning-activities-date-from" type="date" wire:model.live="date_from"
+                    min="{{ $lapsoMinDate }}" max="{{ $lapsoMaxDate }}"
+                    aria-label="Fecha inicial del rango de actividades"
+                    title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Debe estar dentro del lapso seleccionado' : 'Fecha inicial del rango' }}"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+            </div>
+
+            <div>
+                <label for="planning-activities-date-to" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Hasta</label>
+                <input id="planning-activities-date-to" type="date" wire:model.live="date_to"
+                    min="{{ $lapsoMinDate }}" max="{{ $lapsoMaxDate }}"
+                    aria-label="Fecha final del rango de actividades"
+                    title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Debe estar dentro del lapso seleccionado' : 'Fecha final del rango' }}"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+            </div>
+
             <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
                 <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
                     <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer" aria-label="Filtrar solo planes con observaciones">
@@ -225,29 +413,58 @@
             </div>
 
             <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
-                <div class="grid w-full grid-cols-1 gap-2 xl:grid-cols-2">
+                <div class="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                     <button type="button" wire:click="downloadMarkdownReport"
                         wire:loading.attr="disabled" wire:target="downloadMarkdownReport"
                         title="Descargar un snapshot Markdown con todas las actividades filtradas para análisis con IA"
                         aria-label="Exportar actividades filtradas en formato Markdown"
-                        class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-all duration-200 text-xs font-bold uppercase tracking-widest disabled:opacity-60 disabled:cursor-wait">
+                        class="inline-flex min-w-[130px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest disabled:opacity-60 disabled:cursor-wait">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
                         <span wire:loading.remove wire:target="downloadMarkdownReport">Exportar MD</span>
                         <span wire:loading wire:target="downloadMarkdownReport">Generando…</span>
                     </button>
-                    <button type="button" wire:click="resetFilters"
+                    <button type="button" @click="openPromptDialog()"
+                        title="Configurar y copiar el system prompt para consolidar ejes temáticos"
+                        aria-label="Abrir configuración del system prompt"
+                        class="inline-flex min-w-[150px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg border border-indigo-200 dark:border-indigo-500/20 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span x-show="!promptCopied && !promptError">Copiar prompt</span>
+                        <span x-show="promptCopied" x-cloak style="display: none;">Copiado ✓</span>
+                        <span x-show="promptError" x-cloak style="display: none;">No se pudo</span>
+                    </button>
+                    @if(config('planning.didactic_plans_enabled') && auth()->check() && (auth()->user()->is_admin || auth()->user()->is_planner))
+                        <!-- <button type="button" wire:click="openDidacticPlanWizard" title="Plan de clases"
+                            title="Abrir el asistente de plan de clases con las actividades filtradas"
+                            aria-label="Abrir el asistente de plan de clases"
+                            class="inline-flex min-w-[150px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg shadow-teal-500/20 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            P. Clases
+                        </button> -->
+                    @endif
+                    <button type="button" wire:click="resetFilters" title="Limpiar filtros"
                         @click="localStorage.removeItem('planning-activities-filters')"
-                        class="inline-flex w-full min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-xs font-bold uppercase tracking-widest">
+                        class="inline-flex min-w-[130px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
-                        Limpiar filtros
+                        Limpiar
                     </button>
                 </div>
             </div>
         </div>
+        @if($lapsoMinDate && $lapsoMaxDate)
+            <p class="mt-2 text-[10px] text-gray-500 dark:text-gray-400">
+                Rango de fechas limitado al lapso:
+                <span class="font-semibold">{{ \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') }}</span> –
+                <span class="font-semibold">{{ \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') }}</span>.
+            </p>
+        @endif
     </div>
 
     @if($hasActiveFilters)
@@ -1827,6 +2044,173 @@
         :publish-publish-at="$publishPublishAt" />
 
     @include('leadership.help-activities')
+
+    @if(config('planning.didactic_plans_enabled') && auth()->check() && (auth()->user()->is_admin || auth()->user()->is_planner))
+        <livewire:planning.didactic-plans.wizard />
+    @endif
+
+    {{-- Diálogo de parámetros para el system prompt de consolidado --}}
+    <div x-show="promptOpen" x-cloak style="display: none;"
+         x-ref="promptDialog"
+         data-nivel="{{ $pestudio_id && isset($list_pestudio[$pestudio_id]) ? $list_pestudio[$pestudio_id] : '' }}"
+         data-periodo="{{ $lapso_id && isset($list_lapso[$lapso_id]) ? $list_lapso[$lapso_id] : '' }}"
+         x-effect="document.body.classList.toggle('overflow-hidden', promptOpen)"
+         @keydown.escape.window="closePromptDialog()"
+         class="fixed inset-0 z-[90] flex items-center justify-center p-4"
+         role="dialog" aria-modal="true" aria-labelledby="system-prompt-dialog-title">
+        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" @click="closePromptDialog()" aria-hidden="true"></div>
+
+        <div x-show="promptOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-2 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-2 sm:scale-95"
+             class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 shadow-2xl">
+            <div class="flex items-start justify-between gap-4 px-5 py-4 border-b border-gray-100 dark:border-white/5">
+                <div>
+                    <h2 id="system-prompt-dialog-title" class="text-base font-extrabold text-gray-900 dark:text-white">
+                        Parámetros del system prompt
+                    </h2>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Estos datos se agregan al final del prompt. Puedes copiarlo tal cual
+                        o pedir a la IA un bloque de refinamiento para esta ejecución.
+                    </p>
+                </div>
+                <button type="button" @click="closePromptDialog()" aria-label="Cerrar"
+                    class="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-gray-200 dark:hover:bg-white/10 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="px-5 py-4 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" @input.debounce.400ms="clearRefinement()">
+                    <div class="sm:col-span-2">
+                        <label for="system-prompt-eje" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                            Eje transversal del plan <span class="text-red-500">*</span>
+                        </label>
+                        <input id="system-prompt-eje" type="text" x-ref="promptEje" x-model="promptForm.eje"
+                            placeholder="Ej.: Alimentación, cultura e identidad"
+                            class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="system-prompt-areas" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                            Ejes / áreas articuladas
+                        </label>
+                        <input id="system-prompt-areas" type="text" x-model="promptForm.areas"
+                            placeholder="Ej.: Ciencias Naturales · Ciencias Sociales · Cultura e Identidad"
+                            class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+                        <p class="mt-1 text-[10px] text-gray-400 dark:text-gray-500">Sepáralos con “ · ” o comas.</p>
+                    </div>
+
+                    <div>
+                        <label for="system-prompt-nivel" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                            Nivel educativo
+                        </label>
+                        <input id="system-prompt-nivel" type="text" x-model="promptForm.nivel"
+                            placeholder="Ej.: EDUCACIÓN PRIMARIA"
+                            class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label for="system-prompt-periodo" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                            Periodo / momento
+                        </label>
+                        <input id="system-prompt-periodo" type="text" x-model="promptForm.periodo"
+                            placeholder="Ej.: 1ER MOMENTO · 2026"
+                            class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="system-prompt-titulo" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                            Título del reporte
+                        </label>
+                        <input id="system-prompt-titulo" type="text" x-model="promptForm.titulo"
+                            placeholder="Consolidado de actividades y estrategias"
+                            class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="system-prompt-instrucciones" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                            Instrucciones adicionales para refinar el prompt
+                        </label>
+                        <textarea id="system-prompt-instrucciones" rows="3" x-model="promptForm.instrucciones"
+                            placeholder="Ej.: enfatiza la progresión por grado, señala vacíos de evaluación y compara secciones A/B."
+                            class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all resize-y"></textarea>
+                    </div>
+                </div>
+
+                {{-- Refinamiento generado por IA (OpenRouter) --}}
+                <div x-show="promptRefinedVisible" x-cloak style="display: none;"
+                     class="rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/5 p-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                            </svg>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">
+                                Refinamiento generado por IA
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span x-show="promptRefineModel" x-cloak style="display: none;"
+                                  class="text-[10px] font-mono text-indigo-500/80 dark:text-indigo-300/70" x-text="promptRefineModel"></span>
+                            <button type="button" @click="clearRefinement()"
+                                class="text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-100 underline underline-offset-2">
+                                Descartar
+                            </button>
+                        </div>
+                    </div>
+                    <textarea x-ref="promptRefinedPreview" x-model="promptRefined" rows="8" spellcheck="false"
+                        aria-label="Bloque de refinamiento generado por IA"
+                        class="w-full bg-white/80 dark:bg-gray-900/60 border border-indigo-200 dark:border-indigo-500/30 text-gray-700 dark:text-gray-200 rounded-lg px-3 py-2 text-xs font-mono leading-relaxed focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/40 outline-none transition-all resize-y"></textarea>
+                    <p class="mt-1 text-[10px] text-indigo-600/80 dark:text-indigo-300/70">
+                        Puedes editarlo antes de copiar. Se anexa al prompt como
+                        <span class="font-mono"># REFINAMIENTO PARA ESTA EJECUCIÓN</span>.
+                    </p>
+                </div>
+
+                <p x-show="promptRefineError" x-cloak style="display: none;"
+                   x-text="promptRefineError"
+                   class="text-xs font-semibold text-red-600 dark:text-red-400"></p>
+
+                <p x-show="promptError" x-cloak class="text-xs font-semibold text-red-600 dark:text-red-400">
+                    No se pudo obtener o copiar el system prompt. Revisa la conexión e inténtalo de nuevo.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 dark:border-white/5">
+                <button type="button" @click="closePromptDialog()" :disabled="promptCopying || promptRefining"
+                    class="inline-flex min-h-[40px] items-center justify-center px-4 py-2 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 text-[11px] font-bold uppercase tracking-widest transition-all disabled:opacity-60">
+                    Cancelar
+                </button>
+                <button type="button" @click="refineSystemPrompt()"
+                    :disabled="promptRefining || promptCopying || !promptForm.eje.trim()"
+                    title="Mejorar el prompt con IA (OpenRouter) usando los parámetros actuales"
+                    class="inline-flex min-h-[40px] items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[11px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                    </svg>
+                    <span x-show="!promptRefining">Mejorar con IA</span>
+                    <span x-show="promptRefining" x-cloak style="display: none;">Mejorando…</span>
+                </button>
+                <button type="button" @click="copySystemPrompt()"
+                    :disabled="promptCopying || promptRefining || !promptForm.eje.trim()"
+                    class="inline-flex min-h-[40px] items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span x-show="!promptCopying && !promptRefined">Copiar system prompt</span>
+                    <span x-show="!promptCopying && promptRefined" x-cloak style="display: none;">Copiar prompt mejorado</span>
+                    <span x-show="promptCopying" x-cloak style="display: none;">Copiando…</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Floating Loading State — anidado filters (transparencia backdrop-blur) -->
     <div wire:loading.flex

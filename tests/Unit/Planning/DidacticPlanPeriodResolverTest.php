@@ -90,10 +90,10 @@ class DidacticPlanPeriodResolverTest extends TestCase
         $this->assertSame(7, $weeks[0]['days']);
     }
 
-    public function test_validate_week_rejects_ranges_over_seven_days(): void
+    public function test_validate_week_accepts_ranges_longer_than_seven_days(): void
     {
         $this->assertSame([], $this->resolver->validateWeek('2026-11-16', '2026-11-22'));
-        $this->assertNotEmpty($this->resolver->validateWeek('2026-11-16', '2026-11-24'));
+        $this->assertSame([], $this->resolver->validateWeek('2026-11-16', '2026-11-24'));
         $this->assertNotEmpty($this->resolver->validateWeek('2026-11-22', '2026-11-16'));
     }
 

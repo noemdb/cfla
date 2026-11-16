@@ -53,6 +53,26 @@ class FilteredActivitiesQuery
         if (! empty($filters['lapso_id'])) {
             $query->where('lapso_id', $filters['lapso_id']);
         }
+        if (! empty($filters['date_from']) || ! empty($filters['date_to'])) {
+            $dateFrom = $filters['date_from'] ?? null;
+            $dateTo = $filters['date_to'] ?? null;
+
+            $query->whereHas('activities', function ($q) use ($dateFrom, $dateTo): void {
+                $q->whereNotNull('finicial')
+                    ->where('finicial', '!=', '0000-00-00');
+
+                if ($dateTo !== null) {
+                    $q->where('finicial', '<=', $dateTo);
+                }
+
+                if ($dateFrom !== null) {
+                    $q->whereRaw(
+                        "COALESCE(NULLIF(ffinal, '0000-00-00'), finicial) >= ?",
+                        [$dateFrom]
+                    );
+                }
+            });
+        }
         if (! empty($filters['profesor_id'])) {
             $query->where('profesor_id', $filters['profesor_id']);
         }
