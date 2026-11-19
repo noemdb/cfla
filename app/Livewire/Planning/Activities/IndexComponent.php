@@ -143,7 +143,9 @@ class IndexComponent extends Component
 
     public function render()
     {
-        $pevaluacions = $this->getPevaluaciones($this->currentFilters());
+        $filters = $this->currentFilters();
+        $pevaluacions = $this->getPevaluaciones($filters);
+        $summaryKpis = $this->computeSummaryKpis($filters);
 
         // Compute the active tab index from the current lapso_id
         $activeTabIndex = 1;
@@ -158,10 +160,54 @@ class IndexComponent extends Component
 
         return view('livewire.planning.activities.index-component', [
             'pevaluacions' => $pevaluacions,
+            'summaryKpis' => $summaryKpis,
             'activeTabIndex' => $activeTabIndex,
             'lapsoMinDate' => $bounds[0],
             'lapsoMaxDate' => $bounds[1],
         ]);
+    }
+
+    /**
+     * Calcula los mini-KPIs del conjunto filtrado ignorando `filter_status` y
+     * `status_activities` cuando queremos saber el desglose del universo base,
+     * o directamente sobre el universo filtrado actual.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array{total: int, approved: int, pending: int, empty: int}
+     */
+    protected function computeSummaryKpis(array $filters): array
+    {
+        $baseFilters = $filters;
+        unset($baseFilters['filter_status'], $baseFilters['status_activities']);
+
+        $rows = app(FilteredActivitiesQuery::class)
+            ->pevaluacions($baseFilters)
+            ->get(['pevaluacions.id']);
+
+        $total = $rows->count();
+        $approved = 0;
+        $pending = 0;
+        $empty = 0;
+
+        foreach ($rows as $row) {
+            $count = (int) ($row->activities_count ?? 0);
+            $revCount = (int) ($row->activities_revision_count ?? 0);
+
+            if ($count === 0) {
+                $empty++;
+            } elseif ($revCount > 0) {
+                $pending++;
+            } else {
+                $approved++;
+            }
+        }
+
+        return [
+            'total' => $total,
+            'approved' => $approved,
+            'pending' => $pending,
+            'empty' => $empty,
+        ];
     }
 
     /**
@@ -402,6 +448,25 @@ class IndexComponent extends Component
 
         $this->seccion_id = $filters['seccion_id'] ?? '';
         $this->profesor_id = $filters['profesor_id'] ?? '';
+
+        $this->resetPage();
+    }
+
+    public function filterByKpi(string $type): void
+    {
+        if ($type === 'all') {
+            $this->filter_status = '';
+            $this->status_activities = '';
+        } elseif ($type === 'approved') {
+            $this->filter_status = $this->filter_status === 'approved' ? '' : 'approved';
+            $this->status_activities = '';
+        } elseif ($type === 'pending') {
+            $this->filter_status = $this->filter_status === 'pending' ? '' : 'pending';
+            $this->status_activities = '';
+        } elseif ($type === 'empty') {
+            $this->status_activities = $this->status_activities === 'NO' ? '' : 'NO';
+            $this->filter_status = '';
+        }
 
         $this->resetPage();
     }
@@ -750,7 +815,45 @@ class IndexComponent extends Component
         );
     }
 
-    // ─── MODAL COMMENTS ─────────────────────────────────────────
+    // ─── MODAL COMMENTS & QUICK APPROVAL ────────────────────────
+
+    public function quickApproveActivity($activityId)
+    {
+        $activity = Activity::findOrFail($activityId);
+
+        if ($activity->status) {
+            return;
+        }
+
+        $activity->status = true;
+        $activity->save();
+
+        $this->notification()->success(
+            title: 'Actividad Aprobada',
+            description: 'La actividad fue marcada como aprobada correctamente.'
+        );
+    }
+
+    public function approveAllPendingInPlan($pevaluacionId)
+    {
+        $pevaluacion = Pevaluacion::with('activities')->findOrFail($pevaluacionId);
+        $pending = $pevaluacion->activities->where('status', false);
+        $count = $pending->count();
+
+        if ($count === 0) {
+            return;
+        }
+
+        foreach ($pending as $activity) {
+            $activity->status = true;
+            $activity->save();
+        }
+
+        $this->notification()->success(
+            title: 'Actividades Aprobadas',
+            description: "Se aprobaron {$count} actividad(es) pendientes del plan de evaluación."
+        );
+    }
 
     public function setModeComment($activitie_id)
     {
