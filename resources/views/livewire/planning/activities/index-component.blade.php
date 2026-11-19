@@ -269,27 +269,33 @@
         $hasActiveFilters = count($activeChips) > 0;
     @endphp
 
-    <!-- Filter Bar -->
-    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-4"
+    <!-- Filter Bar (Compact & Dense) -->
+    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 px-3 py-2.5 rounded-lg mb-3"
          @change.debounce.150ms="saveFilters()">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            <div class="sm:col-span-2">
-                <label for="planning-activities-search" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Buscar</label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-12 gap-2 items-end">
+            {{-- Buscar --}}
+            <div class="col-span-2 sm:col-span-2 lg:col-span-2 xl:col-span-3"
+                 title="Buscar por nombre del profesor, asignatura o código de sección">
+                <label for="planning-activities-search" class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Buscar</label>
                 <div class="relative">
-                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"></path>
                     </svg>
                     <input id="planning-activities-search" type="search" wire:model.live.debounce.300ms="search"
                         @input.debounce.500ms="saveFilters()"
                         placeholder="Profesor, asignatura o sección..."
-                        class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600">
+                        title="Escribe para filtrar por profesor, asignatura o sección"
+                        class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md pl-8 pr-2.5 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600">
                 </div>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan de Estudio</label>
+            {{-- Plan de Estudio --}}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2 xl:col-span-3"
+                 title="Filtrar planes de evaluación por Plan de Estudio (habilita el filtro de Grado/Año)">
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Plan de Estudio</label>
                 <select wire:model.live="pestudio_id" aria-label="Filtrar por plan de estudio"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    title="Selecciona un Plan de Estudio para habilitar los filtros de Grado/Año y Sección"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all truncate">
                     <option value="">Todos</option>
                     @foreach($list_pestudio as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -297,17 +303,17 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$pestudio_id ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500 dark:text-gray-500' }}">
+            {{-- Grado / Año --}}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2"
+                 title="{{ !$pestudio_id ? 'Selecciona primero un Plan de Estudio para filtrar por Grado/Año' : 'Filtrar por Grado o Año académico del Plan de Estudio seleccionado' }}">
+                <label class="block text-[9px] font-bold uppercase tracking-wider mb-0.5 leading-tight truncate transition-colors {{ !$pestudio_id ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400' }}">
                     Grado/Año
-                    @if(!$pestudio_id)
-                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Plan</span>
-                    @endif
                 </label>
                 <select wire:model.live="grado_id" @disabled(!$pestudio_id) aria-label="Filtrar por grado o año"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed {{ !$pestudio_id ? 'opacity-60 cursor-not-allowed' : '' }}">
+                    title="{{ !$pestudio_id ? 'Requiere seleccionar primero un Plan de Estudio' : 'Selecciona el Grado o Año académico (habilita el filtro de Sección)' }}"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all truncate disabled:opacity-50 disabled:cursor-not-allowed {{ !$pestudio_id ? 'opacity-60 cursor-not-allowed' : '' }}">
                     @if(!$pestudio_id)
-                        <option value="">Seleccione Plan Estudio primero</option>
+                        <option value="">Seleccione Plan</option>
                     @else
                         <option value="">Todos</option>
                         @foreach($list_grado as $id => $name)
@@ -317,19 +323,17 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 transition-colors {{ !$grado_id ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500 dark:text-gray-500' }}">
+            {{-- Sección --}}
+            <div class="col-span-1 sm:col-span-1 lg:col-span-1 xl:col-span-1"
+                 title="{{ !$pestudio_id ? 'Requiere seleccionar Plan de Estudio y Grado/Año' : (!$grado_id ? 'Selecciona primero un Grado/Año para filtrar por Sección' : 'Filtrar por Sección del Grado seleccionado') }}">
+                <label class="block text-[9px] font-bold uppercase tracking-wider mb-0.5 leading-tight truncate transition-colors {{ !$grado_id ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400' }}">
                     Sección
-                    @if(!$pestudio_id)
-                        <span class="normal-case font-normal text-[9px] tracking-normal">— requiere Plan</span>
-                    @elseif(!$grado_id)
-                        <span class="normal-case font-normal text-[9px] tracking-normal">— seleccione Grado</span>
-                    @endif
                 </label>
                 <select wire:model.live="seccion_id" @disabled(!$grado_id) aria-label="Filtrar por sección"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed {{ !$grado_id ? 'opacity-60 cursor-not-allowed' : '' }}">
+                    title="{{ !$pestudio_id ? 'Requiere seleccionar Plan de Estudio y Grado/Año' : (!$grado_id ? 'Requiere seleccionar primero un Grado/Año' : 'Selecciona una Sección específica') }}"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all truncate disabled:opacity-50 disabled:cursor-not-allowed {{ !$grado_id ? 'opacity-60 cursor-not-allowed' : '' }}">
                     @if(!$grado_id)
-                        <option value="">{{ !$pestudio_id ? 'Seleccione Plan Estudio' : 'Seleccione Grado primero' }}</option>
+                        <option value="">{{ !$pestudio_id ? 'Plan req.' : 'Grado req.' }}</option>
                     @else
                         <option value="">Todas</option>
                         @foreach($list_seccion as $id => $name)
@@ -339,11 +343,14 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
+            {{-- Profesor --}}
+            <div class="col-span-1 sm:col-span-3 lg:col-span-2 xl:col-span-3"
+                 title="Filtrar planes por docente responsable (habilita el indicador global de calidad)">
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Profesor</label>
                 <select wire:model.live="profesor_id"
                     aria-label="Filtrar por profesor"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    title="Selecciona un profesor para ver sus planes y su indicador global de desempeño"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all truncate">
                     <option value="">Todos</option>
                     @foreach($list_profesors as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -351,10 +358,13 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades / Lecciones</label>
+            {{-- Actividades / Lecciones --}}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2 xl:col-span-2"
+                 title="Filtrar según carga de actividades, lecciones LMS o información complementaria">
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight truncate">Actividades / Lecc.</label>
                 <select wire:model.live="status_activities" aria-label="Filtrar por actividades o lecciones"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    title="Filtra planes con/sin actividades, con/sin lecciones LMS o con información complementaria"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all truncate">
                     <option value="">Todas</option>
                     <option value="SI">Con actividades</option>
                     <option value="NO">Sin actividades</option>
@@ -364,44 +374,49 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
+            {{--Estado --}}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-1"
+                 title="Filtrar planes por estado de revisión pedagógica del Jefe de Área">
+                <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Estado</label>
                 <select wire:model.live="filter_status" aria-label="Filtrar por estado de revisión"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    title="Filtra planes que contengan actividades aprobadas o pendientes en revisión"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all truncate">
                     <option value="">Todas</option>
                     <option value="approved">Aprobada</option>
                     <option value="pending">En revisión</option>
                 </select>
             </div>
 
-            <div>
-                <label for="planning-activities-date-from" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Desde</label>
+            {{-- Desde --}}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2"
+                 title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Fecha inicial del rango de actividades (límite del lapso: ' . \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') . ')' : 'Filtrar actividades con fecha de inicio a partir de esta fecha' }}">
+                <label for="planning-activities-date-from" class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Desde</label>
                 <input id="planning-activities-date-from" type="date" wire:model.live="date_from"
                     min="{{ $lapsoMinDate }}" max="{{ $lapsoMaxDate }}"
                     aria-label="Fecha inicial del rango de actividades"
-                    title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Debe estar dentro del lapso seleccionado' : 'Fecha inicial del rango' }}"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Fecha inicial dentro del lapso (' . \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') . ')' : 'Fecha inicial del rango' }}"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
             </div>
 
-            <div>
-                <label for="planning-activities-date-to" class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Hasta</label>
+            {{-- Hasta --}}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2"
+                 title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Fecha final del rango de actividades (límite del lapso: ' . \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') . ')' : 'Filtrar actividades con fecha de cierre hasta esta fecha' }}">
+                <label for="planning-activities-date-to" class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Hasta</label>
                 <input id="planning-activities-date-to" type="date" wire:model.live="date_to"
                     min="{{ $lapsoMinDate }}" max="{{ $lapsoMaxDate }}"
                     aria-label="Fecha final del rango de actividades"
-                    title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Debe estar dentro del lapso seleccionado' : 'Fecha final del rango' }}"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Fecha final dentro del lapso (' . \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') . ')' : 'Fecha final del rango' }}"
+                    class="w-full h-8 bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-1 text-xs focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
             </div>
 
-            <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
-                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
+            {{-- Observaciones + Acciones (Exportar MD, Copiar prompt, Limpiar) --}}
+            <div class="col-span-2 sm:col-span-4 lg:col-span-6 xl:col-span-5 flex flex-wrap xl:flex-nowrap items-center justify-between xl:justify-end gap-1.5">
+                <label title="Mostrar únicamente planes de evaluación que tienen observaciones registradas por coordinación o jefatura de área"
+                    class="relative inline-flex items-center gap-1.5 cursor-pointer h-8 px-2 rounded-md border border-gray-200 dark:border-white/10 bg-gray-50/70 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/5 select-none transition-colors shrink-0">
                     <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer" aria-label="Filtrar solo planes con observaciones">
-                    <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
-                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                        Observaciones
+                    <div class="relative w-7 h-4 rounded-full transition-all duration-200 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/15 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all after:duration-200 peer-checked:after:translate-x-3"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors">
+                        Obs.
                     </span>
                     <span wire:loading wire:target="filter_observations" class="w-3 h-3">
                         <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24" aria-hidden="true">
@@ -410,47 +425,38 @@
                         </svg>
                     </span>
                 </label>
-            </div>
 
-            <div class="flex items-end sm:col-span-1 lg:col-span-2 xl:col-span-2">
-                <div class="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                <div class="flex items-center gap-1.5 flex-1 sm:flex-initial justify-end">
                     <button type="button" wire:click="downloadMarkdownReport"
                         wire:loading.attr="disabled" wire:target="downloadMarkdownReport"
-                        title="Descargar un snapshot Markdown con todas las actividades filtradas para análisis con IA"
+                        title="Descargar un snapshot Markdown (.md) con todas las actividades filtradas para análisis con IA"
                         aria-label="Exportar actividades filtradas en formato Markdown"
-                        class="inline-flex min-w-[130px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest disabled:opacity-60 disabled:cursor-wait">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        class="inline-flex h-8 items-center justify-center gap-1 px-2.5 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-md border border-emerald-200 dark:border-emerald-500/20 transition-all duration-200 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap disabled:opacity-60 disabled:cursor-wait">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
                         <span wire:loading.remove wire:target="downloadMarkdownReport">Exportar MD</span>
                         <span wire:loading wire:target="downloadMarkdownReport">Generando…</span>
                     </button>
+
                     <button type="button" @click="openPromptDialog()"
-                        title="Configurar y copiar el system prompt para consolidar ejes temáticos"
+                        title="Configurar parámetros y copiar el system prompt para consolidar ejes temáticos con IA"
                         aria-label="Abrir configuración del system prompt"
-                        class="inline-flex min-w-[150px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-lg border border-indigo-200 dark:border-indigo-500/20 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        class="inline-flex h-8 items-center justify-center gap-1 px-2.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded-md border border-indigo-200 dark:border-indigo-500/20 transition-all duration-200 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                         <span x-show="!promptCopied && !promptError">Copiar prompt</span>
                         <span x-show="promptCopied" x-cloak style="display: none;">Copiado ✓</span>
                         <span x-show="promptError" x-cloak style="display: none;">No se pudo</span>
                     </button>
-                    @if(config('planning.didactic_plans_enabled') && auth()->check() && (auth()->user()->is_admin || auth()->user()->is_planner))
-                        <!-- <button type="button" wire:click="openDidacticPlanWizard" title="Plan de clases"
-                            title="Abrir el asistente de plan de clases con las actividades filtradas"
-                            aria-label="Abrir el asistente de plan de clases"
-                            class="inline-flex min-w-[150px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg shadow-teal-500/20 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                            P. Clases
-                        </button> -->
-                    @endif
-                    <button type="button" wire:click="resetFilters" title="Limpiar filtros"
+
+                    <button type="button" wire:click="resetFilters"
+                        title="Restablecer todos los filtros activos y limpiar la búsqueda guardada"
+                        aria-label="Limpiar filtros"
                         @click="localStorage.removeItem('planning-activities-filters')"
-                        class="inline-flex min-w-[130px] flex-1 min-h-[44px] items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-lg border border-gray-200 dark:border-white/10 transition-all duration-200 text-[11px] font-bold uppercase tracking-widest">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        class="inline-flex h-8 items-center justify-center gap-1 px-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 rounded-md border border-gray-200 dark:border-white/10 transition-all duration-200 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                         Limpiar
@@ -458,35 +464,43 @@
                 </div>
             </div>
         </div>
-        @if($lapsoMinDate && $lapsoMaxDate)
-            <p class="mt-2 text-[10px] text-gray-500 dark:text-gray-400">
-                Rango de fechas limitado al lapso:
-                <span class="font-semibold">{{ \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') }}</span> –
-                <span class="font-semibold">{{ \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') }}</span>.
-            </p>
+
+        @if(($lapsoMinDate && $lapsoMaxDate) || $hasActiveFilters)
+            <div class="mt-2 pt-1.5 border-t border-gray-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-2">
+                @if($hasActiveFilters)
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500" title="Filtros aplicados actualmente (haz clic en cualquiera para quitarlo)">Filtros activos:</span>
+                        @foreach($activeChips as $chip)
+                            <button type="button" wire:click="$set('{{ $chip['key'] }}', {{ $chip['value'] }})"
+                                @click="setTimeout(() => saveFilters(), 400)"
+                                title="Quitar filtro «{{ $chip['label'] }}»"
+                                class="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
+                                {{ $chip['label'] }}
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        @endforeach
+                        <button type="button" wire:click="resetFilters"
+                            @click="localStorage.removeItem('planning-activities-filters')"
+                            title="Quitar todos los filtros activos"
+                            class="text-[10px] font-bold text-gray-500 dark:text-gray-400 underline decoration-dotted underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-400">
+                            Limpiar todo
+                        </button>
+                    </div>
+                @endif
+
+                @if($lapsoMinDate && $lapsoMaxDate)
+                    <p class="text-[9px] text-gray-400 dark:text-gray-500 ml-auto"
+                       title="Las fechas Desde y Hasta se ajustan automáticamente a los límites del momento académico activo">
+                        Rango del lapso:
+                        <span class="font-semibold text-gray-600 dark:text-gray-400">{{ \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') }}</span> –
+                        <span class="font-semibold text-gray-600 dark:text-gray-400">{{ \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') }}</span>
+                    </p>
+                @endif
+            </div>
         @endif
     </div>
-
-    @if($hasActiveFilters)
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500">Filtros activos</span>
-            @foreach($activeChips as $chip)
-                <button type="button" wire:click="$set('{{ $chip['key'] }}', {{ $chip['value'] }})"
-                    @click="setTimeout(() => saveFilters(), 400)"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
-                    {{ $chip['label'] }}
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            @endforeach
-            <button type="button" wire:click="resetFilters"
-                @click="localStorage.removeItem('planning-activities-filters')"
-                class="text-xs font-bold text-gray-500 dark:text-gray-400 underline decoration-dotted underline-offset-4 hover:text-emerald-600 dark:hover:text-emerald-400">
-                Limpiar todo
-            </button>
-        </div>
-    @endif
 
     <!-- Global Indicator (solo cuando hay profesor seleccionado) -->
     @if($profesor_id && $pevaluacions->total() > 0)
