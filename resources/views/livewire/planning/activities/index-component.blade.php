@@ -5,7 +5,6 @@
     modeCopy: @entangle('modeCopy'),
     commentStatus: @entangle('status'),
     restored: false,
-    linkCopied: false,
     profOpen: false,
     profQuery: '',
     promptOpen: false,
@@ -67,19 +66,6 @@
                 }
             });
             window.history.replaceState({}, '', url.toString());
-        } catch (e) {}
-    },
-    async copyShareableUrl() {
-        this.saveFilters();
-        const url = window.location.href;
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(url);
-            } else {
-                this.copyPromptFallback(url);
-            }
-            this.linkCopied = true;
-            setTimeout(() => { this.linkCopied = false; }, 2200);
         } catch (e) {}
     },
     openPromptDialog() {
@@ -482,7 +468,7 @@
             </div>
 
             {{-- Estado --}}
-            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-1"
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2 xl:col-span-1"
                  title="Filtrar planes por estado de revisión pedagógica del Jefe de Área">
                 <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Estado</label>
                 <div class="relative">
@@ -498,7 +484,7 @@
             </div>
 
             {{-- Desde --}}
-            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2"
+            <div class="col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-2"
                  title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Fecha inicial del rango de actividades (límite del lapso: ' . \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') . ')' : 'Filtrar actividades con fecha de inicio a partir de esta fecha' }}">
                 <label for="planning-activities-date-from" class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Desde</label>
                 <input id="planning-activities-date-from" type="date" wire:model.live="date_from"
@@ -509,7 +495,7 @@
             </div>
 
             {{-- Hasta --}}
-            <div class="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2"
+            <div class="col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-2"
                  title="{{ $lapsoMinDate && $lapsoMaxDate ? 'Fecha final del rango de actividades (límite del lapso: ' . \Carbon\Carbon::parse($lapsoMinDate)->format('d/m/Y') . ' – ' . \Carbon\Carbon::parse($lapsoMaxDate)->format('d/m/Y') . ')' : 'Filtrar actividades con fecha de cierre hasta esta fecha' }}">
                 <label for="planning-activities-date-to" class="block text-[9px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-0.5 leading-tight">Hasta</label>
                 <input id="planning-activities-date-to" type="date" wire:model.live="date_to"
@@ -561,17 +547,6 @@
                         <span x-show="promptError" x-cloak style="display: none;">No se pudo</span>
                     </button>
 
-                    <button type="button" @click="copyShareableUrl()"
-                        title="Copiar enlace directo con los filtros actuales para compartir esta vista"
-                        aria-label="Copiar enlace de la vista filtrada"
-                        class="inline-flex h-8 items-center justify-center gap-1 px-2 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-300 rounded-md border border-sky-200 dark:border-sky-500/20 transition-all duration-200 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
-                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                        </svg>
-                        <span x-show="!linkCopied">Enlace</span>
-                        <span x-show="linkCopied" x-cloak style="display: none;">Copiado ✓</span>
-                    </button>
-
                     <button type="button" wire:click="resetFilters"
                         title="Restablecer todos los filtros activos y limpiar la búsqueda guardada"
                         aria-label="Limpiar filtros"
@@ -602,12 +577,6 @@
                                 </svg>
                             </button>
                         @endforeach
-                        <button type="button" wire:click="resetFilters"
-                            @click="clearSavedFilters()"
-                            title="Quitar todos los filtros activos"
-                            class="text-[10px] font-bold text-gray-500 dark:text-gray-400 underline decoration-dotted underline-offset-2 hover:text-emerald-600 dark:hover:text-emerald-400">
-                            Limpiar todo
-                        </button>
                     </div>
                 @endif
 
