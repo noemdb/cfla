@@ -37595,3 +37595,1831 @@
 [Sun Nov 22 18:20:19 2026] 127.0.0.1:54714 Accepted
 [Sun Nov 22 18:20:45 2026] 127.0.0.1:54714 Closed without sending a request; it was probably just an unused speculative preconnection
 [Sun Nov 22 18:20:45 2026] 127.0.0.1:54714 Closing
+[Tue Nov 24 20:48:34 2026] PHP 8.2.35 Development Server (http://127.0.0.1:8080) started
+[Tue Nov 24 20:49:12 2026] 127.0.0.1:35976 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35976 [200]: GET /
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35976 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35986 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35992 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35986 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35994 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35986 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36006 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36010 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36026 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36006 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35992 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36010 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35994 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36026 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35992 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36026 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36006 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:35994 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36010 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36028 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36028 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36028 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36032 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36032 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36038 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36032 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36046 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36038 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36038 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36062 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36046 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36046 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36074 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36082 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36062 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36088 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36062 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36074 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36074 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36082 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36088 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36092 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36082 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36088 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36102 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36092 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36108 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36110 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36102 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36108 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36092 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36120 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36110 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36130 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36120 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36102 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36108 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36130 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36110 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36120 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36130 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36140 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36150 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36154 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36156 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36140 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36150 [200]: GET /js/messages.php?l=es&v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36150 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36154 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36162 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36156 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36168 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36162 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36180 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36140 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36154 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36168 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36156 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36162 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36168 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36196 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36180 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36180 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36208 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36210 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36196 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36196 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36208 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36208 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36216 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36218 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36210 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36210 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36216 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36216 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36218 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36226 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36218 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36228 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36226 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36226 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36230 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36240 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36228 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36250 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36228 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36266 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36230 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36240 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36250 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36230 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36240 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36250 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36268 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36266 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36268 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36266 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36268 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36274 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36282 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36274 [200]: GET /themes/darkwolf/img/logo_right.png
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36274 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36282 [200]: GET /themes/dot.gif
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36282 Closing
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36284 Accepted
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36284 [200]: GET /themes/darkwolf/img/help-alt.svg
+[Tue Nov 24 20:49:13 2026] 127.0.0.1:36284 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36296 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36296 [302]: POST /index.php?route=/
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36296 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36310 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36310 [200]: GET /index.php?route=/
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36310 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36322 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36326 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36336 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36348 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36350 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36354 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36322 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36322 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36326 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36326 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36336 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36336 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36348 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36348 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36350 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36350 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36370 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36378 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36394 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36354 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36354 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36370 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36370 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36378 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36378 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36394 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36394 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36404 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36412 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36426 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36442 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36404 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36404 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36444 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36412 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36412 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36458 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36426 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36426 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36442 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36442 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36470 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36482 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36444 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36458 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36470 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36444 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36458 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36470 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36484 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36496 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36482 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36482 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36506 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36484 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36484 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36510 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36496 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36496 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36518 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36530 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36506 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36506 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36510 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36510 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36538 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36518 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36530 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36530 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36518 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36554 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36538 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36562 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36554 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36576 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36538 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36554 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36562 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36562 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36576 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36576 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36580 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36582 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36592 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36598 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36580 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36580 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36582 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36582 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36592 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36592 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36602 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36618 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36598 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36598 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36602 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36602 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36630 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36618 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36618 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36646 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36630 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36630 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36650 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36662 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36666 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36646 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36646 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36650 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36662 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36666 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36650 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36662 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36666 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36668 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36674 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36668 [200]: GET /js/dist/home.js?v=5.2.3
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36668 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36674 [200]: GET /themes/dot.gif
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36674 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36690 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36690 [200]: GET /themes/darkwolf/img/logo_left.png
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36690 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36704 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36716 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36728 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36704 [200]: GET /themes/darkwolf/img/home.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36716 [200]: GET /themes/darkwolf/img/sign-out.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36728 [200]: GET /themes/darkwolf/img/help.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36704 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36744 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36716 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36728 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36744 [200]: GET /themes/darkwolf/img/manual.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36756 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36766 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36744 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36756 [200]: GET /themes/darkwolf/img/gear.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36756 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36766 [200]: GET /themes/darkwolf/img/reload.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36766 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36778 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36778 [200]: GET /themes/darkwolf/img/link.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36786 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36778 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36794 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36808 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36786 [200]: GET /themes/darkwolf/img/database-plus.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36786 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36794 [200]: GET /themes/darkwolf/img/tree-expand.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36794 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36808 [200]: GET /themes/darkwolf/img/database.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36808 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36818 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36828 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36834 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36836 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36838 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36846 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36818 [200]: GET /themes/darkwolf/img/host.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36828 [200]: GET /themes/darkwolf/img/sql.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36834 [200]: GET /themes/darkwolf/img/server.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36836 [200]: GET /themes/darkwolf/img/user-props.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36818 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36838 [200]: GET /themes/darkwolf/img/export.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36846 [200]: GET /themes/darkwolf/img/import.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36828 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36834 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36836 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36838 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36846 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36848 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36858 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36866 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36868 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36848 [200]: GET /themes/darkwolf/img/help-alt.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36880 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36848 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36858 [200]: GET /themes/darkwolf/img/preferences.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36866 [200]: GET /themes/darkwolf/img/database-vars.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36858 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36868 [200]: GET /themes/darkwolf/img/charset.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36880 [200]: GET /themes/darkwolf/img/database-engine.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36894 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36866 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36896 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36868 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36880 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36894 [200]: GET /themes/darkwolf/img/plugin.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36894 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36896 [200]: GET /themes/darkwolf/img/replication.svg
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36896 Closing
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36902 Accepted
+[Tue Nov 24 20:49:15 2026] 127.0.0.1:36910 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36902 [200]: GET /themes/darkwolf/img/caret-up-stop.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36910 [200]: GET /themes/darkwolf/img/password.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36916 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36902 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36910 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36916 [200]: GET /themes/darkwolf/img/console.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36916 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36918 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36918 [200]: GET /themes/darkwolf/img/language.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36926 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36918 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36926 [200]: GET /themes/darkwolf/img/theme.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36930 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36926 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36932 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36942 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36932 [200]: GET /themes/darkwolf/img/notice.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36930 [200]: GET /themes/darkwolf/img/s_attention.png
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36942 [200]: GET /themes/darkwolf/img/windows.svg
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36932 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36930 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36942 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36950 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36950 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36950 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36964 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36970 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36964 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36964 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36974 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36970 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36970 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36974 [200]: POST /index.php?route=/version-check
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36974 Closing
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36984 Accepted
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36984 [200]: POST /index.php?route=/config/set
+[Tue Nov 24 20:49:16 2026] 127.0.0.1:36984 Closing
+[Tue Nov 24 20:49:19 2026] 127.0.0.1:49260 Accepted
+[Tue Nov 24 20:49:19 2026] 127.0.0.1:49260 [200]: GET /themes/darkwolf/img/loading.gif
+[Tue Nov 24 20:49:19 2026] 127.0.0.1:49260 Closing
+[Tue Nov 24 20:49:20 2026] 127.0.0.1:49272 Accepted
+[Tue Nov 24 20:49:20 2026] 127.0.0.1:49272 [200]: GET /index.php?route=/database/structure&db=s2627&ajax_request=true&ajax_page_request=true&_nocache=1795567760017737775&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49272 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49276 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49278 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49280 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49292 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49276 [200]: GET /themes/darkwolf/img/table-engine.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49304 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49276 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49278 [200]: GET /themes/darkwolf/img/search.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49280 [200]: GET /themes/darkwolf/img/routine.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49292 [200]: GET /themes/darkwolf/img/event.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49278 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49280 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49304 [200]: GET /themes/darkwolf/img/flag.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49292 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49304 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49308 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49308 [200]: GET /themes/darkwolf/img/designer.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49308 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49312 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49312 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49312 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49326 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49336 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49326 [200]: GET /themes/darkwolf/img/sort-asc.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49344 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49336 [200]: GET /themes/darkwolf/img/favorite-alt.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49356 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49344 [200]: GET /themes/darkwolf/img/bd_browse.png
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49372 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49326 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49356 [200]: GET /themes/darkwolf/img/bd_select.png
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49336 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49372 [200]: GET /themes/darkwolf/img/row-plus.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49344 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49356 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49372 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49378 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49390 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49378 [200]: GET /themes/darkwolf/img/bd_empty.png
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49378 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49390 [200]: GET /themes/darkwolf/img/minus.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49390 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49404 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49420 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49428 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49430 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49404 [200]: GET /themes/darkwolf/img/table-browse.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49420 [200]: GET /themes/darkwolf/img/search-across.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49404 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49420 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49428 [200]: GET /themes/darkwolf/img/shredder.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49428 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49430 [200]: GET /themes/darkwolf/img/print.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49430 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49436 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49448 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49436 [200]: GET /themes/darkwolf/img/table-analyse.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49448 [200]: GET /themes/darkwolf/img/table-plus.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49436 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49448 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49456 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49468 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49456 [200]: GET /js/dist/table/change.js?v=5.2.3
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49468 [200]: GET /js/dist/database/structure.js?v=5.2.3
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49456 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49468 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49474 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49474 [200]: GET /themes/darkwolf/img/arrow_ltr.png
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49474 Closing
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49488 Accepted
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49488 [200]: GET /themes/darkwolf/img/tree-collapse.svg
+[Tue Nov 24 20:49:21 2026] 127.0.0.1:49488 Closing
+[Tue Nov 24 20:50:44 2026] 127.0.0.1:51078 Accepted
+[Tue Nov 24 20:50:45 2026] 127.0.0.1:51078 [200]: GET /index.php?route=/database/structure&db=s2627&ajax_request=true&ajax_page_request=true&_nocache=1795567844630188962&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:50:45 2026] 127.0.0.1:51078 Closing
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51092 Accepted
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51092 [200]: GET /index.php?route=/database/import&db=s2627
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51092 Closing
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51094 Accepted
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51104 Accepted
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51106 Accepted
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51094 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51094 Closing
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51112 Accepted
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51124 Accepted
+[Tue Nov 24 20:50:46 2026] 127.0.0.1:51134 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51112 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51104 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51106 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51124 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51112 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51104 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51106 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51124 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51140 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51134 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51134 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51148 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51152 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51158 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51140 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51140 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51148 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51148 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51152 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51152 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51158 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51158 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51162 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51164 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51172 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51182 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51196 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51162 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51162 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51164 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51172 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51164 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51172 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51182 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51182 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51212 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51196 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51196 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51216 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51224 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51212 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51216 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51212 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51216 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51226 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51230 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51224 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51224 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51232 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51246 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51226 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51230 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51252 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51226 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51230 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51264 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51232 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51232 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51268 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51272 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51246 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51252 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51252 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51246 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51264 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51264 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51268 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51268 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51288 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51272 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51272 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51298 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51308 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51288 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51288 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51312 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51298 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51298 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51316 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51308 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51308 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51320 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51312 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51312 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51326 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51316 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51316 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51326 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51320 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51326 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51320 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51342 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51346 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51354 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51368 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51384 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51342 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51346 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51354 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51368 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51342 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51346 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51354 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51368 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51388 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51394 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51388 [200]: GET /js/dist/import.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51384 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51402 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51388 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51384 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51394 [200]: GET /themes/darkwolf/img/logo_left.png
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51394 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51402 [200]: GET /themes/dot.gif
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51402 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51408 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51408 [200]: GET /themes/darkwolf/img/ajax_clock_small.gif
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51408 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51416 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51424 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51432 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51446 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51462 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51474 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51416 [200]: GET /themes/darkwolf/img/home.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51416 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51424 [200]: GET /themes/darkwolf/img/sign-out.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51424 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51432 [200]: GET /themes/darkwolf/img/help.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51432 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51446 [200]: GET /themes/darkwolf/img/manual.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51446 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51462 [200]: GET /themes/darkwolf/img/gear.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51474 [200]: GET /themes/darkwolf/img/reload.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51462 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51474 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51476 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51480 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51482 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51476 [200]: GET /themes/darkwolf/img/link.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51476 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51486 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51500 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51506 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51480 [200]: GET /themes/darkwolf/img/database-plus.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51482 [200]: GET /themes/darkwolf/img/tree-expand.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51480 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51482 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51514 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51486 [200]: GET /themes/darkwolf/img/database.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51514 [200]: GET /themes/darkwolf/img/caret-up-stop.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51500 [200]: GET /themes/darkwolf/img/import.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51506 [200]: GET /themes/darkwolf/img/routine.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51486 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51514 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51500 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51506 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51526 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51534 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51536 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51544 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51554 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51526 [200]: GET /themes/darkwolf/img/flag.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51526 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51534 [200]: GET /themes/darkwolf/img/sql.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51534 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51536 [200]: GET /themes/darkwolf/img/preferences.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51536 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51544 [200]: GET /themes/darkwolf/img/host.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51544 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51556 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51554 [200]: GET /themes/darkwolf/img/table-engine.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51566 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51554 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51576 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51588 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51598 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51556 [200]: GET /themes/darkwolf/img/designer.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51556 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51566 [200]: GET /themes/darkwolf/img/search.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51566 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51612 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51576 [200]: GET /themes/darkwolf/img/user-props.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51588 [200]: GET /themes/darkwolf/img/export.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51598 [200]: GET /themes/darkwolf/img/event.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51612 [200]: GET /themes/darkwolf/img/console.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51576 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51588 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51598 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51612 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51628 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51628 [200]: GET /themes/darkwolf/img/windows.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51628 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51642 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51654 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51642 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51642 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51660 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51654 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51654 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51660 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51660 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51666 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51672 Accepted
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51666 [200]: GET /themes/darkwolf/img/tree-collapse.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51672 [200]: GET /themes/darkwolf/img/table-plus.svg
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51666 Closing
+[Tue Nov 24 20:50:47 2026] 127.0.0.1:51672 Closing
+[Tue Nov 24 20:50:48 2026] 127.0.0.1:51688 Accepted
+[Tue Nov 24 20:50:48 2026] 127.0.0.1:51688 [200]: POST /index.php?route=/config/set
+[Tue Nov 24 20:50:48 2026] 127.0.0.1:51688 Closing
+[Tue Nov 24 20:50:57 2026] 127.0.0.1:39486 Accepted
+[Tue Nov 24 20:50:57 2026] 127.0.0.1:39486 [200]: GET /themes/darkwolf/img/help-alt.svg
+[Tue Nov 24 20:50:57 2026] 127.0.0.1:39486 Closing
+[Tue Nov 24 20:50:57 2026] 127.0.0.1:39496 Accepted
+[Tue Nov 24 20:50:57 2026] 127.0.0.1:39512 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:39496 [200]: POST /index.php?route=/import
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:39496 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:39512 Closed without sending a request; it was probably just an unused speculative preconnection
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:39512 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36836 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36838 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36854 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36870 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36884 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36896 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36836 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36838 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36854 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36870 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36836 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36838 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36854 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36870 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36884 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36884 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36910 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36896 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36896 Closing
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36924 Accepted
+[Tue Nov 24 20:52:24 2026] 127.0.0.1:36930 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36946 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36910 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36910 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36924 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36924 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36930 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36930 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36946 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36946 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36956 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36972 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36980 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36990 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36956 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36956 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36994 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36972 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36980 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36990 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36994 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36972 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36980 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36990 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:36994 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37008 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37020 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37036 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37008 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37008 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37020 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37036 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37020 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37048 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37036 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37056 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37072 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37082 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37094 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37048 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37056 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37072 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37082 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37104 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37048 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37056 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37072 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37082 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37094 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37094 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37120 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37104 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37132 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37138 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37104 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37120 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37120 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37148 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37132 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37132 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37138 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37138 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37158 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37148 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37168 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37184 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37148 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37192 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37158 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37168 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37184 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37192 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37158 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37168 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37184 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37192 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37206 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37222 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37206 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37206 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37224 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37222 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37228 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37222 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37230 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37224 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37224 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37238 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37228 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37252 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37238 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37230 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37228 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37238 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37230 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37252 [200]: GET /themes/darkwolf/img/logo_left.png
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37268 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37252 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37268 [200]: GET /themes/dot.gif
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37268 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37272 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37278 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37292 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37304 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37306 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37310 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37272 [200]: GET /themes/darkwolf/img/home.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37272 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37278 [200]: GET /themes/darkwolf/img/sign-out.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37278 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37292 [200]: GET /themes/darkwolf/img/help.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37292 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37304 [200]: GET /themes/darkwolf/img/manual.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37306 [200]: GET /themes/darkwolf/img/gear.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37310 [200]: GET /themes/darkwolf/img/reload.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37318 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37304 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37306 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37310 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37324 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37340 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37346 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37350 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37352 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37324 [200]: GET /themes/darkwolf/img/database.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37340 [200]: GET /themes/darkwolf/img/database-plus.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37346 [200]: GET /themes/darkwolf/img/link.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37350 [200]: GET /themes/darkwolf/img/host.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37318 [200]: GET /themes/darkwolf/img/tree-expand.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37360 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37324 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37340 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37346 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37350 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37352 [200]: GET /themes/darkwolf/img/table-engine.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37318 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37364 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37352 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37366 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37368 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37372 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37386 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37360 [200]: GET /themes/darkwolf/img/preferences.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37366 [200]: GET /themes/darkwolf/img/flag.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37364 [200]: GET /themes/darkwolf/img/caret-up-stop.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37368 [200]: GET /themes/darkwolf/img/sql.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37372 [200]: GET /themes/darkwolf/img/export.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37386 [200]: GET /themes/darkwolf/img/event.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37360 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37394 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37404 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37366 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37364 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37368 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37372 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37386 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37394 [200]: GET /themes/darkwolf/img/import.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37416 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37404 [200]: GET /themes/darkwolf/img/user-props.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37424 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37438 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37394 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37404 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37440 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37416 [200]: GET /themes/darkwolf/img/search.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37416 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37444 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37424 [200]: GET /themes/darkwolf/img/designer.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37438 [200]: GET /themes/darkwolf/img/routine.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37424 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37438 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37452 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37440 [200]: GET /themes/darkwolf/img/windows.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37444 [200]: GET /themes/darkwolf/img/success.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37440 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37444 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37452 [200]: GET /themes/darkwolf/img/console.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37452 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37454 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37454 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37454 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37468 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37478 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37468 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37468 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37478 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37478 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37492 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37506 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37492 [200]: GET /themes/darkwolf/img/tree-collapse.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37506 [200]: GET /themes/darkwolf/img/table-plus.svg
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37492 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37506 Closing
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37514 Accepted
+[Tue Nov 24 20:52:25 2026] 127.0.0.1:37514 [200]: POST /index.php?route=/config/set
+[Tue Nov 24 20:52:26 2026] 127.0.0.1:37514 Closing
+[Tue Nov 24 20:53:33 2026] 127.0.0.1:53656 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53656 [200]: GET /themes/darkwolf/img/loading.gif
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53656 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53658 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53658 [200]: GET /index.php?route=/database/structure&db=s2627&ajax_request=true&ajax_page_request=true&_nocache=1795568014052686152&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53658 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53666 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53670 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53678 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53680 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53686 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53700 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53666 [200]: GET /themes/darkwolf/img/sort-asc.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53666 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53670 [200]: GET /themes/darkwolf/img/help-alt.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53670 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53678 [200]: GET /themes/darkwolf/img/favorite-alt.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53678 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53680 [200]: GET /themes/darkwolf/img/bd_browse.png
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53680 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53686 [200]: GET /themes/darkwolf/img/bd_select.png
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53686 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53700 [200]: GET /themes/darkwolf/img/row-plus.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53700 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53714 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53730 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53744 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53758 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53762 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53714 [200]: GET /themes/darkwolf/img/bd_empty.png
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53714 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53730 [200]: GET /themes/darkwolf/img/minus.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53730 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53744 [200]: GET /themes/darkwolf/img/table-browse.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53744 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53758 [200]: GET /themes/darkwolf/img/search-across.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53762 [200]: GET /themes/darkwolf/img/shredder.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53758 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53762 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53772 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53788 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53772 [200]: GET /themes/darkwolf/img/print.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53788 [200]: GET /themes/darkwolf/img/table-analyse.svg
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53772 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53788 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53804 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53818 Accepted
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53804 [200]: GET /js/dist/database/structure.js?v=5.2.3
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53818 [200]: GET /js/dist/table/change.js?v=5.2.3
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53804 Closing
+[Tue Nov 24 20:53:34 2026] 127.0.0.1:53818 Closing
+[Tue Nov 24 20:53:35 2026] 127.0.0.1:53822 Accepted
+[Tue Nov 24 20:53:35 2026] 127.0.0.1:53822 [200]: GET /themes/darkwolf/img/arrow_ltr.png
+[Tue Nov 24 20:53:35 2026] 127.0.0.1:53822 Closing
+[Tue Nov 24 20:53:42 2026] 127.0.0.1:41134 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41134 [200]: GET /index.php?route=/sql&db=s2627&table=asignaturas&pos=0&ajax_request=true&ajax_page_request=true&_nocache=1795568022885176524&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41134 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41138 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41138 [200]: GET /themes/darkwolf/img/table.svg
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41138 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41144 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41144 [200]: GET /themes/darkwolf/img/edit.svg
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41144 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41152 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41168 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41152 [200]: GET /themes/darkwolf/img/chart.svg
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41168 [200]: GET /themes/darkwolf/img/table-view-plus.svg
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41152 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41168 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41172 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41172 [200]: GET /index.php?route=/recent-table&ajax_request=1&recent_table=1&no_debug=true&_nocache=1795568023497768957&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41172 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41180 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41190 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41180 [200]: GET /js/dist/makegrid.js?v=5.2.3
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41194 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41190 [200]: GET /js/dist/sql.js?v=5.2.3
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41204 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41194 [200]: GET /js/vendor/jquery/jquery.uitablefilter.js?v=5.2.3
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41206 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41180 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41204 [200]: GET /js/dist/gis_data_editor.js?v=5.2.3
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41190 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41206 [200]: GET /js/dist/multi_column_sort.js?v=5.2.3
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41194 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41208 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41204 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41206 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41208 [200]: GET /themes/darkwolf/img/s_fulltext.png
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41208 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41212 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41212 [200]: GET /themes/darkwolf/img/col_drop.png
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41212 Closing
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41218 Accepted
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41218 [200]: GET /themes/darkwolf/img/col_pointer.png
+[Tue Nov 24 20:53:43 2026] 127.0.0.1:41218 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34304 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34304 [200]: GET /index.php?route=/table/structure&db=s2627&table=asignaturas
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34304 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34320 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34326 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34340 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34320 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34342 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34320 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34354 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34362 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34326 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34340 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34354 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34326 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34342 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34340 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34342 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34354 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34370 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34376 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34362 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34362 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34386 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34394 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34370 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34370 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34376 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34376 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34386 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34386 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34394 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34394 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34404 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34418 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34424 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34440 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34454 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34404 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34404 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34418 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34424 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34440 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34454 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34418 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34424 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34440 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34454 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34462 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34470 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34462 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34470 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34462 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34470 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34478 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34490 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34500 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34514 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34478 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34478 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34490 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34490 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34522 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34500 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34500 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34532 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34514 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34514 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34534 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34522 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34522 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34548 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34532 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34532 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34556 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34548 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34534 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34570 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34548 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34534 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34580 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34556 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34570 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34596 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34556 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34570 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34600 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34616 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34628 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34580 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34580 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34596 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34596 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34644 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34600 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34600 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34616 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34616 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34646 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34628 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34628 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34644 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34644 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34650 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34646 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34660 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34646 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34664 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34680 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34650 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34660 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34650 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34660 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34664 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34692 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34664 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34680 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34692 [200]: GET /js/dist/table/structure.js?v=5.2.3
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34696 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34704 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34680 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34692 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34696 [200]: GET /themes/darkwolf/img/logo_left.png
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34704 [200]: GET /themes/dot.gif
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34696 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34704 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34714 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34714 [200]: GET /themes/darkwolf/img/arrow_ltr.png
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34714 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34722 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34722 [200]: GET /themes/darkwolf/img/home.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34722 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34726 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34734 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34738 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34744 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34758 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34726 [200]: GET /themes/darkwolf/img/sign-out.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34726 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34734 [200]: GET /themes/darkwolf/img/help.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34734 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34760 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34738 [200]: GET /themes/darkwolf/img/manual.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34738 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34744 [200]: GET /themes/darkwolf/img/gear.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34772 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34758 [200]: GET /themes/darkwolf/img/reload.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34786 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34744 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34758 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34760 [200]: GET /themes/darkwolf/img/link.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34760 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34788 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34772 [200]: GET /themes/darkwolf/img/database-plus.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34786 [200]: GET /themes/darkwolf/img/tree-expand.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34772 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34786 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34804 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34788 [200]: GET /themes/darkwolf/img/database.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34788 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34812 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34814 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34818 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34804 [200]: GET /themes/darkwolf/img/host.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34804 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34824 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34812 [200]: GET /themes/darkwolf/img/preferences.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34814 [200]: GET /themes/darkwolf/img/caret-up-stop.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34812 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34814 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34818 [200]: GET /themes/darkwolf/img/table.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34832 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34818 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34834 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34824 [200]: GET /themes/darkwolf/img/table-browse.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34840 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34824 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34848 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34832 [200]: GET /themes/darkwolf/img/sql.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34832 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34834 [200]: GET /themes/darkwolf/img/row-plus.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34834 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34850 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34848 [200]: GET /themes/darkwolf/img/search.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34840 [200]: GET /themes/darkwolf/img/user-props.svg
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34848 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34840 Closing
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34866 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34878 Accepted
+[Tue Nov 24 20:54:30 2026] 127.0.0.1:34884 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34850 [200]: GET /themes/darkwolf/img/table-engine.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34850 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34896 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34866 [200]: GET /themes/darkwolf/img/import.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34878 [200]: GET /themes/darkwolf/img/export.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34884 [200]: GET /themes/darkwolf/img/flag.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34866 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34878 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34884 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34908 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34924 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34928 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34896 [200]: GET /themes/darkwolf/img/console.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34908 [200]: GET /themes/darkwolf/img/minus.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34896 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34908 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34924 [200]: GET /themes/darkwolf/img/edit.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34924 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34928 [200]: GET /themes/darkwolf/img/designer.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34942 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34928 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34950 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34942 [200]: GET /themes/darkwolf/img/key-primary.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34942 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34950 [200]: GET /themes/darkwolf/img/key.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34950 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34958 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34972 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34984 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34958 [200]: GET /themes/darkwolf/img/print.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34958 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34998 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34972 [200]: GET /themes/darkwolf/img/table-analyse.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35008 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35016 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34972 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34984 [200]: GET /themes/darkwolf/img/field-index-uinique.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34998 [200]: GET /themes/darkwolf/img/field-index.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34984 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:34998 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35008 [200]: GET /themes/darkwolf/img/field-spatial.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35008 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35016 [200]: GET /themes/darkwolf/img/field-index-text.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35016 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35024 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35024 [200]: GET /themes/darkwolf/img/help-alt.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35024 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35032 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35032 [200]: GET /themes/darkwolf/img/notice.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35032 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35044 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35058 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35074 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35080 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35044 [200]: GET /themes/darkwolf/img/windows.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35058 [200]: GET /themes/darkwolf/img/col-move.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35074 [200]: GET /themes/darkwolf/img/wizard.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35090 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35080 [200]: GET /themes/darkwolf/img/b_rename.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35090 [200]: GET /themes/darkwolf/img/optimize.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35044 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35058 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35074 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35080 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35090 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35094 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35094 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35094 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35100 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35102 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35100 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35100 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35110 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35102 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35102 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35124 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35110 [200]: GET /index.php?route=/recent-table&ajax_request=1&recent_table=1&no_debug=true&_nocache=1795568071345171773&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35110 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35140 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35124 [200]: GET /themes/darkwolf/img/tree-collapse.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35140 [200]: GET /themes/darkwolf/img/table-plus.svg
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35124 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35140 Closing
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35154 Accepted
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35154 [200]: POST /index.php?route=/config/set
+[Tue Nov 24 20:54:31 2026] 127.0.0.1:35154 Closing
+[Tue Nov 24 20:55:29 2026] 127.0.0.1:36970 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36970 [200]: GET /index.php?route=/sql&db=s2627&table=asignaturas&pos=0
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36970 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36972 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36974 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36978 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36986 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37000 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36972 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37012 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36972 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36974 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36974 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36978 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36986 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37000 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36978 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:36986 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37000 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37020 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37034 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37012 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37012 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37040 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37056 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37020 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37020 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37034 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37034 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37040 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37040 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37056 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37056 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37058 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37068 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37058 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37078 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37068 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37082 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37078 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37096 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37082 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37058 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37068 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37096 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37078 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37082 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37096 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37110 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37120 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37110 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37110 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37120 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37120 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37132 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37144 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37156 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37132 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37132 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37162 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37144 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37144 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37176 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37156 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37156 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37178 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37162 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37162 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37186 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37176 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37176 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37178 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37178 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37186 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37186 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37202 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37210 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37214 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37202 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37210 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37214 [200]: GET /js/vendor/jquery/jquery.uitablefilter.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37202 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37210 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37214 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37222 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37234 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37248 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37262 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37222 [200]: GET /js/dist/table/change.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37278 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37234 [200]: GET /js/dist/gis_data_editor.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37248 [200]: GET /js/dist/multi_column_sort.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37262 [200]: GET /js/dist/makegrid.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37290 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37278 [200]: GET /js/dist/sql.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37222 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37234 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37248 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37262 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37278 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37294 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37290 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37290 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37294 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37294 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37310 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37314 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37328 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37310 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37310 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37344 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37314 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37328 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37352 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37344 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37360 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37314 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37328 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37344 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37352 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37352 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37360 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37360 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37370 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37370 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37370 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37376 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37386 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37396 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37376 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37386 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37396 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37376 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37386 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37396 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37408 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37410 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37408 [200]: GET /themes/darkwolf/img/logo_left.png
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37408 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37410 [200]: GET /themes/dot.gif
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37410 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37420 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37432 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37420 [200]: GET /themes/darkwolf/img/s_fulltext.png
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37420 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37432 [200]: GET /themes/darkwolf/img/arrow_ltr.png
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37432 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37446 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37446 [200]: GET /themes/darkwolf/img/home.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37446 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37452 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37466 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37470 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37482 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37490 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37498 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37452 [200]: GET /themes/darkwolf/img/sign-out.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37452 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37466 [200]: GET /themes/darkwolf/img/help.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37466 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37470 [200]: GET /themes/darkwolf/img/manual.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37482 [200]: GET /themes/darkwolf/img/gear.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37490 [200]: GET /themes/darkwolf/img/reload.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37470 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37482 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37490 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37498 [200]: GET /themes/darkwolf/img/link.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37498 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37514 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37522 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37526 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37534 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37514 [200]: GET /themes/darkwolf/img/database.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37522 [200]: GET /themes/darkwolf/img/tree-expand.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37526 [200]: GET /themes/darkwolf/img/minus.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37534 [200]: GET /themes/darkwolf/img/edit.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37514 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37522 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37526 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37534 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37536 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37542 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37558 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37572 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37586 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37536 [200]: GET /themes/darkwolf/img/sql.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37536 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37542 [200]: GET /themes/darkwolf/img/table-engine.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37542 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37558 [200]: GET /themes/darkwolf/img/export.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37558 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37572 [200]: GET /themes/darkwolf/img/search.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37572 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37586 [200]: GET /themes/darkwolf/img/import.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37586 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37598 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37600 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37610 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37616 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37626 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37634 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37598 [200]: GET /themes/darkwolf/img/user-props.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37600 [200]: GET /themes/darkwolf/img/database-plus.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37610 [200]: GET /themes/darkwolf/img/preferences.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37616 [200]: GET /themes/darkwolf/img/row-plus.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37626 [200]: GET /themes/darkwolf/img/table.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37634 [200]: GET /themes/darkwolf/img/table-browse.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37598 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37600 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37610 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37616 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37626 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37634 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37646 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37652 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37646 [200]: GET /themes/darkwolf/img/host.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37656 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37652 [200]: GET /themes/darkwolf/img/success.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37662 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37656 [200]: GET /themes/darkwolf/img/caret-up-stop.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37664 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37646 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37662 [200]: GET /themes/darkwolf/img/flag.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37678 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37652 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37664 [200]: GET /themes/darkwolf/img/console.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37678 [200]: GET /themes/darkwolf/img/print.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37656 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37662 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37664 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37678 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37682 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37690 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37700 Accepted
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37682 [200]: GET /themes/darkwolf/img/chart.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37682 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37690 [200]: GET /themes/darkwolf/img/table-view-plus.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37690 Closing
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37700 [200]: GET /themes/darkwolf/img/windows.svg
+[Tue Nov 24 20:55:30 2026] 127.0.0.1:37700 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37716 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37716 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37716 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37728 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37740 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37728 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37728 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37748 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37740 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37740 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37748 [200]: GET /index.php?route=/recent-table&ajax_request=1&recent_table=1&no_debug=true&_nocache=1795568131045132314&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37748 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37754 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37754 [200]: GET /themes/darkwolf/img/col_drop.png
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37754 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37758 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37758 [200]: GET /themes/darkwolf/img/col_pointer.png
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37758 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37760 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37760 [200]: GET /themes/darkwolf/img/tree-collapse.svg
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37760 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37774 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37774 [200]: GET /themes/darkwolf/img/table-plus.svg
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37774 Closing
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37790 Accepted
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37790 [200]: POST /index.php?route=/config/set
+[Tue Nov 24 20:55:31 2026] 127.0.0.1:37790 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58302 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58310 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58302 [200]: GET /index.php?route=/sql&db=s2627&table=asignaturas&pos=0
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58302 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58322 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58310 [200]: GET /themes/darkwolf/jquery/jquery-ui.css
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58332 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58338 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58322 [200]: GET /js/vendor/codemirror/lib/codemirror.css?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58310 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58322 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58332 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.css?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58332 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58352 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58338 [200]: GET /js/vendor/codemirror/addon/lint/lint.css?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58358 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58352 [200]: GET /themes/darkwolf/css/theme.css?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58338 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58352 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58374 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58382 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58386 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58358 [200]: GET /js/vendor/jquery/jquery.min.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58358 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58374 [200]: GET /js/vendor/jquery/jquery-migrate.min.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58382 [200]: GET /js/vendor/sprintf.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58374 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58386 [200]: GET /js/dist/ajax.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58396 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58382 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58386 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58396 [200]: GET /js/dist/keyhandler.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58396 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58400 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58406 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58400 [200]: GET /js/vendor/jquery/jquery-ui.min.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58400 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58406 [200]: GET /js/dist/name-conflict-fixes.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58406 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58418 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58422 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58430 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58418 [200]: GET /js/vendor/bootstrap/bootstrap.bundle.min.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58418 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58438 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58422 [200]: GET /js/vendor/js.cookie.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58440 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58438 [200]: GET /js/vendor/jquery/jquery-ui-timepicker-addon.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58422 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58430 [200]: GET /js/vendor/jquery/jquery.validate.min.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58438 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58430 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58440 [200]: GET /js/vendor/jquery/jquery.debounce-1.0.6.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58440 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58454 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58460 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58454 [200]: GET /js/dist/menu_resizer.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58454 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58476 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58460 [200]: GET /js/dist/cross_framing_protection.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58460 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58480 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58476 [200]: GET /js/messages.php?l=es&v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58476 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58486 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58480 [200]: GET /js/dist/config.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58488 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58486 [200]: GET /js/dist/doclinks.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58502 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58488 [200]: GET /js/dist/functions.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58518 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58480 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58502 [200]: GET /js/dist/navigation.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58524 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58486 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58518 [200]: GET /js/dist/indexes.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58488 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58502 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58518 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58524 [200]: GET /js/dist/common.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58524 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58526 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58532 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58546 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58560 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58562 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58526 [200]: GET /js/dist/page_settings.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58526 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58532 [200]: GET /js/vendor/jquery/jquery.uitablefilter.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58546 [200]: GET /js/dist/table/change.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58532 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58546 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58560 [200]: GET /js/dist/gis_data_editor.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58560 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58562 [200]: GET /js/dist/multi_column_sort.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58562 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58576 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58588 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58590 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58606 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58576 [200]: GET /js/vendor/codemirror/lib/codemirror.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58576 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58588 [200]: GET /js/vendor/codemirror/mode/sql/sql.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58588 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58620 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58590 [200]: GET /js/dist/makegrid.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58590 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58626 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58638 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58620 [200]: GET /js/vendor/codemirror/addon/runmode/runmode.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58606 [200]: GET /js/dist/sql.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58620 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58606 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58626 [200]: GET /js/vendor/codemirror/addon/hint/sql-hint.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58638 [200]: GET /js/vendor/codemirror/addon/lint/lint.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58626 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58640 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58638 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58644 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58640 [200]: GET /js/vendor/codemirror/addon/hint/show-hint.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58644 [200]: GET /js/dist/codemirror/addon/lint/sql-lint.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58640 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58644 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58646 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58660 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58670 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58684 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58698 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58646 [200]: GET /js/vendor/tracekit.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58660 [200]: GET /js/dist/error_report.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58670 [200]: GET /js/dist/drag_drop_import.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58684 [200]: GET /js/dist/shortcuts_handler.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58698 [200]: GET /js/dist/console.js?v=5.2.3
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58700 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58646 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58660 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58670 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58700 [200]: GET /themes/darkwolf/img/logo_left.png
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58684 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58698 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58700 Closing
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58706 Accepted
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58706 [200]: GET /themes/dot.gif
+[Tue Nov 24 21:02:08 2026] 127.0.0.1:58706 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58712 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58712 [200]: GET /themes/darkwolf/img/s_fulltext.png
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58712 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58714 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58714 [200]: GET /themes/darkwolf/img/arrow_ltr.png
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58714 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58718 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58734 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58718 [200]: GET /themes/darkwolf/img/home.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58718 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58744 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58748 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58754 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58768 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58734 [200]: GET /themes/darkwolf/img/sign-out.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58734 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58744 [200]: GET /themes/darkwolf/img/help.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58748 [200]: GET /themes/darkwolf/img/manual.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58754 [200]: GET /themes/darkwolf/img/gear.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58774 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58744 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58768 [200]: GET /themes/darkwolf/img/reload.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58748 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58754 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58780 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58768 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58774 [200]: GET /themes/darkwolf/img/database.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58774 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58782 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58784 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58780 [200]: GET /themes/darkwolf/img/tree-expand.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58780 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58782 [200]: GET /themes/darkwolf/img/link.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58782 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58786 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58784 [200]: GET /themes/darkwolf/img/database-plus.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58784 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58792 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58808 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58786 [200]: GET /themes/darkwolf/img/host.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58818 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58834 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58792 [200]: GET /themes/darkwolf/img/table.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58808 [200]: GET /themes/darkwolf/img/table-browse.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58786 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58818 [200]: GET /themes/darkwolf/img/table-engine.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58834 [200]: GET /themes/darkwolf/img/sql.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58792 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58808 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58818 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:58834 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53800 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53806 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53808 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53822 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53832 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53838 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53800 [200]: GET /themes/darkwolf/img/search.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53800 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53806 [200]: GET /themes/darkwolf/img/row-plus.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53806 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53848 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53862 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53808 [200]: GET /themes/darkwolf/img/export.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53808 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53822 [200]: GET /themes/darkwolf/img/import.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53822 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53832 [200]: GET /themes/darkwolf/img/caret-up-stop.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53832 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53872 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53838 [200]: GET /themes/darkwolf/img/edit.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53838 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53874 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53882 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53848 [200]: GET /themes/darkwolf/img/user-props.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53862 [200]: GET /themes/darkwolf/img/flag.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53848 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53862 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53872 [200]: GET /themes/darkwolf/img/success.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53874 [200]: GET /themes/darkwolf/img/preferences.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53872 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53874 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53882 [200]: GET /themes/darkwolf/img/console.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53882 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53892 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53892 [200]: GET /themes/darkwolf/img/minus.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53892 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53904 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53904 [200]: GET /themes/darkwolf/img/print.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53910 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53904 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53910 [200]: GET /themes/darkwolf/img/chart.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53910 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53920 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53936 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53920 [200]: GET /themes/darkwolf/img/table-view-plus.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53920 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53936 [200]: GET /themes/darkwolf/img/windows.svg
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53936 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53944 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53944 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53944 Closing
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53956 Accepted
+[Tue Nov 24 21:02:09 2026] 127.0.0.1:53972 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53956 [200]: POST /index.php?route=/navigation&ajax_request=1
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53956 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53976 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53972 [200]: POST /index.php?route=/config/get
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53972 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53976 [200]: GET /index.php?route=/recent-table&ajax_request=1&recent_table=1&no_debug=true&_nocache=1795568529981528688&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53976 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53984 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53984 [200]: GET /themes/darkwolf/img/col_drop.png
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53984 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53990 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53990 [200]: GET /themes/darkwolf/img/col_pointer.png
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53990 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53992 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54000 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53992 [200]: GET /themes/darkwolf/img/tree-collapse.svg
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54000 [200]: GET /themes/darkwolf/img/table-plus.svg
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:53992 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54000 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54012 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54012 [200]: POST /index.php?route=/config/set
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54012 Closing
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54026 Accepted
+[Tue Nov 24 21:02:10 2026] 127.0.0.1:54026 [200]: GET /favicon.ico
+[Tue Nov 24 21:02:11 2026] 127.0.0.1:54026 Closing
+[Tue Nov 24 21:02:25 2026] 127.0.0.1:39354 Accepted
+[Tue Nov 24 21:02:25 2026] 127.0.0.1:39354 [200]: GET /themes/darkwolf/img/loading.gif
+[Tue Nov 24 21:02:25 2026] 127.0.0.1:39354 Closing
+[Tue Nov 24 21:02:25 2026] 127.0.0.1:39360 Accepted
+[Tue Nov 24 21:02:25 2026] 127.0.0.1:39360 [200]: GET /index.php?route=/sql&db=s2627&table=asignaturas&sql_query=SELECT+%2A+FROM+%60asignaturas%60+%0AORDER+BY+%60asignaturas%60.%60observations%60+ASC+&sql_signature=88bb49917ab3b851fee248d7b475ff5f0271b27074b224540535af977a668748&session_max_rows=25&is_browse_distinct=0&ajax_request=true&ajax_page_request=true&_nocache=1795568545634809776&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 21:02:25 2026] 127.0.0.1:39360 Closing
+[Tue Nov 24 21:02:26 2026] 127.0.0.1:39372 Accepted
+[Tue Nov 24 21:02:26 2026] 127.0.0.1:39372 [200]: GET /themes/darkwolf/img/sort-asc.svg
+[Tue Nov 24 21:02:26 2026] 127.0.0.1:39372 Closing
+[Tue Nov 24 21:02:26 2026] 127.0.0.1:39378 Accepted
+[Tue Nov 24 21:02:26 2026] 127.0.0.1:39378 [200]: GET /index.php?route=/recent-table&ajax_request=1&recent_table=1&no_debug=true&_nocache=1795568546193130656&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 21:02:26 2026] 127.0.0.1:39378 Closing
+[Tue Nov 24 21:02:28 2026] 127.0.0.1:39380 Accepted
+[Tue Nov 24 21:02:28 2026] 127.0.0.1:39380 [200]: GET /themes/darkwolf/img/sort-desc.svg
+[Tue Nov 24 21:02:28 2026] 127.0.0.1:39380 Closing
+[Tue Nov 24 21:02:28 2026] 127.0.0.1:39388 Accepted
+[Tue Nov 24 21:02:29 2026] 127.0.0.1:39388 [200]: GET /index.php?route=/sql&db=s2627&table=asignaturas&sql_query=SELECT+%2A+FROM+%60asignaturas%60+%0AORDER+BY+%60asignaturas%60.%60observations%60+DESC+&sql_signature=5a0b96e5ebb1a86881734d4ba2e0d113cb7a4356eac14a8880e953bc0c9af3da&session_max_rows=25&is_browse_distinct=0&ajax_request=true&ajax_page_request=true&_nocache=1795568548861489130&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 21:02:29 2026] 127.0.0.1:39388 Closing
+[Tue Nov 24 21:02:29 2026] 127.0.0.1:40290 Accepted
+[Tue Nov 24 21:02:29 2026] 127.0.0.1:40290 [200]: GET /index.php?route=/recent-table&ajax_request=1&recent_table=1&no_debug=true&_nocache=1795568549529565356&token=372969314c66335a287e3d2b4964396a
+[Tue Nov 24 21:02:29 2026] 127.0.0.1:40290 Closing
